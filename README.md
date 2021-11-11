@@ -1,5 +1,17 @@
 # subscene_downloader
-Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu
+Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu.
+
+    The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
+    This standard can be used to filter everything but Title and Year and use it as str to search with
+    The str can be aquired from selecting the scene release directory
+    
+    Right-click in folder > Search subscene
+    Cwd gets used e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    removes stuff 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
+    remove more stff foo.2021.1080p.WEB.H264-bar
+    etc..
+    Until 'foo 2021' remains and is the searchterm on subscene
+    The deafult terminal then displays a list of matches, see prtsc below which can open link to subs
 
 # How to:
 1. Start regedit ```WIN+R``` ```regedit```
