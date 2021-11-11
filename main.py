@@ -4,18 +4,17 @@ import os               # get cwd
 
 '''
     The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-    This standard can be used to filter everything but Title and Year and use it as str to search with
-    The str can be aquired from selecting the scene release directory
+    This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
 '''
 
 
 def current_working_dir():
     dir_name = os.getcwd()
-    return dir_name                                     # return the value, used in title_filter
+    return dir_name     # return the value, used in Search.parameter
 
 
 class Search:
-    def filter(dir_name: str, release_title_lst=[]):        # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    def parameter(dir_name: str, release_title_lst=[]):        # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         dir_name_lst = dir_name.split('\\')                 # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                 # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')      # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
@@ -34,4 +33,4 @@ class Search:
         webbrowser.open(url)                                # returns name of release with year eg 'foo 2021'
 
 
-Search.subscene(Search.filter(current_working_dir()))
+Search.subscene(Search.parameter(current_working_dir()))
