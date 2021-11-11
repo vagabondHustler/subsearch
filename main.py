@@ -90,3 +90,15 @@ def scraping_subscene(name_of_release=None, find_id=None, find_type=None, find_c
     return elements
 
 
+def title_lst_appender(elements, lst=[]):               # removes unnecessary HTML code
+    for element in elements:
+        links = element.find_all()                      # name of the title with HTML code and URL to subtitles
+        link_soup = str(links)[0:-5:].split('>')        # remove unnecessary HTML code
+        name = link_soup[1]                             # name of the title
+        for link in links:                              # append all links into a list
+            link_url = link['href']
+            link = (name, 'https://subscene.com'+(f'{link_url}'))   # tuple (name, URL), e.g ('foo 2021', 'https://subscene.com/subtitles/foo-2021')
+            lst.append(link)
+    return lst
+
+
