@@ -12,8 +12,9 @@ The str can be aquired from selecting the scene release directory
 ```
 ----
 ```
+Script bascilly does:
 Right-click in folder > Search subscene
->Cwd gets used e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+os.getcwd used, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
 removes stuff 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
 remove more stff foo.2021.1080p.WEB.H264-bar
 etc..
