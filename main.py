@@ -11,3 +11,11 @@ from tkinter import filedialog   # folder dialog
 '''
 
 
+def select_release_dir():
+    dir_name = filedialog.askdirectory(initialdir='/', title='Select release directory')     # directory prompt
+    if dir_name == '':
+        exit('Exit. No directory selected')
+    else:
+        return dir_name     # return the value, used in title_filter
+
+
