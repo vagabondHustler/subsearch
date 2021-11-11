@@ -11,7 +11,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 ---
 Script bascilly does:
 ```
-Right-click in folder > Search subscene
+'Right-click' in folder > 'Search subscene'
 os.getcwd used, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
 removes stuff 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
 remove more stff foo.2021.1080p.WEB.H264-bar
@@ -25,8 +25,8 @@ The deafult terminal then displays a list of matches, see prtsc below which can 
 1. Start regedit ```WIN+R``` ```regedit```
 2. Go to ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\```
 3. Create new key named whatever you want your context menu text to be, I named it ```Search subscene```
-4. If you want a icon, New > String Value```path_to_icon\icon.ico, 0``` 0 for first obj, 1 for second etc, etc 
-5. Create New > Key inside ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene ``` named ```command```
+4. If you want a icon, 'New > String Value' ```path_to_icon\icon.ico, 0``` 0 for first obj, 1 for second etc, etc 
+5. Create 'New > Key' inside ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene ``` named ```command```
 6. Modify 'default' ```cmd.exe "%V" /c  python path_to_project\subscene_downloader\main.py```
 7. Install dependencies:
 ```pip install -r docs/requirements.txt```
