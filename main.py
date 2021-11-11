@@ -69,3 +69,9 @@ def releases_menu(release_name: str):                  # scraped information get
             webbrowser.open(value)                                  # opens value of selected key in the webroser
 
 
+def search_subscene(name_of_release: str, a_dict=[]):
+    elements = scraping_subscene(search_parameters(name_of_release), 'left', 'div', 'title')    # name_of_release='foo 2021', find_id='left', find_type='div', find_class='title'
+    media_lst = title_lst_appender(elements)  # lst ('title of release', 'link to subtitles')
+    return media_lst
+
+
