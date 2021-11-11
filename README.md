@@ -21,6 +21,8 @@ etc..
 Until 'foo 2021' remains and is the searchterm on subscene
 The deafult terminal then displays a list of matches, see prtsc below which can open link to subs
 ```
+![alt text](https://github.com/vagabondHustler/subscene_downloader/blob/main/resources/prtsc.png)
+---
 # How to:
 1. Start regedit ```WIN+R``` ```regedit```
 2. Go to ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\```
@@ -29,8 +31,6 @@ The deafult terminal then displays a list of matches, see prtsc below which can 
 5. Modify default ```cmd.exe "%V" /c  python path_to_project\subscene_downloader\main.py```
 6. Install dependencies:
 ```pip install -r docs/requirements.txt```
-
-![alt text](https://github.com/vagabondHustler/subscene_downloader/blob/main/resources/prtsc.png)
 
 # ToDoList
 - ~~simple terminal menu~~
