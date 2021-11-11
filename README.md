@@ -3,6 +3,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 
 
 ---
+```
 <p>The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 <p>This standard can be used to filter everything but Title and Year and use it as str to search with
 <p>The str can be aquired from selecting the scene release directory
@@ -14,7 +15,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 <p>etc..
 <p>Until 'foo 2021' remains and is the searchterm on subscene
 <p>The deafult terminal then displays a list of matches, see prtsc below which can open link to subs
-
+```
 # How to:
 1. Start regedit ```WIN+R``` ```regedit```
 2. Go to ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\```
