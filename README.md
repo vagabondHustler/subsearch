@@ -10,7 +10,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 6. Install dependencies:
 ```pip install -r docs/requirements.txt```
 
-![alt text](https://github.com/vagabondHustler/subscene_downloader/blob/context-menu/resources/prtsc.png)
+![alt text](https://github.com/vagabondHustler/subscene_downloader/blob/main/resources/prtsc.png)
 
 # ToDoList
 - ~~simple terminal menu~~
