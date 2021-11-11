@@ -7,6 +7,8 @@ Download subtitles from subscene.com with the name of a directory as the search 
 3. Create new key named whatever you want your context menu text to be
 4. Create new key inside ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Subscene_downloader``` named ```command```
 5. Modify default ```cmd.exe "%V" /c  python path_to_project\subscene_downloader\main.py```
+6. Install dependencies:
+```pip install -r docs/requirements.txt```
 
 # ToDoList
 - ~~simple terminal menu~~
