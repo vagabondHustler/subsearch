@@ -80,3 +80,13 @@ def search_parameters(the_title: str):
     return search_url                                                                   # https://subscene.com/subtitles/searchbytitle?query=foo%202021
 
 
+def scraping_subscene(name_of_release=None, find_id=None, find_type=None, find_class=None):         # 'foo 2021', 'left', 'div', 'title'
+    search_results = requests.get(name_of_release)
+
+    title_soup = BeautifulSoup(search_results.content, 'html.parser')
+    results = title_soup.find(id=find_id)
+
+    elements = results.find_all(find_type, class_=find_class)
+    return elements
+
+
