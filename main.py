@@ -7,7 +7,7 @@ from tkinter import filedialog   # folder dialog
 '''
     The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
     This standard can be used to filter everything but Title and Year and use it as str to search with
-    The str can be aquired from selecting the scene release directory
+    The str can be acquired from selecting the scene release directory
 '''
 
 
