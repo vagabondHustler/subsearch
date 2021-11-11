@@ -75,3 +75,8 @@ def search_subscene(name_of_release: str, a_dict=[]):
     return media_lst
 
 
+def search_parameters(the_title: str):
+    search_url = f'https://subscene.com/subtitles/searchbytitle?query={the_title}'      # 'foo 2021'
+    return search_url                                                                   # https://subscene.com/subtitles/searchbytitle?query=foo%202021
+
+
