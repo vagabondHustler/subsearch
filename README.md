@@ -40,3 +40,4 @@ The deafult terminal then displays a list of matches, see prtsc below which can 
 - Auto add registry key/context menu with module winreg
 - Show best scene release result and not Title of media
 - Add gui?
+- compile a exe so no dependencies/python is requierd
