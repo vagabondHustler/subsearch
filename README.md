@@ -3,13 +3,13 @@ Download subtitles from subscene.com with the name of a directory as the search 
 
 
 ---
-```
-The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 
-This standard can be used to filter everything but Title and Year and use it as str to search with
+- The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 
-The str can be aquired from selecting the scene release directory
-```
+- This standard can be used to filter everything but Title and Year and use it as str to search with
+
+- The str can be aquired from selecting the scene release directory
+
 ----
 ```
 Script bascilly does:
