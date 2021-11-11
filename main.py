@@ -11,16 +11,13 @@ import os
 '''
 
 
-def select_release_dir():
+def current_working_dir():
     dir_name = os.getcwd()
-    if dir_name == '':
-        exit('Exit. No directory selected')
-    else:
-        return dir_name     # return the value, used in title_filter
+    return dir_name     # return the value, used in title_filter
 
 
 def title_filter(release_title_lst=[]):
-    dir_name = select_release_dir()                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    dir_name = current_working_dir()                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
     dir_name_lst = dir_name.split('/')                  # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
     release_dot_name = dir_name_lst[-1]                 # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
     release_name_lst = release_dot_name.split('.')      # remove the . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
@@ -47,7 +44,7 @@ def releases_menu(release_name: str):                  # scraped information get
             menu_dict[number] = item[1]
     print('\n')
     while True:
-        menu_item = input('\nInput number to open URL or exit: ')
+        menu_item = input('\nInput number to open URL or 0 to exit: ')
         try:
             int(menu_item)
             if len(str(menu_item)) == 0:
@@ -56,17 +53,15 @@ def releases_menu(release_name: str):                  # scraped information get
             if int(menu_item) > int(number):
                 print(f'You typed {menu_item} but only {number} numbers exists as a option\n')
                 continue
-            else:
-                break
-        except ValueError as err:
-            if menu_item == 'exit':
+            if int(menu_item) == 0:
                 exit(f'Exit, user input {menu_item}')
+
+        except ValueError as err:
             print(f'Not a valid option\nError: {err}\n')
             continue
-
-    for key, value in menu_dict.items():                            # unpack key and values
-        if int(menu_item) == key:                                   # if user input matches key
-            webbrowser.open(value)                                  # opens value of selected key in the webroser
+        for key, value in menu_dict.items():                            # unpack key and values
+            if int(menu_item) == key:                                   # if user input matches key
+                webbrowser.open(value)                                  # opens value of selected key in the webroser
 
 
 def search_subscene(name_of_release: str, a_dict=[]):
@@ -104,5 +99,3 @@ def title_lst_appender(elements, lst=[]):               # removes unnecessary HT
 
 release_name = title_filter()
 releases_menu(release_name)
-# a = input('> ')
-# print_list(a)
