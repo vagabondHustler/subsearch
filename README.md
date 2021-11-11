@@ -4,7 +4,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 <p>The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 <p>This standard can be used to filter everything but Title and Year and use it as str to search with
 <p>The str can be aquired from selecting the scene release directory
-
+<p>
 <p>Right-click in folder > Search subscene
 <p>Cwd gets used e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
 <p>removes stuff 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
