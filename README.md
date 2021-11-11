@@ -1,5 +1,5 @@
 # subscene_downloader
-Download subtitles from subscene.com with the name of a directory as the search parameter
+Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu
 
 # How to:
 1. Start regedit ```WIN+R``` ```regedit```
@@ -18,4 +18,5 @@ Download subtitles from subscene.com with the name of a directory as the search 
 - ~~add to context menu~~
 - ~~Run from context menu in cwd~~
 - Auto add registry key/context menu with module winreg
-- Add gui
+- Show best scene release result and not Title of media
+- Add gui?
