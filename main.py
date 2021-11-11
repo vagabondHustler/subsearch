@@ -102,3 +102,7 @@ def title_lst_appender(elements, lst=[]):               # removes unnecessary HT
     return lst
 
 
+release_name = title_filter()
+releases_menu(release_name)
+# a = input('> ')
+# print_list(a)
