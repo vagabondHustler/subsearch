@@ -35,3 +35,37 @@ def title_filter(release_title_lst=[]):
     return name_of_release                              # returns name of release with year eg 'foo 2021'
 
 
+def releases_menu(release_name: str):                  # scraped information gets combined title of the movie and link to subtitles
+    menu_dict = {}
+    for number, item in enumerate(search_subscene(release_name)):   # enumerate so the number can be used to select key in dict
+        number += 1
+        if number < 10:                                             # formatting reasons
+            print(number, item[0])                                  # prints out lst with number before title, e.g 1 foo (2021)
+            menu_dict[number] = item[1]                             # create key for dict, with key: number, value: link
+        else:
+            print(number, item[0])
+            menu_dict[number] = item[1]
+    print('\n')
+    while True:
+        menu_item = input('\nInput number to open URL or exit: ')
+        try:
+            int(menu_item)
+            if len(str(menu_item)) == 0:
+                print('Not a valid option')
+                continue
+            if int(menu_item) > int(number):
+                print(f'You typed {menu_item} but only {number} numbers exists as a option\n')
+                continue
+            else:
+                break
+        except ValueError as err:
+            if menu_item == 'exit':
+                exit(f'Exit, user input {menu_item}')
+            print(f'Not a valid option\nError: {err}\n')
+            continue
+
+    for key, value in menu_dict.items():                            # unpack key and values
+        if int(menu_item) == key:                                   # if user input matches key
+            webbrowser.open(value)                                  # opens value of selected key in the webroser
+
+
