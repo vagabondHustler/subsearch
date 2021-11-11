@@ -2,6 +2,7 @@ import requests                  # HTTP libary to easily send requests
 import webbrowser                # open website URL in deafult browser
 from bs4 import BeautifulSoup    # pulling data out of HTML/XML files
 from tkinter import filedialog   # folder dialog
+import os
 
 
 '''
@@ -12,7 +13,7 @@ from tkinter import filedialog   # folder dialog
 
 
 def select_release_dir():
-    dir_name = filedialog.askdirectory(initialdir='/', title='Select release directory')     # directory prompt
+    dir_name = os.getcwd()
     if dir_name == '':
         exit('Exit. No directory selected')
     else:
