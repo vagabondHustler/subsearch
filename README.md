@@ -23,7 +23,7 @@ The deafult terminal then displays a list of matches, see prtsc below which can 
 ```
 ![alt text](https://github.com/vagabondHustler/subscene_downloader/blob/main/resources/prtsc.png)
 ---
-# How to:
+# How to add context menu:
 1. Start regedit ```WIN+R``` ```regedit```
 2. Go to ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\```
 3. Create new key named whatever you want your context menu text to be
