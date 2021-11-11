@@ -17,5 +17,5 @@ Download subtitles from subscene.com with the name of a directory as the search 
 - ~~search with folder name~~
 - ~~add to context menu~~
 - ~~Run from context menu in cwd~~
-- Auto add registry key/context menu
+- Auto add registry key/context menu with module winreg
 - Add gui
