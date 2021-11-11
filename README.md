@@ -16,7 +16,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 4. If you want a icon, 'New > String Value', name it Icon, value ```path_to_icon\icon.ico, 0``` 0 for first obj, 1 for second etc, etc
 5. Create 'New > Key' inside ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene ``` named ```command```
 6. Modify 'default' ```cmd.exe "%V" /c  python path_to_project\subscene_downloader\main.py```
-~~7. Install dependencies:~~
+7. ~~Install dependencies:~~
 ~~```pip install -r docs/requirements.txt```~~
 
 # ToDoList
