@@ -130,4 +130,5 @@ dmypy.json
 
 # test files and directories
 test/
-test.py
+test.*
+regkey.reg
