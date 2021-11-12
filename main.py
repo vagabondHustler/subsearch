@@ -1,6 +1,12 @@
 import webbrowser       # open website URL in deafult browser
 import os               # get cwd
+import regkey           # .py file to write regkey.reg, easier than doing through winreg
+import ctypes           # run as admin
+import sys              # execute main.py
+import winreg as reg    # check if sub keys allready exists
 
+if __name__ == '__main__':
+    regkey
 
 '''
     The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
