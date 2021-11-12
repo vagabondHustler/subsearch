@@ -20,12 +20,12 @@ def cwd():
 
 
 class Search:
-    def parameter(dir_name: str, release_title_lst=[]):     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
-        dir_name_lst = dir_name.split('\\')                 # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
-        release_dot_name = dir_name_lst[-1]                 # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
-        release_name_lst = release_dot_name.split('.')      # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
-        for word in release_name_lst:                       # loop through lst
-            try:                                            # if word is not a int ValueError is raised
+    def parameter(self, dir_name: str, release_title_lst=[]):       # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+        dir_name_lst = dir_name.split('\\')                         # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
+        release_dot_name = dir_name_lst[-1]                         # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
+        release_name_lst = release_dot_name.split('.')              # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
+        for word in release_name_lst:                               # loop through lst
+            try:                                                    # if word is not a int ValueError is raised
                 int(word)
                 break                                       # if word is a in break
             except ValueError:
