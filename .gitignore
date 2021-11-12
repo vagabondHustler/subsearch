@@ -128,7 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# test files and directories
+# test files and directories stuff
 test/
 test.*
 regkey.reg
+main.pyw
