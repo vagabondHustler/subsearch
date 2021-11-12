@@ -14,9 +14,9 @@ if __name__ == '__main__':
 '''
 
 
-def current_working_dir():
+def cwd():
     dir_name = os.getcwd()
-    return dir_name     # return the value, used in Search.parameter
+    return dir_name     # return path, used in Search.parameter
 
 
 class Search:
