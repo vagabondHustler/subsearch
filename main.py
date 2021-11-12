@@ -27,16 +27,16 @@ class Search:
         for word in release_name_lst:                               # loop through lst
             try:                                                    # if word is not a int ValueError is raised
                 int(word)
-                break                                       # if word is a in break
+                break                                               # if word is a in break
             except ValueError:
-                release_title_lst.append(word)              # appends the Title to from the release name
-        name_of_release = ' '.join(release_title_lst)       # join the lst into str with spaces between words
+                release_title_lst.append(word)                      # appends the Title to from the release name
+        name_of_release = ' '.join(release_title_lst)               # join the lst into str with spaces between words
         return name_of_release
 
-    def subscene(name_of_release: str):
+    def subscene(self, name_of_release: str):
         query = 'https://subscene.com/subtitles/searchbytitle?query='
         url = f'{query}{name_of_release}'
-        webbrowser.open(url)                                # returns name of release with year eg 'foo 2021'
+        webbrowser.open(url)                                        # returns name of release with year eg 'foo'
 
 
 Search.subscene(Search.parameter(current_working_dir()))
