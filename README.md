@@ -1,4 +1,4 @@
-# Subscene scraper
+# subscene_search
 Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu.
 
 
