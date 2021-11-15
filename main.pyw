@@ -58,7 +58,7 @@ class Registry:
 r = Registry()
 s = Search()
 if r.is_admin():
-    regkey.write_key()                                  # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
+    regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
     os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
 if r.is_key() is False:                             # check if key exists
     # Re-run the program with admin rights
