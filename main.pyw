@@ -65,3 +65,4 @@ if r.is_key() is False:                             # check if key exists
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
 else:
     s.subscene(s.parameter(cwd()))      # search subscene for subtitles with current directry name as parameter
+    exit(0)
