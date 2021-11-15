@@ -132,4 +132,3 @@ dmypy.json
 test/
 test.*
 regkey.reg
-main.pyw
