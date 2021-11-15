@@ -12,7 +12,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 ---
 
 # How to use:
-1. Run ```python main.py``` from where you are planning to store it
+1. Run ```python main.pyw``` from where you are planning to store it
 2. Context menu gets added when Right-Clicking inside a folder, named 'Search subscene'
 3. Use the menu insde the folder you want to use as a search parameter
 4. Registry key can be found here:```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene```
