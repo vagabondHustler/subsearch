@@ -1,9 +1,9 @@
 import webbrowser       # open website URL in deafult browser
 import os               # get cwd
-import regkey           # .py file to write regkey.reg, easier than doing through winreg
-import ctypes           # run as admin
-import sys              # execute main.py
-import winreg as reg    # check if sub keys allready exists
+from data import regkey,
+from bs4 import BeautifulSoup
+
+import requests
 
 if __name__ == '__main__':
     regkey
@@ -39,30 +39,6 @@ class Search:
         webbrowser.open(url)                                        # returns name of release with year eg 'foo'
 
 
-class Registry:
-    def is_key(self):   # check if keys exsist
-        sub_key = r'Directory\Background\shell\Search subscene'             # registry path
-        try:
-            with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
-                reg.OpenKey(hkey, sub_key)
-        except Exception:                                                   # raised if no key found
-            return False
-
-    def is_admin(self):
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
-        except PermissionError:                                 # raiser if user did not run as admin
-            return False
-
-
-r = Registry()
-s = Search()
-if r.is_admin():
-    regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
-    os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
-if r.is_key() is False:                             # check if key exists
-    # Re-run the program with admin rights
-    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
 else:
     s.subscene(s.parameter(cwd()))      # search subscene for subtitles with current directry name as parameter
     exit(0)
