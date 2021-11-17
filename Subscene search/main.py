@@ -72,14 +72,17 @@ s = Search()
 
 
 class Webscraping:
-    def request(self):
-        url = s.subscene(s.parameter('The Dark Knight'))
+    def search_results(self):
+        url = s.subscene(s.parameter('Breaking bad'))
         source = requests.get(url).text
         soup = BeautifulSoup(source, 'html.parser')
-        best_result = soup.find('div', class_='byTitle')
-        for result in best_result:
-            href = result.find('a')['href']
-            print(f'\n{href}\n')
+        search_result = soup.find('div', class_='search-result')
+        results = [r.text for r in search_result.find_all('a')]
+        links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]
+        for result, link in zip(results, links):
+            print(f'{result}\nhttps://subscene.com/{link}\n')
+        # for result in search_result:
+        #     print(f'\n{result.text}\n {link}')
         # best_h2 = best_result.h2.text
         # best_ul = best_result.ul.text
         # print(best_h2, best_ul)
@@ -90,4 +93,4 @@ class Webscraping:
 
 
 w = Webscraping()
-w.request()
+w.search_results()
