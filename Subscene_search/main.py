@@ -132,7 +132,11 @@ class Webscraping:
 
         for tr in trs:
             if 'English' in tr.text:                                                    # filter out all non-english subtitles
-                release_name = [(x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', '')) for x in tr.find_all('span')]   # remove spaces, tabs new-lines etc
+                # remove spaces, tabs new-lines etc
+                release_name = [
+                    (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
+                    for x in tr.find_all('span')
+                ]
                 link = [y['href'] for y in tr.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
                 if self.scene_name == release_name[1]:                                  # checks if the release name match subtitle release name
                     if f'https://subscene.com/{link[0]}' not in self.links_to_dl:       # ignores already added subtitles in lst
