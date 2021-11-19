@@ -198,6 +198,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
     if r.is_admin():
         regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
         os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
+        exit(0)
     if r.is_key() is False:                             # check if key exists
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
