@@ -221,6 +221,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         unzipper()
         w.rename_srt()
         print('---*** All done ***---')
+        exit(0)
 
 
 main()
