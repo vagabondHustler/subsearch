@@ -10,7 +10,7 @@ def write_key():
 "Icon"="'''+str(getcwd()).replace('\\', '\\\\')+r'''\\resources\\icon.ico, 0"
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene\command]
-@="cmd.exe \"%V\" /c  python '''+str(getcwd()).replace('\\', '\\\\')+r'\\main.pyw"'
+@="cmd.exe \"%V\" /c  python '''+str(getcwd()).replace('\\', '\\\\')+r'\\main.py"'
 
     regkey_file.write(str(regkey))
     regkey_file.close()
