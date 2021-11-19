@@ -47,7 +47,7 @@ class Registry:
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
 
-        except PermissionError:                                 # raiser if user did not run as admin
+        except PermissionError:                                 # raise if user did not run as admin
             return False
 
 
