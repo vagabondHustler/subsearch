@@ -76,7 +76,6 @@ class Webscraping:
                  scene_group=s.parameter(use='scene_group'),    # returns initial search url
                  language='English',                            # language of the subtitles
                  search_title_lst=[], links_to_dl=[]):          # lsts
-        print('Parameter:')
         self.title = title
         print(f'Title: {title}')
         self.scene_name = scene_name
@@ -84,7 +83,6 @@ class Webscraping:
         self.url = url
         self.scene_group = scene_group
         self.language = language
-        print('------------------------------------------')
         print('\n\n')
 
         self.search_title_lst = search_title_lst
