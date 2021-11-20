@@ -2,7 +2,7 @@
 Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu.
 
 <p>This branch has a few, but everything is automatic from the search to the downloading and unzipping of the .srt-files.
-<p>The main branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
+<p>The main_old branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
 
 ---
 
