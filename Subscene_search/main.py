@@ -55,7 +55,7 @@ class Search:
         if use == 'scene_group':                            # returns the scene group e.g bar
             scene_group = dir_name_lst[-1].split('-')
             return scene_group[-1]
-        if use == 'scene_name':                             # returns release name e.g foo.2021.1080p.WEB.H264-bar
+        if use == 'release_name':                             # returns release name e.g foo.2021.1080p.WEB.H264-bar
             release_name = dir_name_lst[-1]
             return release_name
         if use == 'title':                                  # returns release title e.g foo
@@ -70,16 +70,16 @@ class Search:
 class Webscraping:
     s = Search()
 
-    def __init__(self, title=s.parameter(use='title'),          # returns the scene group e.g bar
-                 scene_name=s.parameter(use='scene_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
-                 url=s.parameter(use='url'),                    # returns release title e.g foo
-                 scene_group=s.parameter(use='scene_group'),    # returns initial search url
+    def __init__(self, title=s.parameter(use='title'),          # returns release title e.g foo
+                 release_name=s.parameter(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
+                 url=s.parameter(use='url'),                    # returns initial search url
+                 scene_group=s.parameter(use='scene_group'),    # returns the scene group e.g bar
                  language='English',                            # language of the subtitles
                  search_title_lst=[], links_to_dl=[]):          # lsts
         self.title = title
         print(f'Title: {title}')
-        self.scene_name = scene_name
-        print(f'Release name: {scene_name}')
+        self.release_name = release_name
+        print(f'Release name: {release_name}')
         self.url = url
         self.scene_group = scene_group
         self.language = language
@@ -122,7 +122,7 @@ class Webscraping:
                     for x in tr.find_all('span')
                 ]
                 link = [y['href'] for y in tr.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
-                if self.scene_name == release_name[1]:                                  # checks if the release name match subtitle release name
+                if self.release_name == release_name[1]:                                  # checks if the release name match subtitle release name
                     if f'https://subscene.com/{link[0]}' not in self.links_to_dl:       # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
                     else:
@@ -178,7 +178,7 @@ class Webscraping:
         dir_name = os.getcwd()
         scene_group = self.scene_group
         preferred_ext = f'{scene_group}.srt'
-        new_name = f'{self.scene_name}.srt'
+        new_name = f'{self.release_name}.srt'
         ext = '.srt'
         for item in os.listdir(dir_name):
             if item.endswith(preferred_ext):
@@ -212,7 +212,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
             if len(w.links_to_dl) > 1:
-                print(f"Subtitles found for '{w.scene_name}'")
+                print(f"Subtitles found for '{w.release_name}'")
                 break
             if x > urls_number:
                 exit('No subtitles found')
