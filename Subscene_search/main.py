@@ -46,7 +46,10 @@ class Search:
                 int(word)
                 break                                           # if word = in, break, e.g year or quality
             except ValueError:
+                print(word)
                 words_lst.append(word)                          # appends the Title to lst from the release name
+                if word.startswith('s') or word.startswith('S'):
+                    break
 
         title = ' '.join(words_lst)
 
