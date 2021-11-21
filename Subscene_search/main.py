@@ -47,10 +47,8 @@ class Search:
                 break                                           # if word is a in break
             except ValueError:
                 words_lst.append(word)                          # appends the Title to lst from the release name
-                if len(words_lst) >= 1:
-                    title = word
-                else:
-                    title = ' '.join(words_lst)
+
+        title = ' '.join(words_lst)
 
         if use == 'scene_group':                            # returns the scene group e.g bar
             scene_group = dir_name_lst[-1].split('-')
@@ -208,6 +206,8 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w = Webscraping()
         w.search_title()
         urls_number = len(w.search_title_lst)
+        if urls_number == 0:
+            exit('No subtitles found')
         for x in range(urls_number):
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
