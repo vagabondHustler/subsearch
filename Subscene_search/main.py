@@ -40,29 +40,25 @@ class Search:
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
-
         for word in release_name_lst:                               # loop through lst
             try:                                                    # if word is not a int ValueError is raised
                 int(word)
                 break                                               # if word = in, break, e.g year or quality
             except ValueError:
-                print(word)
                 words_lst.append(word)                              # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S'):    # s/S for season e.g Foo.Bar.s01e01
-                    for letter in word[1]:                          # if second letter is not int continue
-                        print(letter)
-                        try:                                        # if word is not a int ValueError is raised
+                if word.startswith('s') or word.startswith('S') and word[0] != word:    # s/S for season e.g Foo.Bar.s01e01
+                    for letter in word[1]:                                              # if second letter is not int continue
+                        try:                                                            # if word is not a int ValueError is raised
                             int(letter)
                             break
                         except ValueError:
                             pass
-
-        title = ' '.join(words_lst)
+            title = ' '.join(words_lst)
 
         if use == 'scene_group':                            # returns the scene group e.g bar
             scene_group = dir_name_lst[-1].split('-')
             return scene_group[-1]
-        if use == 'release_name':                             # returns release name e.g foo.2021.1080p.WEB.H264-bar
+        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
             release_name = dir_name_lst[-1]
             return release_name
         if use == 'title':                                  # returns release title e.g foo
@@ -81,8 +77,10 @@ class Webscraping:
                  release_name=s.parameter(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
                  url=s.parameter(use='url'),                        # returns initial search url
                  scene_group=s.parameter(use='scene_group'),        # returns the scene group e.g bar
+                 write_lst=s.parameter(write_lst=True),
                  language='English',                                # language of the subtitles
                  search_title_lst=[], links_to_dl=[]):              # lsts
+        self.write_lst = write_lst
         self.title = title
         print(f'Title: {title}')
         self.release_name = release_name
