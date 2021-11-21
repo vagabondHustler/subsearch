@@ -41,14 +41,14 @@ class Search:
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
 
-        for word in release_name_lst:                           # loop through lst
-            try:                                                # if word is not a int ValueError is raised
+        for word in release_name_lst:                               # loop through lst
+            try:                                                    # if word is not a int ValueError is raised
                 int(word)
-                break                                           # if word = in, break, e.g year or quality
+                break                                               # if word = in, break, e.g year or quality
             except ValueError:
                 print(word)
-                words_lst.append(word)                          # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S'):
+                words_lst.append(word)                              # appends the Title to lst from the release name
+                if word.startswith('s') or word.startswith('S'):    # s/S for season e.g Foo.Bar.s01e01
                     break
 
         title = ' '.join(words_lst)
