@@ -49,7 +49,13 @@ class Search:
                 print(word)
                 words_lst.append(word)                              # appends the Title to lst from the release name
                 if word.startswith('s') or word.startswith('S'):    # s/S for season e.g Foo.Bar.s01e01
-                    break
+                    for letter in word[1]:                          # if second letter is not int continue
+                        print(letter)
+                        try:                                        # if word is not a int ValueError is raised
+                            int(letter)
+                            break
+                        except ValueError:
+                            pass
 
         title = ' '.join(words_lst)
 
