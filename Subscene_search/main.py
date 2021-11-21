@@ -44,7 +44,7 @@ class Search:
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
-                break                                           # if word is a in break
+                break                                           # if word = in, break, e.g year or quality
             except ValueError:
                 words_lst.append(word)                          # appends the Title to lst from the release name
 
@@ -68,12 +68,12 @@ class Search:
 class Webscraping:
     s = Search()
 
-    def __init__(self, title=s.parameter(use='title'),          # returns release title e.g foo
+    def __init__(self, title=s.parameter(use='title'),              # returns release title e.g foo
                  release_name=s.parameter(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
-                 url=s.parameter(use='url'),                    # returns initial search url
-                 scene_group=s.parameter(use='scene_group'),    # returns the scene group e.g bar
-                 language='English',                            # language of the subtitles
-                 search_title_lst=[], links_to_dl=[]):          # lsts
+                 url=s.parameter(use='url'),                        # returns initial search url
+                 scene_group=s.parameter(use='scene_group'),        # returns the scene group e.g bar
+                 language='English',                                # language of the subtitles
+                 search_title_lst=[], links_to_dl=[]):              # lsts
         self.title = title
         print(f'Title: {title}')
         self.release_name = release_name
@@ -120,7 +120,7 @@ class Webscraping:
                     for x in tr.find_all('span')
                 ]
                 link = [y['href'] for y in tr.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
-                if self.release_name == release_name[1]:                                  # checks if the release name match subtitle release name
+                if self.release_name == release_name[1]:                                # checks if the release name match subtitle release name
                     if f'https://subscene.com/{link[0]}' not in self.links_to_dl:       # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
                     else:
@@ -219,7 +219,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w.download_zip()
         w.extract_zip()
         w.rename_srt()
-        exit('---*** All done ***---')
+        exit('--- All done ---')
 
 
 main()
