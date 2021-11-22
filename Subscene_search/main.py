@@ -70,6 +70,7 @@ class Search:
         except NameError:
             year = None
         temp_lst = [url, title, year, release_name, scene_group, name_group]
+
         return temp_lst
 
 
@@ -90,7 +91,7 @@ class Values:
             return self.values_lst[3]
         if use == 'scene_group':                            # returns the scene group e.g bar
             return self.values_lst[4]
-        if use == 'name_group':                     # returns release name + scene group
+        if use == 'name_group':                             # returns release name + scene group
             return self.values_lst[5]
 
 
@@ -154,9 +155,10 @@ class Webscraping:
                     (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
                     for x in content.find_all('span')
                 ]
-                link = [y['href'] for y in content.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
-                if self.name_group == release_name[1]:                                       # checks if the release name match subtitle release name
-                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:            # ignores already added subtitles in lst
+                link = [y['href'] for y in content.find_all('a', href=True) if y.text]          # url of downloadlink to subtitle matching release name)
+                name_group_1080p = self.name_group.replace('720p', '1080p')
+                if self.name_group == release_name[1] or name_group_1080p == release_name[1]:   # checks if the release name match subtitle release name
+                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:               # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
                 else:
                     pass
