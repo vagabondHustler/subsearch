@@ -35,7 +35,7 @@ class Registry:
 
 
 class Search:
-    def mk_lst(self, dir_name=os.getcwd()):                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    def parameters(self, dir_name=os.getcwd()):                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         temp_lst = []
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
@@ -43,10 +43,11 @@ class Search:
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
+                year = word
                 break                                           # if word = in, break, e.g year or quality
             except ValueError:
                 temp_lst.append(word)                           # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S') and word[0] != word: # s/S for season e.g Foo.Bar.s01e01
+                if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
                     for letter in word[1]:                      # if second letter is not int continue
                         try:                                    # if word is not a int ValueError is raised
                             int(letter)
@@ -54,17 +55,23 @@ class Search:
                         except ValueError:
                             pass
             title = ' '.join(temp_lst)
-            scene_group = dir_name_lst[-1].split('-')
-            release_name = dir_name_lst[-1]
-            url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
-            temp_lst = [url, title, release_name, scene_group]
-            return temp_lst
+            release_lst = dir_name_lst[-1].split('-')
+            release_name = release_lst[0]
+            scene_group = release_lst[1]
+            name_group = dir_name_lst[-1]
+        url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
+        try:
+            year
+        except NameError:
+            year = None
+        temp_lst = [url, title, year, release_name, scene_group, name_group]
+        return temp_lst
 
 
 class Values:
     s = Search()
 
-    def __init__(self, values_lst=s.mk_lst()):
+    def __init__(self, values_lst=s.parameters()):
         self.values_lst = values_lst
 
     def values(self, use=None):
@@ -72,29 +79,36 @@ class Values:
             return self.values_lst[0]
         if use == 'title':                                  # returns release title e.g foo
             return self.values_lst[1]
-        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
+        if use == 'year':                                   # returns the year of the release
             return self.values_lst[2]
-        if use == 'scene_group':                            # returns the scene group e.g bar
+        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
             return self.values_lst[3]
+        if use == 'scene_group':                            # returns the scene group e.g bar
+            return self.values_lst[4]
+        if use == 'release_name_group':                     # returns release name + scene group
+            return self.values_lst[5]
 
 
 class Webscraping:
-
     v = Values()
 
     def __init__(self, title=v.values(use='title'),              # returns release title e.g foo
                  release_name=v.values(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
                  url=v.values(use='url'),                        # returns initial search url
                  scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
-                 language='English',                                # language of the subtitles
-                 search_title_lst=[], links_to_dl=[]):              # lsts
+                 year=v.values(use='year'),                      # returns year of the release
+                 name_group=v.values(use='name_group'),
+                 language='English',                             # language of the subtitles
+                 search_title_lst=[], links_to_dl=[]):           # lsts
 
         self.title = title
         print(f'Title: {title}')
         self.release_name = release_name
         print(f'Release name: {release_name}')
         self.url = url
+        self.year = year
         self.scene_group = scene_group
+        self.name_group = name_group
         self.language = language
         print('\n\n')
 
@@ -107,39 +121,40 @@ class Webscraping:
         doc = BeautifulSoup(source, 'html.parser')                                      # computing html
         search_result = doc.find('div', class_='search-result')                         # section with search result from initial search
         links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
-
         for link in links:                                                              # place urls in said lst
             self.search_title_lst.append(f'https://subscene.com/{link}')                # add missing address to url
         number = len(self.search_title_lst)
         print(f"{number} titles matched '{self.title}'")
         print('------------------------------------------')
+        if number == 0:
+            exit('No matches')
         return self.search_title_lst
 
     def search_for_subtitles(self, number: int):              # check title and release name with subs list of avilable subtitles to download
-        timeout = True
-        while timeout is True:
+        searching = True
+        while searching is True:
             source = requests.get(self.search_title_lst[number]).text       # determin which url to request to from lst
             doc = BeautifulSoup(source, 'html.parser')
             tbody = doc.tbody                                               # tbody of html
-            if tbody is not None:                                           # if subsceen says to many requests and timeouts the connection, script does not crash
-                trs = tbody.contents                                        # contents of tbody
-                timeout = False
+            if tbody is not None:                                           # if subsceen returns 'to many requests' and timedout the connection, script does not crash
+                tbc = tbody.contents                                        # contents of tbody
+                searching = False
             else:
-                time.sleep(2)
+                time.sleep(2)                                               # takes around 2 seconds before a new request is allowd after 'to many requests'
 
-        for tr in trs:
-            if self.language in tr.text:        # filter out all non-english subtitles
+        for content in tbc:
+            if self.language in content.text:        # filter out all non-english subtitles
                 # remove spaces, tabs new-lines etc
                 release_name = [
                     (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
-                    for x in tr.find_all('span')
+                    for x in content.find_all('span')
                 ]
-                link = [y['href'] for y in tr.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
-                if self.release_name == release_name[1]:                                # checks if the release name match subtitle release name
-                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:       # ignores already added subtitles in lst
+                link = [y['href'] for y in content.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
+                if self.name_group == release_name[1]:                                       # checks if the release name match subtitle release name
+                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:            # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
-                    else:
-                        pass
+                else:
+                    pass
 
         return self.links_to_dl
 
@@ -222,7 +237,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w.search_title()
         urls_number = len(w.search_title_lst)
         if urls_number == 0:
-            exit('No subtitles found')
+            return exit('No subtitles found')
         for x in range(urls_number):
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
@@ -231,6 +246,8 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
                 break
             if x > urls_number:
                 exit('No subtitles found')
+        if len(w.links_to_dl) == 0:
+            return exit(f'Nothing found for {w.release_name} by {w.scene_group}')
         w.download_zip()
         w.extract_zip()
         w.rename_srt()
