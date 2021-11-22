@@ -55,16 +55,14 @@ class Search:
                         except ValueError:
                             pass
             title = ' '.join(temp_lst)
-            release_lst = dir_name_lst[-1].split('-')
-            release_name = release_lst[0]
-            scene_group = release_lst[1]
-            name_group = dir_name_lst[-1]
-        url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
+            scene_group = dir_name_lst[-1].split('-')
+            release_name = dir_name_lst[-1]
+            url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
         try:
             year
         except NameError:
             year = None
-        temp_lst = [url, title, year, release_name, scene_group, name_group]
+        temp_lst = [url, title, year, release_name, scene_group]
         return temp_lst
 
 
@@ -85,8 +83,6 @@ class Values:
             return self.values_lst[3]
         if use == 'scene_group':                            # returns the scene group e.g bar
             return self.values_lst[4]
-        if use == 'release_name_group':                     # returns release name + scene group
-            return self.values_lst[5]
 
 
 class Webscraping:
@@ -97,7 +93,6 @@ class Webscraping:
                  url=v.values(use='url'),                        # returns initial search url
                  scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
                  year=v.values(use='year'),                      # returns year of the release
-                 name_group=v.values(use='name_group'),
                  language='English',                             # language of the subtitles
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
@@ -108,7 +103,6 @@ class Webscraping:
         self.url = url
         self.year = year
         self.scene_group = scene_group
-        self.name_group = name_group
         self.language = language
         print('\n\n')
 
@@ -126,8 +120,6 @@ class Webscraping:
         number = len(self.search_title_lst)
         print(f"{number} titles matched '{self.title}'")
         print('------------------------------------------')
-        if number == 0:
-            exit('No matches')
         return self.search_title_lst
 
     def search_for_subtitles(self, number: int):              # check title and release name with subs list of avilable subtitles to download
@@ -150,11 +142,11 @@ class Webscraping:
                     for x in content.find_all('span')
                 ]
                 link = [y['href'] for y in content.find_all('a', href=True) if y.text]       # url of downloadlink to subtitle matching release name
-                if self.name_group == release_name[1]:                                       # checks if the release name match subtitle release name
-                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:            # ignores already added subtitles in lst
+                if self.release_name == release_name[1]:                                # checks if the release name match subtitle release name
+                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:       # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
-                else:
-                    pass
+                    else:
+                        pass
 
         return self.links_to_dl
 
@@ -237,7 +229,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w.search_title()
         urls_number = len(w.search_title_lst)
         if urls_number == 0:
-            return exit('No subtitles found')
+            exit('No subtitles found')
         for x in range(urls_number):
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
@@ -246,8 +238,6 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
                 break
             if x > urls_number:
                 exit('No subtitles found')
-        if len(w.links_to_dl) == 0:
-            return exit(f'Nothing found for {w.release_name} by {w.scene_group}')
         w.download_zip()
         w.extract_zip()
         w.rename_srt()
