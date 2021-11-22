@@ -149,14 +149,14 @@ class Webscraping:
                 time.sleep(2)                                               # takes around 2 seconds before a new request is allowd after 'to many requests'
 
         for content in tbc:
-            if self.language in content.text:        # filter out all non-english subtitles
+            if self.language in content.text:        # languish filter
                 # remove spaces, tabs new-lines etc
                 release_name = [
                     (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
                     for x in content.find_all('span')
                 ]
                 link = [y['href'] for y in content.find_all('a', href=True) if y.text]          # url of downloadlink to subtitle matching release name)
-                name_group_1080p = self.name_group.replace('720p', '1080p')
+                name_group_1080p = self.name_group.replace('720p', '1080p')                     # foo.2021.1080p.WEB.H264-bar and foo.2021.720p.WEB.H264-bar will be a match
                 if self.name_group == release_name[1] or name_group_1080p == release_name[1]:   # checks if the release name match subtitle release name
                     if f'https://subscene.com/{link[0]}' not in self.links_to_dl:               # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
