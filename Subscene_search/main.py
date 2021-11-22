@@ -43,15 +43,12 @@ class Search:
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
-                print(word)
                 year = word
                 break                                           # if word = in, break, e.g year or quality
             except ValueError:
-                print(word)
                 temp_lst.append(word)                           # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S'):  # s/S for season e.g Foo.Bar.s01e01
+                if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
                     for letter in word[1]:                      # if second letter is not int continue
-                        print(letter, word[1])
                         try:                                    # if word is not a int ValueError is raised
                             int(letter)
                             season = True
@@ -63,7 +60,6 @@ class Search:
                 if season is True:
                     break
 
-            print(temp_lst)
             release_lst = dir_name_lst[-1].split('-')
             release_name = release_lst[0]
             scene_group = release_lst[1]
@@ -74,7 +70,6 @@ class Search:
         except NameError:
             year = None
         temp_lst = [url, title, year, release_name, scene_group, name_group]
-        print(temp_lst)
         return temp_lst
 
 
