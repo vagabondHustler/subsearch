@@ -35,7 +35,7 @@ class Registry:
 
 
 class Search:
-    def parameters(self, dir_name=os.getcwd()):                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    def parameters(self, dir_name=os.getcwd(), season=False):                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         temp_lst = []
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
@@ -43,18 +43,27 @@ class Search:
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
+                print(word)
                 year = word
                 break                                           # if word = in, break, e.g year or quality
             except ValueError:
+                print(word)
                 temp_lst.append(word)                           # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
+                if word.startswith('s') or word.startswith('S'):  # s/S for season e.g Foo.Bar.s01e01
                     for letter in word[1]:                      # if second letter is not int continue
+                        print(letter, word[1])
                         try:                                    # if word is not a int ValueError is raised
                             int(letter)
+                            season = True
                             break
                         except ValueError:
+                            input('value error')
                             pass
-            title = ' '.join(temp_lst)
+                title = ' '.join(temp_lst)
+                if season is True:
+                    break
+
+            print(temp_lst)
             release_lst = dir_name_lst[-1].split('-')
             release_name = release_lst[0]
             scene_group = release_lst[1]
@@ -65,6 +74,7 @@ class Search:
         except NameError:
             year = None
         temp_lst = [url, title, year, release_name, scene_group, name_group]
+        print(temp_lst)
         return temp_lst
 
 
@@ -85,7 +95,7 @@ class Values:
             return self.values_lst[3]
         if use == 'scene_group':                            # returns the scene group e.g bar
             return self.values_lst[4]
-        if use == 'release_name_group':                     # returns release name + scene group
+        if use == 'name_group':                     # returns release name + scene group
             return self.values_lst[5]
 
 
@@ -206,7 +216,7 @@ class Webscraping:
         dir_name = os.getcwd()
         scene_group = self.scene_group
         preferred_ext = f'{scene_group}.srt'
-        new_name = f'{self.release_name}.srt'
+        new_name = f'{self.name_group}.srt'
         ext = '.srt'
         for item in os.listdir(dir_name):
             if item.endswith(preferred_ext):
@@ -242,7 +252,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
             if len(w.links_to_dl) > 1:
-                print(f"Subtitles found for '{w.release_name}'")
+                print(f"Subtitles found for '{w.name_group}'")
                 break
             if x > urls_number:
                 exit('No subtitles found')
