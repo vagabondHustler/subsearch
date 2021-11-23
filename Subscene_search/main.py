@@ -156,7 +156,7 @@ class IsaMatch:
             return False
 
 
-class Webscraping:
+class WebScraping:
     v = Values()
     sm = IsaMatch()
 
