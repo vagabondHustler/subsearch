@@ -302,7 +302,7 @@ class WebScraping:
         except FileExistsError:
             pass
         finally:
-            print(f'Added ~/{self.name_group}/{new_name}\n')
+            print(f'Added ~/{self.name_group}/{new_name}')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
@@ -328,9 +328,6 @@ def main():     # main, checks if user is admin, if registry context menu exists
         if urls_number == 1:
             print(f"One exact match found for Title '{w.title}' Released '{w.year}'")
             print('------------------------------------------')
-        elif urls_number >= 1:
-            print(f'{urls_number} matches')
-            print('------------------------------------------')
         elif urls_number == 0:
             return exit('No subtitles found')
 
@@ -351,6 +348,9 @@ def main():     # main, checks if user is admin, if registry context menu exists
         w.extract_zip()
         w.rename_srt()
 
+        if len(w.links_to_dl) >= 2:
+            print(f'Rest of the .srt-files moved to ~/{w.name_group}/subs\n')
+        print('\n')
         exit('--- All done ---')
 
 
