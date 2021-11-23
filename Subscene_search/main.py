@@ -59,7 +59,7 @@ class Search:
 
         release_lst = dir_name_lst[-1].split('-')
         release_name = release_lst[0]
-        scene_group = release_name_lst[-1]
+        scene_group = release_lst[-1]
         name_group = dir_name_lst[-1]
         url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
 
