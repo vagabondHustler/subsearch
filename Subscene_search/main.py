@@ -38,7 +38,7 @@ class Search:
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
-
+        print(release_name_lst)
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
@@ -60,7 +60,8 @@ class Search:
 
         release_lst = dir_name_lst[-1].split('-')
         release_name = release_lst[0]
-        scene_group = release_lst[1]
+        print(release_name)
+        scene_group = release_name_lst[-1]
         name_group = dir_name_lst[-1]
         url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
 
@@ -189,7 +190,6 @@ class Webscraping:
         sr_lis = [a for a in search_result.find_all('li') if a.text]    # url of subtitle matching title name
         for li in sr_lis:
             sr_href = li.find('a', href=True)
-            print(self.year)
             if self.title in sr_href.text and self.year in sr_href.text:
                 link = sr_href['href']
                 self.search_title_lst.append(f'https://subscene.com/{link}')        # add missing address to url
@@ -294,26 +294,18 @@ class Webscraping:
         preferred_ext = f'{scene_group}.srt'
         new_name = f'{self.name_group}.srt'
         ext = '.srt'
-
-        for item in os.listdir(dir_name):
-            if item.endswith(preferred_ext):
-                try:
+        try:
+            for item in os.listdir(dir_name):
+                if item.endswith(preferred_ext):
                     os.rename(item, new_name)
-                except FileExistsError:
-                    pass
-                finally:
-                    print(f'Added ~/{self.name_group}/{new_name}\nRemaining .srt moved to ~/{self.name_group}/subs\n')
                     break
-            elif item.endswith(ext) and 'HI' not in item:
-                try:
+                elif item.endswith(ext) and 'HI' not in item:
                     os.rename(item, new_name)
-                except FileExistsError:
-                    pass
-                finally:
-                    print(f'Added ~/{self.name_group}/{new_name}\nRemaining .srt moved to ~/{self.name_group}/subs\n')
                     break
-            else:
-                print(f'.srt moved to ~/{self.name_group}/subs\n')
+        except FileExistsError:
+            pass
+        finally:
+            print(f'Added ~/{self.name_group}/{new_name}\n')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
@@ -336,6 +328,10 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w = Webscraping()
         w.search_title()
         urls_number = len(w.search_title_lst)
+        if urls_number == 1:
+            print(f'One exact match to {w.title} {w.year}')
+        elif urls_number >= 1:
+            print(f'{urls_number} matches')
         if urls_number == 0:
             return exit('No subtitles found')
 
