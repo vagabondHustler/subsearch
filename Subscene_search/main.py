@@ -53,7 +53,6 @@ class Search:
                             season = True
                             break
                         except ValueError:
-                            input('value error')
                             pass
                 title = ' '.join(temp_lst)
                 if season is True:
@@ -119,6 +118,7 @@ class IsaMatch:
 
         tot = len(searched)
         percent_is = (round((match/tot)*100))
+
         return percent_is
 
     def find_res(self, word_lst) -> list:
@@ -182,10 +182,22 @@ class Webscraping:
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
 
-    def search_title(self) -> list:                                                     # search with Search.parameter e.g directry name
-        source = requests.get(self.url).text                                            # inittial url request
-        doc = BeautifulSoup(source, 'html.parser')                                      # computing html
-        search_result = doc.find('div', class_='search-result')                         # section with search result from initial search
+    def search_title(self) -> list:                                     # search with Search.parameter e.g directry name
+        source = requests.get(self.url).text                            # inittial url request
+        doc = BeautifulSoup(source, 'html.parser')                      # computing html
+        search_result = doc.find('div', class_='search-result')         # section with search result from initial search
+        sr_lis = [a for a in search_result.find_all('li') if a.text]    # url of subtitle matching title name
+        for li in sr_lis:
+            sr_href = li.find('a', href=True)
+            print(self.year)
+            if self.title in sr_href.text and self.year in sr_href.text:
+                link = sr_href['href']
+                self.search_title_lst.append(f'https://subscene.com/{link}')        # add missing address to url
+            if len(self.search_title_lst) > 0:
+                return self.search_title_lst
+            else:
+                pass
+
         links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
 
         for link in links:                                                              # place urls in said lst
@@ -290,13 +302,20 @@ class Webscraping:
                 except FileExistsError:
                     pass
                 finally:
+                    print(f'{new_name} added\nRemaining .srt-files moved to ~/subs\n')
+                    break
+            elif item.endswith(ext) and 'HI' not in item:
+                try:
+                    os.rename(item, new_name)
+                except FileExistsError:
+                    pass
+                finally:
+                    print(f'Added ~/{self.name_group}/{new_name}\nRemaining .srt moved to ~/{self.name_group}/subs\n')
                     break
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
                 shutil.move(item, f'subs/{item}')
-
-        print(f'{new_name} added\nRemaining .srt-files moved to ~/subs\n')
 
 
 def main():     # main, checks if user is admin, if registry for contextmenu exists, runs webscraping etc...
