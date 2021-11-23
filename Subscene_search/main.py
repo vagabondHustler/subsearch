@@ -16,8 +16,8 @@ import zipfile                  # unzipping downloaded .zip files
 '''
 
 
-class IsSubaMatch:
-    def check(self, searched: str, search_result: str):
+class IsaMatch:
+    def check(self, searched: str, search_result: str) -> int:
         match = 0
         searched: list = self.mk_lst(searched)
         search_result: list = self.mk_lst(search_result)
@@ -60,7 +60,7 @@ class IsSubaMatch:
             x.append(item)
         return x
 
-    def is_bigger(self, searched, search_result):
+    def is_bigger(self, searched, search_result) -> int:
         if len(searched) > len(search_result):
             answer = len(searched) - len(search_result)
             return answer
@@ -68,7 +68,7 @@ class IsSubaMatch:
             answer = len(search_result) - len(searched)
             return answer
 
-    def compare(self, x, y):
+    def compare(self, x, y) -> bool:
         if x == y:
             return True
         else:
@@ -76,7 +76,7 @@ class IsSubaMatch:
 
 
 class Registry:
-    def is_key(self):       # check if keys exsist
+    def is_key(self) -> bool:       # check if keys exsist
         sub_key = r'Directory\Background\shell\Search subscene'             # registry path
         try:
             with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
@@ -85,7 +85,7 @@ class Registry:
         except Exception:                                                   # raised if no key found
             return False
 
-    def is_admin(self):
+    def is_admin(self) -> bool:
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
 
@@ -94,7 +94,7 @@ class Registry:
 
 
 class Search:
-    def parameters(self, dir_name=os.getcwd(), season=False):                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    def parameters(self, dir_name=os.getcwd(), season=False) -> list:                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         temp_lst = []
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
@@ -139,7 +139,7 @@ class Values:
     def __init__(self, values_lst=s.parameters()):
         self.values_lst = values_lst
 
-    def values(self, use=None):
+    def values(self, use=None) -> str:
         if use == 'url':                                    # returns initial search url
             return self.values_lst[0]
         if use == 'title':                                  # returns release title e.g foo
@@ -156,7 +156,7 @@ class Values:
 
 class Webscraping:
     v = Values()
-    sm = IsSubaMatch()
+    sm = IsaMatch()
 
     def __init__(self, title=v.values(use='title'),              # returns release title e.g foo
                  release_name=v.values(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
@@ -169,22 +169,19 @@ class Webscraping:
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
         self.title = title
-        print(f'Title: {title}')
         self.release_name = release_name
-        print(f'Release name: {release_name}')
         self.url = url
         self.year = year
         self.scene_group = scene_group
         self.name_group = name_group
         self.language = language
         self.sm = sm
-        print('\n\n')
 
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
         return
 
-    def search_title(self):                                                             # search with Search.parameter e.g directry name
+    def search_title(self) -> list:                                                             # search with Search.parameter e.g directry name
         source = requests.get(self.url).text                                            # inittial url request
         doc = BeautifulSoup(source, 'html.parser')                                      # computing html
         search_result = doc.find('div', class_='search-result')                         # section with search result from initial search
@@ -198,7 +195,7 @@ class Webscraping:
             exit('No matches')
         return self.search_title_lst
 
-    def search_for_subtitles(self, number: int):              # check title and release name with subs list of avilable subtitles to download
+    def search_for_subtitles(self, number: int) -> list:              # check title and release name with subs list of avilable subtitles to download
         searching = True
         while searching is True:
             source = requests.get(self.search_title_lst[number]).text       # determin which url to request to from lst
