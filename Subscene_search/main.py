@@ -334,7 +334,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         elif urls_number >= 1:
             print(f'{urls_number} matches')
             print('------------------------------------------')
-        if urls_number == 0:
+        elif urls_number == 0:
             return exit('No subtitles found')
 
         for x in range(urls_number):
