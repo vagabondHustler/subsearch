@@ -329,9 +329,11 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         w.search_title()
         urls_number = len(w.search_title_lst)
         if urls_number == 1:
-            print(f'One exact match to {w.title} {w.year}')
+            print(f"One exact match found for Title '{w.title}' Released '{w.year}'")
+            print('------------------------------------------')
         elif urls_number >= 1:
             print(f'{urls_number} matches')
+            print('------------------------------------------')
         if urls_number == 0:
             return exit('No subtitles found')
 

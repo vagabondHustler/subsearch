@@ -17,13 +17,13 @@ Download subtitles from subscene.com with the name of a directory as the search 
 1. Run ```python main.py``` to add the context-menu.
 	1. You will be prompted to run as admin, nessecarry to save the new keys to the registry.
 	2. Context menu gets added and you can now Right-Clicking inside a  folder to see context-menu option 'Search subscene'.
-	
-2. Use the menu insde the folder of the release you want to find subtitles for.
+
+2. Use the menu inside the folder of the release you want to find subtitles for.
+  1. Most settings, like language can be tweaked in class Webscraping: __init__
 
 ---  
 Registry key can be found here:```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene``` if you want to remove it or make edits to it.
-	
+
 <p>
 
 If you don't want the icon in the context menu, delete Name:```Icon``` Type: ```REG_SZ``` in Key: ```Search subscene```
-	
