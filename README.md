@@ -2,7 +2,7 @@
 Download subtitles from subscene.com with the name of a directory as the search parameter from the context menu.
 
 <p>This branch has a few, but everything is automatic from the search to the downloading and unzipping of the .srt-files.
-<p>The main_old branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
+<p>The main_no-dependencies branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
 
 ---
 
@@ -19,7 +19,7 @@ Download subtitles from subscene.com with the name of a directory as the search 
 	2. Context menu gets added and you can now Right-Clicking inside a  folder to see context-menu option 'Search subscene'.
 
 2. Use the menu inside the folder of the release you want to find subtitles for.
-  1. Most settings, like language can be tweaked in class ```WebScraping:``` method ```__init__```
+  1. Most settings, like language can be tweaked in class ```WebScraping:``` method ```__init__``` in ```main.py```
 
 ---  
 Registry key can be found here:```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene``` if you want to remove it or make edits to it.
