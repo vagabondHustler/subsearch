@@ -69,8 +69,8 @@ class Search:
             year
         except NameError:
             year = None
-        temp_lst = [url, title, year, release_name, scene_group, name_group]
 
+        temp_lst = [url, title, year, release_name, scene_group, name_group]
         return temp_lst
 
 
@@ -100,9 +100,8 @@ class IsaMatch:
         match = 0
         searched: list = self.mk_lst(searched)
         search_result: list = self.mk_lst(search_result)
-        # self.find_res(searched)
-        # self.find_res(search_result)
         greater_answer = self.is_bigger(searched, search_result)
+
         if len(searched) < len(search_result):                      # if one list is longer than the other _NONE gets added
             for ga in range(greater_answer):
                 searched.append('_None')
@@ -117,6 +116,7 @@ class IsaMatch:
                 match += 1
             else:
                 pass
+
         tot = len(searched)
         percent_is = (round((match/tot)*100))
         return percent_is
@@ -124,6 +124,7 @@ class IsaMatch:
     def find_res(self, word_lst) -> list:
         res_lst = ['4K', '2K', '4320p', '2160p', '1080p', '720p']
         count = 0
+
         for x in word_lst:
             if x in res_lst:
                 count += 1
@@ -136,6 +137,7 @@ class IsaMatch:
     def mk_lst(self, x: str) -> list:
         x: list = x.split('.')
         x1 = x[-1].split('-')
+
         for item in x1:
             x.append(item)
         return x
@@ -177,27 +179,31 @@ class Webscraping:
         self.name_group = name_group
         self.language = language
         self.sm = sm
-
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
-        return
+
 
     def search_title(self) -> list:                                                     # search with Search.parameter e.g directry name
         source = requests.get(self.url).text                                            # inittial url request
         doc = BeautifulSoup(source, 'html.parser')                                      # computing html
         search_result = doc.find('div', class_='search-result')                         # section with search result from initial search
         links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
+
         for link in links:                                                              # place urls in said lst
             self.search_title_lst.append(f'https://subscene.com/{link}')                # add missing address to url
+
         number = len(self.search_title_lst)
         print(f"{number} titles matched '{self.title}'")
         print('------------------------------------------')
+
         if number == 0:
             exit('No matches')
+
         return self.search_title_lst
 
     def search_for_subtitles(self, number: int) -> list:              # check title and release name with subs list of avilable subtitles to download
         searching = True
+
         while searching is True:
             source = requests.get(self.search_title_lst[number]).text       # determin which url to request to from lst
             doc = BeautifulSoup(source, 'html.parser')
@@ -230,6 +236,7 @@ class Webscraping:
         print('\n')
         print(f'Downloading {subtitles_number} .zip files')
         print('------------------------------------------')
+
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
             print(f'{number}/{subtitles_number}')
@@ -246,6 +253,7 @@ class Webscraping:
             zip_file = f'{save_path}\\{name}_by_{author[0]}_{number}.zip'       # name and path of .zip
             zip_file_url = f'https://subscene.com/{link[0]}'                    # add missing address to url
             r = requests.get(zip_file_url, stream=True)
+
             with open(zip_file, 'wb') as fd:                                    # save .zip with for loop
                 for chunk in r.iter_content(chunk_size=128):
                     fd.write(chunk)
@@ -265,6 +273,7 @@ class Webscraping:
     def rename_srt(self):       # rename best matching .srt file so MPC auto-loads it, places rest of the .srt-files in /subs directory
         print('\n')
         subs = 'subs/'
+
         try:
             os.mkdir(subs)
         except FileExistsError:
@@ -274,6 +283,7 @@ class Webscraping:
         preferred_ext = f'{scene_group}.srt'
         new_name = f'{self.name_group}.srt'
         ext = '.srt'
+
         for item in os.listdir(dir_name):
             if item.endswith(preferred_ext):
                 try:
@@ -282,18 +292,22 @@ class Webscraping:
                     pass
                 finally:
                     break
+
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
                 shutil.move(item, f'subs/{item}')
+
         print(f'{new_name} added\nRemaining .srt-files moved to ~/subs\n')
 
 
 def main():     # main, checks if user is admin, if registry for contextmenu exists, runs webscraping etc...
     r = Registry()
+
     if r.is_admin():
         regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
         os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
         exit(0)
+
     if r.is_key() is False:                             # check if key exists
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
@@ -304,19 +318,24 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         urls_number = len(w.search_title_lst)
         if urls_number == 0:
             return exit('No subtitles found')
+
         for x in range(urls_number):
             print(f"Searching match: {x+1}/{urls_number}")
             w.search_for_subtitles(x)
             if len(w.links_to_dl) > 1:
                 print(f"Subtitles found for '{w.name_group}'")
                 break
+
             if x > urls_number:
                 exit('No subtitles found')
+
         if len(w.links_to_dl) == 0:
             return exit(f'Nothing found for {w.release_name} by {w.scene_group}')
+
         w.download_zip()
         w.extract_zip()
         w.rename_srt()
+
         exit('--- All done ---')
 
 
