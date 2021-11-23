@@ -38,7 +38,6 @@ class Search:
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
-        print(release_name_lst)
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
@@ -60,7 +59,6 @@ class Search:
 
         release_lst = dir_name_lst[-1].split('-')
         release_name = release_lst[0]
-        print(release_name)
         scene_group = release_name_lst[-1]
         name_group = dir_name_lst[-1]
         url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
@@ -168,8 +166,9 @@ class Webscraping:
                  scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
                  year=v.values(use='year'),                      # returns year of the release
                  name_group=v.values(use='name_group'),
-                 sm=sm,
+                 accuracy=90,                                    # sefines how many% of the words in the title, which need to match the search result
                  language='English',                             # language of the subtitles
+                 sm=sm,
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
         self.title = title
@@ -179,6 +178,7 @@ class Webscraping:
         self.scene_group = scene_group
         self.name_group = name_group
         self.language = language
+        self.accuracy = accuracy
         self.sm = sm
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
@@ -233,7 +233,7 @@ class Webscraping:
                     for x in content.find_all('span')
                 ]
                 link = [y['href'] for y in content.find_all('a', href=True) if y.text]        # url of downloadlink to subtitle matching release name)
-                if self.sm.check(self.name_group, release_name[1]) >= 90:                     # checks if 90% of the words in searched and result are a match
+                if self.sm.check(self.name_group, release_name[1]) >= self.accuracy:          # checks if 90% of the words in searched and result are a match
                     if f'https://subscene.com/{link[0]}' not in self.links_to_dl:             # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
                 else:
