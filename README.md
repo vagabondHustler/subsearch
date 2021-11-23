@@ -1,7 +1,7 @@
 # subscene_search
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
 
-<p>This branch has a few, but everything is automatic from the search to the downloading and unzipping of the .srt-files.
+<p>This branch has a few dependencies, but everything is automatic from the search to the downloading and unzipping of the .srt-files.
 <p>The main_no-dependencies branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
 
 ---
