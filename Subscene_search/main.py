@@ -166,7 +166,7 @@ class WebScraping:
                  scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
                  year=v.values(use='year'),                      # returns year of the release
                  name_group=v.values(use='name_group'),
-                 accuracy=90,                                    # sefines how many% of the words in the title, which need to match the search result
+                 accuracy=90,                                    # defines how many% of the words in the title, which need to match the search result
                  language='English',                             # language of the subtitles
                  sm=sm,
                  search_title_lst=[], links_to_dl=[]):           # lsts
