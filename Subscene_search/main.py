@@ -325,7 +325,7 @@ def main():     # main, checks if user is admin, if registry for contextmenu exi
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
 
     else:
-        w = Webscraping()
+        w = WebScraping()
         w.search_title()
         urls_number = len(w.search_title_lst)
         if urls_number == 1:
