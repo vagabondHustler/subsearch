@@ -302,7 +302,7 @@ class WebScraping:
         except FileExistsError:
             pass
         finally:
-            print(f'Added ~/{self.name_group}/{new_name}')
+            print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
@@ -349,7 +349,7 @@ def main():     # main, checks if user is admin, if registry context menu exists
         w.rename_srt()
 
         if len(w.links_to_dl) >= 2:
-            print(f'Rest of the .srt-files moved to ~/{w.name_group}/subs\n')
+            print(f'Rest of the .srt-files moved to ~/{w.name_group[0:8]}.../subs\n')
         print('\n')
         exit('--- All done ---')
 
