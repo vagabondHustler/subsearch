@@ -312,7 +312,7 @@ class WebScraping:
                 shutil.move(item, f'subs/{item}')
 
 
-def main():     # main, checks if user is admin, if registry for contextmenu exists, runs webscraping etc...
+def main():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
     r = Registry()
 
     if r.is_admin():
