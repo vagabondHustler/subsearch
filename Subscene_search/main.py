@@ -182,7 +182,6 @@ class Webscraping:
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
 
-
     def search_title(self) -> list:                                                     # search with Search.parameter e.g directry name
         source = requests.get(self.url).text                                            # inittial url request
         doc = BeautifulSoup(source, 'html.parser')                                      # computing html
