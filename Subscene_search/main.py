@@ -22,14 +22,12 @@ class Registry:
         try:
             with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
                 reg.OpenKey(hkey, sub_key)
-
         except Exception:                                                   # raised if no key found
             return False
 
     def is_admin(self) -> bool:
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
-
         except PermissionError:                                 # raise if user did not run as admin
             return False
 
@@ -40,6 +38,7 @@ class Search:
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
+
         for word in release_name_lst:                           # loop through lst
             try:                                                # if word is not a int ValueError is raised
                 int(word)
@@ -60,11 +59,12 @@ class Search:
                 if season is True:
                     break
 
-            release_lst = dir_name_lst[-1].split('-')
-            release_name = release_lst[0]
-            scene_group = release_lst[1]
-            name_group = dir_name_lst[-1]
+        release_lst = dir_name_lst[-1].split('-')
+        release_name = release_lst[0]
+        scene_group = release_lst[1]
+        name_group = dir_name_lst[-1]
         url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
+
         try:
             year
         except NameError:
@@ -103,7 +103,7 @@ class IsaMatch:
         # self.find_res(searched)
         # self.find_res(search_result)
         greater_answer = self.is_bigger(searched, search_result)
-        if len(searched) < len(search_result):      # if one list is longer than the other _NONE gets added
+        if len(searched) < len(search_result):                      # if one list is longer than the other _NONE gets added
             for ga in range(greater_answer):
                 searched.append('_None')
         elif len(searched) > len(search_result):
