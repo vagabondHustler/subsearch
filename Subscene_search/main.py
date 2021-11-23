@@ -302,7 +302,7 @@ class Webscraping:
                 except FileExistsError:
                     pass
                 finally:
-                    print(f'{new_name} added\nRemaining .srt-files moved to ~/subs\n')
+                    print(f'Added ~/{self.name_group}/{new_name}\nRemaining .srt moved to ~/{self.name_group}/subs\n')
                     break
             elif item.endswith(ext) and 'HI' not in item:
                 try:
@@ -312,6 +312,8 @@ class Webscraping:
                 finally:
                     print(f'Added ~/{self.name_group}/{new_name}\nRemaining .srt moved to ~/{self.name_group}/subs\n')
                     break
+            else:
+                print(f'.srt moved to ~/{self.name_group}/subs\n')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
