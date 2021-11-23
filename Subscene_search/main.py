@@ -193,15 +193,12 @@ class WebScraping:
             if self.title in sr_href.text and self.year in sr_href.text:
                 link = sr_href['href']
                 self.search_title_lst.append(f'https://subscene.com/{link}')        # add missing address to url
-            if len(self.search_title_lst) > 0:
-                return self.search_title_lst
-            else:
-                pass
 
         links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
 
         for link in links:                                                              # place urls in said lst
-            self.search_title_lst.append(f'https://subscene.com/{link}')                # add missing address to url
+            if link not in self.search_title_lst:
+                self.search_title_lst.append(f'https://subscene.com/{link}')                # add missing address to url
 
         number = len(self.search_title_lst)
         print(f"{number} titles matched '{self.title}'")
@@ -338,7 +335,7 @@ def main():     # main, checks if user is admin, if registry context menu exists
             return exit('No subtitles found')
 
         for x in range(urls_number):
-            print(f"Searching match: {x+1}/{urls_number}")
+            print(f"Searching match {x+1}/{urls_number} for subtitles")
             w.search_for_subtitles(x)
             if len(w.links_to_dl) > 1:
                 print(f"Subtitles found for '{w.name_group}'")
