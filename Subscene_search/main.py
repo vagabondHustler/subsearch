@@ -16,6 +16,65 @@ import zipfile                  # unzipping downloaded .zip files
 '''
 
 
+class IsSubaMatch:
+    def check(self, searched: str, search_result: str):
+        match = 0
+        searched: list = self.mk_lst(searched)
+        search_result: list = self.mk_lst(search_result)
+        # self.find_res(searched)
+        # self.find_res(search_result)
+        greater_answer = self.is_bigger(searched, search_result)
+        if len(searched) < len(search_result):
+            for ga in range(greater_answer):
+                searched.append('_None')
+        elif len(searched) > len(search_result):
+            for ga in range(greater_answer):
+                search_result.append('_None')
+        else:
+            pass
+
+        for x, y in zip(searched, search_result):
+            if self.compare(x, y) is True:
+                match += 1
+            else:
+                pass
+        tot = len(searched)
+        percent_is = (round((match/tot)*100))
+        return percent_is
+
+    def find_res(self, word_lst) -> list:
+        res_lst = ['4K', '2K', '4320p', '2160p', '1080p', '720p']
+        count = 0
+        for x in word_lst:
+            if x in res_lst:
+                count += 1
+                res_lst.remove(x)
+                # release_res = x
+        if count > 0:
+            pass
+
+    def mk_lst(self, x: str) -> list:
+        x: list = x.split('.')
+        x1 = x[-1].split('-')
+        for item in x1:
+            x.append(item)
+        return x
+
+    def is_bigger(self, searched, search_result):
+        if len(searched) > len(search_result):
+            answer = len(searched) - len(search_result)
+            return answer
+        elif len(searched) < len(search_result):
+            answer = len(search_result) - len(searched)
+            return answer
+
+    def compare(self, x, y):
+        if x == y:
+            return True
+        else:
+            return False
+
+
 class Registry:
     def is_key(self):       # check if keys exsist
         sub_key = r'Directory\Background\shell\Search subscene'             # registry path
@@ -97,6 +156,7 @@ class Values:
 
 class Webscraping:
     v = Values()
+    sm = IsSubaMatch()
 
     def __init__(self, title=v.values(use='title'),              # returns release title e.g foo
                  release_name=v.values(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
@@ -104,6 +164,7 @@ class Webscraping:
                  scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
                  year=v.values(use='year'),                      # returns year of the release
                  name_group=v.values(use='name_group'),
+                 sm=sm,
                  language='English',                             # language of the subtitles
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
@@ -116,6 +177,7 @@ class Webscraping:
         self.scene_group = scene_group
         self.name_group = name_group
         self.language = language
+        self.sm = sm
         print('\n\n')
 
         self.search_title_lst = search_title_lst
@@ -155,10 +217,9 @@ class Webscraping:
                     (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
                     for x in content.find_all('span')
                 ]
-                link = [y['href'] for y in content.find_all('a', href=True) if y.text]          # url of downloadlink to subtitle matching release name)
-                name_group_1080p = self.name_group.replace('720p', '1080p')                     # foo.2021.1080p.WEB.H264-bar and foo.2021.720p.WEB.H264-bar will be a match
-                if self.name_group == release_name[1] or name_group_1080p == release_name[1]:   # checks if the release name match subtitle release name
-                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:               # ignores already added subtitles in lst
+                link = [y['href'] for y in content.find_all('a', href=True) if y.text]        # url of downloadlink to subtitle matching release name)
+                if self.sm.check(self.name_group, release_name[1]) >= 90:                     # checks if 90% of the words in searched and result are a match
+                    if f'https://subscene.com/{link[0]}' not in self.links_to_dl:             # ignores already added subtitles in lst
                         self.links_to_dl.append(f'https://subscene.com/{link[0]}')
                 else:
                     pass
