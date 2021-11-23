@@ -16,6 +16,84 @@ import zipfile                  # unzipping downloaded .zip files
 '''
 
 
+class Registry:
+    def is_key(self) -> bool:       # check if keys exsist
+        sub_key = r'Directory\Background\shell\Search subscene'             # registry path
+        try:
+            with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
+                reg.OpenKey(hkey, sub_key)
+
+        except Exception:                                                   # raised if no key found
+            return False
+
+    def is_admin(self) -> bool:
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
+
+        except PermissionError:                                 # raise if user did not run as admin
+            return False
+
+
+class Search:
+    def parameters(self, dir_name=os.getcwd(), season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+        temp_lst = []
+        dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
+        release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
+        release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
+        for word in release_name_lst:                           # loop through lst
+            try:                                                # if word is not a int ValueError is raised
+                int(word)
+                year = word
+                break                                           # if word = in, break, e.g year or quality
+            except ValueError:
+                temp_lst.append(word)                           # appends the Title to lst from the release name
+                if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
+                    for letter in word[1]:                      # if second letter is not int continue
+                        try:                                    # if word is not a int ValueError is raised
+                            int(letter)
+                            season = True
+                            break
+                        except ValueError:
+                            input('value error')
+                            pass
+                title = ' '.join(temp_lst)
+                if season is True:
+                    break
+
+            release_lst = dir_name_lst[-1].split('-')
+            release_name = release_lst[0]
+            scene_group = release_lst[1]
+            name_group = dir_name_lst[-1]
+        url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
+        try:
+            year
+        except NameError:
+            year = None
+        temp_lst = [url, title, year, release_name, scene_group, name_group]
+
+        return temp_lst
+
+
+class Values:
+    s = Search()
+
+    def __init__(self, values_lst=s.parameters()):
+        self.values_lst = values_lst
+
+    def values(self, use=None) -> str:
+        if use == 'url':                                    # returns initial search url
+            return self.values_lst[0]
+        if use == 'title':                                  # returns release title e.g foo
+            return self.values_lst[1]
+        if use == 'year':                                   # returns the year of the release
+            return self.values_lst[2]
+        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
+            return self.values_lst[3]
+        if use == 'scene_group':                            # returns the scene group e.g bar
+            return self.values_lst[4]
+        if use == 'name_group':                             # returns release name + scene group
+            return self.values_lst[5]
+
 class IsaMatch:
     def check(self, searched: str, search_result: str) -> int:
         match = 0
@@ -75,85 +153,6 @@ class IsaMatch:
             return False
 
 
-class Registry:
-    def is_key(self) -> bool:       # check if keys exsist
-        sub_key = r'Directory\Background\shell\Search subscene'             # registry path
-        try:
-            with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
-                reg.OpenKey(hkey, sub_key)
-
-        except Exception:                                                   # raised if no key found
-            return False
-
-    def is_admin(self) -> bool:
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()        # check if script ran as admin, otherwise import .reg is denied
-
-        except PermissionError:                                 # raise if user did not run as admin
-            return False
-
-
-class Search:
-    def parameters(self, dir_name=os.getcwd(), season=False) -> list:                     # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
-        temp_lst = []
-        dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
-        release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
-        release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
-        for word in release_name_lst:                           # loop through lst
-            try:                                                # if word is not a int ValueError is raised
-                int(word)
-                year = word
-                break                                           # if word = in, break, e.g year or quality
-            except ValueError:
-                temp_lst.append(word)                           # appends the Title to lst from the release name
-                if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
-                    for letter in word[1]:                      # if second letter is not int continue
-                        try:                                    # if word is not a int ValueError is raised
-                            int(letter)
-                            season = True
-                            break
-                        except ValueError:
-                            input('value error')
-                            pass
-                title = ' '.join(temp_lst)
-                if season is True:
-                    break
-
-            release_lst = dir_name_lst[-1].split('-')
-            release_name = release_lst[0]
-            scene_group = release_lst[1]
-            name_group = dir_name_lst[-1]
-        url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
-        try:
-            year
-        except NameError:
-            year = None
-        temp_lst = [url, title, year, release_name, scene_group, name_group]
-
-        return temp_lst
-
-
-class Values:
-    s = Search()
-
-    def __init__(self, values_lst=s.parameters()):
-        self.values_lst = values_lst
-
-    def values(self, use=None) -> str:
-        if use == 'url':                                    # returns initial search url
-            return self.values_lst[0]
-        if use == 'title':                                  # returns release title e.g foo
-            return self.values_lst[1]
-        if use == 'year':                                   # returns the year of the release
-            return self.values_lst[2]
-        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
-            return self.values_lst[3]
-        if use == 'scene_group':                            # returns the scene group e.g bar
-            return self.values_lst[4]
-        if use == 'name_group':                             # returns release name + scene group
-            return self.values_lst[5]
-
-
 class Webscraping:
     v = Values()
     sm = IsaMatch()
@@ -181,7 +180,7 @@ class Webscraping:
         self.links_to_dl = links_to_dl
         return
 
-    def search_title(self) -> list:                                                             # search with Search.parameter e.g directry name
+    def search_title(self) -> list:                                                     # search with Search.parameter e.g directry name
         source = requests.get(self.url).text                                            # inittial url request
         doc = BeautifulSoup(source, 'html.parser')                                      # computing html
         search_result = doc.find('div', class_='search-result')                         # section with search result from initial search
