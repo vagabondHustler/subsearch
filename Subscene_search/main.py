@@ -94,15 +94,16 @@ class Values:
         if use == 'name_group':                             # returns release name + scene group
             return self.values_lst[5]
 
+
 class IsaMatch:
-    def check(self, searched: str, search_result: str) -> int:
+    def check(self, searched: str, search_result: str) -> int:      # compares searched words with words in result, returns int out of 100%
         match = 0
         searched: list = self.mk_lst(searched)
         search_result: list = self.mk_lst(search_result)
         # self.find_res(searched)
         # self.find_res(search_result)
         greater_answer = self.is_bigger(searched, search_result)
-        if len(searched) < len(search_result):
+        if len(searched) < len(search_result):      # if one list is longer than the other _NONE gets added
             for ga in range(greater_answer):
                 searched.append('_None')
         elif len(searched) > len(search_result):
@@ -127,7 +128,8 @@ class IsaMatch:
             if x in res_lst:
                 count += 1
                 res_lst.remove(x)
-                # release_res = x
+                release_res = x
+                print(release_res)
         if count > 0:
             pass
 
@@ -138,7 +140,7 @@ class IsaMatch:
             x.append(item)
         return x
 
-    def is_bigger(self, searched, search_result) -> int:
+    def is_bigger(self, searched, search_result) -> int:  # answer will not come back negative
         if len(searched) > len(search_result):
             answer = len(searched) - len(search_result)
             return answer
