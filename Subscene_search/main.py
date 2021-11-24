@@ -16,8 +16,8 @@ import zipfile                  # unzipping downloaded .zip files
 '''
 
 
-class Registry:
-    def is_key(self) -> bool:       # check if keys exsist
+class CurrentUser:
+    def got_key(self) -> bool:       # check if keys exsist
         sub_key = r'Directory\Background\shell\Search subscene'             # registry path
         try:
             with reg.ConnectRegistry(None, reg.HKEY_CLASSES_ROOT) as hkey:
@@ -32,8 +32,8 @@ class Registry:
             return False
 
 
-class Search:
-    def parameters(self, dir_name=os.getcwd(), season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+class FilterOut:
+    def dir_path(self, dir_name=os.getcwd(), season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         temp_lst = []
         dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
@@ -70,27 +70,6 @@ class Search:
 
         temp_lst = [url, title, year, release_name, scene_group, name_group]
         return temp_lst
-
-
-class Values:
-    s = Search()
-
-    def __init__(self, values_lst=s.parameters()):
-        self.values_lst = values_lst
-
-    def values(self, use=None) -> str:
-        if use == 'url':                                    # returns initial search url
-            return self.values_lst[0]
-        if use == 'title':                                  # returns release title e.g foo
-            return self.values_lst[1]
-        if use == 'year':                                   # returns the year of the release
-            return self.values_lst[2]
-        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
-            return self.values_lst[3]
-        if use == 'scene_group':                            # returns the scene group e.g bar
-            return self.values_lst[4]
-        if use == 'name_group':                             # returns release name + scene group
-            return self.values_lst[5]
 
 
 class IsaMatch:
@@ -156,16 +135,37 @@ class IsaMatch:
             return False
 
 
+class ReturnValues:
+    fo = FilterOut()
+
+    def __init__(self, directory_path=fo.dir_path()):
+        self.directory_path = directory_path
+
+    def from_dir(self, use=None) -> str:
+        if use == 'url':                                    # returns initial search url
+            return self.directory_path[0]
+        if use == 'title':                                  # returns release title e.g foo
+            return self.directory_path[1]
+        if use == 'year':                                   # returns the year of the release
+            return self.directory_path[2]
+        if use == 'release_name':                           # returns release name e.g foo.2021.1080p.WEB.H264-bar
+            return self.directory_path[3]
+        if use == 'scene_group':                            # returns the scene group e.g bar
+            return self.directory_path[4]
+        if use == 'name_group':                             # returns release name + scene group
+            return self.directory_path[5]
+
+
 class WebScraping:
-    v = Values()
+    rv = ReturnValues()
     sm = IsaMatch()
 
-    def __init__(self, title=v.values(use='title'),              # returns release title e.g foo
-                 release_name=v.values(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
-                 url=v.values(use='url'),                        # returns initial search url
-                 scene_group=v.values(use='scene_group'),        # returns the scene group e.g bar
-                 year=v.values(use='year'),                      # returns year of the release
-                 name_group=v.values(use='name_group'),
+    def __init__(self, title=rv.from_dir(use='title'),              # returns release title e.g foo
+                 release_name=rv.from_dir(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
+                 url=rv.from_dir(use='url'),                        # returns initial search url
+                 scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
+                 name_group=rv.from_dir(use='name_group'),
+                 year=rv.from_dir(use='year'),                      # returns year of the release
                  accuracy=90,                                    # defines how many% of the words in the title, which need to match the search result
                  language='English',                             # language of the subtitles
                  sm=sm,
@@ -266,6 +266,18 @@ class WebScraping:
                 for chunk in r.iter_content(chunk_size=128):
                     fd.write(chunk)
 
+
+class FileManager:
+    rv = ReturnValues()
+
+    def __init__(self, scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
+                 name_group=rv.from_dir(use='name_group'),
+                 rv=rv):
+
+        self.scene_group = scene_group
+        self.name_group = name_group
+        self.rv = rv
+
     def extract_zip(self):
         dir_name = os.getcwd()
         ext = ".zip"
@@ -310,46 +322,46 @@ class WebScraping:
 
 
 def main():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
-    r = Registry()
+    cu = CurrentUser()
+    wb = WebScraping()
+    fm = FileManager()
 
-    if r.is_admin():
+    if cu.is_admin():
         regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
         os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
         exit(0)
 
-    if r.is_key() is False:                             # check if key exists
+    if cu.got_key() is False:                             # check if key exists
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
 
     else:
-        w = WebScraping()
-        w.search_title()
-        urls_number = len(w.search_title_lst)
+        wb.search_title()
+        urls_number = len(wb.search_title_lst)
         if urls_number == 1:
-            print(f"One exact match found for Title '{w.title}' Released '{w.year}'")
+            print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
             print('------------------------------------------')
         elif urls_number == 0:
             return exit('No subtitles found')
 
         for x in range(urls_number):
             print(f"Searching match {x+1}/{urls_number} for subtitles")
-            w.search_for_subtitles(x)
-            if len(w.links_to_dl) > 1:
-                print(f"Subtitles found for '{w.name_group}'")
+            wb.search_for_subtitles(x)
+            if len(wb.links_to_dl) > 1:
+                print(f"Subtitles found for '{wb.name_group}'")
                 break
-
             if x > urls_number:
                 exit('No subtitles found')
 
-        if len(w.links_to_dl) == 0:
-            return exit(f'Nothing found for {w.release_name} by {w.scene_group}')
+        if len(wb.links_to_dl) == 0:
+            return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
 
-        w.download_zip()
-        w.extract_zip()
-        w.rename_srt()
+        wb.download_zip()
+        fm.extract_zip()
+        fm.rename_srt()
 
-        if len(w.links_to_dl) >= 2:
-            print(f'Rest of the .srt-files moved to ~/{w.name_group[0:8]}.../subs\n')
+        if len(wb.links_to_dl) >= 2:
+            print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
         print('\n')
         exit('--- All done ---')
 
