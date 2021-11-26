@@ -63,6 +63,10 @@ class Gui():    # main gui
         t1.start()
         t2.start()
         master.protocol("WM_DELETE_WINDOW", self.exit_terminal)   # when user presses corner x windows will close
+
+    def exit_terminal(self):
+        exit()
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
