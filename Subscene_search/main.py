@@ -573,18 +573,20 @@ def script():     # main, checks if user is admin, if registry context menu exis
             rd.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
             rd.print('')
         elif urls_number == 0:
-            return exit('No subtitles found')
+            rd_exit()
 
         for x in range(urls_number):
-            print(f"Searching match {x+1}/{urls_number} for subtitles")
+            rd.print(f"Searching match {x+1}/{urls_number} for subtitles")
             wb.search_for_subtitles(x)
             if len(wb.links_to_dl) > 1:
-                print(f"Subtitles found for '{wb.name_group}'")
+                rd.print(f"Subtitles found for '{wb.name_group}'")
                 break
             if x > urls_number:
-                exit('No subtitles found')
+                rd.print('No subtitles found')
+                rd_exit()
 
         if len(wb.links_to_dl) == 0:
+            rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
             return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
 
         wb.download_zip()
