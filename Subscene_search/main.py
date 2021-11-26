@@ -8,6 +8,10 @@ from bs4 import BeautifulSoup   # webscraping
 import requests                 # requests to urls
 import time                     # sleep between requests, otherwise subscene times you out
 import zipfile                  # unzipping downloaded .zip files
+import tkinter as tk            # for Gui
+from tkinter import Label, Button, Scrollbar, Listbox, END  # for Gui functionality
+from ctypes import windll       # for removing title bar etc
+import threading                # so script and Gui can run at the same time
 
 
 '''
