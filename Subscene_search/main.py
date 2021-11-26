@@ -21,6 +21,7 @@ import threading                # so script and Gui can run at the same time
 
 
 class Gui():    # main gui
+class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
         sub_key = r'Directory\Background\shell\Search subscene'             # registry path
