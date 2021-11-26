@@ -222,6 +222,15 @@ class CurrentUser:
         except PermissionError:                                 # raise if user did not run as admin
             return False
 
+    def got_file(self) -> bool:
+        dir_name, file_name = os.path.split(os.path.abspath(__file__))
+        language_file = f'{dir_name}\\language'
+
+        if os.path.isfile(language_file) and os.stat(language_file).st_size != 0:
+            return True
+        else:
+            return False
+
 
 class FilterOut:
     def dir_path(self, dir_name=os.getcwd(), season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
