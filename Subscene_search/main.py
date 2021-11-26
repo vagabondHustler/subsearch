@@ -555,7 +555,6 @@ def script():     # main, checks if user is admin, if registry context menu exis
 
     wb = WebScraping()
     fm = FileManager()
-
     if cu.is_admin():
         regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
         os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
@@ -594,9 +593,9 @@ def script():     # main, checks if user is admin, if registry context menu exis
         fm.rename_srt()
 
         if len(wb.links_to_dl) >= 2:
-            print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
-        print('\n')
-        exit('--- All done ---')
+            rd.print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
+        rd.print('')
+        rd_exit()
 
 
 main()
