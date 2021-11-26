@@ -455,9 +455,9 @@ class WebScraping:
     def download_zip(self):     # download .zip files containing the subtitles
         number = 0
         subtitles_number = len(self.links_to_dl)
-        print('\n')
-        print(f'Downloading {subtitles_number} .zip files')
-        print('------------------------------------------')
+        self.rd.print('')
+        self.rd.print(f'Downloading {subtitles_number} .zip files')
+        self.rd.print('')
 
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
