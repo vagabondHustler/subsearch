@@ -405,14 +405,16 @@ class WebScraping:
 
         for link in links:                                                              # place urls in said lst
             if link not in self.search_title_lst:
-                self.search_title_lst.append(f'https://subscene.com/{link}')                # add missing address to url
+                self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
 
         number = len(self.search_title_lst)
-        print(f"{number} titles matched '{self.title}'")
-        print('------------------------------------------')
+        self.rd.print(f"{number} titles matched '{self.title}'")
+        self.rd.print('')
 
         if number == 0:
-            exit('No matches')
+            self.rd.print('No matches')
+            self.rd.print('--- All done ---')
+            exit()
 
         return self.search_title_lst
 
