@@ -598,4 +598,7 @@ def script():     # main, checks if user is admin, if registry context menu exis
         rd_exit()
 
 
-main()
+if __name__ == "__main__":
+    root = tk.Tk()
+    Gui(root)
+    root.mainloop()
