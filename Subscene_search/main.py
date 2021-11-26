@@ -461,7 +461,7 @@ class WebScraping:
 
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
-            print(f'{number}/{subtitles_number}')
+            self.rd.print(f'{number}/{subtitles_number}')
             save_path = os.getcwd()
             name = self.title.replace(' ', '_')     # name of the .zip file
             source = requests.get(url).text
@@ -483,14 +483,17 @@ class WebScraping:
 
 class FileManager:
     rv = ReturnValues()
+    rd = Redirect()
 
     def __init__(self, scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
                  name_group=rv.from_dir(use='name_group'),
-                 rv=rv):
+                 rv=rv,
+                 rd=rd):
 
         self.scene_group = scene_group
         self.name_group = name_group
         self.rv = rv
+        self.rd = rd
 
     def extract_zip(self):
         dir_name = os.getcwd()
