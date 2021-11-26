@@ -546,6 +546,13 @@ def rd_exit():
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
     cu = CurrentUser()
+    rd = Redirect()
+    rd.print('Terminal:')
+    rd.print('')
+    while cu.got_file() is False:
+        time.sleep(2)
+        cu.got_file()
+
     wb = WebScraping()
     fm = FileManager()
 
