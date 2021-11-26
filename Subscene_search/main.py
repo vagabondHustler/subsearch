@@ -164,6 +164,20 @@ class Gui():    # main gui
         master.withdraw()
         master.after(10, master.deiconify)
 
+    def drag(self, event):                              # allows title bar to be clicked and dragged
+        x = self.master.winfo_pointerx() - offsetx      # calculate mouse pos before and after click
+        y = self.master.winfo_pointery() - offsety
+        self.master.geometry('+{x}+{y}'.format(x=x, y=y))
+
+    def click(self, event):
+        global offsetx, offsety
+        offsetx = event.x
+        offsety = event.y
+
+    offsetx = 0
+    offsety = 0
+
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
