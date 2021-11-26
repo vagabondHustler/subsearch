@@ -429,10 +429,15 @@ class WebScraping:
                 tbc = tbody.contents          # contents of tbody
                 searching = False
             else:
-                time.sleep(2)                                               # takes around 2 seconds before a new request is allowd after 'to many requests'
+                time.sleep(1)                 # takes around 2 seconds before a new request is allowd after 'to many requests'
 
         for content in tbc:
-            if self.language in content.text:        # languish filter
+            dir_name, file_name = os.path.split(os.path.abspath(__file__))
+            language_file = f'{dir_name}\\language'
+            with open(language_file, 'r') as f:
+                lines = f.readlines()
+                lines = [line.rstrip() for line in lines]
+            if lines[0] in content.text:        # languish filter
                 # remove spaces, tabs new-lines etc
                 release_name = [
                     (x.text.replace('\r\n\t\t\t\t\t\t', '').replace(' \r\n\t\t\t\t\t', ''))
