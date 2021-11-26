@@ -178,6 +178,9 @@ class Gui():    # main gui
     offsety = 0
 
 
+lst = []
+
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
