@@ -12,13 +12,16 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 
 ---
-
+![alt text](https://github.com/vagabondHustler/Pykey_chatter/blob/main/resources/prtsc.png?raw=true)
+---
 # How to use:
 1. Run ```python main.py``` to add the context-menu.
-	1. You will be prompted to run as admin, nessecarry to save the new keys to the registry.
+	1. You will be prompted to run as admin, necessary to save the new keys to the registry.
 	2. Context menu gets added and you can now Right-Clicking inside a  folder to see context-menu option 'Search subscene'.
+2. Gui will launch, you can now pick your preferred language on the right hand side.
+  1. After selection the gui will quit in 5 seconds, or you can press the X if you don't want to wait.
 
-2. Use the menu inside the folder of the release you want to find subtitles for.
+3. Use the menu inside the folder of the release you want to find subtitles for.
   1. Most settings, like language can be tweaked in class ```WebScraping:``` method ```__init__``` in ```main.py```
 
 ---  
