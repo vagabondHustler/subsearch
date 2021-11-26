@@ -151,6 +151,19 @@ class Gui():    # main gui
         value = f'{w}x{h}+{x}+{y}'
         return value
 
+    def set_appwindow(self, master):                        # for removing original window border and title bar
+        GWL_EXSTYLE = -20
+        WS_EX_APPWINDOW = 0x00040000
+        WS_EX_TOOLWINDOW = 0x00000080
+        hwnd = windll.user32.GetParent(master.winfo_id())
+        style = windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TOOLWINDOW
+        style = style | WS_EX_APPWINDOW
+        # res = windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        # re-assert the new window style
+        master.withdraw()
+        master.after(10, master.deiconify)
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
