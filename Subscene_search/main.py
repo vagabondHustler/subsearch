@@ -531,7 +531,7 @@ class FileManager:
         except FileExistsError:
             pass
         finally:
-            print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
+            self.rd.print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
