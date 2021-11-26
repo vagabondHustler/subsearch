@@ -233,9 +233,12 @@ class CurrentUser:
 
 
 class FilterOut:
-    def dir_path(self, dir_name=os.getcwd(), season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
+    def __init__(self, dir_name=os.getcwd()):
+        self.dir_name = dir_name
+
+    def dir_path(self, season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
         temp_lst = []
-        dir_name_lst = dir_name.split('\\')                     # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
+        dir_name_lst = self.dir_name.split('\\')                # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
         for word in release_name_lst:                           # loop through lst
