@@ -81,6 +81,11 @@ class Gui():    # main gui
         button_exit.bind("<Enter>", on_enter)
         button_exit.bind("<Leave>", on_leave)
 
+    def app_name(self, master):         # title of window
+        label = Label(master, text='Subscene search', height=1)
+        label.configure(bg=self.bg, fg=self.fg, font=self.font8)
+        label.place(relx=0, rely=0.0078, anchor='nw')
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
