@@ -130,6 +130,5 @@ dmypy.json
 
 # test files and directories stuff
 test/
-test.*
-testgui.*
+test*.*
 regkey.reg
