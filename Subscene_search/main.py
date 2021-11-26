@@ -140,6 +140,17 @@ class Gui():    # main gui
 
         lb.bind('<<ListboxSelect>>', select)
 
+    def tkpos(self, master, w=858, h=418):              # centers the window in the middle of the screeen
+        # get screen width and height
+        ws = master.winfo_screenwidth()       # width of the screen
+        hs = master.winfo_screenheight()      # height of the screen
+
+        # calculate x and y coordinates for the Tk root window
+        x = int((ws/2) - (w/2))
+        y = int((hs/2) - (h/2))
+        value = f'{w}x{h}+{x}+{y}'
+        return value
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
