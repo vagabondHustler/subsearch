@@ -340,6 +340,7 @@ class IsaMatch:
 
 class ReturnValues:
     fo = FilterOut()
+    rt = Redirect()
 
     def __init__(self, directory_path=fo.dir_path()):
         self.directory_path = directory_path
@@ -362,16 +363,18 @@ class ReturnValues:
 class WebScraping:
     rv = ReturnValues()
     sm = IsaMatch()
+    rd = Redirect()
 
     def __init__(self, title=rv.from_dir(use='title'),              # returns release title e.g foo
                  release_name=rv.from_dir(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
                  url=rv.from_dir(use='url'),                        # returns initial search url
                  scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
                  name_group=rv.from_dir(use='name_group'),
-                 year=rv.from_dir(use='year'),                      # returns year of the release
+                 # language=rv.from_dir(use='language'),
+                 year=rv.from_dir(use='year'),                   # returns year of the release
                  accuracy=90,                                    # defines how many% of the words in the title, which need to match the search result
-                 language='English',                             # language of the subtitles
                  sm=sm,
+                 rd=rd,
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
         self.title = title
@@ -380,9 +383,10 @@ class WebScraping:
         self.year = year
         self.scene_group = scene_group
         self.name_group = name_group
-        self.language = language
         self.accuracy = accuracy
+        # self.language = language
         self.sm = sm
+        self.rd = rd
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
 
