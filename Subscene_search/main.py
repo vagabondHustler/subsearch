@@ -186,10 +186,10 @@ class Redirect:             # class for printing to Gui terminal
         pass
 
     def print(self, x):
-        lst.append(f' {x}')
+        lst.append(f'  {x}')
         lbc = Listbox(root, height=24, width=120, selectmode='single', exportselection=False, activestyle='none')
         lbc.configure(bd=0, highlightthickness=0,
-                      bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#0E0F12', selectforeground='#797979', font='Cascadia 8 bold')
+                      bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#240d14', selectforeground='#797979', font='Cascadia 8 bold')
         lbc.grid(column=0, padx=6, pady=30, row=1)
 
         for item in lst:
@@ -199,7 +199,7 @@ class Redirect:             # class for printing to Gui terminal
         lbc.yview(END)
         if '--- All done ---' in lst[-1]:
             for number in range(3, -1, -1):
-                lbc.insert(END, f'Exit in {number} seconds')
+                lbc.insert(END, f'  Exit in {number} seconds')
                 lbc.select_clear(lbc.size() - 2)  # Clear the current selected item
                 lbc.select_set(END)  # Select the new item
                 lbc.yview(END)
@@ -548,7 +548,7 @@ def rd_exit():
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
     cu = CurrentUser()
     rd = Redirect()
-    rd.print('Terminal:')
+    rd.print('Output:')
     rd.print('')
     while cu.got_file() is False:
         time.sleep(2)
