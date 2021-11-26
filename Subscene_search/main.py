@@ -86,6 +86,60 @@ class Gui():    # main gui
         label.configure(bg=self.bg, fg=self.fg, font=self.font8)
         label.place(relx=0, rely=0.0078, anchor='nw')
 
+    def lang_menu(self, master):        # language
+        rd = Redirect()                 # custom print class
+
+        def select(self):                   # allows selection of language from list
+            selection = lb.curselection()
+            value = lb.get(selection[0])
+
+            dir_name, file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
+            language_file = f'{dir_name}\\language'
+
+            lang_file = open(language_file, "w")        # save user selection to file
+            lang_file.write(value)
+            lang_file.close()
+            rd.print(f'You have selected {value} as your language')
+
+        language = ['Arabic',
+                    'Bengali',
+                    'Brazillian/Portuguese',
+                    'Danish',
+                    'Dutch',
+                    'English',
+                    'Farsi/Persian',
+                    'Finnish',
+                    'French',
+                    'German',
+                    'Greek',
+                    'Hebrew',
+                    'Indonesian',
+                    'Italian',
+                    'Korean',
+                    'Malay',
+                    'Norwegian',
+                    'Portuguese',
+                    'Romanian',
+                    'Spanish',
+                    'Swedish',
+                    'Thai',
+                    'Turkish',
+                    'Vietnamese']
+
+        sb = Scrollbar(master, bg=self.bg)              # allows scrolling in language list
+        sb.place(relx=2, rely=2, anchor='center')
+
+        lb = Listbox(master, height=24, selectmode='single', yscrollcommand=sb.set, exportselection=False, activestyle='none')
+
+        for lang in language:
+            lb.insert(END, lang)
+
+        lb.configure(bd=0, highlightthickness=0,
+                     bg=self.bg, fg=self.fg, highlightcolor=self.hc, selectbackground=self.selbgc,  selectforeground=self.fg, font=self.font8)
+        lb.grid(column=1, pady=30, row=1)
+
+        lb.bind('<<ListboxSelect>>', select)
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
