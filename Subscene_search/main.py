@@ -204,7 +204,9 @@ class Redirect:             # class for printing to Gui terminal
                 lbc.select_set(END)  # Select the new item
                 lbc.yview(END)
                 time.sleep(1)
-            root.destroy()
+
+            root.quit()
+            os._exit(1)
 
 
 class CurrentUser:
@@ -414,7 +416,7 @@ class WebScraping:
         if number == 0:
             self.rd.print('No matches')
             self.rd.print('--- All done ---')
-            exit()
+            rd_exit()
 
         return self.search_title_lst
 
@@ -541,7 +543,6 @@ class FileManager:
 def rd_exit():
     rd = Redirect()
     rd.print('--- All done ---')
-    exit(0)
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
