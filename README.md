@@ -12,7 +12,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 
 ---
-![alt text](https://github.com/vagabondHustler/Pykey_chatter/blob/main/resources/prtsc.png?raw=true)
+![alt text](https://github.com/vagabondHustler/subsceen_search/blob/main/resources/prtsc.png?raw=true)
 ---
 # How to use:
 1. Run ```python main.py``` to add the context-menu.
