@@ -131,4 +131,5 @@ dmypy.json
 # test files and directories stuff
 test/
 test*.*
+language
 regkey.reg
