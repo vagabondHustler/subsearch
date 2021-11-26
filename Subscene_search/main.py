@@ -566,11 +566,12 @@ def script():     # main, checks if user is admin, if registry context menu exis
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
 
     else:
+        rd.print(f'Searching for titles matching {wb.title}')
         wb.search_title()
         urls_number = len(wb.search_title_lst)
         if urls_number == 1:
-            print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
-            print('------------------------------------------')
+            rd.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
+            rd.print('')
         elif urls_number == 0:
             return exit('No subtitles found')
 
