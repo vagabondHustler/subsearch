@@ -67,6 +67,20 @@ class Gui():    # main gui
     def exit_terminal(self):
         exit()
 
+    def button_exit(self, master):                  # exit button
+        def on_enter(self):                         # button light up when mouseover
+            button_exit['background'] = '#252525'
+
+        def on_leave(self):
+            button_exit['background'] = '#121212'
+
+        # exit button settings
+        button_exit = Button(master, text='X', command=master.destroy, height=1, width=3, bd=0,
+                             bg=self.bg, activebackground=self.abg, fg=self.fg,  font=self.font10)
+        button_exit.place(relx=1, rely=0, anchor='ne')
+        button_exit.bind("<Enter>", on_enter)
+        button_exit.bind("<Leave>", on_leave)
+
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
