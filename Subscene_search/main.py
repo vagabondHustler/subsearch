@@ -538,7 +538,13 @@ class FileManager:
                 shutil.move(item, f'subs/{item}')
 
 
-def main():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
+def rd_exit():
+    rd = Redirect()
+    rd.print('--- All done ---')
+    exit(0)
+
+
+def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
     cu = CurrentUser()
     wb = WebScraping()
     fm = FileManager()
