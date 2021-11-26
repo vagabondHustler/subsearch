@@ -424,9 +424,9 @@ class WebScraping:
         while searching is True:
             source = requests.get(self.search_title_lst[number]).text       # determin which url to request to from lst
             doc = BeautifulSoup(source, 'html.parser')
-            tbody = doc.tbody                                               # tbody of html
-            if tbody is not None:                                           # if subsceen returns 'to many requests' and timedout the connection, script does not crash
-                tbc = tbody.contents                                        # contents of tbody
+            tbody = doc.tbody                 # tbody of html
+            if tbody is not None:             # if subsceen returns 'to many requests' and timedout the connection, script does not crash
+                tbc = tbody.contents          # contents of tbody
                 searching = False
             else:
                 time.sleep(2)                                               # takes around 2 seconds before a new request is allowd after 'to many requests'
