@@ -508,7 +508,7 @@ class FileManager:
                 os.remove(file_name)                    # delete zipped file
 
     def rename_srt(self):       # rename best matching .srt file so MPC auto-loads it, places rest of the .srt-files in /subs directory
-        print('\n')
+        print('')
         subs = 'subs/'
 
         try:
