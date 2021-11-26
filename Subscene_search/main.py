@@ -182,6 +182,31 @@ lst = []
 
 
 class Redirect:             # class for printing to Gui terminal
+    def __init__(self):
+        pass
+
+    def print(self, x):
+        lst.append(f' {x}')
+        lbc = Listbox(root, height=24, width=120, selectmode='single', exportselection=False, activestyle='none')
+        lbc.configure(bd=0, highlightthickness=0,
+                      bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#0E0F12', selectforeground='#797979', font='Cascadia 8 bold')
+        lbc.grid(column=0, padx=6, pady=30, row=1)
+
+        for item in lst:
+            lbc.insert(END, item)
+        lbc.select_clear(lbc.size() - 2)  # Clear the current selected item
+        lbc.select_set(END)  # Select the new item
+        lbc.yview(END)
+        if '--- All done ---' in lst[-1]:
+            for number in range(5, -1, -1):
+                lbc.insert(END, f'Exit in {number} seconds')
+                lbc.select_clear(lbc.size() - 2)  # Clear the current selected item
+                lbc.select_set(END)  # Select the new item
+                lbc.yview(END)
+                time.sleep(1)
+            root.destroy()
+
+
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
         sub_key = r'Directory\Background\shell\Search subscene'             # registry path
