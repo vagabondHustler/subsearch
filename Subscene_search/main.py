@@ -198,7 +198,7 @@ class Redirect:             # class for printing to Gui terminal
         lbc.select_set(END)  # Select the new item
         lbc.yview(END)
         if '--- All done ---' in lst[-1]:
-            for number in range(5, -1, -1):
+            for number in range(3, -1, -1):
                 lbc.insert(END, f'Exit in {number} seconds')
                 lbc.select_clear(lbc.size() - 2)  # Clear the current selected item
                 lbc.select_set(END)  # Select the new item
