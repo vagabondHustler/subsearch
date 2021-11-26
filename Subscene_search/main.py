@@ -21,6 +21,48 @@ import threading                # so script and Gui can run at the same time
 
 
 class Gui():    # main gui
+    def __init__(self, master,
+                 mbc='#191919', bg='#121212', fg='#797979', bgc='#23252C', abg='#131313', hc='#24272E', selbgc='#0E0F12',  # colors for Gui
+                 font8='Cascadia 8 bold', font10='Cascadia 10 bold'):   # fonts
+        self.master = master
+        self.mbc = mbc
+        self.bg = bg
+        self.fg = fg
+        self.bgc = bgc
+        self.abg = abg
+        self.hc = hc
+        self.selbgc = selbgc
+        self.font8 = font8
+        self.font10 = font10
+
+        # main window settings
+        master.geometry(self.tkpos(self.master))
+        master.configure(borderwidth=0, relief='flat', highlightthickness=0, background=self.mbc)
+        master.resizable(False, False)
+        master.wm_title("Subscene_search")
+        master.overrideredirect(True)
+        master.after(10, self.set_appwindow, master)
+        master.attributes('-topmost', 1)
+        master.focus_force()
+
+        # custom window label
+        titlebar_canvas = tk.Canvas(master, height=24, width=1060)
+        titlebar_canvas.configure(highlightthickness=0, bg=self.bg)
+        titlebar_canvas.place(relx=0, rely=0, anchor='nw')
+        titlebar_canvas.bind('<Button-1>', self.click)
+        titlebar_canvas.bind('<B1-Motion>', self.drag)
+
+        # draw app name, language menu and exit button in corner
+        self.app_name(self.master)
+        self.lang_menu(self.master)
+        self.button_exit(self.master)
+
+        # starts main script and Gui terminal
+        t1 = threading.Thread(target=script)
+        t2 = threading.Thread(target=Redirect)
+        t1.start()
+        t2.start()
+        master.protocol("WM_DELETE_WINDOW", self.exit_terminal)   # when user presses corner x windows will close
 class Redirect:             # class for printing to Gui terminal
 class CurrentUser:
     def got_key(self) -> bool:       # check if keys exsist
