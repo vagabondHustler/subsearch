@@ -42,7 +42,7 @@ class Gui():    # main gui
         master.wm_title("Subscene_search")
         master.overrideredirect(True)
         master.after(10, self.set_appwindow, master)
-        master.attributes('-topmost', 1)
+        master.attributes('-alpha', 0.95, '-topmost', 1)
         master.focus_force()
 
         # custom window label
