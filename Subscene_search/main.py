@@ -426,9 +426,8 @@ class WebScraping:
         self.rd.print('')
 
         if number == 0:
-            self.rd.print('No matches')
-            self.rd.print('--- All done ---')
-            rd_exit()
+            self.rd.print(f'Nothing found for {self.release_name} by {self.scene_group}')
+            return exit(f'Nothing found for {self.release_name} by {self.scene_group}')
 
         return self.search_title_lst
 
@@ -585,7 +584,8 @@ def script():     # main, checks if user is admin, if registry context menu exis
             rd.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
             rd.print('')
         elif urls_number == 0:
-            rd_exit()
+            rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+            return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
 
         for x in range(urls_number):
             rd.print(f"Searching match {x+1}/{urls_number} for subtitles")
@@ -594,8 +594,8 @@ def script():     # main, checks if user is admin, if registry context menu exis
                 rd.print(f"Subtitles found for '{wb.name_group}'")
                 break
             if x > urls_number:
-                rd.print('No subtitles found')
-                rd_exit()
+                rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+                return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
 
         if len(wb.links_to_dl) == 0:
             rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
