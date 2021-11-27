@@ -213,6 +213,8 @@ class Redirect:             # class for printing to Gui terminal
         lbc.yview(END)
         if '--- All done ---' in _output_lst[-1]:
             for number in range(3, -1, -1):
+                if number == 0:
+                    break
                 lbc.insert(END, f'  Exit in {number} seconds')
                 lbc.select_clear(lbc.size() - 2)
                 lbc.select_set(END)
