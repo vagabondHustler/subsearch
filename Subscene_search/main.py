@@ -153,7 +153,7 @@ class Gui():    # main gui
 
         lb.bind('<<ListboxSelect>>', select)
 
-    def tkpos(self, master, w=858, h=418):              # centers the window in the middle of the screeen
+    def tkpos(self, master, w=858, h=396):              # centers the window in the middle of the screeen
         # get screen width and height
         ws = master.winfo_screenwidth()       # width of the screen
         hs = master.winfo_screenheight()      # height of the screen
@@ -217,7 +217,6 @@ class Redirect:             # class for printing to Gui terminal
                 lbc.select_set(END)
                 lbc.yview(END)
                 time.sleep(1)
-            input('')
             root.quit()
             os._exit(1)
 
