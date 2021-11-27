@@ -24,7 +24,6 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
   1. After selection the gui will quit in 5 seconds, or you can press the X if you don't want to wait.
 
 3. Use the menu inside the folder of the release you want to find subtitles for.
-  1. Most settings, like language can be tweaked in class ```WebScraping:``` method ```__init__``` in ```main.py```
 
 ---  
 Registry key can be found here:```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene``` if you want to remove it or make edits to it.
