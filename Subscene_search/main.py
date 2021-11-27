@@ -139,8 +139,9 @@ class Gui():    # main gui
         lb.grid(column=1, pady=30, row=1)
 
         # highlight current language
-        dir_name, file_name = os.path.split(os.path.abspath(__file__))
-        language_file = f'{dir_name}\\language'
+        dir_path, file_name = os.path.split(os.path.abspath(__file__))
+        language_file = f'{dir_path}\\language'
+
         if os.path.isfile(language_file):
             with open(language_file, 'r') as f:
                 lines = f.readlines()
@@ -426,8 +427,7 @@ class WebScraping:
         self.rd.print('')
 
         if number == 0:
-            self.rd.print(f'Nothing found for {self.release_name} by {self.scene_group}')
-            return exit(f'Nothing found for {self.release_name} by {self.scene_group}')
+            return None
 
         return self.search_title_lst
 
@@ -551,31 +551,38 @@ class FileManager:
                 shutil.move(item, f'subs/{item}')
 
 
+cu = CurrentUser()
+rd = Redirect()
+wb = WebScraping()
+fm = FileManager()
+
+
 def rd_exit():
-    rd = Redirect()
+    rd.print('')
     rd.print('--- All done ---')
+    time.sleep(2)
+
+
+def no_match():
+    rd.print('')
+    rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+    rd.print('--- All done ---')
+    time.sleep(2)
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
-    cu = CurrentUser()
-    rd = Redirect()
     rd.print('Output:')
     rd.print('')
     while cu.got_file() is False:
         time.sleep(2)
         cu.got_file()
-
-    wb = WebScraping()
-    fm = FileManager()
     if cu.is_admin():
         regkey.write_key()                              # regkey.reg gets written, adds a context menu option to start main.py when right clicking inside folder
         os.system('cmd /c "reg import regkey.reg"')     # imports regkey.reg to the registry
         exit(0)
-
     if cu.got_key() is False:                             # check if key exists
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
-
     else:
         rd.print(f'Searching for titles matching {wb.title}')
         wb.search_title()
@@ -584,8 +591,7 @@ def script():     # main, checks if user is admin, if registry context menu exis
             rd.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
             rd.print('')
         elif urls_number == 0:
-            rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
-            return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+            return no_match()
 
         for x in range(urls_number):
             rd.print(f"Searching match {x+1}/{urls_number} for subtitles")
@@ -594,12 +600,10 @@ def script():     # main, checks if user is admin, if registry context menu exis
                 rd.print(f"Subtitles found for '{wb.name_group}'")
                 break
             if x > urls_number:
-                rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
-                return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+                return no_match()
 
         if len(wb.links_to_dl) == 0:
-            rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
-            return exit(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+            return no_match()
 
         wb.download_zip()
         fm.extract_zip()
