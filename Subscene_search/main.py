@@ -22,7 +22,7 @@ import threading                # so script and Gui can run at the same time
 
 class Gui():    # main gui
     def __init__(self, master,
-                 mbc='#191919', bg='#121212', fg='#797979', bgc='#23252C', abg='#131313', hc='#24272E', selbgc='#0E0F12',  # colors for Gui
+                 mbc='#191919', bg='#121212', fg='#797979', bgc='#23252C', abg='#131313', hc='#24272E', selbgc='#240d14',  # colors for Gui
                  font8='Cascadia 8 bold', font10='Cascadia 10 bold'):   # fonts
         self.master = master
         self.mbc = mbc
@@ -84,7 +84,7 @@ class Gui():    # main gui
     def app_name(self, master):         # title of window
         label = Label(master, text='Subscene search', height=1)
         label.configure(bg=self.bg, fg=self.fg, font=self.font8)
-        label.place(relx=0, rely=0.0078, anchor='nw')
+        label.place(relx=0, rely=0.0046, anchor='nw')
 
     def lang_menu(self, master):            # language
         rd = Redirect()                     # custom print class
@@ -137,6 +137,19 @@ class Gui():    # main gui
         lb.configure(bd=0, highlightthickness=0,
                      bg=self.bg, fg=self.fg, highlightcolor=self.hc, selectbackground=self.selbgc,  selectforeground=self.fg, font=self.font8)
         lb.grid(column=1, pady=30, row=1)
+
+        # highlight current language
+        dir_name, file_name = os.path.split(os.path.abspath(__file__))
+        language_file = f'{dir_name}\\language'
+        if os.path.isfile(language_file):
+            with open(language_file, 'r') as f:
+                lines = f.readlines()
+                lang = [line.rstrip() for line in lines]
+                for n in enumerate(language):
+                    if lang[0] == n[1]:
+                        lb.select_clear(lb.size() - 2)
+                        lb.select_set(n[0])
+                        lb.yview(n[0])
 
         lb.bind('<<ListboxSelect>>', select)
 
@@ -204,7 +217,7 @@ class Redirect:             # class for printing to Gui terminal
                 lbc.select_set(END)
                 lbc.yview(END)
                 time.sleep(1)
-
+            input('')
             root.quit()
             os._exit(1)
 
