@@ -13,11 +13,24 @@ from tkinter import Label, Button, Scrollbar, Listbox, END  # for Gui functional
 from ctypes import windll       # for removing title bar etc
 import threading                # so script and Gui can run at the same time
 
-
 '''
     The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
     This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
 '''
+
+cwd = os.getcwd()
+
+
+def whf():
+    home_dir_name, _file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
+    language_file = f'{home_dir_name}\\language'
+    return language_file
+
+
+def listbox_select(x, select=END):
+    x.select_clear(x.size() - 2)      # Clear the current selected item
+    x.select_set(select)              # Select the new item
+    x.yview(select)
 
 
 class Gui():    # main gui
@@ -42,7 +55,7 @@ class Gui():    # main gui
         master.wm_title("Subscene_search")
         master.overrideredirect(True)
         master.after(10, self.set_appwindow, master)
-        master.attributes('-alpha', 0.95, '-topmost', 1)
+        master.attributes('-topmost', 1)
         master.focus_force()
 
         # custom window label
@@ -54,14 +67,15 @@ class Gui():    # main gui
 
         # draw app name, language menu and exit button in corner
         self.app_name(self.master)
-        self.lang_menu(self.master)
+        self.language_menu(self.master)
         self.button_exit(self.master)
 
         # starts main script and Gui terminal
         t1 = threading.Thread(target=script)
-        t2 = threading.Thread(target=Redirect)
+        t2 = threading.Thread(target=RedirectTerminal)
         t1.start()
         t2.start()
+        t2.join()
         master.protocol("WM_DELETE_WINDOW", self.exit_terminal)   # when user presses corner x windows will close
 
     def exit_terminal(self):
@@ -86,20 +100,15 @@ class Gui():    # main gui
         label.configure(bg=self.bg, fg=self.fg, font=self.font8)
         label.place(relx=0, rely=0.0046, anchor='nw')
 
-    def lang_menu(self, master):            # language
-        rd = Redirect()                     # custom print class
+    def language_menu(self, master):            # language
+        rt = RedirectTerminal()                     # custom print class
 
         def select(self):                   # allows selection of language from list
             selection = lb.curselection()
             value = lb.get(selection[0])
-
-            dir_name, file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
-            language_file = f'{dir_name}\\language'
-
-            lang_file = open(language_file, "w")        # save user selection to file
-            lang_file.write(value)
-            lang_file.close()
-            rd.print(f'You have selected {value} as your language')
+            with open(whf(), 'w') as f:
+                f.write(value)
+            rt.print(f'You have selected {value} as your language')
 
         language = ['Arabic',
                     'Bengali',
@@ -139,19 +148,13 @@ class Gui():    # main gui
         lb.grid(column=1, pady=30, row=1)
 
         # highlight current language
-        dir_path, file_name = os.path.split(os.path.abspath(__file__))
-        language_file = f'{dir_path}\\language'
-
-        if os.path.isfile(language_file):
-            with open(language_file, 'r') as f:
+        if os.path.isfile(whf()):
+            with open(whf(), 'r') as f:
                 lines = f.readlines()
                 lang = [line.rstrip() for line in lines]
                 for n in enumerate(language):
                     if lang[0] == n[1]:
-                        lb.select_clear(lb.size() - 2)
-                        lb.select_set(n[0])
-                        lb.yview(n[0])
-
+                        listbox_select(lb, select=n[0])
         lb.bind('<<ListboxSelect>>', select)
 
     def tkpos(self, master, w=858, h=396):              # centers the window in the middle of the screeen
@@ -195,10 +198,7 @@ class Gui():    # main gui
 _output_lst = []
 
 
-class Redirect:             # class for printing to Gui terminal
-    def __init__(self):
-        pass
-
+class RedirectTerminal():             # class for printing to Gui terminal
     def print(self, x):
         _output_lst.append(f'  {x}')
         lbc = Listbox(root, height=24, width=120, selectmode='single', exportselection=False, activestyle='none')
@@ -208,18 +208,17 @@ class Redirect:             # class for printing to Gui terminal
 
         for item in _output_lst:
             lbc.insert(END, item)           # insert from _output_lst
-        lbc.select_clear(lbc.size() - 2)    # Clear the current selected item
-        lbc.select_set(END)                 # Select the new item
-        lbc.yview(END)
+            listbox_select(lbc)
         if '--- All done ---' in _output_lst[-1]:
-            for number in range(3, -1, -1):
+            for number in range(5, -1, -1):
                 if number == 0:
                     break
                 lbc.insert(END, f'  Exit in {number} seconds')
-                lbc.select_clear(lbc.size() - 2)
-                lbc.select_set(END)
-                lbc.yview(END)
+                listbox_select(lbc)
                 time.sleep(1)
+                label_item = f'  Exit in {number} seconds'
+                idx = lbc.get(0, END).index(label_item)
+                lbc.delete(idx)
             root.quit()
             os._exit(1)
 
@@ -240,21 +239,18 @@ class CurrentUser:
             return False
 
     def got_file(self) -> bool:
-        dir_name, file_name = os.path.split(os.path.abspath(__file__))
-        language_file = f'{dir_name}\\language'
-
-        if os.path.isfile(language_file) and os.stat(language_file).st_size != 0:
+        if os.path.isfile(whf()) and os.stat(whf()).st_size != 0:
             return True
         else:
             return False
 
 
 class FilterOut:
-    def __init__(self, dir_name=os.getcwd()):
+    def __init__(self, dir_name=cwd):
         self.dir_name = dir_name
 
     def dir_path(self, season=False) -> list:   # cwd, e.g: C:/Users/username/Downloads/foo.2021.1080p.WEB.H264-bar
-        temp_lst = []
+        _lst = []
         dir_name_lst = self.dir_name.split('\\')                # removes / form the path to the directry e.g: 'C:' 'Users' 'username' 'Downloads' 'foo.2021.1080p.WEB.H264-bar'
         release_dot_name = dir_name_lst[-1]                     # get last part of the path which is the release name with . as spaces e.g: foo.2021.1080p.WEB.H264-bar
         release_name_lst = release_dot_name.split('.')          # remove . from the release name e.g: 'foo' '2021' '1080p' 'WEB' 'H264-bar'
@@ -264,7 +260,7 @@ class FilterOut:
                 year = word
                 break                                           # if word = in, break, e.g year or quality
             except ValueError:
-                temp_lst.append(word)                           # appends the Title to lst from the release name
+                _lst.append(word)                           # appends the Title to lst from the release name
                 if word.startswith('s') or word.startswith('S') and word != release_name_lst[0]:  # s/S for season e.g Foo.Bar.s01e01
                     for letter in word[1]:                      # if second letter is not int continue
                         try:                                    # if word is not a int ValueError is raised
@@ -273,23 +269,21 @@ class FilterOut:
                             break
                         except ValueError:
                             pass
-                title = ' '.join(temp_lst)
+                title = ' '.join(_lst)
                 if season is True:
                     break
-
         release_lst = dir_name_lst[-1].split('-')
         release_name = release_lst[0]
         scene_group = release_lst[-1]
         name_group = dir_name_lst[-1]
         url = f'https://subscene.com/subtitles/searchbytitle?query={title}'
-
         try:
             year
         except NameError:
             year = None
 
-        temp_lst = [url, title, year, release_name, scene_group, name_group]
-        return temp_lst
+        _lst = [url, title, year, release_name, scene_group, name_group]
+        return _lst
 
 
 class IsaMatch:
@@ -357,7 +351,7 @@ class IsaMatch:
 
 class ReturnValues:
     fo = FilterOut()
-    rt = Redirect()
+    rt = RedirectTerminal()
 
     def __init__(self, directory_path=fo.dir_path()):
         self.directory_path = directory_path
@@ -380,18 +374,17 @@ class ReturnValues:
 class WebScraping:
     rv = ReturnValues()
     sm = IsaMatch()
-    rd = Redirect()
+    rt = RedirectTerminal()
 
-    def __init__(self, title=rv.from_dir(use='title'),              # returns release title e.g foo
-                 release_name=rv.from_dir(use='release_name'),      # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
-                 url=rv.from_dir(use='url'),                        # returns initial search url
-                 scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
-                 name_group=rv.from_dir(use='name_group'),
-                 # language=rv.from_dir(use='language'),
+    def __init__(self, title=rv.from_dir(use='title'),           # returns release title e.g foo
+                 release_name=rv.from_dir(use='release_name'),   # for returning release_name e.g foo.2021.1080p.WEB.H264-bar
+                 url=rv.from_dir(use='url'),                     # returns initial search url
+                 scene_group=rv.from_dir(use='scene_group'),     # returns the scene group e.g bar
+                 name_group=rv.from_dir(use='name_group'),       # returns name with group
                  year=rv.from_dir(use='year'),                   # returns year of the release
                  accuracy=90,                                    # defines how many% of the words in the title, which need to match the search result
                  sm=sm,
-                 rd=rd,
+                 rt=rt,
                  search_title_lst=[], links_to_dl=[]):           # lsts
 
         self.title = title
@@ -401,9 +394,8 @@ class WebScraping:
         self.scene_group = scene_group
         self.name_group = name_group
         self.accuracy = accuracy
-        # self.language = language
         self.sm = sm
-        self.rd = rd
+        self.rt = rt
         self.search_title_lst = search_title_lst
         self.links_to_dl = links_to_dl
 
@@ -425,8 +417,8 @@ class WebScraping:
                 self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
 
         number = len(self.search_title_lst)
-        self.rd.print(f"{number} titles matched '{self.title}'")
-        self.rd.print('')
+        self.rt.print(f"{number} titles matched '{self.title}'")
+        self.rt.print('')
 
         if number == 0:
             return None
@@ -447,9 +439,7 @@ class WebScraping:
                 time.sleep(1)                 # takes around 2 seconds before a new request is allowd after 'to many requests'
 
         for content in tbc:
-            dir_name, file_name = os.path.split(os.path.abspath(__file__))
-            language_file = f'{dir_name}\\language'
-            with open(language_file, 'r') as f:
+            with open(whf(), 'r') as f:
                 lines = f.readlines()
                 lines = [line.rstrip() for line in lines]
             if lines[0] in content.text:        # languish filter
@@ -470,14 +460,13 @@ class WebScraping:
     def download_zip(self):     # download .zip files containing the subtitles
         number = 0
         subtitles_number = len(self.links_to_dl)
-        self.rd.print('')
-        self.rd.print(f'Downloading {subtitles_number} .zip files')
-        self.rd.print('')
-
+        self.rt.print('')
+        self.rt.print(f'Downloading {subtitles_number} .zip files')
+        self.rt.print('')
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
-            self.rd.print(f'{number}/{subtitles_number}')
-            save_path = os.getcwd()
+            self.rt.print(f'{number}/{subtitles_number}')
+            save_path = cwd
             name = self.title.replace(' ', '_')     # name of the .zip file
             source = requests.get(url).text
             doc = BeautifulSoup(source, 'html.parser')
@@ -490,7 +479,6 @@ class WebScraping:
             zip_file = f'{save_path}\\{name}_by_{author[0]}_{number}.zip'       # name and path of .zip
             zip_file_url = f'https://subscene.com/{link[0]}'                    # add missing address to url
             r = requests.get(zip_file_url, stream=True)
-
             with open(zip_file, 'wb') as fd:                                    # save .zip with for loop
                 for chunk in r.iter_content(chunk_size=128):
                     fd.write(chunk)
@@ -498,20 +486,20 @@ class WebScraping:
 
 class FileManager:
     rv = ReturnValues()
-    rd = Redirect()
+    rt = RedirectTerminal()
 
     def __init__(self, scene_group=rv.from_dir(use='scene_group'),        # returns the scene group e.g bar
                  name_group=rv.from_dir(use='name_group'),
                  rv=rv,
-                 rd=rd):
+                 rt=rt):
 
         self.scene_group = scene_group
         self.name_group = name_group
         self.rv = rv
-        self.rd = rd
+        self.rt = rt
 
     def extract_zip(self):
-        dir_name = os.getcwd()
+        dir_name = cwd
         ext = ".zip"
 
         for item in os.listdir(dir_name):               # loop through items in dir
@@ -530,7 +518,7 @@ class FileManager:
             os.mkdir(subs)
         except FileExistsError:
             pass
-        dir_name = os.getcwd()
+        dir_name = cwd
         scene_group = self.scene_group
         preferred_ext = f'{scene_group}.srt'
         new_name = f'{self.name_group}.srt'
@@ -546,7 +534,7 @@ class FileManager:
         except FileExistsError:
             pass
         finally:
-            self.rd.print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
+            self.rt.print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
 
         for item in os.listdir(dir_name):
             if item.endswith(ext) and not item.startswith(new_name):
@@ -554,27 +542,27 @@ class FileManager:
 
 
 cu = CurrentUser()
-rd = Redirect()
+rt = RedirectTerminal()
 wb = WebScraping()
 fm = FileManager()
 
 
 def rd_exit():
-    rd.print('')
-    rd.print('--- All done ---')
+    rt.print('')
+    rt.print('--- All done ---')
     time.sleep(2)
 
 
 def no_match():
-    rd.print('')
-    rd.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
-    rd.print('--- All done ---')
+    rt.print('')
+    rt.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+    rt.print('--- All done ---')
     time.sleep(2)
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
-    rd.print('Output:')
-    rd.print('')
+    rt.print('Output:')
+    rt.print('')
     while cu.got_file() is False:
         time.sleep(2)
         cu.got_file()
@@ -586,34 +574,30 @@ def script():     # main, checks if user is admin, if registry context menu exis
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
     else:
-        rd.print(f'Searching for titles matching {wb.title}')
+        rt.print(f'Searching for titles matching {wb.title}')
         wb.search_title()
         urls_number = len(wb.search_title_lst)
         if urls_number == 1:
-            rd.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
-            rd.print('')
+            rt.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
+            rt.print('')
         elif urls_number == 0:
             return no_match()
-
         for x in range(urls_number):
-            rd.print(f"Searching match {x+1}/{urls_number} for subtitles")
+            rt.print(f"Searching match {x+1}/{urls_number} for subtitles")
             wb.search_for_subtitles(x)
             if len(wb.links_to_dl) > 1:
-                rd.print(f"Subtitles found for '{wb.name_group}'")
+                rt.print(f"Subtitles found for '{wb.name_group}'")
                 break
             if x > urls_number:
                 return no_match()
-
         if len(wb.links_to_dl) == 0:
             return no_match()
-
         wb.download_zip()
         fm.extract_zip()
         fm.rename_srt()
-
         if len(wb.links_to_dl) >= 2:
-            rd.print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
-        rd.print('')
+            rt.print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
+        rt.print('')
         rd_exit()
 
 
