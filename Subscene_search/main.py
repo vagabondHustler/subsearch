@@ -196,7 +196,7 @@ class Gui():    # main gui
 
 
 class RedirectTerminal():             # class for printing to Gui terminal
-    def listbox(self):
+    def lbc_listbox(self):
         global lbc
         lbc = Listbox(root, height=24, width=120, selectmode='single', exportselection=False, activestyle='none')
         lbc.configure(bd=0, highlightthickness=0,
@@ -204,7 +204,6 @@ class RedirectTerminal():             # class for printing to Gui terminal
         lbc.grid(column=0, padx=6, pady=30, row=1)
 
     def print(self, x):
-
         lbc.insert(END, f'  {x}')           # insert from _output_lst
         listbox_select(lbc)
         if '--- All done ---' == x:
@@ -559,7 +558,7 @@ def no_match():
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
-    rt.listbox()
+    rt.lbc_listbox()
     rt.print('Output:')
     rt.print('')
     while cu.got_file() is False:
