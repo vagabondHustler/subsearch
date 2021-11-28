@@ -203,7 +203,9 @@ class RedirectTerminal():             # class for printing to Gui terminal
                       bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#240d14', selectforeground='#797979', font='Cascadia 8 bold')
         lbc.grid(column=0, padx=6, pady=30, row=1)
 
-    def print(self, x):
+    def print(self, x, newline=True):
+        if newline is False and x != '':
+            lbc.delete(END)
         lbc.insert(END, f'  {x}')           # insert from _output_lst
         listbox_select(lbc)
         if '--- All done ---' == x:
@@ -414,8 +416,8 @@ class WebScraping:
                 self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
 
         number = len(self.search_title_lst)
-        self.rt.print(f"{number} titles matched '{self.title}'")
         self.rt.print('')
+        self.rt.print(f"{number} titles matched '{self.title}'")
 
         if number == 0:
             return None
@@ -462,7 +464,7 @@ class WebScraping:
         self.rt.print('')
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
-            self.rt.print(f'{number}/{subtitles_number}')
+            self.rt.print(f'{number}/{subtitles_number}', newline=False)
             save_path = cwd
             name = self.title.replace(' ', '_')     # name of the .zip file
             source = requests.get(url).text
@@ -580,8 +582,9 @@ def script():     # main, checks if user is admin, if registry context menu exis
             rt.print('')
         elif urls_number == 0:
             return no_match()
+        rt.print('')
         for x in range(urls_number):
-            rt.print(f"Searching match {x+1}/{urls_number} for subtitles")
+            rt.print(f'Searching match {x+1}/{urls_number} for subtitles', newline=False)
             wb.search_for_subtitles(x)
             if len(wb.links_to_dl) > 1:
                 rt.print(f"Subtitles found for '{wb.name_group}'")
