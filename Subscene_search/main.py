@@ -209,13 +209,13 @@ class RedirectTerminal():             # class for printing to Gui terminal
         lbc.insert(END, f'  {x}')           # insert from _output_lst
         listbox_select(lbc)
         if '--- All done ---' == x:
-            for number in range(5, -1, -1):
+            for number in range(10, -1, -1):
                 if number == 0:
                     break
-                lbc.insert(END, f'  Exit in {number} seconds')
+                lbc.insert(END, f'  Auto exit in {number} seconds')
                 listbox_select(lbc)
                 time.sleep(1)
-                label_item = f'  Exit in {number} seconds'
+                label_item = f'  Auto exit in {number} seconds'
                 idx = lbc.get(0, END).index(label_item)
                 lbc.delete(idx)
             root.quit()
@@ -279,7 +279,7 @@ class FilterOut:
         try:
             year
         except NameError:
-            year = None
+            year = 'N/A'
 
         _lst = [url, title, year, release_name, scene_group, name_group]
         return _lst
@@ -549,14 +549,22 @@ fm = FileManager()
 def rd_exit():
     rt.print('')
     rt.print('--- All done ---')
-    time.sleep(2)
+    rt.print('')
 
 
 def no_match():
     rt.print('')
     rt.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
     rt.print('--- All done ---')
-    time.sleep(2)
+    rt.print('')
+
+
+def not_valid():
+    rt.print(f'Title: {wb.title} with release name {wb.release_name} by {wb.scene_group} is not valid')
+    rt.print("Valid syntax is e.g 'foo.2021.1080p.WEB.H264-bar'")
+    rt.print('')
+    rt.print('--- All done ---')
+    rt.print('')
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
@@ -576,6 +584,8 @@ def script():     # main, checks if user is admin, if registry context menu exis
     else:
         rt.print(f'Searching for titles matching {wb.title}')
         wb.search_title()
+        if wb.title == wb.release_name or wb.title == wb.scene_group:
+            return not_valid()
         urls_number = len(wb.search_title_lst)
         if urls_number == 1:
             rt.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
@@ -594,6 +604,7 @@ def script():     # main, checks if user is admin, if registry context menu exis
         if len(wb.links_to_dl) == 0:
             return no_match()
         wb.download_zip()
+        rt.print('')
         fm.extract_zip()
         fm.rename_srt()
         if len(wb.links_to_dl) >= 2:
