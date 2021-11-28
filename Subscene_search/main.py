@@ -195,21 +195,19 @@ class Gui():    # main gui
     offsety = 0
 
 
-_output_lst = []
-
-
 class RedirectTerminal():             # class for printing to Gui terminal
-    def print(self, x):
-        _output_lst.append(f'  {x}')
+    def listbox(self):
+        global lbc
         lbc = Listbox(root, height=24, width=120, selectmode='single', exportselection=False, activestyle='none')
         lbc.configure(bd=0, highlightthickness=0,
                       bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#240d14', selectforeground='#797979', font='Cascadia 8 bold')
         lbc.grid(column=0, padx=6, pady=30, row=1)
 
-        for item in _output_lst:
-            lbc.insert(END, item)           # insert from _output_lst
-            listbox_select(lbc)
-        if '--- All done ---' in _output_lst[-1]:
+    def print(self, x):
+
+        lbc.insert(END, f'  {x}')           # insert from _output_lst
+        listbox_select(lbc)
+        if '--- All done ---' == x:
             for number in range(5, -1, -1):
                 if number == 0:
                     break
@@ -561,6 +559,7 @@ def no_match():
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
+    rt.listbox()
     rt.print('Output:')
     rt.print('')
     while cu.got_file() is False:
