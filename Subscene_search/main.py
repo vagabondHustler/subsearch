@@ -523,11 +523,11 @@ class FileManager:
         new_name = f'{self.name_group}.srt'
         ext = '.srt'
         try:
-            for item in os.listdir(dir_name):
+            for item in os.listdir(dir_name):       # preferr subtitles specifically for scene group over diffrent scene group
                 if item.endswith(preferred_ext):
                     os.rename(item, new_name)
                     break
-                elif item.endswith(ext) and 'HI' not in item:
+                elif item.endswith(ext) and 'HI' not in item:       # preferr non hearing impared subtitles
                     os.rename(item, new_name)
                     break
         except FileExistsError:
@@ -535,7 +535,7 @@ class FileManager:
         finally:
             self.rt.print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
 
-        for item in os.listdir(dir_name):
+        for item in os.listdir(dir_name):       # move .srt not matching above to ../subs
             if item.endswith(ext) and not item.startswith(new_name):
                 shutil.move(item, f'subs/{item}')
 
@@ -555,16 +555,13 @@ def rd_exit():
 def no_match():
     rt.print('')
     rt.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
-    rt.print('--- All done ---')
-    rt.print('')
+    rd_exit()
 
 
 def not_valid():
     rt.print(f'Title: {wb.title} with release name {wb.release_name} by {wb.scene_group} is not valid')
     rt.print("Valid syntax is e.g 'foo.2021.1080p.WEB.H264-bar'")
-    rt.print('')
-    rt.print('--- All done ---')
-    rt.print('')
+    rd_exit()
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
