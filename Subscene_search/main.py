@@ -22,8 +22,8 @@ cwd = os.getcwd()
 
 
 def whf():
-    home_dir_name, _file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
-    language_file = f'{home_dir_name}\\language'
+    home_dir_path, _file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
+    language_file = f'{home_dir_path}\\language'
     return language_file
 
 
