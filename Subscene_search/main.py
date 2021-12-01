@@ -267,6 +267,7 @@ class FilterOut:
                             season = True
                             break
                         except ValueError:
+                            season = False
                             pass
                 title = ' '.join(_lst)
                 if season is True:
@@ -281,7 +282,7 @@ class FilterOut:
         except NameError:
             year = 'N/A'
 
-        _lst = [url, title, year, release_name, scene_group, name_group]
+        _lst = [url, title, year, release_name, scene_group, name_group, season]
         return _lst
 
 
@@ -367,6 +368,8 @@ class ReturnValues:
             return self.directory_path[4]
         if use == 'name_group':                             # returns release name + scene group
             return self.directory_path[5]
+        if use == 'season':
+            return self.directory_path[6]
 
 
 class WebScraping:
@@ -380,6 +383,7 @@ class WebScraping:
                  scene_group=rv.from_dir(use='scene_group'),     # returns the scene group e.g bar
                  name_group=rv.from_dir(use='name_group'),       # returns name with group
                  year=rv.from_dir(use='year'),                   # returns year of the release
+                 season=rv.from_dir(use='season'),               # if dir is part of a show, value is True
                  accuracy=90,                                    # defines how many% of the words in the title, which need to match the search result
                  sm=sm,
                  rt=rt,
@@ -391,6 +395,7 @@ class WebScraping:
         self.year = year
         self.scene_group = scene_group
         self.name_group = name_group
+        self.season = season
         self.accuracy = accuracy
         self.sm = sm
         self.rt = rt
@@ -404,15 +409,16 @@ class WebScraping:
         sr_lis = [a for a in search_result.find_all('li') if a.text]    # url of subtitle matching title name
         for li in sr_lis:
             sr_href = li.find('a', href=True)
-            if self.title in sr_href.text and self.year in sr_href.text:
-                link = sr_href['href']
-                self.search_title_lst.append(f'https://subscene.com/{link}')        # add missing address to url
+            if self.season is False:
+                if self.title.lower() in sr_href.text.lower() and self.year in sr_href.text:
+                    link = sr_href['href']
+                    self.search_title_lst.append(f'https://subscene.com/{link}')        # add missing address to url
+            elif self.season is True:
+                links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
 
-        links = [a['href'] for a in search_result.find_all('a', href=True) if a.text]   # url of subtitle matching title name
-
-        for link in links:                                                              # place urls in said lst
-            if link not in self.search_title_lst:
-                self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
+                for link in links:                                                              # place urls in said lst
+                    if link not in self.search_title_lst:
+                        self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
 
         number = len(self.search_title_lst)
         self.rt.output('')
