@@ -35,7 +35,7 @@ def listbox_select(x, select=END):
 
 class Gui():    # main gui
     def __init__(self, master,
-                 mbc='#191919', bg='#121212', fg='#797979', bgc='#23252C', abg='#131313', hc='#24272E', selbgc='#240d14',  # colors for Gui
+                 mbc='#191919', bg='#121212', fg='#797979', bgc='#23252C', abg='#131313', hc='#24272E', sbgc='#240d14',  # colors for Gui
                  font8='Cascadia 8 bold', font10='Cascadia 10 bold'):   # fonts
         self.master = master
         self.mbc = mbc
@@ -44,7 +44,7 @@ class Gui():    # main gui
         self.bgc = bgc
         self.abg = abg
         self.hc = hc
-        self.selbgc = selbgc
+        self.sbgc = sbgc
         self.font8 = font8
         self.font10 = font10
 
@@ -108,7 +108,7 @@ class Gui():    # main gui
             value = lb.get(selection[0])
             with open(rwd(), 'w') as f:
                 f.write(value)
-            rt.print(f'You have selected {value} as your language')
+            rt.output(f'You have selected {value} as your language')
 
         language = ['Arabic',
                     'Bengali',
@@ -144,7 +144,7 @@ class Gui():    # main gui
             lb.insert(END, lang)
 
         lb.configure(bd=0, highlightthickness=0,
-                     bg=self.bg, fg=self.fg, highlightcolor=self.hc, selectbackground=self.selbgc,  selectforeground=self.fg, font=self.font8)
+                     bg=self.bg, fg=self.fg, highlightcolor=self.hc, selectbackground=self.sbgc,  selectforeground=self.fg, font=self.font8)
         lb.grid(column=1, pady=30, row=1)
 
         # highlight current language
@@ -203,7 +203,7 @@ class RedirectTerminal():             # class for printing to Gui terminal
                       bg='#121212', fg='#797979', highlightcolor='#121212', selectbackground='#240d14', selectforeground='#797979', font='Cascadia 8 bold')
         lbc.grid(column=0, padx=6, pady=30, row=1)
 
-    def print(self, x, newline=True):
+    def output(self, x, newline=True):
         if newline is False and x != '':
             lbc.delete(END)
         lbc.insert(END, f'  {x}')           # insert from _output_lst
@@ -321,7 +321,6 @@ class IsaMatch:
                 count += 1
                 res_lst.remove(x)
                 release_res = x
-                print(release_res)
         if count > 0:
             pass
 
@@ -416,8 +415,8 @@ class WebScraping:
                 self.search_title_lst.append(f'https://subscene.com/{link}')            # add missing address to url
 
         number = len(self.search_title_lst)
-        self.rt.print('')
-        self.rt.print(f"{number} titles matched '{self.title}'")
+        self.rt.output('')
+        self.rt.output(f"{number} titles matched '{self.title}'")
 
         if number == 0:
             return None
@@ -459,12 +458,12 @@ class WebScraping:
     def download_zip(self):     # download .zip files containing the subtitles
         number = 0
         subtitles_number = len(self.links_to_dl)
-        self.rt.print('')
-        self.rt.print(f'Downloading {subtitles_number} .zip files')
-        self.rt.print('')
+        self.rt.output('')
+        self.rt.output(f'Downloading {subtitles_number} .zip files')
+        self.rt.output('')
         for url in self.links_to_dl:                # lst containing urls with subtitles to download
             number += 1
-            self.rt.print(f'{number}/{subtitles_number}', newline=False)
+            self.rt.output(f'{number}/{subtitles_number}', newline=False)
             save_path = cwd
             name = self.title.replace(' ', '_')     # name of the .zip file
             source = requests.get(url).text
@@ -510,7 +509,7 @@ class FileManager:
                 os.remove(file_name)                    # delete zipped file
 
     def rename_srt(self):       # rename best matching .srt file so MPC auto-loads it, places rest of the .srt-files in /subs directory
-        print('')
+        output('')
         subs = 'subs/'
 
         try:
@@ -533,7 +532,7 @@ class FileManager:
         except FileExistsError:
             pass
         finally:
-            self.rt.print(f'Added ~/{self.name_group[0:8]}.../{new_name}')
+            self.rt.output(f'Added ~/{self.name_group[0:8]}.../{new_name}')
 
         for item in os.listdir(dir_name):       # move .srt not matching above to ../subs
             if item.endswith(ext) and not item.startswith(new_name):
@@ -547,27 +546,27 @@ fm = FileManager()
 
 
 def rd_exit():
-    rt.print('')
-    rt.print('--- All done ---')
-    rt.print('')
+    rt.output('')
+    rt.output('--- All done ---')
+    rt.output('')
 
 
 def no_match():
-    rt.print('')
-    rt.print(f'Nothing found for {wb.release_name} by {wb.scene_group}')
+    rt.output('')
+    rt.output(f'Nothing found for {wb.release_name} by {wb.scene_group}')
     rd_exit()
 
 
 def not_valid():
-    rt.print(f'Title: {wb.title} with release name {wb.release_name} by {wb.scene_group} is not valid')
-    rt.print("Valid syntax is e.g 'foo.2021.1080p.WEB.H264-bar'")
+    rt.output(f'Title: {wb.title} with release name {wb.release_name} by {wb.scene_group} is not valid')
+    rt.output("Valid syntax is e.g 'foo.2021.1080p.WEB.H264-bar'")
     rd_exit()
 
 
 def script():     # main, checks if user is admin, if registry context menu exists, search subscene for subtitles etc...
     rt.lbc_listbox()
-    rt.print('Output:')
-    rt.print('')
+    rt.output('Output:')
+    rt.output('')
     while cu.got_file() is False:
         time.sleep(2)
         cu.got_file()
@@ -579,34 +578,34 @@ def script():     # main, checks if user is admin, if registry context menu exis
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)  # runs script as admin if not admin
     else:
-        rt.print(f'Searching for titles matching {wb.title}')
+        rt.output(f'Searching for titles matching {wb.title}')
         wb.search_title()
         if wb.title == wb.release_name or wb.title == wb.scene_group:
             return not_valid()
         urls_number = len(wb.search_title_lst)
         if urls_number == 1:
-            rt.print(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
-            rt.print('')
+            rt.output(f"One exact match found for Title '{wb.title}' Released '{wb.year}'")
+            rt.output('')
         elif urls_number == 0:
             return no_match()
-        rt.print('')
+        rt.output('')
         for x in range(urls_number):
-            rt.print(f'Searching match {x+1}/{urls_number} for subtitles', newline=False)
+            rt.output(f'Searching match {x+1}/{urls_number} for subtitles', newline=False)
             wb.search_for_subtitles(x)
             if len(wb.links_to_dl) > 1:
-                rt.print(f"Subtitles found for '{wb.name_group}'")
+                rt.output(f"Subtitles found for '{wb.name_group}'")
                 break
             if x > urls_number:
                 return no_match()
         if len(wb.links_to_dl) == 0:
             return no_match()
         wb.download_zip()
-        rt.print('')
+        rt.output('')
         fm.extract_zip()
         fm.rename_srt()
         if len(wb.links_to_dl) >= 2:
-            rt.print(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
-        rt.print('')
+            rt.output(f'Rest of the .srt-files moved to ~/{wb.name_group[0:8]}.../subs\n')
+        rt.output('')
         rd_exit()
 
 
