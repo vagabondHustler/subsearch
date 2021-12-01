@@ -312,17 +312,17 @@ class IsaMatch:
 
         return percent_is
 
-    def find_res(self, word_lst) -> list:
-        res_lst = ['4K', '2K', '4320p', '2160p', '1080p', '720p']
-        count = 0
-
-        for x in word_lst:
-            if x in res_lst:
-                count += 1
-                res_lst.remove(x)
-                release_res = x
-        if count > 0:
-            pass
+    # def find_res(self, word_lst) -> list:
+    #     res_lst = ['4K', '2K', '4320p', '2160p', '1080p', '720p']
+    #     count = 0
+    #
+    #     for x in word_lst:
+    #         if x in res_lst:
+    #             count += 1
+    #             res_lst.remove(x)
+    #
+    #     if count > 0:
+    #         pass
 
     def mk_lst(self, x: str) -> list:
         x: list = x.split('.')
