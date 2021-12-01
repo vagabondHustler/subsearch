@@ -133,3 +133,4 @@ test/
 test*.*
 language
 regkey.reg
+old*
