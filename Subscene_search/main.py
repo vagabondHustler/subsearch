@@ -342,7 +342,7 @@ class IsaMatch:
             return answer
 
     def compare(self, x, y) -> bool:
-        if x == y:
+        if x.lower() == y.lower():      # compare serched with results, lowercase
             return True
         else:
             return False
