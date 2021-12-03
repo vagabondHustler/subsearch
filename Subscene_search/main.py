@@ -21,10 +21,10 @@ import threading                # so script and Gui can run at the same time
 cwd = os.getcwd()
 
 
-def rwd():
+def frp(file_name):     # file root path
     root_dir_path, _file_name = os.path.split(os.path.abspath(__file__))      # allows file being in read from orgin while in working folder
-    language_file = f'{root_dir_path}\\language'
-    return language_file
+    file_path = f'{root_dir_path}\\{file_name}'
+    return file_path
 
 
 def listbox_select(x, select=END):
@@ -106,7 +106,7 @@ class Gui():    # main gui
         def select(self):                   # allows selection of language from list
             selection = lb.curselection()
             value = lb.get(selection[0])
-            with open(rwd(), 'w') as f:
+            with open(frp('language'), 'w') as f:
                 f.write(value)
             rt.output(f'You have selected {value} as your language')
 
@@ -148,8 +148,8 @@ class Gui():    # main gui
         lb.grid(column=1, pady=30, row=1)
 
         # highlight current language
-        if os.path.isfile(rwd()):
-            with open(rwd(), 'r') as f:
+        if os.path.isfile(frp('language')):
+            with open(frp('language'), 'r') as f:
                 lines = f.readlines()
                 lang = [line.rstrip() for line in lines]
                 for n in enumerate(language):
@@ -238,7 +238,7 @@ class CurrentUser:
             return False
 
     def got_file(self) -> bool:
-        if os.path.isfile(rwd()) and os.stat(rwd()).st_size != 0:
+        if os.path.isfile(frp('language')) and os.stat(frp('language')).st_size != 0:
             return True
         else:
             return False
@@ -443,7 +443,7 @@ class WebScraping:
                 time.sleep(1)                 # takes around 2 seconds before a new request is allowd after 'to many requests'
 
         for content in tbc:
-            with open(rwd(), 'r') as f:
+            with open(frp('language'), 'r') as f:
                 lines = f.readlines()
                 lines = [line.rstrip() for line in lines]
             if lines[0] in content.text:        # languish filter
