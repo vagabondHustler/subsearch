@@ -23,7 +23,7 @@ from src.tools.regkey import write_key
 def setup_subscene_search() -> None:
     if is_admin():
         write_key()
-        os.system(f'cmd /c "reg import {path_of_tools}\\regkey.reg"')
+        os.system(f'cmd /c "reg import regkey.reg"')
     else:
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
@@ -32,7 +32,8 @@ def main() -> None:
     start = time.perf_counter()
 
     if got_key() is False:
-        return setup_subscene_search()
+        setup_subscene_search()
+        return
 
     scrape = SearchSubscene()
     language = get("language")
