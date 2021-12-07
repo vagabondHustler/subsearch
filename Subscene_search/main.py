@@ -13,10 +13,10 @@ from tkinter import Label, Button, Scrollbar, Listbox, END  # for Gui functional
 from ctypes import windll       # for removing title bar etc
 import threading                # so script and Gui can run at the same time
 
-'''
-    The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-    This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
-'''
+#
+#    The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
+#    This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
+#
 
 cwd = os.getcwd()
 
