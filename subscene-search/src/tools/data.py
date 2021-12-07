@@ -59,7 +59,7 @@ def get_parameters(directory_path: str) -> SearchParameters:
             url = f"https://subscene.com/subtitles/searchbytitle?query={title}"
             year = "N/A"
 
-    data = {
+    parameters = {
         "url": url,
         "title": title,
         "year": year,
@@ -69,4 +69,4 @@ def get_parameters(directory_path: str) -> SearchParameters:
         "release": release,
         "group": group,
     }
-    return SearchParameters(**data)
+    return SearchParameters(**parameters)
