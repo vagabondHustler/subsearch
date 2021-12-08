@@ -14,7 +14,6 @@ from src.tools import file_manager as fm
 
 def main() -> None:
     start = time.perf_counter()
-
     if got_key() is False:
         user_config.context_menu()
         user_config.select_language()
@@ -23,10 +22,16 @@ def main() -> None:
     scrape = SearchSubscene()
     language: str = get("language")
     languages: list = get("languages")
-    for abbr in languages:
+    for abbr_num, abbr in enumerate(languages):
+        abbr_num += 1
         if language in abbr:
             _abbr, language_abbr = abbr.split(", ")
+            abbr_supported = True
             break
+        elif abbr_num >= len(languages):
+            log_msg("[ERROR] Your language is not supported")
+            log_msg("[ERROR] Search might be longer for TV-series")
+            abbr_supported = False
 
     param = get_parameters(cwd().lower(), language_abbr)
 
@@ -48,7 +53,11 @@ def main() -> None:
             log_msg(f"[Movie]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value)
-        elif param.title and param.season_ordinal in key.lower() and param.tv_series:
+        elif param.title and param.season_ordinal in key.lower() and param.tv_series and abbr_supported:
+            log_msg(f"[TV-series]: {key} found.")
+            log_msg(f"[URL]: {value}")
+            to_be_scraped.append(value)
+        elif param.title and param.season_ordinal in key.lower() and param.tv_series and abbr_supported is  False:
             log_msg(f"[TV-series]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value)
