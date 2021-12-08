@@ -134,3 +134,7 @@ test*.*
 language
 regkey.reg
 old*
+*.zip
+*.srt
+subs/
+*.reg

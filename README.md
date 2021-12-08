@@ -1,33 +1,45 @@
-# subscene_search
+# subscene-search
+
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
 
-<p>This branch has a few dependencies, but everything is automatic from the search to the downloading and unzipping of the .srt-files.
-<p>The main_no-dependencies branch has no requirements besides python3.10, but only opens the initial search result in the webbrowser.
+### Supported languages
 
----
+<sub> These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.</sub>
 
+- Arabic,`ar`
+- Brazillian Portuguesed, `pt_BR`
+- Danishd, `dk`
+- Dutchd, `nl`
+- Englishd, `en`
+- Finnishd, `fi`
+- Frenchd, `fr`
+- Germand, `de`
+- Hebrewd, `he`
+- Indonesiand, `id`
+- Italiand, `it`
+- Koreand, `ko`
+- Norwegiand, `no`
+- Romaniand, `ro`
+- Spanishd, `es`
+- Swedishd, `sv`
+- Thaid, `th`
+- Turkishd, `tr`
+- Vietnamesed, `vi`
 
-- The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-- This standard can be used as a search parameter.
+### How to use:
 
+1. Run `python main.py` to add the context-menu.
+   1. You will be prompted to run as admin, necessary to save the new keys to the registry.
+   2. You will be asked to proived the language you want the subtitles to be in.
+   3. Context menu gets added and you can now Right-Clicking inside a folder to see context-menu option 'Search subscene'.
 
----
-	
-![alt text](https://github.com/vagabondHustler/subscene_search/blob/main/resources/prtsc.png?raw=true)
-	
----
-# How to use:
-1. Run ```python main.py``` to add the context-menu.
-	1. You will be prompted to run as admin, necessary to save the new keys to the registry.
-	2. Context menu gets added and you can now Right-Clicking inside a  folder to see context-menu option 'Search subscene'.
-2. Gui will launch, you can now pick your preferred language on the right hand side.
-  1. After selection the gui will quit in 5 seconds, or you can press the X if you don't want to wait.
+2. Use the menu inside the folder of the release you want to find subtitles for.
+   1. You can change the subtitle language in config/language.txt
 
-3. Use the menu inside the folder of the release you want to find subtitles for.
+### Misc
 
----  
-Registry key can be found here:```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene``` if you want to remove it or make edits to it.
+Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
 <p>
 
-If you don't want the icon in the context menu, delete Name:```Icon``` Type: ```REG_SZ``` in Key: ```Search subscene```
+If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`

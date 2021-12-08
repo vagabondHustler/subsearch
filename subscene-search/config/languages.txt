@@ -1,0 +1,19 @@
+Arabic, ar
+Brazillian Portuguesed, pt_BR
+Danishd, dk
+Dutchd, nl
+Englishd, en
+Finnishd, fi
+Frenchd, fr
+Germand, de
+Hebrewd, he
+Indonesiand, id
+Italiand, it
+Koreand, ko
+Norwegiand, no
+Romaniand, ro
+Spanishd, es
+Swedishd, sv
+Thaid, th
+Turkishd, tr
+Vietnamesed, vi
