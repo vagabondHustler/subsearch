@@ -4,7 +4,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 ### Supported languages
 
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but search might be slower.
+These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
 - Arabic,`ar`
 - Brazillian Portuguesed, `pt_BR`
