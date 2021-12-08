@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# test files and directories stuff
+# Temporary files
 test/
 test*.*
 language
@@ -138,3 +138,8 @@ old*
 *.srt
 subs/
 *.reg
+
+# Prevent users to commit the README
+*README.html
+*README_cache/
+#*README_files/
