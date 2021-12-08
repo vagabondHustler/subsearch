@@ -1,6 +1,8 @@
 # main
 import time
 
+from src import user_config
+from src.tools.current_user import got_key
 from src.config import get
 from src.tools.log import log_msg
 from src.tools.data import get_parameters
@@ -9,30 +11,13 @@ from src.subscrape import SearchSubscene
 from src.tools.compare import check
 from src.tools import file_manager as fm
 
-# setup_subscene
-import ctypes
-import sys
-import os
-
-from src.tools.os import path_of_tools
-from src.tools.current_user import got_key
-from src.tools.current_user import is_admin
-from src.tools.regkey import write_key
-
-
-def setup_subscene_search() -> None:
-    if is_admin():
-        write_key()
-        os.system(f'cmd /c "reg import regkey.reg"')
-    else:
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-
 
 def main() -> None:
     start = time.perf_counter()
 
     if got_key() is False:
-        setup_subscene_search()
+        user_config.select_language()
+        user_config.context_menu()
         return
 
     scrape = SearchSubscene()
