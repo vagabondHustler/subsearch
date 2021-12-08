@@ -12,7 +12,7 @@ def get(output):
 
     def languages() -> list:
         lines: list = []
-        with open(root_directory_file(config_json.user_config), "r", encoding="utf-8") as f:
+        with open(root_directory_file(config_json.languages), "r", encoding="utf-8") as f:
             _lines = f.readlines()
             for line in _lines:
                 _line = line.strip()
