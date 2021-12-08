@@ -29,7 +29,6 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 ### How to use:
 
 1. Run `python main.py` to add the context-menu.
-
    1. You will be prompted to run as admin, necessary to save the new keys to the registry.
    2. You will be asked to proived the language you want the subtitles to be in.
    3. Context menu gets added and you can now Right-Clicking inside a folder to see context-menu option 'Search subscene'.
