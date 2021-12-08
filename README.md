@@ -5,7 +5,9 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 <p> dev-2.0
 
 # Supported languages
- <sub> These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.</sub>
+
+<sub> These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.</sub>
+
 - Arabic,`ar`
 - Brazillian Portuguesed, `pt_BR`
 - Danishd, `dk`
@@ -26,14 +28,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 - Turkishd, `tr`
 - Vietnamesed, `vi`
 
----
-
-- The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-- This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
-
----
-
-# How to use:
+<sup># How to use:</sup>
 
 1. Run `python main.py` to add the context-menu.
 
