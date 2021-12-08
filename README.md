@@ -1,8 +1,6 @@
-# subscene_search
+# subscene-search
 
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
-
-<p> dev-2.0
 
 ### Supported languages
 
