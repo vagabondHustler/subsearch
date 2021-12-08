@@ -5,7 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class UserData:
     language: str
-    user_settings: list
+    user_config: list
 
 
 def read_data(config_file: str) -> UserData:

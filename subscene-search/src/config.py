@@ -10,9 +10,9 @@ def get(output):
             line = f.readline()
             return line
 
-    def user_settings() -> list:
+    def languages() -> list:
         lines: list = []
-        with open(root_directory_file(config_json.user_settings), "r", encoding="utf-8") as f:
+        with open(root_directory_file(config_json.user_config), "r", encoding="utf-8") as f:
             _lines = f.readlines()
             for line in _lines:
                 _line = line.strip()
@@ -21,5 +21,5 @@ def get(output):
 
     if output == "language":
         return language()
-    if output == "settings":
-        return user_settings()
+    if output == "languages":
+        return languages()
