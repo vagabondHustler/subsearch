@@ -1,10 +1,24 @@
-# subscene-search
+## Subscene search
 
-Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
+Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
+There are probably better repositories out there than this one, that does the same thing, I made this one mainly to learn python and git by doing.
 
-### Supported languages
+---
 
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but search might be slower.
+#### TODO:
+- [x] Remove GUI
+- [x] Improve search times
+- [x] Let user pick subtitle languish trough terminal 
+- [ ] Look into some sort of terminal menu system
+- [ ] Find a better way to run script than trough cmd
+- [ ] Add opensubtitles as a source for subs
+- [ ] Improve code?
+- [ ] Learn HTML so I write better .md files ^_^
+---
+
+### Supported languages:
+
+These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
 - Arabic,`ar`
 - Brazillian Portuguesed, `pt_BR`
@@ -36,7 +50,7 @@ These are the fully supported languages, but all languages [subscene](https://u.
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. You can change the subtitle language in config/language.txt
 
-### Misc
+### Misc:
 
 Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
