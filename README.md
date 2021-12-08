@@ -4,7 +4,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 #### TODO
 
-[] test
+[x] test
 []
 []
 []
