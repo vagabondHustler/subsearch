@@ -17,7 +17,7 @@ class SearchSubscene:
         results = doc_result.find_all("div", class_="title")
 
         for i in results:
-            title = i.get_text().strip().replace("'", "").lower()
+            title = i.get_text().strip().replace("'", "").replace(":", "").lower()
             link = [a["href"] for a in i.find_all("a", href=True) if a.text]
             _tmp[title] = f"https://subscene.com/{link[0]}"
         return _tmp
