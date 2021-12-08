@@ -16,8 +16,8 @@ def main() -> None:
     start = time.perf_counter()
 
     if got_key() is False:
-        user_config.select_language()
         user_config.context_menu()
+        user_config.select_language()
         return
 
     scrape = SearchSubscene()
