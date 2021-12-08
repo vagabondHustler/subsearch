@@ -4,9 +4,10 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 <p> dev-2.0
 
-# Supported languages
+#### Supported languages
 
-<sub> These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.</sub>
+<sub> 
+These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.
 
 - Arabic,`ar`
 - Brazillian Portuguesed, `pt_BR`
@@ -28,7 +29,9 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 - Turkishd, `tr`
 - Vietnamesed, `vi`
 
-<sup># How to use:</sup>
+</sub>
+
+### How to use:
 
 1. Run `python main.py` to add the context-menu.
 
@@ -39,7 +42,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. You can change the subtitle language in config/language.txt
 
----
+#### Misc
 
 Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
