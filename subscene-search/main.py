@@ -105,8 +105,9 @@ def main() -> None:
     fm.extract_zips(cwd(), ".zip")
     log_msg(f"[Re-naming]: Best matching .srt to {param.release}.srt")
     fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
-    log_msg(f"[Moving]: Unused .srt's to directory subs/")
-    fm.move_files(cwd(), f"{param.group}.srt", ".srt")
+    if len(to_be_downloaded) > 1:
+        log_msg(f"[Moving]: Unused .srt's to directory subs/")
+        fm.move_files(cwd(), f"{param.group}.srt", ".srt")
     log_msg(f"[Removing] .zip's")
     fm.clean_up(cwd(), ".zip")
     log_msg("[Done]\n")
