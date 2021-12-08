@@ -23,7 +23,6 @@ def main() -> None:
     language: str = get("language")
     languages: list = get("languages")
     for abbr_num, abbr in enumerate(languages):
-        abbr_num += 1
         if language in abbr:
             _abbr, language_abbr = abbr.split(", ")
             abbr_supported = True
