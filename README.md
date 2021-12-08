@@ -4,13 +4,11 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 #### TODO
 
-[x] test
-[]
-[]
-[]
-[]
-[]
-[]
+- [x] Remove GUI
+- [x] Improve search times
+- [x] Let user pick subtitle languish trough terminal 
+- [ ] Look into some sort of terminal menu system
+- [ ] Find a better way to run script than trough cmd
 
 ### Supported languages
 
