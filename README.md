@@ -8,7 +8,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 
 - The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-- This standard can be used as a search parameter, we only need to fetch the path and directory name, then remove everything but the Title
+- This standard can be used as a search parameter.
 
 
 ---
