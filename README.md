@@ -4,7 +4,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 <p> dev-2.0
 
-#### Supported languages
+### Supported languages
 
 <sub> 
 These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower.
@@ -42,7 +42,7 @@ These are the fully supported languages, but all languages subscene offers as a 
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. You can change the subtitle language in config/language.txt
 
-#### Misc
+### Misc
 
 Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
