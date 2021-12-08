@@ -1,4 +1,4 @@
 {
   "language": "config\\language.txt",
-  "user_config": "config\\user_config.txt"
+  "languages": "config\\languages.txt"
 }
