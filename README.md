@@ -5,10 +5,7 @@ There are probably better repositories out there than this one, that does the sa
 
 ---
 
-#### TODO
-
----
-
+#### TODO:
 - [x] Remove GUI
 - [x] Improve search times
 - [x] Let user pick subtitle languish trough terminal 
@@ -19,7 +16,7 @@ There are probably better repositories out there than this one, that does the sa
 - [ ] Learn HTML so I write better .md files ^_^
 ---
 
-### Supported languages
+### Supported languages:
 
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
@@ -53,7 +50,7 @@ These are the fully supported languages, but all languages [subscene](https://u.
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. You can change the subtitle language in config/language.txt
 
-### Misc
+### Misc:
 
 Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
