@@ -1,6 +1,6 @@
 # subscene-search
 
-Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
+Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com 
 
 #### TODO
 
@@ -9,7 +9,9 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 - [x] Let user pick subtitle languish trough terminal 
 - [ ] Look into some sort of terminal menu system
 - [ ] Find a better way to run script than trough cmd
+- [ ] Add opensubtitles as a source for subs
 - [ ] Improve code?
+- [ ] Learn HTML so I write better .md files ^_^
 ---
 
 ### Supported languages
