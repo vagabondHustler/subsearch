@@ -31,6 +31,7 @@ def main() -> None:
         elif abbr_num >= len(languages):
             log_msg("[ERROR] Your language is not supported")
             log_msg("[ERROR] Search might be longer for TV-series")
+            language_abbr = "en"
             abbr_supported = False
 
     param = get_parameters(cwd().lower(), language_abbr)
@@ -52,15 +53,15 @@ def main() -> None:
         if key.lower() == f"{param.title} ({param.year})":
             log_msg(f"[Movie]: {key} found.")
             log_msg(f"[URL]: {value}")
-            to_be_scraped.append(value)
+            to_be_scraped.append(value) if value not in (to_be_scraped) else None
         elif param.title and param.season_ordinal in key.lower() and param.tv_series and abbr_supported:
             log_msg(f"[TV-series]: {key} found.")
             log_msg(f"[URL]: {value}")
-            to_be_scraped.append(value)
-        elif param.title and param.season_ordinal in key.lower() and param.tv_series and abbr_supported is  False:
+            to_be_scraped.append(value) if value not in (to_be_scraped) else None
+        elif param.title in key.lower() and param.tv_series and abbr_supported is False:
             log_msg(f"[TV-series]: {key} found.")
             log_msg(f"[URL]: {value}")
-            to_be_scraped.append(value)
+            to_be_scraped.append(value) if value not in (to_be_scraped) else None
     log_msg("[Done]\n") if len(to_be_scraped) > 0 else None
     if len(to_be_scraped) == 0:
         if param.tv_series:
