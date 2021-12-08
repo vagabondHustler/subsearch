@@ -4,6 +4,28 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 <p> dev-2.0
 
+# Supported languages
+
+- Arabic,`ar`
+- Brazillian Portuguesed, `pt_BR`
+- Danishd, `dk`
+- Dutchd, `nl`
+- Englishd, `en`
+- Finnishd, `fi`
+- Frenchd, `fr`
+- Germand, `de`
+- Hebrewd, `he`
+- Indonesiand, `id`
+- Italiand, `it`
+- Koreand, `ko`
+- Norwegiand, `no`
+- Romaniand, `ro`
+- Spanishd, `es`
+- Swedishd, `sv`
+- Thaid, `th`
+- Turkishd, `tr`
+- Vietnamesed, `vi`
+
 ---
 
 - The standard for naming a scene release is typically by Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
