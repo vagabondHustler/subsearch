@@ -10,8 +10,12 @@ certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.9
     # via requests
+docopt==0.6.2
+    # via num2words
 idna==3.3
     # via requests
+num2words==0.5.10
+    # via -r docs/requirements.txt
 requests==2.26.0
     # via -r docs/requirements.txt
 soupsieve==2.3.1
