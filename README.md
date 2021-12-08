@@ -5,7 +5,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 <p> dev-2.0
 
 # Supported languages
-
+ <sub> These are the fully supported languages, but all languages subscene offers as a filter will work, but search might be slower </sub>
 - Arabic,`ar`
 - Brazillian Portuguesed, `pt_BR`
 - Danishd, `dk`
