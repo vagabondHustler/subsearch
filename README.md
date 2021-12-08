@@ -1,4 +1,4 @@
-# Subscene search
+## Subscene search
 
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
 There are probably better repositories out there than this one, that does the same thing, I made this one mainly to learn python and git by doing.
