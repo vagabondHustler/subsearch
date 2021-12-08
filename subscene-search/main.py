@@ -21,14 +21,21 @@ def main() -> None:
         return
 
     scrape = SearchSubscene()
-    language = get("language")
-    param = get_parameters(cwd().lower())
+    language: str = get("language")
+    languages: list = get("languages")
+    for abbr in languages:
+        if language in abbr:
+            _abbr, language_abbr = abbr.split(", ")
+            break
+
+    param = get_parameters(cwd().lower(), language_abbr)
+
     log_msg("[PARAMETERS]")
-    log_msg(f"[LANGUAGE]: {language}")
+    log_msg(f"[LANGUAGE]: {language}, {language_abbr}")
     log_msg(f"[TITLE]: {param.title}")
     log_msg(f"[YEAR]: {param.year}")
-    log_msg(f"[SEASON]: {param.season}")
-    log_msg(f"[EPSISODE]: {param.episode}")
+    log_msg(f"[SEASON]: {param.season}, {param.season_ordinal}")
+    log_msg(f"[EPSISODE]: {param.episode}, {param.episode_ordinal}")
     log_msg(f"[TV-SERIES]: {param.tv_series}")
     log_msg(f"[RELEASE]: {param.release}")
     log_msg(f"[GROUP]: {param.group}")
@@ -41,8 +48,7 @@ def main() -> None:
             log_msg(f"[Movie]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value)
-
-        elif param.title in key.lower() and param.tv_series:
+        elif param.title and param.season_ordinal in key.lower() and param.tv_series:
             log_msg(f"[TV-series]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value)
@@ -68,9 +74,10 @@ def main() -> None:
             if number.precentage >= 90 or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
                 log_msg(f"[{number.precentage}% match]: {key}")
                 log_msg(f"[Appending]: {value}")
-                to_be_downloaded.append(value)
+                to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
         log_msg("[Done]\n") if len(to_be_downloaded) > 0 else None
+
     if len(to_be_downloaded) == 0:
         log_msg(f"[subsecen-search]: No subtitles to download for {param.release}")
         elapsed = time.perf_counter() - start
