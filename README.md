@@ -2,6 +2,16 @@
 
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory on Windows. The subtitles are grabbed from Subscene.com
 
+#### TODO
+
+[] test
+[]
+[]
+[]
+[]
+[]
+[]
+
 ### Supported languages
 
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
