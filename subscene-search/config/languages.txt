@@ -1,4 +1,4 @@
-Arabicd, ar
+Arabic, ar
 Brazillian Portuguesed, pt_BR
 Danishd, dk
 Dutchd, nl
