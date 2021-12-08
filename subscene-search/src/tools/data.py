@@ -1,11 +1,12 @@
 import json
 from dataclasses import dataclass
+from num2words import num2words
 
 
 @dataclass
 class UserData:
     language: str
-    user_config: list
+    languages: list[tuple[str, str]]
 
 
 def read_data(config_file: str) -> UserData:
@@ -21,13 +22,15 @@ class SearchParameters:
     title: str
     year: int
     season: str
+    season_ordinal: str
     episode: str
+    episode_ordinal: str
     tv_series: bool
     release: str
     group: str
 
 
-def get_parameters(directory_path: str) -> SearchParameters:
+def get_parameters(directory_path: str, language_abbr: str) -> SearchParameters:
     _tmp: list = []
     directory_name = directory_path.split("\\")
 
@@ -46,13 +49,18 @@ def get_parameters(directory_path: str) -> SearchParameters:
             year = item
             break
         elif item.startswith("s") and item[-1].isdigit():
-            season_episode = item.split("e")
-            season, episode = season_episode[0], f"e{season_episode[1]}"
+            _season_episode = item.replace("s", "").replace("e", " ")
+            season_episode = _season_episode.split(" ")
+            sint, eint = season_episode[0], season_episode[1]
+            season, episode = f"s{sint}", f"e{eint}"
+            season_ordinal, episode_ordinal = (num2words(sint, lang=language_abbr, to="ordinal"), num2words(eint, lang=language_abbr, to="ordinal"))
+            print(season, episode)
+            print(season_ordinal, episode_ordinal)
             if season[-1].isdigit():
                 tv_series = True
                 break
         else:
-            season, episode = "N/A", "N/A"
+            season, episode, season_ordinal, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
             tv_series = False
             _tmp.append(item)
             title = " ".join(_tmp)
@@ -64,7 +72,9 @@ def get_parameters(directory_path: str) -> SearchParameters:
         "title": title,
         "year": year,
         "season": season,
+        "season_ordinal": season_ordinal,
         "episode": episode,
+        "episode_ordinal": episode_ordinal,
         "tv_series": tv_series,
         "release": release,
         "group": group,
