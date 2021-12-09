@@ -22,43 +22,25 @@ There are probably better repositories out there than this one, that does the sa
 
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
-> Arabic,`ar`
->
-> Brazillian Portuguese, `pt_BR`
->
-> Danish, `dk`
->
-> Dutch, `nl`
->
-> English, `en`
->
-> Finnish, `fi`
->
-> French, `fr`
->
-> German, `de`
->
-> Hebrew, `he`
->
-> Indonesian, `id`
->
-> Italian, `it`
->
-> Korean, `ko`
->
-> Norwegian, `no`
->
-> Romanian, `ro`
->
-> Spanish, `es`
->
-> Swedish, `sv`
->
-> Thai, `th`
->
-> Turkish, `tr`
->
-> Vietnamese, `vi`
+- Arabic,`ar`
+- Brazillian Portuguese, `pt_BR`
+- Danish, `dk`
+- Dutch, `nl`
+- English, `en`
+- Finnish, `fi`
+- French, `fr`
+- German, `de`
+- Hebrew, `he`
+- Indonesian, `id`
+- Italian, `it`
+- Korean, `ko`
+- Norwegian, `no`
+- Romanian, `ro`
+- Spanish, `es`
+- Swedish, `sv`
+- Thai, `th`
+- Turkish, `tr`
+- Vietnamese, `vi`
 
 ### How to use:
 
@@ -73,8 +55,8 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 #### Misc:
 
-> Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
->
-> If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
->
-> You can change the subtitle language in `config/language.txt`
+>> Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
+>>
+>> If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
+>>
+>> You can change the subtitle language in `config/language.txt`
