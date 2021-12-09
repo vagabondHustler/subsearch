@@ -1,5 +1,6 @@
 # main
 import time
+import os
 
 from src import user_config
 from src.tools.current_user import got_key
@@ -18,6 +19,9 @@ def main() -> None:
         user_config.context_menu()
         user_config.select_language()
         return
+
+    if fm.is_file_empty("config/language.txt"):
+        user_config.select_language()
 
     scrape = SearchSubscene()
     language: str = get("language")
