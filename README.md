@@ -53,10 +53,10 @@ These are the fully supported languages, but all languages [subscene](https://u.
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. If there are any problems it will be displayed in `cwd/subscene-search.log`
 
-### Misc:
+#### Misc:
 
-Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
+<sup>Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
 If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
 
-You can change the subtitle language in config/language.txt
+You can change the subtitle language in `config/language.txt`</sup>
