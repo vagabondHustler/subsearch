@@ -21,24 +21,24 @@ There are probably better repositories out there than this one, that does the sa
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
 - Arabic,`ar`
-- Brazillian Portuguesed, `pt_BR`
-- Danishd, `dk`
-- Dutchd, `nl`
-- Englishd, `en`
-- Finnishd, `fi`
-- Frenchd, `fr`
-- Germand, `de`
-- Hebrewd, `he`
-- Indonesiand, `id`
-- Italiand, `it`
-- Koreand, `ko`
-- Norwegiand, `no`
-- Romaniand, `ro`
-- Spanishd, `es`
-- Swedishd, `sv`
-- Thaid, `th`
-- Turkishd, `tr`
-- Vietnamesed, `vi`
+- Brazillian Portuguese, `pt_BR`
+- Danish, `dk`
+- Dutch, `nl`
+- English, `en`
+- Finnish, `fi`
+- French, `fr`
+- German, `de`
+- Hebrew, `he`
+- Indonesian, `id`
+- Italian, `it`
+- Korean, `ko`
+- Norwegian, `no`
+- Romanian, `ro`
+- Spanish, `es`
+- Swedish, `sv`
+- Thai, `th`
+- Turkish, `tr`
+- Vietnamese, `vi`
 
 ### How to use:
 
