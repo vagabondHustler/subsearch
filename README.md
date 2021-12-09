@@ -62,7 +62,7 @@ If you don't want the icon in the context menu, delete Name: `Icon` Type: `REG_S
 You can change the subtitle language in `config/language.txt`
 
 If u're running VS Code and are getting decode, encode errors add in settings.json:
-    "code-runner.executorMap": {
-    "python": "set PYTHONIOENCODING=utf8 && python"
-  },
+    > "code-runner.executorMap": {
+    > "python": "set PYTHONIOENCODING=utf8 && python"
+  > },
    
