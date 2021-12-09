@@ -42,6 +42,8 @@ These are the fully supported languages, but all languages [subscene](https://u.
 - Turkish, `tr`
 - Vietnamese, `vi`
 
+---
+
 ### How to use:
 
 1. Run `python main.py` to add the context-menu.
@@ -61,7 +63,7 @@ If you don't want the icon in the context menu, delete Name: `Icon` Type: `REG_S
 
 You can change the subtitle language in `config/language.txt`
 
-
+---
 
 If u're running VS Code and are getting decode, encode errors add in settings.json:
    
