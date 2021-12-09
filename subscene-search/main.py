@@ -32,7 +32,8 @@ def main() -> None:
             abbr_supported = True
             break
         elif abbr_num >= len(languages):
-            log_msg("[ERROR] Your language is not supported")
+            log_msg("[ERROR] Your language is not fully supported")
+            log_msg("[ERROR] See supported languages in subscene-search/config/languages.txt")
             log_msg("[ERROR] Search might be longer for TV-series")
             language_abbr = "en"
             abbr_supported = False
