@@ -55,8 +55,8 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 #### Misc:
 
-<sup>Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
-
-If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
-
-You can change the subtitle language in `config/language.txt`</sup>
+> Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
+>
+> If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
+>
+> You can change the subtitle language in `config/language.txt`
