@@ -6,14 +6,16 @@ There are probably better repositories out there than this one, that does the sa
 ---
 
 #### TODO:
+
 - [x] Remove GUI
 - [x] Improve search times
-- [x] Let user pick subtitle languish trough terminal 
+- [x] Let user pick subtitle languish trough terminal
 - [ ] Look into some sort of terminal menu system
 - [ ] Find a better way to run script than trough cmd
 - [ ] Add opensubtitles as a source for subs
 - [ ] Improve code?
-- [ ] Learn HTML so I write better .md files ^_^
+- [ ] Learn HTML so I write better .md files ^\_^
+
 ---
 
 ### Supported languages:
@@ -43,17 +45,18 @@ These are the fully supported languages, but all languages [subscene](https://u.
 ### How to use:
 
 1. Run `python main.py` to add the context-menu.
+
    1. You will be prompted to run as admin, necessary to save the new keys to the registry.
    2. You will be asked to proived the language you want the subtitles to be in.
    3. Context menu gets added and you can now Right-Clicking inside a folder to see context-menu option 'Search subscene'.
 
 2. Use the menu inside the folder of the release you want to find subtitles for.
-   1. You can change the subtitle language in config/language.txt
+   1. If there are any problems it will be displayed in `cwd/subscene-search.log`
 
 ### Misc:
 
 Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
 
-<p>
-
 If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
+
+You can change the subtitle language in config/language.txt
