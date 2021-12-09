@@ -1,7 +1,7 @@
 ## Subscene search
 
-Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
-There are probably better repositories out there than this one, that does the same thing, I made this one mainly to learn python and git by doing.
+<p>Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
+<p>There are probably better repositories out there than this one, that does the same thing, I made this one mainly to learn python and git by doing.
 
 ---
 
@@ -20,7 +20,7 @@ There are probably better repositories out there than this one, that does the sa
 
 ### Supported languages:
 
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
+<p>These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
 - Arabic,`ar`
 - Brazillian Portuguese, `pt_BR`
@@ -55,8 +55,6 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 #### Misc:
 
->> Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
->>
->> If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
->>
->> You can change the subtitle language in `config/language.txt`
+<p>Registry key can be found here:`Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene` if you want to remove it or make edits to it.
+<p>If you don't want the icon in the context menu, delete Name:`Icon` Type: `REG_SZ` in Key: `Search subscene`
+<p>You can change the subtitle language in `config/language.txt`
