@@ -59,4 +59,4 @@ Registry key can be found here: ```Computer\HKEY_CLASSES_ROOT\Directory\Backgrou
 
 If you don't want the icon in the context menu, delete Name: ```Icon``` Type: ```REG_SZ``` in Key: ```Search subscene```
 
-You can change the subtitle language in ````config/language.txt```
+You can change the subtitle language in ```config/language.txt```
