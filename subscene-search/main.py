@@ -41,6 +41,7 @@ def main() -> None:
             log_msg("[ERROR]: Search might be longer for TV-series")
             language_abbr = "en"
             abbr_supported = False
+            
     #
     # filter parameters
     #
