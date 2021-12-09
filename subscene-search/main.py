@@ -34,7 +34,6 @@ def main() -> None:
             abbr_supported = False
 
     param = get_parameters(cwd().lower(), language_abbr)
-
     log_msg("[PARAMETERS]")
     log_msg(f"[LANGUAGE]: {language}, {language_abbr}")
     log_msg(f"[TITLE]: {param.title}")
