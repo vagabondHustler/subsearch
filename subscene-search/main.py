@@ -1,6 +1,5 @@
 # main
 import time
-import os
 
 from src import user_config
 from src.tools.current_user import got_key
