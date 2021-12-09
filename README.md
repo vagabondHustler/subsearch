@@ -55,6 +55,8 @@
 
 #### Misc:
 
-<p>Registry key can be found here: ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene```
-<p>If you don't want the icon in the context menu, delete Name: ```Icon``` Type: ```REG_SZ``` in Key: ```Search subscene```
-<p>You can change the subtitle language in ````config/language.txt```
+Registry key can be found here: ```Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene```
+
+If you don't want the icon in the context menu, delete Name: ```Icon``` Type: ```REG_SZ``` in Key: ```Search subscene```
+
+You can change the subtitle language in ````config/language.txt```
