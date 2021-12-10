@@ -42,5 +42,5 @@ def main():
     menu(option)
 
 
-if __file__ == root_directory_file("test_configure.py"):
+if __file__ == root_directory_file("configure.py"):
     main()
