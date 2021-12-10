@@ -13,14 +13,17 @@ from src.compare import check
 from src import file_manager as fm
 
 
+# TODO: remove logging from main.py and into a separate module
+
+
 def main() -> None:
     #
     # initialising
     #
     start = time.perf_counter()
     language, lang_abbr = get("language")
+    precentage = get("percentage")
     if got_key() is False:
-        edit_config.select_language()
         edit_config.context_menu()
         return
     #
@@ -36,7 +39,9 @@ def main() -> None:
     log_msg(f"[TV-SERIES]: {param.tv_series}")
     log_msg(f"[RELEASE]: {param.release}")
     log_msg(f"[GROUP]: {param.group}")
+    log_msg(f"[{precentage}%] Match threshold")
     log_msg(f"[URL]: {param.url}\n")
+
     #
     # get title
     #
@@ -71,8 +76,8 @@ def main() -> None:
             break
         for key, value in zip(sub_keys, sub_keys.values()):
             number = check(key, param.release)
-            log_msg(f"[{number.precentage}% match]: {key}") if number.precentage <= 90 else None
-            if number.precentage >= 90 or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
+            log_msg(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
+            if number.precentage >= precentage or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
                 log_msg(f"[{number.precentage}% match]: {key}")
                 log_msg(f"[Appending]: {value}")
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
