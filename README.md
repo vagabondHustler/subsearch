@@ -10,11 +10,12 @@
 - [x] Remove GUI
 - [x] Improve search times
 - [x] Let user pick subtitle languish trough terminal
-- [ ] Look into some sort of terminal menu system
+- [x] Look into some sort of terminal menu system
+- [ ] Remove logging from main.py and into a separate module
+- [ ] Remove/add implement: icon from context_menu, toogle terminal foucus
 - [ ] Find a better way to run script than trough cmd
 - [ ] Add opensubtitles as a source for subs
 - [ ] Improve code?
-- [ ] Learn HTML so I write better .md files ^\_^
 
 ---
 
