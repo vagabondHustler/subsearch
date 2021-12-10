@@ -12,10 +12,28 @@ def get(output):
         return lang, lang_abbr
 
     def languages() -> list:
-        languages = config_json.languages            
-        return languages
+        ls = config_json.languages
+        return ls
+
+    def precent() -> int:
+        p = config_json.precentage_pass
+        return p
+
+    def terminal() -> str:
+        tf = config_json.terminal_focus
+        return tf
+    
+    def cm_icon() -> str:
+        cm = config_json.context_menu_icon
+        return cm
 
     if output == "language":
         return language()
     if output == "languages":
         return languages()
+    if output == "percentage":
+        return precent()
+    if output == "terminal_focus":
+        return terminal()
+    if output == "cm_icon":
+        return cm_icon()
