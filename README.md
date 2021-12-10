@@ -46,7 +46,7 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 ### How to use:
 
-1. Run `python main.py` to add the context-menu.
+1. Run `main.py` to add the context-menu.
 
    1. You will be prompted to run as admin, necessary to save the new keys to the registry.
    2. You will be asked to proived the language you want the subtitles to be in.
@@ -54,6 +54,8 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 2. Use the menu inside the folder of the release you want to find subtitles for.
    1. If there are any problems it will be displayed in `cwd/subscene-search.log`
+
+3. Run `configure.py` to edit language, how closly the subtitles need to match to be downloaded.
 
 #### Misc:
 
