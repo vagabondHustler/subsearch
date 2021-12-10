@@ -6,7 +6,9 @@ from src.config import get
 from src.tools.log import log_msg
 from src.tools.data import get_parameters
 from src.tools.os import cwd
-from src.subscrape import SearchSubscene
+from src.subscrape import search_for_title
+from src.subscrape import search_title_for_sub
+from src.subscrape import get_download_url
 from src.tools.compare import check
 from src.tools import file_manager as fm
 
@@ -23,8 +25,6 @@ def main() -> None:
 
     if fm.is_file_empty("config/language.txt"):
         user_config.select_language()
-
-    scrape = SearchSubscene()
     #
     # fetch language
     #
@@ -41,7 +41,6 @@ def main() -> None:
             log_msg("[ERROR]: Search might be longer for TV-series")
             language_abbr = "en"
             abbr_supported = False
-            
     #
     # filter parameters
     #
@@ -60,7 +59,7 @@ def main() -> None:
     # get title
     #
     to_be_scraped: list = []
-    title_keys = scrape.search_for_title(param.url)
+    title_keys = search_for_title(param.url)
     for key, value in zip(title_keys, title_keys.values()):
         if key.lower() == f"{param.title} ({param.year})":
             log_msg(f"[Movie]: {key} found.")
@@ -90,7 +89,7 @@ def main() -> None:
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log_msg(f"[Searching for subtitles]")
-            sub_keys = scrape.search_title_for_sub(language, url)
+            sub_keys = search_title_for_sub(language, url)
             break
         for key, value in zip(sub_keys, sub_keys.values()):
             number = check(key, param.release)
@@ -112,7 +111,7 @@ def main() -> None:
     log_msg("[Downloading]")
     for enu_num, (dl_url) in enumerate(to_be_downloaded):
         enu_num += 1
-        root_dl_url = scrape.get_download_url(dl_url)
+        root_dl_url = get_download_url(dl_url)
         file_path = f"{cwd()}\\{enu_num}.zip"
         log_msg(f"[Downloading]: {enu_num}/{len(to_be_downloaded)}.zip")
         fm.download_zip(file_path, root_dl_url)
@@ -132,6 +131,7 @@ def main() -> None:
 
     elapsed = time.perf_counter() - start
     log_msg(f"[subsecen-search]: Finished in {elapsed} seconds.\n\n")
+    exit(1)
 
 
 if __name__ == "__main__":
