@@ -53,9 +53,12 @@ These are the fully supported languages, but all languages [subscene](https://u.
    3. Context menu gets added and you can now Right-Clicking inside a folder to see context-menu option 'Search subscene'.
 
 2. Use the menu inside the folder of the release you want to find subtitles for.
+
    1. If there are any problems it will be displayed in `cwd/subscene-search.log`
 
 3. Run `configure.py` to edit language, how closly the subtitles need to match to be downloaded.
+
+---
 
 #### Misc:
 
@@ -68,10 +71,9 @@ You can change the subtitle language in `config/language.txt`
 ---
 
 If u're running VS Code and are getting decode, encode errors add in settings.json:
-   
-   <sup>"code-runner.executorMap": {
- 
-   <sup>"python": "set PYTHONIOENCODING=utf8 && python"
-   
-   <sup>},
-   
+
+<sup>"code-runner.executorMap": {
+
+<sup>"python": "set PYTHONIOENCODING=utf8 && python"
+
+<sup>},
