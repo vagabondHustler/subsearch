@@ -1,6 +1,9 @@
 from src.os import root_directory
 
 
+# TODO: remove/add icon, toogle foucus
+
+
 regkey = (
     r"Windows Registry Editor Version 5.00" + "\n"
     r"" + "\n"
@@ -13,6 +16,6 @@ regkey = (
 )
 
 
-def write_key() -> None:
+def write_key(icon="True", focus="True") -> None:
     with open("regkey.reg", "w") as f:
         f.write(str(regkey))
