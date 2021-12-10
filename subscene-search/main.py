@@ -1,16 +1,16 @@
 import time
 
-from src import user_config
-from src.tools.current_user import got_key
+from src import edit_config
+from src.current_user import got_key
 from src.config import get
-from src.tools.log import log_msg
-from src.tools.data import get_parameters
-from src.tools.os import cwd
+from src.log import log_msg
+from src.data import get_parameters
+from src.os import cwd
 from src.subscrape import search_for_title
 from src.subscrape import search_title_for_sub
 from src.subscrape import get_download_url
-from src.tools.compare import check
-from src.tools import file_manager as fm
+from src.compare import check
+from src import file_manager as fm
 
 
 def main() -> None:
@@ -18,35 +18,17 @@ def main() -> None:
     # initialising
     #
     start = time.perf_counter()
+    language, lang_abbr = get("language")
     if got_key() is False:
-        user_config.context_menu()
-        user_config.select_language()
+        edit_config.select_language()
+        edit_config.context_menu()
         return
-
-    if fm.is_file_empty("config/language.txt"):
-        user_config.select_language()
-    #
-    # fetch language
-    #
-    language: str = get("language")
-    languages: list = get("languages")
-    for abbr_num, abbr in enumerate(languages):
-        if language in abbr:
-            _abbr, language_abbr = abbr.split(", ")
-            abbr_supported = True
-            break
-        elif abbr_num >= len(languages):
-            log_msg("[ERROR]: Your language is not fully supported")
-            log_msg("[ERROR]: See supported languages in subscene-search/config/languages.txt")
-            log_msg("[ERROR]: Search might be longer for TV-series")
-            language_abbr = "en"
-            abbr_supported = False
     #
     # filter parameters
     #
-    param = get_parameters(cwd().lower(), language_abbr)
+    param = get_parameters(cwd().lower(), lang_abbr)
     log_msg("[PARAMETERS]")
-    log_msg(f"[LANGUAGE]: {language}, {language_abbr}")
+    log_msg(f"[LANGUAGE]: {language}, {lang_abbr}")
     log_msg(f"[TITLE]: {param.title}")
     log_msg(f"[YEAR]: {param.year}")
     log_msg(f"[SEASON]: {param.season}, {param.season_ordinal}")
@@ -65,11 +47,7 @@ def main() -> None:
             log_msg(f"[Movie]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        elif param.title and param.season_ordinal in key.lower() and param.tv_series and abbr_supported:
-            log_msg(f"[TV-series]: {key} found.")
-            log_msg(f"[URL]: {value}")
-            to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        elif param.title in key.lower() and param.tv_series and abbr_supported is False:
+        elif param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
             log_msg(f"[TV-series]: {key} found.")
             log_msg(f"[URL]: {value}")
             to_be_scraped.append(value) if value not in (to_be_scraped) else None

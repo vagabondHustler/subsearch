@@ -6,7 +6,7 @@ from num2words import num2words
 @dataclass
 class UserData:
     language: str
-    languages: list[tuple[str, str]]
+    languages: list[str]
 
 
 def read_data(config_file: str) -> UserData:

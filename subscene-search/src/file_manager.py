@@ -3,8 +3,6 @@ import os
 import zipfile
 import shutil
 
-from src.tools.os import root_directory_file
-
 
 def download_zip(zip_path: str, zip_url: str) -> None:
     r = requests.get(zip_url, stream=True)
@@ -48,10 +46,3 @@ def clean_up(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
             os.remove(file)
-
-
-def is_file_empty(file) -> bool:
-    if os.stat(root_directory_file(file)).st_size == 0:
-        return True
-    else:
-        return False

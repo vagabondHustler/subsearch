@@ -1,4 +1,4 @@
-from src.tools.os import root_directory
+from src.os import root_directory
 
 
 regkey = (
