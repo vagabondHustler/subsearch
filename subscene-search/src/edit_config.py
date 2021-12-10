@@ -27,7 +27,7 @@ def update_language(language):
         f.truncate()
 
 
-def select_language():
+def select_language() -> None:
     languages = get("languages")
     print("\n")
     print("[Fully supported languages]")
@@ -58,3 +58,59 @@ def select_language():
             update_language(custom_answer)
             print("\n\n")
             break
+
+
+def select_precentage_pass() -> None:
+    while True:
+        answer = int(input("Enter number between 1-100: "))
+        if answer <= 100:
+            break
+        else:
+            print("Must be a number between 1-100")
+
+    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
+        data = json.load(f)
+        data["precentage_pass"] = answer
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
+
+
+def select_terminal_focus() -> None:
+    while True:
+        answer = input("Foucus or minimized terminal while searching? [f/m]: ")
+        if answer.lower() == "f":
+            value = "True"
+            break
+        if answer.lower() == "n":
+            value = "False"
+            break
+        else:
+            print("Please enter f or n")
+
+    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
+        data = json.load(f)
+        data["precentage_pass"] = value
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
+
+
+def select_cm_icon() -> None:
+    while True:
+        answer = input("Foucus or minimized terminal while searching? [y/n]: ")
+        if answer.lower() == "y":
+            value = "True"
+            break
+        if answer.lower() == "n":
+            value = "False"
+            break
+        else:
+            print("Please enter f or n")
+
+    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
+        data = json.load(f)
+        data["precentage_pass"] = value
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
