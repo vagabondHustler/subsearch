@@ -7,6 +7,9 @@ from num2words import num2words
 class UserData:
     language: str
     languages: list[str]
+    precentage_pass: int
+    terminal_focus: str
+    context_menu_icon: str
 
 
 def read_data(config_file: str) -> UserData:
