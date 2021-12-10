@@ -18,10 +18,10 @@ def context_menu() -> None:
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
 
-def update_language(language):
+def update_json(key: str, value) -> None:
     with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
         data = json.load(f)
-        data["language"] = language
+        data[key] = value
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
@@ -31,20 +31,20 @@ def select_language() -> None:
     languages = get("languages")
     print("\n")
     print("[Fully supported languages]")
-    for num, lang in enumerate(languages):
+    for num, value in enumerate(languages):
         if num < 10:
-            print(f"{num}.  {lang}")
+            print(f"{num}.  {value}")
         else:
-            print(f"{num}. {lang}")
+            print(f"{num}. {value}")
     print("\n")
     print("[Supported languages] - Slower search times")
     print("Visit: https://u.subscene.com/filter")
     print("\n")
     while True:
         answer = int(input("Enter number for corresponding subtitle: "))
-        for num, lang in enumerate(languages):
+        for num, value in enumerate(languages):
             if answer == num:
-                update_language(lang)
+                update_json("language", value)
                 print("\n\n")
                 break
 
@@ -55,25 +55,19 @@ def select_language() -> None:
             print("Example: English")
             new_answer = input("Enter language: ")
             custom_answer = f"{new_answer}, en"
-            update_language(custom_answer)
+            update_json("language", custom_answer)
             print("\n\n")
             break
 
 
 def select_precentage_pass() -> None:
     while True:
-        answer = int(input("Enter number between 1-100: "))
-        if answer <= 100:
+        value = int(input("Enter number between 1-100: "))
+        if value <= 100:
             break
         else:
             print("Must be a number between 1-100")
-
-    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        data["precentage_pass"] = answer
-        f.seek(0)
-        json.dump(data, f, indent=4)
-        f.truncate()
+    update_json("precentage_pass", value)
 
 
 def select_terminal_focus() -> None:
@@ -87,13 +81,7 @@ def select_terminal_focus() -> None:
             break
         else:
             print("Please enter f or n")
-
-    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        data["precentage_pass"] = value
-        f.seek(0)
-        json.dump(data, f, indent=4)
-        f.truncate()
+    update_json("terminal_focus", value)
 
 
 def select_cm_icon() -> None:
@@ -107,10 +95,4 @@ def select_cm_icon() -> None:
             break
         else:
             print("Please enter f or n")
-
-    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        data["precentage_pass"] = value
-        f.seek(0)
-        json.dump(data, f, indent=4)
-        f.truncate()
+    update_json("context_menu_icon", value)
