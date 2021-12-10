@@ -1,4 +1,24 @@
 {
-  "language": "config\\language.txt",
-  "languages": "config\\languages.txt"
+    "language": "English, en",
+    "languages": [
+        "Arabic, ar",
+        "Brazillian Portuguese, pt_BR",
+        "Danish, dk",
+        "Dutch, nl",
+        "English, en",
+        "Finnish, fi",
+        "French, fr",
+        "German, de",
+        "Hebrew, he",
+        "Indonesian, id",
+        "Italian, it",
+        "Korean, ko",
+        "Norwegian, no",
+        "Romanian, ro",
+        "Spanish, es",
+        "Swedish, sv",
+        "Thai, th",
+        "Turkish, tr",
+        "Vietnamese, vi"
+    ]
 }
