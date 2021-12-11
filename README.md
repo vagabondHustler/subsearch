@@ -21,7 +21,7 @@
 - [Usage](#usage)
 - [Language support](#lsupport)
 - [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
+- [Misc](#misc)
 
 ## About <a name = "about"></a>
 Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
@@ -91,7 +91,7 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
 
-## Misc
+## Misc <a name = "misc"></a
 
 Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene`
 
