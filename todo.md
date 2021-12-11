@@ -11,7 +11,7 @@
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
 - [ ] Add a option to include/exclude HI-subs. 
-- [ ] Add opensubtitles as soruce.
+- [ ] Add opensubtitles as a soruce.
 
 ### In progress <a name = "progress"></a>
 
