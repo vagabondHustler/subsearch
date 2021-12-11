@@ -1,7 +1,7 @@
 
-<h1 align="left">TODO:</h3>
+<h2 align="left">TODO:</h2>
 
-## Table of Contents
+### Table of Contents
 - [Todo](#todo)
 - [In progress](#progress)
 - [Done](#authors)
