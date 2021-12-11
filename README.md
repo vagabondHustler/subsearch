@@ -91,7 +91,7 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
 
-## Misc <a name = "misc"></a
+## Misc <a name = "misc"></a>
 
 Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene`
 
