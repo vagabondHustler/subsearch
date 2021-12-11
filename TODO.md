@@ -6,7 +6,7 @@
 - [In progress](#progress)
 - [Done](#authors)
 
-### Todo <a name = "todo"></a>
+### TODO <a name = "todo"></a>
 
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
