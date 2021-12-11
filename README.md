@@ -28,11 +28,9 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 ## Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
-
-What things you need to install the software and how to install them.
 
 ```
 Python 3.10
@@ -59,7 +57,7 @@ After everything is setup, you should be able to fetch subtitles by right clicki
 ```
 Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 ```
-For easy configuration of language and similar features, run.
+For easy configuration of language, toggle context menu icon and similar features, run.
 ```
 python path\subscene-search\subscene-search\configure.py 
 ``` 
