@@ -1,5 +1,3 @@
-import os
-
 from src.os import root_directory_file
 from src.current_user import is_admin
 from src.current_user import run_as_admin
@@ -7,11 +5,7 @@ from src.edit_config import select_language
 from src.edit_config import select_precentage_pass
 from src.edit_config import select_terminal_focus
 from src.edit_config import select_cm_icon
-from src.regkey import write_key
 from src.config import get
-
-
-# TODO: implement menu_option 3, 4
 
 
 def menu(menu_option: int) -> str:
