@@ -24,7 +24,7 @@
 - [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
-Made mainly to learn python ang git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
+Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
 
 ## Getting Started <a name = "getting_started"></a>
 ---
