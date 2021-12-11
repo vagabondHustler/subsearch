@@ -16,8 +16,8 @@ def write_key(focus="True", icon="True") -> None:
 
     with open("regkey.reg", "w") as f:
         line = r'"Icon"="' + str(root_directory()).replace("\\", "\\\\") + r'\\icon.ico, 0"' + "\n"
-        reg_true_true = regkey_deafult
-        reg_false_true = regkey_deafult.replace("/min ", "")
+        reg_false_true = regkey_deafult
+        reg_true_true = regkey_deafult.replace("/min ", "")
         reg_false_false = reg_false_true.replace(line, "")
         reg_ture_false = regkey_deafult.replace(line, "")
         if focus == "True" and icon == "True":

@@ -35,13 +35,13 @@ def main() -> None:
     focus = get("terminal_focus")
     icon = get("cm_icon")
 
-    a = f"                       --- MENU ---                                  "
-    a = f"1. Change language                current: {language}, {lang_abbr}\n"
-    b = f"2. Set search strictness          current: {precentage} out of 100%\n"
-    c = f"3. Show Terminal on search        current: {focus}\n"
-    d = f"4. Show context menu              current: {icon}\n"
+    a = f"                       --- MENU ---                              \n"
+    b = f"1. Change language                current: {language}, {lang_abbr}"
+    c = f"2. Set search strictness          current: {precentage} out of 100%"
+    d = f"3. Show Terminal on search        current: {focus}"
+    e = f"4. Show context menu              current: {icon}"
     z = f"\nCtrl+C to exit\n"
-    menu_options = [a, b, c, d, z]
+    menu_options = [a, b, c, d, e, z]
 
     for item in menu_options:
         print(item)
