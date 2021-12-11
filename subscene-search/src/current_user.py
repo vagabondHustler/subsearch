@@ -1,6 +1,6 @@
 import winreg as reg
 import ctypes
-import os
+import sys
 
 
 def got_key() -> bool:
@@ -17,6 +17,9 @@ def is_admin() -> bool:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except PermissionError:
         return False
+    
+def run_as_admin() -> None:
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
 
 # def got_file() -> bool:
