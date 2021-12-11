@@ -13,6 +13,6 @@ logging.basicConfig(
 )
 
 
-def log_msg(msg: str) -> None:
+def msg(msg: str) -> None:
     logging.info(msg)
     print(msg)
