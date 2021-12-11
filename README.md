@@ -1,29 +1,73 @@
-## Subscene search
+<h1 align="center">Subscene search</h3>
 
-<p>Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
-<p>There are probably better repositories out there than this one, that does the same thing, I made this one mainly to learn python and git by doing.
+<div align="center">
 
----
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
-#### TODO:
-
-- [x] Remove GUI
-- [x] Improve search times
-- [x] Let user pick subtitle languish trough terminal
-- [x] Look into some sort of terminal menu system
-- [ ] Remove logging from main.py and into a separate module
-- [ ] Remove/add implement: icon from context_menu, toogle terminal foucus
-- [ ] Find a better way to run script than trough cmd
-- [ ] Add opensubtitles as a source for subs
-- [ ] Improve code?
+</div>
 
 ---
 
-### Supported languages:
+<p align="center"> Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
+    <br> 
+</p>
+
+## Table of Contents
+
+- [About](#about)
+- [Getting Started](#getting_started)
+- [Usage](#usage)
+- [Language support](#lsupport)
+- [Authors](#authors)
+- [Acknowledgments](#acknowledgement)
+
+## About <a name = "about"></a>
+Made mainly to learn python ang git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
+
+## Getting Started <a name = "getting_started"></a>
+---
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+
+### Prerequisites
+
+What things you need to install the software and how to install them.
+
+```
+Python 3.10
+```
+
+### Installing
+
+#### Clone the project
+```
+git clone https://github.com/vagabondHustler/subscene-search
+```
+#### Install dependencies
+```
+pip install -r path/subscene-search/docs/requirements.txt
+```
+#### Run main
+```
+python path\subscene-search\subscene-search\main.py 
+```
+
+## Usage <a name="usage"></a>
+
+After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/Tv-show, keep in mind the directory needs to have the standard release format.
+```
+Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
+```
+For easy configuration of language and similar features, run.
+```
+python path\subscene-search\subscene-search\configure.py 
+``` 
+## Supported languages <a name = "lsupport"></a>
 
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
 
-- Arabic,`ar`
+- Arabic, `ar`
 - Brazillian Portuguese, `pt_BR`
 - Danish, `dk`
 - Dutch, `nl`
@@ -43,38 +87,12 @@ These are the fully supported languages, but all languages [subscene](https://u.
 - Turkish, `tr`
 - Vietnamese, `vi`
 
----
+## Authors <a name = "authors"></a>
 
-### How to use:
+- [@vagabondHustler](https://github.com/vagabondHustler)
 
-1. Run `main.py` to add the context-menu.
-
-   1. You will be prompted to run as admin, necessary to save the new keys to the registry.
-   2. You will be asked to proived the language you want the subtitles to be in.
-   3. Context menu gets added and you can now Right-Clicking inside a folder to see context-menu option 'Search subscene'.
-
-2. Use the menu inside the folder of the release you want to find subtitles for.
-
-   1. If there are any problems it will be displayed in `cwd/subscene-search.log`
-
-3. Run `configure.py` to edit language, how closly the subtitles need to match to be downloaded.
-
----
-
-#### Misc:
+## Misc
 
 Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene`
 
 If you don't want the icon in the context menu, delete Name: `Icon` Type: `REG_SZ` in Key: `Search subscene`
-
-You can change the subtitle language in `config/language.txt`
-
----
-
-If u're running VS Code and are getting decode, encode errors add in settings.json:
-
-<sup>"code-runner.executorMap": {
-
-<sup>"python": "set PYTHONIOENCODING=utf8 && python"
-
-<sup>},
