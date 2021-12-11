@@ -73,23 +73,7 @@ def select_precentage_pass() -> None:
 
 def select_terminal_focus() -> None:
     while True:
-        answer = input("Foucus or minimized terminal while searching? [f/m]: ")
-        if answer.lower() == "f":
-            value = "True"
-            break
-        if answer.lower() == "m":
-            value = "False"
-            break
-        else:
-            print("Please enter f or m")
-    update_json("terminal_focus", value)
-    write_key(focus=value)
-    os.system(f'cmd /c "reg import regkey.reg"')
-
-
-def select_cm_icon() -> None:
-    while True:
-        answer = input("Foucus or minimized terminal while searching? [y/n]: ")
+        answer = input("Show terminal while searching? [y/n]: ")
         if answer.lower() == "y":
             value = "True"
             break
@@ -97,5 +81,26 @@ def select_cm_icon() -> None:
             value = "False"
             break
         else:
-            print("Please enter f or n")
+            print("Please enter f or m")
+    update_json("terminal_focus", value)
+    write_key(focus=value)
+    os.system(f'cmd /c "reg import regkey.reg"')
+    print("\n")
+
+
+def select_cm_icon() -> None:
+    while True:
+        answer = input("Icon in context menu [y/n]: ")
+        if answer.lower() == "y":
+            value = "True"
+            break
+        if answer.lower() == "n":
+            value = "False"
+            break
+        else:
+            print("Please enter y or n")
     update_json("context_menu_icon", value)
+    os.system(f'cmd /c "reg delete "HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene" /v Icon /f"')
+    write_key(icon=value)
+    os.system(f'cmd /c "reg import regkey.reg"')
+    print("\n")
