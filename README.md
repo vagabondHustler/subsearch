@@ -20,6 +20,7 @@
 - [Getting Started](#getting_started)
 - [Usage](#usage)
 - [Language support](#lsupport)
+- [TODO](#todo)
 - [Authors](#authors)
 - [Misc](#misc)
 
@@ -88,6 +89,17 @@ These are the fully supported languages, but all languages [subscene](https://u.
 ## Authors <a name = "authors"></a>
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
+
+## TODO <a name = "todo"></a>
+#### Finnished
+- [x] Remove GUI
+- [x] Improve search times
+- [x] Let user pick subtitle language trough terminal
+- [x] Look into some sort of terminal menu system
+- [x] Create a better README.md
+- [x] Remove/add implement: icon from context_menu, toogle terminal foucus
+#### In progress
+- [ ] Improve code?
 
 ## Misc <a name = "misc"></a>
 
