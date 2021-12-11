@@ -6,6 +6,7 @@ import json
 
 from src.os import root_directory_file
 from src.current_user import is_admin
+from src.current_user import run_as_admin
 from src.regkey import write_key
 from src.config import get
 
@@ -15,7 +16,7 @@ def context_menu() -> None:
         write_key()
         os.system(f'cmd /c "reg import regkey.reg"')
     else:
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        run_as_admin()
 
 
 def update_json(key: str, value) -> None:
@@ -76,12 +77,14 @@ def select_terminal_focus() -> None:
         if answer.lower() == "f":
             value = "True"
             break
-        if answer.lower() == "n":
+        if answer.lower() == "m":
             value = "False"
             break
         else:
-            print("Please enter f or n")
+            print("Please enter f or m")
     update_json("terminal_focus", value)
+    write_key(focus=value)
+    os.system(f'cmd /c "reg import regkey.reg"')
 
 
 def select_cm_icon() -> None:
