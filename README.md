@@ -99,7 +99,8 @@ These are the fully supported languages, but all languages [subscene](https://u.
 - [x] Create a better README.md
 - [x] Remove/add implement: icon from context_menu, toogle terminal foucus
 #### In progress
-- [ ] Improve code?
+- [ ] Fix value errors in configure.py
+- [ ] Improve code
 
 ## Misc <a name = "misc"></a>
 
