@@ -25,7 +25,7 @@ def main() -> None:
     precentage = get("percentage")
     if got_key() is False:
         edit_config.context_menu()
-        return
+        return exit(0)
     #
     # filter parameters
     #
@@ -114,7 +114,9 @@ def main() -> None:
 
     elapsed = time.perf_counter() - start
     log_msg(f"[subsecen-search]: Finished in {elapsed} seconds.\n\n")
-    exit(1)
+    focus = get("terminal_focus")
+    if focus == "True":
+        exit("All done!")
 
 
 if __name__ == "__main__":
