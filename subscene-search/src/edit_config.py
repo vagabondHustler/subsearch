@@ -46,18 +46,18 @@ def select_language() -> None:
             if answer == num:
                 update_json("language", value)
                 print("\n\n")
-                break
-
-        print("Not a valid number")
-        print("Enter custom language from https://u.subscene.com/filter ?")
-        choice = input("[y]/[N]: ")
-        if choice.lower() == "y":
-            print("Example: English")
-            new_answer = input("Enter language: ")
-            custom_answer = f"{new_answer}, en"
-            update_json("language", custom_answer)
-            print("\n\n")
-            break
+                return
+            elif answer != num and num >= len(languages):
+                print("Not a valid number")
+                print("Enter custom language from https://u.subscene.com/filter ?")
+                choice = input("[y]/[N]: ")
+                if choice.lower() == "y":
+                    print("Example: English")
+                    new_answer = input("Enter language: ")
+                    custom_answer = f"{new_answer}, en"
+                    update_json("language", custom_answer)
+                    print("\n\n")
+                    return
 
 
 def select_precentage_pass() -> None:

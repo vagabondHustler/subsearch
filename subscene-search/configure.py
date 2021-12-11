@@ -8,21 +8,23 @@ from src.config import get
 # TODO: implement menu_option 3, 4
 
 
-def menu(menu_option):
-    if menu_option == "1":
+def menu(menu_option: int) -> str:
+    if menu_option == 1:
         select_language()
-    if menu_option == "2":
+    elif menu_option == 2:
         select_precentage_pass()
-    if menu_option == "3":
+    elif menu_option == 3:
         print("Not yet implemented")
-        # select_terminal_focus()
-    if menu_option == "4":
+        # select_terminal_focus()1
+    elif menu_option == 4:
         print("Not yet implemented")
-    else:
-        print("Not a valid option")
+    elif menu_option == 0:
+        return "Exit"
+    elif menu_option is not range(0, 4):
+        print("Not a valid choice!")
 
 
-def main():
+def main() -> None:
     language, lang_abbr = get("language")
     precentage = get("percentage")
     focus = get("terminal_focus")
@@ -38,9 +40,12 @@ def main():
     for item in menu_options:
         print(item)
     print("\n")
-    option = input("Enter number: ")
+    option = int(input("Enter number: "))
     menu(option)
 
 
 if __file__ == root_directory_file("configure.py"):
-    main()
+    while True:
+        e = main()
+        if e == "Exit":
+            break
