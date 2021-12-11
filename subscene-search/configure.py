@@ -1,7 +1,12 @@
+import os
+
 from src.os import root_directory_file
+from src.current_user import is_admin
+from src.current_user import run_as_admin
 from src.edit_config import select_language
 from src.edit_config import select_precentage_pass
 from src.edit_config import select_terminal_focus
+from src.regkey import write_key
 from src.config import get
 
 
@@ -14,8 +19,7 @@ def menu(menu_option: int) -> str:
     elif menu_option == 2:
         select_precentage_pass()
     elif menu_option == 3:
-        print("Not yet implemented")
-        # select_terminal_focus()1
+        select_terminal_focus()
     elif menu_option == 4:
         print("Not yet implemented")
     elif menu_option == 0:
@@ -45,6 +49,10 @@ def main() -> None:
 
 
 if __file__ == root_directory_file("configure.py"):
+    if is_admin():
+        pass
+    else:
+        run_as_admin()
     while True:
         e = main()
         if e == "Exit":
