@@ -1,7 +1,7 @@
 from src.os import root_directory
 
 
-# TODO: remove/add icon, toogle foucus
+# TODO: remove/add icon
 
 
 regkey = (
@@ -16,6 +16,10 @@ regkey = (
 )
 
 
-def write_key(icon="True", focus="True") -> None:
+def write_key(focus="True") -> None:
     with open("regkey.reg", "w") as f:
-        f.write(str(regkey))
+        if focus == "True":
+            focus_regkey = regkey.replace("/min ", "")
+            f.write(str(focus_regkey))
+        else:
+            f.write(str(regkey))
