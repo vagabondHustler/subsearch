@@ -8,8 +8,6 @@
 
 </div>
 
----
-
 <p align="center"> Download subtitles for well known scene groups with two easy mouse clicks inside a directory. The subtitles are grabbed from Subscene.com.
     <br> 
 </p>
