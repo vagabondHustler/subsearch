@@ -27,7 +27,7 @@
 Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
 
 ## Getting Started <a name = "getting_started"></a>
----
+
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Prerequisites
