@@ -1,4 +1,3 @@
-from src.os import root_directory_file
 from src.current_user import is_admin
 from src.current_user import run_as_admin
 from src.edit_config import select_language
@@ -40,14 +39,17 @@ def main() -> None:
     for item in menu_options:
         print(item)
     print("\n")
-    option = int(input("Enter number: "))
+    try:
+        option = int(input("Go to menu option: "))
+    except ValueError:
+        print("Invalid option")
+        main()
+
     menu(option)
+    main()
 
 
-if __file__ == root_directory_file("configure.py") and is_admin():
-    while True:
-        e = main()
-        if e == "Exit":
-            break
+if is_admin():
+    main()
 else:
     run_as_admin()
