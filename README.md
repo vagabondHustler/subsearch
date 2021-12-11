@@ -48,7 +48,7 @@ pip install -r path/subscene-search/docs/requirements.txt
 ```
 #### Run main
 ```
-python path\subscene-search\subscene-search\main.py 
+python main.py 
 ```
 
 ## Usage <a name="usage"></a>
@@ -59,7 +59,7 @@ Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 ```
 For easy configuration of language, toggle context menu icon and similar features, run.
 ```
-python path\subscene-search\subscene-search\configure.py 
+python configure.py 
 ``` 
 ## Supported languages <a name = "lsupport"></a>
 
