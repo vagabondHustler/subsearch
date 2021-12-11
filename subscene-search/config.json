@@ -22,6 +22,6 @@
         "Vietnamese, vi"
     ],
     "precentage_pass": 90,
-    "terminal_focus": "True",
+    "terminal_focus": "False",
     "context_menu_icon": "True"
 }
