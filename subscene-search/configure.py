@@ -50,12 +50,10 @@ def main() -> None:
     menu(option)
 
 
-if __file__ == root_directory_file("configure.py"):
-    if is_admin():
-        pass
-    else:
-        run_as_admin()
+if __file__ == root_directory_file("configure.py") and is_admin():
     while True:
         e = main()
         if e == "Exit":
             break
+else:
+    run_as_admin()
