@@ -58,7 +58,7 @@ python main.py
 
 #### Run configure (Optinal)
 
-configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more
+Configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more
 
 ```
 python configure.py
