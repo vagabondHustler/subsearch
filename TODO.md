@@ -17,7 +17,7 @@
 - [ ] Add a option to include/exclude HI-subs.
 
 ### Done <a name = "done"></a>
-
+- [x] And more....
 - [x] Remove GUI.
 - [x] Improve search times.
 - [x] Let user pick subtitle language trough terminal.
