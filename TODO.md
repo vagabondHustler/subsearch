@@ -11,13 +11,10 @@
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
 - [ ] Add opensubtitles as a soruce.
-- [ ] Use winreg instead of os to write and edit registry, not as dirty
 
 ### In progress <a name = "progress"></a>
 
 - [ ] Add a option to include/exclude HI-subs.
-- [ ] Improve code
-  - [x] Exclude resolutions e.g 720p from %match.
 
 ### Done <a name = "done"></a>
 
@@ -29,3 +26,6 @@
 - [x] Remove/add implement: icon from context_menu, toogle terminal foucus.
 - [x] Fix value errors in configure.py.
 - [x] Start with latest version of pwsh.ex x64 instead of cmd
+- [x] Use winreg instead of os to write and edit registry, not as dirty
+- [x] Improve code
+  - [x] Exclude resolutions e.g 720p from %match.
