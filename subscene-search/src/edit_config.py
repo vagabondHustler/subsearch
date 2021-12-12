@@ -4,7 +4,7 @@ import sys
 import os
 import json
 
-from src.os import root_directory_file
+from src.sos import root_directory_file
 from src.current_user import is_admin
 from src.current_user import run_as_admin
 from src.regkey import write_key

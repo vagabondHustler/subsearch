@@ -1,5 +1,5 @@
 import json
-from src.os import root_directory_file
+from src.sos import root_directory_file
 from src.data import read_data
 
 

@@ -1,11 +1,12 @@
 import time
 
+from src import registry
 from src import edit_config
 from src.current_user import got_key
 from src.config import get
 from src import log
 from src.data import get_parameters
-from src.os import cwd
+from src.sos import cwd
 from src.subscrape import search_for_title
 from src.subscrape import search_title_for_sub
 from src.subscrape import get_download_url

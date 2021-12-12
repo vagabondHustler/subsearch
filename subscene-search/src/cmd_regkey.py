@@ -1,4 +1,4 @@
-from src.os import root_directory
+from src.sos import root_directory
 
 regkey_deafult = (
     r"Windows Registry Editor Version 5.00" + "\n"
