@@ -1,16 +1,16 @@
-<h1 align="center">Subscene search</h3>
-
 <div align="center">
+    
+# Subscene search
+    
+Download subtitles for well known scene groups with two easy mouse clicks inside a directory
 
+![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+
+   
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-
 </div>
-
-<p align="center"> Download subtitles for well known scene groups with two easy mouse clicks inside a directory.
-    <br> 
-</p>
 
 ## Table of Contents
 
