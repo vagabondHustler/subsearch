@@ -18,7 +18,7 @@
 - [Getting Started](#getting_started)
 - [Usage](#usage)
 - [Language support](#lsupport)
-- [TODO](https://github.com/vagabondHustler/subscene-search/blob/main/todo.md)
+- [TODO](https://github.com/vagabondHustler/subscene-search/blob/main/TODO.md)
 - [Authors](#authors)
 - [Misc](#misc)
 
