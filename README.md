@@ -3,6 +3,7 @@
 <div align="center">
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory
     
+<p>
     
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
