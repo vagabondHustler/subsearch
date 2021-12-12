@@ -24,7 +24,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 ## About <a name = "about"></a>
 
-Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-shows due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
+Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
 
 ## Getting Started <a name = "getting_started"></a>
 
@@ -58,7 +58,7 @@ python main.py
 
 #### Run configure (Optinal)
 
-Configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more
+<sup>Configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more.</sup>
 
 ```
 python configure.py
@@ -66,7 +66,7 @@ python configure.py
 
 ## Usage <a name="usage"></a>
 
-After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/Tv-show, keep in mind the directory needs to have the standard release format.
+After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/TV-Series, keep in mind the directory needs to have the standard release format.
 
 ```
 Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
@@ -76,7 +76,7 @@ For easy configuration of language, toggle context menu icon and similar feature
 
 ## Supported languages <a name = "lsupport"></a>
 
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
+These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-Series might be slower, more results to filter trough.
 
 - Arabic, `ar`
 - Brazillian Portuguese, `pt_BR`
