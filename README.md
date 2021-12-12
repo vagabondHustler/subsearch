@@ -2,12 +2,10 @@
 
 <div align="center">
 
-    [![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
     
-![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
-
 </div>
 
 <p align="center"> Download subtitles for well known scene groups with two easy mouse clicks inside a directory.
