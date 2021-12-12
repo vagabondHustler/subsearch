@@ -2,27 +2,14 @@
     
 ### Subscene search
     
-![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
-    
-</div>
-
-<div align="right">
-    
-    Terminal output if it's not hidden
-    
-</div>
-
-<div align="center">
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory
 
----
-    
-<p>
-    
+![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+
+   
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-    
 </div>
 
 ## Table of Contents
