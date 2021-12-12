@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class Precentage:
     precentage: int
@@ -13,14 +12,14 @@ def check(searched: str, search_result: str) -> Precentage:
     greater_answer = is_bigger(searched, search_result)
 
     if len(searched) < len(search_result):
-        for ga in range(greater_answer):
+        for _ga in range(greater_answer):
             searched.append("_None")
     elif len(searched) > len(search_result):
-        for ga in range(greater_answer):
+        for _ga in range(greater_answer):
             search_result.append("_None")
 
-    for x, y in zip(searched, search_result):
-        if compare(x, y):
+    for item_x, item_y in zip(searched, search_result):
+        if compare(item_x, item_y):
             match += 1
 
     tot = len(searched)
@@ -29,13 +28,16 @@ def check(searched: str, search_result: str) -> Precentage:
     return Precentage(precentage)
 
 
-def mk_lst(x: str) -> list:
-    x: list = x.split(".")
-    x1 = x[-1].split("-")
+def mk_lst(release: str) -> list:
+    new: list = []
+    qualities = ["720p", "1080p", "1440p", "2160p"]
 
-    for item in x1:
-        x.append(item)
-    return x
+    temp: list = release.split(".")
+
+    for item in temp:
+        if item not in qualities:
+            new.append(item)
+    return new
 
 
 def is_bigger(searched, search_result) -> int:
@@ -47,7 +49,7 @@ def is_bigger(searched, search_result) -> int:
         return answer
 
 
-def compare(x, y) -> bool:
-    if x.lower() == y.lower():
+def compare(item_x, item_y) -> bool:
+    if item_x.lower() == item_y.lower():
         return True
     return False
