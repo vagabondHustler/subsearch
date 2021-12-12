@@ -1,6 +1,6 @@
 <div align="center">
     
-### Subscene search
+# Subscene search
     
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory
 
