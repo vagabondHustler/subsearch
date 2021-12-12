@@ -1,12 +1,14 @@
-<h1 align="center">Subscene search</h3>
-
-
 <div align="center">
     
-##### prtsc of Terminal output if it's not hidden
+### Subscene search
     
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
     
+</div>
+
+<div align="right">
+    
+    ###### prtsc of Terminal output if it's not hidden
 </div>
 
 <div align="center">
