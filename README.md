@@ -25,7 +25,7 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 
 <div align="center">
     
-### prtsc of Terminal output if it's not hidden
+##### prtsc of Terminal output if it's not hidden
     
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
     
