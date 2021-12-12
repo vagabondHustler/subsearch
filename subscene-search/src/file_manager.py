@@ -35,9 +35,10 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
     dir_subs = "subs/"
     os.mkdir(dir_subs) if os.path.exists(dir_subs) is False else None
     for file in os.listdir(cwd_path):
+        file = file.lower()
         if file.endswith(prefered_extension):
-            pass
-        elif file.endswith(extension):
+            continue
+        elif file.endswith(extension) and not file.endswith(prefered_extension):
             os.remove(f"subs/{file}") if os.path.exists(f"subs/{file}") else None
             shutil.move(file, f"subs/{file}")
 
