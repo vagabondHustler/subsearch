@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
