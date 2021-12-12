@@ -1,22 +1,7 @@
-# setup_subscene
-import ctypes
-import sys
-import os
 import json
 
 from src.sos import root_directory_file
-from src.current_user import is_admin
-from src.current_user import run_as_admin
-from src.regkey import write_key
 from src.config import get
-
-
-def context_menu() -> None:
-    if is_admin():
-        write_key()
-        os.system(f'cmd /c "reg import regkey.reg"')
-    else:
-        run_as_admin()
 
 
 def update_json(key: str, value) -> None:
@@ -83,9 +68,23 @@ def select_terminal_focus() -> None:
         else:
             print("Please enter f or m")
     update_json("terminal_focus", value)
-    write_key(focus=value)
-    os.system(f'cmd /c "reg import regkey.reg"')
-    print("\n")
+
+
+def select_terminal_in() -> None:
+    while True:
+        answer = input("Use cmd, pwsh or ps: ")
+        if answer.lower() == "cmd":
+            value = "cmd"
+            break
+        if answer.lower() == "pwsh":
+            value = "pwsh"
+            break
+        if answer.lower() == "ps":
+            value = "ps"
+            break
+        else:
+            print("Please enter cmd, pwsh or ps")
+    update_json("terminal_in", value)
 
 
 def select_cm_icon() -> None:
@@ -100,7 +99,3 @@ def select_cm_icon() -> None:
         else:
             print("Please enter y or n")
     update_json("context_menu_icon", value)
-    os.system(f'cmd /c "reg delete "HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene" /v Icon /f"')
-    write_key(icon=value)
-    os.system(f'cmd /c "reg import regkey.reg"')
-    print("\n")
