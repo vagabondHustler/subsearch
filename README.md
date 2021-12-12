@@ -2,6 +2,8 @@
 
 <div align="center">
 Download subtitles for well known scene groups with two easy mouse clicks inside a directory
+
+---
     
 <p>
     
