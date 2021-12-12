@@ -11,6 +11,7 @@
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
 - [ ] Add opensubtitles as a soruce.
+- [ ] Use winreg instead of os to write and edit registry, not as dirty
 
 ### In progress <a name = "progress"></a>
 
@@ -27,3 +28,4 @@
 - [x] Create a better README.md.
 - [x] Remove/add implement: icon from context_menu, toogle terminal foucus.
 - [x] Fix value errors in configure.py.
+- [x] Start with latest version powershell instead of cmd
