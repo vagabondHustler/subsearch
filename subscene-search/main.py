@@ -104,9 +104,6 @@ def main() -> None:
     elapsed = time.perf_counter() - start
     log.msg("Done with tasks.\n")
     log.msg(f"Finished in {elapsed} seconds.\n\n")
-    focus = get("terminal_focus")
-    if focus == "True":
-        exit("All done!")
 
 
 if __name__ == "__main__":
