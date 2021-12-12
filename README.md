@@ -56,7 +56,9 @@ pip install -r path/subscene-search/docs/requirements.txt
 python main.py
 ```
 
-#### Run configure (Optinal) - configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more
+#### Run configure (Optinal)
+
+configure language, toggle context-menu icon, run terminal in cmd, pwsh, ps and more
 
 ```
 python configure.py
