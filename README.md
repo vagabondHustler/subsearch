@@ -23,7 +23,7 @@
 - [Misc](#misc)
 
 ## About <a name = "about"></a>
-Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to.
+Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-shows due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
 
 ## Getting Started <a name = "getting_started"></a>
 
