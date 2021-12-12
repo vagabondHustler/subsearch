@@ -22,7 +22,7 @@ def main() -> None:
         edit_config.context_menu()
         return exit(0)
 
-    # filter parameters
+    # search parameters
     param = get_parameters(cwd().lower(), lang_abbr)
     log.msg("[PARAMETERS]")
     log.msg(f"Language: {language}, {lang_abbr}")
