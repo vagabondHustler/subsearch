@@ -62,7 +62,7 @@ python configure.py
 ```
 If you for some reason don't wanna use pwsh.exe rename `/src/cmd_regkey.py` to `regkey.py`, and del/rename the current one.
 
-If you want to use powershell.exe instead replace `pwsh.exe` on line 12 with it.
+I dont think Windows comes with `C:\Program Files\PowerShell\7\pwsh.exe` by deafult but powershell.exe does? On line 12 in `/src/regkey.py`, replace `pwsh.exe` with `powershell.exe`.
 
 ## Supported languages <a name = "lsupport"></a>
 
