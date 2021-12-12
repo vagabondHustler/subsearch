@@ -10,15 +10,13 @@
 
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
-- [ ] Add a option to include/exclude HI-subs.
 - [ ] Add opensubtitles as a soruce.
 
 ### In progress <a name = "progress"></a>
 
+- [ ] Add a option to include/exclude HI-subs.
 - [ ] Improve code
-  - [ ] Exinclude quality e.g bdrip from %match.
-  - [x] Exinclude resolutions e.g 720p from %match.
-  - [ ] If %match 100% besides group download zip.
+  - [x] Exclude resolutions e.g 720p from %match.
 
 ### Done <a name = "done"></a>
 
