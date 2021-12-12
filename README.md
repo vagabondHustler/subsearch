@@ -59,7 +59,11 @@ Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 For easy configuration of language, toggle context menu icon and similar features, run.
 ```
 python configure.py 
-``` 
+```
+If you for some reason don't wanna use pwsh.exe rename `/src/cmd_regkey.py` to `regkey.py`, and del/rename the current one.
+
+If you want to use powershell.exe instead replace `pwsh.exe` on line 12 with it.
+
 ## Supported languages <a name = "lsupport"></a>
 
 These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-shows might be slower, more results to filter trough.
