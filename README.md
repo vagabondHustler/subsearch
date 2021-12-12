@@ -9,6 +9,7 @@
 <div align="right">
     
     ###### prtsc of Terminal output if it's not hidden
+    
 </div>
 
 <div align="center">
