@@ -19,7 +19,3 @@ def root_directory() -> str:  # root directory of subscene-search
     return file_path
 
 
-def path_of_tools() -> str:  # root directory of /src/tools
-    root_dir_path, _file_name = os.path.split(os.path.abspath(__file__))
-    file_path = f"{root_dir_path}"
-    return file_path
