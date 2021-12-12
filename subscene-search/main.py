@@ -1,7 +1,7 @@
 import time
 
+
 from src import registry
-from src import edit_config
 from src.current_user import got_key
 from src.config import get
 from src import log
@@ -20,7 +20,7 @@ def main() -> None:
     language, lang_abbr = get("language")
     precentage = get("percentage")
     if got_key() is False:
-        edit_config.context_menu()
+        registry.add_context_menu()
         return exit(0)
 
     # search parameters
