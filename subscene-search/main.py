@@ -49,7 +49,7 @@ def main() -> None:
             log.msg(f"URL: {value}")
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
     log.msg("Done with task.\n") if len(to_be_scraped) > 0 else None
-    
+
     # exit if no titles found
     if len(to_be_scraped) == 0:
         if param.tv_series:
@@ -75,7 +75,7 @@ def main() -> None:
                 log.msg(f"Appending: {value}")
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        log.msg("Done with task.\n") if len(to_be_downloaded) > 0 else None
+        log.msg("Done with tasks.\n") if len(to_be_downloaded) > 0 else None
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
@@ -83,31 +83,26 @@ def main() -> None:
         elapsed = time.perf_counter() - start
         log.msg(f"Finished in {elapsed} seconds.\n\n")
         return
-    
+
     # check if subtitle is a match, if so download
     log.msg("[Downloading]")
-    for enu_num, (dl_url) in enumerate(to_be_downloaded):
-        enu_num += 1
+    for current_num, (dl_url) in enumerate(to_be_downloaded):
+        total_num = len(to_be_downloaded)
+        current_num += 1
         root_dl_url = get_download_url(dl_url)
-        file_path = f"{cwd()}\\{enu_num}.zip"
-        log.msg(f"Downloading: {enu_num}/{len(to_be_downloaded)}.zip")
-        fm.download_zip(file_path, root_dl_url)
+        file_path = f"{cwd()}\\{current_num}.zip"
+        fm.download_zip(file_path, root_dl_url, current_num, total_num)
 
     # extract files, rename files, delete unused files
-    log.msg(f"Extracting files.")
     fm.extract_zips(cwd(), ".zip")
-    log.msg(f"Renaming files.")
     fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
     if len(to_be_downloaded) > 1:
-        log.msg(f"Moving unused srt's to /subs/")
         fm.move_files(cwd(), f"{param.group}.srt", ".srt")
-        
-    log.msg(f"Removing zip files.")
     fm.clean_up(cwd(), ".zip")
-    log.msg("Done with tasks.\n")
 
     # finnishing up
     elapsed = time.perf_counter() - start
+    log.msg("Done with tasks.\n")
     log.msg(f"Finished in {elapsed} seconds.\n\n")
     focus = get("terminal_focus")
     if focus == "True":
