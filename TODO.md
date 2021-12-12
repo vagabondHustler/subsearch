@@ -1,7 +1,7 @@
-
 <h2 align="left">TODO:</h2>
 
 ### Table of Contents
+
 - [Todo](#todo)
 - [In progress](#progress)
 - [Done](#authors)
@@ -10,14 +10,14 @@
 
 - [ ] Remove bugs, if found.
 - [ ] Add option to either search by file or directory.
-- [ ] Add a option to include/exclude HI-subs. 
+- [ ] Add a option to include/exclude HI-subs.
 - [ ] Add opensubtitles as a soruce.
 
 ### In progress <a name = "progress"></a>
 
 - [ ] Improve code
-  - [ ] Exinclude quality e.g bdrip from  %match. 
-  - [ ] Exinclude resolutions e.g 720p from %match.
+  - [ ] Exinclude quality e.g bdrip from %match.
+  - [x] Exinclude resolutions e.g 720p from %match.
   - [ ] If %match 100% besides group download zip.
 
 ### Done <a name = "done"></a>
