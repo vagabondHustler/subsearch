@@ -2,7 +2,7 @@
     
 # Subscene search
     
-Download subtitles for well known scene groups with two easy mouse clicks inside a directory
+Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside a directory.
 
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
 
