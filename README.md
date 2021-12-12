@@ -24,7 +24,9 @@ Download subtitles for well known scene groups with two easy mouse clicks inside
 - [Misc](#misc)
 
 <div align="center">
+    
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+    
 </div>
 
 ## About <a name = "about"></a>
