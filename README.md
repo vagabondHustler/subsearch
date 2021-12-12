@@ -28,8 +28,6 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 ## Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
 
 ```
