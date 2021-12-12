@@ -132,12 +132,10 @@ dmypy.json
 test/
 test*.*
 language
-regkey.reg
 old*
 *.zip
 *.srt
 subs/
-*.reg
 
 # Prevent users to commit the README
 *README.html
