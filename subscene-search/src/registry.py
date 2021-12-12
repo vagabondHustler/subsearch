@@ -4,6 +4,7 @@ import socket
 
 from src.config import get
 from src.sos import root_directory
+from src.sos import root_directory_file
 from src.current_user import is_admin
 from src.current_user import run_as_admin
 
@@ -62,7 +63,8 @@ def write_command_subkey():
 
 def add_context_menu() -> None:
     if is_admin():
-        os.system(f'cmd /c "reg import regkey.reg"')
+        regkey = root_directory_file("regkey.reg")
+        os.system(f'cmd /c "reg import "{regkey}"')
         context_menu_icon()
         write_command_subkey()
     else:
