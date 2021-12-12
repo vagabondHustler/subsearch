@@ -28,4 +28,4 @@
 - [x] Create a better README.md.
 - [x] Remove/add implement: icon from context_menu, toogle terminal foucus.
 - [x] Fix value errors in configure.py.
-- [x] Start with latest version powershell instead of cmd
+- [x] Start with latest version of pwsh.ex x64 instead of cmd
