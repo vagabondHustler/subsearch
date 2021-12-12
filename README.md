@@ -1,16 +1,14 @@
 <h1 align="center">Subscene search</h3>
 
 <div align="center">
-
+Download subtitles for well known scene groups with two easy mouse clicks inside a directory
+    
+    
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
     
 </div>
-
-<p align="center"> Download subtitles for well known scene groups with two easy mouse clicks inside a directory.
-    <br> 
-</p>
 
 ## Table of Contents
 
@@ -21,6 +19,10 @@
 - [TODO](https://github.com/vagabondHustler/subscene-search/blob/main/TODO.md)
 - [Authors](#authors)
 - [Misc](#misc)
+
+<div align="center">
+![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+</div>
 
 ## About <a name = "about"></a>
 Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-shows due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
