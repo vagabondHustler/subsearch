@@ -34,7 +34,6 @@ def search_title_for_sub(language: str, url: str) -> dict:
 
     for i in tbc:
         if language == i.span.get_text().strip():
-            # print(i)
             _release_name = [x.get_text().strip() for x in i.find("a")]
             release_name = _release_name[-2]
             link = [y["href"] for y in i.find_all("a", href=True) if y.text]
