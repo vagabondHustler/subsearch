@@ -1,6 +1,5 @@
 import time
 
-
 from src import registry
 from src.current_user import got_key
 from src.config import get
@@ -32,12 +31,13 @@ def main() -> None:
         log.output(f"Finished in {elapsed} seconds.\n\n")
         return
 
+    # download results from scraper
     log.output("[Downloading]")
     for items in download_info:
         file_path, root_dl_url, current_num, total_num = items
         fm.download_zip(file_path, root_dl_url, current_num, total_num)
 
-    # extract files, rename files, delete unused files
+    # procsess downloaded files
     fm.extract_zips(cwd(), ".zip")
     fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
     fm.move_files(cwd(), f"{param.group}.srt", ".srt")
