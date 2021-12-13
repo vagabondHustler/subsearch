@@ -11,7 +11,7 @@ from src.current_user import run_as_admin
 COMPUTER_NAME = socket.gethostname()
 
 
-def context_menu_icon(use=get("cm_icon")):
+def context_menu_icon(use=get("cm_icon")) -> None:
     ss_path = "Directory\Background\shell\Search subscene"
     icon_path = f"{root_directory()}\icon.ico, 0"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
@@ -22,7 +22,7 @@ def context_menu_icon(use=get("cm_icon")):
                 winreg.DeleteValue(subkey_ss, "Icon")
 
 
-def write_command_subkey():
+def write_command_subkey() -> None:
     from src.config import get
 
     open_with = get("terminal_in")
