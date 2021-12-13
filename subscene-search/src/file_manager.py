@@ -41,6 +41,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         file = file.lower()
         if file.endswith(prefered_extension):
+            log.output(f"Keeping: {file}")
             continue
         elif file.endswith(extension) and not file.endswith(prefered_extension):
             dir_subs = "subs/"

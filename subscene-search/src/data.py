@@ -58,8 +58,6 @@ def get_parameters(directory_path: str, language_abbr: str) -> SearchParameters:
             sint, eint = season_episode[0], season_episode[1]
             season, episode = f"s{sint}", f"e{eint}"
             season_ordinal, episode_ordinal = (num2words(sint, lang=language_abbr, to="ordinal"), num2words(eint, lang=language_abbr, to="ordinal"))
-            print(season, episode)
-            print(season_ordinal, episode_ordinal)
             if season[-1].isdigit():
                 tv_series = True
                 break

@@ -24,7 +24,7 @@ def main() -> None:
     # log parameters
     log.parameters(param, language, lang_abbr, precentage)
 
-    log.output("[Searching]")
+    log.output("\n[Searching]")
     download_info = subscene.scrape(param, language, lang_abbr, precentage)
     if download_info is None:
         elapsed = time.perf_counter() - start
@@ -32,21 +32,22 @@ def main() -> None:
         return
 
     # download results from scraper
-    log.output("[Downloading]")
+    log.output("\n[Downloading]")
     for items in download_info:
         file_path, root_dl_url, current_num, total_num = items
         fm.download_zip(file_path, root_dl_url, current_num, total_num)
 
     # procsess downloaded files
+    log.output("\n[Procsessing files]")
     fm.extract_zips(cwd(), ".zip")
+    fm.clean_up(cwd(), ".zip")
     fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
     fm.move_files(cwd(), f"{param.group}.srt", ".srt")
-    fm.clean_up(cwd(), ".zip")
+    print("\n\n")
 
     # finnishing up
     elapsed = time.perf_counter() - start
-    log.output("Done with tasks.\n")
-    log.output(f"Finished in {elapsed} seconds.\n\n")
+    log.output(f"Finished in {elapsed} seconds")
 
 
 if __name__ == "__main__":

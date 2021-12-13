@@ -12,21 +12,21 @@ def scrape(param, language: str, lang_abbr: str, precentage) -> list or None:
     title_keys = search_for_title(param.url)
     for key, value in zip(title_keys, title_keys.values()):
         if key.lower() == f"{param.title} ({param.year})":
-            log.output(f"Movie {key} found.")
-            log.output(f"URL: {value}")
+            log.output(f"Movie {key} found")
+            # log.output(f"URL: {value}")
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
         elif param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
-            log.output(f"TV-Series {key} found.")
-            log.output(f"URL: {value}")
+            log.output(f"TV-Series {key} found")
+            # log.output(f"URL: {value}")
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-    log.output("Done with task.\n") if len(to_be_scraped) > 0 else None
+    log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
     # exit if no titles found
     if len(to_be_scraped) == 0:
         if param.tv_series:
-            log.output(f"No TV-series found matching {param.title}.")
+            log.output(f"No TV-series found matching {param.title}")
         else:
-            log.output(f"No movies found matching {param.title}.")
+            log.output(f"No movies found matching {param.title}")
         return None
 
     # search title for subtitles
@@ -41,10 +41,10 @@ def scrape(param, language: str, lang_abbr: str, precentage) -> list or None:
             log.output(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
             if number.precentage >= precentage or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
                 log.output(f"[{number.precentage}% match]: {key}")
-                log.output(f"Appending: {value}")
+                # log.output(f"Appending: {value}")
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        log.output("Done with tasks.\n") if len(to_be_downloaded) > 0 else None
+        log.output("Done with tasks") if len(to_be_downloaded) > 0 else None
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
