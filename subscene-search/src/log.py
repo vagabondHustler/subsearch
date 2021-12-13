@@ -13,6 +13,20 @@ logging.basicConfig(
 )
 
 
-def msg(msg: str) -> None:
+def output(msg: str) -> None:
     logging.info(msg)
     print(msg)
+
+
+def parameters(param, language, lang_abbr, precentage):
+    output("[PARAMETERS]")
+    output(f"Language: {language}, {lang_abbr}")
+    output(f"Title: {param.title}")
+    output(f"Year: {param.year}")
+    output(f"Season: {param.season}, {param.season_ordinal}")
+    output(f"Episode: {param.episode}, {param.episode_ordinal}")
+    output(f"TV-Series: {param.tv_series}")
+    output(f"Release: {param.release}")
+    output(f"Group: {param.group}")
+    output(f"Match threshold: {precentage}%")
+    output(f"URL: {param.url}\n")
