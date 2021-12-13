@@ -17,6 +17,7 @@ def menu(menu_option: int) -> str:
         select_precentage_pass()
     elif menu_option == 3:
         select_terminal_focus()
+        registry.write_command_subkey()
     elif menu_option == 4:
         select_terminal_in()
         registry.write_command_subkey()
