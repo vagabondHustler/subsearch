@@ -7,7 +7,7 @@ from src import log
 
 
 def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) -> None:
-    log.msg(f"Downloading: {current_num}/{total_num}")
+    log.output(f"Downloading: {current_num}/{total_num}")
     r = requests.get(zip_url, stream=True)
     with open(zip_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=128):
@@ -17,7 +17,7 @@ def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) 
 def extract_zips(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
-            log.msg(f"Extracting: {file}")
+            log.output(f"Extracting: {file}")
             file_name = os.path.abspath(file)
             zip_ref = zipfile.ZipFile(file_name)
             zip_ref.extractall(f"{cwd_path}")
@@ -27,12 +27,12 @@ def extract_zips(cwd_path: str, extension: str) -> None:
 def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(prefered_extension) and os.path.exists(new_name) is False:
-            log.msg(f"Renaming: {file} to {new_name}")
+            log.output(f"Renaming: {file} to {new_name}")
             os.rename(file, new_name)
             return
 
         elif file.endswith(extension) and os.path.exists(new_name) is False:
-            log.msg(f"Renaming: {file} to {new_name}")
+            log.output(f"Renaming: {file} to {new_name}")
             os.rename(file, new_name)
             return
 
@@ -45,7 +45,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
         if file.endswith(prefered_extension):
             continue
         elif file.endswith(extension) and not file.endswith(prefered_extension):
-            log.msg(f"Moving: {file} to /subs/")
+            log.output(f"Moving: {file} to /subs/")
             os.remove(f"subs/{file}") if os.path.exists(f"subs/{file}") else None
             shutil.move(file, f"subs/{file}")
 
@@ -53,5 +53,5 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
 def clean_up(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
-            log.msg(f"Removing: {file}")
+            log.output(f"Removing: {file}")
             os.remove(file)
