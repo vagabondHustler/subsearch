@@ -21,6 +21,7 @@
 - [x] Improve code
   - [x] Exclude resolutions e.g 720p from %match.
   - [x] Fix value errors in configure.py.
+  - [x] Changed stuff to be ready for more than one source
 - [x] Use winreg instead of os to write and edit registry, not as dirty
 - [x] Start with latest version of pwsh.ex x64 instead of cmd
 - [x] Remove/add implement: icon from context_menu, toogle terminal foucus.
