@@ -5,20 +5,20 @@ class Precentage:
     precentage: int
 
 
-def check(searched: str, search_result: str) -> Precentage:
+def check(searched: str, against: str) -> Precentage:
     match = 0
     searched: list = mk_lst(searched)
-    search_result: list = mk_lst(search_result)
-    greater_answer = is_bigger(searched, search_result)
+    against: list = mk_lst(against)
+    greater_answer = is_bigger(searched, against)
 
-    if len(searched) < len(search_result):
+    if len(searched) < len(against):
         for _ga in range(greater_answer):
             searched.append("_None")
-    elif len(searched) > len(search_result):
+    elif len(searched) > len(against):
         for _ga in range(greater_answer):
-            search_result.append("_None")
+            against.append("_None")
 
-    for item_x, item_y in zip(searched, search_result):
+    for item_x, item_y in zip(searched, against):
         if compare(item_x, item_y):
             match += 1
 
@@ -40,16 +40,16 @@ def mk_lst(release: str) -> list:
     return new
 
 
-def is_bigger(searched, search_result) -> int:
-    if len(searched) > len(search_result):
-        answer = len(searched) - len(search_result)
+def is_bigger(searched, against) -> int:
+    if len(searched) > len(against):
+        answer = len(searched) - len(against)
         return answer
-    elif len(searched) < len(search_result):
-        answer = len(search_result) - len(searched)
+    elif len(searched) < len(against):
+        answer = len(against) - len(searched)
         return answer
 
 
-def compare(item_x, item_y) -> bool:
-    if item_x.lower() == item_y.lower():
+def compare(searched, against) -> bool:
+    if searched.lower() == against.lower():
         return True
     return False
