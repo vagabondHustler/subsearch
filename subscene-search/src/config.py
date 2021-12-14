@@ -23,10 +23,6 @@ def get(output):
         tf = config_json.terminal_focus
         return tf
 
-    def terminal_in() -> str:
-        ti = config_json.terminal_in
-        return ti
-
     def cm_icon() -> str:
         cm = config_json.context_menu_icon
         return cm
@@ -39,7 +35,5 @@ def get(output):
         return precent()
     if output == "terminal_focus":
         return terminal_focus()
-    if output == "terminal_in":
-        return terminal_in()
     if output == "cm_icon":
         return cm_icon()
