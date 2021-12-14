@@ -9,7 +9,6 @@
 ### TODO <a name = "todo"></a>
 
 - [ ] Remove bugs, if found.
-- [ ] Add option to either search by file or directory.
 - [ ] Add opensubtitles as a soruce.
 
 ### In progress <a name = "progress"></a>
@@ -18,6 +17,7 @@
 
 ### Done <a name = "done"></a>
 
+- [x] Add option to either search by file or directory.
 - [x] Improve code
   - [x] Exclude resolutions e.g 720p from %match.
   - [x] Fix value errors in configure.py.
