@@ -2,7 +2,9 @@
     
 # Subscene search
     
-Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside the directory containing the video file, if there is no video file inside the directory, the directory name will be used as a search parameter, can be useful if the video file is comppressed inside a rar/zip archive or if the video file is of a unusual extension type not implement in the code.
+Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside the directory containing the video file, if there is no video file inside the directory, the directory name will be used as a search parameter.
+
+This can be useful if the video file is comppressed inside a rar/zip archive or if the video file is of a unusual extension type not implement in the code.
 
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
 
@@ -103,5 +105,3 @@ These are the fully supported languages, but all languages [subscene](https://u.
 ## Misc <a name = "misc"></a>
 
 Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene`
-
-If you don't want the icon in the context menu, delete Name: `Icon` Type: `REG_SZ` in Key: `Search subscene`
