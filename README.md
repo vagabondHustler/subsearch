@@ -2,7 +2,7 @@
     
 # Subscene search
     
-Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside a directory.
+Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside the directory containing the video file, if there is no video file inside the directory, the directory name will be used as a search parameter, can be useful if the video file is comppressed inside a rar/zip archive or if the video file is of a unusual extension type not implement in the code.
 
 ![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
 
