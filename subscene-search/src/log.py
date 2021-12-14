@@ -12,12 +12,12 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
 )
 
-
+# log and print message
 def output(msg: str) -> None:
     logging.info(msg)
     print(msg)
 
-
+# log and print all the used parameters from video/directory-name
 def parameters(param, language, lang_abbr, precentage):
     output("[PARAMETERS]")
     output(f"Language: {language}, {lang_abbr}")

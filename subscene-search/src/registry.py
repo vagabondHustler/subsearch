@@ -11,7 +11,7 @@ from src.current_user import run_as_admin
 
 COMPUTER_NAME = socket.gethostname()
 
-
+# write value to "Icon"
 def context_menu_icon(use=get("cm_icon")) -> None:
     ss_path = "Directory\Background\shell\Search subscene"
     icon_path = f"{root_directory()}\icon.ico, 0"
@@ -23,6 +23,7 @@ def context_menu_icon(use=get("cm_icon")) -> None:
                 winreg.DeleteValue(subkey_ss, "Icon")
 
 
+# write value to (Deafult)
 def write_command_subkey() -> None:
     from src.config import get
 
@@ -46,6 +47,7 @@ def write_command_subkey() -> None:
                 winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tsilent)
 
 
+# imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
         regkey = root_directory_file("regkey.reg")

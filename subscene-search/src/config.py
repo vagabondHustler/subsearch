@@ -2,7 +2,7 @@ import json
 from src.sos import root_directory_file
 from src.data import read_data
 
-
+# get said value(s) from config.json
 def get(output):
     config_json = read_data(root_directory_file("config.json"))
 
@@ -14,7 +14,7 @@ def get(output):
     def languages() -> list:
         ls = config_json.languages
         return ls
-    
+
     def video_ext() -> list:
         voe = config_json.video_ext
         return voe
@@ -30,11 +30,10 @@ def get(output):
     def dir_or_file() -> str:
         dof = config_json.dof
         return dof
-    
+
     def cm_icon() -> str:
         cm = config_json.context_menu_icon
         return cm
-
 
     if output == "language":
         return language()

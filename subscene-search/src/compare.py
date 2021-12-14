@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Precentage:
     precentage: int
 
 
+# compare two strings with each other and return match in %
 def check(searched: str, against: str) -> Precentage:
     match = 0
     searched: list = mk_lst(searched)
@@ -28,6 +30,7 @@ def check(searched: str, against: str) -> Precentage:
     return Precentage(precentage)
 
 
+# create list from string
 def mk_lst(release: str) -> list:
     new: list = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
@@ -40,6 +43,7 @@ def mk_lst(release: str) -> list:
     return new
 
 
+# check if strings are equal length
 def is_bigger(searched, against) -> int:
     if len(searched) > len(against):
         answer = len(searched) - len(against)
@@ -49,7 +53,8 @@ def is_bigger(searched, against) -> int:
         return answer
 
 
-def compare(searched, against) -> bool:
-    if searched.lower() == against.lower():
+# compare two items
+def compare(itemx, itemy) -> bool:
+    if itemx.lower() == itemy.lower():
         return True
     return False

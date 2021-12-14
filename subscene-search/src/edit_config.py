@@ -3,7 +3,7 @@ import json
 from src.sos import root_directory_file
 from src.config import get
 
-
+# update config.json
 def update_json(key: str, value) -> None:
     with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
         data = json.load(f)
@@ -13,6 +13,7 @@ def update_json(key: str, value) -> None:
         f.truncate()
 
 
+# set language
 def select_language() -> None:
     languages = get("languages")
     print("\n")
@@ -46,6 +47,7 @@ def select_language() -> None:
                     return
 
 
+# set precentage threshold
 def select_precentage_pass() -> None:
     while True:
         value = int(input("Enter number between 1-100: "))
@@ -56,6 +58,7 @@ def select_precentage_pass() -> None:
     update_json("precentage_pass", value)
 
 
+# set if terminal is hidden or shown while searching
 def select_terminal_focus() -> None:
     while True:
         answer = input("Show terminal while searching? [y/n]: ")

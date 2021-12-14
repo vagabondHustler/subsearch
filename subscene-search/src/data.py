@@ -14,7 +14,6 @@ class ConfigData:
 
 
 def read_data(config_file: str) -> ConfigData:
-
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
         return ConfigData(**data)
@@ -34,6 +33,7 @@ class SearchParameters:
     group: str
 
 
+# get all the parameters needed to scrape, from file or directory name
 def get_parameters(directory_path: str, language_abbr: str, video_release_name=None) -> SearchParameters:
     _tmp: list = []
     if video_release_name is None:
@@ -49,7 +49,7 @@ def get_parameters(directory_path: str, language_abbr: str, video_release_name=N
         _group = release.split(".")
         group = _group[-1]
     items = release.split(".")
-    # url, title and year
+    # url, title, season, and year
     for item in items:
         if item[0].isdigit() and len(item) == 4:
             year = item

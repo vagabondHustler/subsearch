@@ -5,8 +5,8 @@ import shutil
 
 from src import log
 
-
-def find_video(cwd_path: str, video_ext: list) -> list:
+# check if a video is in directory, returns video name without extension
+def find_video(cwd_path: str, video_ext: list) -> str:
     for file in os.listdir(cwd_path):
         for ext in video_ext:
             if file.endswith(ext):
@@ -16,6 +16,7 @@ def find_video(cwd_path: str, video_ext: list) -> list:
     return None
 
 
+# download zip files from url
 def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) -> None:
     log.output(f"Downloading: {current_num}/{total_num}")
     r = requests.get(zip_url, stream=True)
@@ -24,6 +25,7 @@ def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) 
             fd.write(chunk)
 
 
+# extract all zip file in said directory
 def extract_zips(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
@@ -34,6 +36,7 @@ def extract_zips(cwd_path: str, extension: str) -> None:
             zip_ref.close()
 
 
+# rename a .srts to the same as video release name
 def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(prefered_extension) and os.path.exists(new_name) is False:
@@ -47,6 +50,7 @@ def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension
             return
 
 
+# move unused .srts to /subs/
 def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         file = file.lower()
@@ -61,6 +65,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
             shutil.move(file, f"subs/{file}")
 
 
+# remove .zips
 def clean_up(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.endswith(extension):

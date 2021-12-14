@@ -33,6 +33,7 @@ def main() -> None:
     # log parameters
     log.parameters(param, language, lang_abbr, precentage)
 
+    # scrape subscene with parameters
     log.output("\n[Searching]")
     download_info = subscene.scrape(param, language, lang_abbr, precentage)
     if download_info is None:
@@ -40,7 +41,7 @@ def main() -> None:
         log.output(f"Finished in {elapsed} seconds.\n\n")
         return
 
-    # download results from scraper
+    # download files from scrape result
     log.output("\n[Downloading]")
     for items in download_info:
         file_path, root_dl_url, current_num, total_num = items
