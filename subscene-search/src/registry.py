@@ -1,4 +1,5 @@
 import os
+import sys
 import winreg
 import socket
 
@@ -25,40 +26,24 @@ def context_menu_icon(use=get("cm_icon")) -> None:
 def write_command_subkey() -> None:
     from src.config import get
 
-    open_with = get("terminal_in")
     focus = get("terminal_focus")
 
     command_path = "Directory\Background\shell\Search subscene\command"
-    main_path = f"{root_directory()}\main.py"
 
-    terminal_title = '"& {$host.ui.RawUI.WindowTitle = ' + "'Subscene search'" + '}"'
-    pwsh = f"pwsh.exe -noexit -command {terminal_title} Set-Location -literalPath '%V'; python {main_path} -NoNewWindow"
-    pwsh_silent = f"pwsh.exe -command {terminal_title} Set-Location -literalPath '%V'; pythonw {main_path} -NoNewWindow"
+    ppath = os.path.dirname(sys.executable)
+    set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('Subscene search');"
+    set_wd = f"import os; working_path = os.getcwd(); os.chdir('{root_directory()}');"
+    run_main = "import main; os.chdir(working_path); main.main()"
 
-    ps = pwsh.replace("pwsh.exe", "powershell.exe")
-    ps_silent = pwsh_silent.replace("pwsh.exe", "powershell.exe")
-
-    cmd = f'cmd.exe "%V" /c start /min python {main_path}'
-    cmd_silent = cmd.replace("/min ", "")
+    tfocus = f'{ppath}\python.exe -c "{set_title} {set_wd} {run_main}"'
+    tsilent = f'{ppath}\pythonw.exe -c "{set_title} {set_wd} {run_main}"'
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, command_path, 0, winreg.KEY_ALL_ACCESS) as subkey_command:
-            if open_with == "pwsh":
-                if focus == "True":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, pwsh)
-                elif focus == "False":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, pwsh_silent)
-            elif open_with == "ps":
-                if focus == "True":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, ps)
-                elif focus == "False":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, ps_silent)
-
-            elif open_with == "cmd":
-                if focus == "True":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, cmd)
-                elif focus == "False":
-                    winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, cmd_silent)
+            if focus == "True":
+                winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tfocus)
+            elif focus == "False":
+                winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tsilent)
 
 
 def add_context_menu() -> None:
