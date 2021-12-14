@@ -3,6 +3,7 @@ import time
 from src import registry
 from src.current_user import got_key
 from src.config import get
+from src.file_manager import find_video
 from src import log
 from src.data import get_parameters
 from src.sos import cwd
@@ -19,9 +20,12 @@ def main() -> None:
 
     language, lang_abbr = get("language")
     precentage = get("percentage")
+    video_ext: list = get("video_ext")
+    video = find_video(cwd(), video_ext)
+    print(video)
     # TODO fix this so no try is needed
     try:
-        param = get_parameters(cwd().lower(), lang_abbr)
+        param = get_parameters(cwd().lower(), lang_abbr, video)
     except IndexError as err:
         log.output(err)
         return exit(1)
