@@ -70,23 +70,6 @@ def select_terminal_focus() -> None:
     update_json("terminal_focus", value)
 
 
-def select_terminal_in() -> None:
-    while True:
-        answer = input("Use cmd, pwsh or ps: ")
-        if answer.lower() == "cmd":
-            value = "cmd"
-            break
-        if answer.lower() == "pwsh":
-            value = "pwsh"
-            break
-        if answer.lower() == "ps":
-            value = "ps"
-            break
-        else:
-            print("Please enter cmd, pwsh or ps")
-    update_json("terminal_in", value)
-
-
 def select_cm_icon() -> None:
     while True:
         answer = input("Icon in context menu [y/n]: ")
