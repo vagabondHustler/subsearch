@@ -30,7 +30,6 @@ def main() -> None:
     language, lang_abbr = get("language")
     precentage = get("percentage")
     focus = get("terminal_focus")
-    tin = get("terminal_in")
     icon = get("cm_icon")
 
     a = f"                       --- MENU ---                              \n"
