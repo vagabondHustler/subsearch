@@ -19,7 +19,12 @@ def main() -> None:
 
     language, lang_abbr = get("language")
     precentage = get("percentage")
-    param = get_parameters(cwd().lower(), lang_abbr)
+    # TODO fix this so no try is needed
+    try:
+        param = get_parameters(cwd().lower(), lang_abbr)
+    except IndexError as err:
+        log.output(err)
+        return exit(1)
 
     # log parameters
     log.parameters(param, language, lang_abbr, precentage)
@@ -48,6 +53,9 @@ def main() -> None:
     # finnishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
+    focus = get("terminal_focus")
+    if focus == "True":
+        exit(" ")
 
 
 if __name__ == "__main__":
