@@ -9,7 +9,6 @@ class UserData:
     languages: list[str]
     precentage_pass: int
     terminal_focus: str
-    terminal_in: str
     context_menu_icon: str
 
 
