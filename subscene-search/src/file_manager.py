@@ -6,6 +6,16 @@ import shutil
 from src import log
 
 
+def find_video(cwd_path: str, video_ext: list) -> list:
+    for file in os.listdir(cwd_path):
+        for ext in video_ext:
+            if file.endswith(ext):
+                _video_release_name = file.replace(f"{ext}", "")
+                video_release_name = _video_release_name.lower()
+                return video_release_name
+    return None
+
+
 def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) -> None:
     log.output(f"Downloading: {current_num}/{total_num}")
     r = requests.get(zip_url, stream=True)
