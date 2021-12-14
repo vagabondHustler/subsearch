@@ -64,7 +64,7 @@ python configure.py
 
 ## Usage <a name="usage"></a>
 
-After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/TV-Series, keep in mind the directory needs to have the standard release format.
+After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/TV-Series, keep in mind the directory/video-file needs to have the standard release format.
 
 ```
 Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
