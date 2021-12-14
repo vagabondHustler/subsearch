@@ -4,7 +4,7 @@ from num2words import num2words
 
 
 @dataclass
-class UserData:
+class ConfigData:
     language: str
     languages: list[str]
     precentage_pass: int
@@ -12,11 +12,11 @@ class UserData:
     context_menu_icon: str
 
 
-def read_data(config_file: str) -> UserData:
+def read_data(config_file: str) -> ConfigData:
 
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
-        return UserData(**data)
+        return ConfigData(**data)
 
 
 @dataclass
