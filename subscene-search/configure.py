@@ -4,7 +4,6 @@ from src.current_user import run_as_admin
 from src.edit_config import select_language
 from src.edit_config import select_precentage_pass
 from src.edit_config import select_terminal_focus
-from src.edit_config import select_terminal_in
 from src.edit_config import select_cm_icon
 from src.config import get
 from src import registry
@@ -19,10 +18,6 @@ def menu(menu_option: int) -> str:
         select_terminal_focus()
         registry.write_command_subkey()
     elif menu_option == 4:
-        select_terminal_in()
-        registry.write_command_subkey()
-
-    elif menu_option == 5:
         select_cm_icon()
         registry.context_menu_icon()
     elif menu_option == 0:
@@ -42,10 +37,9 @@ def main() -> None:
     b = f"1. Change language                current: {language}, {lang_abbr}"
     c = f"2. Set search strictness          current: {precentage} out of 100%"
     d = f"3. Show Terminal on search        current: {focus}"
-    e = f"4. Use cmd, pwsh(>=7) or ps       current: {tin}"
-    f = f"5. Show context menu              current: {icon}"
+    e = f"4. Show context menu              current: {icon}"
     z = f"\nCtrl+C to exit\n"
-    menu_options = [a, b, c, d, e, f, z]
+    menu_options = [a, b, c, d, e, z]
 
     for item in menu_options:
         print(item)
