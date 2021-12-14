@@ -7,6 +7,7 @@ from num2words import num2words
 class ConfigData:
     language: str
     languages: list[str]
+    video_ext: list
     precentage_pass: int
     terminal_focus: str
     context_menu_icon: str
@@ -33,12 +34,14 @@ class SearchParameters:
     group: str
 
 
-def get_parameters(directory_path: str, language_abbr: str) -> SearchParameters:
+def get_parameters(directory_path: str, language_abbr: str, video_release_name=None) -> SearchParameters:
     _tmp: list = []
-    directory_name = directory_path.split("\\")
-
-    # release and group
-    release = directory_name[-1]
+    if video_release_name is None:
+        directory_name = directory_path.split("\\")
+        # release and group
+        release = directory_name[-1]
+    elif video_release_name is not None:
+        release = video_release_name
     if "-" in release:
         _group = release.split("-")
         group = _group[-1]
