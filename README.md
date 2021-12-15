@@ -45,7 +45,7 @@ git clone https://github.com/vagabondHustler/subscene-search
 ```
 
 #### Install dependencies
-<sup>Everything works to be ran from a venv, just have it active first time running main.py. If you dont want to enable/disable at a later time, just run configure.py with the venv active/deactivated and do menu option 3. "Show Terminal on search", and the python.exe/pythonw path will update, just sure to have the dependencies installed.<sup>
+<sup>Everything works to be ran from a venv, just have it active first time running main.py. If you dont want it enable/disable at a later time, just run configure.py with the venv active/deactivated and do menu option 3. "Show Terminal on search", and the python.exe/pythonw path will update, just sure to have the dependencies installed.<sup>
 ```
 pip install -r path/subscene-search/docs/requirements.txt
 ```
