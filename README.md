@@ -45,7 +45,7 @@ git clone https://github.com/vagabondHustler/subscene-search
 ```
 
 #### Install dependencies
-
+<sup>Everything works to be ran from a venv<sup>
 ```
 pip install -r path/subscene-search/docs/requirements.txt
 ```
@@ -55,7 +55,6 @@ pip install -r path/subscene-search/docs/requirements.txt
 ```
 python main.py
 ```
-<sup>If setuped for .venv, python/pythonw.exe will be ran from there.<sup>
     
 #### Run configure (Optinal)
 
