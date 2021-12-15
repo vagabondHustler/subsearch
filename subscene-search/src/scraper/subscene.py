@@ -5,28 +5,49 @@ from src.scraper.subscene_soup import search_title_for_sub
 from src.scraper.subscene_soup import get_download_url
 from src.compare import check
 
+# check if dict is of movies
+def is_movie(key: str, p=None) -> bool:
+    print("is movie")
+    if key.lower() == f"{p.title} ({p.year})":
+        log.output(f"Movie {key} found")
+        return True
+    return False
+
+
+# check if dict is of tv-series
+def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
+    if p.title and p.season_ordinal in key.lower() and p.tv_series and lang_abbr:
+        log.output(f"TV-Series {key} found")
+        return True
+    return False
+
+
+# check str is above precentage threshold
+def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
+    if number.precentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
+        log.output(f"[{number.precentage}% match]: {key}")
+        return True
+    return False
+
+
 # decides what to do with all the scrape data
-def scrape(param, language: str, lang_abbr: str, precentage) -> list or None:
+def scrape(parameters, language: str, lang_abbr: str, precentage) -> list or None:
     # search for titles
     to_be_scraped: list = []
-    title_keys = search_for_title(param.url)
+    title_keys = search_for_title(parameters.url)
     for key, value in zip(title_keys, title_keys.values()):
-        if key.lower() == f"{param.title} ({param.year})":
-            log.output(f"Movie {key} found")
-            # log.output(f"URL: {value}")
+        if is_movie(key, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        elif param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
-            log.output(f"TV-Series {key} found")
-            # log.output(f"URL: {value}")
+        if is_tv_series(key, lang_abbr, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
     log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
     # exit if no titles found
     if len(to_be_scraped) == 0:
-        if param.tv_series:
-            log.output(f"No TV-series found matching {param.title}")
+        if parameters.tv_series:
+            log.output(f"No TV-series found matching {parameters.title}")
         else:
-            log.output(f"No movies found matching {param.title}")
+            log.output(f"No movies found matching {parameters.title}")
         return None
 
     # search title for subtitles
@@ -37,18 +58,16 @@ def scrape(param, language: str, lang_abbr: str, precentage) -> list or None:
             sub_keys = search_title_for_sub(language, url)
             break
         for key, value in zip(sub_keys, sub_keys.values()):
-            number = check(key, param.release)
+            number = check(key, parameters.release)
             log.output(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
-            if number.precentage >= precentage or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
-                log.output(f"[{number.precentage}% match]: {key}")
-                # log.output(f"Appending: {value}")
+            if is_threshold(key, number, precentage, parameters):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
         log.output("Done with tasks") if len(to_be_downloaded) > 0 else None
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
-        log.output(f"No subtitles to download for {param.release}")
+        log.output(f"No subtitles to download for {parameters.release}")
         return None
 
     download_info: list = []
