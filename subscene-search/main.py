@@ -20,25 +20,32 @@ def main() -> None:
 
     language, lang_abbr = get("language")
     precentage = get("percentage")
+    focus = get("terminal_focus")
     video_ext: list = get("video_ext")
     video = find_video(cwd(), video_ext)
-    print(video)
+
     # TODO fix this so no try is needed
     try:
         param = get_parameters(cwd().lower(), lang_abbr, video)
     except IndexError as err:
         log.output(err)
-        return exit(1)
+        fm.copy_log_to_cwd()
+        if focus == "True":
+            return exit(1)
+        return
 
     # log parameters
     log.parameters(param, language, lang_abbr, precentage)
-
+    
     # scrape subscene with parameters
     log.output("\n[Searching]")
     download_info = subscene.scrape(param, language, lang_abbr, precentage)
     if download_info is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.\n\n")
+        fm.copy_log_to_cwd()
+        if focus == "True":
+            return exit(1)
         return
 
     # download files from scrape result
@@ -58,9 +65,9 @@ def main() -> None:
     # finnishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
-    focus = get("terminal_focus")
+
     if focus == "True":
-        exit(" ")
+        exit(1)
 
 
 if __name__ == "__main__":
