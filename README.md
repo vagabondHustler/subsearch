@@ -55,7 +55,8 @@ pip install -r path/subscene-search/docs/requirements.txt
 ```
 python main.py
 ```
-
+<sup>Can be ran from .vevn<sup>
+    
 #### Run configure (Optinal)
 
 <sup>Configure language, toggle context-menu icon, show terminal True/False and more.</sup>
