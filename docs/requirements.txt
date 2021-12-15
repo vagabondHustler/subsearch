@@ -7,18 +7,32 @@
 beautifulsoup4==4.10.0
     # via -r docs/requirements.txt
 certifi==2021.10.8
-    # via requests
+    # via
+    #   -r docs/requirements.txt
+    #   requests
 charset-normalizer==2.0.9
-    # via requests
+    # via
+    #   -r docs/requirements.txt
+    #   requests
 docopt==0.6.2
-    # via num2words
+    # via
+    #   -r docs/requirements.txt
+    #   num2words
 idna==3.3
-    # via requests
+    # via
+    #   -r docs/requirements.txt
+    #   requests
+lxml==4.7.1
+    # via -r docs/requirements.txt
 num2words==0.5.10
     # via -r docs/requirements.txt
 requests==2.26.0
     # via -r docs/requirements.txt
 soupsieve==2.3.1
-    # via beautifulsoup4
+    # via
+    #   -r docs/requirements.txt
+    #   beautifulsoup4
 urllib3==1.26.7
-    # via requests
+    # via
+    #   -r docs/requirements.txt
+    #   requests
