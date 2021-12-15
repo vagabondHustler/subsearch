@@ -1,5 +1,6 @@
 import os
 import ctypes
+import webbrowser
 
 from src.current_user import is_admin
 from src.current_user import got_key
@@ -23,6 +24,8 @@ def menu(menu_option: int) -> str:
     elif menu_option == 4:
         select_cm_icon()
         registry.context_menu_icon()
+    elif menu_option == 5:
+        webbrowser.open("https://github.com/vagabondHustler/subscene-search/blob/main/README.md")
     elif menu_option == 0:
         return "Exit"
     elif menu_option is not range(0, 4):
@@ -42,8 +45,9 @@ def main() -> None:
     c = f"2. Set precentage threshold       current: {precentage}% out of 100%"
     d = f"3. Show Terminal on search        current: {focus}"
     e = f"4. Show context menu icon         current: {icon}"
+    f = f"5. Help!"
     z = f"\nCtrl+C to exit\n"
-    menu_options = [a, b, c, d, e, z]
+    menu_options = [a, b, c, d, e, f, z]
 
     for item in menu_options:
         print(item)
