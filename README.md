@@ -55,7 +55,7 @@ pip install -r path/subscene-search/docs/requirements.txt
 ```
 python main.py
 ```
-<sup>Can be ran from .vevn<sup>
+<sup>If setuped for .venv, python/pythonw.exe will be ran from there.<sup>
     
 #### Run configure (Optinal)
 
