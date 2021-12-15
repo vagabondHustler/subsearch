@@ -1,3 +1,6 @@
+import os
+import ctypes
+
 from src.current_user import is_admin
 from src.current_user import got_key
 from src.current_user import run_as_admin
@@ -27,6 +30,8 @@ def menu(menu_option: int) -> str:
 
 
 def main() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Menu")
+    os.system("cls||clear")
     language, lang_abbr = get("language")
     precentage = get("percentage")
     focus = get("terminal_focus")
@@ -34,9 +39,9 @@ def main() -> None:
 
     a = f"                       --- MENU ---                              \n"
     b = f"1. Change language                current: {language}, {lang_abbr}"
-    c = f"2. Set search strictness          current: {precentage} out of 100%"
+    c = f"2. Set precentage threshold       current: {precentage}% out of 100%"
     d = f"3. Show Terminal on search        current: {focus}"
-    e = f"4. Show context menu              current: {icon}"
+    e = f"4. Show context menu icon         current: {icon}"
     z = f"\nCtrl+C to exit\n"
     menu_options = [a, b, c, d, e, z]
 

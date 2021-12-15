@@ -5,7 +5,7 @@ now = datetime.now()
 date = now.strftime("%y%m%d")
 
 logging.basicConfig(
-    filename=f"subscene-search.log",
+    filename=f"search.log",
     filemode="w",
     level=logging.DEBUG,
     format="%(asctime)s - %(message)s",
