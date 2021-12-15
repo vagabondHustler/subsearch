@@ -1,4 +1,6 @@
 import json
+import ctypes
+import os
 
 from src.sos import root_directory_file
 from src.config import get
@@ -15,8 +17,9 @@ def update_json(key: str, value) -> None:
 
 # set language
 def select_language() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select language")
+    os.system("cls||clear")
     languages = get("languages")
-    print("\n")
     print("[Fully supported languages]")
     for num, value in enumerate(languages):
         if num < 10:
@@ -32,7 +35,6 @@ def select_language() -> None:
         for num, value in enumerate(languages):
             if answer == num:
                 update_json("language", value)
-                print("\n\n")
                 return
             elif answer != num and num >= len(languages):
                 print("Not a valid number")
@@ -43,12 +45,26 @@ def select_language() -> None:
                     new_answer = input("Enter language: ")
                     custom_answer = f"{new_answer}, en"
                     update_json("language", custom_answer)
-                    print("\n\n")
                     return
 
 
 # set precentage threshold
 def select_precentage_pass() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select precentage threshold")
+    os.system("cls||clear")
+    print(
+        """
+          The precentage threshold determines the amount of of words that need to
+          match the subtitles foud to be downloaded. If there are 10 words in the. 
+          release name, 10%, means that only 1 word needs to match. Excluding, 
+          quality e.g 720p.
+          
+          Subtitles for Tv-shows are usally not affected as much by this threshold,
+          beacuse if a season and episode match it gets automaticlly downloaded.
+          Deafult value is 90, i.e 90% 
+          
+          """
+    )
     while True:
         value = int(input("Enter number between 1-100: "))
         if value <= 100:
@@ -60,6 +76,16 @@ def select_precentage_pass() -> None:
 
 # set if terminal is hidden or shown while searching
 def select_terminal_focus() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select show Terminal while searching")
+    os.system("cls||clear")
+    print(
+        """
+          The terminal can be hidden or be shown while searching, hiden is defult.
+          If it's hidden and no subtitles are found, you can check the search.log,
+          inside the subscene-search directory.
+          
+          """
+    )
     while True:
         answer = input("Show terminal while searching? [y/n]: ")
         if answer.lower() == "y":
@@ -74,6 +100,15 @@ def select_terminal_focus() -> None:
 
 
 def select_cm_icon() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select show icon in context menu")
+    os.system("cls||clear")
+    print(
+        """
+          More or less just lets you turn the icon in the context menu on or off.
+          Deafult is True, i.e on. 
+          
+          """
+    )
     while True:
         answer = input("Icon in context menu [y/n]: ")
         if answer.lower() == "y":
