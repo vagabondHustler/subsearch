@@ -80,7 +80,7 @@ def select_terminal_focus() -> None:
     os.system("cls||clear")
     print(
         """
-          The terminal can be hidden or be shown while searching, hiden is defult.
+          The terminal can be hidden or be shown while searching, hidden is defult.
           If it's hidden and no subtitles are found, you can check the search.log,
           inside the the searched folder.
           
