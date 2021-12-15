@@ -4,6 +4,8 @@ import zipfile
 import shutil
 
 from src import log
+from src.sos import root_directory_file
+from src.sos import cwd
 
 # check if a video is in directory, returns video name without extension
 def find_video(cwd_path: str, video_ext: list) -> str:
@@ -71,3 +73,9 @@ def clean_up(cwd_path: str, extension: str) -> None:
         if file.endswith(extension):
             log.output(f"Removing: {file}")
             os.remove(file)
+
+
+def copy_log_to_cwd() -> None:
+    file = root_directory_file("search.log")
+    dest = f"{cwd()}/search.log"
+    shutil.copy(file, dest)
