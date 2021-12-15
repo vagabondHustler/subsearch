@@ -5,7 +5,7 @@ from src.scraper.subscene_soup import search_title_for_sub
 from src.scraper.subscene_soup import get_download_url
 from src.compare import check
 
-
+# decides what to do with all the scrape data
 def scrape(param, language: str, lang_abbr: str, precentage) -> list or None:
     # search for titles
     to_be_scraped: list = []
