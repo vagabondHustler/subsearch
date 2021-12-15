@@ -14,7 +14,7 @@ COMPUTER_NAME = socket.gethostname()
 # write value to "Icon"
 def context_menu_icon(use=get("cm_icon")) -> None:
     ss_path = "Directory\Background\shell\Search subscene"
-    icon_path = f"{root_directory()}\icon.ico, 0"
+    icon_path = f"{root_directory()}\data\icon.ico, 0"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_ALL_ACCESS) as subkey_ss:
             if use == "True":
@@ -50,7 +50,7 @@ def write_command_subkey() -> None:
 # imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
-        regkey = root_directory_file("regkey.reg")
+        regkey = root_directory_file("data/regkey.reg")
         os.system(f'cmd /c "reg import "{regkey}"')
         context_menu_icon()
         write_command_subkey()

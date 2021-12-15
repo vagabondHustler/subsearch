@@ -5,7 +5,7 @@ from src.config import get
 
 # update config.json
 def update_json(key: str, value) -> None:
-    with open(root_directory_file("config.json"), "r+", encoding="utf-8") as f:
+    with open(root_directory_file("data/config.json"), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
