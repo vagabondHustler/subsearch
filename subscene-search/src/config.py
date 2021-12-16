@@ -27,9 +27,9 @@ def get(output):
         tf = config_json.terminal_focus
         return tf
 
-    def dir_or_file() -> str:
-        dof = config_json.dof
-        return dof
+    def hearing_impaired() -> str:
+        hi = config_json.hearing_impaired
+        return hi
 
     def cm_icon() -> str:
         cm = config_json.context_menu_icon
@@ -45,7 +45,7 @@ def get(output):
         return precent()
     if output == "terminal_focus":
         return terminal_focus()
-    if output == "dof":
-        return dir_or_file()
+    if output == "hearing_impaired":
+        return hearing_impaired()
     if output == "cm_icon":
         return cm_icon()

@@ -6,6 +6,7 @@ from num2words import num2words
 @dataclass
 class ConfigData:
     language: str
+    hearing_impaired: str
     languages: list[str]
     video_ext: list
     precentage_pass: int

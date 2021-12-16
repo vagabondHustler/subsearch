@@ -13,10 +13,11 @@
 
 ### In progress <a name = "progress"></a>
 
-- [ ] Add a option to include/exclude HI-subs.
+
 
 ### Done <a name = "done"></a>
 
+- [x] Add a option to include/exclude HI-subs.
 - [x] Add option to either search by file or directory.
 - [x] Improve code
   - [x] Exclude resolutions e.g 720p from %match.
