@@ -17,10 +17,12 @@ def output(msg: str) -> None:
     logging.info(msg)
     print(msg)
 
+
 # log and print all the used parameters from video/directory-name
-def parameters(param, language, lang_abbr, precentage):
+def parameters(param, language, lang_abbr, hearing_impaired, precentage):
     output("[PARAMETERS]")
     output(f"Language: {language}, {lang_abbr}")
+    output(f"Hearing impaired: {hearing_impaired}")
     output(f"Title: {param.title}")
     output(f"Year: {param.year}")
     output(f"Season: {param.season}, {param.season_ordinal}")
