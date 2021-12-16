@@ -3,17 +3,18 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-
+# check if subtitle is hearing impaired or not
 def is_sub_hi(a1: Tag) -> str:
     a1_parent = a1.parent
-    a40 = a1_parent.find("td", class_="a40")
-    a41 = a1_parent.find("td", class_="a41")
+    a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
+    a41 = a1_parent.find("td", class_="a41")  # hearing impareded
     if a40 is None:
         return "False"
     elif a41 is None:
         return "True"
 
 
+# search for title
 def search_for_title(url: str) -> dict:
     titles: dict = {}
     source = requests.get(url)
@@ -29,6 +30,7 @@ def search_for_title(url: str) -> dict:
     return titles
 
 
+# search title(s) for subtitle
 def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict:
     searching = True
     subtitles: dict = {}
@@ -59,6 +61,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
     return subtitles
 
 
+# get download url for subtitlee
 def get_download_url(url: str) -> str:
     source = requests.get(url).text
     doc = BeautifulSoup(source, "lxml")
