@@ -10,10 +10,9 @@
 
 - [ ] Remove bugs, if found.
 - [ ] Add opensubtitles as a soruce.
+- [ ] Add always, error/not found and never show log in video folder
 
 ### In progress <a name = "progress"></a>
-
-
 
 ### Done <a name = "done"></a>
 
