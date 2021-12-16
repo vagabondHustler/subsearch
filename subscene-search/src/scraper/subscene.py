@@ -7,7 +7,6 @@ from src.compare import check
 
 # check if dict is of movies
 def is_movie(key: str, p=None) -> bool:
-    print("is movie")
     if key.lower() == f"{p.title} ({p.year})":
         log.output(f"Movie {key} found")
         return True
@@ -31,7 +30,7 @@ def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
 
 
 # decides what to do with all the scrape data
-def scrape(parameters, language: str, lang_abbr: str, precentage) -> list or None:
+def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage) -> list or None:
     # search for titles
     to_be_scraped: list = []
     title_keys = search_for_title(parameters.url)
@@ -55,7 +54,7 @@ def scrape(parameters, language: str, lang_abbr: str, precentage) -> list or Non
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
-            sub_keys = search_title_for_sub(language, url)
+            sub_keys = search_title_for_sub(language, hearing_impaired, url)
             break
         for key, value in zip(sub_keys, sub_keys.values()):
             number = check(key, parameters.release)
