@@ -19,6 +19,7 @@ def main() -> None:
         return exit(0)
 
     language, lang_abbr = get("language")
+    hearing_impaired = get("hearing_impaired")
     precentage = get("percentage")
     focus = get("terminal_focus")
     video_ext: list = get("video_ext")
@@ -35,11 +36,11 @@ def main() -> None:
         return
 
     # log parameters
-    log.parameters(param, language, lang_abbr, precentage)
-    
+    log.parameters(param, language, lang_abbr, hearing_impaired, precentage)
+
     # scrape subscene with parameters
     log.output("\n[Searching]")
-    download_info = subscene.scrape(param, language, lang_abbr, precentage)
+    download_info = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
     if download_info is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.\n\n")
