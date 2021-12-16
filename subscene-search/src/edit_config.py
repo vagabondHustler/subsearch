@@ -99,6 +99,32 @@ def select_terminal_focus() -> None:
     update_json("terminal_focus", value)
 
 
+def select_hearing_impaired() -> None:
+    ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select hearing impaired subtitles")
+    os.system("cls||clear")
+    print(
+        """
+          Use hearing impaired subtitles?
+          yes, no or both 
+          
+          """
+    )
+    while True:
+        answer = input("Icon in context menu [y/n/b]: ")
+        if answer.lower() == "y":
+            value = "True"
+            break
+        if answer.lower() == "n":
+            value = "False"
+            break
+        if answer.lower() == "b":
+            value = "Both"
+            break
+        else:
+            print("Please enter y, n or b")
+    update_json("hearing_impaired", value)
+
+
 def select_cm_icon() -> None:
     ctypes.windll.kernel32.SetConsoleTitleW("Subscene search - Select show icon in context menu")
     os.system("cls||clear")
