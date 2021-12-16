@@ -8,6 +8,7 @@ from src.current_user import run_as_admin
 from src.edit_config import select_language
 from src.edit_config import select_precentage_pass
 from src.edit_config import select_terminal_focus
+from src.edit_config import select_hearing_impaired
 from src.edit_config import select_cm_icon
 from src.config import get
 from src import registry
@@ -25,6 +26,8 @@ def menu(menu_option: int) -> str:
         select_cm_icon()
         registry.context_menu_icon()
     elif menu_option == 5:
+        select_hearing_impaired()
+    elif menu_option == 6:
         webbrowser.open("https://github.com/vagabondHustler/subscene-search/blob/main/README.md")
     elif menu_option == 0:
         return "Exit"
@@ -38,16 +41,18 @@ def main() -> None:
     language, lang_abbr = get("language")
     precentage = get("percentage")
     focus = get("terminal_focus")
+    hi = get("hearing_impaired")
     icon = get("cm_icon")
 
     a = f"                       --- MENU ---                              \n"
     b = f"1. Change language                current: {language}, {lang_abbr}"
     c = f"2. Set precentage threshold       current: {precentage}% out of 100%"
     d = f"3. Show Terminal on search        current: {focus}"
-    e = f"4. Show context menu icon         current: {icon}"
-    f = f"5. Help!"
+    e = f"4. Show context menu icon         current: {hi}"
+    f = f"4. Show context menu icon         current: {icon}"
+    g = f"5. Help!"
     z = f"\nCtrl+C to exit\n"
-    menu_options = [a, b, c, d, e, f, z]
+    menu_options = [a, b, c, d, e, f, g, z]
 
     for item in menu_options:
         print(item)
