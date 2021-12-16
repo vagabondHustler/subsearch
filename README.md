@@ -58,12 +58,12 @@ pip install -r path/subscene-search/docs/requirements.txt
 python main.py
 ```
 
-#### Run configure (Optinal)
+#### Run settings (Optinal)
 
-<sup>Configure language, toggle context-menu icon, show terminal True/False and more.</sup>
+<sup>Configure language, hearing impaired subtitles, toggle context-menu icon, show terminal True/False and more.</sup>
 
 ```
-python configure.py
+python settings.py
 ```
 
 ## Usage <a name="usage"></a>
