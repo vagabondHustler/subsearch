@@ -11,6 +11,7 @@
 - [ ] Remove bugs, if found.
 - [ ] Add opensubtitles as a soruce.
 - [ ] Add always, error/not found and never show log in video folder
+- [ ] Fix IndexError in main.py
 
 ### In progress <a name = "progress"></a>
 
