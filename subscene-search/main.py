@@ -2,6 +2,7 @@ import time
 
 from src import registry
 from src.current_user import got_key
+from src.edit_config import set_default_values
 from src.config import get
 from src.file_manager import find_video
 from src import log
@@ -15,6 +16,7 @@ def main() -> None:
     # initialising
     start = time.perf_counter()
     if got_key() is False:
+        set_default_values()
         registry.add_context_menu()
         return exit(0)
 
