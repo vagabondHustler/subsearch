@@ -45,12 +45,12 @@ def main() -> None:
     icon = get("cm_icon")
 
     a = f"                       --- MENU ---                              \n"
-    b = f"1. Change language                current: {language}, {lang_abbr}"
-    c = f"2. Set precentage threshold       current: {precentage}% out of 100%"
-    d = f"3. Show Terminal on search        current: {focus}"
-    e = f"4. Show context menu icon         current: {hi}"
-    f = f"4. Show context menu icon         current: {icon}"
-    g = f"5. Help!"
+    b = f"1. Change language                    current: {language}, {lang_abbr}"
+    c = f"2. Set precentage threshold           current: {precentage}% out of 100%"
+    d = f"3. Show Terminal on search            current: {focus}"
+    e = f"4. Show context menu icon             current: {icon}"
+    f = f"5. Use hearing impaired subtitles     current: {hi}"
+    g = f"6. Help!"
     z = f"\nCtrl+C to exit\n"
     menu_options = [a, b, c, d, e, f, g, z]
 

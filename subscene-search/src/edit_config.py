@@ -87,15 +87,15 @@ def select_terminal_focus() -> None:
           """
     )
     while True:
-        answer = input("Show terminal while searching? [y/n]: ")
+        answer = input("Show terminal while searching? [y/N]: ")
         if answer.lower() == "y":
             value = "True"
             break
-        if answer.lower() == "n":
+        if answer.lower() == "n" or len(answer) == 0:
             value = "False"
             break
         else:
-            print("Please enter f or m")
+            print("Please enter y or n")
     update_json("terminal_focus", value)
 
 
@@ -110,14 +110,14 @@ def select_hearing_impaired() -> None:
           """
     )
     while True:
-        answer = input("Icon in context menu [y/n/b]: ")
+        answer = input("Icon in context menu [y/n/B]: ")
         if answer.lower() == "y":
             value = "True"
             break
         if answer.lower() == "n":
             value = "False"
             break
-        if answer.lower() == "b":
+        if answer.lower() == "b" or len(answer) == 0:
             value = "Both"
             break
         else:
@@ -136,8 +136,8 @@ def select_cm_icon() -> None:
           """
     )
     while True:
-        answer = input("Icon in context menu [y/n]: ")
-        if answer.lower() == "y":
+        answer = input("Icon in context menu [Y/n]: ")
+        if answer.lower() == "y" or len(answer) == 0:
             value = "True"
             break
         if answer.lower() == "n":
