@@ -4,6 +4,16 @@ from bs4 import BeautifulSoup
 import time
 
 
+def is_sub_hi(a1: Tag) -> str:
+    a1_parent = a1.parent
+    a40 = a1_parent.find("td", class_="a40")
+    a41 = a1_parent.find("td", class_="a41")
+    if a40 is None:
+        return "False"
+    elif a41 is None:
+        return "True"
+
+
 def search_for_title(url: str) -> dict:
     titles: dict = {}
     source = requests.get(url)
@@ -17,16 +27,6 @@ def search_for_title(url: str) -> dict:
         link = [a["href"] for a in i.find_all("a", href=True) if a.text]
         titles[get_title] = f"https://subscene.com/{link[0]}"
     return titles
-
-
-def is_sub_hi(a1: Tag) -> str:
-    a1_parent = a1.parent
-    a40 = a1_parent.find("td", class_="a40")
-    a41 = a1_parent.find("td", class_="a41")
-    if a40 is None:
-        return "False"
-    elif a41 is None:
-        return "True"
 
 
 def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict:
