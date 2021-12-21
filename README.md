@@ -78,8 +78,6 @@ For easy configuration of language, toggle context menu icon and similar feature
 
 ## Supported languages <a name = "lsupport"></a>
 
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-Series might be slower, more results to filter trough.
-
 - Arabic, `ar`
 - Brazillian Portuguese, `pt_BR`
 - Danish, `dk`
