@@ -57,7 +57,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
     return subtitles
 
 
-# get download url for subtitlee
+# get download url for subtitle(s)
 def get_download_url(url: str) -> str:
     source = requests.get(url).text
     doc = BeautifulSoup(source, "lxml")

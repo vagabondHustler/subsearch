@@ -33,8 +33,8 @@ def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
 def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage) -> list or None:
     # search for titles
     to_be_scraped: list = []
-    title_keys = search_for_title(parameters.url)
-    for key, value in zip(title_keys, title_keys.values()):
+    title_keys = search_for_title(parameters.url_subscene)
+    for key, value in title_keys.items():
         if is_movie(key, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
         if is_tv_series(key, lang_abbr, parameters):
@@ -43,6 +43,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
 
     # exit if no titles found
     if len(to_be_scraped) == 0:
+        print("\n")
         if parameters.tv_series:
             log.output(f"No TV-series found matching {parameters.title}")
         else:
@@ -56,7 +57,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
             log.output(f"[Searching for subtitles]")
             sub_keys = search_title_for_sub(language, hearing_impaired, url)
             break
-        for key, value in zip(sub_keys, sub_keys.values()):
+        for key, value in sub_keys.items():
             number = check(key, parameters.release)
             log.output(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
             if is_threshold(key, number, precentage, parameters):
@@ -66,6 +67,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
+        print("\n")
         log.output(f"No subtitles to download for {parameters.release}")
         return None
 
@@ -74,7 +76,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
         total_num = len(to_be_downloaded)
         current_num += 1
         root_dl_url = get_download_url(dl_url)
-        file_path = f"{cwd()}\\{current_num}.zip"
+        file_path = f"{cwd()}\\subscene_{current_num}.zip"
         current_num = (file_path, root_dl_url, current_num, total_num)
         download_info.append(current_num)
     return download_info
