@@ -1,6 +1,6 @@
 <div align="center">
     
-# Subtitle search
+# SubSearch
 
 ![prtsc](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
 
@@ -77,8 +77,6 @@ Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 For easy configuration of language, toggle context menu icon and similar features, run.
 
 ## Supported languages <a name = "lsupport"></a>
-
-These are the fully supported languages, but all languages [subscene](https://u.subscene.com/filter) offers as a filter will work, but searches for TV-Series might be slower, more results to filter trough.
 
 - Arabic, `ar`
 - Brazillian Portuguese, `pt_BR`
