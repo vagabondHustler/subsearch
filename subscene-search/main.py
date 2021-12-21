@@ -9,7 +9,6 @@ from src import log
 from src.data import get_parameters
 from src.sos import cwd
 from src.scraper import subscene
-# from src.scraper import opensubtitles
 from src import file_manager as fm
 
 
@@ -22,6 +21,7 @@ def main() -> None:
         return exit(0)
 
     language, lang_abbr = get("language")
+    print(lang_abbr)
     hearing_impaired = get("hearing_impaired")
     precentage = get("percentage")
     focus = get("terminal_focus")
@@ -30,7 +30,7 @@ def main() -> None:
 
     # TODO fix this so no try is needed
     try:
-        param = get_parameters(cwd().lower(), lang_abbr, video)
+        param = get_parameters(cwd().lower(), hearing_impaired, lang_abbr, video)
     except IndexError as err:
         log.output(err)
         fm.copy_log_to_cwd()
@@ -45,8 +45,6 @@ def main() -> None:
     print("\n")
     log.output("[Searching]")
     download_info = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
-    # TODO implement opensubtitles, almost done
-    # download_info = opensubtitles.scrape(param, language, lang_abbr, hearing_impaired, precentage)
     if download_info is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
