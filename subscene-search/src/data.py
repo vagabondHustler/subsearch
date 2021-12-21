@@ -22,7 +22,8 @@ def read_data(config_file: str) -> ConfigData:
 
 @dataclass
 class SearchParameters:
-    url: str
+    url_subscene: str
+    url_opensubtitles: str
     title: str
     year: int
     season: str
@@ -69,11 +70,13 @@ def get_parameters(directory_path: str, language_abbr: str, video_release_name=N
             tv_series = False
             _tmp.append(item)
             title = " ".join(_tmp)
-            url = f"https://subscene.com/subtitles/searchbytitle?query={title}"
+            url_subscene = f"https://subscene.com/subtitles/searchbytitle?query={title}"
+            url_opensubtitles = f"https://www.opensubtitles.org/en/search2/sublanguageid-all/moviename-{title}"
             year = "N/A"
 
     parameters = {
-        "url": url,
+        "url_subscene": url_subscene,
+        "url_opensubtitles": url_opensubtitles,
         "title": title,
         "year": year,
         "season": season,
