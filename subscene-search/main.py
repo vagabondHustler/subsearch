@@ -46,7 +46,7 @@ def main() -> None:
     download_info = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
     if download_info is None:
         elapsed = time.perf_counter() - start
-        log.output(f"Finished in {elapsed} seconds.\n\n")
+        log.output(f"Finished in {elapsed} seconds.")
         fm.copy_log_to_cwd()
         if focus == "True":
             return exit(1)
