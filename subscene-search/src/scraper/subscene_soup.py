@@ -9,9 +9,9 @@ def is_sub_hi(a1: Tag) -> str:
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing impareded
     if a40 is None:
-        return "False"
-    elif a41 is None:
         return "True"
+    elif a41 is None:
+        return "False"
 
 
 # search for title
@@ -47,12 +47,8 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
 
     for a1 in tda1:
         sub_hi = is_sub_hi(a1)
-        if hearing_impaired != "Both":
-            print(hearing_impaired)
-            if hearing_impaired != sub_hi:
-                print("skipping")
-                continue
-            print("using both")
+        if hearing_impaired != "Both" and hearing_impaired != sub_hi:
+            continue
         if language == a1.span.get_text().strip():
             _release_name = [x.get_text().strip() for x in a1.find("a")]
             release_name = _release_name[-2]
