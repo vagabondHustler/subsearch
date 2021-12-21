@@ -14,10 +14,9 @@
 
 ### In progress <a name = "progress"></a>
 
-- [ ] Add opensubtitles as a soruce.
-
 ### Done <a name = "done"></a>
 
+- [x] Add opensubtitles as a soruce.
 - [x] Add a option to include/exclude HI-subs.
 - [x] Add option to either search by file or directory.
 - [x] Improve code
