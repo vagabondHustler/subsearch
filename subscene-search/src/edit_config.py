@@ -14,12 +14,14 @@ def update_json(key: str, value) -> None:
         json.dump(data, f, indent=4)
         f.truncate()
 
+
 def set_default_values():
     update_json("language", "English, en")
     update_json("hearing_impaired", "Both")
     update_json("precentage_pass", 90)
     update_json("terminal_focus", "False")
     update_json("context_menu_icon", "True")
+
 
 # set language
 def select_language() -> None:
@@ -111,7 +113,9 @@ def select_hearing_impaired() -> None:
     print(
         """
           Use hearing impaired subtitles?
-          yes, no or both 
+          [y]es to only use HI
+          [n]o to only use none-HI
+          [b]oth to use both 
           
           """
     )
