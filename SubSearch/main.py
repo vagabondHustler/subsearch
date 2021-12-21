@@ -54,8 +54,8 @@ def main() -> None:
     print("\n")
     log.output("[Searching subscene]")
     diss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
-
-    if dios and diss is None:
+    print(dios, diss)
+    if dios is None and diss is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
         fm.copy_log_to_cwd()
