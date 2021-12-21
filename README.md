@@ -1,6 +1,6 @@
 <div align="center">
     
-# Subtitle search
+# SubSearch
 
 ![prtsc](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
 
