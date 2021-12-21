@@ -136,7 +136,6 @@ old*
 *.zip
 *.srt
 subs/
-config.json
 
 # Prevent users to commit the README
 *README.html
