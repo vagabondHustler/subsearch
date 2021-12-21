@@ -136,9 +136,9 @@ old*
 *.zip
 *.srt
 subs/
+config.json
 
 # Prevent users to commit the README
 *README.html
 *README_cache/
 #*README_files/
-subscene-search/data/config.json
