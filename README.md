@@ -1,11 +1,11 @@
 <div align="center">
     
-# Subscene search
+# Subtitle search
 
-![prtsc](https://github.com/vagabondHustler/subscene-search/blob/main/assets/prtsc.png)
+![prtsc](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/subscene-search)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/SubSearch)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
@@ -16,7 +16,7 @@
 - [Getting Started](#getting_started)
 - [Usage](#usage)
 - [Language support](#lsupport)
-- [TODO](https://github.com/vagabondHustler/subscene-search/blob/main/TODO.md)
+- [TODO](https://github.com/vagabondHustler/SubSearch/blob/main/TODO.md)
 - [Authors](#authors)
 - [Misc](#misc)
 
@@ -41,7 +41,7 @@ Python 3.10
 #### Clone the project
 
 ```
-git clone https://github.com/vagabondHustler/subscene-search
+git clone https://github.com/vagabondHustler/SubSearch
 ```
 
 #### Install dependencies
@@ -49,7 +49,7 @@ git clone https://github.com/vagabondHustler/subscene-search
 <sup>Everything works to be ran from a venv, just have it active first time running main.py. If you dont want it enable/disable at a later time, just run configure.py with the venv active/deactivated and do menu option 3. "Show Terminal on search", and the python.exe/pythonw path will update, just be sure to have the dependencies installed.<sup>
 
 ```
-pip install -r path/subscene-search/docs/requirements.txt
+pip install -r path/SubSearch/docs/requirements.txt
 ```
 
 #### Run main
@@ -106,4 +106,4 @@ These are the fully supported languages, but all languages [subscene](https://u.
 
 ## Misc <a name = "misc"></a>
 
-Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Search subscene`
+Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\SubSearch`
