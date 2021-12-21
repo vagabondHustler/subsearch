@@ -31,4 +31,5 @@ def parameters(param, language, lang_abbr, hearing_impaired, precentage):
     output(f"Release: {param.release}")
     output(f"Group: {param.group}")
     output(f"Match threshold: {precentage}%")
-    output(f"URL: {param.url}\n")
+    output(f"URL: {param.url_subscene}")
+    output(f"URL: {param.url_opensubtitles}\n")
