@@ -52,18 +52,10 @@ git clone https://github.com/vagabondHustler/SubSearch
 pip install -r path/SubSearch/docs/requirements.txt
 ```
 
-#### Run main
+#### Run main from it's true path
 
 ```
 python main.py
-```
-
-#### Run settings (Optinal)
-
-<sup>Configure language, hearing impaired subtitles, toggle context-menu icon, show terminal True/False and more.</sup>
-
-```
-python settings.py
 ```
 
 ## Usage <a name="usage"></a>
@@ -73,8 +65,6 @@ After everything is setup, you should be able to fetch subtitles by right clicki
 ```
 Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
 ```
-
-For easy configuration of language, toggle context menu icon and similar features, run.
 
 ## Supported languages <a name = "lsupport"></a>
 

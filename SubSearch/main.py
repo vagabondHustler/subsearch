@@ -9,6 +9,7 @@ from src.file_manager import get_hash
 from src import log
 from src.data import get_parameters
 from src.sos import cwd
+from src.sos import root_directory
 from src.scraper import subscene
 from src.scraper import opensubtitles
 from src import file_manager as fm
@@ -32,7 +33,7 @@ def main() -> None:
     if video_with_ext is not None:
         file_hash = get_hash(video_with_ext)
     elif video_with_ext is None:
-        file_hash = 0000000000000000
+        file_hash = None
 
     # TODO fix this so no try is needed
     try:
@@ -50,11 +51,11 @@ def main() -> None:
     # scrape with parameters
     print("\n")
     log.output("[Searching opensubtitles]")
-    dios = opensubtitles.scrape(param, language, hearing_impaired)
+    dios = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
     print("\n")
     log.output("[Searching subscene]")
     diss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
-    
+
     if dios is None and diss is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
@@ -95,4 +96,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    if cwd() == root_directory():
+        import settings
+
+        exit()
     main()
