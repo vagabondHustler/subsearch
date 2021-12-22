@@ -49,14 +49,14 @@ def main() -> None:
     log.parameters(param, language, lang_abbr, hearing_impaired, precentage)
 
     # scrape with parameters
-    print("\n")
-    log.output("[Searching opensubtitles]")
-    dios = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
+    # print("\n")
+    # log.output("[Searching opensubtitles]")
+    # dios = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
     print("\n")
     log.output("[Searching subscene]")
     diss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
 
-    if dios is None and diss is None:
+    if diss is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
         fm.copy_log_to_cwd()
@@ -67,10 +67,10 @@ def main() -> None:
     # download files from scrape result
     print("\n")
     log.output("[Downloading]")
-    if dios is not None:
-        for item in dios:
-            file_path, root_dl_url, current_num, total_num = item
-            fm.download_zip(file_path, root_dl_url, current_num, total_num)
+    # if dios is not None:
+    #     for item in dios:
+    #         file_path, root_dl_url, current_num, total_num = item
+    #         fm.download_zip(file_path, root_dl_url, current_num, total_num)
     if diss is not None:
         for item in diss:
             if item is not None:
