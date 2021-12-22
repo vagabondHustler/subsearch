@@ -13,12 +13,12 @@ def scrape(parameters, language: str, hearing_impaired: str) -> list or None:
         return None
 
     download_info: list = []
+    log.output(f"Peparing  hash {parameters.file_hash} for download")
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
         file_path = f"{cwd()}\\opensubtitles_{current_num}.zip"
         current_num = (file_path, dl_url, current_num, total_num)
         download_info.append(current_num)
+    log.output(f"Done with tasks")
     return download_info
-
-    
