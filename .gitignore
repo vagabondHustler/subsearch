@@ -141,3 +141,6 @@ subs/
 *README.html
 *README_cache/
 #*README_files/
+
+# Visual Sudio Code
+*.code-workspace
