@@ -16,7 +16,6 @@ def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or N
         return None
     tr_name = doc_results.find_all("tr", id=lambda value: value and value.startswith("name"))
     for item in tr_name:
-        # print(item.prettify())
         tl = [a["title"] for a in item.find_all("a", title=language)]
         if language in tl:
             hi = item.find("img", alt="Subtitles for hearing impaired")
