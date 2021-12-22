@@ -100,4 +100,5 @@ if __name__ == "__main__":
         import src.settings
 
         exit()
-    main()
+    elif cwd() != root_directory():
+        main()
