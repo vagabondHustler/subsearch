@@ -97,7 +97,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     if cwd() == root_directory():
-        import settings
+        import src.settings
 
         exit()
     main()
