@@ -24,9 +24,9 @@ def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
 
 
 # download zip files from url
-def download_zip(from_site: str, item: str) -> None:
+def download_zip(item: str) -> None:
     file_path, url, current_num, total_num = item
-    log.output(f"Downloading from {from_site}: {current_num}/{total_num}")
+    log.output(f"Downloading: {current_num}/{total_num}")
     r = requests.get(url, stream=True)
     with open(file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):

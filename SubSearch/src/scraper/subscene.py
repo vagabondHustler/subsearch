@@ -66,7 +66,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
-        print("\n")
+        log.output("")
         log.output(f"No subtitles to download for {parameters.release}")
         return None
 
