@@ -21,7 +21,7 @@ def main() -> None:
     if got_key() is False:
         set_default_values()
         registry.add_context_menu()
-        return exit(0)
+        return
 
     language, lang_abbr = get("language")
     hearing_impaired = get("hearing_impaired")
@@ -42,17 +42,17 @@ def main() -> None:
         log.output(err)
         fm.copy_log_to_cwd()
         if focus == "True":
-            return exit(1)
+            return input()
         return
 
     # log parameters
     log.parameters(param, language, lang_abbr, hearing_impaired, precentage)
 
     # scrape with parameters
-    print("\n")
+    log.output("")
     log.output("[Searching opensubtitles]")
     dios = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
-    print("\n")
+    log.output("")
     log.output("[Searching subscene]")
     diss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
     if dios is None and diss is None:
@@ -60,33 +60,35 @@ def main() -> None:
         log.output(f"Finished in {elapsed} seconds.")
         fm.copy_log_to_cwd()
         if focus == "True":
-            return exit(1)
+            return input()
         return
 
-    # download files from scrape result
-    print("\n")
-    log.output("[Downloading]")
+    # download files from scrape results
+    log.output("")
+    log.output("[Downloading from Opensubtitles]")
     for item in dios if dios is not None else None:
-        fm.download_zip("Opensubtitles", item)
+        fm.download_zip(item)
+    log.output("") if dios is not None else None
+    log.output("[Downloading from Subscene]")
     for item in diss if diss is not None else None:
-        fm.download_zip("Subscene", item)
+        fm.download_zip(item)
 
     # procsess downloaded files
-    print("\n")
+    log.output("")
     log.output("[Procsessing files]")
     fm.extract_zips(cwd(), ".zip")
     fm.clean_up(cwd(), ".zip")
     fm.clean_up(cwd(), ").nfo")
     fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
     fm.move_files(cwd(), f"{param.release}.srt", ".srt")
-    print("\n\n")
+    log.output("")
 
     # finnishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
 
     if focus == "True":
-        exit(1)
+        input()
 
 
 if __name__ == "__main__":
