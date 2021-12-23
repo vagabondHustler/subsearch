@@ -3,6 +3,7 @@ import os
 import zipfile
 import shutil
 import struct
+import urllib.request
 
 from src import log
 from src.sos import root_directory_file
@@ -23,11 +24,12 @@ def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
 
 
 # download zip files from url
-def download_zip(zip_path: str, zip_url: str, current_num: int, total_num: int) -> None:
-    log.output(f"Downloading: {current_num}/{total_num}")
-    r = requests.get(zip_url, stream=True)
-    with open(zip_path, "wb") as fd:
-        for chunk in r.iter_content(chunk_size=128):
+def download_zip(from_site: str, item: str) -> None:
+    file_path, url, current_num, total_num = item
+    log.output(f"Downloading from {from_site}: {current_num}/{total_num}")
+    r = requests.get(url, stream=True)
+    with open(file_path, "wb") as fd:
+        for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
 
 
