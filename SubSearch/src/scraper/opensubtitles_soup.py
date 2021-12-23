@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 
 from src import log
 
-import time
 
 # search for file hash
 def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or None:
