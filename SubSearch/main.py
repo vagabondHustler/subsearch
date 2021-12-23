@@ -64,14 +64,16 @@ def main() -> None:
         return
 
     # download files from scrape results
-    log.output("")
-    log.output("[Downloading from Opensubtitles]")
-    for item in dios if dios is not None else None:
-        fm.download_zip(item)
-    log.output("") if dios is not None else None
-    log.output("[Downloading from Subscene]")
-    for item in diss if diss is not None else None:
-        fm.download_zip(item)
+    if dios is not None:
+        log.output("")
+        log.output("[Downloading from Opensubtitles]")
+        for item in dios:
+            fm.download_zip(item)
+    if diss is not None:
+        log.output("")
+        log.output("[Downloading from Subscene]")
+        for item in diss:
+            fm.download_zip(item)
 
     # procsess downloaded files
     log.output("")
