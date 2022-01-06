@@ -5,7 +5,7 @@
 ![prtsc](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/vagabondHustler/SubSearch)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondHustler/SubSearch)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
