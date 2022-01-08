@@ -7,7 +7,7 @@ class Precentage:
 
 
 # compare two strings with each other and return match in %
-def check(searched: str, against: str) -> Precentage:
+def check(searched: str or int, against: str or int) -> Precentage:
     match = 0
     searched: list = mk_lst(searched)
     against: list = mk_lst(against)
@@ -31,7 +31,7 @@ def check(searched: str, against: str) -> Precentage:
 
 
 # create list from string
-def mk_lst(release: str) -> list:
+def mk_lst(release: str or int) -> list:
     new: list = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
 
@@ -44,7 +44,7 @@ def mk_lst(release: str) -> list:
 
 
 # check if strings are equal length
-def is_bigger(searched, against) -> int:
+def is_bigger(searched: str or int, against: str or int) -> int:
     if len(searched) > len(against):
         answer = len(searched) - len(against)
         return answer
@@ -54,7 +54,7 @@ def is_bigger(searched, against) -> int:
 
 
 # compare two items
-def compare(itemx, itemy) -> bool:
+def compare(itemx: str or int, itemy: str or int) -> bool:
     if itemx.lower() == itemy.lower():
         return True
     return False

@@ -37,7 +37,7 @@ class SearchParameters:
 
 
 # get all the parameters needed to scrape, from file or directory name
-def get_parameters(directory_path: str, language_abbr: str, file_hash: str, video_release_name=None) -> SearchParameters:
+def get_parameters(directory_path: str, language_abbr: str, file_hash: str, video_release_name: str=None) -> SearchParameters:
     _tmp: list = []
     if video_release_name is None:
         directory_name = directory_path.split("\\")

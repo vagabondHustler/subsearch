@@ -87,7 +87,7 @@ def copy_log_to_cwd() -> None:
     shutil.copy(file, dest)
 
 
-def get_hash(file_name):
+def get_hash(file_name: str):
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)

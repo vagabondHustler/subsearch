@@ -12,7 +12,7 @@ from src.current_user import run_as_admin
 COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
-def context_menu_icon(use=get("cm_icon")) -> None:
+def context_menu_icon(use: str=get("cm_icon")) -> None:
     ss_path = "Directory\Background\shell\SubSearch"
     icon_path = f"{root_directory()}\data\icon.ico, 0"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:

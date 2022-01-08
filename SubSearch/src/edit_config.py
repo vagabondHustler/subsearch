@@ -6,7 +6,7 @@ from src.sos import root_directory_file
 from src.config import get
 
 # update config.json
-def update_json(key: str, value) -> None:
+def update_json(key: str, value: str or int) -> None:
     with open(root_directory_file("data/config.json"), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
