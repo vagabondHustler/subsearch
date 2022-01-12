@@ -12,6 +12,7 @@ from src.edit_config import select_hearing_impaired
 from src.edit_config import select_cm_icon
 from src.config import get
 from src import registry
+from src.edit_config import set_default_values
 
 
 def menu(menu_option: int) -> str:
@@ -36,6 +37,9 @@ def menu(menu_option: int) -> str:
 
 
 def main() -> None:
+    if got_key() is False:
+        set_default_values()
+        registry.add_context_menu()
     ctypes.windll.kernel32.SetConsoleTitleW("SubSearch - Menu")
     os.system("cls||clear")
     language, lang_abbr = get("language")
