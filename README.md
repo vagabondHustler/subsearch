@@ -8,7 +8,8 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/vagabondHustler/SubSearch)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
-Searching on subscene is currently not working due to captcha :(
+
+# Searching on subscene is not working due to captcha :(
 
 
 </div>
