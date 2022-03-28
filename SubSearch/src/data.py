@@ -36,8 +36,18 @@ class SearchParameters:
     file_hash: str
 
 
+def split_last_hyphen(string: str) -> str:
+    release, group = string.rsplit("-", 1)
+    return release, group
+
+
+def split_last_dot(string: str) -> str:
+    release, group = string.rsplit(".", 1)
+    return release, group
+
+
 # get all the parameters needed to scrape, from file or directory name
-def get_parameters(directory_path: str, language_abbr: str, file_hash: str, video_release_name: str=None) -> SearchParameters:
+def get_parameters(directory_path: str, language_abbr: str, file_hash: str, video_release_name: str = None) -> SearchParameters:
     _tmp: list = []
     if video_release_name is None:
         directory_name = directory_path.split("\\")
@@ -46,13 +56,12 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
     elif video_release_name is not None:
         release = video_release_name
     if "-" in release:
-        _group = release.split("-")
-        group = _group[-1]
-    else:
-        _group = release.split(".")
-        group = _group[-1]
+        _release, group = split_last_hyphen(release)
+    elif "-" not in release:
+        _release, group = split_last_hyphen(release)
     items = release.split(".")
     # url, title, season, and year
+    print(_release)
     for item in items:
         if item[0].isdigit() and len(item) == 4:
             year = item
@@ -71,7 +80,7 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
             tv_series = False
             _tmp.append(item)
             title = " ".join(_tmp)
-            url_subscene = f"https://subscene.com/subtitles/searchbytitle?query={title}"
+            url_subscene = f"https://subscene.com/subtitles/searchbytitle?query={title}".replace(" ", "%20")
             url_opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-all/moviehash-{file_hash}"
             year = "N/A"
 
