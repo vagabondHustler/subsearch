@@ -34,6 +34,9 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
     # search for titles
     to_be_scraped: list = []
     title_keys = search_for_title(parameters.url_subscene)
+    if title_keys == "ERROR: CAPTCHA PROTECTION":
+        log.output(f"Captcha protection detected. Please try again later.")
+        return None
     for key, value in title_keys.items():
         if is_movie(key, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None

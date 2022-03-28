@@ -21,8 +21,11 @@ def search_for_title(url: str) -> dict:
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
     doc_result = doc.find("div", class_="search-result")
+    if doc_result is None:
+        doc_captcha = doc.find("h2", text="Why do I have to complete a CAPTCHA?")
+        if doc_captcha.text == "Why do I have to complete a CAPTCHA?":
+            return 'ERROR: CAPTCHA PROTECTION'
     results = doc_result.find_all("div", class_="title")
-
     for i in results:
         get_title = i.get_text().strip().replace("'", "").replace(":", "").lower()
         link = [a["href"] for a in i.find_all("a", href=True) if a.text]
