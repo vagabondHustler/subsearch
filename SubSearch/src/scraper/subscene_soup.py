@@ -1,7 +1,10 @@
-from bs4.element import Tag
-import requests
-from bs4 import BeautifulSoup
 import time
+
+import cloudscraper
+from bs4 import BeautifulSoup
+from bs4.element import Tag
+
+SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
 def is_sub_hi(a1: Tag) -> str:
@@ -17,14 +20,14 @@ def is_sub_hi(a1: Tag) -> str:
 # search for title
 def search_for_title(url: str) -> dict:
     titles: dict = {}
-    source = requests.get(url)
+    source = SCRAPER.get(url)
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
     doc_result = doc.find("div", class_="search-result")
     if doc_result is None:
         doc_captcha = doc.find("h2", text="Why do I have to complete a CAPTCHA?")
         if doc_captcha.text == "Why do I have to complete a CAPTCHA?":
-            return 'ERROR: CAPTCHA PROTECTION'
+            return "ERROR: CAPTCHA PROTECTION"
     results = doc_result.find_all("div", class_="title")
     for i in results:
         get_title = i.get_text().strip().replace("'", "").replace(":", "").lower()
@@ -38,7 +41,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
     searching = True
     subtitles: dict = {}
     while searching:
-        source = requests.get(url)
+        source = SCRAPER.get(url)
         scontent = source.content
         doc = BeautifulSoup(scontent, "lxml")
         tbody = doc.find("tbody")
@@ -62,7 +65,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
 
 # get download url for subtitle(s)
 def get_download_url(url: str) -> str:
-    source = requests.get(url).text
+    source = SCRAPER.get(url).text
     doc = BeautifulSoup(source, "lxml")
     _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
     download_url = f"https://subscene.com/{_link[0]}"
