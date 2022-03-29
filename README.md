@@ -9,9 +9,6 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 
-# Searching on subscene is not working due to captcha :(
-
-
 </div>
 
 
