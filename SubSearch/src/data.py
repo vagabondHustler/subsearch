@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from tokenize import group
 from num2words import num2words
 
 
@@ -36,14 +37,9 @@ class SearchParameters:
     file_hash: str
 
 
-def split_last_hyphen(string: str) -> str:
-    release, group = string.rsplit("-", 1)
-    return release, group
-
-
-def split_last_dot(string: str) -> str:
-    release, group = string.rsplit(".", 1)
-    return release, group
+def split_last_hyphen(character: str, string: str) -> str:
+    group = string.rsplit(character, 1)[-1]
+    return group
 
 
 # get all the parameters needed to scrape, from file or directory name
@@ -56,12 +52,11 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
     elif video_release_name is not None:
         release = video_release_name
     if "-" in release:
-        _release, group = split_last_hyphen(release)
-    elif "-" not in release:
-        _release, group = split_last_hyphen(release)
+        group = split_last_hyphen("-", release)
+    else:
+        group = "N/A"
     items = release.split(".")
     # url, title, season, and year
-    print(_release)
     for item in items:
         if item[0].isdigit() and len(item) == 4:
             year = item
