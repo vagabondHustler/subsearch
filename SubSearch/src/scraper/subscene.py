@@ -47,8 +47,10 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
     # exit if no titles found
     if len(to_be_scraped) == 0:
         if parameters.tv_series:
+            log.output("")
             log.output(f"No TV-series found matching {parameters.title}")
         else:
+            log.output("")
             log.output(f"No movies found matching {parameters.title}")
         return None
 
