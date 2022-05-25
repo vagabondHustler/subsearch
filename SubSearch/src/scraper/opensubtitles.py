@@ -13,7 +13,7 @@ def scrape(parameters, language: str, hearing_impaired: str) -> list or None:
         return None
 
     download_info: list = []
-    log.output(f"Peparing  hash {parameters.file_hash} for download")
+    log.output(f"Preparing  hash {parameters.file_hash} for download")
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
