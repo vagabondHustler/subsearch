@@ -58,8 +58,11 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
         if language == a1.span.get_text().strip():
             _release_name = [x.get_text().strip() for x in a1.find("a")]
             release_name = _release_name[-2]
+            if " " in release_name:
+                release_name = release_name.replace(" ", ".")
             link = [y["href"] for y in a1.find_all("a", href=True) if y.text]
             subtitles[release_name] = f"https://subscene.com/{link[0]}"
+
     return subtitles
 
 
