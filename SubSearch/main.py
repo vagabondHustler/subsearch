@@ -1,23 +1,23 @@
 import time
+import ctypes
 
-from src import registry
-from src.current_user import got_key
-from src.edit_config import set_default_values
-from src.config import get
-from src.file_manager import find_video
-from src.file_manager import get_hash
-from src import log
-from src.data import get_parameters
-from src.sos import cwd
-from src.sos import root_directory
-from src.scraper import subscene
-from src.scraper import opensubtitles
+from data._version import current_version
 from src import file_manager as fm
+from src import log, registry
+from src.config import get
+from src.current_user import got_key
+from src.data import get_parameters
+from src.edit_config import set_default_values
+from src.file_manager import find_video, get_hash
+from src.scraper import opensubtitles, subscene
+from src.sos import cwd, root_directory
 
 
 def main() -> None:
     # initialising
     start = time.perf_counter()
+    version = current_version()
+    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - v{version}")
     if got_key() is False:
         set_default_values()
         registry.add_context_menu()
