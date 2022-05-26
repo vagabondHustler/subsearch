@@ -49,7 +49,7 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
         # release and group
         release = directory_name[-1]
     elif video_release_name is not None:
-        release = video_release_name
+        release = video_release_name.replace(" ", ".")
     if "-" in release:
         group = split_last_hyphen("-", release)
     else:
