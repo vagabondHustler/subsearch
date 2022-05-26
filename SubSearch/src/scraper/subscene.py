@@ -75,10 +75,13 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
         for key, value in sub_keys.items():
             number = check(key, parameters.release)
             log.output(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
+            lenght_str = sum(1 for char in f"[{number.precentage}% match]:")
+            formatting_spaces = " " * lenght_str
+            log.output(f"{formatting_spaces} {value}") if number.precentage <= precentage else None
             if is_threshold(key, number, precentage, parameters):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        log.output("Done with tasks") if len(to_be_downloaded) > 0 else None
+        log.output("Done with tasks")
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
