@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from data._version import current_version
 
 now = datetime.now()
 date = now.strftime("%y%m%d")
@@ -13,13 +14,15 @@ logging.basicConfig(
 )
 
 # log and print message
-def output(msg: str) -> None:
+def output(msg: str, print_to_terminal: bool = True) -> None:
     logging.info(msg)
-    print(msg)
+    print(msg) if print_to_terminal else False
 
 
 # log and print all the used parameters from video/directory-name
 def parameters(param, language, lang_abbr, hearing_impaired, precentage):
+    version = current_version()
+    output(f"SubSearch - v{version} ", False)
     output("[PARAMETERS]")
     output(f"Language: {language}, {lang_abbr}")
     output(f"Hearing impaired: {hearing_impaired}")
