@@ -84,9 +84,9 @@ def clean_up(cwd_path: str, extension: str) -> None:
 
 
 def copy_log_to_cwd() -> None:
-    file = root_directory_file("search.log")
-    dest = f"{cwd()}/search.log"
-    shutil.copy(file, dest)
+    src_file = root_directory_file("search.log")
+    dst_file = f"{cwd()}/search.log"
+    shutil.copy(src_file, dst_file)
 
 
 def get_hash(file_name: str):
