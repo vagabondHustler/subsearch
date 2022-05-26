@@ -13,6 +13,15 @@ def is_movie(key: str, p=None) -> bool:
     return False
 
 
+# check if the movie might have been released the year before
+def try_the_year_before(key: str, p=None) -> bool:
+    year = int(p.year) - 1
+    the_year_before = f"{p.title} ({year})"
+    if key.lower().startswith(the_year_before):
+        log.output(f"Movie {key} found")
+        return True
+
+
 # check if dict is of tv-series
 def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
     if p.title and p.season_ordinal in key.lower() and p.tv_series and lang_abbr:
@@ -39,6 +48,8 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
         return None
     for key, value in title_keys.items():
         if is_movie(key, parameters):
+            to_be_scraped.append(value) if value not in (to_be_scraped) else None
+        if try_the_year_before(key, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
         if is_tv_series(key, lang_abbr, parameters):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
