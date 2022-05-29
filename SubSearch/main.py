@@ -87,7 +87,6 @@ def main() -> None:
 
     # finnishing up
     fm.copy_log_to_cwd()
-    print("asdf")
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
 
