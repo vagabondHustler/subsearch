@@ -33,9 +33,20 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
 # check str is above precentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
     if number.precentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
-        log.output(f"[{number.precentage}% match]: {key}")
         return True
     return False
+
+
+# log and sort list
+def log_and_sort_list(list_of_tuples: list, precentage) -> list:
+    list_of_tuples.sort(key=lambda x: x[0], reverse=True)
+    log.output("\n[Sorted List from Subscene]")
+    for i in list_of_tuples:
+        name = i[1]
+        url = i[2]
+        log.output(f"{name}\n{url}\n") if i[0] <= precentage else None
+        log.output(f"--- Has been downloaded ---\n{name}\n{url}\n\n--- Has not been downloaded ---") if i[0] >= precentage else None
+    return list_of_tuples
 
 
 # decides what to do with all the scrape data
@@ -67,6 +78,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
 
     # search title for subtitles
     to_be_downloaded: list = []
+    to_be_sorted: list = []
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
@@ -74,13 +86,17 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
             break
         for key, value in sub_keys.items():
             number = check(key, parameters.release)
-            log.output(f"[{number.precentage}% match]: {key}") if number.precentage <= precentage else None
+            log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.precentage}% match]:")
             formatting_spaces = " " * lenght_str
-            log.output(f"{formatting_spaces} {value}") if number.precentage <= precentage else None
+            _name = f"[{number.precentage}% match]: {key}"
+            _url = f"{formatting_spaces} {value}"
+            to_be_sorted_value = number.precentage, _name, _url
+            to_be_sorted.append(to_be_sorted_value)
             if is_threshold(key, number, precentage, parameters):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
+        log_and_sort_list(to_be_sorted, precentage)
         log.output("Done with tasks")
 
     # exit if no subtitles found
