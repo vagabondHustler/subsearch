@@ -1,4 +1,4 @@
-_VERSION = "1.1.1"
+_VERSION = "1.2.1"
 
 
 def current_version(version: str = _VERSION) -> str:
