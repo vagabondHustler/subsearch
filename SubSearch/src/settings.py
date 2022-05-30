@@ -33,7 +33,6 @@ def menu(menu_option: int) -> str:
     elif menu_option == 6:
         os.system("cls||clear")
         check_for_updates()
-        go_to_github()
         main()
     elif menu_option == 7:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/blob/main/README.md")
@@ -62,7 +61,7 @@ def main() -> None:
     e = f"4. Show context menu icon                 current: {icon}"
     f = f"5. Use hearing impaired subtitles         current: {hi}"
     g = f"6. Check for updates"
-    h = f"7. Help!"
+    h = f"7. Help - Opens README.md in webbrowser"
     z = f"\nCtrl+C to exit\n"
     menu_options = [a, b, c, d, e, f, g, h, z]
 

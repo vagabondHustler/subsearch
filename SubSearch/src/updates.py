@@ -9,7 +9,7 @@ from src import log
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def check_for_updates() -> str:
+def check_for_updates() -> bool:
     source = SCRAPER.get("https://github.com/vagabondHustler/SubSearch/blob/main/SubSearch/data/_version.py")
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
@@ -17,9 +17,15 @@ def check_for_updates() -> str:
     latest_v = doc_result.text[1:-1]
     current_v = current_version()
     if int(latest_v.replace(".", "")) > int(current_v.replace(".", "")):
-        log.output("\nNew version available!")
-        log.output(f"Your version: {current_v}, available version: {latest_v}")
-        log.output("https://github.com/vagabondHustler/SubSearch/\n")
+        print("\nNew version available!")
+        print(f"Your version: {current_v}, available version: {latest_v}")
+        print("https://github.com/vagabondHustler/SubSearch/\n")
+        go_to_github()
+        return False
+    print(f"Your version {current_v} is the latest version")
+    print("Press enter to continue")
+    input()
+    return True
 
 
 def go_to_github() -> None:
