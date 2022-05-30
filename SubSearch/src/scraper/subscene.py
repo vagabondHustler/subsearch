@@ -45,7 +45,7 @@ def log_and_sort_list(list_of_tuples: list, precentage) -> list:
         name = i[1]
         url = i[2]
         log.output(f"{name}\n{url}\n") if i[0] <= precentage else None
-        log.output(f"--- Has been downloaded ---\n{name}\n{url}\n\n--- Has not been downloaded ---") if i[0] >= precentage else None
+        log.output(f"--- Has been downloaded ---\n{name}\n{url}\n") if i[0] >= precentage else None
     return list_of_tuples
 
 
