@@ -35,7 +35,7 @@ def select_language() -> None:
         else:
             print(f"{num}. {value}")
     print("\n")
-    print("[Supported languages] - Slower search times")
+    print("[Supported languages]")
     print("Visit: https://u.subscene.com/filter")
     print("\n")
     while True:
