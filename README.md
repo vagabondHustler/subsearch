@@ -57,7 +57,7 @@ pip install -r path/SubSearch/docs/requirements.txt
 #### First time running or change settings\check for updates
 Run main.py from its directory, i.e ```E:\SubSearch\main.py```
 ```
-python main.py
+python path\SubSearch\main.py
 ```
 
 ## Usage <a name="usage"></a>
