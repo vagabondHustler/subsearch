@@ -15,6 +15,8 @@ def is_movie(key: str, p=None) -> bool:
 
 # check if the movie might have been released the year before
 def try_the_year_before(key: str, p=None) -> bool:
+    if p.year == "N/A":
+        return False
     year = int(p.year) - 1
     the_year_before = f"{p.title} ({year})"
     if key.lower().startswith(the_year_before):
@@ -41,11 +43,18 @@ def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
 def log_and_sort_list(list_of_tuples: list, precentage) -> list:
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
+    hbd_printed = False
+    hnbd_printed = False
     for i in list_of_tuples:
         name = i[1]
         url = i[2]
-        log.output(f"{name}\n{url}\n") if i[0] <= precentage else None
-        log.output(f"--- Has been downloaded ---\n{name}\n{url}\n") if i[0] >= precentage else None
+        if i[0] >= precentage and not hbd_printed:
+            log.output(f"--- Has been downloaded ---\n")
+            hbd_printed = True
+        if i[0] <= precentage and not hnbd_printed:
+            log.output(f"--- Has not been downloaded ---\n")
+            hnbd_printed = True
+        log.output(f"{name}\n{url}\n")
     return list_of_tuples
 
 
