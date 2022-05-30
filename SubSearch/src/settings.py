@@ -13,6 +13,8 @@ from src.edit_config import select_cm_icon
 from src.config import get
 from src import registry
 from src.edit_config import set_default_values
+from src.updates import check_for_updates
+from src.updates import go_to_github
 
 
 def menu(menu_option: int) -> str:
@@ -29,6 +31,11 @@ def menu(menu_option: int) -> str:
     elif menu_option == 5:
         select_hearing_impaired()
     elif menu_option == 6:
+        os.system("cls||clear")
+        check_for_updates()
+        go_to_github()
+        main()
+    elif menu_option == 7:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/blob/main/README.md")
     elif menu_option == 0:
         return "Exit"
@@ -54,9 +61,10 @@ def main() -> None:
     d = f"3. Show Terminal on search                current: {focus}"
     e = f"4. Show context menu icon                 current: {icon}"
     f = f"5. Use hearing impaired subtitles         current: {hi}"
-    g = f"6. Help!"
+    g = f"6. Check for updates"
+    h = f"7. Help!"
     z = f"\nCtrl+C to exit\n"
-    menu_options = [a, b, c, d, e, f, g, z]
+    menu_options = [a, b, c, d, e, f, g, h, z]
 
     for item in menu_options:
         print(item)
