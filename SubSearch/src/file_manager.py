@@ -97,7 +97,8 @@ def get_hash(file_name: str):
             filesize = os.path.getsize(file_name)
             hash = filesize
             if filesize < 65536 * 2:
-                return "SizeError"
+                log.output(f"SizeError: {filesize} bytes", False)
+                return None
             n1 = 65536 // bytesize
             for _x in range(n1):
                 buffer = f.read(bytesize)
@@ -113,6 +114,7 @@ def get_hash(file_name: str):
                 hash = hash & 0xFFFFFFFFFFFFFFFF
 
         returnedhash = "%016x" % hash
+        print(returnedhash)
         return returnedhash
 
     except IOError as err:
