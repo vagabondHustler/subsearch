@@ -114,7 +114,6 @@ def get_hash(file_name: str):
                 hash = hash & 0xFFFFFFFFFFFFFFFF
 
         returnedhash = "%016x" % hash
-        print(returnedhash)
         return returnedhash
 
     except IOError as err:
