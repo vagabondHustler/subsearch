@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+from src.utilities import log
 
-from src import log
 
 # search for file hash
 def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or None:

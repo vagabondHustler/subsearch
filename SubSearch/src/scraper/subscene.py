@@ -1,9 +1,8 @@
-from src import log
-from src.sos import cwd
-from src.scraper.subscene_soup import search_for_title
-from src.scraper.subscene_soup import search_title_for_sub
-from src.scraper.subscene_soup import get_download_url
-from src.compare import check
+from src.utilities import log
+from src.utilities.compare import check
+from src.local_paths import cwd
+from src.scraper.subscene_soup import get_download_url, search_for_title, search_title_for_sub
+
 
 # check if dict is of movies
 def is_movie(key: str, p=None) -> bool:
