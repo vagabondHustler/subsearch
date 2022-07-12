@@ -4,12 +4,10 @@ import struct
 import zipfile
 
 import cloudscraper
+from src.local_paths import cwd, root_directory, root_directory_file
+from src.utilities import log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
-
-from src import log
-from src.sos import cwd, root_directory_file
-
 
 # check if a video is in directory, returns video name without extension
 def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
@@ -84,9 +82,10 @@ def clean_up(cwd_path: str, extension: str) -> None:
 
 
 def copy_log_to_cwd() -> None:
-    src_file = root_directory_file("search.log")
-    dst_file = f"{cwd()}/search.log"
-    shutil.copy(src_file, dst_file)
+    if cwd() != root_directory():
+        src_file = root_directory_file("search.log")
+        dst_file = f"{cwd()}/search.log"
+        shutil.copy(src_file, dst_file)
 
 
 def get_hash(file_name: str):

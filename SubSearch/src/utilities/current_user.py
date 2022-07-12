@@ -1,6 +1,7 @@
-import winreg as reg
 import ctypes
 import sys
+import winreg as reg
+
 
 # check if current user has the registry key
 def got_key() -> bool:

@@ -1,10 +1,10 @@
-import json
-from src.sos import root_directory_file
-from src.data import read_data
+from src.utilities.fetch_data import read_data
+from src.local_paths import root_directory_file
+
 
 # get said value(s) from config.json
 def get(output):
-    config_json = read_data(root_directory_file("data/config.json"))
+    config_json = read_data(root_directory_file("src/data/config.json"))
 
     def language() -> str:
         language = config_json.language

@@ -1,6 +1,7 @@
-from src import log
-from src.sos import cwd
+from src.utilities import log
+from src.local_paths import cwd
 from src.scraper.opensubtitles_soup import search_for_hash
+
 
 # decides what to do with all the scrape data
 def scrape(parameters, language: str, hearing_impaired: str) -> list or None:
