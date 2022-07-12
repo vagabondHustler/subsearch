@@ -1,103 +1,18 @@
-import time
-import ctypes
-
-from data._version import current_version
-from src import file_manager as fm
-from src import log, registry
-from src.config import get
-from src.current_user import got_key
-from src.data import get_parameters
-from src.edit_config import set_default_values
-from src.file_manager import find_video, get_hash
-from src.scraper import opensubtitles, subscene
-from src.sos import cwd, root_directory
+from src.local_paths import cwd, root_directory
 
 
 def main() -> None:
-    # initialising
-    start = time.perf_counter()
-    version = current_version()
-    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - v{version}")
-    if got_key() is False:
-        set_default_values()
-        registry.add_context_menu()
-        return
-
-    language, lang_abbr = get("language")
-    hearing_impaired = get("hearing_impaired")
-    precentage = get("percentage")
-    focus = get("terminal_focus")
-    video_ext: list = get("video_ext")
-    video = find_video(cwd(), video_ext, False)
-    video_with_ext = find_video(cwd(), video_ext, True)
-    if video_with_ext is not None:
-        file_hash = get_hash(video_with_ext)
-    elif video_with_ext is None:
-        file_hash = None
-
-    # TODO fix this so no try is needed
-    try:
-        param = get_parameters(cwd().lower(), lang_abbr, file_hash, video)
-    except IndexError as err:
-        log.output(err)
-        fm.copy_log_to_cwd()
-        if focus == "True":
-            return input()
-        return
-
-    # log parameters
-    log.parameters(param, language, lang_abbr, hearing_impaired, precentage)
-
-    # scrape with parameters
-    log.output("")
-    log.output("[Searching opensubtitles]")
-    scrape_os = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
-    log.output("")
-    log.output("[Searching subscene]")
-    scrape_ss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
-    if scrape_os is None and scrape_ss is None:
-        elapsed = time.perf_counter() - start
-        log.output(f"Finished in {elapsed} seconds.")
-        fm.copy_log_to_cwd()
-        if focus == "True":
-            return input()
-        return
-
-    # download files from scrape results
-    if scrape_os is not None:
-        log.output("")
-        log.output("[Downloading from Opensubtitles]")
-        for item in scrape_os:
-            fm.download_zip(item)
-    if scrape_ss is not None:
-        log.output("")
-        log.output("[Downloading from Subscene]")
-        for item in scrape_ss:
-            fm.download_zip(item)
-
-    # procsess downloaded files
-    log.output("")
-    log.output("[Procsessing files]")
-    fm.extract_zips(cwd(), ".zip")
-    fm.clean_up(cwd(), ".zip")
-    fm.clean_up(cwd(), ").nfo")
-    fm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
-    fm.move_files(cwd(), f"{param.release}.srt", ".srt")
-    log.output("")
-
-    # finnishing up
-    fm.copy_log_to_cwd()
-    elapsed = time.perf_counter() - start
-    log.output(f"Finished in {elapsed} seconds")
-
-    if focus == "True":
-        input()
-
-
-if __name__ == "__main__":
     if cwd() == root_directory():
-        import src.settings
+        import src.settings_menu
+
+        src.settings_menu.main()
 
         exit()
     elif cwd() != root_directory():
-        main()
+        import src.subsearch
+
+        src.subsearch.main()
+
+
+if __name__ == "__main__":
+    main()
