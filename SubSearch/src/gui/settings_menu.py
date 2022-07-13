@@ -177,3 +177,60 @@ class SelectPercentage(tk.Frame):
             button.bind("<Button-1>", self.b_sub)
 
 
+class HearingImparedSubs(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        svar = tk.StringVar()
+        svar.set(f"{hearing_impared}")
+
+        self.svar = svar
+        _xstr = " " * 50
+        for i in range(1, 4):
+            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            if i >= 3:
+                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+
+        self.create_label(t="Use HI-Subtitles", r=1, c=1, f=TFONT10)
+        self.create_label(r=1, c=2, f=TFONT10)
+
+        self.create_button(r=1, c=3, x="Both")
+        self.create_button(r=1, c=3, x="True")
+        self.create_button(r=1, c=3, x="False")
+
+        self.configure(bg=TBG)
+
+    def b_true(self, event):
+        self.svar.set(f"True")
+        update_svar = self.svar.get()
+        update_json("hearing_impaired", update_svar)
+
+    def b_false(self, event):
+        self.svar.set(f"False")
+        update_svar = self.svar.get().split(" ")[0]
+        update_json("hearing_impaired", update_svar)
+
+    def b_both(self, event):
+        self.svar.set(f"Both")
+        update_svar = self.svar.get().split(" ")[0]
+        update_json("hearing_impaired", update_svar)
+
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+        if t is None:
+            label = tk.Label(self, textvariable=self.svar, anchor="center")
+        else:
+            label = tk.Label(self, text=t, anchor="w")
+        label.configure(bg=TBG, fg=TFG, font=f)
+        label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+
+    def create_button(self, r=0, c=0, x=None):
+        button = tk.Button(self, text=x, height=1, width=6, bd=0)
+        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        if x == "True":
+            button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
+            button.bind("<Button-1>", self.b_true)
+        elif x == "False":
+            button.grid(row=r, column=c, padx=5, pady=2, sticky="w")
+            button.bind("<Button-1>", self.b_false)
+        elif x == "Both":
+            button.grid(row=r, column=c, padx=2, pady=2)
+            button.bind("<Button-1>", self.b_both)
