@@ -3,14 +3,17 @@ import socket
 import sys
 import winreg
 
-from src.utilities.fetch_config import get
-from src.utilities.current_user import is_admin, run_as_admin
 from src.local_paths import root_directory, root_directory_file
+from src.utilities.current_user import is_admin, run_as_admin
+
 
 COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
-def context_menu_icon(use: str = get("cm_icon")) -> None:
+def context_menu_icon() -> None:
+    from src.utilities.fetch_config import get
+
+    use: str = get("cm_icon")
     ss_path = "Directory\Background\shell\SubSearch"
     icon_path = f"{root_directory()}\src\data\icon.ico, 0"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
@@ -18,7 +21,7 @@ def context_menu_icon(use: str = get("cm_icon")) -> None:
             if use == "True":
                 winreg.SetValueEx(subkey_ss, "Icon", 0, winreg.REG_SZ, icon_path)
             if use == "False":
-                winreg.DeleteValue(subkey_ss, "Icon")
+                winreg.SetValueEx(subkey_ss, "Icon", 0, winreg.REG_SZ, "")
 
 
 # write value to (Deafult)
