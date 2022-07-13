@@ -2,7 +2,7 @@
     
 # SubSearch
 
-![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
+![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
 ![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_226.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
