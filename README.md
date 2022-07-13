@@ -15,7 +15,7 @@
 
 - [About](#about)
 - [Getting Started](#getting_started)
-- [Usage](#usage)
+- [Setup](#setup)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
@@ -30,43 +30,21 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 ## Getting Started <a name = "getting_started"></a>
 
-### Prerequisites
+### Setup
 
-```
-Python 3.10
-```
 
-### Installing
+Download Python 3.10 ```https://www.python.org/downloads/```
 
-#### Clone the project
+Download SubScene ```git clone https://github.com/vagabondHustler/SubSearch``` or ```https://github.com/vagabondHustler/SubSearch/releases```
 
-```
-git clone https://github.com/vagabondHustler/SubSearch
-```
+Install dependencies ```pip install -r .../SubSearch/docs/requirements.txt```
 
-#### Install dependencies
+Run main.py from where it is located ```python .../SubSearch/SubSearch/main.py```
 
-<sup>Everything works to be ran from a venv, just have it active first time running main.py. If you dont want it enable/disable at a later time, just run configure.py with the venv active/deactivated and do menu option 3. "Show Terminal on search", and the python.exe/pythonw path will update, just be sure to have the dependencies installed.<sup>
+To acces the settings, run main.py again
 
-```
-pip install -r path/SubSearch/docs/requirements.txt
-```
+Right-click inside any folder containing the movie/series and you're done!
 
-#### First time running or change settings\check for updates
-
-Run main.py from its directory, i.e `E:\SubSearch\main.py`
-
-```
-python path\SubSearch\main.py
-```
-
-## Usage <a name="usage"></a>
-
-After everything is setup, you should be able to fetch subtitles by right clicking inside a directory containng the movie/TV-Series, keep in mind the directory/video-file needs to have the standard release format.
-
-```
-Title.Year.Soruce.Codec-GroupName, e.g foo.2021.1080p.WEB.H264-bar
-```
 
 ## Supported languages <a name = "lsupport"></a>
 
