@@ -42,16 +42,16 @@ def draw_menu() -> None:
     os.system("cls||clear")
     language, lang_abbr = get("language")
     precentage = get("percentage")
-    focus = get("terminal_focus")
-    hi = get("hearing_impaired")
-    icon = get("cm_icon")
+    terminal_focus = get("terminal_focus")
+    hearing_impared = get("hearing_impaired")
+    cm_icon = get("cm_icon")
 
     a = f"                       --- MENU ---                              \n"
     b = f"1. Change language                            current: {language}, {lang_abbr}"
     c = f"2. Set precentage threshold                   current: {precentage}% out of 100%"
-    d = f"3. Show Terminal on search                    current: {focus}"
-    e = f"4. Show context menu icon                     current: {icon}"
-    f = f"5. Use hearing impaired subtitles             current: {hi}"
+    d = f"3. Show Terminal on search                    current: {terminal_focus}"
+    e = f"4. Show context menu icon                     current: {cm_icon}"
+    f = f"5. Use hearing impaired subtitles             current: {hearing_impared}"
     g = f"6. Check for updates"
     h = f"7. Help - Opens README.md in webbrowser"
     z = f"\nCtrl+C to exit\n"
