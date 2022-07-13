@@ -78,3 +78,45 @@ class MenuTitle(tk.Frame):
         label = tk.Label(self, text=t, anchor="w")
         label.configure(bg=TBG, fg=TFG, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+
+class SelectLanguage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        svar = tk.StringVar()
+        svar.set(f"{language}, {lang_abbr}")
+        number_of_buttons = len(TLANGUAGE)
+        self.svar = svar
+        _xstr = " " * 50
+        _rowcountert = 0
+        _colcountert = 1
+        for i in range(1, 4):
+            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+        self.create_label(t="Selected language", r=1, c=1, f=TFONT10)
+        self.create_label(r=1, c=2, f=TFONT10)
+        for i in range(number_of_buttons):
+            _rowcountert += 1
+            if _rowcountert == 8:
+                _colcountert += 1
+                _rowcountert = 1
+            self.create_button(r=_rowcountert + 1, c=_colcountert, x=i)
+        self.configure(bg=TBG)
+
+    def set_language(self, event):
+        btn = event.widget
+        self.svar.set(btn.cget("text"))
+        update_svar = self.svar.get()
+        update_json("language", update_svar)
+
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+        if t is None:
+            label = tk.Label(self, textvariable=self.svar, anchor="center")
+        else:
+            label = tk.Label(self, text=t, anchor="w")
+        label.configure(bg=TBG, fg=TFG, font=f)
+        label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+
+    def create_button(self, r=0, c=0, x=None):
+        button = tk.Button(self, text=TLANGUAGE[x], height=1, width=24, bd=0)
+        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.grid(row=r, column=c, padx=2, pady=2)
+        button.bind("<Button-1>", self.set_language)
