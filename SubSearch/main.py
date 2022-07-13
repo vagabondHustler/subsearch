@@ -3,9 +3,7 @@ from src.local_paths import cwd, root_directory
 
 def main() -> None:
     if cwd() == root_directory():
-        import src.settings_menu
-
-        src.settings_menu.main()
+        import src.gui.settings_menu
 
         exit()
     elif cwd() != root_directory():

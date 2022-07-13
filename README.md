@@ -18,7 +18,6 @@
 - [Getting Started](#getting_started)
 - [Usage](#usage)
 - [Language support](#lsupport)
-- [TODO](https://github.com/vagabondHustler/SubSearch/blob/main/TODO.md)
 - [Authors](#authors)
 - [Misc](#misc)
 
