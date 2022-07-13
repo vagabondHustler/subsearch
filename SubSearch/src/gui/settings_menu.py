@@ -120,3 +120,60 @@ class SelectLanguage(tk.Frame):
         button.configure(bg=TBC, fg=TFG, font=TFONT10)
         button.grid(row=r, column=c, padx=2, pady=2)
         button.bind("<Button-1>", self.set_language)
+
+
+class SelectPercentage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        svar = tk.StringVar()
+        svar.set(f"{precentage} %")
+
+        self.svar = svar
+        _xstr = " " * 50
+        for i in range(1, 4):
+            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            if i >= 3:
+                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+
+        self.create_label(t="Selected threshold", r=1, c=1, f=TFONT10)
+        self.create_label(r=1, c=2, f=TFONT10)
+
+        self.create_button(r=1, c=3, x="+")
+        self.create_button(r=1, c=3, x="-")
+
+        self.configure(bg=TBG)
+
+        self._add = precentage
+
+    def b_add(self, event):
+
+        self._add += 5 if self._add < 100 else 0
+        self.svar.set(f"{self._add} %")
+        update_svar = self.svar.get().split(" ")[0]
+        update_json("precentage_pass", update_svar)
+
+    def b_sub(self, event):
+        self._add -= 5 if self._add > 0 else 0
+        self.svar.set(f"{self._add} %")
+        update_svar = self.svar.get().split(" ")[0]
+        update_json("precentage_pass", update_svar)
+
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+        if t is None:
+            label = tk.Label(self, textvariable=self.svar, anchor="center")
+        else:
+            label = tk.Label(self, text=t, anchor="w")
+        label.configure(bg=TBG, fg=TFG, font=f)
+        label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+
+    def create_button(self, r=0, c=0, x=None):
+        button = tk.Button(self, text=x, height=1, width=8, bd=0)
+        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        if x == "+":
+            button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
+            button.bind("<Button-1>", self.b_add)
+        elif x == "-":
+            button.grid(row=r, column=c, padx=5, pady=2, sticky="w")
+            button.bind("<Button-1>", self.b_sub)
+
+
