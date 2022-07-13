@@ -56,6 +56,7 @@ terminal_focus = get("terminal_focus")
 hearing_impared = get("hearing_impaired")
 cm_icon = get("cm_icon")
 
+
 def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
     # get screen width and height
     ws = root.winfo_screenwidth()  # width of the screen
@@ -66,6 +67,7 @@ def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
     y = int((hs / 2) - (h / 2))
     value = f"{w}x{h}+{x}+{y}"
     return value
+
 
 class MenuTitle(tk.Frame):
     def __init__(self, parent):
@@ -78,6 +80,7 @@ class MenuTitle(tk.Frame):
         label = tk.Label(self, text=t, anchor="w")
         label.configure(bg=TBG, fg=TFG, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+
 
 class SelectLanguage(tk.Frame):
     def __init__(self, parent):
