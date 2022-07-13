@@ -396,3 +396,19 @@ class CheckForUpdates(tk.Frame):
             button.bind("<Button-1>", self.b_check)
 
 
+_v = current_version()
+root = tk.Tk(className=f" Subsearch")
+root.iconbitmap(os.path.join(sys.path[0], r"src\data\icon.ico"))
+root.geometry(set_window_position())
+root.resizable(False, False)
+root.configure(bg=TBG)
+
+MenuTitle(root).pack()
+SelectLanguage(root).pack()
+HearingImparedSubs(root).pack()
+SelectPercentage(root).pack()
+ShowContextMenuIcon(root).pack()
+ShowTerminalOnSearch(root).pack()
+CheckForUpdates(root).pack()
+
+root.mainloop()
