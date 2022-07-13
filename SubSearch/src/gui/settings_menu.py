@@ -55,3 +55,14 @@ precentage = get("percentage")
 terminal_focus = get("terminal_focus")
 hearing_impared = get("hearing_impaired")
 cm_icon = get("cm_icon")
+
+def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
+    # get screen width and height
+    ws = root.winfo_screenwidth()  # width of the screen
+    hs = root.winfo_screenheight()  # height of the screen
+
+    # calculate x and y coordinates for the Tk root window
+    x = int((ws / 2) - (w / 2))
+    y = int((hs / 2) - (h / 2))
+    value = f"{w}x{h}+{x}+{y}"
+    return value
