@@ -2,15 +2,14 @@
     
 # SubSearch
 
-![prtsc](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
+![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/prtsc.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_226.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
-
 </div>
-
 
 ## Table of Contents
 
@@ -54,7 +53,9 @@ pip install -r path/SubSearch/docs/requirements.txt
 ```
 
 #### First time running or change settings\check for updates
-Run main.py from its directory, i.e ```E:\SubSearch\main.py```
+
+Run main.py from its directory, i.e `E:\SubSearch\main.py`
+
 ```
 python path\SubSearch\main.py
 ```
