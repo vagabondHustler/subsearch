@@ -66,3 +66,15 @@ def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
     y = int((hs / 2) - (h / 2))
     value = f"{w}x{h}+{x}+{y}"
     return value
+
+class MenuTitle(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.create_label("Menu", 1, 1, "nsew", TFONT20)
+        self.configure(bg=TBG)
+
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT20):
+
+        label = tk.Label(self, text=t, anchor="w")
+        label.configure(bg=TBG, fg=TFG, font=f)
+        label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
