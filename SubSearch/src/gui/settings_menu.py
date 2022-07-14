@@ -174,7 +174,7 @@ class ShowContextMenu(tk.Frame):
         self.context_menu = context_menu
         for i in range(1, 4):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
-        Draw.label(self, text="Show Context menu", row=1, col=1, sticky="w", font=Tks.font8b)
+        Draw.label(self, text="Show context menu", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.context_menu, row=1, col=2, font=Tks.font8b, anchor="center")
         Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true)
         Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false)
@@ -269,7 +269,7 @@ class CheckForUpdates(tk.Frame):
         self.updates_var.set(f"Searching for updates...")
         current, latest = check_for_updates(fgui=True)
         if current == latest:
-            self.updates_var.set(f"You are up to date")
+            self.updates_var.set(f"You are up to date!")
         if current != latest:
             self.updates_var.set(f"New version available!")
             Draw.button(self, text=f"Get v{latest}", row=1, col=3, height=2, width=18, bind_to=self.button_download)
@@ -291,7 +291,7 @@ def set_window_position(w=Tks.window_width, h=Tks.window_height):
 
 
 c_verison = current_version()
-root = tk.Tk(className=f" Subsearch")
+root = tk.Tk(className=f" SubSearch")
 root.iconbitmap(os.path.join(sys.path[0], r"src\data\icon.ico"))
 root.geometry(set_window_position())
 root.resizable(False, False)
