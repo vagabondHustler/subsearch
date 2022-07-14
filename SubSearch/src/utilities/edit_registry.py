@@ -48,6 +48,26 @@ def write_command_subkey() -> None:
                 winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tsilent)
 
 
+def restore_context_menu() -> None:
+    regkey = root_directory_file("/src/data/regkey.reg")
+    os.system(f'cmd /c "reg import "{regkey}"')
+    context_menu_icon()
+    write_command_subkey()
+
+
+def remove_context_menu() -> None:
+    shell_path = "Directory\Background\shell"
+    ss_path = "Directory\Background\shell\SubSearch"
+
+    with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
+        with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_ALL_ACCESS) as ss_key:
+            winreg.DeleteKey(ss_key, "command")
+
+    with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
+        with winreg.OpenKey(hkey, shell_path, 0, winreg.KEY_ALL_ACCESS) as shell_key:
+            winreg.DeleteKey(shell_key, "SubSearch")
+
+
 # imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
