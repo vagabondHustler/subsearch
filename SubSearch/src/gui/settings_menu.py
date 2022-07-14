@@ -190,7 +190,7 @@ class ContextMenu(tk.Frame):
         self.context_menu.set(f"False")
         from src.utilities import edit_registry
 
-        edit_registry.delete_context_menu()
+        edit_registry.remove_context_menu()
 
 
 class ShowContextMenuIcon(tk.Frame):
