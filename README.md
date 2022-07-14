@@ -40,9 +40,11 @@ Install dependencies `pip install -r .../SubSearch/docs/requirements.txt`
 
 Run main.py from where it is located `python .../SubSearch/SubSearch/main.py`
 
-To acces the settings, run main.py again
+To access the settings, run main.py again
 
 Right-click inside any folder containing the movie/series and you're done!
+
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py 
 
 ## Supported languages <a name = "lsupport"></a>
 
