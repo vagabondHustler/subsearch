@@ -115,7 +115,7 @@ class HearingImparedSubs(tk.Frame):
         self.hi_var = hi_var
         for i in range(1, 4):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
-        Draw.label(self, text="Use Hearing impaired", sticky="w", row=1, col=1, font=Tks.font8b, anchor="w")
+        Draw.label(self, text="Hearing impaired subtitles", sticky="w", row=1, col=1, font=Tks.font8b, anchor="w")
         Draw.label(self, textvar=self.hi_var, row=1, col=2, font=Tks.font8b)
         Draw.button(self, text="True", row=1, col=3, width=7, sticky="e", bind_to=self.button_set_true)
         Draw.button(self, text="False", row=1, col=3, width=7, sticky="w", bind_to=self.button_set_false)
@@ -138,7 +138,7 @@ class HearingImparedSubs(tk.Frame):
         update_json("hearing_impaired", update_svar)
 
 
-class SelectPercentage(tk.Frame):
+class SearchThreshold(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         pct_var = tk.StringVar()
@@ -166,7 +166,7 @@ class SelectPercentage(tk.Frame):
         update_json("precentage_pass", update_svar)
 
 
-class ContextMenu(tk.Frame):
+class ShowContextMenu(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         context_menu = tk.StringVar()
@@ -302,9 +302,9 @@ tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 SelectLanguage(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 HearingImparedSubs(root).pack(anchor="center")
-SelectPercentage(root).pack(anchor="center")
+SearchThreshold(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-ContextMenu(root).pack(anchor="center")
+ShowContextMenu(root).pack(anchor="center")
 ShowContextMenuIcon(root).pack(anchor="center")
 ShowTerminalOnSearch(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
