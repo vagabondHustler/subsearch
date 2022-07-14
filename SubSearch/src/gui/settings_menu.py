@@ -18,38 +18,16 @@ elif got_key:
     run_as_admin()
     exit()
 
-WINDOW_WIDTH = 560
-WINDOW_HEIGHT = 530
-TBG = "#1b1d22"
-TSLBG = "#4c4c4c"
-TFG = "#bdbdbd"
-TBC = "#121417"
-TEC = "#494B52"
-TFONT10 = "Cascadia 8 bold"
-TFONT20 = "Cascadia 20 bold"
-TLANGUAGE = (
-    "Arabic, ar",
-    "Brazillian Portuguese, pt_BR",
-    "Danish, dk",
-    "Dutch, nl",
-    "English, en",
-    "Finnish, fi",
-    "French, fr",
-    "German, de",
-    "Hebrew, he",
-    "Indonesian, id",
-    "Italian, it",
-    "Korean, ko",
-    "Norwegian, no",
-    "Romanian, ro",
-    "Spanish, es",
-    "Swedish, sv",
-    "Thai, th",
-    "Turkish, tr",
-    "Vietnamese, vi",
-)
-
-
+window_width = 560
+window_height = 530
+tk_bg = "#1b1d22"
+tk_lbg = "#4c4c4c"
+tk_fg = "#bdbdbd"
+tk_bc = "#121417"
+tk_ec = "#494B52"
+tk_font8b = "Cascadia 8 bold"
+tk_font20b = "Cascadia 20 bold"
+languages = get("languages")
 language, lang_abbr = get("language")
 precentage = get("percentage")
 terminal_focus = get("terminal_focus")
@@ -57,7 +35,7 @@ hearing_impared = get("hearing_impaired")
 cm_icon = get("cm_icon")
 
 
-def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
+def set_window_position(w=window_width, h=window_height):
     # get screen width and height
     ws = root.winfo_screenwidth()  # width of the screen
     hs = root.winfo_screenheight()  # height of the screen
@@ -72,13 +50,13 @@ def set_window_position(w=WINDOW_WIDTH, h=WINDOW_HEIGHT):
 class MenuTitle(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.create_label("Menu", 1, 1, "nsew", TFONT20)
-        self.configure(bg=TBG)
+        self.create_label("Menu", 1, 1, "nsew", tk_font20b)
+        self.configure(bg=tk_bg)
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT20):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font20b):
 
         label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
 
@@ -87,22 +65,22 @@ class SelectLanguage(tk.Frame):
         tk.Frame.__init__(self, parent)
         svar = tk.StringVar()
         svar.set(f"{language}, {lang_abbr}")
-        number_of_buttons = len(TLANGUAGE)
+        number_of_buttons = len(languages)
         self.svar = svar
         _xstr = " " * 50
         _rowcountert = 0
         _colcountert = 1
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
-        self.create_label(t="Selected language", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
+        self.create_label(t="Selected language", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
         for i in range(number_of_buttons):
             _rowcountert += 1
             if _rowcountert == 8:
                 _colcountert += 1
                 _rowcountert = 1
             self.create_button(r=_rowcountert + 1, c=_colcountert, x=i)
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
     def set_language(self, event):
         btn = event.widget
@@ -110,17 +88,17 @@ class SelectLanguage(tk.Frame):
         update_svar = self.svar.get()
         update_json("language", update_svar)
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None):
-        button = tk.Button(self, text=TLANGUAGE[x], height=1, width=24, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button = tk.Button(self, text=languages[x], height=1, width=24, bd=0)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         button.grid(row=r, column=c, padx=2, pady=2)
         button.bind("<Button-1>", self.set_language)
 
@@ -134,17 +112,17 @@ class SelectPercentage(tk.Frame):
         self.svar = svar
         _xstr = " " * 50
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
             if i >= 3:
-                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+                self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
 
-        self.create_label(t="Selected threshold", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+        self.create_label(t="Selected threshold", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
 
         self.create_button(r=1, c=3, x="+")
         self.create_button(r=1, c=3, x="-")
 
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
         self._add = precentage
 
@@ -161,17 +139,17 @@ class SelectPercentage(tk.Frame):
         update_svar = self.svar.get().split(" ")[0]
         update_json("precentage_pass", update_svar)
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None):
         button = tk.Button(self, text=x, height=1, width=8, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         if x == "+":
             button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
             button.bind("<Button-1>", self.b_add)
@@ -189,18 +167,18 @@ class HearingImparedSubs(tk.Frame):
         self.svar = svar
         _xstr = " " * 50
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
             if i >= 3:
-                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+                self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
 
-        self.create_label(t="Use HI-Subtitles", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+        self.create_label(t="Use HI-Subtitles", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
 
         self.create_button(r=1, c=3, x="Both")
         self.create_button(r=1, c=3, x="True")
         self.create_button(r=1, c=3, x="False")
 
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
     def b_true(self, event):
         self.svar.set(f"True")
@@ -217,17 +195,17 @@ class HearingImparedSubs(tk.Frame):
         update_svar = self.svar.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None):
         button = tk.Button(self, text=x, height=1, width=6, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         if x == "True":
             button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
             button.bind("<Button-1>", self.b_true)
@@ -248,17 +226,17 @@ class ShowContextMenuIcon(tk.Frame):
         self.svar = svar
         _xstr = " " * 50
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
             if i >= 3:
-                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+                self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
 
-        self.create_label(t="Show context menu icon", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+        self.create_label(t="Show context menu icon", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
 
         self.create_button(r=1, c=3, x="True")
         self.create_button(r=1, c=3, x="False")
 
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
     def b_true(self, event):
         self.svar.set(f"True")
@@ -276,17 +254,17 @@ class ShowContextMenuIcon(tk.Frame):
 
         edit_registry.context_menu_icon()
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None):
         button = tk.Button(self, text=x, height=1, width=6, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         if x == "True":
             button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
             button.bind("<Button-1>", self.b_true)
@@ -304,17 +282,17 @@ class ShowTerminalOnSearch(tk.Frame):
         self.svar = svar
         _xstr = " " * 50
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
             if i >= 3:
-                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+                self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
 
-        self.create_label(t="Terminal while searching", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+        self.create_label(t="Terminal while searching", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
 
         self.create_button(r=1, c=3, x="True")
         self.create_button(r=1, c=3, x="False")
 
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
     def b_true(self, event):
         self.svar.set(f"True")
@@ -328,17 +306,17 @@ class ShowTerminalOnSearch(tk.Frame):
         update_json("terminal_focus", update_svar)
         edit_registry.write_command_subkey()
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None):
         button = tk.Button(self, text=x, height=1, width=6, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         if x == "True":
             button.grid(row=r, column=c, padx=5, pady=2, sticky="e")
             button.bind("<Button-1>", self.b_true)
@@ -357,16 +335,16 @@ class CheckForUpdates(tk.Frame):
         self.svar = svar
         _xstr = " " * 50
         for i in range(1, 4):
-            self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+            self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
             if i >= 3:
-                self.create_label(t=_xstr, r=0, c=i, f=TFONT10)
+                self.create_label(t=_xstr, r=0, c=i, f=tk_font8b)
 
-        self.create_label(t=f"Subsearch v{version}", r=1, c=1, f=TFONT10)
-        self.create_label(r=1, c=2, f=TFONT10)
+        self.create_label(t=f"Subsearch v{version}", r=1, c=1, f=tk_font8b)
+        self.create_label(r=1, c=2, f=tk_font8b)
 
         self.create_button(r=1, c=3, x="Check for updates")
 
-        self.configure(bg=TBG)
+        self.configure(bg=tk_bg)
 
     def b_check(self, event):
         self.svar.set(f"Searching for updates...")
@@ -380,17 +358,17 @@ class CheckForUpdates(tk.Frame):
     def b_download_update(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=TFONT10):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
         if t is None:
             label = tk.Label(self, textvariable=self.svar, anchor="center")
         else:
             label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=TBG, fg=TFG, font=f)
+        label.configure(bg=tk_bg, fg=tk_fg, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
     def create_button(self, r=0, c=0, x=None, new=False):
         button = tk.Button(self, text=x, height=1, bd=0)
-        button.configure(bg=TBC, fg=TFG, font=TFONT10)
+        button.configure(bg=tk_bc, fg=tk_fg, font=tk_font8b)
         if new:
             button.grid(row=r, column=c, padx=5, pady=2, sticky="nsew")
             button.bind("<Button-1>", self.b_download_update)
@@ -404,7 +382,7 @@ root = tk.Tk(className=f" Subsearch")
 root.iconbitmap(os.path.join(sys.path[0], r"src\data\icon.ico"))
 root.geometry(set_window_position())
 root.resizable(False, False)
-root.configure(bg=TBG)
+root.configure(bg=tk_bg)
 
 MenuTitle(root).pack()
 SelectLanguage(root).pack()
