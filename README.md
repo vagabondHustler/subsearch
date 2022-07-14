@@ -3,7 +3,7 @@
 # SubSearch
 
 ![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_247.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_248.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
@@ -32,19 +32,17 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 ### Setup
 
+Download Python 3.10 `https://www.python.org/downloads/`
 
-Download Python 3.10 ```https://www.python.org/downloads/```
+Download SubScene `git clone https://github.com/vagabondHustler/SubSearch` or `https://github.com/vagabondHustler/SubSearch/releases`
 
-Download SubScene ```git clone https://github.com/vagabondHustler/SubSearch``` or ```https://github.com/vagabondHustler/SubSearch/releases```
+Install dependencies `pip install -r .../SubSearch/docs/requirements.txt`
 
-Install dependencies ```pip install -r .../SubSearch/docs/requirements.txt```
-
-Run main.py from where it is located ```python .../SubSearch/SubSearch/main.py```
+Run main.py from where it is located `python .../SubSearch/SubSearch/main.py`
 
 To acces the settings, run main.py again
 
 Right-click inside any folder containing the movie/series and you're done!
-
 
 ## Supported languages <a name = "lsupport"></a>
 
