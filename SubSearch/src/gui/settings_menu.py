@@ -130,13 +130,13 @@ class SelectPercentage(tk.Frame):
 
         self._add += 5 if self._add < 100 else 0
         self.svar.set(f"{self._add} %")
-        update_svar = self.svar.get().split(" ")[0]
+        update_svar = int(self.svar.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
 
     def b_sub(self, event):
         self._add -= 5 if self._add > 0 else 0
         self.svar.set(f"{self._add} %")
-        update_svar = self.svar.get().split(" ")[0]
+        update_svar = int(self.svar.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
 
     def create_label(self, t=None, r=1, c=1, p="nsew", f=tk_font8b):
