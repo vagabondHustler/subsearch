@@ -54,13 +54,6 @@ class MenuTitle(tk.Frame):
         label.configure(bg=Tks.bgc, fg=Tks.fgc, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
-
-# def my_label(_bg=None, _fg=None, _text=None, _textvariable=None, _row=None, _column=None, _anchor=None, _sticky=None, _font=None, _padx=None, _pady=None):
-#     _label = tk.Label(text=_text, textvariable=_textvariable ,font=_font, fg=_fg, anchor=_anchor)
-#     _label.configure(bg=_bg, fg=_fg, font=_font)
-#     _label.grid(row=_row, column=_column, sticky=_sticky, padx=_padx, pady=_pady)
-
-
 class Draw(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -97,7 +90,6 @@ class SelectLanguage(tk.Frame):
                 colcount += 1
                 rowcount = 1
             Draw.button(self, text=languages[i], row=rowcount + 1, col=colcount, height=2, width=24, bind_to=self.button_set_lang)
-            # self.create_button(r=_rowcountert + 1, c=_colcountert, x=i)
         self.configure(bg=Tks.bgc)
 
     def button_set_lang(self, event):
@@ -297,7 +289,7 @@ root.geometry(set_window_position())
 root.resizable(False, False)
 root.configure(bg=Tks.bgc)
 
-# MenuTitle(root).pack()
+
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 SelectLanguage(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
