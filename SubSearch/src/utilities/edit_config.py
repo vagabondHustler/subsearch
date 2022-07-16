@@ -2,8 +2,8 @@ import ctypes
 import json
 import os
 
-from src.utilities.fetch_config import get
 from src.local_paths import root_directory_file
+from src.utilities.fetch_config import get
 
 
 # update config.json
