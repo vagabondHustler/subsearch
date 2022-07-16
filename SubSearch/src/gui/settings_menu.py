@@ -8,11 +8,11 @@ from dataclasses import dataclass
 import src.utilities.edit_registry as edit_registry
 from src.data._version import current_version
 from src.gui.tooltip import Hovertip
+from src.local_paths import cwd
 from src.utilities.current_user import got_key, is_admin, run_as_admin
 from src.utilities.edit_config import set_default_values, update_json
 from src.utilities.fetch_config import get
 from src.utilities.updates import check_for_updates
-from src.local_paths import cwd
 
 languages = get("languages")
 language, lang_abbr = get("language")
