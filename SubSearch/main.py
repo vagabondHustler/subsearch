@@ -1,5 +1,7 @@
-from src.local_paths import cwd, root_directory
 import sys
+
+from src.local_paths import cwd, root_directory
+
 
 def main() -> None:
     if cwd() == root_directory():
