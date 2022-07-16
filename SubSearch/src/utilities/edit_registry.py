@@ -6,7 +6,6 @@ import winreg
 from src.local_paths import root_directory, root_directory_file
 from src.utilities.current_user import is_admin, run_as_admin
 
-
 COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
