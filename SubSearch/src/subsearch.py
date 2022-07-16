@@ -39,7 +39,6 @@ def main() -> None:
         param = get_parameters(cwd().lower(), lang_abbr, file_hash, video)
     except IndexError as err:
         log.output(err)
-        ufm.copy_log_to_cwd()
         if focus == "True":
             return input()
         return
@@ -57,7 +56,6 @@ def main() -> None:
     if scrape_os is None and scrape_ss is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
-        ufm.copy_log_to_cwd()
         if focus == "True":
             return input()
         return
@@ -87,7 +85,6 @@ def main() -> None:
     # finnishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
-    ufm.copy_log_to_cwd()
 
     if focus == "True":
         input()
