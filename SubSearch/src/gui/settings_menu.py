@@ -1,11 +1,13 @@
-from dataclasses import dataclass
+import ctypes
 import os
 import sys
 import tkinter as tk
 import webbrowser
+from dataclasses import dataclass
 
 import src.utilities.edit_registry as edit_registry
 from src.data._version import current_version
+from src.gui.tooltip import Hovertip
 from src.utilities.current_user import got_key, is_admin, run_as_admin
 from src.utilities.edit_config import set_default_values, update_json
 from src.utilities.fetch_config import get
@@ -36,7 +38,7 @@ class Tks:
     fgc: str = "#bdbdbd"
     buttonc: str = "#121417"
     entryc: str = "#494B52"
-    font8: str = "Cascadia 8 bold"
+    font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 10 bold"
     font20b: str = "Cascadia 20 bold"
@@ -54,21 +56,37 @@ class MenuTitle(tk.Frame):
         label.configure(bg=Tks.bgc, fg=Tks.fgc, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
+
 class Draw(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
+
         self.configure(bg=Tks.bgc)
 
     def label(self, bg=Tks.bgc, fg=Tks.fgc, text=None, textvar=None, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2):
         _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
+        return _label
 
-    def button(self, bg=Tks.buttonc, fg=Tks.fgc, text=None, height=2, width=10, bd=0, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2, bind_to=None):
+    def button(self, bg=Tks.buttonc, abgc="#16181c", bgc_e="#16181c", bgc_l=Tks.buttonc, fg=Tks.fgc, fg_e="#c5895e", text=None, height=2, width=10, bd=0, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2, bind_to=None, show_tip=False, text_tip=None):
         _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
-        _button.configure(bg=bg, fg=fg, font=font)
+        _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
         _button.bind("<Button-1>", bind_to)
+        tip = Hovertip(_button, text_tip) if show_tip else None
+
+        def button_enter(self):
+            _button.configure(bg=bgc_e, fg=fg_e, font=font)
+            tip.showtip() if show_tip else None
+
+        def button_leave(self):
+            _button.configure(bg=bg, fg=fg, font=font)
+            tip.hidetip() if show_tip else None
+
+        _button.bind("<Enter>", button_enter)
+        _button.bind("<Leave>", button_leave)
+        return _button
 
 
 class SelectLanguage(tk.Frame):
@@ -109,9 +127,9 @@ class HearingImparedSubs(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Hearing impaired subtitles", sticky="w", row=1, col=1, font=Tks.font8b, anchor="w")
         Draw.label(self, textvar=self.hi_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, width=7, sticky="e", bind_to=self.button_set_true)
-        Draw.button(self, text="False", row=1, col=3, width=7, sticky="w", bind_to=self.button_set_false)
-        Draw.button(self, text="Both", row=1, col=3, width=7, bind_to=self.button_set_both)
+        Draw.button(self, text="True", row=1, col=3, width=7, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Only use hearing impaired subtitles")
+        Draw.button(self, text="False", row=1, col=3, width=7, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Only use regular subtitles")
+        Draw.button(self, text="Both", row=1, col=3, width=7, bind_to=self.button_set_both, show_tip=True, text_tip="Use both hearing impaired and regular subtitles")
         self.configure(bg=Tks.bgc)
 
     def button_set_true(self, event):
@@ -141,8 +159,8 @@ class SearchThreshold(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Search threshold", sticky="w", row=1, col=1, font=Tks.font8b)
         Draw.label(self, textvar=self.pct_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="+", row=1, col=3, sticky="e", bind_to=self.button_add_5)
-        Draw.button(self, text="-", row=1, col=3, sticky="w", bind_to=self.button_sub_5)
+        Draw.button(self, text="+", row=1, col=3, sticky="e", bind_to=self.button_add_5, show_tip=True, text_tip="Add 5% to the search threshold\n A higher value means less chance of finding a subtitles that is not synced witht the movie/series")
+        Draw.button(self, text="-", row=1, col=3, sticky="w", bind_to=self.button_sub_5, show_tip=True, text_tip="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded")
         self.configure(bg=Tks.bgc)
 
     def button_add_5(self, event):
@@ -168,8 +186,8 @@ class ShowContextMenu(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show context menu", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.context_menu, row=1, col=2, font=Tks.font8b, anchor="center")
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true)
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false)
+        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Add SubSearch to the context menu when you right click inside a folder")
+        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch")
         self.configure(bg=Tks.bgc)
 
     def button_set_true(self, event):
@@ -195,8 +213,8 @@ class ShowContextMenuIcon(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.cmi_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true)
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false)
+        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Add a icon next to SubSearch in the context menu")
+        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove the icon next to SubSearch in the context menu")
         self.configure(bg=Tks.bgc)
 
     def button_set_true(self, event):
@@ -226,8 +244,8 @@ class ShowTerminalOnSearch(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.terminal_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true)
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false)
+        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log")
+        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Hide the terminal when searching for subtitles")
         self.configure(bg=Tks.bgc)
 
     def button_set_true(self, event):
@@ -270,12 +288,69 @@ class CheckForUpdates(tk.Frame):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
 
-def set_window_position(w=Tks.window_width, h=Tks.window_height):
-    # get screen width and height
-    ws = root.winfo_screenwidth()  # width of the screen
-    hs = root.winfo_screenheight()  # height of the screen
+class CustomTitleBar(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        self.after(10, self.remove_titlebar, root)
+        self.parent = parent
+        self._offsetx = 0
+        self._offsety = 0
+        root.focus_force()
+        root.overrideredirect(True)
 
-    # calculate x and y coordinates for the Tk root window
+        button = Draw.button(self, text="X", row=0, col=0, height=1, width=2, abgc="#cd2e3e", bgc_e="#a72633", bgc_l="#811e28", fg_e=Tks.fgc, font=Tks.font10b, pady=5, padx=5, bind_to=self.tk_exit_press)
+        label = tk.Label(root, text=" SubSearch", height=2, bg=Tks.buttonc, fg=Tks.fgc, font=Tks.font10b, justify="left", anchor="w", width=Tks.window_width)
+        label.place(bordermode="outside", x=0, y=0)
+        label.lower()
+
+        self.button = button
+        self.label = label
+
+        label.bind("<Button-1>", self.titlebar_press)
+        label.bind("<B1-Motion>", self.titlebar_drag)
+
+        self.configure(bg=Tks.buttonc)
+
+    def window_pos(self, parent, w: int = 80, h: int = 48) -> str:
+        ws = parent.winfo_screenwidth()
+        hs = parent.winfo_screenheight()
+
+        x = int((ws / 2) - (w / 2))
+        y = int((hs / 2) - (h / 2))
+        value = f"{w}x{h}+{x}+{y}"
+        return value
+
+    def remove_titlebar(self, parent):
+        GWL_EXSTYLE = -20
+        WS_EX_APPWINDOW = 0x00040000
+        WS_EX_TOOLWINDOW = 0x00000080
+        hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+        style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TOOLWINDOW
+        style = style | WS_EX_APPWINDOW
+        res = ctypes.windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        root.withdraw()
+        root.after(10, root.deiconify)
+
+    def titlebar_press(self, event) -> None:
+        self._offsetx = root.winfo_pointerx() - root.winfo_rootx()
+        self._offsety = root.winfo_pointery() - root.winfo_rooty()
+
+    def titlebar_drag(self, event) -> None:
+        x = self.winfo_pointerx() - self._offsetx
+        y = self.winfo_pointery() - self._offsety
+        root.geometry(f"+{x}+{y}")
+
+    def tk_exit_release(self, event) -> None:
+        root.destroy()
+
+    def tk_exit_press(self, event) -> None:
+        self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
+
+
+def set_window_position(w=Tks.window_width, h=Tks.window_height):
+    ws = root.winfo_screenwidth()
+    hs = root.winfo_screenheight()
     x = int((ws / 2) - (w / 2))
     y = int((hs / 2) - (h / 2))
     value = f"{w}x{h}+{x}+{y}"
@@ -287,9 +362,14 @@ root = tk.Tk(className=f" SubSearch")
 root.iconbitmap(os.path.join(sys.path[0], r"src\data\icon.ico"))
 root.geometry(set_window_position())
 root.resizable(False, False)
+# root.attributes("-topmost", True, "-alpha", 1)
+root.wm_attributes("-transparentcolor", "#2a2d2f")
 root.configure(bg=Tks.bgc)
 
 
+CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
+tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 SelectLanguage(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
@@ -302,5 +382,6 @@ ShowTerminalOnSearch(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 CheckForUpdates(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+
 
 root.mainloop()
