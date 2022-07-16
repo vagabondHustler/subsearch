@@ -80,14 +80,6 @@ def clean_up(cwd_path: str, extension: str) -> None:
             log.output(f"Removing: {file}")
             os.remove(file)
 
-
-def copy_log_to_cwd() -> None:
-    if cwd() != root_directory():
-        src_file = root_directory_file("search.log")
-        dst_file = f"{cwd()}/search.log"
-        shutil.copy(src_file, dst_file)
-
-
 def get_hash(file_name: str):
     try:
         longlongformat = "<q"  # little-endian long long
