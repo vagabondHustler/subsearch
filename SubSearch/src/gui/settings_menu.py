@@ -238,7 +238,7 @@ class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         terminal_var = tk.StringVar()
-        terminal_var.set(f"{cm_icon}")
+        terminal_var.set(f"{terminal_focus}")
         self.terminal_var = terminal_var
         for i in range(1, 4):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
