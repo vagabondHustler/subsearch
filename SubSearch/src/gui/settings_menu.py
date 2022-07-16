@@ -12,14 +12,7 @@ from src.utilities.current_user import got_key, is_admin, run_as_admin
 from src.utilities.edit_config import set_default_values, update_json
 from src.utilities.fetch_config import get
 from src.utilities.updates import check_for_updates
-
-if is_admin():
-    if got_key() is False:
-        set_default_values()
-        edit_registry.add_context_menu()
-elif got_key:
-    run_as_admin()
-    exit()
+from src.local_paths import cwd
 
 languages = get("languages")
 language, lang_abbr = get("language")
@@ -159,7 +152,7 @@ class SearchThreshold(tk.Frame):
             Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Search threshold", sticky="w", row=1, col=1, font=Tks.font8b)
         Draw.label(self, textvar=self.pct_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="+", row=1, col=3, sticky="e", bind_to=self.button_add_5, show_tip=True, text_tip="Add 5% to the search threshold\n A higher value means less chance of finding a subtitles that is not synced witht the movie/series")
+        Draw.button(self, text="+", row=1, col=3, sticky="e", bind_to=self.button_add_5, show_tip=True, text_tip="Add 5% to the search threshold\n A higher value means less chance of finding subtitles that are not synced witht the movie/series")
         Draw.button(self, text="-", row=1, col=3, sticky="w", bind_to=self.button_sub_5, show_tip=True, text_tip="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded")
         self.configure(bg=Tks.bgc)
 
@@ -357,31 +350,39 @@ def set_window_position(w=Tks.window_width, h=Tks.window_height):
     return value
 
 
-c_verison = current_version()
-root = tk.Tk(className=f" SubSearch")
-root.iconbitmap(os.path.join(sys.path[0], r"src\data\icon.ico"))
-root.geometry(set_window_position())
-root.resizable(False, False)
-# root.attributes("-topmost", True, "-alpha", 1)
-root.wm_attributes("-transparentcolor", "#2a2d2f")
-root.configure(bg=Tks.bgc)
+if is_admin():
+    if got_key() is False:
+        set_default_values()
+        edit_registry.add_context_menu()
 
+    c_verison = current_version()
+    root = tk.Tk(className=f" SubSearch")
+    icon_path = cwd() + "\src\data\icon.ico"
+    root.iconbitmap(icon_path)
+    root.geometry(set_window_position())
+    root.resizable(False, False)
+    # root.attributes("-topmost", True, "-alpha", 1)
+    root.wm_attributes("-transparentcolor", "#2a2d2f")
+    root.configure(bg=Tks.bgc)
 
-CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-SelectLanguage(root).pack(anchor="center")
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-HearingImparedSubs(root).pack(anchor="center")
-SearchThreshold(root).pack(anchor="center")
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-ShowContextMenu(root).pack(anchor="center")
-ShowContextMenuIcon(root).pack(anchor="center")
-ShowTerminalOnSearch(root).pack(anchor="center")
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-CheckForUpdates(root).pack(anchor="center")
-tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    SelectLanguage(root).pack(anchor="center")
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    HearingImparedSubs(root).pack(anchor="center")
+    SearchThreshold(root).pack(anchor="center")
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    ShowContextMenu(root).pack(anchor="center")
+    ShowContextMenuIcon(root).pack(anchor="center")
+    ShowTerminalOnSearch(root).pack(anchor="center")
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    CheckForUpdates(root).pack(anchor="center")
+    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
 
+    root.mainloop()
 
-root.mainloop()
+elif got_key:
+    run_as_admin()
+    sys.exit()
