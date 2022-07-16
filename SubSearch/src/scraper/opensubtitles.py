@@ -1,6 +1,6 @@
-from src.utilities import log
 from src.local_paths import cwd
 from src.scraper.opensubtitles_soup import search_for_hash
+from src.utilities import log
 
 
 # decides what to do with all the scrape data
