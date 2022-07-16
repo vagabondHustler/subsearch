@@ -1,11 +1,11 @@
 from src.local_paths import cwd, root_directory
-
+import sys
 
 def main() -> None:
     if cwd() == root_directory():
         import src.gui.settings_menu
 
-        exit()
+        sys.exit()
     elif cwd() != root_directory():
         import src.subsearch
 
