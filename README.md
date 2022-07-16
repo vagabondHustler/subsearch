@@ -3,7 +3,7 @@
 # SubSearch
 
 ![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_248.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_258.png)
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
@@ -44,7 +44,7 @@ To access the settings, run main.py again
 
 Right-click inside any folder containing the movie/series and you're done!
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py 
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py
 
 ## Supported languages <a name = "lsupport"></a>
 
