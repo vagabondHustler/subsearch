@@ -2,7 +2,7 @@ import ctypes
 import json
 import os
 
-from src.local_paths import root_directory_file
+from utilities.local_paths import root_directory_file
 from src.utilities.fetch_config import get
 
 

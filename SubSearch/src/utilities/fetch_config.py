@@ -1,4 +1,4 @@
-from src.local_paths import root_directory_file
+from utilities.local_paths import root_directory_file
 from src.utilities.fetch_parameters import read_data
 
 

@@ -4,7 +4,7 @@ import struct
 import zipfile
 
 import cloudscraper
-from src.local_paths import cwd, root_directory, root_directory_file
+from utilities.local_paths import cwd, root_directory, root_directory_file
 from src.utilities import log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
@@ -79,6 +79,7 @@ def clean_up(cwd_path: str, extension: str) -> None:
         if file.endswith(extension):
             log.output(f"Removing: {file}")
             os.remove(file)
+
 
 def get_hash(file_name: str):
     try:
