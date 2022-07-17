@@ -73,13 +73,47 @@ class Draw(tk.Frame):
 
         self.configure(bg=Tks.bgc)
 
-    def label(self, bg=Tks.bgc, fg=Tks.fgc, text=None, textvar=None, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2) -> str:
+    def label(
+        self,
+        bg=Tks.bgc,
+        fg=Tks.fgc,
+        text=None,
+        textvar=None,
+        row=None,
+        col=None,
+        anchor=None,
+        sticky=None,
+        font=Tks.font8b,
+        padx=2,
+        pady=2,
+    ) -> str:
         _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
 
-    def button(self, bg=Tks.buttonc, abgc=Tks.abgc, bgc_e=Tks.abgc, bgc_l=Tks.buttonc, fg=Tks.fgc, fg_e=Tks.efgc, text=None, height=2, width=10, bd=0, row=None, col=None, sticky=None, font=Tks.font8b, padx=2, pady=2, bind_to=None, show_tip=False, text_tip=None) -> str:
+    def button(
+        self,
+        bg=Tks.buttonc,
+        abgc=Tks.abgc,
+        bgc_e=Tks.abgc,
+        bgc_l=Tks.buttonc,
+        fg=Tks.fgc,
+        fg_e=Tks.efgc,
+        text=None,
+        height=2,
+        width=10,
+        bd=0,
+        row=None,
+        col=None,
+        sticky=None,
+        font=Tks.font8b,
+        padx=2,
+        pady=2,
+        bind_to=None,
+        show_tip=False,
+        text_tip=None,
+    ) -> str:
         _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
         _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
