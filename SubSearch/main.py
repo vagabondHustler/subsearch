@@ -1,6 +1,6 @@
 import sys
 
-from utilities.local_paths import cwd, root_directory
+from src.utilities.local_paths import cwd, root_directory
 
 
 def main() -> None:
