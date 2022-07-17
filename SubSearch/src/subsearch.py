@@ -49,11 +49,11 @@ def main() -> None:
     # scrape with parameters
     log.output("")
     log.output("[Searching opensubtitles]")
-    scrape_os = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
+    scrape_opensubtitles = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
     log.output("")
     log.output("[Searching subscene]")
-    scrape_ss = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
-    if scrape_os is None and scrape_ss is None:
+    scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
+    if scrape_opensubtitles is None and scrape_subscene is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
         if focus == "True":
@@ -61,15 +61,15 @@ def main() -> None:
         return
 
     # download files from scrape results
-    if scrape_os is not None:
+    if scrape_opensubtitles is not None:
         log.output("")
         log.output("[Downloading from Opensubtitles]")
-        for item in scrape_os:
+        for item in scrape_opensubtitles:
             ufm.download_zip(item)
-    if scrape_ss is not None:
+    if scrape_subscene is not None:
         log.output("")
         log.output("[Downloading from Subscene]")
-        for item in scrape_ss:
+        for item in scrape_subscene:
             ufm.download_zip(item)
 
     # procsess downloaded files
