@@ -24,6 +24,23 @@ cm_icon = get("cm_icon")
 
 @dataclass
 class Tks:
+    """Data class for diffrent gui settings that are used often.
+
+    Args:
+        window_width (int) = The width of the window\n
+        window_height (int) = The height of the window\n
+        bgc (str) = Background color\n
+        lbgc (str) = Light background color\n
+        fgc (str) = Foreground color\n
+        efgc (str) = Enter foreground color, when mouse enters said area\n
+        buttonc (str) = Button color\n
+        abgc (str) = Active background color, when object is active\n
+        font8 (str) = Font Cascadia 8\n
+        font8b (str) = Font Cascadia 8 bold\n
+        font10b (str) = Font Cascadia 10 bold\n
+        font20b (str) = Font Cascadia 20 bold\n
+        column_lenght50 (str) = Fills column with 50 blank spaces"""
+
     window_width: int = 660
     window_height: int = 660
     bgc: str = "#1b1d22"
