@@ -1,4 +1,4 @@
-from utilities.local_paths import cwd
+from src.utilities.local_paths import cwd
 from src.scraper.opensubtitles_soup import search_for_hash
 from src.utilities import log
 

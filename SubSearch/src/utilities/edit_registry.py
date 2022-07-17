@@ -3,7 +3,7 @@ import socket
 import sys
 import winreg
 
-from utilities.local_paths import root_directory, root_directory_file
+from src.utilities.local_paths import root_directory, root_directory_file
 from src.utilities.current_user import is_admin, run_as_admin
 
 COMPUTER_NAME = socket.gethostname()

@@ -1,4 +1,4 @@
-from utilities.local_paths import cwd
+from src.utilities.local_paths import cwd
 from src.scraper.subscene_soup import get_download_url, search_for_title, search_title_for_sub
 from src.utilities import log
 from src.utilities.compare import check
