@@ -4,7 +4,7 @@ import struct
 import zipfile
 
 import cloudscraper
-from src.utilities.local_paths import cwd, root_directory, root_directory_file
+from src.utilities.local_paths import cwd, root_directory, root_directory
 from src.utilities import log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})

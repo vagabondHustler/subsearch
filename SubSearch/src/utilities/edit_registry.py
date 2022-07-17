@@ -3,7 +3,7 @@ import socket
 import sys
 import winreg
 
-from src.utilities.local_paths import root_directory, root_directory_file
+from src.utilities.local_paths import root_directory, root_directory
 from src.utilities.current_user import is_admin, run_as_admin
 
 COMPUTER_NAME = socket.gethostname()
@@ -14,7 +14,7 @@ def context_menu_icon() -> None:
 
     use: str = get("cm_icon")
     ss_path = "Directory\Background\shell\SubSearch"
-    icon_path = f"{root_directory()}\src\data\icon.ico, 0"
+    icon_path = root_directory("data", "icon.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_ALL_ACCESS) as subkey_ss:
             if use == "True":
@@ -48,7 +48,7 @@ def write_command_subkey() -> None:
 
 
 def restore_context_menu() -> None:
-    regkey = root_directory_file("/src/data/regkey.reg")
+    regkey = root_directory("data", "regkey.reg")
     os.system(f'cmd /c "reg import "{regkey}"')
     context_menu_icon()
     write_command_subkey()
@@ -70,7 +70,7 @@ def remove_context_menu() -> None:
 # imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
-        regkey = root_directory_file("/src/data/regkey.reg")
+        regkey = root_directory("/src/data/regkey.reg")
         os.system(f'cmd /c "reg import "{regkey}"')
         context_menu_icon()
         write_command_subkey()
