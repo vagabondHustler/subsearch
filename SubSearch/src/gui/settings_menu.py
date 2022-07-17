@@ -46,8 +46,9 @@ class Tks:
     bgc: str = "#1b1d22"
     lbgc: str = "#4c4c4c"
     fgc: str = "#bdbdbd"
+    efgc: str = "#c5895e"
     buttonc: str = "#121417"
-    entryc: str = "#494B52"
+    abgc: str = "#16181c"
     font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 10 bold"
@@ -56,41 +57,41 @@ class Tks:
 
 
 class MenuTitle(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.create_label("Menu", 1, 1, "nsew", Tks.font20b)
         self.configure(bg=Tks.bgc)
 
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=Tks.font20b):
+    def create_label(self, t=None, r=1, c=1, p="nsew", f=Tks.font20b) -> None:
         label = tk.Label(self, text=t, anchor="w")
         label.configure(bg=Tks.bgc, fg=Tks.fgc, font=f)
         label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
 
 
 class Draw(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
 
         self.configure(bg=Tks.bgc)
 
-    def label(self, bg=Tks.bgc, fg=Tks.fgc, text=None, textvar=None, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2):
+    def label(self, bg=Tks.bgc, fg=Tks.fgc, text=None, textvar=None, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2) -> str:
         _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
 
-    def button(self, bg=Tks.buttonc, abgc="#16181c", bgc_e="#16181c", bgc_l=Tks.buttonc, fg=Tks.fgc, fg_e="#c5895e", text=None, height=2, width=10, bd=0, row=None, col=None, anchor=None, sticky=None, font=Tks.font8b, padx=2, pady=2, bind_to=None, show_tip=False, text_tip=None):
+    def button(self, bg=Tks.buttonc, abgc=Tks.abgc, bgc_e=Tks.abgc, bgc_l=Tks.buttonc, fg=Tks.fgc, fg_e=Tks.efgc, text=None, height=2, width=10, bd=0, row=None, col=None, sticky=None, font=Tks.font8b, padx=2, pady=2, bind_to=None, show_tip=False, text_tip=None) -> str:
         _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
         _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
         _button.bind("<Button-1>", bind_to)
         tip = Hovertip(_button, text_tip) if show_tip else None
 
-        def button_enter(self):
+        def button_enter(self) -> None:
             _button.configure(bg=bgc_e, fg=fg_e, font=font)
             tip.showtip() if show_tip else None
 
-        def button_leave(self):
+        def button_leave(self) -> None:
             _button.configure(bg=bg, fg=fg, font=font)
             tip.hidetip() if show_tip else None
 
@@ -100,7 +101,7 @@ class Draw(tk.Frame):
 
 
 class SelectLanguage(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         lang_var = tk.StringVar()
         lang_var.set(f"{language}, {lang_abbr}")
@@ -120,7 +121,7 @@ class SelectLanguage(tk.Frame):
             Draw.button(self, text=languages[i], row=rowcount + 1, col=colcount, height=2, width=24, bind_to=self.button_set_lang)
         self.configure(bg=Tks.bgc)
 
-    def button_set_lang(self, event):
+    def button_set_lang(self, event) -> None:
         btn = event.widget
         self.lang_var.set(btn.cget("text"))
         update_svar = self.lang_var.get()
@@ -128,7 +129,7 @@ class SelectLanguage(tk.Frame):
 
 
 class HearingImparedSubs(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         hi_var = tk.StringVar()
         hi_var.set(f"{hearing_impared}")
@@ -142,24 +143,24 @@ class HearingImparedSubs(tk.Frame):
         Draw.button(self, text="Both", row=1, col=3, width=7, bind_to=self.button_set_both, show_tip=True, text_tip="Use both hearing impaired and regular subtitles")
         self.configure(bg=Tks.bgc)
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         self.hi_var.set(f"True")
         update_svar = self.hi_var.get()
         update_json("hearing_impaired", update_svar)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         self.hi_var.set(f"False")
         update_svar = self.hi_var.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
-    def button_set_both(self, event):
+    def button_set_both(self, event) -> None:
         self.hi_var.set(f"Both")
         update_svar = self.hi_var.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
 
 class SearchThreshold(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         pct_var = tk.StringVar()
         pct_var.set(f"{precentage} %")
@@ -173,13 +174,13 @@ class SearchThreshold(tk.Frame):
         Draw.button(self, text="-", row=1, col=3, sticky="w", bind_to=self.button_sub_5, show_tip=True, text_tip="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded")
         self.configure(bg=Tks.bgc)
 
-    def button_add_5(self, event):
+    def button_add_5(self, event) -> None:
         self._add += 5 if self._add < 100 else 0
         self.pct_var.set(f"{self._add} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
 
-    def button_sub_5(self, event):
+    def button_sub_5(self, event) -> None:
         self._add -= 5 if self._add > 0 else 0
         self.pct_var.set(f"{self._add} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
@@ -187,7 +188,7 @@ class SearchThreshold(tk.Frame):
 
 
 class ShowContextMenu(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         context_menu = tk.StringVar()
         context_menu.set(f"True")
@@ -200,13 +201,13 @@ class ShowContextMenu(tk.Frame):
         Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch")
         self.configure(bg=Tks.bgc)
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         self.context_menu.set(f"True")
         from src.utilities import edit_registry
 
         edit_registry.restore_context_menu()
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         self.context_menu.set(f"False")
         from src.utilities import edit_registry
 
@@ -214,7 +215,7 @@ class ShowContextMenu(tk.Frame):
 
 
 class ShowContextMenuIcon(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         cmi_var = tk.StringVar()
         cmi_var.set(f"{cm_icon}")
@@ -227,7 +228,7 @@ class ShowContextMenuIcon(tk.Frame):
         Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove the icon next to SubSearch in the context menu")
         self.configure(bg=Tks.bgc)
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         self.cmi_var.set(f"True")
         update_svar = self.cmi_var.get()
         update_json("context_menu_icon", update_svar)
@@ -235,7 +236,7 @@ class ShowContextMenuIcon(tk.Frame):
 
         edit_registry.context_menu_icon()
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         self.cmi_var.set(f"False")
         update_svar = self.cmi_var.get()
         update_json("context_menu_icon", update_svar)
@@ -245,7 +246,7 @@ class ShowContextMenuIcon(tk.Frame):
 
 
 class ShowTerminalOnSearch(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         terminal_var = tk.StringVar()
         terminal_var.set(f"{terminal_focus}")
@@ -258,13 +259,13 @@ class ShowTerminalOnSearch(tk.Frame):
         Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Hide the terminal when searching for subtitles")
         self.configure(bg=Tks.bgc)
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         self.terminal_var.set(f"True")
         update_svar = self.terminal_var.get()
         update_json("terminal_focus", update_svar)
         edit_registry.write_command_subkey()
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         self.terminal_var.set(f"False")
         update_svar = self.terminal_var.get()
         update_json("terminal_focus", update_svar)
@@ -272,7 +273,7 @@ class ShowTerminalOnSearch(tk.Frame):
 
 
 class CheckForUpdates(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         updates_var = tk.StringVar()
         c_version = current_version()
@@ -285,7 +286,7 @@ class CheckForUpdates(tk.Frame):
         Draw.button(self, text="Check for updates", row=1, col=3, height=2, width=18, bind_to=self.button_check)
         self.configure(bg=Tks.bgc)
 
-    def button_check(self, event):
+    def button_check(self, event) -> None:
         self.updates_var.set(f"Searching for updates...")
         current, latest = check_for_updates(fgui=True)
         if current == latest:
@@ -294,7 +295,7 @@ class CheckForUpdates(tk.Frame):
             self.updates_var.set(f"New version available!")
             Draw.button(self, text=f"Get v{latest}", row=1, col=3, height=2, width=18, bind_to=self.button_download)
 
-    def button_download(self, event):
+    def button_download(self, event) -> None:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
 
@@ -330,7 +331,7 @@ class CustomTitleBar(tk.Frame):
         value = f"{w}x{h}+{x}+{y}"
         return value
 
-    def remove_titlebar(self, parent):
+    def remove_titlebar(self, parent) -> None:
         GWL_EXSTYLE = -20
         WS_EX_APPWINDOW = 0x00040000
         WS_EX_TOOLWINDOW = 0x00000080
