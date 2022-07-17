@@ -1,5 +1,5 @@
 from src.local_paths import root_directory_file
-from src.utilities.fetch_data import read_data
+from src.utilities.fetch_parameters import read_data
 
 
 # get said value(s) from config.json

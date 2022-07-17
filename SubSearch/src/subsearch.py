@@ -9,7 +9,7 @@ from src.utilities import file_manager as ufm
 from src.utilities import log
 from src.utilities.current_user import got_key
 from src.utilities.fetch_config import get
-from src.utilities.fetch_data import get_parameters
+from src.utilities.fetch_parameters import get_parameters
 
 
 def main() -> None:
