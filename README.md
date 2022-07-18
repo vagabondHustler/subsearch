@@ -14,8 +14,9 @@
 ## Table of Contents
 
 - [About](#about)
-- [Getting Started](#getting_started)
+- [Getting Started](#getting_started_src)
 - [Setup](#setup)
+- [Getting Started](#getting_started_exe)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
@@ -28,7 +29,7 @@ This can be useful if the video file is comppressed inside a rar/zip archive or 
 
 Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
 
-## Getting Started <a name = "getting_started"></a>
+## Getting Started - Source <a name = "getting_started_src"></a>
 
 ### Setup
 
@@ -45,6 +46,16 @@ To access the settings, run main.py again
 Right-click inside any folder containing the movie/series and you're done!
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py
+
+## Getting Started - Executable file <a name = "getting_started_exe"></a>
+
+Download SubSearch_vx.x.x.exe.zip
+
+Unzip file and run SubSearch.exe
+
+Right-click inside any folder containing the movie/series and you're done!
+
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from SubSearch.exe
 
 ## Supported languages <a name = "lsupport"></a>
 
