@@ -15,8 +15,8 @@
 
 - [About](#about)
 - [Getting Started](#getting_started)
-- [Source](#src)
-- [Executable](#exe)
+- [Source](#Source)
+- [Executable](#Executable)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
@@ -33,7 +33,7 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
-### Setup
+### Source
 
 Download Python 3.10 `https://www.python.org/downloads/`
 
