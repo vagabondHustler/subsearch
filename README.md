@@ -14,9 +14,9 @@
 ## Table of Contents
 
 - [About](#about)
-- [Getting Started - Source](#getting_started_src)
-- [Setup](#setup)
-- [Getting Started - Exe](#getting_started_exe)
+- [Getting Started](#getting_started)
+- [Source](#src)
+- [Executable](#exe)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
@@ -47,7 +47,7 @@ Right-click inside any folder containing the movie/series and you're done!
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py
 
-## Getting Started - Executable file <a name = "getting_started_exe"></a>
+### Executable
 
 Download SubSearch_vx.x.x.exe.zip
 
