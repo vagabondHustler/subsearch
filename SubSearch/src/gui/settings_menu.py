@@ -408,7 +408,7 @@ if is_admin():
 
     c_verison = current_version()
     root = tk.Tk(className=f" SubSearch")
-    icon_path = cwd() + "\src\data\icon.ico"
+    icon_path = cwd() + r"\src\data\icon.ico"
     root.iconbitmap(icon_path)
     root.geometry(set_window_position())
     root.resizable(False, False)
