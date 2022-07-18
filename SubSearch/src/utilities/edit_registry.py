@@ -70,7 +70,7 @@ def remove_context_menu() -> None:
 # imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
-        regkey = root_directory("/src/data/regkey.reg")
+        regkey = root_directory("data", "regkey.reg")
         os.system(f'cmd /c "reg import "{regkey}"')
         context_menu_icon()
         write_command_subkey()
