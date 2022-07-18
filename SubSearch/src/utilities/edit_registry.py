@@ -3,8 +3,8 @@ import socket
 import sys
 import winreg
 
-from src.local_paths import root_directory, root_directory_file
-from src.utilities.current_user import is_admin, run_as_admin
+from src.utilities.local_paths import root_directory
+from src.utilities.current_user import is_admin, run_as_admin, is_exe_version
 
 COMPUTER_NAME = socket.gethostname()
 
@@ -14,7 +14,7 @@ def context_menu_icon() -> None:
 
     use: str = get("cm_icon")
     ss_path = "Directory\Background\shell\SubSearch"
-    icon_path = f"{root_directory()}\src\data\icon.ico, 0"
+    icon_path = root_directory("data", "icon.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_ALL_ACCESS) as subkey_ss:
             if use == "True":
@@ -30,25 +30,32 @@ def write_command_subkey() -> None:
     focus = get("terminal_focus")
 
     command_path = "Directory\Background\shell\SubSearch\command"
+    if is_exe_version():
+        exe_path = root_directory(file_name="SubSearch.exe")
+    else:
+        ppath = os.path.dirname(sys.executable)
+        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        set_wd = f"import os; working_path = os.getcwd(); os.chdir('{root_directory()}');"
+        run_main = "import main; os.chdir(working_path); main.main()"
 
-    ppath = os.path.dirname(sys.executable)
-    set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
-    set_wd = f"import os; working_path = os.getcwd(); os.chdir('{root_directory()}');"
-    run_main = "import main; os.chdir(working_path); main.main()"
-
-    tfocus = f'{ppath}\python.exe -c "{set_title} {set_wd} {run_main}"'
-    tsilent = f'{ppath}\pythonw.exe -c "{set_title} {set_wd} {run_main}"'
+        tfocus = f'{ppath}\python.exe -c "{set_title} {set_wd} {run_main}"'
+        tsilent = f'{ppath}\pythonw.exe -c "{set_title} {set_wd} {run_main}"'
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, command_path, 0, winreg.KEY_ALL_ACCESS) as subkey_command:
+            if is_exe_version():
+                winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, exe_path)
+                return
             if focus == "True":
                 winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tfocus)
-            elif focus == "False":
+                return
+            if focus == "False":
                 winreg.SetValueEx(subkey_command, "", 0, winreg.REG_SZ, tsilent)
+                return
 
 
 def restore_context_menu() -> None:
-    regkey = root_directory_file("/src/data/regkey.reg")
+    regkey = root_directory("data", "regkey.reg")
     os.system(f'cmd /c "reg import "{regkey}"')
     context_menu_icon()
     write_command_subkey()
@@ -70,7 +77,7 @@ def remove_context_menu() -> None:
 # imports templet registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
-        regkey = root_directory_file("/src/data/regkey.reg")
+        regkey = root_directory("data", "regkey.reg")
         os.system(f'cmd /c "reg import "{regkey}"')
         context_menu_icon()
         write_command_subkey()

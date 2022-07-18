@@ -1,7 +1,8 @@
 import ctypes
 import sys
 import winreg as reg
-
+import os
+from src.utilities.local_paths import cwd
 
 # check if current user has the registry key
 def got_key() -> bool:
@@ -26,3 +27,10 @@ def run_as_admin() -> None:
     _python_exe = sys.executable
     _pythonw_exe = _python_exe.replace("python.exe", "pythonw.exe")
     ctypes.windll.shell32.ShellExecuteW(None, "runas", _pythonw_exe, " ".join(sys.argv), None, 1)
+
+
+def is_exe_version() -> bool:
+    for file in os.listdir(cwd()):
+        if file.endswith("SubSearch.exe"):
+            return True
+    return False

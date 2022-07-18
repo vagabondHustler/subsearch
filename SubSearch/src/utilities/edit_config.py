@@ -2,13 +2,13 @@ import ctypes
 import json
 import os
 
-from src.local_paths import root_directory_file
+from src.utilities.local_paths import root_directory
 from src.utilities.fetch_config import get
 
 
 # update config.json
 def update_json(key: str, value: str or int) -> None:
-    with open(root_directory_file("src/data/config.json"), "r+", encoding="utf-8") as f:
+    with open(root_directory("data", "config.json"), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
