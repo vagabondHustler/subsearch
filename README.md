@@ -14,9 +14,9 @@
 ## Table of Contents
 
 - [About](#about)
-- [Getting Started](#getting_started_src)
+- [Getting Started - Source](#getting_started_src)
 - [Setup](#setup)
-- [Getting Started](#getting_started_exe)
+- [Getting Started - Exe](#getting_started_exe)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
