@@ -1,7 +1,7 @@
 from src.utilities.local_paths import cwd
 from src.scraper.subscene_soup import get_download_url, search_for_title, search_title_for_sub
 from src.utilities import log
-from src.utilities.compare import check
+from src.utilities.compare import pct_value
 
 
 # check if dict is of movies
@@ -100,7 +100,7 @@ def scrape(
             sub_keys = search_title_for_sub(language, hearing_impaired, url)
             break
         for key, value in sub_keys.items():
-            number = check(key, parameters.release)
+            number = pct_value(key, parameters.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.precentage}% match]:")
             formatting_spaces = " " * lenght_str
