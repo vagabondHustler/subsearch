@@ -1,33 +1,18 @@
-# Name of the workflow
-name: Release
+name: release
 
-# Run on every commit tag which begins with "v" (e.g., "v0.1.4")
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
-# Automatically create a GitHub Release, with release details specified (the relevant commits)
 jobs:
-  release-project:
-    name: Release
+  build:
     runs-on: windows-latest
-    needs: build-project
     steps:
-      - uses: marvinpinto/action-automatic-releases@latest
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'dist/')
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: false
-
-  build-project:
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: True
-          draft: True
-          artifacts: "dist/SubSearch.exe.zip"
-          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
+          files: SubSearch.zip
