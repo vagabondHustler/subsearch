@@ -24,7 +24,7 @@ def main() -> None:
 
     language, lang_abbr = get("language")
     hearing_impaired = get("hearing_impaired")
-    precentage = get("percentage")
+    pct = get("percentage")
     focus = get("terminal_focus")
     video_ext: list = get("video_ext")
     video = ufm.find_video(cwd(), video_ext, False)
@@ -44,7 +44,7 @@ def main() -> None:
         return
 
     # log parameters
-    log.parameters(param, language, lang_abbr, hearing_impaired, precentage)
+    log.parameters(param, language, lang_abbr, hearing_impaired, pct)
 
     # scrape with parameters
     log.output("")
@@ -52,7 +52,7 @@ def main() -> None:
     scrape_opensubtitles = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
     log.output("")
     log.output("[Searching subscene]")
-    scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, precentage)
+    scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct)
     if scrape_opensubtitles is None and scrape_subscene is None:
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")

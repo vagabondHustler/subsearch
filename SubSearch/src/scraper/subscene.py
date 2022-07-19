@@ -1,7 +1,7 @@
 from src.utilities.local_paths import cwd
 from src.scraper.subscene_soup import get_download_url, search_for_title, search_title_for_sub
 from src.utilities import log
-from src.utilities.compare import check
+from src.utilities.compare import pct_value
 
 
 # check if dict is of movies
@@ -33,7 +33,12 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
 
 # check str is above precentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
-    if number.precentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
+    if (
+        number.precentage >= pct
+        or p.title
+        and f"{p.season}{p.episode}" in key.lower()
+        and p.tv_series
+    ):
         return True
     return False
 
@@ -58,7 +63,9 @@ def log_and_sort_list(list_of_tuples: list, precentage) -> list:
 
 
 # decides what to do with all the scrape data
-def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage) -> list or None:
+def scrape(
+    parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage
+) -> list or None:
     # search for titles
     to_be_scraped: list = []
     title_keys = search_for_title(parameters.url_subscene)
@@ -93,7 +100,7 @@ def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, pre
             sub_keys = search_title_for_sub(language, hearing_impaired, url)
             break
         for key, value in sub_keys.items():
-            number = check(key, parameters.release)
+            number = pct_value(key, parameters.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.precentage}% match]:")
             formatting_spaces = " " * lenght_str

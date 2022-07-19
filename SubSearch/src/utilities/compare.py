@@ -7,7 +7,7 @@ class Precentage:
 
 
 # compare two lists  with each other and return match in %
-def check(from_pc: str or int, from_browser: str or int) -> Precentage:
+def pct_value(from_pc: str or int, from_browser: str or int) -> Precentage:
     max_precentage = 100
     pc_list: list = mk_lst(from_pc)
     browser_list: list = mk_lst(from_browser)

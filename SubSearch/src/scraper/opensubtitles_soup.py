@@ -18,15 +18,29 @@ def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or N
         if language in tl:
             hi = item.find("img", alt="Subtitles for hearing impaired")
             if hi is not None and hearing_impaired == "False":
-                log.output(f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'")
+                log.output(
+                    f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'"
+                )
                 continue
             if hi is None and hearing_impaired == "True":
-                log.output(f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'")
+                log.output(
+                    f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'"
+                )
                 continue
 
-            title_name = item.find("a", class_="bnone").text.replace("\n", "").replace("\t", "").replace("(", " (")
+            title_name = (
+                item.find("a", class_="bnone")
+                .text.replace("\n", "")
+                .replace("\t", "")
+                .replace("(", " (")
+            )
             log.output(f"{title_name} matched file hash")
-            th = [a["href"] for a in item.find_all("a", href=lambda value: value and value.startswith("/en/subtitleserve/sub/"))]
+            th = [
+                a["href"]
+                for a in item.find_all(
+                    "a", href=lambda value: value and value.startswith("/en/subtitleserve/sub/")
+                )
+            ]
             th = th[0] if th is not None else None
             link = f"https://www.opensubtitles.org{th}"
             download_url.append(link) if th is not None else None
