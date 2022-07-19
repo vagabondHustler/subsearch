@@ -15,7 +15,7 @@ from src.utilities.updates import check_for_updates
 
 languages = get("languages")
 language, lang_abbr = get("language")
-precentage = get("percentage")
+pct = get("percentage")
 terminal_focus = get("terminal_focus")
 hearing_impared = get("hearing_impaired")
 cm_icon = get("cm_icon")
@@ -210,8 +210,8 @@ class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         pct_var = tk.StringVar()
-        pct_var.set(f"{precentage} %")
-        self._add = precentage
+        pct_var.set(f"{pct} %")
+        self.pct = pct
         self.pct_var = pct_var
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
@@ -240,14 +240,14 @@ class SearchThreshold(tk.Frame):
         self.configure(bg=Tks.bg)
 
     def button_add_5(self, event) -> None:
-        self._add += 5 if self._add < 100 else 0
-        self.pct_var.set(f"{self._add} %")
+        self.pct += 5 if self.pct < 100 else 0
+        self.pct_var.set(f"{self.pct} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
 
     def button_sub_5(self, event) -> None:
-        self._add -= 5 if self._add > 0 else 0
-        self.pct_var.set(f"{self._add} %")
+        self.pct -= 5 if self.pct > 0 else 0
+        self.pct_var.set(f"{self.pct} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
 
