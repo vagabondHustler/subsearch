@@ -32,8 +32,6 @@ jobs:
           exclusions: "*.git* /*node_modules/* .editorconfig"
 
     upload:
-      name: "Upload"
-      steps:
         - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
