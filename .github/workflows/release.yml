@@ -19,6 +19,7 @@ jobs:
           prerelease: false
 
   build:
+    name: "Build"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@master
@@ -30,8 +31,11 @@ jobs:
           filename: "SubSearch.exe.zip"
           exclusions: "*.git* /*node_modules/* .editorconfig"
 
-      - name: Upload Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "release.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
+    upload:
+      name: "Upload"
+      steps:
+        - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
