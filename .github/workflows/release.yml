@@ -1,18 +1,24 @@
-name: release
+name: "tagged-release"
 
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v*"
 
 jobs:
-  build:
-    runs-on: windows-latest
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith('SubSearch.zip', 'dist/')
+      # ...
+      - name: "Build & test"
+        run: |
+          echo "done!"
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          files: SubSearch.zip
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            dist\SubSearch.zip
