@@ -17,3 +17,22 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
+
+  build:
+      runs-on: windows-latest
+      steps:
+      - uses: actions/checkout@master
+      - name: Archive Release
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          path: dist
+          filename: 'SubSearch.exe.zip'
+          exclusions: '*.git* /*node_modules/* .editorconfig'
+
+  upload:
+      - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "SubSearch.exe.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
