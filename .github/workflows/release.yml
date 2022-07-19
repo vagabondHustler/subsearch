@@ -26,7 +26,7 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          path: dist
+          path: 'dist'
           filename: 'SubSearch.exe.zip'
           exclusions: '*.git* /*node_modules/* .editorconfig'
 
