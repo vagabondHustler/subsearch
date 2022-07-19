@@ -33,7 +33,12 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
 
 # check str is above precentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
-    if number.precentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
+    if (
+        number.precentage >= pct
+        or p.title
+        and f"{p.season}{p.episode}" in key.lower()
+        and p.tv_series
+    ):
         return True
     return False
 
@@ -58,7 +63,9 @@ def log_and_sort_list(list_of_tuples: list, precentage) -> list:
 
 
 # decides what to do with all the scrape data
-def scrape(parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage) -> list or None:
+def scrape(
+    parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage
+) -> list or None:
     # search for titles
     to_be_scraped: list = []
     title_keys = search_for_title(parameters.url_subscene)

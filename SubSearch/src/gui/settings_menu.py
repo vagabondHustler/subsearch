@@ -23,60 +23,30 @@ cm_icon = get("cm_icon")
 
 @dataclass
 class Tks:
-    """Data class for diffrent gui settings that are used often.
-
-    Args:
-        window_width (int) = The width of the window\n
-        window_height (int) = The height of the window\n
-        bgc (str) = Background color\n
-        lbgc (str) = Light background color\n
-        fgc (str) = Foreground color\n
-        efgc (str) = Enter foreground color, when mouse enters said area\n
-        buttonc (str) = Button color\n
-        abgc (str) = Active background color, when object is active\n
-        font8 (str) = Font Cascadia 8\n
-        font8b (str) = Font Cascadia 8 bold\n
-        font10b (str) = Font Cascadia 10 bold\n
-        font20b (str) = Font Cascadia 20 bold\n
-        column_lenght50 (str) = Fills column with 50 blank spaces"""
-
     window_width: int = 660
     window_height: int = 660
-    bgc: str = "#1b1d22"
-    lbgc: str = "#4c4c4c"
-    fgc: str = "#bdbdbd"
-    efgc: str = "#c5895e"
+    bg: str = "#1b1d22"
+    bgl: str = "#4c4c4c"
+    fg: str = "#bdbdbd"
+    fge: str = "#c5895e"
     buttonc: str = "#121417"
-    abgc: str = "#16181c"
+    abg: str = "#16181c"
     font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 10 bold"
     font20b: str = "Cascadia 20 bold"
-    column_lenght50: str = " " * 58
-
-
-class MenuTitle(tk.Frame):
-    def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.create_label("Menu", 1, 1, "nsew", Tks.font20b)
-        self.configure(bg=Tks.bgc)
-
-    def create_label(self, t=None, r=1, c=1, p="nsew", f=Tks.font20b) -> None:
-        label = tk.Label(self, text=t, anchor="w")
-        label.configure(bg=Tks.bgc, fg=Tks.fgc, font=f)
-        label.grid(row=r, column=c, sticky=p, padx=2, pady=2)
+    col58: str = " " * 58
 
 
 class Draw(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-
-        self.configure(bg=Tks.bgc)
+        self.configure(bg=Tks.bg)
 
     def label(
         self,
-        bg=Tks.bgc,
-        fg=Tks.fgc,
+        bg=Tks.bg,
+        fg=Tks.fg,
         text=None,
         textvar=None,
         row=None,
@@ -95,11 +65,11 @@ class Draw(tk.Frame):
     def button(
         self,
         bg=Tks.buttonc,
-        abgc=Tks.abgc,
-        bgc_e=Tks.abgc,
+        abgc=Tks.abg,
+        bgc_e=Tks.abg,
         bgc_l=Tks.buttonc,
-        fg=Tks.fgc,
-        fg_e=Tks.efgc,
+        fg=Tks.fg,
+        fg_e=Tks.fge,
         text=None,
         height=2,
         width=10,
@@ -143,7 +113,7 @@ class SelectLanguage(tk.Frame):
         rowcount = 0
         colcount = 1
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Selected language", sticky="w", row=1, col=1, font=Tks.font8b)
         Draw.label(self, textvar=self.lang_var, row=1, col=2, font=Tks.font8b)
         for i in range(number_of_buttons):
@@ -151,8 +121,16 @@ class SelectLanguage(tk.Frame):
             if rowcount == 8:
                 colcount += 1
                 rowcount = 1
-            Draw.button(self, text=languages[i], row=rowcount + 1, col=colcount, height=2, width=24, bind_to=self.button_set_lang)
-        self.configure(bg=Tks.bgc)
+            Draw.button(
+                self,
+                text=languages[i],
+                row=rowcount + 1,
+                col=colcount,
+                height=2,
+                width=24,
+                bind_to=self.button_set_lang,
+            )
+        self.configure(bg=Tks.bg)
 
     def button_set_lang(self, event) -> None:
         btn = event.widget
@@ -168,13 +146,50 @@ class HearingImparedSubs(tk.Frame):
         hi_var.set(f"{hearing_impared}")
         self.hi_var = hi_var
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
-        Draw.label(self, text="Hearing impaired subtitles", sticky="w", row=1, col=1, font=Tks.font8b, anchor="w")
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
+        Draw.label(
+            self,
+            text="Hearing impaired subtitles",
+            sticky="w",
+            row=1,
+            col=1,
+            font=Tks.font8b,
+            anchor="w",
+        )
         Draw.label(self, textvar=self.hi_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, width=7, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Only use hearing impaired subtitles")
-        Draw.button(self, text="False", row=1, col=3, width=7, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Only use regular subtitles")
-        Draw.button(self, text="Both", row=1, col=3, width=7, bind_to=self.button_set_both, show_tip=True, text_tip="Use both hearing impaired and regular subtitles")
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="True",
+            row=1,
+            col=3,
+            width=7,
+            sticky="e",
+            bind_to=self.button_set_true,
+            show_tip=True,
+            text_tip="Only use hearing impaired subtitles",
+        )
+        Draw.button(
+            self,
+            text="False",
+            row=1,
+            col=3,
+            width=7,
+            sticky="w",
+            bind_to=self.button_set_false,
+            show_tip=True,
+            text_tip="Only use regular subtitles",
+        )
+        Draw.button(
+            self,
+            text="Both",
+            row=1,
+            col=3,
+            width=7,
+            bind_to=self.button_set_both,
+            show_tip=True,
+            text_tip="Use both hearing impaired and regular subtitles",
+        )
+        self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
         self.hi_var.set(f"True")
@@ -200,12 +215,30 @@ class SearchThreshold(tk.Frame):
         self._add = precentage
         self.pct_var = pct_var
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Search threshold", sticky="w", row=1, col=1, font=Tks.font8b)
         Draw.label(self, textvar=self.pct_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="+", row=1, col=3, sticky="e", bind_to=self.button_add_5, show_tip=True, text_tip="Add 5% to the search threshold\n A higher value means less chance of finding subtitles that are not synced witht the movie/series")
-        Draw.button(self, text="-", row=1, col=3, sticky="w", bind_to=self.button_sub_5, show_tip=True, text_tip="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded")
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="+",
+            row=1,
+            col=3,
+            sticky="e",
+            bind_to=self.button_add_5,
+            show_tip=True,
+            text_tip="Add 5% to the search threshold\n A higher value means less chance of finding subtitles that are not synced witht the movie/series",
+        )
+        Draw.button(
+            self,
+            text="-",
+            row=1,
+            col=3,
+            sticky="w",
+            bind_to=self.button_sub_5,
+            show_tip=True,
+            text_tip="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded",
+        )
+        self.configure(bg=Tks.bg)
 
     def button_add_5(self, event) -> None:
         self._add += 5 if self._add < 100 else 0
@@ -227,12 +260,30 @@ class ShowContextMenu(tk.Frame):
         context_menu.set(f"True")
         self.context_menu = context_menu
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show context menu", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.context_menu, row=1, col=2, font=Tks.font8b, anchor="center")
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Add SubSearch to the context menu when you right click inside a folder")
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch")
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="True",
+            row=1,
+            col=3,
+            sticky="e",
+            bind_to=self.button_set_true,
+            show_tip=True,
+            text_tip="Add SubSearch to the context menu when you right click inside a folder",
+        )
+        Draw.button(
+            self,
+            text="False",
+            row=1,
+            col=3,
+            sticky="w",
+            bind_to=self.button_set_false,
+            show_tip=True,
+            text_tip="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch",
+        )
+        self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
         self.context_menu.set(f"True")
@@ -254,12 +305,30 @@ class ShowContextMenuIcon(tk.Frame):
         cmi_var.set(f"{cm_icon}")
         self.cmi_var = cmi_var
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.cmi_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Add a icon next to SubSearch in the context menu")
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Remove the icon next to SubSearch in the context menu")
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="True",
+            row=1,
+            col=3,
+            sticky="e",
+            bind_to=self.button_set_true,
+            show_tip=True,
+            text_tip="Add a icon next to SubSearch in the context menu",
+        )
+        Draw.button(
+            self,
+            text="False",
+            row=1,
+            col=3,
+            sticky="w",
+            bind_to=self.button_set_false,
+            show_tip=True,
+            text_tip="Remove the icon next to SubSearch in the context menu",
+        )
+        self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
         self.cmi_var.set(f"True")
@@ -285,12 +354,30 @@ class ShowTerminalOnSearch(tk.Frame):
         terminal_var.set(f"{terminal_focus}")
         self.terminal_var = terminal_var
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Draw.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b)
         Draw.label(self, textvar=self.terminal_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="True", row=1, col=3, sticky="e", bind_to=self.button_set_true, show_tip=True, text_tip="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log")
-        Draw.button(self, text="False", row=1, col=3, sticky="w", bind_to=self.button_set_false, show_tip=True, text_tip="Hide the terminal when searching for subtitles")
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="True",
+            row=1,
+            col=3,
+            sticky="e",
+            bind_to=self.button_set_true,
+            show_tip=True,
+            text_tip="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log",
+        )
+        Draw.button(
+            self,
+            text="False",
+            row=1,
+            col=3,
+            sticky="w",
+            bind_to=self.button_set_false,
+            show_tip=True,
+            text_tip="Hide the terminal when searching for subtitles",
+        )
+        self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
         self.terminal_var.set(f"True")
@@ -313,11 +400,21 @@ class CheckForUpdates(tk.Frame):
         updates_var.set(f"")
         self.updates_var = updates_var
         for i in range(1, 4):
-            Draw.label(self, text=Tks.column_lenght50, row=1, col=i, font=Tks.font8)
-        Draw.label(self, text=f"SubScene version {c_version}", row=1, col=1, sticky="w", font=Tks.font8b)
+            Draw.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
+        Draw.label(
+            self, text=f"SubScene version {c_version}", row=1, col=1, sticky="w", font=Tks.font8b
+        )
         Draw.label(self, textvar=self.updates_var, row=1, col=2, font=Tks.font8b)
-        Draw.button(self, text="Check for updates", row=1, col=3, height=2, width=18, bind_to=self.button_check)
-        self.configure(bg=Tks.bgc)
+        Draw.button(
+            self,
+            text="Check for updates",
+            row=1,
+            col=3,
+            height=2,
+            width=18,
+            bind_to=self.button_check,
+        )
+        self.configure(bg=Tks.bg)
 
     def button_check(self, event) -> None:
         self.updates_var.set(f"Searching for updates...")
@@ -326,7 +423,15 @@ class CheckForUpdates(tk.Frame):
             self.updates_var.set(f"You are up to date!")
         if current != latest:
             self.updates_var.set(f"New version available!")
-            Draw.button(self, text=f"Get v{latest}", row=1, col=3, height=2, width=18, bind_to=self.button_download)
+            Draw.button(
+                self,
+                text=f"Get v{latest}",
+                row=1,
+                col=3,
+                height=2,
+                width=18,
+                bind_to=self.button_download,
+            )
 
     def button_download(self, event) -> None:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
@@ -341,12 +446,35 @@ class CustomTitleBar(tk.Frame):
         self._offsety = 0
         root.focus_force()
         root.overrideredirect(True)
-
-        button = Draw.button(self, text="X", row=0, col=0, height=1, width=2, abgc="#cd2e3e", bgc_e="#a72633", bgc_l="#811e28", fg_e=Tks.fgc, font=Tks.font10b, pady=5, padx=5, bind_to=self.tk_exit_press)
-        label = tk.Label(root, text=" SubSearch", height=2, bg=Tks.buttonc, fg=Tks.fgc, font=Tks.font10b, justify="left", anchor="w", width=Tks.window_width)
+        button = Draw.button(
+            self,
+            text="X",
+            row=0,
+            col=0,
+            height=1,
+            width=2,
+            abgc="#cd2e3e",
+            bgc_e="#a72633",
+            bgc_l="#811e28",
+            fg_e=Tks.fg,
+            font=Tks.font10b,
+            pady=5,
+            padx=5,
+            bind_to=self.tk_exit_press,
+        )
+        label = tk.Label(
+            root,
+            text=" SubSearch",
+            height=2,
+            bg=Tks.buttonc,
+            fg=Tks.fg,
+            font=Tks.font10b,
+            justify="left",
+            anchor="w",
+            width=Tks.window_width,
+        )
         label.place(bordermode="outside", x=0, y=0)
         label.lower()
-
         self.button = button
         self.label = label
 
@@ -414,23 +542,23 @@ if is_admin():
     root.resizable(False, False)
     # root.attributes("-topmost", True, "-alpha", 1)
     root.wm_attributes("-transparentcolor", "#2a2d2f")
-    root.configure(bg=Tks.bgc)
+    root.configure(bg=Tks.bg)
 
     CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     SelectLanguage(root).pack(anchor="center")
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     HearingImparedSubs(root).pack(anchor="center")
     SearchThreshold(root).pack(anchor="center")
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
     ShowTerminalOnSearch(root).pack(anchor="center")
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     CheckForUpdates(root).pack(anchor="center")
-    tk.Frame(root, bg=Tks.bgc).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
 
     root.mainloop()
 

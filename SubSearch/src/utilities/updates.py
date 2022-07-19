@@ -4,11 +4,15 @@ import cloudscraper
 from bs4 import BeautifulSoup
 from src.data._version import current_version
 
-SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+SCRAPER = cloudscraper.create_scraper(
+    browser={"browser": "chrome", "platform": "android", "desktop": False}
+)
 
 
 def check_for_updates(fgui=False) -> bool:
-    source = SCRAPER.get("https://github.com/vagabondHustler/SubSearch/blob/main/SubSearch/src/data/_version.py")
+    source = SCRAPER.get(
+        "https://github.com/vagabondHustler/SubSearch/blob/main/SubSearch/src/data/_version.py"
+    )
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
     doc_result = doc.find("span", class_="pl-s")
