@@ -9,35 +9,25 @@ on:
 
 # Automatically create a GitHub Release, with release details specified (the relevant commits)
 jobs:
-  release:
-    name: "Release"
-    runs-on: "windows-latest"
+  release-project:
+    name: Release
+    runs-on: windows-latest
+    needs: build-project
     steps:
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
 
-  build:
-    name: "Build"
+  build-project:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@master
-      - name: Archive Release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: "zip"
-          path: "dist"
-          filename: "SubSearch.exe.zip"
-          exclusions: "*.git* /*node_modules/* .editorconfig"
-
-    upload:
-      runs-on: windows-latest
-      permissions:
-        contents: write
-      steps:
       - uses: actions/checkout@v2
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "dist\SubSearch\SubSearch.exe.zip"
+          allowUpdates: True
+          draft: True
+          artifacts: "dist/SubSearch.exe.zip"
           token: ${{ secrets.YOUR_GITHUB_TOKEN }}
