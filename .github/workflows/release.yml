@@ -1,4 +1,4 @@
-name: Release
+name: release
 on:
   push:
     tags:
@@ -8,23 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-      - uses: actions/checkout@master
-      - name: Archive Release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: "zip"
-          filename: "SubSearch_${{ env.RELEASE_VERSION }}_exe.zip"
-          path: "./dist/SubSearch/"
-          exclusions: "*.git* /*node_modules/* .editorconfig/*"
-      - name: "Build & test"
+      - name: release
         run: |
-          echo "done!"
+          echo Done
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          files: |
-            SubSearch_${{ env.RELEASE_VERSION }}_exe.zip
