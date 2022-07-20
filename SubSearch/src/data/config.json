@@ -39,6 +39,6 @@
         ".mswmm"
     ],
     "precentage_pass": 90,
-    "terminal_focus": "False",
+    "terminal_focus": "True",
     "context_menu_icon": "True"
 }
