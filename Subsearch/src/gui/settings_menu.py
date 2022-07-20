@@ -32,6 +32,7 @@ class Tks:
     bc: str = "#121417"
     abg: str = "#16181c"
     abg_disabled: str = "#303030"
+    abg_disabled: str = "#303030"
     font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 10 bold"
@@ -261,7 +262,9 @@ class ShowContextMenu(tk.Frame):
         self.context_menu = context_menu
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
-        Create.label(self, text="Show context menu", row=1, col=1, sticky="w", font=Tks.font8b)
+        Create.label(
+            self, textvar=self.context_menu, row=1, col=2, font=Tks.font8b, anchor="center"
+        )
         Create.label(
             self, textvar=self.context_menu, row=1, col=2, font=Tks.font8b, anchor="center"
         )
@@ -305,7 +308,9 @@ class ShowContextMenuIcon(tk.Frame):
         tk.Frame.__init__(self, parent)
         cmi_var = tk.StringVar()
         cmi_var.set(f"{cm_icon}")
-        self.cmi_var = cmi_var
+        Create.label(
+            self, text="Show context menu icon", row=1, col=1, sticky="w", font=Tks.font8b
+        )
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(
@@ -350,11 +355,6 @@ class ShowContextMenuIcon(tk.Frame):
 
         edit_registry.context_menu_icon()
 
-
-class ShowTerminalOnSearch(tk.Frame):
-    def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        terminal_var = tk.StringVar()
         if is_exe_version():
             terminal_var.set(f"Disabled")
             text1 = " "
@@ -363,28 +363,52 @@ class ShowTerminalOnSearch(tk.Frame):
             tip_text2 = tip_text1
 
         else:
-            terminal_var.set(f"{terminal_focus}")
+
             text1 = "True"
             text2 = "False"
             tip_text1 = "Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log"
             tip_text2 = "Hide the terminal when searching for subtitles"
 
+class ShowTerminalOnSearch(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        Create.label(
+            self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b
+        )
+        if is_exe_version():
+            terminal_var.set(f"Disabled")
+            text1 = " "
+            text=text1,
+            tip_text1 = "Not available when running .exe-package"
+            tip_text2 = tip_text1
+
+        else:
+            terminal_var.set(f"{terminal_focus}")
+            tip_text=tip_text1,
+            text2 = "False"
+            tip_text1 = "Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log"
+            tip_text2 = "Hide the terminal when searching for subtitles"
+            text=text2,
         self.terminal_var = terminal_var
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(
             self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b
-        )
+            tip_text=tip_text2,
         Create.label(self, textvar=self.terminal_var, row=1, col=2, font=Tks.font8b)
         Create.button(
             self,
             text=text1,
+        if is_exe_version():
+            return
             row=1,
             col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
             tip_text=tip_text1,
+        if is_exe_version():
+            return
         )
         Create.button(
             self,
@@ -528,13 +552,15 @@ class CustomTitleBar(tk.Frame):
 
     def titlebar_press(self, event) -> None:
         self._offsetx = root.winfo_pointerx() - root.winfo_rootx()
+    if "win" in sys.platform:
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
         self._offsety = root.winfo_pointery() - root.winfo_rooty()
 
     def titlebar_drag(self, event) -> None:
         x = self.winfo_pointerx() - self._offsetx
         y = self.winfo_pointery() - self._offsety
         root.geometry(f"+{x}+{y}")
-
+    icon_path = cwd() + r"\src\data\64.ico"
     def tk_exit_release(self, event) -> None:
         root.destroy()
 
