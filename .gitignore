@@ -144,3 +144,6 @@ subs/
 
 # Visual Sudio Code
 *.code-workspace
+
+#Github Publish py-script
+git_publish.py
