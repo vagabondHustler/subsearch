@@ -22,3 +22,4 @@
             return
         if is_exe_version():
             return
+    icon_path = cwd() + r"\src\data\64.ico"
