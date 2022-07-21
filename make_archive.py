@@ -1,8 +1,8 @@
 import os
 import shutil
 
-path_src = f"{os.getcwd()}/SubSearchEXE"
-zip_dst = f"{os.getcwd()}/SubSearchEXE.zip"
+path_src = f"{os.getcwd()}/SubSearchApp"
+zip_dst = f"{os.getcwd()}/SubSearchApp.zip"
 
 
 def make_archive(source, destination):
