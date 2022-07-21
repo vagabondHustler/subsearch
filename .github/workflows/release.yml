@@ -18,7 +18,7 @@ jobs:
           pip install pyinstaller
           pyinstaller release.spec -y --clean --distpath ./
           python make_archive.py
-      - run: mv ./SubSearch.zip ./SubSearch_${{ github.ref_name }}_exe.zip
+      - run: mv ./SubSearchEXE.zip ./SubSearch_${{ github.ref_name }}_exe.zip
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
