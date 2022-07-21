@@ -37,7 +37,7 @@ Source is probably faster than the executable version, but the executable can be
 
 Download Python 3.10 `https://www.python.org/downloads/`
 
-Download SubScene `git clone https://github.com/vagabondHustler/SubSearch` or `https://github.com/vagabondHustler/SubSearch/releases`
+Download SubScene `git clone https://github.com/vagabondHustler/SubSearch`
 
 Install dependencies `pip install -r .../SubSearch/docs/requirements.txt`
 
