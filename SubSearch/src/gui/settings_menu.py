@@ -108,6 +108,7 @@ class Create(tk.Frame):
         _button.bind("<Leave>", button_leave)
         return _button
 
+
 # replace the regular windows-style title bar with a custom one
 class CustomTitleBar(tk.Frame):
     def __init__(self, parent) -> None:
@@ -190,6 +191,7 @@ class CustomTitleBar(tk.Frame):
     def tk_exit_press(self, event) -> None:
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
+
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
@@ -225,6 +227,7 @@ class SelectLanguage(tk.Frame):
         self.lang_var.set(btn.cget("text"))
         update_svar = self.lang_var.get()
         update_json("language", update_svar)
+
 
 # set HI, none-HI or both HI and none-HI subtitles should be included in the search
 class HearingImparedSubs(tk.Frame):
@@ -294,6 +297,7 @@ class HearingImparedSubs(tk.Frame):
         update_svar = self.hi_var.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
+
 # set how closely the subtitle name should match the release name of the media file
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
@@ -339,6 +343,7 @@ class SearchThreshold(tk.Frame):
         self.pct_var.set(f"{self.pct} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
         update_json("precentage_pass", update_svar)
+
 
 # remove or restore the context menu option when right-clicking
 class ShowContextMenu(tk.Frame):
@@ -386,6 +391,7 @@ class ShowContextMenu(tk.Frame):
         from src.utilities import edit_registry
 
         edit_registry.remove_context_menu()
+
 
 # remove or restore the icon next to the context menu option when right clicking
 class ShowContextMenuIcon(tk.Frame):
@@ -438,6 +444,7 @@ class ShowContextMenuIcon(tk.Frame):
 
         edit_registry.context_menu_icon()
 
+
 # show a terminal with what the code is doing while searching
 class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent) -> None:
@@ -445,17 +452,8 @@ class ShowTerminalOnSearch(tk.Frame):
         terminal_var = tk.StringVar()
         if is_exe_version():
             terminal_var.set(f"Disabled")
-            text1 = " "
-            text2 = text1
-            tip_text1 = "Not available when running .exe-package"
-            tip_text2 = tip_text1
-
         else:
             terminal_var.set(f"{terminal_focus}")
-            text1 = "True"
-            text2 = "False"
-            tip_text1 = "Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log"
-            tip_text2 = "Hide the terminal when searching for subtitles"
 
         self.terminal_var = terminal_var
         for i in range(1, 4):
@@ -464,26 +462,27 @@ class ShowTerminalOnSearch(tk.Frame):
             self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b
         )
         Create.label(self, textvar=self.terminal_var, row=1, col=2, font=Tks.font8b)
-        Create.button(
-            self,
-            text=text1,
-            row=1,
-            col=3,
-            sticky="e",
-            bind_to=self.button_set_true,
-            tip_show=True,
-            tip_text=tip_text1,
-        )
-        Create.button(
-            self,
-            text=text2,
-            row=1,
-            col=3,
-            sticky="w",
-            bind_to=self.button_set_false,
-            tip_show=True,
-            tip_text=tip_text2,
-        )
+        if is_exe_version() is False:
+            Create.button(
+                self,
+                text="True",
+                row=1,
+                col=3,
+                sticky="e",
+                bind_to=self.button_set_true,
+                tip_show=True,
+                tip_text="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log",
+            )
+            Create.button(
+                self,
+                text="False",
+                row=1,
+                col=3,
+                sticky="w",
+                bind_to=self.button_set_false,
+                tip_show=True,
+                tip_text="Hide the terminal when searching for subtitles",
+            )
         self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
@@ -501,6 +500,7 @@ class ShowTerminalOnSearch(tk.Frame):
         update_svar = self.terminal_var.get()
         update_json("terminal_focus", update_svar)
         edit_registry.write_command_subkey()
+
 
 # check for new updates on the github repository
 class CheckForUpdates(tk.Frame):
@@ -547,6 +547,7 @@ class CheckForUpdates(tk.Frame):
     def button_download(self, event) -> None:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
+
 # get the window position so it can be placed in the center of the screen
 def set_window_position(w=Tks.window_width, h=Tks.window_height):
     ws = root.winfo_screenwidth()
@@ -555,6 +556,7 @@ def set_window_position(w=Tks.window_width, h=Tks.window_height):
     y = int((hs / 2) - (h / 2))
     value = f"{w}x{h}+{x}+{y}"
     return value
+
 
 # only runs if file is run as administrator
 if is_admin():
