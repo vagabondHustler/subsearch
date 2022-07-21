@@ -6,7 +6,9 @@ import zipfile
 import cloudscraper
 from src.utilities import log
 
-SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+SCRAPER = cloudscraper.create_scraper(
+    browser={"browser": "chrome", "platform": "android", "desktop": False}
+)
 
 # check if a video is in directory, returns video name without extension
 def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
@@ -57,7 +59,7 @@ def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension
             return
 
 
-# move unused .srts to /subs/
+# move unused .srt to /subs/
 def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         file = file.lower()
@@ -80,6 +82,7 @@ def clean_up(cwd_path: str, extension: str) -> None:
             os.remove(file)
 
 
+# get file hash
 def get_hash(file_name: str):
     try:
         longlongformat = "<q"  # little-endian long long

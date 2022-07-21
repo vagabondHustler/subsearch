@@ -9,7 +9,7 @@ SCRAPER = cloudscraper.create_scraper(
 )
 
 
-def check_for_updates(fgui=False) -> bool:
+def check_for_updates(gui_running=False) -> bool:
     source = SCRAPER.get(
         "https://github.com/vagabondHustler/SubSearch/blob/main/SubSearch/src/data/_version.py"
     )
@@ -19,7 +19,7 @@ def check_for_updates(fgui=False) -> bool:
 
     latest_v = doc_result.text[1:-1]
     current_v = current_version()
-    if fgui:
+    if gui_running:
         return current_v, latest_v
     else:
         if int(latest_v.replace(".", "")) > int(current_v.replace(".", "")):
