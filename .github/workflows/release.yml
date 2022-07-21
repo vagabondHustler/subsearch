@@ -16,6 +16,7 @@ jobs:
           python-version: "3.10.5"
       - run: |
           pip install pyinstaller
+          pip install -r docs/requirements.txt
           pyinstaller subsearch.spec -y --clean --distpath ./app_release
           python make_archive.py
       - run: mv ./SubSearch.zip ./SubSearch_${{ github.ref_name }}_exe.zip
