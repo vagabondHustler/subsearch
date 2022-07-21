@@ -51,7 +51,7 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ### Executable
 
-Download SubSearch_vx.x.x.exe_.zip
+Download SubSearch-vx.x.x-win-x64.zip
 
 Unzip file and run SubSearch.exe
 
