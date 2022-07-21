@@ -23,6 +23,10 @@ cm_icon = get("cm_icon")
 
 @dataclass
 class Tks:
+    """
+    Dataclass with often used values for the graphical user interface
+    """
+
     window_width: int = 660
     window_height: int = 660
     bg: str = "#1b1d22"
@@ -44,6 +48,7 @@ class Create(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=Tks.bg)
 
+    # create a basic label
     def label(
         self,
         bg=Tks.bg,
@@ -63,6 +68,7 @@ class Create(tk.Frame):
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
 
+    # create a basic button
     def button(
         self,
         bg=Tks.bc,
@@ -103,6 +109,7 @@ class Create(tk.Frame):
         return _button
 
 
+# replace the regular windows-style title bar with a custom one
 class CustomTitleBar(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -185,6 +192,7 @@ class CustomTitleBar(tk.Frame):
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
 
+# set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -221,6 +229,7 @@ class SelectLanguage(tk.Frame):
         update_json("language", update_svar)
 
 
+# set HI, none-HI or both HI and none-HI subtitles should be included in the search
 class HearingImparedSubs(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -289,6 +298,7 @@ class HearingImparedSubs(tk.Frame):
         update_json("hearing_impaired", update_svar)
 
 
+# set how closely the subtitle name should match the release name of the media file
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -335,6 +345,7 @@ class SearchThreshold(tk.Frame):
         update_json("precentage_pass", update_svar)
 
 
+# remove or restore the context menu option when right-clicking
 class ShowContextMenu(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -382,6 +393,7 @@ class ShowContextMenu(tk.Frame):
         edit_registry.remove_context_menu()
 
 
+# remove or restore the icon next to the context menu option when right clicking
 class ShowContextMenuIcon(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -433,23 +445,15 @@ class ShowContextMenuIcon(tk.Frame):
         edit_registry.context_menu_icon()
 
 
+# show a terminal with what the code is doing while searching
 class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         terminal_var = tk.StringVar()
         if is_exe_version():
             terminal_var.set(f"Disabled")
-            text1 = " "
-            text2 = text1
-            tip_text1 = "Not available when running .exe-package"
-            tip_text2 = tip_text1
-
         else:
             terminal_var.set(f"{terminal_focus}")
-            text1 = "True"
-            text2 = "False"
-            tip_text1 = "Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log"
-            tip_text2 = "Hide the terminal when searching for subtitles"
 
         self.terminal_var = terminal_var
         for i in range(1, 4):
@@ -458,26 +462,27 @@ class ShowTerminalOnSearch(tk.Frame):
             self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b
         )
         Create.label(self, textvar=self.terminal_var, row=1, col=2, font=Tks.font8b)
-        Create.button(
-            self,
-            text=text1,
-            row=1,
-            col=3,
-            sticky="e",
-            bind_to=self.button_set_true,
-            tip_show=True,
-            tip_text=tip_text1,
-        )
-        Create.button(
-            self,
-            text=text2,
-            row=1,
-            col=3,
-            sticky="w",
-            bind_to=self.button_set_false,
-            tip_show=True,
-            tip_text=tip_text2,
-        )
+        if is_exe_version() is False:
+            Create.button(
+                self,
+                text="True",
+                row=1,
+                col=3,
+                sticky="e",
+                bind_to=self.button_set_true,
+                tip_show=True,
+                tip_text="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log",
+            )
+            Create.button(
+                self,
+                text="False",
+                row=1,
+                col=3,
+                sticky="w",
+                bind_to=self.button_set_false,
+                tip_show=True,
+                tip_text="Hide the terminal when searching for subtitles",
+            )
         self.configure(bg=Tks.bg)
 
     def button_set_true(self, event) -> None:
@@ -497,6 +502,7 @@ class ShowTerminalOnSearch(tk.Frame):
         edit_registry.write_command_subkey()
 
 
+# check for new updates on the github repository
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -523,7 +529,7 @@ class CheckForUpdates(tk.Frame):
 
     def button_check(self, event) -> None:
         self.updates_var.set(f"Searching for updates...")
-        current, latest = check_for_updates(fgui=True)
+        current, latest = check_for_updates(gui_running=True)
         if current == latest:
             self.updates_var.set(f"You are up to date!")
         if current != latest:
@@ -542,6 +548,7 @@ class CheckForUpdates(tk.Frame):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
 
+# get the window position so it can be placed in the center of the screen
 def set_window_position(w=Tks.window_width, h=Tks.window_height):
     ws = root.winfo_screenwidth()
     hs = root.winfo_screenheight()
@@ -551,6 +558,7 @@ def set_window_position(w=Tks.window_width, h=Tks.window_height):
     return value
 
 
+# only runs if file is run as administrator
 if is_admin():
     if "win" in sys.platform:
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -586,6 +594,7 @@ if is_admin():
 
     root.mainloop()
 
+# re-runs the file as an administrator
 elif got_key:
     run_as_admin()
     sys.exit()

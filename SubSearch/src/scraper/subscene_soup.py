@@ -12,7 +12,7 @@ SCRAPER = cloudscraper.create_scraper(
 def is_sub_hi(a1: Tag) -> str:
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
-    a41 = a1_parent.find("td", class_="a41")  # hearing impareded
+    a41 = a1_parent.find("td", class_="a41")  # hearing imparted
     if a40 is None:
         return "True"
     elif a41 is None:

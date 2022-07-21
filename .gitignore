@@ -147,3 +147,4 @@ subs/
 #Github Publish py-script
 git_publish.py
 desktop.ini
+.vscode/settings.json
