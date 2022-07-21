@@ -2,7 +2,7 @@ import sys
 
 from src.utilities.local_paths import cwd, root_directory
 
-# main 123
+
 def main() -> None:
     if cwd() == root_directory():
         import src.gui.settings_menu

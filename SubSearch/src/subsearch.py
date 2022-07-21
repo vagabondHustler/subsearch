@@ -13,7 +13,7 @@ from src.utilities.fetch_parameters import get_parameters
 
 
 def main() -> None:
-    # initialising
+    # initializing
     start = time.perf_counter()
     version = current_version()
     ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - v{version}")
@@ -34,7 +34,6 @@ def main() -> None:
     elif video_with_ext is None:
         file_hash = None
 
-    # TODO fix this so no try is needed
     try:
         param = get_parameters(cwd().lower(), lang_abbr, file_hash, video)
     except IndexError as err:
@@ -49,7 +48,9 @@ def main() -> None:
     # scrape with parameters
     log.output("")
     log.output("[Searching opensubtitles]")
-    scrape_opensubtitles = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
+    scrape_opensubtitles = (
+        opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
+    )
     log.output("")
     log.output("[Searching subscene]")
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct)
@@ -72,7 +73,7 @@ def main() -> None:
         for item in scrape_subscene:
             ufm.download_zip(item)
 
-    # procsess downloaded files
+    # process downloaded files
     log.output("")
     log.output("[Procsessing files]")
     ufm.extract_zips(cwd(), ".zip")
@@ -82,7 +83,7 @@ def main() -> None:
     ufm.move_files(cwd(), f"{param.release}.srt", ".srt")
     log.output("")
 
-    # finnishing up
+    # finishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
 

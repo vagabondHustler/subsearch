@@ -31,7 +31,7 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
     return False
 
 
-# check str is above precentage threshold
+# check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
     if (
         number.precentage >= pct

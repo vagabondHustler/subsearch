@@ -6,6 +6,10 @@ from num2words import num2words
 
 @dataclass
 class ConfigData:
+    """
+    Dataclass with current values from config.json
+    """
+
     language: str
     hearing_impaired: str
     languages: list[str]
@@ -23,6 +27,9 @@ def read_data(config_file: str) -> ConfigData:
 
 @dataclass
 class SearchParameters:
+    """
+    Dataclass with all the necessary information from the media file
+    """
     url_subscene: str
     url_opensubtitles: str
     title: str
@@ -43,7 +50,9 @@ def split_last_hyphen(character: str, string: str) -> str:
 
 
 # get all the parameters needed to scrape, from file or directory name
-def get_parameters(directory_path: str, language_abbr: str, file_hash: str, video_release_name: str = None) -> SearchParameters:
+def get_parameters(
+    directory_path: str, language_abbr: str, file_hash: str, video_release_name: str = None
+) -> SearchParameters:
     _tmp: list = []
     if video_release_name is None:
         directory_name = directory_path.split("\\")
@@ -66,7 +75,10 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
             season_episode = _season_episode.split(" ")
             sint, eint = season_episode[0], season_episode[1]
             season, episode = f"s{sint}", f"e{eint}"
-            season_ordinal, episode_ordinal = (num2words(sint, lang=language_abbr, to="ordinal"), num2words(eint, lang=language_abbr, to="ordinal"))
+            season_ordinal, episode_ordinal = (
+                num2words(sint, lang=language_abbr, to="ordinal"),
+                num2words(eint, lang=language_abbr, to="ordinal"),
+            )
             if season[-1].isdigit():
                 tv_series = True
                 break
@@ -75,8 +87,12 @@ def get_parameters(directory_path: str, language_abbr: str, file_hash: str, vide
             tv_series = False
             _tmp.append(item)
             title = " ".join(_tmp)
-            url_subscene = f"https://subscene.com/subtitles/searchbytitle?query={title}".replace(" ", "%20")
-            url_opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-all/moviehash-{file_hash}"
+            url_subscene = f"https://subscene.com/subtitles/searchbytitle?query={title}".replace(
+                " ", "%20"
+            )
+            url_opensubtitles = (
+                f"https://www.opensubtitles.org/en/search/sublanguageid-all/moviehash-{file_hash}"
+            )
             year = "N/A"
 
     parameters = {
