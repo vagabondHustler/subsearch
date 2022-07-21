@@ -25,4 +25,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: True
-          files: SubSearch-${{ github.ref_name }}-exe.zip
+          files: SubSearch-${{ github.ref_name }}-win-x64.zip
