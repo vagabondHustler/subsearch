@@ -23,7 +23,7 @@ def context_menu_icon() -> None:
                 winreg.SetValueEx(subkey_ss, "Icon", 0, winreg.REG_SZ, "")
 
 
-# write value to (Deafult)
+# write value to (Default)
 def write_command_subkey() -> None:
     from src.utilities.fetch_config import get
 
@@ -74,7 +74,7 @@ def remove_context_menu() -> None:
             winreg.DeleteKey(shell_key, "SubSearch")
 
 
-# imports templet registry key to be filled in with values later
+# imports empty registry key to be filled in with values later
 def add_context_menu() -> None:
     if is_admin():
         regkey = root_directory("data", "regkey.reg")

@@ -57,20 +57,20 @@ def select_language() -> None:
                     return
 
 
-# set precentage threshold
+# set percentage threshold
 def select_precentage_pass() -> None:
     ctypes.windll.kernel32.SetConsoleTitleW("SubSearch - Select precentage threshold")
     os.system("cls||clear")
     print(
         """
-          The precentage threshold determines the amount of of words that need to
-          match the subtitles foud to be downloaded. If there are 10 words in the. 
+          The percentage threshold determines the amount of of words that need to
+          match the subtitles found to be downloaded. If there are 10 words in the. 
           release name, 10%, means that only 1 word needs to match. Excluding, 
           quality e.g 720p.
           
-          Subtitles for Tv-shows are usally not affected as much by this threshold,
-          beacuse if a season and episode match it gets automaticlly downloaded.
-          Deafult value is 90, i.e 90% 
+          Subtitles for Tv-shows are usually not affected as much by this threshold,
+          because if a season and episode match it gets automatically downloaded.
+          Default value is 90, i.e 90% 
           
           """
     )
@@ -89,7 +89,7 @@ def select_terminal_focus() -> None:
     os.system("cls||clear")
     print(
         """
-          The terminal can be hidden or be shown while searching, hidden is defult.
+          The terminal can be hidden or be shown while searching, hidden is default.
           If it's hidden and no subtitles are found, you can check the search.log,
           inside the the searched folder.
           
@@ -142,7 +142,7 @@ def select_cm_icon() -> None:
     print(
         """
           More or less just lets you turn the icon in the context menu on or off.
-          Deafult is True, i.e on. 
+          Default is True, i.e on. 
           
           """
     )
