@@ -55,7 +55,7 @@ Download SubSearch_vx.x.x.exe_.zip
 
 Unzip file and run SubSearch.exe
 
-If you get a PUA message, click ```More info````
+If you get a PUA message, click `More info`
 
 ![prtsc3](https://github.com/vagabondHustler/SubSearch/blob/main/assets/moreinfo.png)
 
