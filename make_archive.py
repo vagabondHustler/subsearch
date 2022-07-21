@@ -1,8 +1,8 @@
 import os
 import shutil
 
-path_src = f"{os.getcwd()}/app_release/SubSearch-x64"
-zip_dst = f"{os.getcwd()}/SubSearch-x64.zip"
+path_x64_dir_src = f"{os.getcwd()}/app_release/SubSearch-x64"
+path_x64_zip_dst = f"{os.getcwd()}/SubSearch-x64.zip"
 
 
 def make_archive(source, destination):
@@ -15,4 +15,4 @@ def make_archive(source, destination):
     shutil.move("%s.%s" % (name, format), destination)
 
 
-make_archive(path_src, zip_dst)
+make_archive(path_x64_dir_src, path_x64_zip_dst)
