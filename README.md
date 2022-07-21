@@ -51,15 +51,13 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ### Executable
 
-Download SubSearch_vx.x.x.exe.zip
+Download SubSearch_vx.x.x.exe_.zip
 
 Unzip file and run SubSearch.exe
 
 If you get a PUA message, click ```More info````
 
 ![prtsc3](https://github.com/vagabondHustler/SubSearch/blob/main/assets/moreinfo.png)
-
-Then `Run anyway`
 
 ![prtsc4](https://github.com/vagabondHustler/SubSearch/blob/main/assets/runanyway.png)
 
