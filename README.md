@@ -55,6 +55,14 @@ Download SubSearch_vx.x.x.exe.zip
 
 Unzip file and run SubSearch.exe
 
+If you get a PUA message, click ```More info````
+
+![prtsc3](https://github.com/vagabondHustler/SubSearch/blob/main/assets/moreinfo.png)
+
+Then `Run anyway`
+
+![prtsc4](https://github.com/vagabondHustler/SubSearch/blob/main/assets/runanyway.png)
+
 Right-click inside any folder containing the movie/series and you're done!
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from SubSearch.exe
