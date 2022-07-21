@@ -17,7 +17,7 @@ jobs:
       - run: |
           pip install pyinstaller
           pip install -r docs/requirements.txt
-          pyinstaller subsearch.spec -y --clean --distpath ./app_release
+          pyinstaller subsearch.spec -y --clean --distpath ./SubSearch-x64
           python make_archive.py
       - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
       - name: Publish
