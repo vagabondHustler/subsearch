@@ -38,6 +38,7 @@ jobs:
   publish-release:
     name: Publish release
     runs-on: windows-latest
+    needs: semantic-versioning
     steps:
       - uses: actions/checkout@v3
         with:
