@@ -57,7 +57,7 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ### Executable <a name = "exe"></a>
 
-Download SubSearch-vx.x.x-win-x64.zip
+Download SubSearch-vx.x.x-win-x64.zip from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
 
 Unzip file and run SubSearch.exe
 
