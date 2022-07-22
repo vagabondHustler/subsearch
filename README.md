@@ -14,9 +14,9 @@
 ## Table of Contents
 
 - [About](#about)
-- [Getting Started](#getting_started)
-- [Source](#Source)
-- [Executable](#Executable)
+- [Getting Started](#getting_started_src)
+- [Source](#src)
+- [Executable](#exe)
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Misc](#misc)
@@ -33,15 +33,21 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
-### Source
+### Source <a name = "src"></a>
 
-Download Python 3.10 `https://www.python.org/downloads/`
+Download Python 3.10 - [Download URL](https://www.python.org/downloads/)
 
-Download SubScene `git clone https://github.com/vagabondHustler/SubSearch`
+Download SubScene 
 
-Install dependencies `pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/docs/requirements.txt"`
+`git clone https://github.com/vagabondHustler/SubSearch`
 
-Run main.py from where it is located `python ./SubSearch/main.py`
+Install dependencies 
+
+`pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/docs/requirements.txt"`
+
+Run main.py from where it is located 
+
+`python ./SubSearch/main.py`
 
 To access the settings, run main.py again
 
@@ -49,7 +55,7 @@ Right-click inside any folder containing the movie/series and you're done!
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the diffrent subtitles that didn't pass the search threshold percentage or decreese the value in the settings GUI, accessed from main.py
 
-### Executable
+### Executable <a name = "exe"></a>
 
 Download SubSearch-vx.x.x-win-x64.zip
 
