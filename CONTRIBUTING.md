@@ -65,4 +65,4 @@ If you have any questions, concerns or comments about these guidelines, please g
 
 Above all else, I hope you enjoy yourself, learn things and make and share great contributions because I need learning too.
 
--- vagabondHustler
+- [vagabondHustler](https://github.com/vagabondHustler)
