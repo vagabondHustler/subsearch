@@ -72,4 +72,6 @@ jobs:
         with:
           token: ${{ secrets.ACTIONS_TOKEN }}
           generate_release_notes: True
-          files: SubSearch-${{ github.ref_name }}-win-x64.zip
+          files: |
+            SubSearch-${{ github.ref_name }}-win-x64.zip
+            SubSearch-${{ github.ref_name }}-win-source.zip
