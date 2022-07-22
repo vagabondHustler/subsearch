@@ -2,7 +2,7 @@ import webbrowser
 
 import cloudscraper
 from bs4 import BeautifulSoup
-from src.data._version import current_version
+from src.utilities.version import current_version
 
 SCRAPER = cloudscraper.create_scraper(
     browser={"browser": "chrome", "platform": "android", "desktop": False}

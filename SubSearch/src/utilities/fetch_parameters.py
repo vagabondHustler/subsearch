@@ -14,7 +14,7 @@ class ConfigData:
     hearing_impaired: str
     languages: list[str]
     video_ext: list
-    precentage_pass: int
+    percentage_pass: int
     terminal_focus: str
     context_menu_icon: str
 
@@ -30,6 +30,7 @@ class SearchParameters:
     """
     Dataclass with all the necessary information from the media file
     """
+
     url_subscene: str
     url_opensubtitles: str
     title: str

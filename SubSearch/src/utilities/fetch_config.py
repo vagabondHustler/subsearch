@@ -20,7 +20,7 @@ def get(output):
         return voe
 
     def precent() -> int:
-        p = config_json.precentage_pass
+        p = config_json.percentage_pass
         return p
 
     def terminal_focus() -> str:
