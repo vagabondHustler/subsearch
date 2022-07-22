@@ -11,7 +11,7 @@ from src.utilities.local_paths import cwd
 from src.utilities.current_user import got_key, is_admin, run_as_admin, is_exe_version
 from src.utilities.edit_config import set_default_values, update_json
 from src.utilities.fetch_config import get
-from src.utilities.updates import check_for_updates
+from src.utilities.updates import is_new_version_available, check_for_updates
 
 languages = get("languages")
 language, lang_abbr = get("language")
@@ -529,20 +529,26 @@ class CheckForUpdates(tk.Frame):
 
     def button_check(self, event) -> None:
         self.updates_var.set(f"Searching for updates...")
-        current, latest = check_for_updates(gui_running=True)
-        if current == latest:
-            self.updates_var.set(f"You are up to date!")
-        if current != latest:
+        value, release_type = is_new_version_available()
+        latest_version = check_for_updates()
+        if value:
             self.updates_var.set(f"New version available!")
             Create.button(
                 self,
-                text=f"Get v{latest}",
+                text=f"Get {latest_version}",
                 row=1,
                 col=3,
                 height=2,
                 width=18,
                 bind_to=self.button_download,
             )
+
+        if value is False and release_type is None:
+            self.updates_var.set(f"You are up to date!")
+        elif value is False and release_type != "newer":
+            self.updates_var.set(f"New {release_type} update available")
+        elif value is False and release_type == "newer":
+            self.updates_var.set(f"Branch ahead of main branch")
 
     def button_download(self, event) -> None:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
