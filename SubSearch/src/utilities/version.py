@@ -1,5 +1,4 @@
 import json
-import sys
 
 from src.utilities.edit_config import update_json
 from src.utilities.local_paths import root_directory
