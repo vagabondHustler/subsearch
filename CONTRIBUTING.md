@@ -61,7 +61,7 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 ## Thank you!
 
-If you have any questions, concerns or comments about these guidelines, please get in touch with me, easiest would be at twitter [@vagabondHustl3r](https://twitter.com/vagabondHustl3r).
+If you have any questions, concerns or comments about these guidelines, please get in touch with me, easiest would be at twitter [@vagabondHustl3r](https://twitter.com/vagabondHustl3r) 
 
 Above all else, I hope you enjoy yourself, learn things and make and share great contributions because I need learning too.
 
