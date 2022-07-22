@@ -1,6 +1,7 @@
 import webbrowser
 
 import cloudscraper
+import json
 from bs4 import BeautifulSoup
 from src.utilities.version import current_version
 
@@ -9,37 +10,45 @@ SCRAPER = cloudscraper.create_scraper(
 )
 
 
-def check_for_updates(gui_running=False) -> bool:
+def check_for_updates() -> str:
     source = SCRAPER.get(
-        "https://github.com/vagabondHustler/SubSearch/blob/main/SubSearch/src/data/_version.py"
+        "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/SubSearch/src/data/version.json"
     )
     scontent = source.content
-    doc = BeautifulSoup(scontent, "lxml")
-    doc_result = doc.find("span", class_="pl-s")
-
-    latest_v = doc_result.text[1:-1]
-    current_v = current_version()
-    if gui_running:
-        return current_v, latest_v
-    else:
-        if int(latest_v.replace(".", "")) > int(current_v.replace(".", "")):
-            print("\nNew version available!")
-            print(f"Your version: {current_v}, available version: {latest_v}")
-            print("https://github.com/vagabondHustler/SubSearch/\n")
-            go_to_github()
-            return False
-        print(f"Your version {current_v} is the latest version")
-        print("Press enter to continue")
-        return True
+    _string = str(scontent)
+    _string_no_qoute = _string.replace('"', " ")
+    _string_items = _string_no_qoute.split(" ")
+    for i in _string_items:
+        if i.startswith("v") and i[-1].isnumeric():
+            latest_version = i
+            return latest_version
 
 
-def go_to_github() -> None:
-    while True:
-        answer = input("Open link in webbrowser?: [Y/n] ")
-        if answer.lower() == "y" or len(answer) == 0:
-            webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
-            break
-        if answer.lower() == "n":
-            break
-        else:
-            print("Please enter y, n")
+def version_release(i: int) -> str:
+    if i == 0:
+        return "major"
+    if i == 1:
+        return "minor"
+    if i == 2:
+        return "patch"
+
+
+def is_new_version_available() -> tuple:
+    """
+    Returns a tuple of (bool, str), where the bool is True if a new version is available, and the str is the type of release available.
+    The str is either "major", "minor", "patch", "newer" or None.
+    The bool is False if the current version is the latest version or your version is greater than the latest version on github.
+
+    :return tuple: (bool, str)
+    """
+    _repo_version = check_for_updates()
+    _local_version = current_version()
+    repo_version = _repo_version.replace("v", "").split(".")
+    local_version = _local_version.replace("v", "").split(".")
+
+    for i, (rv, lv) in enumerate(zip(repo_version, local_version)):
+        if int(rv) > int(lv):
+            return True, version_release(i)
+        if int(rv) < int(lv):
+            return False, "newer"
+    return False, None
