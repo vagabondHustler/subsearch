@@ -4,7 +4,14 @@ from src.utilities.local_paths import cwd, root_directory
 
 
 def main() -> None:
-    if cwd() == root_directory():
+    release_type = "major", "minor", "patch"
+    if sys.argv[1] in release_type:
+        from src.utilities.version import add_patch_minor_major
+
+        add_patch_minor_major(sys.argv[1])
+        return
+
+    elif cwd() == root_directory():
         import src.gui.settings_menu
 
         sys.exit()
