@@ -6,6 +6,7 @@ on:
       - "v*.*.*"
 
 jobs:
+  # get the current version, update version.json in ../data with new version with pushed tags
   semantic-versioning:
     name: Semantic versioning
     runs-on: ubuntu-latest
@@ -13,6 +14,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+      # import GPG key for verified commits
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
@@ -20,21 +22,26 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+      # install jq to reading/writing .json files
       - name: Install jq
         run: sudo apt install jq
+      # read version.json in ../data, save as variable version_output
       - name: Get current version
         id: current_version
         run: |
           echo "::set-output name=version_output::$(echo "`jq '.version' SubSearch/src/data/version.json`")"
-      - name: Get new version
+      # write pushed tags as version number into version.json in ../data
+      - name: Set new version
         run: echo "`jq '.version="${{ github.ref_name }}"' SubSearch/src/data/version.json`" > SubSearch/src/data/version.json
-      - name: Update version.json
+      # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
+      - name: Commit version.json
         run: |
           git pull origin main
           git add SubSearch/src/data/version.json
           git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
           git push
 
+  # build and publish release with pushed tags as release name
   publish-release:
     name: Publish release
     runs-on: windows-latest
@@ -43,8 +50,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+      # pull main so everything is up to date
       - name: Pull main
         run: git pull origin main
+      # install pyinstaller and build x64 package
       - name: Build
         uses: actions/setup-python@v4
         with:
@@ -55,6 +64,7 @@ jobs:
           pyinstaller subsearch.spec -y --clean --distpath ./SubSearch-x64
           python make_archive.py
       - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
+      # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
