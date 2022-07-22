@@ -2,7 +2,7 @@ import os
 import shutil
 
 """
-Used by publish.yml in .github\workflows to create a zip file of the pyinstaller output
+Used by publish.yml in .github\workflows to create a zip files of the repository contents
 """
 
 path_x64_dir_src = f"{os.getcwd()}/SubSearch-x64/SubSearch"
