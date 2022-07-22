@@ -39,9 +39,9 @@ Download Python 3.10 `https://www.python.org/downloads/`
 
 Download SubScene `git clone https://github.com/vagabondHustler/SubSearch`
 
-Install dependencies `pip install -r .../SubSearch/docs/requirements.txt`
+Install dependencies `pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/docs/requirements.txt"`
 
-Run main.py from where it is located `python .../SubSearch/SubSearch/main.py`
+Run main.py from where it is located `python ./SubSearch/main.py`
 
 To access the settings, run main.py again
 
