@@ -30,6 +30,7 @@ jobs:
         run: echo "`jq '.version="${{ github.ref_name }}"' SubSearch/src/data/version.json`" > SubSearch/src/data/version.json
       - name: Update version.json
         run: |
+          git pull origin main
           git add SubSearch/src/data/version.json
           git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
           git push
