@@ -7,7 +7,9 @@ from src.utilities.fetch_config import get
 
 
 # update config.json
-def update_json(key: str, value: str or int, directory: str = 'data', file: str = 'config.json') -> None:
+def update_json(
+    key: str, value: str or int, directory: str = "data", file: str = "config.json"
+) -> None:
     with open(root_directory(directory, file), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
@@ -59,7 +61,7 @@ def select_language() -> None:
 
 # set percentage threshold
 def select_percentage_pass() -> None:
-    ctypes.windll.kernel32.SetConsoleTitleW("SubSearch - Select precentage threshold")
+    ctypes.windll.kernel32.SetConsoleTitleW("SubSearch - Select percentage threshold")
     os.system("cls||clear")
     print(
         """
