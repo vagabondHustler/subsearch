@@ -572,7 +572,6 @@ if is_admin():
     root.iconbitmap(icon_path)
     root.geometry(set_window_position())
     root.resizable(False, False)
-    # root.attributes("-topmost", True, "-alpha", 1)
     root.wm_attributes("-transparentcolor", "#2a2d2f")
     root.configure(bg=Tks.bg)
 
@@ -593,6 +592,7 @@ if is_admin():
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
 
     root.mainloop()
+    sys.exit()
 
 # re-runs the file as an administrator
 elif got_key:
