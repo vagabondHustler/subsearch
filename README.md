@@ -2,9 +2,11 @@
     
 ![prtsc0](https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png)
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+![Status](https://img.shields.io/badge/status-active-success.svg)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+![Version](https://img.shields.io/github/v/release/vagabondHustler/SubSearch)
+![Commits Since](https://img.shields.io/github/commits-since/vagabondHustler/SubSearch/latest/main)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
 
