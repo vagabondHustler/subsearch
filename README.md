@@ -2,9 +2,6 @@
     
 ![prtsc0](https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png)
 
-![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_258.png)
-
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
@@ -15,6 +12,7 @@
 
 - [About](#about)
 - [Getting Started](#getting_started_src)
+- [Preview](#preview)
 - [Source](#src)
 - [Executable](#exe)
 - [Language support](#lsupport)
@@ -28,6 +26,15 @@ Download subtitles for movies and tv-series, automatically for well known scene 
 This can be useful if the video file is comppressed inside a rar/zip archive or if the video file is of a unusual extension type not implement in the code.
 
 Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The avragee run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles, season eppisode to go trough, but not by much if you are searching with a [supported](#lsupport) language.
+
+## Preview <a name = "preview"></a>
+
+<div align="center">
+
+![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_258.png)
+
+</div>
 
 ## Getting Started - Source <a name = "getting_started_src"></a>
 
