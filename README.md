@@ -39,7 +39,7 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 </div>
 
-## Getting Started - Source <a name = "getting_started_src"></a>
+## Getting Started <a name = "getting_started_src"></a>
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
