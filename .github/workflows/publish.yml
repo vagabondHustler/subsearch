@@ -53,7 +53,7 @@ jobs:
       # pull main so everything is up to date
       - name: Pull main
         run: git pull origin main
-      # install pyinstaller and build x64 package
+      # install pyinstaller and requirements
       - name: Build
         uses: actions/setup-python@v4
         with:
@@ -64,6 +64,7 @@ jobs:
           pyinstaller subsearch.spec -y --clean --distpath ./SubSearch-x64
           python make_archive.py
       - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
+      - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
