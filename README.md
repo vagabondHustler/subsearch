@@ -18,7 +18,7 @@
 - [Language support](#lsupport)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
-- [Reporting a Vulnerability]https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md
+- [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md)
 
 ## About <a name = "about"></a>
 
