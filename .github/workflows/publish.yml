@@ -3,9 +3,37 @@ name: Publish
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
 jobs:
+  semantic-versioning:
+    name: Semantic versioning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      - name: Install jq
+        run: sudo apt install jq
+      - name: Get current version
+        id: current_version
+        run: |
+          echo "::set-output name=version_output::$(echo "`jq '.version' SubSearch/src/data/version.json`")"
+      - name: Get new version
+        run: echo "`jq '.version="${{ github.ref_name }}"' SubSearch/src/data/version.json`" > SubSearch/src/data/version.json
+      - name: Update version.json
+        run: |
+          git add SubSearch/src/data/version.json
+          git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
+          git push
+
   publish-release:
     runs-on: windows-latest
     steps:
