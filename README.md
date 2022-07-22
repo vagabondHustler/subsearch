@@ -1,6 +1,6 @@
 <div align="center">
     
-# SubSearch
+![prtsc0](https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png)
 
 ![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
 ![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_258.png)
