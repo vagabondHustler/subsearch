@@ -2,22 +2,22 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Precentage:
-    precentage: int
+class percentage:
+    percentage: int
 
 
 # compare two lists  with each other and return match in %
-def pct_value(from_pc: str or int, from_browser: str or int) -> Precentage:
-    max_precentage = 100
+def pct_value(from_pc: str or int, from_browser: str or int) -> percentage:
+    max_percentage = 100
     pc_list: list = mk_lst(from_pc)
     browser_list: list = mk_lst(from_browser)
     not_matching = list(set(pc_list) - set(browser_list))
     not_matching_value = len(not_matching)
     number_of_items = len(pc_list)
-    precentage_to_remove = round(not_matching_value / number_of_items * max_precentage)
-    precentage = round(max_precentage - precentage_to_remove)
+    percentage_to_remove = round(not_matching_value / number_of_items * max_percentage)
+    percentage = round(max_percentage - percentage_to_remove)
 
-    return Precentage(precentage)
+    return percentage(percentage)
 
 
 # create list from string

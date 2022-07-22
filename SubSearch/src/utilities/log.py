@@ -21,7 +21,7 @@ def output(msg: str, print_to_terminal: bool = True) -> None:
 
 
 # log and print all the used parameters from video/directory-name
-def parameters(param, language, lang_abbr, hearing_impaired, precentage):
+def parameters(param, language, lang_abbr, hearing_impaired, percentage):
     version = current_version()
     output(f"SubSearch - v{version} ", False)
     output("[PARAMETERS]")
@@ -34,7 +34,7 @@ def parameters(param, language, lang_abbr, hearing_impaired, precentage):
     output(f"TV-Series: {param.tv_series}")
     output(f"Release: {param.release}")
     output(f"Group: {param.group}")
-    output(f"Match threshold: {precentage}%")
+    output(f"Match threshold: {percentage}%")
     output(f"File hash: {param.file_hash}")
     output(f"URL: {param.url_subscene}")
     output(f"URL: {param.url_opensubtitles}\n")

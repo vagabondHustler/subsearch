@@ -16,7 +16,7 @@ def main() -> None:
     # initializing
     start = time.perf_counter()
     version = current_version()
-    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - v{version}")
+    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {version}")
     if got_key() is False:
         edit_config.set_default_values()
         edit_registry.add_context_menu()

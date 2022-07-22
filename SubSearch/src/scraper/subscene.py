@@ -34,7 +34,7 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
 # check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
     if (
-        number.precentage >= pct
+        number.percentage >= pct
         or p.title
         and f"{p.season}{p.episode}" in key.lower()
         and p.tv_series
@@ -44,7 +44,7 @@ def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
 
 
 # log and sort list
-def log_and_sort_list(list_of_tuples: list, precentage) -> list:
+def log_and_sort_list(list_of_tuples: list, percentage) -> list:
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
     hbd_printed = False
@@ -52,10 +52,10 @@ def log_and_sort_list(list_of_tuples: list, precentage) -> list:
     for i in list_of_tuples:
         name = i[1]
         url = i[2]
-        if i[0] >= precentage and not hbd_printed:
+        if i[0] >= percentage and not hbd_printed:
             log.output(f"--- Has been downloaded ---\n")
             hbd_printed = True
-        if i[0] <= precentage and not hnbd_printed:
+        if i[0] <= percentage and not hnbd_printed:
             log.output(f"--- Has not been downloaded ---\n")
             hnbd_printed = True
         log.output(f"{name}\n{url}\n")
@@ -64,7 +64,7 @@ def log_and_sort_list(list_of_tuples: list, precentage) -> list:
 
 # decides what to do with all the scrape data
 def scrape(
-    parameters, language: str, lang_abbr: str, hearing_impaired: str, precentage
+    parameters, language: str, lang_abbr: str, hearing_impaired: str, percentage
 ) -> list or None:
     # search for titles
     to_be_scraped: list = []
@@ -102,16 +102,16 @@ def scrape(
         for key, value in sub_keys.items():
             number = pct_value(key, parameters.release)
             log.output(f"[Found]: {key}")
-            lenght_str = sum(1 for char in f"[{number.precentage}% match]:")
+            lenght_str = sum(1 for char in f"[{number.percentage}% match]:")
             formatting_spaces = " " * lenght_str
-            _name = f"[{number.precentage}% match]: {key}"
+            _name = f"[{number.percentage}% match]: {key}"
             _url = f"{formatting_spaces} {value}"
-            to_be_sorted_value = number.precentage, _name, _url
+            to_be_sorted_value = number.percentage, _name, _url
             to_be_sorted.append(to_be_sorted_value)
-            if is_threshold(key, number, precentage, parameters):
+            if is_threshold(key, number, percentage, parameters):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        log_and_sort_list(to_be_sorted, precentage)
+        log_and_sort_list(to_be_sorted, percentage)
         log.output("Done with tasks")
 
     # exit if no subtitles found
