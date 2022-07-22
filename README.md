@@ -17,7 +17,7 @@
 - [Executable](#exe)
 - [Language support](#lsupport)
 - [Authors](#authors)
-- [Misc](#misc)
+- [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
 
 ## About <a name = "about"></a>
 
@@ -103,7 +103,3 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 ## Authors <a name = "authors"></a>
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
-
-## Misc <a name = "misc"></a>
-
-Registry key can be found here: `Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\SubSearch`
