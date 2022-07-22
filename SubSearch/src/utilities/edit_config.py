@@ -7,8 +7,8 @@ from src.utilities.fetch_config import get
 
 
 # update config.json
-def update_json(key: str, value: str or int) -> None:
-    with open(root_directory("data", "config.json"), "r+", encoding="utf-8") as f:
+def update_json(key: str, value: str or int, directory: str = 'data', file: str = 'config.json') -> None:
+    with open(root_directory(directory, file), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -19,7 +19,7 @@ def update_json(key: str, value: str or int) -> None:
 def set_default_values():
     update_json("language", "English, en")
     update_json("hearing_impaired", "Both")
-    update_json("precentage_pass", 90)
+    update_json("percentage_pass", 90)
     update_json("terminal_focus", "False")
     update_json("context_menu_icon", "True")
 
@@ -58,7 +58,7 @@ def select_language() -> None:
 
 
 # set percentage threshold
-def select_precentage_pass() -> None:
+def select_percentage_pass() -> None:
     ctypes.windll.kernel32.SetConsoleTitleW("SubSearch - Select precentage threshold")
     os.system("cls||clear")
     print(
@@ -80,7 +80,7 @@ def select_precentage_pass() -> None:
             break
         else:
             print("Must be a number between 1-100")
-    update_json("precentage_pass", value)
+    update_json("percentage_pass", value)
 
 
 # set if terminal is hidden or shown while searching

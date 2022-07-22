@@ -5,7 +5,7 @@ import webbrowser
 from dataclasses import dataclass
 
 import src.utilities.edit_registry as edit_registry
-from src.data._version import current_version
+from src.utilities.version import current_version
 from src.gui.tooltip import Hovertip
 from src.utilities.local_paths import cwd
 from src.utilities.current_user import got_key, is_admin, run_as_admin, is_exe_version
@@ -336,13 +336,13 @@ class SearchThreshold(tk.Frame):
         self.pct += 5 if self.pct < 100 else 0
         self.pct_var.set(f"{self.pct} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
-        update_json("precentage_pass", update_svar)
+        update_json("percentage_pass", update_svar)
 
     def button_sub_5(self, event) -> None:
         self.pct -= 5 if self.pct > 0 else 0
         self.pct_var.set(f"{self.pct} %")
         update_svar = int(self.pct_var.get().split(" ")[0])
-        update_json("precentage_pass", update_svar)
+        update_json("percentage_pass", update_svar)
 
 
 # remove or restore the context menu option when right-clicking

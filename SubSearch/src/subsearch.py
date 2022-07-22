@@ -1,7 +1,7 @@
 import ctypes
 import time
 
-from src.data._version import current_version
+from src.utilities.version import current_version
 from src.utilities.local_paths import cwd
 from src.scraper import opensubtitles, subscene
 from src.utilities import edit_config, edit_registry
