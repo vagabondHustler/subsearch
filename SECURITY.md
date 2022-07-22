@@ -8,4 +8,4 @@
 
 Either via a new [Issue](https://github.com/vagabondHustler/SubSearch/pulls), or via twitter [vagabondHustl3r](https://twitter.com/vagabondHustl3r)
 
-- [vagabondHustler](https://github.com/vagabondHustler)
+-- [vagabondHustler](https://github.com/vagabondHustler)
