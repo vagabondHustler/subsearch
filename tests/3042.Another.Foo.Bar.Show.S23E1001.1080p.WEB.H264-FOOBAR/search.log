@@ -1,25 +1,25 @@
-23-Jul-22 23:24:43 - SubSearch - v2.8.16 
-23-Jul-22 23:24:43 - [PARAMETERS]
-23-Jul-22 23:24:43 - Language: English, en
-23-Jul-22 23:24:43 - Hearing impaired: Both
-23-Jul-22 23:24:43 - Title: 3042 another foo bar show s23e1001
-23-Jul-22 23:24:43 - Year: N/A
-23-Jul-22 23:24:43 - Season: 23, twenty-third
-23-Jul-22 23:24:43 - Episode: 1001, one thousand and first
-23-Jul-22 23:24:43 - TV-Series: True
-23-Jul-22 23:24:43 - Release: 3042.another.foo.bar.show.s23e1001.1080p.web.h264-foobar
-23-Jul-22 23:24:43 - Group: foobar
-23-Jul-22 23:24:43 - Match threshold: 90%
-23-Jul-22 23:24:43 - File hash: None
-23-Jul-22 23:24:43 - URL: https://subscene.com/subtitles/searchbytitle?query=3042%20another%20foo%20bar%20show%20s23e1001
-23-Jul-22 23:24:43 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
+24-Jul-22 00:21:43 - SubSearch - v2.8.17 
+24-Jul-22 00:21:43 - [PARAMETERS]
+24-Jul-22 00:21:43 - Language: English, en
+24-Jul-22 00:21:43 - Hearing impaired: Both
+24-Jul-22 00:21:43 - Title: 3042 another foo bar show s23e1001
+24-Jul-22 00:21:43 - Year: N/A
+24-Jul-22 00:21:43 - Season: 23, twenty-third
+24-Jul-22 00:21:43 - Episode: 1001, one thousand and first
+24-Jul-22 00:21:43 - TV-Series: True
+24-Jul-22 00:21:43 - Release: 3042.another.foo.bar.show.s23e1001.1080p.web.h264-foobar
+24-Jul-22 00:21:43 - Group: foobar
+24-Jul-22 00:21:43 - Match threshold: 90%
+24-Jul-22 00:21:43 - File hash: None
+24-Jul-22 00:21:43 - URL: https://subscene.com/subtitles/searchbytitle?query=3042%20another%20foo%20bar%20show%20s23e1001
+24-Jul-22 00:21:43 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
 
-23-Jul-22 23:24:43 - 
-23-Jul-22 23:24:43 - [Searching opensubtitles]
-23-Jul-22 23:24:43 - 
-23-Jul-22 23:24:43 - [Searching subscene]
-23-Jul-22 23:24:43 - Starting new HTTPS connection (1): subscene.com:443
-23-Jul-22 23:24:43 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=3042%20another%20foo%20bar%20show%20s23e1001 HTTP/1.1" 200 None
-23-Jul-22 23:24:43 - 
-23-Jul-22 23:24:43 - No TV-series found matching 3042 another foo bar show s23e1001
-23-Jul-22 23:24:43 - Finished in 0.2457402000000002 seconds.
+24-Jul-22 00:21:43 - 
+24-Jul-22 00:21:43 - [Searching opensubtitles]
+24-Jul-22 00:21:43 - 
+24-Jul-22 00:21:43 - [Searching subscene]
+24-Jul-22 00:21:43 - Starting new HTTPS connection (1): subscene.com:443
+24-Jul-22 00:21:43 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=3042%20another%20foo%20bar%20show%20s23e1001 HTTP/1.1" 200 None
+24-Jul-22 00:21:43 - 
+24-Jul-22 00:21:43 - No TV-series found matching 3042 another foo bar show s23e1001
+24-Jul-22 00:21:43 - Finished in 0.19724890000361484 seconds.
