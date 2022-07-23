@@ -1,25 +1,25 @@
-23-Jul-22 23:36:34 - SubSearch - v2.8.16 
-23-Jul-22 23:36:34 - [PARAMETERS]
-23-Jul-22 23:36:34 - Language: English, en
-23-Jul-22 23:36:34 - Hearing impaired: Both
-23-Jul-22 23:36:34 - Title: another.foo.bar.show.1080p.web.h264-foobar
-23-Jul-22 23:36:34 - Year: N/A
-23-Jul-22 23:36:34 - Season: N/A, N/A
-23-Jul-22 23:36:34 - Episode: N/A, N/A
-23-Jul-22 23:36:34 - TV-Series: False
-23-Jul-22 23:36:34 - Release: another.foo.bar.show.1080p.web.h264-foobar
-23-Jul-22 23:36:34 - Group: foobar
-23-Jul-22 23:36:34 - Match threshold: 90%
-23-Jul-22 23:36:34 - File hash: None
-23-Jul-22 23:36:34 - URL: https://subscene.com/subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar
-23-Jul-22 23:36:34 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
+24-Jul-22 00:21:54 - SubSearch - v2.8.17 
+24-Jul-22 00:21:54 - [PARAMETERS]
+24-Jul-22 00:21:54 - Language: English, en
+24-Jul-22 00:21:54 - Hearing impaired: Both
+24-Jul-22 00:21:54 - Title: another.foo.bar.show.1080p.web.h264-foobar
+24-Jul-22 00:21:54 - Year: N/A
+24-Jul-22 00:21:54 - Season: N/A, N/A
+24-Jul-22 00:21:54 - Episode: N/A, N/A
+24-Jul-22 00:21:54 - TV-Series: False
+24-Jul-22 00:21:54 - Release: another.foo.bar.show.1080p.web.h264-foobar
+24-Jul-22 00:21:54 - Group: foobar
+24-Jul-22 00:21:54 - Match threshold: 90%
+24-Jul-22 00:21:54 - File hash: None
+24-Jul-22 00:21:54 - URL: https://subscene.com/subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar
+24-Jul-22 00:21:54 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
 
-23-Jul-22 23:36:34 - 
-23-Jul-22 23:36:34 - [Searching opensubtitles]
-23-Jul-22 23:36:34 - 
-23-Jul-22 23:36:34 - [Searching subscene]
-23-Jul-22 23:36:34 - Starting new HTTPS connection (1): subscene.com:443
-23-Jul-22 23:36:35 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar HTTP/1.1" 200 None
-23-Jul-22 23:36:35 - 
-23-Jul-22 23:36:35 - No movies found matching another.foo.bar.show.1080p.web.h264-foobar
-23-Jul-22 23:36:35 - Finished in 0.30081889999564737 seconds.
+24-Jul-22 00:21:54 - 
+24-Jul-22 00:21:54 - [Searching opensubtitles]
+24-Jul-22 00:21:54 - 
+24-Jul-22 00:21:54 - [Searching subscene]
+24-Jul-22 00:21:54 - Starting new HTTPS connection (1): subscene.com:443
+24-Jul-22 00:21:55 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar HTTP/1.1" 200 None
+24-Jul-22 00:21:55 - 
+24-Jul-22 00:21:55 - No movies found matching another.foo.bar.show.1080p.web.h264-foobar
+24-Jul-22 00:21:55 - Finished in 0.41061740000441205 seconds.
