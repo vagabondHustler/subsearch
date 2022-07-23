@@ -50,13 +50,34 @@ def split_last_hyphen(string: str) -> str:
     return group
 
 
-def find_title_year(x: str, year_found: bool = False) -> tuple:
-    string_list = x.split(".")
+def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
+    # if no file is found use the current directory path
+    if file_name is None:
+        release = dir_path.split("\\")[-1]
+    else:
+        release = file_name
+
+    season, episode, season_ordinal, episode_ordinal, tv_series = "N/A", "N/A", "N/A", "N/A", False
+    year_found = False
+
+    for item in release.lower().split("."):
+        if item.startswith("s") and item[-1].isdigit() and 'e' in item:
+            season, episode = item.replace("s", "").replace("e", " ").split(" ")
+            s_season, e_episode = f"s{season}", f"e{episode}"
+            season_ordinal, episode_ordinal = (
+                num2words(int(season), lang=lang_abbr, to="ordinal"),
+                num2words(int(episode), lang=lang_abbr, to="ordinal"),
+            )
+            if season[-1].isdigit():
+                tv_series = True
+                break
+
+    string_list = release.lower().split(".")
     subtract = []
     # list is reversed if a year is apart of the title, like "2001: A Foo Bar" from 1991
     # this is to prevent the year from the title being used as the release year of the movie/show
     for item in string_list[::-1]:
-        if year_found:
+        if year_found or item.startswith("s") and item[-1].isdigit():
             _title = (i for i in string_list if i not in subtract)
             break
         if item.isdigit() and len(item) == 4:
@@ -65,43 +86,15 @@ def find_title_year(x: str, year_found: bool = False) -> tuple:
         subtract.append(item)
 
     title = " ".join(x for x in _title)
-    return title, year
-
-
-def find_season_episode(string: str, lang_abbr: str) -> tuple:
-    season, episode, season_ordinal, episode_ordinal, tv_series = "N/A", "N/A", "N/A", "N/A", False
-    for item in string.lower().split("."):
-        if item.startswith("s") and item[-1].isdigit():
-            _season_episode = item.replace("s", "").replace("e", " ")
-            season_episode = _season_episode.split(" ")
-            sint, eint = season_episode[0], season_episode[1]
-            season, episode = f"s{sint}", f"e{eint}"
-            season_ordinal, episode_ordinal = (
-                num2words(sint, lang=lang_abbr, to="ordinal"),
-                num2words(eint, lang=lang_abbr, to="ordinal"),
-            )
-            if season[-1].isdigit():
-                tv_series = True
-                break
-    return season, episode, season_ordinal, episode_ordinal, tv_series
-
-
-def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
-    # if no file is found use the current directory path
-    if file_name is None:
-        release = dir_path.split("\\")[-1]
-    else:
-        release = file_name
-
-    title, year = find_title_year(release)
-    i = find_season_episode(release, lang_abbr)
-    season, episode, season_ordinal, episode_ordinal, tv_series = i
 
     if "-" in release:
         _group = split_last_hyphen(release)
         group = _group[-1]
     else:
         group = "N/A"
+
+    if year_found is False:
+        year = "N/A"
 
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
     opensubtitles = "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-"
