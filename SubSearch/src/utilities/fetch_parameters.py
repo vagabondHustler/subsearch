@@ -44,6 +44,7 @@ def split_last_hyphen(string: str) -> str:
 
 def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
     # default values
+    _title = None
     year = "N/A"
     season = "N/A"
     season_ordinal = "N/A"
@@ -82,7 +83,11 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
             year_found = True
             year = item
         subtract.append(item)
-    title = " ".join(x for x in _title)
+
+    if _title is not None:
+        title = " ".join(x for x in _title)
+    else:
+        title = release
 
     if "-" in release:
         group = split_last_hyphen(release)
