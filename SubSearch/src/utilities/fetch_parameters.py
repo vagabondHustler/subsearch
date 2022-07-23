@@ -6,10 +6,6 @@ from num2words import num2words
 
 @dataclass
 class ConfigData:
-    """
-    Dataclass with current values from config.json
-    """
-
     language: str
     hearing_impaired: str
     languages: list[str]
@@ -19,18 +15,8 @@ class ConfigData:
     context_menu_icon: str
 
 
-def read_data(config_file: str) -> ConfigData:
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
-        return ConfigData(**data)
-
-
 @dataclass
 class SearchParameters:
-    """
-    Dataclass with all the necessary information from the media file
-    """
-
     url_subscene: str
     url_opensubtitles: str
     title: str
@@ -45,6 +31,12 @@ class SearchParameters:
     file_hash: str
 
 
+def read_data(config_file: str) -> ConfigData:
+    with open(config_file, encoding="utf-8") as file:
+        data = json.load(file)
+        return ConfigData(**data)
+
+
 def split_last_hyphen(string: str) -> str:
     group = string.rsplit("-", 1)[-1]
     return group
@@ -52,6 +44,7 @@ def split_last_hyphen(string: str) -> str:
 
 def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
     # default values
+    _title = None
     year = "N/A"
     season = "N/A"
     season_ordinal = "N/A"
@@ -67,7 +60,7 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
     else:
         release = file_name
 
-    # find season, episode, make it ordinal and if it is a tv-series
+    # find season, episode, make it ordinal and set tv_series to true if it is a tv-series
     for item in release.lower().split("."):
         if item.startswith("s") and item[-1].isdigit() and "e" in item:
             season, episode = item.replace("s", "").replace("e", " ").split(" ")
@@ -91,7 +84,10 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
             year = item
         subtract.append(item)
 
-    title = " ".join(x for x in _title)
+    if _title is not None:
+        title = " ".join(x for x in _title)
+    else:
+        title = release
 
     if "-" in release:
         group = split_last_hyphen(release)
