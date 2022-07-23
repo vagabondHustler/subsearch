@@ -51,23 +51,28 @@ def split_last_hyphen(string: str) -> str:
 
 
 def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
+    # default values
+    year = "N/A"
+    season = "N/A"
+    season_ordinal = "N/A"
+    episode = "N/A"
+    episode_ordinal = "N/A"
+    group = "N/A"
+    tv_series = False
+    year_found = False
+
     # if no file is found use the current directory path
     if file_name is None:
         release = dir_path.split("\\")[-1]
     else:
         release = file_name
 
-    season, episode, season_ordinal, episode_ordinal, tv_series = "N/A", "N/A", "N/A", "N/A", False
-    year_found = False
-
+    # find season, episode, make it ordinal and if it is a tv-series
     for item in release.lower().split("."):
-        if item.startswith("s") and item[-1].isdigit() and 'e' in item:
+        if item.startswith("s") and item[-1].isdigit() and "e" in item:
             season, episode = item.replace("s", "").replace("e", " ").split(" ")
-            s_season, e_episode = f"s{season}", f"e{episode}"
-            season_ordinal, episode_ordinal = (
-                num2words(int(season), lang=lang_abbr, to="ordinal"),
-                num2words(int(episode), lang=lang_abbr, to="ordinal"),
-            )
+            season_ordinal = num2words(int(season), lang=lang_abbr, to="ordinal")
+            episode_ordinal = num2words(int(episode), lang=lang_abbr, to="ordinal")
             if season[-1].isdigit():
                 tv_series = True
                 break
@@ -77,6 +82,7 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
     # list is reversed if a year is apart of the title, like "2001: A Foo Bar" from 1991
     # this is to prevent the year from the title being used as the release year of the movie/show
     for item in string_list[::-1]:
+        # if year is found everything else in the list should be the release name
         if year_found or item.startswith("s") and item[-1].isdigit():
             _title = (i for i in string_list if i not in subtract)
             break
@@ -88,13 +94,7 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
     title = " ".join(x for x in _title)
 
     if "-" in release:
-        _group = split_last_hyphen(release)
-        group = _group[-1]
-    else:
-        group = "N/A"
-
-    if year_found is False:
-        year = "N/A"
+        group = split_last_hyphen(release)
 
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
     opensubtitles = "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-"
