@@ -67,7 +67,7 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
     else:
         release = file_name
 
-    # find season, episode, make it ordinal and if it is a tv-series
+    # find season, episode, make it ordinal and set tv_series to true if it is a tv-series
     for item in release.lower().split("."):
         if item.startswith("s") and item[-1].isdigit() and "e" in item:
             season, episode = item.replace("s", "").replace("e", " ").split(" ")
