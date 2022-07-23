@@ -6,10 +6,6 @@ from num2words import num2words
 
 @dataclass
 class ConfigData:
-    """
-    Dataclass with current values from config.json
-    """
-
     language: str
     hearing_impaired: str
     languages: list[str]
@@ -19,18 +15,8 @@ class ConfigData:
     context_menu_icon: str
 
 
-def read_data(config_file: str) -> ConfigData:
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
-        return ConfigData(**data)
-
-
 @dataclass
 class SearchParameters:
-    """
-    Dataclass with all the necessary information from the media file
-    """
-
     url_subscene: str
     url_opensubtitles: str
     title: str
@@ -43,6 +29,12 @@ class SearchParameters:
     release: str
     group: str
     file_hash: str
+
+
+def read_data(config_file: str) -> ConfigData:
+    with open(config_file, encoding="utf-8") as file:
+        data = json.load(file)
+        return ConfigData(**data)
 
 
 def split_last_hyphen(string: str) -> str:
