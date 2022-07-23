@@ -5,7 +5,6 @@
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch)
 ![Version](https://img.shields.io/github/v/release/vagabondHustler/SubSearch)
-![Commits Since](https://img.shields.io/github/commits-since/vagabondHustler/SubSearch/latest/main)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
