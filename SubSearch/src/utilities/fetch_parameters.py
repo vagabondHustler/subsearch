@@ -90,7 +90,6 @@ def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameter
             year_found = True
             year = item
         subtract.append(item)
-
     title = " ".join(x for x in _title)
 
     if "-" in release:
