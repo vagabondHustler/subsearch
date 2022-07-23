@@ -12,28 +12,28 @@ def get(output):
         return lang, lang_abbr
 
     def languages() -> list:
-        ls = config_json.languages
-        return ls
+        langs = config_json.languages
+        return langs
 
     def video_ext() -> list:
-        voe = config_json.video_ext
-        return voe
+        video_ext = config_json.video_ext
+        return video_ext
 
     def precent() -> int:
-        p = config_json.percentage_pass
-        return p
+        pct = config_json.percentage_pass
+        return pct
 
     def terminal_focus() -> str:
-        tf = config_json.terminal_focus
-        return tf
+        terminal_focus = config_json.terminal_focus
+        return terminal_focus
 
     def hearing_impaired() -> str:
-        hi = config_json.hearing_impaired
-        return hi
+        hearing_impaired = config_json.hearing_impaired
+        return hearing_impaired
 
     def cm_icon() -> str:
-        cm = config_json.context_menu_icon
-        return cm
+        context_menu_icon = config_json.context_menu_icon
+        return context_menu_icon
 
     if output == "language":
         return language()
