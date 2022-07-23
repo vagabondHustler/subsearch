@@ -1,34 +1,25 @@
-23-Jul-22 23:24:09 - SubSearch - v2.8.16 
-23-Jul-22 23:24:09 - [PARAMETERS]
-23-Jul-22 23:24:09 - Language: English, en
-23-Jul-22 23:24:09 - Hearing impaired: Both
-23-Jul-22 23:24:09 - Title: another.foo.bar.show.1080p.web.h264-foobar
+23-Jul-22 23:36:34 - SubSearch - v2.8.16 
+23-Jul-22 23:36:34 - [PARAMETERS]
+23-Jul-22 23:36:34 - Language: English, en
+23-Jul-22 23:36:34 - Hearing impaired: Both
+23-Jul-22 23:36:34 - Title: another.foo.bar.show.1080p.web.h264-foobar
+23-Jul-22 23:36:34 - Year: N/A
+23-Jul-22 23:36:34 - Season: N/A, N/A
+23-Jul-22 23:36:34 - Episode: N/A, N/A
+23-Jul-22 23:36:34 - TV-Series: False
+23-Jul-22 23:36:34 - Release: another.foo.bar.show.1080p.web.h264-foobar
+23-Jul-22 23:36:34 - Group: foobar
+23-Jul-22 23:36:34 - Match threshold: 90%
+23-Jul-22 23:36:34 - File hash: None
+23-Jul-22 23:36:34 - URL: https://subscene.com/subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar
+23-Jul-22 23:36:34 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
 
-Error Title must include a year or season/episode
-
-23-Jul-22 23:24:09 - Year: N/A
-23-Jul-22 23:24:09 - Season: N/A, N/A
-23-Jul-22 23:24:09 - Episode: N/A, N/A
-23-Jul-22 23:24:09 - TV-Series: False
-23-Jul-22 23:24:09 - Release: another.foo.bar.show.1080p.web.h264-foobar
-23-Jul-22 23:24:09 - Group: foobar
-23-Jul-22 23:24:09 - Match threshold: 90%
-23-Jul-22 23:24:09 - File hash: None
-23-Jul-22 23:24:09 - URL: https://subscene.com/subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar
-
-Error%20Title%20must%20include%20a%20year%20or%20season/episode
-
-23-Jul-22 23:24:09 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
-
-23-Jul-22 23:24:09 - 
-23-Jul-22 23:24:09 - [Searching opensubtitles]
-23-Jul-22 23:24:09 - 
-23-Jul-22 23:24:09 - [Searching subscene]
-23-Jul-22 23:24:09 - Starting new HTTPS connection (1): subscene.com:443
-23-Jul-22 23:24:09 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar%0A%0AError%20Title%20must%20include%20a%20year%20or%20season/episode%0A HTTP/1.1" 200 None
-23-Jul-22 23:24:09 - 
-23-Jul-22 23:24:09 - No movies found matching another.foo.bar.show.1080p.web.h264-foobar
-
-Error Title must include a year or season/episode
-
-23-Jul-22 23:24:09 - Finished in 0.2952159999986179 seconds.
+23-Jul-22 23:36:34 - 
+23-Jul-22 23:36:34 - [Searching opensubtitles]
+23-Jul-22 23:36:34 - 
+23-Jul-22 23:36:34 - [Searching subscene]
+23-Jul-22 23:36:34 - Starting new HTTPS connection (1): subscene.com:443
+23-Jul-22 23:36:35 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=another.foo.bar.show.1080p.web.h264-foobar HTTP/1.1" 200 None
+23-Jul-22 23:36:35 - 
+23-Jul-22 23:36:35 - No movies found matching another.foo.bar.show.1080p.web.h264-foobar
+23-Jul-22 23:36:35 - Finished in 0.30081889999564737 seconds.
