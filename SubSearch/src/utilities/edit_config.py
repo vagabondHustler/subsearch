@@ -1,9 +1,6 @@
-import ctypes
 import json
-import os
 
 from src.utilities.local_paths import root_directory
-from src.utilities.fetch_config import get
 
 
 # update config.json
@@ -23,5 +20,6 @@ def set_default_values():
     update_json("language", "English, en")
     update_json("hearing_impaired", "Both")
     update_json("percentage_pass", 90)
-    update_json("terminal_focus", "False")
     update_json("context_menu_icon", "True")
+    update_json("show_download_window", "False")
+    update_json("terminal_focus", "False")

@@ -10,7 +10,7 @@ COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
 def context_menu_icon() -> None:
-    from src.utilities.fetch_config import get
+    from src.utilities.read_config_json import get
 
     use: str = get("cm_icon")
     ss_path = "Directory\Background\shell\SubSearch"
@@ -25,7 +25,7 @@ def context_menu_icon() -> None:
 
 # write value to (Default)
 def write_command_subkey() -> None:
-    from src.utilities.fetch_config import get
+    from src.utilities.read_config_json import get
 
     focus = get("terminal_focus")
 

@@ -7,12 +7,13 @@ from num2words import num2words
 @dataclass
 class ConfigData:
     language: str
-    hearing_impaired: str
     languages: list[str]
-    video_ext: list
+    hearing_impaired: str
     percentage_pass: int
-    terminal_focus: str
     context_menu_icon: str
+    terminal_focus: str
+    show_download_window: str
+    video_ext: list
 
 
 @dataclass
