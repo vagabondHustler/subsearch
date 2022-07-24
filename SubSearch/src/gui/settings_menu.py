@@ -10,15 +10,16 @@ from src.gui.tooltip import Hovertip
 from src.utilities.local_paths import cwd
 from src.utilities.current_user import got_key, is_admin, run_as_admin, is_exe_version
 from src.utilities.edit_config import set_default_values, update_json
-from src.utilities.fetch_config import get
+from src.utilities.read_config_json import get
 from src.utilities.updates import is_new_version_available, check_for_updates
 
 languages = get("languages")
 language, lang_abbr = get("language")
+hearing_impared = get("hearing_impaired")
 pct = get("percentage")
 terminal_focus = get("terminal_focus")
-hearing_impared = get("hearing_impaired")
 cm_icon = get("cm_icon")
+dl_window = get("show_download_window")
 
 
 @dataclass
@@ -445,6 +446,50 @@ class ShowContextMenuIcon(tk.Frame):
         edit_registry.context_menu_icon()
 
 
+# remove or restore the icon next to the context menu option when right clicking
+class ShowDownloadWindow(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        dlw_var = tk.StringVar()
+        dlw_var.set(f"{dl_window}")
+        self.dlw_var = dlw_var
+        for i in range(1, 4):
+            Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
+        Create.label(self, text="Show download window", row=1, col=1, sticky="w", font=Tks.font8b)
+        Create.label(self, textvar=self.dlw_var, row=1, col=2, font=Tks.font8b)
+        Create.button(
+            self,
+            text="True",
+            row=1,
+            col=3,
+            sticky="e",
+            bind_to=self.button_set_true,
+            tip_show=True,
+            tip_text="If no subtitles are found show a window with the disregarded subtitles with download buttons to each of them",
+        )
+        Create.button(
+            self,
+            text="False",
+            row=1,
+            col=3,
+            sticky="w",
+            bind_to=self.button_set_false,
+            tip_show=True,
+            tip_text="No window will be shown if no subtitles are found\n The list can be found in search.log",
+        )
+        self.configure(bg=Tks.bg)
+
+    def button_set_true(self, event) -> None:
+        self.dlw_var.set(f"True")
+        update_svar = self.dlw_var.get()
+        update_json("show_download_window", update_svar)
+
+    def button_set_false(self, event) -> None:
+        self.dlw_var.set(f"False")
+        update_svar = self.dlw_var.get()
+        update_json("show_download_window", update_svar)
+
+
 # show a terminal with what the code is doing while searching
 class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent) -> None:
@@ -592,6 +637,7 @@ if is_admin():
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
+    ShowDownloadWindow(root).pack(anchor="center")
     ShowTerminalOnSearch(root).pack(anchor="center")
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     CheckForUpdates(root).pack(anchor="center")
