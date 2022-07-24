@@ -8,8 +8,8 @@ from src.utilities import edit_config, edit_registry
 from src.utilities import file_manager as ufm
 from src.utilities import log
 from src.utilities.current_user import got_key
-from src.utilities.fetch_config import get
-from src.utilities.fetch_parameters import get_parameters
+from src.utilities.read_config_json import get
+from src.utilities.read_parameters import get_parameters
 
 
 def main() -> None:
@@ -25,6 +25,7 @@ def main() -> None:
     language, lang_abbr = get("language")
     hearing_impaired = get("hearing_impaired")
     pct = get("percentage")
+    show_download_window = get("show_download_window")
     focus = get("terminal_focus")
     video_ext: list = get("video_ext")
     video = ufm.find_video(cwd(), video_ext, False)
@@ -53,8 +54,13 @@ def main() -> None:
     )
     log.output("")
     log.output("[Searching subscene]")
-    scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct)
-    if scrape_opensubtitles is None and scrape_subscene is None:
+    scrape_subscene = subscene.scrape(
+        param, language, lang_abbr, hearing_impaired, pct, show_download_window
+    )
+    if scrape_opensubtitles is None and scrape_subscene[0] is None:
+        if show_download_window == "True":
+            import src.gui.download_window
+
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
         if focus == "True":
@@ -66,12 +72,12 @@ def main() -> None:
         log.output("")
         log.output("[Downloading from Opensubtitles]")
         for item in scrape_opensubtitles:
-            ufm.download_zip(item)
-    if scrape_subscene is not None:
+            ufm.download_zip_auto(item)
+    if scrape_subscene[0] is not None:
         log.output("")
         log.output("[Downloading from Subscene]")
         for item in scrape_subscene:
-            ufm.download_zip(item)
+            ufm.download_zip_auto(item)
 
     # process downloaded files
     log.output("")
