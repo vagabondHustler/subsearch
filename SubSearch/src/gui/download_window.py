@@ -60,3 +60,86 @@ class Create(tk.Frame):
         return _label
 
 # replace the regular windows-style title bar with a custom one
+class CustomTitleBar(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        self.after(10, self.remove_titlebar, root)
+        self.parent = parent
+        self._offsetx = 0
+        self._offsety = 0
+        root.focus_force()
+        root.overrideredirect(True)
+        button = Create.button(
+            self,
+            text="X",
+            row=0,
+            col=0,
+            height=1,
+            width=2,
+            abgc="#cd2e3e",
+            bge="#a72633",
+            fge=Tks.fg,
+            font=Tks.font10b,
+            pady=5,
+            padx=5,
+            bind_to=self.tk_exit_press,
+        )
+        label = tk.Label(
+            root,
+            text=" SubSearch",
+            height=2,
+            bg=Tks.bc,
+            fg=Tks.fg,
+            font=Tks.font10b,
+            justify="left",
+            anchor="w",
+            width=Tks.window_width,
+        )
+        label.place(bordermode="outside", x=0, y=0)
+        label.lower()
+        self.button = button
+        self.label = label
+
+        label.bind("<Button-1>", self.titlebar_press)
+        label.bind("<B1-Motion>", self.titlebar_drag)
+
+        self.configure(bg=Tks.bc)
+
+    def window_pos(self, parent, w: int = 80, h: int = 48) -> str:
+        ws = parent.winfo_screenwidth()
+        hs = parent.winfo_screenheight()
+
+        x = int((ws / 2) - (w / 2))
+        y = int((hs / 2) - (h / 2))
+        value = f"{w}x{h}+{x}+{y}"
+        return value
+
+    def remove_titlebar(self, parent) -> None:
+        GWL_EXSTYLE = -20
+        WS_EX_APPWINDOW = 0x00040000
+        WS_EX_TOOLWINDOW = 0x00000080
+        hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+        style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TOOLWINDOW
+        style = style | WS_EX_APPWINDOW
+        res = ctypes.windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        root.withdraw()
+        root.after(10, root.deiconify)
+
+    def titlebar_press(self, event) -> None:
+        self._offsetx = root.winfo_pointerx() - root.winfo_rootx()
+        self._offsety = root.winfo_pointery() - root.winfo_rooty()
+
+    def titlebar_drag(self, event) -> None:
+        x = self.winfo_pointerx() - self._offsetx
+        y = self.winfo_pointery() - self._offsety
+        root.geometry(f"+{x}+{y}")
+
+    def tk_exit_release(self, event) -> None:
+        clean_up(cwd(), "temp.txt")
+        root.destroy()
+
+    def tk_exit_press(self, event) -> None:
+        self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
+
+
