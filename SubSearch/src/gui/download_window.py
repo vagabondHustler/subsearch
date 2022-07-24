@@ -34,3 +34,29 @@ class Tks:
     col58: str = " " * 58
 
 
+class Create(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=Tks.bg)
+
+    # create a basic label
+    def label(
+        self,
+        bg=Tks.bg,
+        fg=Tks.fg,
+        text=None,
+        textvar=None,
+        row=None,
+        col=None,
+        anchor=None,
+        sticky=None,
+        font=Tks.font8b,
+        padx=2,
+        pady=2,
+    ) -> str:
+        _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
+        _label.configure(bg=bg, fg=fg, font=font)
+        _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
+        return _label
+
+# replace the regular windows-style title bar with a custom one
