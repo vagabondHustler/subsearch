@@ -64,8 +64,13 @@ def log_and_sort_list(list_of_tuples: list, percentage) -> list:
 
 # decides what to do with all the scrape data
 def scrape(
-    parameters, language: str, lang_abbr: str, hearing_impaired: str, percentage
-) -> list or None:
+    parameters,
+    language: str,
+    lang_abbr: str,
+    hearing_impaired: str,
+    percentage,
+    show_download_window: str,
+) -> list | None:
     # search for titles
     to_be_scraped: list = []
     title_keys = search_for_title(parameters.url_subscene)
@@ -111,14 +116,25 @@ def scrape(
             if is_threshold(key, number, percentage, parameters):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        log_and_sort_list(to_be_sorted, percentage)
+        sorted_list = log_and_sort_list(to_be_sorted, percentage)
         log.output("Done with tasks")
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
         log.output("")
         log.output(f"No subtitles to download for {parameters.release}")
-        return None
+        if show_download_window:
+            with open("temp.txt", "w") as f:
+                for i in range(len(sorted_list)):
+                    name, _link = sorted_list[i][1], sorted_list[i][2]
+                    link = _link.replace(" ", "")
+                    f.writelines(f"{name} {link}")
+                    f.write("\n")
+            import src.gui.download_window
+
+            return None
+        else:
+            return None
 
     download_info: list = []
     for current_num, (dl_url) in enumerate(to_be_downloaded):
