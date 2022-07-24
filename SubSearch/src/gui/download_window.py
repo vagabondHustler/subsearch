@@ -3,7 +3,6 @@ import sys
 import tkinter as tk
 from dataclasses import dataclass
 
-from src.gui.tooltip import Hovertip
 from src.scraper.subscene_soup import get_download_url
 from src.utilities.file_manager import (clean_up, download_zip_auto,
                                         extract_zips)
@@ -143,4 +142,115 @@ class CustomTitleBar(tk.Frame):
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
 
+# download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
+    def __init__(self, parent) -> None:
+        tk.Frame.__init__(self, parent)
+        count = 1
+        input_list = tk.Listbox(
+            root,
+            bg=Tks.bg,
+            fg=Tks.fg,
+            font=Tks.font10b,
+            bd=0,
+            border=0,
+            borderwidth=0,
+        )
+        input_list.place(
+            height=Tks.window_height - 80,
+            width=Tks.window_width - 80,
+            relx=0.5,
+            rely=0.525,
+            bordermode="inside",
+            anchor="center",
+        )
+        dicts_names = {}
+        dicts_urls = {}
+        count = 0
+        for x, i in zip(range(0, len(sublist)), sublist):
+            x = i.split(" ")
+            match = f"{x[0]} {x[1]}"
+            name = x[2]
+            url = x[-1]
+            txt = f"{match} {name}"
+            input_list.insert(tk.END, f"{match} {name}\n")
+            input_list.bind("<<ListboxSelect>>", self.download_button)
+            dicts_names[count] = txt
+            dicts_urls[count] = url
+            self.dicts_urls = dicts_urls
+            self.dicts_names = dicts_names
+            self.input_list = input_list
+            count += 1
+        self.configure(bg=Tks.bc)
+
+    def download_button(self, event) -> None:
+        a = str(self.input_list.curselection())
+        a = a.replace("(", "")
+        a = a.replace(")", "")
+        a = a.replace(",", "")
+        _error = False
+        for (number, url), (name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
+            if number == int(a):
+                self.input_list.delete(int(number))
+                self.input_list.insert(int(number), f"»»» DOWNLOADING «««")
+                self.input_list.itemconfig(int(number), {"fg": "#2b609a"})
+                try:
+                    dl_url = get_download_url(url)
+                    _name = name.replace("/", "").replace("\\", "").split(": ")
+                    path = f"{cwd()}\\{_name[-1]}.zip"
+                    item = path, dl_url, 1, 1
+                    download_zip_auto(item)
+                    if _error is False:
+                        extract_zips(cwd(), ".zip")
+                        clean_up(cwd(), ".zip")
+                        clean_up(cwd(), ").nfo")
+                        self.input_list.delete(int(number))
+                        self.input_list.insert(int(number), f"✔ {name}")
+                        self.input_list.itemconfig(int(number), {"fg": "#73aa4f"})
+                        _error = False
+                except OSError:
+                    _error = True
+                    self.input_list.delete(int(number))
+                    self.input_list.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
+                    self.input_list.itemconfig(int(number), {"fg": "#9b3435"})
+
+
+# get the window position so it can be placed in the center of the screen
+def set_window_position(w=Tks.window_width, h=Tks.window_height):
+    ws = root.winfo_screenwidth()
+    hs = root.winfo_screenheight()
+    x = int((ws / 2) - (w / 2))
+    y = int((hs / 2) - (h / 2))
+    value = f"{w}x{h}+{x}+{y}"
+    return value
+
+
+import os
+
+# only runs if file is run as administrator
+print(os.getcwd())
+with open("temp.txt", "r") as fileopen:
+    sublist = [line.strip() for line in fileopen]
+
+if "win" in sys.platform:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
+c_verison = current_version()
+root = tk.Tk(className=f" SubSearch")
+
+icon_path = root_directory("data", "64.ico")
+root.iconbitmap(icon_path)
+root.geometry(set_window_position())
+# root.resizable(False, False)
+root.wm_attributes("-transparentcolor", "#2a2d2f")
+root.configure(bg=Tks.bg)
+CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
+tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+DownloadList(root).pack(anchor="center")
+tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+root.mainloop()
+
+
+sys.exit()
