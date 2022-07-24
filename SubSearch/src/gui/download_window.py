@@ -57,6 +57,46 @@ class Create(tk.Frame):
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
+    
+    # create a basic button
+    def button(
+        self,
+        bg=Tks.bc,
+        abgc=Tks.abg,
+        bge=Tks.abg,
+        fg=Tks.fg,
+        fge=Tks.fge,
+        text=None,
+        height=2,
+        width=10,
+        bd=0,
+        row=None,
+        col=None,
+        sticky=None,
+        font=Tks.font8b,
+        padx=2,
+        pady=2,
+        bind_to=None,
+        tip_show=False,
+        tip_text=None,
+    ) -> str:
+        _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
+        _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
+        _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
+        _button.bind("<Button-1>", bind_to)
+        tip = Hovertip(_button, tip_text) if tip_show else None
+
+        def button_enter(self) -> None:
+            _button.configure(bg=bge, fg=fge, font=font)
+            tip.showtip() if tip_show else None
+
+        def button_leave(self) -> None:
+            _button.configure(bg=bg, fg=fg, font=font)
+            tip.hidetip() if tip_show else None
+
+        _button.bind("<Enter>", button_enter)
+        _button.bind("<Leave>", button_leave)
+        return _button
 
 # replace the regular windows-style title bar with a custom one
 class CustomTitleBar(tk.Frame):
