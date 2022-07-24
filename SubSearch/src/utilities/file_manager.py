@@ -25,7 +25,7 @@ def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
 
 
 # download zip files from url
-def download_zip(item: str) -> None:
+def download_zip_auto(item: str) -> None:
     file_path, url, current_num, total_num = item
     log.output(f"Downloading: {current_num}/{total_num}")
     r = SCRAPER.get(url, stream=True)
