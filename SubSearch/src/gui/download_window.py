@@ -143,3 +143,4 @@ class CustomTitleBar(tk.Frame):
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
 
+class DownloadList(tk.Frame):
