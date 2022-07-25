@@ -14,6 +14,11 @@ from src.utilities.version import current_version
 class Tks:
     """
     Dataclass with often used values for the graphical user interface
+
+    window_width: int, window_height: int, bg: str, bgl: str, fg: str, 
+    fge: str, bc: str, abg: str, abg_disabled: str, dling: str, dled: str, 
+    failed: str, font8: str, font8b: str, font10b: str, font10b: str, 
+    font20b: str, col58: str
     """
 
     window_width: int = 700
@@ -213,10 +218,10 @@ def main():
     # root.resizable(False, False)
     root.wm_attributes("-transparentcolor", "#2a2d2f")
     root.configure(bg=Tks.bg)
-    
+
     CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
     tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
-    
+
     return root
