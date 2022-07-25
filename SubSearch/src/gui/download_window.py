@@ -12,8 +12,7 @@ from src.utilities.local_paths import cwd
 class DownloadList(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        count = 1
-        self.extent = 0
+        # listbox for the subtitles
         list_box = tk.Listbox(
             root,
             bg=Tks.bg,
@@ -36,6 +35,7 @@ class DownloadList(tk.Frame):
         dicts_names = {}
         dicts_urls = {}
         count = 0
+        # fil list box with all available subtitles that were found and not downloaded
         for x, i in zip(range(0, len(sublist)), sublist):
             x = i.split(" ")
             match = f"{x[0]} {x[1]}"
@@ -50,24 +50,31 @@ class DownloadList(tk.Frame):
             self.dicts_names = dicts_names
             self.list_box = list_box
             count += 1
-        bar_lenght = 50
-        self.bar_lenght = bar_lenght
-        self.bar_lenght_half = round(bar_lenght / 2)
-        canvas = tk.Canvas(root, width=24, height=633)
-        canvas.configure(bg=Tks.bc, bd=0, highlightthickness=0)
-        self.c = canvas
-        self.rect = canvas.create_rectangle(
-            2, 2, bar_lenght, bar_lenght, fill=Tks.fg, outline=Tks.fg
+            
+        # custom scrollbar
+        scrollbar_lengt = 50
+        self.scrollbar_lengt = scrollbar_lengt
+        self.scrollbar_lenght_half = round(scrollbar_lengt / 2)
+        scrollbar_canvas = tk.Canvas(root, width=24, height=633)
+        scrollbar_canvas.configure(bg=Tks.bc, bd=0, highlightthickness=0)
+        self.scrollbar_canvas = scrollbar_canvas
+        self.scrollbar = scrollbar_canvas.create_rectangle(
+            2, 2, scrollbar_lengt, scrollbar_lengt, fill=Tks.fg, outline=Tks.fg
         )
-        canvas.place(x=Tks.window_width - 35, y=51, bordermode="inside")
-        canvas.bind("<ButtonPress-1>", self.scrollbar)
-        canvas.bind("<ButtonRelease-1>", self.scroll_release)
-        canvas.tag_bind(id, "<<MouseWheel>>", self.custom_scroll)
+        scrollbar_canvas.place(x=Tks.window_width - 35, y=51, bordermode="inside")
+        # scrollbar binds
+        scrollbar_canvas.bind("<ButtonPress-1>", self.scrollbar)    # scrollbar click
+        scrollbar_canvas.bind("<ButtonRelease-1>", self.scroll_release) # scrollbar release
+        # custom mousewheel binds
+        scrollbar_canvas.tag_bind(id, "<<MouseWheel>>", self.custom_scroll)
         root.bind("<MouseWheel>", self.custom_scroll)
+        
+        self.extent = 0
 
     def custom_scroll(self, event):
         event.widget.event_generate("<<MouseWheel>>")
-
+        
+        # maintain ratio between scrollbar pos and scrollbar canvas length
         old_value = self.extent
         old_min = 0
         old_max = 633
@@ -76,6 +83,8 @@ class DownloadList(tk.Frame):
         old_range = old_max - old_min
         new_range = new_max - new_min
         new_value = (((old_value - old_min) * new_range) / old_range) + new_min
+        
+        # move scrollbar with scrollwheel and prevent scrollbar from going out of bounds 
         if new_value <= 0:
             pass
         else:
@@ -87,27 +96,27 @@ class DownloadList(tk.Frame):
             if event.delta < 0:
                 self.extent += 25
 
-        # self.c.coords(self.rect,2,old_value - self.bar_lenght_half,self.bar_lenght_half,old_value + self.bar_lenght_half)
-        print(round(new_value))
-
+        # update scrollbar position
         if round(new_value) <= new_max and round(new_value) >= new_min:
-            self.c.coords(
-                self.rect,
+            self.scrollbar_canvas.coords(
+                self.scrollbar,
                 2,
-                old_value - self.bar_lenght_half,
-                self.bar_lenght_half,
-                old_value + self.bar_lenght_half,
+                old_value - self.scrollbar_lenght_half,
+                self.scrollbar_lenght_half,
+                old_value + self.scrollbar_lenght_half,
             )
+        # dirty fix for scrollbar moving further than intended
         if self.list_box.get(round(new_value)) == self.list_box.get(0):
-            self.c.coords(self.rect, 2, self.bar_lenght, self.bar_lenght_half, new_min)
+            self.scrollbar_canvas.coords(self.scrollbar, 2, self.scrollbar_lengt, self.scrollbar_lenght_half, new_min)
         if self.list_box.get(round(new_value)) == self.list_box.get(new_max):
-            self.c.coords(self.rect, 2, old_max, self.bar_lenght_half, 633 - 50)
+            self.scrollbar_canvas.coords(self.scrollbar, 2, old_max, self.scrollbar_lenght_half, 633 - 50)
         self.list_box.see(round(new_value))
 
     def no_op(self, event):
         return "break"
 
     def scrollbar(self, event):
+        # maintain ratio between scrollbar pos and mouse movement in the Y axis
         old_value = event.y
         old_min = 0
         old_max = 633
@@ -116,21 +125,25 @@ class DownloadList(tk.Frame):
         old_range = old_max - old_min
         new_range = new_max - new_min
         new_value = (((old_value - old_min) * new_range) / old_range) + new_min
-
-        self.c.bind("<Motion>", self.scrollbar)
+        
+        # mouse movement bind while scrollbar is pressed
+        self.scrollbar_canvas.bind("<Motion>", self.scrollbar)
         self.extent = old_value
+        
+        # prevent scrollbar from going out of bounds
         if new_value <= new_max and new_value >= new_min:
-            self.c.coords(
-                self.rect,
+            # move scrollbar with mouse movement Y axis pos
+            self.scrollbar_canvas.coords(
+                self.scrollbar,
                 2,
-                old_value - self.bar_lenght_half,
-                self.bar_lenght_half,
-                old_value + self.bar_lenght_half,
+                old_value - self.scrollbar_lenght_half,
+                self.scrollbar_lenght_half,
+                old_value + self.scrollbar_lenght_half,
             )
             self.list_box.see(round(new_value))
 
     def scroll_release(self, event):
-        self.c.unbind("<Motion>")
+        self.scrollbar_canvas.unbind("<Motion>")
 
     def download_button(self, event) -> None:
         a = str(self.list_box.curselection())
