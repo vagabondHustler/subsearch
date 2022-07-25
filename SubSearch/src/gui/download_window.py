@@ -50,7 +50,7 @@ class DownloadList(tk.Frame):
             self.dicts_names = dicts_names
             self.list_box = list_box
             count += 1
-            
+
         # custom scrollbar
         scrollbar_lengt = 50
         self.scrollbar_lengt = scrollbar_lengt
@@ -63,17 +63,17 @@ class DownloadList(tk.Frame):
         )
         scrollbar_canvas.place(x=Tks.window_width - 35, y=51, bordermode="inside")
         # scrollbar binds
-        scrollbar_canvas.bind("<ButtonPress-1>", self.scrollbar)    # scrollbar click
-        scrollbar_canvas.bind("<ButtonRelease-1>", self.scroll_release) # scrollbar release
+        scrollbar_canvas.bind("<ButtonPress-1>", self.scrollbar)  # scrollbar click
+        scrollbar_canvas.bind("<ButtonRelease-1>", self.scroll_release)  # scrollbar release
         # custom mousewheel binds
         scrollbar_canvas.tag_bind(id, "<<MouseWheel>>", self.custom_scroll)
         root.bind("<MouseWheel>", self.custom_scroll)
-        
+
         self.extent = 0
 
     def custom_scroll(self, event):
         event.widget.event_generate("<<MouseWheel>>")
-        
+
         # maintain ratio between scrollbar pos and scrollbar canvas length
         old_value = self.extent
         old_min = 0
@@ -83,8 +83,8 @@ class DownloadList(tk.Frame):
         old_range = old_max - old_min
         new_range = new_max - new_min
         new_value = (((old_value - old_min) * new_range) / old_range) + new_min
-        
-        # move scrollbar with scrollwheel and prevent scrollbar from going out of bounds 
+
+        # move scrollbar with scrollwheel and prevent scrollbar from going out of bounds
         if new_value <= 0:
             pass
         else:
@@ -107,9 +107,13 @@ class DownloadList(tk.Frame):
             )
         # dirty fix for scrollbar moving further than intended
         if self.list_box.get(round(new_value)) == self.list_box.get(0):
-            self.scrollbar_canvas.coords(self.scrollbar, 2, self.scrollbar_lengt, self.scrollbar_lenght_half, new_min)
+            self.scrollbar_canvas.coords(
+                self.scrollbar, 2, self.scrollbar_lengt, self.scrollbar_lenght_half, new_min
+            )
         if self.list_box.get(round(new_value)) == self.list_box.get(new_max):
-            self.scrollbar_canvas.coords(self.scrollbar, 2, old_max, self.scrollbar_lenght_half, 633 - 50)
+            self.scrollbar_canvas.coords(
+                self.scrollbar, 2, old_max, self.scrollbar_lenght_half, 633 - 50
+            )
         self.list_box.see(round(new_value))
 
     def no_op(self, event):
@@ -125,11 +129,11 @@ class DownloadList(tk.Frame):
         old_range = old_max - old_min
         new_range = new_max - new_min
         new_value = (((old_value - old_min) * new_range) / old_range) + new_min
-        
+
         # mouse movement bind while scrollbar is pressed
         self.scrollbar_canvas.bind("<Motion>", self.scrollbar)
         self.extent = old_value
-        
+
         # prevent scrollbar from going out of bounds
         if new_value <= new_max and new_value >= new_min:
             # move scrollbar with mouse movement Y axis pos
@@ -177,6 +181,7 @@ class DownloadList(tk.Frame):
                     self.list_box.itemconfig(int(number), {"fg": Tks.failed})
 
 
+# file with subtitles and corresponding dl links
 if os.path.exists("temp.txt"):
     with open("temp.txt", "r") as fileopen:
         sublist = [line.strip() for line in fileopen]
