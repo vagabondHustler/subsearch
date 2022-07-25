@@ -57,7 +57,7 @@ def main() -> None:
     scrape_subscene = subscene.scrape(
         param, language, lang_abbr, hearing_impaired, pct, show_download_window
     )
-    if scrape_opensubtitles is None and scrape_subscene[0] is None:
+    if scrape_opensubtitles is None and scrape_subscene is None:
         if show_download_window == "True":
             import src.gui.download_window
 
