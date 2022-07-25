@@ -1,0 +1,26 @@
+24-Jul-22 00:21:50 - SizeError: filesize is 0 bytes
+24-Jul-22 00:21:50 - SubSearch - v2.8.17 
+24-Jul-22 00:21:50 - [PARAMETERS]
+24-Jul-22 00:21:50 - Language: English, en
+24-Jul-22 00:21:50 - Hearing impaired: Both
+24-Jul-22 00:21:50 - Title: a foo bar show s23e12
+24-Jul-22 00:21:50 - Year: N/A
+24-Jul-22 00:21:50 - Season: 23, twenty-third
+24-Jul-22 00:21:50 - Episode: 12, twelfth
+24-Jul-22 00:21:50 - TV-Series: True
+24-Jul-22 00:21:50 - Release: a.foo.bar.show.s23e12.1080p.web.h264-foobar
+24-Jul-22 00:21:50 - Group: foobar
+24-Jul-22 00:21:50 - Match threshold: 90%
+24-Jul-22 00:21:50 - File hash: None
+24-Jul-22 00:21:50 - URL: https://subscene.com/subtitles/searchbytitle?query=a%20foo%20bar%20show%20s23e12
+24-Jul-22 00:21:50 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
+
+24-Jul-22 00:21:50 - 
+24-Jul-22 00:21:50 - [Searching opensubtitles]
+24-Jul-22 00:21:50 - 
+24-Jul-22 00:21:50 - [Searching subscene]
+24-Jul-22 00:21:50 - Starting new HTTPS connection (1): subscene.com:443
+24-Jul-22 00:21:50 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=a%20foo%20bar%20show%20s23e12 HTTP/1.1" 200 None
+24-Jul-22 00:21:50 - 
+24-Jul-22 00:21:50 - No TV-series found matching a foo bar show s23e12
+24-Jul-22 00:21:50 - Finished in 0.30354899998928886 seconds.
