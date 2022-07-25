@@ -1,6 +1,5 @@
 {
     "language": "English, en",
-    "hearing_impaired": "Both",
     "languages": [
         "Arabic, ar",
         "Brazillian Portuguese, pt_BR",
@@ -22,6 +21,11 @@
         "Turkish, tr",
         "Vietnamese, vi"
     ],
+    "hearing_impaired": "Both",
+    "percentage_pass": 90,
+    "context_menu_icon": "True",
+    "show_download_window": "False",
+    "terminal_focus": "False",
     "video_ext": [
         ".avi",
         ".mp4",
@@ -37,8 +41,5 @@
         ".3g2",
         ".swf",
         ".mswmm"
-    ],
-    "percentage_pass": 90,
-    "terminal_focus": "False",
-    "context_menu_icon": "True"
+    ]
 }

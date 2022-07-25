@@ -1,0 +1,23 @@
+24-Jul-22 00:21:47 - SizeError: filesize is 0 bytes
+24-Jul-22 00:21:47 - SubSearch - v2.8.17 
+24-Jul-22 00:21:47 - [PARAMETERS]
+24-Jul-22 00:21:47 - Language: English, en
+24-Jul-22 00:21:47 - Hearing impaired: Both
+24-Jul-22 00:21:47 - Title: a foo bar moive
+24-Jul-22 00:21:47 - Year: 2022
+24-Jul-22 00:21:47 - Season: N/A, N/A
+24-Jul-22 00:21:47 - Episode: N/A, N/A
+24-Jul-22 00:21:47 - TV-Series: False
+24-Jul-22 00:21:47 - Release: a.foo.bar.moive.2022.1080p.web.h264-foobar
+24-Jul-22 00:21:47 - Group: foobar
+24-Jul-22 00:21:47 - Match threshold: 90%
+24-Jul-22 00:21:47 - File hash: None
+24-Jul-22 00:21:47 - URL: https://subscene.com/subtitles/searchbytitle?query=a%20foo%20bar%20moive
+24-Jul-22 00:21:47 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
+
+24-Jul-22 00:21:47 - 
+24-Jul-22 00:21:47 - [Searching opensubtitles]
+24-Jul-22 00:21:47 - 
+24-Jul-22 00:21:47 - [Searching subscene]
+24-Jul-22 00:21:47 - Starting new HTTPS connection (1): subscene.com:443
+24-Jul-22 00:21:47 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=a%20foo%20bar%20moive HTTP/1.1" 409 None
