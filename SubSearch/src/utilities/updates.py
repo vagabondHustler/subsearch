@@ -5,9 +5,7 @@ import json
 from bs4 import BeautifulSoup
 from src.utilities.version import current_version
 
-SCRAPER = cloudscraper.create_scraper(
-    browser={"browser": "chrome", "platform": "android", "desktop": False}
-)
+SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
 def check_for_updates() -> str:
