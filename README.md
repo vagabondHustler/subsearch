@@ -34,7 +34,8 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 <div align="center">
 
 ![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_258.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_2918.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_dlw_2918.png)
 
 </div>
 
