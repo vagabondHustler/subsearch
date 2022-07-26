@@ -1,38 +1,32 @@
 import ctypes
-import os
 import sys
 import tkinter as tk
 from dataclasses import dataclass
 
 from src.gui.tooltip import Hovertip
-from src.utilities.file_manager import clean_up
-from src.utilities.local_paths import cwd, root_directory
+from src.utilities.local_paths import root_directory
 from src.utilities.version import current_version
 
 
 @dataclass
 class Tks:
-    """
-    Dataclass with often used values for the graphical user interface
-
-    window_width: int, window_height: int, bg: str, bgl: str, fg: str, 
-    fge: str, bc: str, abg: str, abg_disabled: str, dling: str, dled: str, 
-    failed: str, font8: str, font8b: str, font10b: str, font10b: str, 
-    font20b: str, col58: str
-    """
-
     window_width: int = 700
     window_height: int = 700
-    bg: str = "#1b1d22"
-    bgl: str = "#4c4c4c"
-    fg: str = "#bdbdbd"
-    fge: str = "#c5895e"
-    bc: str = "#121417"
-    abg: str = "#16181c"
-    abg_disabled: str = "#303030"
-    dling: str = "#2b609a"
-    dled: str = "#73aa4f"
-    failed: str = "#9b3435"
+
+    purple: str = "#b294bb"
+    red: str = "#bc473b"
+    orange: str = "#ab7149"
+    light_orange: str = "#de935f"
+    yellow: str = "#f0c674"
+    blue: str = "#81a2be"
+    cyan: str = "#82b3ac"
+    green: str = "#9fa65d"
+    grey: str = "#4c4c4c"
+    light_grey: str = "#727272"
+    dark_grey: str = "#1A1A1A"
+    white_grey: str = "#bdbdbd"
+    light_black: str = "#0e0e0e"
+    black: str = "#000000"
     font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 8 bold"
@@ -44,13 +38,13 @@ class Tks:
 class Create(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=Tks.bg)
+        self.configure(bg=Tks.dark_grey)
 
     # create a basic label
     def label(
         self,
-        bg=Tks.bg,
-        fg=Tks.fg,
+        bg=Tks.dark_grey,
+        fg=Tks.white_grey,
         text=None,
         textvar=None,
         row=None,
@@ -69,11 +63,11 @@ class Create(tk.Frame):
     # create a basic button
     def button(
         self,
-        bg=Tks.bc,
-        abgc=Tks.abg,
-        bge=Tks.abg,
-        fg=Tks.fg,
-        fge=Tks.fge,
+        bg=Tks.light_black,
+        abgc=Tks.orange,
+        bge=Tks.black,
+        fg=Tks.white_grey,
+        fge=Tks.orange,
         text=None,
         height=2,
         width=10,
@@ -124,9 +118,9 @@ class CustomTitleBar(tk.Frame):
             col=0,
             height=1,
             width=2,
-            abgc="#cd2e3e",
-            bge="#a72633",
-            fge=Tks.fg,
+            abgc=Tks.red,
+            bge=Tks.red,
+            fge=Tks.white_grey,
             font=Tks.font10b,
             pady=5,
             padx=5,
@@ -136,8 +130,8 @@ class CustomTitleBar(tk.Frame):
             root,
             text=" SubSearch",
             height=2,
-            bg=Tks.bc,
-            fg=Tks.fg,
+            bg=Tks.light_black,
+            fg=Tks.white_grey,
             font=Tks.font10b,
             justify="left",
             anchor="w",
@@ -151,7 +145,7 @@ class CustomTitleBar(tk.Frame):
         label.bind("<Button-1>", self.titlebar_press)
         label.bind("<B1-Motion>", self.titlebar_drag)
 
-        self.configure(bg=Tks.bc)
+        self.configure(bg=Tks.light_black)
 
     def window_pos(self, parent, w: int = 80, h: int = 48) -> str:
         ws = parent.winfo_screenwidth()
@@ -212,16 +206,16 @@ c_verison = current_version()
 def main():
     global root
     root = tk.Tk(className=f" SubSearch")
-    icon_path = root_directory("data", "64.ico")
+    icon_path = root_directory("data", "grey32.ico")
     root.iconbitmap(icon_path)
     root.geometry(set_window_position())
     # root.resizable(False, False)
-    root.wm_attributes("-transparentcolor", "#2a2d2f")
-    root.configure(bg=Tks.bg)
+    root.wm_attributes("-transparentcolor", Tks.grey)
+    root.configure(bg=Tks.dark_grey)
 
     CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
-    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
-    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
-    tk.Frame(root, bg=Tks.bg).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
 
     return root
