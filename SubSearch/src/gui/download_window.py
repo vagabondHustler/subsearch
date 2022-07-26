@@ -25,7 +25,7 @@ def read_tmp_file(file: str) -> list[str]:
 
 
 class DownloadList(tk.Frame):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         # listbox for the subtitles
         self.extent = 0
@@ -78,7 +78,7 @@ class DownloadList(tk.Frame):
         self.hs.config(command=self.sub_listbox.yview)
         self.hs.lift()
 
-    def fill_listbox(self) -> None:
+    def fill_listbox(self):
         dicts_names = {}
         dicts_urls = {}
 
@@ -97,7 +97,7 @@ class DownloadList(tk.Frame):
             self.dicts_names = dicts_names
             self.count += 1
 
-    def download_button(self, event) -> None:
+    def download_button(self, event):
         a = str(self.sub_listbox.curselection())
         a = a.replace("(", "")
         a = a.replace(")", "")
