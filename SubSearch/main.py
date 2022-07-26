@@ -17,7 +17,7 @@ def main() -> None:
     if cwd() == root_directory():
         import src.gui.settings_menu
 
-        sys.exit()
+        return
     elif cwd() != root_directory():
         import src.subsearch
 
