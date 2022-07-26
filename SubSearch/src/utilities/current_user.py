@@ -23,7 +23,7 @@ def is_admin() -> bool:
 
 
 # re-run .py as admin
-def run_as_admin() -> None:
+def run_as_admin():
     _python_exe = sys.executable
     _pythonw_exe = _python_exe.replace("python.exe", "pythonw.exe")
     ctypes.windll.shell32.ShellExecuteW(None, "runas", _pythonw_exe, " ".join(sys.argv), None, 1)

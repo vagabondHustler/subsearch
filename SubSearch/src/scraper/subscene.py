@@ -39,7 +39,7 @@ def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
 
 
 # log and sort list
-def log_and_sort_list(list_of_tuples: list, percentage) -> list:
+def log_and_sort_list(list_of_tuples: list, percentage):
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
     hbd_printed = False
