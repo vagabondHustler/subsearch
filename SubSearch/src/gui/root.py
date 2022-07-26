@@ -15,18 +15,21 @@ class Tks:
 
     purple: str = "#b294bb"
     red: str = "#bc473b"
+    red_brown: str = "#b26947"
     orange: str = "#ab7149"
     light_orange: str = "#de935f"
     yellow: str = "#f0c674"
     blue: str = "#81a2be"
     cyan: str = "#82b3ac"
     green: str = "#9fa65d"
+    green_brown: str = "#a59256"
     grey: str = "#4c4c4c"
     light_grey: str = "#727272"
     dark_grey: str = "#1A1A1A"
     white_grey: str = "#bdbdbd"
     light_black: str = "#0e0e0e"
-    black: str = "#000000"
+    black: str = "#151515"
+    dark_black: str = "#000000"
     font8: str = "Cascadia 8"
     font8b: str = "Cascadia 8 bold"
     font10b: str = "Cascadia 8 bold"
@@ -36,7 +39,7 @@ class Tks:
 
 
 class Create(tk.Frame):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=Tks.dark_grey)
 
@@ -54,7 +57,7 @@ class Create(tk.Frame):
         font=Tks.font8b,
         padx=2,
         pady=2,
-    ) -> str:
+    ):
         _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
@@ -81,18 +84,18 @@ class Create(tk.Frame):
         bind_to=None,
         tip_show=False,
         tip_text=None,
-    ) -> str:
+    ):
         _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
         _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
         _button.bind("<Button-1>", bind_to)
         tip = Hovertip(_button, tip_text) if tip_show else None
 
-        def button_enter(self) -> None:
+        def button_enter(self):
             _button.configure(bg=bge, fg=fge, font=font)
             tip.showtip() if tip_show else None
 
-        def button_leave(self) -> None:
+        def button_leave(self):
             _button.configure(bg=bg, fg=fg, font=font)
             tip.hidetip() if tip_show else None
 
@@ -103,7 +106,7 @@ class Create(tk.Frame):
 
 # replace the regular windows-style title bar with a custom one
 class CustomTitleBar(tk.Frame):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.after(10, self.remove_titlebar, root)
         self.parent = parent
@@ -147,7 +150,7 @@ class CustomTitleBar(tk.Frame):
 
         self.configure(bg=Tks.light_black)
 
-    def window_pos(self, parent, w: int = 80, h: int = 48) -> str:
+    def window_pos(self, parent, w: int = 80, h: int = 48):
         ws = parent.winfo_screenwidth()
         hs = parent.winfo_screenheight()
 
@@ -156,7 +159,7 @@ class CustomTitleBar(tk.Frame):
         value = f"{w}x{h}+{x}+{y}"
         return value
 
-    def remove_titlebar(self, parent) -> None:
+    def remove_titlebar(self, parent):
         GWL_EXSTYLE = -20
         WS_EX_APPWINDOW = 0x00040000
         WS_EX_TOOLWINDOW = 0x00000080
@@ -168,21 +171,21 @@ class CustomTitleBar(tk.Frame):
         root.withdraw()
         root.after(10, root.deiconify)
 
-    def titlebar_press(self, event) -> None:
+    def titlebar_press(self, event):
         self._offsetx = root.winfo_pointerx() - root.winfo_rootx()
         self._offsety = root.winfo_pointery() - root.winfo_rooty()
 
-    def titlebar_drag(self, event) -> None:
+    def titlebar_drag(self, event):
         x = self.winfo_pointerx() - self._offsetx
         y = self.winfo_pointery() - self._offsety
         root.geometry(f"+{x}+{y}")
 
-    def tk_exit_release(self, event) -> None:
+    def tk_exit_release(self, event):
         # if os.path.exists("temp.txt"):
         #     clean_up(cwd(), "temp.txt")
         root.destroy()
 
-    def tk_exit_press(self, event) -> None:
+    def tk_exit_press(self, event):
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
 
@@ -206,7 +209,7 @@ c_verison = current_version()
 def main():
     global root
     root = tk.Tk(className=f" SubSearch")
-    icon_path = root_directory("data", "grey32.ico")
+    icon_path = root_directory("data", "32.ico")
     root.iconbitmap(icon_path)
     root.geometry(set_window_position())
     # root.resizable(False, False)
