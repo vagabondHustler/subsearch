@@ -3,33 +3,33 @@ from src.utilities.read_parameters import read_data
 
 
 # get said value(s) from config.json
-def get(output) -> str | list | int | None:
+def get(output):
     config_json = read_data(root_directory("data", "config.json"))
 
-    def languages() -> list:
+    def languages():
         return config_json.languages
 
-    def language() -> str:
+    def language():
         language = config_json.language
         lang, lang_abbr = language.split(", ")
         return lang, lang_abbr
 
-    def hearing_impaired() -> str:
+    def hearing_impaired():
         return config_json.hearing_impaired
 
-    def percentage() -> int:
+    def percentage():
         return config_json.percentage_pass
 
-    def cm_icon() -> str:
+    def cm_icon():
         return config_json.context_menu_icon
 
-    def download_window() -> str:
+    def download_window():
         return config_json.show_download_window
 
-    def terminal_focus() -> str:
+    def terminal_focus():
         return config_json.terminal_focus
 
-    def video_ext() -> list:
+    def video_ext():
         return config_json.video_ext
 
     if output == "language":

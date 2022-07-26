@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 
 # log and print message
-def output(msg: str, print_to_terminal: bool = True) -> None:
+def output(msg: str, print_to_terminal: bool = True):
     logging.info(msg)
     print(msg) if print_to_terminal else False
 

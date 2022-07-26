@@ -7,7 +7,7 @@ def cwd():
 
 
 # get root directory path
-def root_directory(directory: str = "src", file_name=None) -> str:
+def root_directory(directory: str = "src", file_name=None):
     path, _i = os.path.split(os.path.abspath(__file__))
     if directory == "src":
         path = path.replace(r"\src\utilities", "")
@@ -24,6 +24,6 @@ def root_directory(directory: str = "src", file_name=None) -> str:
     return path
 
 
-def add_file_to_path(root_dir_path: str, file_name: str) -> str:
+def add_file_to_path(root_dir_path: str, file_name: str):
     file_path = f"{root_dir_path}\{file_name}"
     return file_path

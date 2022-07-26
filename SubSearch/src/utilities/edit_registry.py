@@ -9,12 +9,12 @@ from src.utilities.current_user import is_admin, run_as_admin, is_exe_version
 COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
-def context_menu_icon() -> None:
+def context_menu_icon():
     from src.utilities.read_config_json import get
 
     use: str = get("cm_icon")
     ss_path = "Directory\Background\shell\SubSearch"
-    icon_path = root_directory("data", "16.ico")
+    icon_path = root_directory("data", "grey16.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CLASSES_ROOT) as hkey:
         with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_ALL_ACCESS) as subkey_ss:
             if use == "True":
@@ -24,7 +24,7 @@ def context_menu_icon() -> None:
 
 
 # write value to (Default)
-def write_command_subkey() -> None:
+def write_command_subkey():
     from src.utilities.read_config_json import get
 
     focus = get("terminal_focus")
@@ -54,14 +54,14 @@ def write_command_subkey() -> None:
                 return
 
 
-def restore_context_menu() -> None:
+def restore_context_menu():
     regkey = root_directory("data", "regkey.reg")
     os.system(f'cmd /c "reg import "{regkey}"')
     context_menu_icon()
     write_command_subkey()
 
 
-def remove_context_menu() -> None:
+def remove_context_menu():
     shell_path = "Directory\Background\shell"
     ss_path = "Directory\Background\shell\SubSearch"
 
@@ -75,7 +75,7 @@ def remove_context_menu() -> None:
 
 
 # imports empty registry key to be filled in with values later
-def add_context_menu() -> None:
+def add_context_menu():
     if is_admin():
         regkey = root_directory("data", "regkey.reg")
         os.system(f'cmd /c "reg import "{regkey}"')
