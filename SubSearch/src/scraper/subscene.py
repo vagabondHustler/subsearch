@@ -33,12 +33,7 @@ def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
 
 # check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
-    if (
-        number.percentage >= pct
-        or p.title
-        and f"{p.season}{p.episode}" in key.lower()
-        and p.tv_series
-    ):
+    if number.percentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
         return True
     return False
 
@@ -124,7 +119,7 @@ def scrape(
         log.output("")
         log.output(f"No subtitles to download for {parameters.release}")
         if show_download_window:
-            with open("temp.txt", "w") as f:
+            with open("tmp.txt", "w") as f:
                 for i in range(len(sorted_list)):
                     name, _link = sorted_list[i][1], sorted_list[i][2]
                     link = _link.replace(" ", "")
