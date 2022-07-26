@@ -1,0 +1,3 @@
+26-Jul-22 22:43:26 - Starting new HTTPS connection (1): subscene.com:443
+26-Jul-22 22:43:27 - https://subscene.com:443 "GET //subtitles/A-foo-bar/english/2650811 HTTP/1.1" 301 0
+26-Jul-22 22:43:27 - https://subscene.com:443 "GET /subtitles/a-foo-bar/english/2650811 HTTP/1.1" 404 None

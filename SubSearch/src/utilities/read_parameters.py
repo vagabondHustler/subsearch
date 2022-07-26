@@ -38,7 +38,7 @@ def read_data(config_file: str) -> ConfigData:
         return ConfigData(**data)
 
 
-def split_last_hyphen(string: str) -> str:
+def split_last_hyphen(string: str):
     group = string.rsplit("-", 1)[-1]
     return group
 

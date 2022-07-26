@@ -11,7 +11,7 @@ path_x64_dir_src = f"{os.getcwd()}/SubSearch-x64/SubSearch"
 path_x64_zip_dst = f"{os.getcwd()}/SubSearch-x64.zip"
 
 
-def make_archive(source: str, destination: str) -> None:
+def make_archive(source: str, destination: str):
     """
     Adds folder and file contents to a zip file
 
