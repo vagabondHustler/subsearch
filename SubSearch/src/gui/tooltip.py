@@ -157,7 +157,15 @@ class Hovertip(OnHoverTooltipBase):
         self.text = text
 
     def showcontents(self):
-        label = Label(self.tipwindow, text=f" {self.text} ", justify=LEFT, background="#393d48", fg="#bdbdbd", relief=SOLID, borderwidth=1)
+        label = Label(
+            self.tipwindow,
+            text=f" {self.text} ",
+            justify=LEFT,
+            background="#1A1A1A",
+            fg="#bdbdbd",
+            relief=SOLID,
+            borderwidth=1,
+        )
         label.pack()
 
 
