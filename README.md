@@ -33,8 +33,16 @@ Made mainly to learn python and git, by doing. There are probably better reposit
 
 <div align="center">
 
+What it looks like while searching for subs if show terminal is disabled
+
 ![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
+
+What the settings menu looks like and available options
+
 ![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_2918.png)
+
+What the download window looks like with subtitles that were not downloaded
+
 ![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_dlw_2918.png)
 
 </div>
