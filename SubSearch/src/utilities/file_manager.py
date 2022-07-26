@@ -6,12 +6,10 @@ import zipfile
 import cloudscraper
 from src.utilities import log
 
-SCRAPER = cloudscraper.create_scraper(
-    browser={"browser": "chrome", "platform": "android", "desktop": False}
-)
+SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if a video is in directory, returns video name without extension
-def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
+def find_video(cwd_path: str, video_ext: list, with_ext: bool):
     for file in os.listdir(cwd_path):
         for ext in video_ext:
             if file.endswith(ext):
@@ -25,7 +23,7 @@ def find_video(cwd_path: str, video_ext: list, with_ext: bool) -> str:
 
 
 # download zip files from url
-def download_zip_auto(item: str) -> None:
+def download_zip_auto(item: str):
     file_path, url, current_num, total_num = item
     log.output(f"Downloading: {current_num}/{total_num}")
     r = SCRAPER.get(url, stream=True)
@@ -35,7 +33,7 @@ def download_zip_auto(item: str) -> None:
 
 
 # extract all zip file in said directory
-def extract_zips(cwd_path: str, extension: str) -> None:
+def extract_zips(cwd_path: str, extension: str):
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
             log.output(f"Extracting: {file}")
@@ -46,7 +44,7 @@ def extract_zips(cwd_path: str, extension: str) -> None:
 
 
 # rename a .srts to the same as video release name
-def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str) -> None:
+def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str):
     for file in os.listdir(cwd_path):
         if file.endswith(prefered_extension) and os.path.exists(new_name) is False:
             log.output(f"Renaming: {file} to {new_name}")
@@ -60,7 +58,7 @@ def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension
 
 
 # move unused .srt to /subs/
-def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
+def move_files(cwd_path: str, prefered_extension: str, extension: str):
     for file in os.listdir(cwd_path):
         file = file.lower()
         if file.endswith(prefered_extension):
@@ -75,7 +73,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
 
 
 # remove .zips
-def clean_up(cwd_path: str, extension: str) -> None:
+def clean_up(cwd_path: str, extension: str):
     for file in os.listdir(cwd_path):
         if file.endswith(extension):
             log.output(f"Removing: {file}")

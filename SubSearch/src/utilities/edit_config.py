@@ -4,7 +4,7 @@ from src.utilities.local_paths import root_directory
 
 
 # update config.json
-def update_json(key: str, value: str or int, directory: str = "data", file: str = "config.json") -> None:
+def update_json(key: str, value: str or int, directory: str = "data", file: str = "config.json"):
     with open(root_directory(directory, file), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value

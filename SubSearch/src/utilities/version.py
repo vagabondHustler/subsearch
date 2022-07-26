@@ -4,14 +4,14 @@ from src.utilities.edit_config import update_json
 from src.utilities.local_paths import root_directory
 
 
-def read_data(config_file: str) -> str:
+def read_data(config_file: str):
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
         version = data["version"]
         return version
 
 
-def current_version() -> str:
+def current_version():
     c_version = read_data(root_directory("data", "version.json"))
     return c_version
 
@@ -19,7 +19,7 @@ def current_version() -> str:
 version_on_load = current_version()
 
 
-def increase_version(current_version: str, release_type: str, i: int = 1) -> str:
+def increase_version(current_version: str, release_type: str, i: int = 1):
     """
     Increase the version number
 
@@ -41,7 +41,7 @@ def increase_version(current_version: str, release_type: str, i: int = 1) -> str
     return f"v{major}.{minor}.{patch}"
 
 
-def add_patch_minor_major(release_type) -> None:
+def add_patch_minor_major(release_type):
     """
     Patch release (0.0.1 -> 0.0.2): bug fixes
     Minor release (0.1.0 -> 0.2.0): larger bug fixes or new features

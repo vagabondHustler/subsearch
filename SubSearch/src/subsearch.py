@@ -12,7 +12,7 @@ from src.utilities.read_config_json import get
 from src.utilities.read_parameters import get_parameters
 
 
-def main() -> None:
+def main():
     # initializing
     start = time.perf_counter()
     version = current_version()

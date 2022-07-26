@@ -3,7 +3,7 @@ import sys
 from src.utilities.local_paths import cwd, root_directory
 
 
-def main() -> None:
+def main():
     try:
         release_type = "major", "minor", "patch"
         if sys.argv[1] in release_type:

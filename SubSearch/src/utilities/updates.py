@@ -8,7 +8,7 @@ from src.utilities.version import current_version
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def check_for_updates() -> str:
+def check_for_updates():
     source = SCRAPER.get(
         "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/SubSearch/src/data/version.json"
     )
@@ -22,7 +22,7 @@ def check_for_updates() -> str:
             return latest_version
 
 
-def version_release(i: int) -> str:
+def version_release(i: int):
     if i == 0:
         return "major"
     if i == 1:

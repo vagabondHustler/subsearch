@@ -21,7 +21,7 @@ def pct_value(from_pc: str or int, from_browser: str or int) -> Percentage:
 
 
 # create list from string
-def mk_lst(release: str or int) -> list:
+def mk_lst(release: str or int):
     new: list = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
     temp: list = release.split(".")
