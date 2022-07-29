@@ -438,11 +438,8 @@ class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
-        if is_exe_version():
-            self.string_var.set(f"Disabled")
-            ColorPicker(self.string_var)
-        else:
-            self.string_var.set(f"{TERMINAL_FOCUS}")
+       
+        self.string_var.set(f"{TERMINAL_FOCUS}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b)
@@ -472,8 +469,6 @@ class ShowTerminalOnSearch(tk.Frame):
         self.configure(bg=Tks.dark_grey)
 
     def button_set_true(self, event):
-        if is_exe_version():
-            return
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
         ColorPicker(self.string_var, self.clabel)
@@ -481,8 +476,6 @@ class ShowTerminalOnSearch(tk.Frame):
         edit_registry.write_command_subkey()
 
     def button_set_false(self, event):
-        if is_exe_version():
-            return
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
         ColorPicker(self.string_var, self.clabel)
@@ -565,7 +558,8 @@ tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
 ShowContextMenu(root).pack(anchor="center")
 ShowContextMenuIcon(root).pack(anchor="center")
 ShowDownloadWindow(root).pack(anchor="center")
-ShowTerminalOnSearch(root).pack(anchor="center")
+if is_exe_version() is False:
+    ShowTerminalOnSearch(root).pack(anchor="center") 
 tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
 CheckForUpdates(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
