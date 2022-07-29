@@ -1,5 +1,5 @@
 <div align="center">
-    
+
 ![prtsc0](https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png)
 
 ![Status](https://img.shields.io/badge/status-active-success?color=9fa65d&style=flat-square)
@@ -17,7 +17,8 @@
 - [Preview](#preview)
 - [Source](#src)
 - [Executable](#exe)
-- [Language support](#lsupport)
+- [Supported Languages](#lsupport)
+- [Other Languages](#notsupport)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
 - [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md)
@@ -54,15 +55,15 @@ Source is probably faster than the executable version, but the executable can be
 
 Download Python 3.10 - [Download URL](https://www.python.org/downloads/)
 
-Download SubScene 
+Download SubScene
 
 `git clone https://github.com/vagabondHustler/SubSearch`
 
-Install dependencies 
+Install dependencies
 
 `pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/docs/requirements.txt"`
 
-Run main.py from where it is located 
+Run main.py from where it is located
 
 `python ./SubSearch/main.py`
 
@@ -109,6 +110,61 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 - Thai, `th`
 - Turkish, `tr`
 - Vietnamese, `vi`
+
+## Other languages <a name = "notsupport"></a>
+
+These languages are not tested at all, but should work if u know the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). These can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
+
+- Albanian
+- Armenian
+- Azerbaijani
+- Basque
+- Belarusian
+- Bosnian
+- Bulgarian
+- Bulgarian/ English
+- Burmese
+- Cambodian/Khmer
+- Catalan
+- Croatian
+- Czech
+- Dutch/ English
+- English/ German
+- Esperanto
+- Estonian
+- Georgian
+- Greenlandic
+- Hindi
+- Hungarian
+- Hungarian/ English
+- Icelandic
+- Japanese
+- Kannada
+- Kinyarwanda
+- Kurdish
+- Latvian
+- Lithuanian
+- Macedonian
+- Malayalam
+- Manipuri
+- Mongolian
+- Nepali
+- Pashto
+- Punjabi
+- Russian
+- Serbian
+- Sinhala
+- Slovak
+- Slovenian
+- Somali
+- Sundanese
+- Swahili
+- Tagalog
+- Tamil
+- Telugu
+- Ukrainian
+- Urdu
+- Yoruba
 
 ## Authors <a name = "authors"></a>
 
