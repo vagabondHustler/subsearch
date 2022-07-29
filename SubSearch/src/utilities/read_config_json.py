@@ -9,10 +9,13 @@ def get(output):
     def languages():
         return config_json.languages
 
-    def language():
+    def oter_language():
         language = config_json.language
         lang, lang_abbr = language.split(", ")
         return lang, lang_abbr
+    
+    def other_languages():
+        return config_json.other_languages
 
     def hearing_impaired():
         return config_json.hearing_impaired
@@ -33,9 +36,11 @@ def get(output):
         return config_json.video_ext
 
     if output == "language":
-        return language()
+        return oter_language()
     if output == "languages":
         return languages()
+    if output == "other_languages":
+        return other_languages()
     if output == "hearing_impaired":
         return hearing_impaired()
     if output == "percentage":

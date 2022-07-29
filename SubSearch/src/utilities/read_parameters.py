@@ -8,6 +8,7 @@ from num2words import num2words
 class ConfigData:
     language: str
     languages: list[str]
+    other_languages: list[str]
     hearing_impaired: str
     percentage_pass: int
     context_menu_icon: str
