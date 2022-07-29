@@ -99,13 +99,13 @@ class DownloadList(tk.Frame):
             self.count += 1
 
     def download_button(self, event):
-        a = str(self.sub_listbox.curselection())
-        a = a.replace("(", "")
-        a = a.replace(")", "")
-        a = a.replace(",", "")
+        _i = str(self.sub_listbox.curselection())
+        _i = _i.replace("(", "")
+        _i = _i.replace(")", "")
+        items = _i.replace(",", "")
         _error = False
         for (number, url), (name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
-            if number == int(a):
+            if number == int(items):
                 self.sub_listbox.delete(int(number))
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
                 self.sub_listbox.itemconfig(int(number), {"fg": Tks.blue})
