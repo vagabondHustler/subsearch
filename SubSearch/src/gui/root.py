@@ -192,9 +192,10 @@ class CustomTitleBar(tk.Frame):
 
 
 # get the window position so it can be placed in the center of the screen
-def set_window_position(w=Tks.window_width, h=Tks.window_height):
-    ws = root.winfo_screenwidth()
-    hs = root.winfo_screenheight()
+class WindowPosition:
+    def set(w=Tks.window_width, h=Tks.window_height, root=None, ws_value_offset=0, hs_value_offset=0):
+        ws = root.winfo_screenwidth() + ws_value_offset
+        hs = root.winfo_screenheight() + hs_value_offset
     x = int((ws / 2) - (w / 2))
     y = int((hs / 2) - (h / 2))
     value = f"{w}x{h}+{x}+{y}"
