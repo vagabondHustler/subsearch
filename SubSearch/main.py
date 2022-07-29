@@ -17,9 +17,7 @@ def main():
 
     if cwd() == root_directory():
         if str(sys.executable).endswith("python.exe"):
-            if is_exe_version():
-                pass
-            else:
+            if is_exe_version() is False:
                 return subprocess.Popen(["pythonw", "main.py"])
         else:
             import src.gui.settings_menu
