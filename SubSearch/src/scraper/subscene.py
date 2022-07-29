@@ -5,41 +5,41 @@ from src.utilities.compare import pct_value
 
 
 # check if dict is of movies
-def is_movie(key: str, p=None) -> bool:
-    if key.lower() == f"{p.title} ({p.year})":
+def is_movie(key: str, param=None) -> bool:
+    if key.lower() == f"{param.title} ({param.year})":
         log.output(f"Movie {key} found")
         return True
     return False
 
 
 # check if the movie might have been released the year before
-def try_the_year_before(key: str, p=None) -> bool:
-    if p.year == "N/A":
+def try_the_year_before(key: str, param=None) -> bool:
+    if param.year == "N/A":
         return False
-    year = int(p.year) - 1
-    the_year_before = f"{p.title} ({year})"
+    year = int(param.year) - 1
+    the_year_before = f"{param.title} ({year})"
     if key.lower().startswith(the_year_before):
         log.output(f"Movie {key} found")
         return True
 
 
 # check if dict is of tv-series
-def is_tv_series(key: str, lang_abbr: str, p=None) -> bool:
-    if p.title and p.season_ordinal in key.lower() and p.tv_series and lang_abbr:
+def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
+    if param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
         log.output(f"TV-Series {key} found")
         return True
     return False
 
 
 # check str is above percentage threshold
-def is_threshold(key: str, number: int, pct: int, p=None) -> bool:
-    if number.percentage >= pct or p.title and f"{p.season}{p.episode}" in key.lower() and p.tv_series:
+def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
+    if number.percentage >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
         return True
     return False
 
 
 # log and sort list
-def log_and_sort_list(list_of_tuples: list, percentage):
+def log_and_sort_list(list_of_tuples: list, pct: int):
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
     hbd_printed = False
@@ -47,10 +47,10 @@ def log_and_sort_list(list_of_tuples: list, percentage):
     for i in list_of_tuples:
         name = i[1]
         url = i[2]
-        if i[0] >= percentage and not hbd_printed:
+        if i[0] >= pct and not hbd_printed:
             log.output(f"--- Has been downloaded ---\n")
             hbd_printed = True
-        if i[0] <= percentage and not hnbd_printed:
+        if i[0] <= pct and not hnbd_printed:
             log.output(f"--- Has not been downloaded ---\n")
             hnbd_printed = True
         log.output(f"{name}\n{url}\n")
@@ -58,37 +58,30 @@ def log_and_sort_list(list_of_tuples: list, percentage):
 
 
 # decides what to do with all the scrape data
-def scrape(
-    parameters,
-    language: str,
-    lang_abbr: str,
-    hearing_impaired: str,
-    percentage,
-    show_download_window: str,
-) -> list | None:
+def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str,):
     # search for titles
     to_be_scraped: list = []
-    title_keys = search_for_title(parameters.url_subscene)
+    title_keys = search_for_title(param.url_subscene)
     if title_keys == "ERROR: CAPTCHA PROTECTION":
         log.output(f"Captcha protection detected. Please try again later.")
         return None
     for key, value in title_keys.items():
-        if is_movie(key, parameters):
+        if is_movie(key, param):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        if try_the_year_before(key, parameters):
+        if try_the_year_before(key, param):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        if is_tv_series(key, lang_abbr, parameters):
+        if is_tv_series(key, lang_abbr, param):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
     log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
     # exit if no titles found
     if len(to_be_scraped) == 0:
-        if parameters.tv_series:
+        if param.tv_series:
             log.output("")
-            log.output(f"No TV-series found matching {parameters.title}")
+            log.output(f"No TV-series found matching {param.title}")
         else:
             log.output("")
-            log.output(f"No movies found matching {parameters.title}")
+            log.output(f"No movies found matching {param.title}")
         return None
 
     # search title for subtitles
@@ -97,10 +90,10 @@ def scrape(
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
-            sub_keys = search_title_for_sub(language, hearing_impaired, url)
+            sub_keys = search_title_for_sub(lang, hi, url)
             break
         for key, value in sub_keys.items():
-            number = pct_value(key, parameters.release)
+            number = pct_value(key, param.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.percentage}% match]:")
             formatting_spaces = " " * lenght_str
@@ -108,17 +101,17 @@ def scrape(
             _url = f"{formatting_spaces} {value}"
             to_be_sorted_value = number.percentage, _name, _url
             to_be_sorted.append(to_be_sorted_value)
-            if is_threshold(key, number, percentage, parameters):
+            if is_threshold(key, number, pct, param):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
-        sorted_list = log_and_sort_list(to_be_sorted, percentage)
+        sorted_list = log_and_sort_list(to_be_sorted, pct)
         log.output("Done with tasks")
 
     # exit if no subtitles found
     if len(to_be_downloaded) == 0:
         log.output("")
-        log.output(f"No subtitles to download for {parameters.release}")
-        if show_download_window:
+        log.output(f"No subtitles to download for {param.release}")
+        if show_dl_window:
             with open("tmp.txt", "w") as f:
                 for i in range(len(sorted_list)):
                     name, _link = sorted_list[i][1], sorted_list[i][2]
