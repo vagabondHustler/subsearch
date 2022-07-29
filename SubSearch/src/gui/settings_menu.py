@@ -27,37 +27,135 @@ DL_WINDOW = get("show_download_window")
 class SelectLanguage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        lang_var = tk.StringVar()
-        lang_var.set(f"{language}, {lang_abbr}")
-        number_of_buttons = len(languages)
-        self.lang_var = lang_var
-        rowcount = 0
-        colcount = 1
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{LANGUAGE}, {LANG_ABBR}")
+        number_of_buttons = len(LANGUAGES)
+        self.rowcount = 0
+        self.colcount = 1
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Selected language", sticky="w", row=1, col=1, font=Tks.font8b)
-        Create.label(self, textvar=self.lang_var, fg=Tks.purple, row=1, col=2, font=Tks.font8b)
+        self.clabel = Create.label(self, textvar=self.string_var, fg=Tks.yellow, row=1, col=2, font=Tks.font8b)
         for i in range(number_of_buttons):
-            rowcount += 1
-            if rowcount == 8:
-                colcount += 1
-                rowcount = 1
+            self.rowcount += 1
+            if self.rowcount == 8:
+                self.colcount += 1
+                self.rowcount = 1
             Create.button(
                 self,
-                text=languages[i],
-                row=rowcount + 1,
-                col=colcount,
+                text=LANGUAGES[i],
+                row=self.rowcount + 1,
+                col=self.colcount,
                 height=2,
                 width=24,
+                padx=2,
                 bind_to=self.button_set_lang,
             )
+        Create.button(
+            self,
+            abgc=Tks.light_black,
+            bge=Tks.light_black,
+            fg=Tks.light_black,
+            fge=Tks.light_black,
+            row=self.rowcount + 2,
+            col=self.colcount,
+            height=2,
+            width=24,
+        )
+        self.entry = tk.Entry(self, text="asdf", width=28, bd=0, font=Tks.font8b, justify="center")
+        self.entry.insert(0, "🞂 Enter language here 🞀")
+        self.entry.configure(bg=Tks.light_black, fg=Tks.purple, insertbackground=Tks.purple)
+        self.entry.grid(ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount)
+        self.add_button = Create.button(
+            self,
+            text="Add",
+            abgc=Tks.purple,
+            bge=Tks.black,
+            fg=Tks.white_grey,
+            fge=Tks.purple,
+            row=self.rowcount + 3,
+            col=self.colcount,
+            height=2,
+            width=10,
+            padx=5,
+            sticky="w",
+            bind_to=self.add_new_lang,
+        )
+
+        self.see_other_langs = Create.button(
+            self,
+            text="∙ ∙ ∙",
+            abgc=Tks.purple,
+            bge=Tks.black,
+            fg=Tks.white_grey,
+            fge=Tks.purple,
+            row=self.rowcount + 3,
+            col=self.colcount,
+            height=2,
+            width=10,
+            padx=5,
+            sticky="e",
+        )
+
+        self.entry.bind("<Enter>", self.entry_enter)
+        self.see_other_langs.bind("<Enter>", self.other_langs_window)
         self.configure(bg=Tks.dark_grey)
+
+    def entry_enter(self, event):
+        if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
+            self.entry.delete(0, "end")
+            self.entry.insert(0, "")
+            self.entry.configure(fg=Tks.purple)
+            self.entry.bind("<Leave>", self.entry_leave)
+
+    def entry_leave(self, event):
+        if self.entry.get() == "" or self.entry.get() == "E.g: Czech, cs":
+            self.entry.delete(0, "end")
+            self.entry.insert(0, "🞂 Enter language here 🞀")
+            self.entry.configure(fg=Tks.purple)
+            self.entry.bind("<Enter>", self.entry_enter)
+
+    def other_langs_window(self, event):
+        self.toplvl = tk.Toplevel(background=Tks.dark_grey, borderwidth=0)
+        self.toplvl.overrideredirect(True)
+        root_x = root.winfo_rootx() + Tks.window_width + 10
+        root_y = root.winfo_rooty()
+        self.toplvl.geometry(f"+{root_x}+{root_y}")
+        for num, i in zip(range(0, 50), OTHER_LANGUAGES):
+            Create.label(
+                self.toplvl,
+                bg=Tks.dark_grey,
+                text=i,
+                row=num if num < 25 else num - 25,
+                col=0 if num < 25 else 1,
+                sticky="w",
+            )
+        self.see_other_langs.configure(fg=Tks.purple)
+        self.see_other_langs.bind("<Leave>", self.destroy_other_langs_window)
+
+    def destroy_other_langs_window(self, event):
+        self.see_other_langs.configure(fg=Tks.white_grey)
+        self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.toplvl.destroy()
 
     def button_set_lang(self, event):
         btn = event.widget
-        self.lang_var.set(btn.cget("text"))
-        update_svar = self.lang_var.get()
+        self.string_var.set(btn.cget("text"))
+        update_svar = self.string_var.get()
         update_json("language", update_svar)
+
+    def add_new_lang(self, event):
+        x = self.entry.get().split(", ")
+        for i in OTHER_LANGUAGES:
+            if x[0] == i:
+                self.string_var.set(self.entry.get())
+                self.entry.configure(fg=Tks.white_grey)
+                update_svar = self.string_var.get()
+                update_json("language", update_svar)
+                return
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "E.g: Czech, cs")
+        self.entry.configure(fg=Tks.red)
 
 
 # set HI, none-HI or both HI and none-HI subtitles should be included in the search
