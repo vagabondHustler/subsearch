@@ -82,14 +82,22 @@ class DownloadList(tk.Frame):
             url = x[-1]
             txt = f"{match} {name}"
             self.sub_listbox.insert(tk.END, f"{match} {name}\n")
-            self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
+            self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             dicts_names[self.count] = txt
             dicts_urls[self.count] = url
             self.dicts_urls = dicts_urls
             self.dicts_names = dicts_names
             self.count += 1
-
+    def mouse_b1_press(self, event):
+        self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
+        
+        
+    def mouse_b1_release(self, event):
+        self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
+                              
     def download_button(self, event):
+        self.sub_listbox.unbind("<<ListboxSelect>>")
+        self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
         _i = str(self.sub_listbox.curselection())
         _i = _i.replace("(", "")
         _i = _i.replace(")", "")
