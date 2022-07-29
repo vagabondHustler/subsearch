@@ -202,6 +202,34 @@ class WindowPosition:
     return value
 
 
+class ColorPicker:
+    def __init__(self, string_var: str = None, clabel: str = None, pct: int = -1):
+        self.string_var = string_var
+        self.clabel = clabel
+        self.pct = pct
+
+        self.pick()
+
+    def pick(self):
+
+        if self.string_var.get() == "True":
+            self.clabel.configure(fg=Tks.green)
+        if self.string_var.get() == "False":
+            self.clabel.configure(fg=Tks.red)
+        if self.string_var.get() == "Both":
+            self.clabel.configure(fg=Tks.blue)
+        if self.pct in range(75, 100):
+            self.clabel.configure(fg=Tks.green)
+        if self.pct in range(50, 75):
+            self.clabel.configure(fg=Tks.green_brown)
+        if self.pct in range(25, 50):
+            self.clabel.configure(fg=Tks.red_brown)
+        if self.pct in range(0, 25):
+            self.clabel.configure(fg=Tks.red)
+        if self.string_var.get() == "Disabled":
+            self.clabel.configure(fg=Tks.silver_grey, font=Tks.font8i)
+
+
 if "win" in sys.platform:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
