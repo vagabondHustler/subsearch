@@ -48,7 +48,7 @@ class SelectLanguage(tk.Frame):
                 height=2,
                 width=24,
                 padx=2,
-                bind_to=self.button_set_lang,
+                bind_to=self.set_language,
             )
         Create.button(
             self,
@@ -78,7 +78,7 @@ class SelectLanguage(tk.Frame):
             width=10,
             padx=5,
             sticky="w",
-            bind_to=self.add_new_lang,
+            bind_to=self.add_language,
         )
 
         self.see_other_langs = Create.button(
@@ -98,23 +98,20 @@ class SelectLanguage(tk.Frame):
 
         self.entry.bind("<Enter>", self.entry_enter)
         self.see_other_langs.bind("<Enter>", self.other_langs_window)
-        self.entry.bind("<Return>", self.add_new_lang)
+        self.entry.bind("<Return>", self.add_language)
         self.configure(bg=Tks.dark_grey)
 
-    def entry_enter(self, event):
-        if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
-            self.clear_entry()
-            self.entry.bind("<Leave>", self.entry_leave)
-
-    def entry_leave(self, event):
-        if self.entry.get() == "" or self.entry.get() == "E.g: Czech, cs":
-            self.fill_entry()
-            self.entry.bind("<Enter>", self.entry_enter)
-
+    # pop up window with list of other languages
     def other_langs_window(self, event):
         self.clear_entry()
-        self.toplvl = tk.Toplevel(background=Tks.dark_grey, borderwidth=0)
+        csx = 264
+        csy = 608
+        self.toplvl = tk.Toplevel(background=Tks.dark_black, borderwidth=0)
         self.toplvl.overrideredirect(True)
+        self.canvas_border = tk.Canvas(self.toplvl, width=csx, height=csy, bg=Tks.light_black, borderwidth=0)
+        self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
+        self.canvas_bg = tk.Canvas(self.canvas_border, width=csx-16, height=csy-12, bg=Tks.dark_grey, highlightthickness=0)
+        self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
         root_x = root.winfo_rootx() + Tks.window_width + 10
         root_y = root.winfo_rooty()
         self.toplvl.geometry(f"+{root_x}+{root_y}")
@@ -128,13 +125,24 @@ class SelectLanguage(tk.Frame):
                 sticky="w",
             )
         self.see_other_langs.configure(fg=Tks.purple)
-        self.see_other_langs.bind("<Leave>", self.destroy_other_langs_window)
+        self.see_other_langs.bind("<Leave>", self.destroy_toplvl)
 
-    def destroy_other_langs_window(self, event):
+    def destroy_toplvl(self, event):
         self.fill_entry()
         self.see_other_langs.configure(fg=Tks.white_grey)
         self.see_other_langs.bind("<Enter>", self.other_langs_window)
         self.toplvl.destroy()
+
+    # entry functions
+    def entry_enter(self, event):
+        if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
+            self.clear_entry()
+            self.entry.bind("<Leave>", self.entry_leave)
+
+    def entry_leave(self, event):
+        if self.entry.get() == "" or self.entry.get() == "E.g: Czech, cs":
+            self.fill_entry()
+            self.entry.bind("<Enter>", self.entry_enter)
 
     def clear_entry(self):
         self.entry.delete(0, "end")
@@ -146,13 +154,15 @@ class SelectLanguage(tk.Frame):
         self.entry.insert(0, "🞂 Enter language here 🞀")
         self.entry.configure(fg=Tks.purple)
 
-    def button_set_lang(self, event):
+    # set language
+    def set_language(self, event):
         btn = event.widget
         self.string_var.set(btn.cget("text"))
         update_svar = self.string_var.get()
         update_json("language", update_svar)
 
-    def add_new_lang(self, event):
+    # add language from entry
+    def add_language(self, event):
         x = self.entry.get()
         for i in OTHER_LANGUAGES:
             if x == i:
