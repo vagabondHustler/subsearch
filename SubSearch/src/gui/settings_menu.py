@@ -4,7 +4,8 @@ import tkinter as tk
 import webbrowser
 
 import src.utilities.edit_registry as edit_registry
-from src.gui.root import Create, Tks, main
+from src.gui.root import Tks, WindowPosition, Create, ColorPicker, main
+from src.utilities.local_paths import root_directory
 from src.utilities.current_user import got_key, is_admin, is_exe_version, run_as_admin
 from src.utilities.edit_config import set_default_values, update_json
 from src.utilities.read_config_json import get
