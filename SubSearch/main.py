@@ -1,6 +1,7 @@
 import subprocess
 import sys
 from src.utilities.local_paths import cwd, root_directory
+from src.utilities.current_user import is_exe_version
 
 
 def main():
@@ -15,9 +16,11 @@ def main():
         pass
 
     if cwd() == root_directory():
-        print(sys.executable)
         if str(sys.executable).endswith("python.exe"):
-            return subprocess.Popen(["pythonw", "main.py"])
+            if is_exe_version():
+                pass
+            else:
+                return subprocess.Popen(["pythonw", "main.py"])
         else:
             import src.gui.settings_menu
 
