@@ -11,13 +11,15 @@ from src.utilities.read_config_json import get
 from src.utilities.updates import check_for_updates, is_new_version_available
 from src.utilities.version import current_version
 
-languages = get("languages")
-language, lang_abbr = get("language")
-hearing_impared = get("hearing_impaired")
-pct = get("percentage")
-terminal_focus = get("terminal_focus")
-cm_icon = get("cm_icon")
-dl_window = get("show_download_window")
+
+LANGUAGES = get("languages")
+OTHER_LANGUAGES = get("other_languages")
+LANGUAGE, LANG_ABBR = get("language")
+HEARING_IMPARED = get("hearing_impaired")
+PCT = get("percentage")
+TERMINAL_FOCUS = get("terminal_focus")
+CM_ICON = get("cm_icon")
+DL_WINDOW = get("show_download_window")
 
 
 # set which language of the subtitles  should be included in the search
