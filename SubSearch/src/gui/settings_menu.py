@@ -98,23 +98,21 @@ class SelectLanguage(tk.Frame):
 
         self.entry.bind("<Enter>", self.entry_enter)
         self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.entry.bind("<Return>", self.add_new_lang)
         self.configure(bg=Tks.dark_grey)
 
     def entry_enter(self, event):
         if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
-            self.entry.delete(0, "end")
-            self.entry.insert(0, "")
-            self.entry.configure(fg=Tks.purple)
+            self.clear_entry()
             self.entry.bind("<Leave>", self.entry_leave)
 
     def entry_leave(self, event):
         if self.entry.get() == "" or self.entry.get() == "E.g: Czech, cs":
-            self.entry.delete(0, "end")
-            self.entry.insert(0, "🞂 Enter language here 🞀")
-            self.entry.configure(fg=Tks.purple)
+            self.fill_entry()
             self.entry.bind("<Enter>", self.entry_enter)
 
     def other_langs_window(self, event):
+        self.clear_entry()
         self.toplvl = tk.Toplevel(background=Tks.dark_grey, borderwidth=0)
         self.toplvl.overrideredirect(True)
         root_x = root.winfo_rootx() + Tks.window_width + 10
@@ -133,9 +131,20 @@ class SelectLanguage(tk.Frame):
         self.see_other_langs.bind("<Leave>", self.destroy_other_langs_window)
 
     def destroy_other_langs_window(self, event):
+        self.fill_entry()
         self.see_other_langs.configure(fg=Tks.white_grey)
         self.see_other_langs.bind("<Enter>", self.other_langs_window)
         self.toplvl.destroy()
+
+    def clear_entry(self):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "")
+        self.entry.configure(fg=Tks.purple)
+
+    def fill_entry(self):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "🞂 Enter language here 🞀")
+        self.entry.configure(fg=Tks.purple)
 
     def button_set_lang(self, event):
         btn = event.widget
@@ -144,9 +153,9 @@ class SelectLanguage(tk.Frame):
         update_json("language", update_svar)
 
     def add_new_lang(self, event):
-        x = self.entry.get().split(", ")
+        x = self.entry.get()
         for i in OTHER_LANGUAGES:
-            if x[0] == i:
+            if x == i:
                 self.string_var.set(self.entry.get())
                 self.entry.configure(fg=Tks.white_grey)
                 update_svar = self.string_var.get()
@@ -438,7 +447,7 @@ class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
-       
+
         self.string_var.set(f"{TERMINAL_FOCUS}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
@@ -559,7 +568,7 @@ ShowContextMenu(root).pack(anchor="center")
 ShowContextMenuIcon(root).pack(anchor="center")
 ShowDownloadWindow(root).pack(anchor="center")
 if is_exe_version() is False:
-    ShowTerminalOnSearch(root).pack(anchor="center") 
+    ShowTerminalOnSearch(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
 CheckForUpdates(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
