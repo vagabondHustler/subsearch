@@ -88,9 +88,9 @@ class DownloadList(tk.Frame):
             self.dicts_urls = dicts_urls
             self.dicts_names = dicts_names
             self.count += 1
+            
     def mouse_b1_press(self, event):
         self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
-        
         
     def mouse_b1_release(self, event):
         self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
