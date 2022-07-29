@@ -59,7 +59,7 @@ class TooltipBase:
         #
         # Note: This is a simplistic implementation; sub-classes will likely
         # want to override this.
-        return 70, self.anchor_widget.winfo_height() - 70
+        return 100, self.anchor_widget.winfo_height() - 70
 
     def showcontents(self):
         """content display hook for sub-classes"""
