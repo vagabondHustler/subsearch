@@ -152,7 +152,7 @@ class CustomTitleBar(tk.Frame):
 
         label.bind("<Button-1>", self.titlebar_press)
         label.bind("<B1-Motion>", self.titlebar_drag)
-
+        label.lift()
         self.configure(bg=Tks.light_black)
 
     def window_pos(self, parent, w: int = 80, h: int = 48):
@@ -190,6 +190,18 @@ class CustomTitleBar(tk.Frame):
     def tk_exit_press(self, event):
         self.button.bind("<ButtonRelease-1>", self.tk_exit_release)
 
+# create a custom border for window
+class CustomBorder(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        csx = Tks.window_width
+        csy = Tks.window_height
+        self.canvas_border = tk.Canvas(root, width=csx, height=csy, bg=Tks.light_black, borderwidth=0)
+        self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
+        self.canvas_bg = tk.Canvas(root, width=csx-4, height=csy-4, bg=Tks.dark_grey, highlightthickness=0)
+        self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
+
+        self.configure(bg=Tks.light_black)
 
 # get the window position so it can be placed in the center of the screen
 class WindowPosition:
@@ -244,9 +256,14 @@ def main():
     root.wm_attributes("-transparentcolor", Tks.grey)
     root.configure(bg=Tks.dark_grey)
 
-    CustomTitleBar(root).place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
+    cb = CustomBorder(root)
+    cb.place(relx=0.5, rely=0.5, anchor="center")
+    ctb = CustomTitleBar(root)
+    ctb.place(x=Tks.window_width - 2, y=2, bordermode="inside", anchor="ne")
     tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
     tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
     tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
+    ctb.lift()
+    
 
     return root
