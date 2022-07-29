@@ -81,7 +81,7 @@ class Create(tk.Frame):
         col=None,
         sticky=None,
         font=Tks.font8b,
-        padx=2,
+        padx=5,
         pady=2,
         bind_to=None,
         tip_show=False,
