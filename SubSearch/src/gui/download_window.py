@@ -1,8 +1,3 @@
-import tkinter as tk
-from tkinter import ttk
-import sv_ttk
-
-
 import os
 import sys
 import tkinter as tk
@@ -23,8 +18,6 @@ def read_tmp_file(file: str) -> list[str]:
 
 
 # download said subtitle to the folder with the video file in it
-
-
 class DownloadList(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -56,7 +49,6 @@ class DownloadList(tk.Frame):
         self.sub_listbox = sub_listbox
         self.sublist = sublist
         self.fill_listbox()
-
         # custom scrollbar
         scrollbar_lengt = 50
         self.scrollbar_lengt = scrollbar_lengt
@@ -82,7 +74,6 @@ class DownloadList(tk.Frame):
     def fill_listbox(self):
         dicts_names = {}
         dicts_urls = {}
-
         # fil list box with all available subtitles that were found and not downloaded
         for x, i in zip(range(0, self.sublist_lenght), self.sublist):
             x = i.split(" ")
@@ -132,7 +123,6 @@ class DownloadList(tk.Frame):
 
 root = main()
 sv_ttk.set_theme("dark")
-root.configure(bg="#1c1c1c")
 DownloadList(root).pack(anchor="center")
 tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
 root.mainloop()

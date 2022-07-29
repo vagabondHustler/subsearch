@@ -162,9 +162,8 @@ class SelectLanguage(tk.Frame):
 class HearingImparedSubs(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
-        string_var.set(f"{hearing_impared}")
-        self.string_var = string_var
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(
@@ -209,31 +208,24 @@ class HearingImparedSubs(tk.Frame):
             tip_show=True,
             tip_text="Use both hearing impaired and regular subtitles",
         )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         self.configure(bg=Tks.dark_grey)
-    def setting_label_color_picker(self):
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=Tks.green)
-        if self.string_var.get() == "False":
-            self.clabel.configure(fg=Tks.red)
-        if self.string_var.get() == "Both":
-            self.clabel.configure(fg=Tks.blue)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
         update_json("hearing_impaired", update_svar)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
     def button_set_both(self, event):
         self.string_var.set(f"Both")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get().split(" ")[0]
         update_json("hearing_impaired", update_svar)
 
@@ -242,10 +234,9 @@ class HearingImparedSubs(tk.Frame):
 class SearchThreshold(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
-        string_var.set(f"{pct} %")
-        self.pct = pct
-        self.string_var = string_var
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{PCT} %")
+        self.pct = PCT
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Search threshold", sticky="w", row=1, col=1, font=Tks.font8b)
@@ -270,30 +261,22 @@ class SearchThreshold(tk.Frame):
             tip_show=True,
             tip_text="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded",
         )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel, self.pct)
         self.configure(bg=Tks.dark_grey)
-    def setting_label_color_picker(self):
-        if self.pct in range(75, 100):
-            self.clabel.configure(fg=Tks.green)
-        if self.pct in range(50, 75):
-            self.clabel.configure(fg=Tks.green_brown)
-        if self.pct in range(25, 50):
-            self.clabel.configure(fg=Tks.red_brown)
-        if self.pct in range(0, 25):
-            self.clabel.configure(fg=Tks.red)
 
     def button_add_5(self, event):
         self.pct += 5 if self.pct < 100 else 0
         self.string_var.set(f"{self.pct} %")
-        self.setting_label_color_picker()
-        update_svar = int(self.string_var.get().split(" ")[0])
+
+        ColorPicker(self.string_var, self.clabel, self.pct)
+        update_svar = int(self.pct)
         update_json("percentage_pass", update_svar)
 
     def button_sub_5(self, event):
         self.pct -= 5 if self.pct > 0 else 0
         self.string_var.set(f"{self.pct} %")
-        self.setting_label_color_picker()
-        update_svar = int(self.string_var.get().split(" ")[0])
+        ColorPicker(self.string_var, self.clabel, self.pct)
+        update_svar = int(self.pct)
         update_json("percentage_pass", update_svar)
 
 
@@ -301,13 +284,20 @@ class SearchThreshold(tk.Frame):
 class ShowContextMenu(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
-        string_var.set(f"True")
-        self.string_var = string_var
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"True")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Show context menu", row=1, col=1, sticky="w", font=Tks.font8b)
-        self.clabel = Create.label(self, textvar=self.string_var, fg=Tks.blue, row=1, col=2, font=Tks.font8b, anchor="center")
+        self.clabel = Create.label(
+            self,
+            textvar=self.string_var,
+            fg=Tks.blue,
+            row=1,
+            col=2,
+            font=Tks.font8b,
+            anchor="center",
+        )
         Create.button(
             self,
             text="True",
@@ -328,27 +318,19 @@ class ShowContextMenu(tk.Frame):
             tip_show=True,
             tip_text="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch",
         )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         self.configure(bg=Tks.dark_grey)
-    
-    def setting_label_color_picker(self):
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=Tks.green)
-        if self.string_var.get() == "False":
-            self.clabel.configure(fg=Tks.red)
-        if self.string_var.get() == "Both":
-            self.clabel.configure(fg=Tks.blue)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         from src.utilities import edit_registry
 
         edit_registry.restore_context_menu()
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         from src.utilities import edit_registry
 
         edit_registry.remove_context_menu()
@@ -358,9 +340,8 @@ class ShowContextMenu(tk.Frame):
 class ShowContextMenuIcon(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
-        string_var.set(f"{cm_icon}")
-        self.string_var = string_var
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=Tks.font8b)
@@ -385,19 +366,13 @@ class ShowContextMenuIcon(tk.Frame):
             tip_show=True,
             tip_text="Remove the icon next to SubSearch in the context menu",
         )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         self.configure(bg=Tks.dark_grey)
-        
-    def setting_label_color_picker(self):
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=Tks.green)
-        if self.string_var.get() == "False":
-            self.clabel.configure(fg=Tks.red)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_json("context_menu_icon", update_svar)
         from src.utilities import edit_registry
 
@@ -406,7 +381,7 @@ class ShowContextMenuIcon(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_json("context_menu_icon", update_svar)
         from src.utilities import edit_registry
 
@@ -417,9 +392,8 @@ class ShowContextMenuIcon(tk.Frame):
 class ShowDownloadWindow(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
-        string_var.set(f"{dl_window}")
-        self.string_var = string_var
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Show download window", row=1, col=1, sticky="w", font=Tks.font8b)
@@ -444,24 +418,18 @@ class ShowDownloadWindow(tk.Frame):
             tip_show=True,
             tip_text="No window will be shown if no subtitles are found\n The list can be found in search.log",
         )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         self.configure(bg=Tks.dark_grey)
-        
-    def setting_label_color_picker(self):
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=Tks.green)
-        if self.string_var.get() == "False":
-            self.clabel.configure(fg=Tks.red)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
         update_json("show_download_window", update_svar)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
         update_json("show_download_window", update_svar)
 
@@ -470,13 +438,12 @@ class ShowDownloadWindow(tk.Frame):
 class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_var = tk.StringVar()
+        self.string_var = tk.StringVar()
         if is_exe_version():
-            string_var.set(f"Disabled")
+            self.string_var.set(f"Disabled")
+            ColorPicker(self.string_var)
         else:
-            string_var.set(f"{terminal_focus}")
-
-        self.string_var = string_var
+            self.string_var.set(f"{TERMINAL_FOCUS}")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
         Create.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=Tks.font8b)
@@ -502,21 +469,15 @@ class ShowTerminalOnSearch(tk.Frame):
                 tip_show=True,
                 tip_text="Hide the terminal when searching for subtitles",
             )
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         self.configure(bg=Tks.dark_grey)
-        
-    def setting_label_color_picker(self):
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=Tks.green)
-        if self.string_var.get() == "False":
-            self.clabel.configure(fg=Tks.red)
 
     def button_set_true(self, event):
         if is_exe_version():
             return
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_json("terminal_focus", update_svar)
         edit_registry.write_command_subkey()
 
@@ -525,7 +486,7 @@ class ShowTerminalOnSearch(tk.Frame):
             return
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
-        self.setting_label_color_picker()
+        ColorPicker(self.string_var, self.clabel)
         update_json("terminal_focus", update_svar)
         edit_registry.write_command_subkey()
 
@@ -534,14 +495,13 @@ class ShowTerminalOnSearch(tk.Frame):
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        string_label = tk.StringVar()
-        c_version = current_version()
-        string_label.set(f"")
-        self.string_label = string_label
+        self.string_var = tk.StringVar()
+        self.version = current_version()
+        self.string_var.set(f"")
         for i in range(1, 4):
             Create.label(self, text=Tks.col58, row=1, col=i, font=Tks.font8)
-        Create.label(self, text=f"SubScene version {c_version}", row=1, col=1, sticky="w", font=Tks.font8b)
-        Create.label(self, textvar=self.string_label, fg=Tks.blue, row=1, col=2, font=Tks.font8b)
+        Create.label(self, text=f"SubScene version {self.version}", row=1, col=1, sticky="w", font=Tks.font8b)
+        Create.label(self, textvar=self.string_var, fg=Tks.blue, row=1, col=2, font=Tks.font8b)
         Create.button(
             self,
             text="Check for updates",
@@ -554,13 +514,12 @@ class CheckForUpdates(tk.Frame):
         )
         self.configure(bg=Tks.dark_grey)
 
-
     def button_check(self, event):
-        self.string_label.set(f"Searching for updates...")
+        self.string_var.set(f"Searching for updates...")
         value, release_type = is_new_version_available()
         latest_version = check_for_updates()
         if value:
-            self.string_label.set(f"New version available!")
+            self.string_var.set(f"New version available!")
             Create.button(
                 self,
                 text=f"Get {latest_version}",
@@ -572,11 +531,11 @@ class CheckForUpdates(tk.Frame):
             )
 
         if value is False and release_type is None:
-            self.string_label.set(f"You are up to date!")
+            self.string_var.set(f"You are up to date!")
         elif value is False and release_type != "newer":
-            self.string_label.set(f"New {release_type} update available")
+            self.string_var.set(f"New {release_type} update available")
         elif value is False and release_type == "newer":
-            self.string_label.set(f"Branch ahead of main branch")
+            self.string_var.set(f"Branch ahead of main branch")
 
     def button_download(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")

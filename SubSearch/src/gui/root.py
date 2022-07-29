@@ -7,12 +7,15 @@ from src.gui.tooltip import Hovertip
 from src.utilities.local_paths import root_directory
 from src.utilities.version import current_version
 
+GWL_EXSTYLE = -20
+WS_EX_APPWINDOW = 0x00040000
+WS_EX_TOOLWINDOW = 0x00000080
+
 
 @dataclass
 class Tks:
     window_width: int = 700
     window_height: int = 700
-
     purple: str = "#b294bb"
     red: str = "#bc473b"
     red_brown: str = "#b26947"
@@ -162,9 +165,6 @@ class CustomTitleBar(tk.Frame):
         return value
 
     def remove_titlebar(self, parent):
-        GWL_EXSTYLE = -20
-        WS_EX_APPWINDOW = 0x00040000
-        WS_EX_TOOLWINDOW = 0x00000080
         hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
         style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
         style = style & ~WS_EX_TOOLWINDOW
@@ -196,10 +196,10 @@ class WindowPosition:
     def set(w=Tks.window_width, h=Tks.window_height, root=None, ws_value_offset=0, hs_value_offset=0):
         ws = root.winfo_screenwidth() + ws_value_offset
         hs = root.winfo_screenheight() + hs_value_offset
-    x = int((ws / 2) - (w / 2))
-    y = int((hs / 2) - (h / 2))
-    value = f"{w}x{h}+{x}+{y}"
-    return value
+        x = int((ws / 2) - (w / 2))
+        y = int((hs / 2) - (h / 2))
+        value = f"{w}x{h}+{x}+{y}"
+        return value
 
 
 class ColorPicker:
@@ -232,7 +232,6 @@ class ColorPicker:
 
 if "win" in sys.platform:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
-
 
 c_verison = current_version()
 
