@@ -14,7 +14,7 @@ def context_menu_icon():
 
     use: str = get("cm_icon")
     ss_path = "Software\Classes\Directory\Background\shell\SubSearch"
-    icon_path = root_directory("data", "grey16.ico")
+    icon_path = root_directory("data", "16.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, ss_path, 0, winreg.KEY_WRITE) as subkey_ss:
             if use == "True":
