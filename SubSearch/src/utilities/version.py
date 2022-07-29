@@ -41,7 +41,7 @@ def increase_version(current_version: str, release_type: str, i: int = 1):
     return f"v{major}.{minor}.{patch}"
 
 
-def add_patch_minor_major(release_type):
+def add_patch_minor_major(release_type: str):
     """
     Patch release (0.0.1 -> 0.0.2): bug fixes
     Minor release (0.1.0 -> 0.2.0): larger bug fixes or new features

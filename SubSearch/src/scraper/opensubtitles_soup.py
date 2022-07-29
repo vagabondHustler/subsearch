@@ -4,7 +4,7 @@ from src.utilities import log
 
 
 # search for file hash
-def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or None:
+def search_for_hash(url: str, lang: str, hi: str):
     download_url: list = []
     source = requests.get(url)
     scontent = source.content
@@ -14,17 +14,17 @@ def search_for_hash(url: str, language: str, hearing_impaired: str) -> list or N
         return None
     tr_name = doc_results.find_all("tr", id=lambda value: value and value.startswith("name"))
     for item in tr_name:
-        tl = [a["title"] for a in item.find_all("a", title=language)]
-        if language in tl:
+        tl = [a["title"] for a in item.find_all("a", title=lang)]
+        if lang in tl:
             hi = item.find("img", alt="Subtitles for hearing impaired")
-            if hi is not None and hearing_impaired == "False":
+            if hi is not None and hi == "False":
                 log.output(
-                    f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'"
+                    f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'"
                 )
                 continue
-            if hi is None and hearing_impaired == "True":
+            if hi is None and hi == "True":
                 log.output(
-                    f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hearing_impaired}'"
+                    f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'"
                 )
                 continue
 
