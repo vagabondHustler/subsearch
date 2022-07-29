@@ -242,7 +242,7 @@ def main():
     root = tk.Tk(className=f" SubSearch")
     icon_path = root_directory("data", "32.ico")
     root.iconbitmap(icon_path)
-    root.geometry(set_window_position())
+    root.geometry(WindowPosition.set(root=root))
     # root.resizable(False, False)
     root.wm_attributes("-transparentcolor", Tks.grey)
     root.configure(bg=Tks.dark_grey)
