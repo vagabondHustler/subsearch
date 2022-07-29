@@ -115,56 +115,56 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 These languages are not tested at all, but should work if u know the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). These can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
-- Albanian
-- Armenian
-- Azerbaijani
-- Basque
-- Belarusian
-- Bosnian
-- Bulgarian
-- Bulgarian/ English
-- Burmese
-- Cambodian/Khmer
-- Catalan
-- Croatian
-- Czech
-- Dutch/ English
-- English/ German
-- Esperanto
-- Estonian
-- Georgian
-- Greenlandic
-- Hindi
-- Hungarian
-- Hungarian/ English
-- Icelandic
-- Japanese
-- Kannada
-- Kinyarwanda
-- Kurdish
-- Latvian
-- Lithuanian
-- Macedonian
-- Malayalam
-- Manipuri
-- Mongolian
-- Nepali
-- Pashto
-- Punjabi
-- Russian
-- Serbian
-- Sinhala
-- Slovak
-- Slovenian
-- Somali
-- Sundanese
-- Swahili
-- Tagalog
-- Tamil
-- Telugu
-- Ukrainian
-- Urdu
-- Yoruba
+- Albanian, `sq`
+- Armenian, `hy`
+- Azerbaijani, `az`
+- Basque, `eu`
+- Belarusian, `be`
+- Bosnian, `bs`
+- Bulgarian, `bg`
+- Bulgarian/ English, `bg_en`
+- Burmese, `my`
+- Cambodian/Khmer, `km`
+- Catalan, `ca`
+- Croatian, `hr`
+- Czech, `cs`
+- Dutch/ English, `nl_en`
+- English/ German, `en_de`
+- Esperanto, `eo`
+- Estonian, `et`
+- Georgian, `ka`
+- Greenlandic, `kl`
+- Hindi, `hi`
+- Hungarian, `hu`
+- Hungarian/ English, `hu_en`
+- Icelandic, `is`
+- Japanese, `ja`
+- Kannada, `kn`
+- Kinyarwanda, `rw`
+- Kurdish, `ku`
+- Latvian, `lv`
+- Lithuanian, `lt`
+- Macedonian, `mk`
+- Malayalam, `ml`
+- Manipuri, `mn`
+- Mongolian, `mn`
+- Nepali, `ne`
+- Pashto, `ps`
+- Punjabi, `pa`
+- Russian, `ru`
+- Serbian, `sr`
+- Sinhala, `si`
+- Slovak, `sk`
+- Slovenian, `sl`
+- Somali, `so`
+- Sundanese, `su`
+- Swahili, `sw`
+- Tagalog, `tl`
+- Tamil, `ta`
+- Telugu, `te`
+- Ukrainian, `uk`
+- Urdu, `ur`
+- Yoruba, `yo`
 
 ## Authors <a name = "authors"></a>
 
