@@ -3,7 +3,7 @@ from src.utilities.read_parameters import read_data
 
 
 # get said value(s) from config.json
-def get(output):
+def get(output: str):
     config_json = read_data(root_directory("data", "config.json"))
 
     def languages():
