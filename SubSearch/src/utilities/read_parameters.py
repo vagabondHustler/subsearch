@@ -44,7 +44,7 @@ def split_last_hyphen(string: str):
     return group
 
 
-def get_parameters(dir_path, lang_abbr, file_hash, file_name) -> SearchParameters:
+def get_parameters(dir_path: str, lang_abbr: str, file_hash: str, file_name: str) -> SearchParameters:
     # default values
     _title = None
     year = "N/A"
