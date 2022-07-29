@@ -226,8 +226,6 @@ class ColorPicker:
             self.clabel.configure(fg=Tks.red_brown)
         if self.pct in range(0, 25):
             self.clabel.configure(fg=Tks.red)
-        if self.string_var.get() == "Disabled":
-            self.clabel.configure(fg=Tks.silver_grey, font=Tks.font8i)
 
 
 if "win" in sys.platform:
