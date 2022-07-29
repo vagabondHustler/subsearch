@@ -6,8 +6,9 @@ import sv_ttk
 import os
 import sys
 import tkinter as tk
-import math
+from tkinter import ttk
 
+import sv_ttk
 from src.gui.root import Tks, main
 from src.scraper.subscene_soup import get_download_url
 from src.utilities.file_manager import clean_up, download_zip_auto, extract_zips
