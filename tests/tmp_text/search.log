@@ -1,3 +1,24 @@
-26-Jul-22 22:43:26 - Starting new HTTPS connection (1): subscene.com:443
-26-Jul-22 22:43:27 - https://subscene.com:443 "GET //subtitles/A-foo-bar/english/2650811 HTTP/1.1" 301 0
-26-Jul-22 22:43:27 - https://subscene.com:443 "GET /subtitles/a-foo-bar/english/2650811 HTTP/1.1" 404 None
+27-Jul-22 18:20:35 - SubSearch - v2.9.18 
+27-Jul-22 18:20:35 - [PARAMETERS]
+27-Jul-22 18:20:35 - Language: English, en
+27-Jul-22 18:20:35 - Hearing impaired: True
+27-Jul-22 18:20:35 - Title: tmp_text
+27-Jul-22 18:20:35 - Year: N/A
+27-Jul-22 18:20:35 - Season: N/A, N/A
+27-Jul-22 18:20:35 - Episode: N/A, N/A
+27-Jul-22 18:20:35 - TV-Series: False
+27-Jul-22 18:20:35 - Release: tmp_text
+27-Jul-22 18:20:35 - Group: N/A
+27-Jul-22 18:20:35 - Match threshold: 70%
+27-Jul-22 18:20:35 - File hash: None
+27-Jul-22 18:20:35 - URL: https://subscene.com/subtitles/searchbytitle?query=tmp_text
+27-Jul-22 18:20:35 - URL: https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None
+
+27-Jul-22 18:20:35 - 
+27-Jul-22 18:20:35 - [Searching opensubtitles]
+27-Jul-22 18:20:35 - 
+27-Jul-22 18:20:35 - [Searching subscene]
+27-Jul-22 18:20:35 - Starting new HTTPS connection (1): subscene.com:443
+27-Jul-22 18:20:36 - https://subscene.com:443 "GET /subtitles/searchbytitle?query=tmp_text HTTP/1.1" 200 None
+27-Jul-22 18:20:36 - 
+27-Jul-22 18:20:36 - No movies found matching tmp_text
