@@ -16,7 +16,7 @@ def main():
     root.iconbitmap(icon_path)
     root.geometry(WindowPosition.set(root))
     root.resizable(False, False)
-    root.wm_attributes("-transparentcolor", Color.grey, "-topmost", True)
+    root.wm_attributes("-transparentcolor", Color.grey)
     root.configure(bg=Color.dark_grey)
     cb = CustomBorder(root)
     cb.place(relx=0.5, rely=0.5, anchor="center")
