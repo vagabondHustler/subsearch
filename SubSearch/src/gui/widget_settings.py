@@ -89,18 +89,18 @@ class SelectLanguage(tk.Frame):
             sticky="e",
         )
         self.entry.bind("<Enter>", self.entry_enter)
-        self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.see_other_langs.bind("<Enter>", self.popup_window)
         self.entry.bind("<Return>", self.add_language)
         self.configure(bg=tkd.Color.dark_grey)
 
     # pop up window with list of other languages
-    def other_langs_window(self, event):
+    def popup_window(self, event):
         self.clear_entry()
         rows = len(OTHER_LANGUAGES) / 2
         cols = 2
         row_size_y = 20.16
-        row_size_x = 113
-        csx = round(cols * row_size_x)
+        col_size_x = 113
+        csx = round(cols * col_size_x)
         csy = round(rows * row_size_y)
 
         self.toplvl = tk.Toplevel(background=tkd.Color.light_black, borderwidth=0)
@@ -125,12 +125,12 @@ class SelectLanguage(tk.Frame):
                 pady=0,
             )
         self.see_other_langs.configure(fg=tkd.Color.purple)
-        self.see_other_langs.bind("<Leave>", self.destroy_toplvl)
+        self.see_other_langs.bind("<Leave>", self.popup_window_destroy)
 
-    def destroy_toplvl(self, event):
+    def popup_window_destroy(self, event):
         self.fill_entry()
         self.see_other_langs.configure(fg=tkd.Color.white_grey)
-        self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.see_other_langs.bind("<Enter>", self.popup_window)
         self.toplvl.destroy()
 
     # entry functions
@@ -210,7 +210,7 @@ class HearingImparedSubs(tk.Frame):
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="Only use regular subtitles",
+            tip_text="Only use non-hearing impaired subtitles",
         )
         tools.Create.button(
             self,
@@ -266,7 +266,7 @@ class SearchThreshold(tk.Frame):
             sticky="e",
             bind_to=self.button_add_5,
             tip_show=True,
-            tip_text="Add 5% to the search threshold\n A higher value means less chance of finding subtitles that are not synced witht the movie/series",
+            tip_text="Add 5% to the search threshold\nA higher value means less chance of finding subtitles that are not synced witht the movie/series",
         )
         tools.Create.button(
             self,
@@ -276,7 +276,7 @@ class SearchThreshold(tk.Frame):
             sticky="w",
             bind_to=self.button_sub_5,
             tip_show=True,
-            tip_text="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded",
+            tip_text="Subtract 5% from the search threshold\nA lower value means more subtitles will be found and downloaded",
         )
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         self.configure(bg=tkd.Color.dark_grey)
@@ -307,7 +307,13 @@ class ShowContextMenu(tk.Frame):
             tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
         tools.Create.label(self, text="Show context menu", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b, anchor="center"
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            row=1,
+            col=2,
+            font=tkd.Font.cas8b,
+            anchor="center",
         )
         tools.Create.button(
             self,
@@ -327,7 +333,7 @@ class ShowContextMenu(tk.Frame):
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch",
+            tip_text="Remove SubSearch from the context menu\nUsed to 'uninstall' SubSearch",
         )
         tools.ColorPicker(self.string_var, self.clabel)
         self.configure(bg=tkd.Color.dark_grey)
@@ -357,7 +363,12 @@ class ShowContextMenuIcon(tk.Frame):
             tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
         tools.Create.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            row=1,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
@@ -411,7 +422,12 @@ class ShowDownloadWindow(tk.Frame):
             tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
         tools.Create.label(self, text="Show download window", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            row=1,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
@@ -431,7 +447,7 @@ class ShowDownloadWindow(tk.Frame):
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="No window will be shown if no subtitles are found\n The list can be found in search.log",
+            tip_text="No window will be shown if no subtitles are found\nThe list can be found in search.log",
         )
         tools.ColorPicker(self.string_var, self.clabel)
         self.configure(bg=tkd.Color.dark_grey)
@@ -460,7 +476,12 @@ class ShowTerminalOnSearch(tk.Frame):
             tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
         tools.Create.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            row=1,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         if current_user.is_exe() is False:
             tools.Create.button(
@@ -471,7 +492,7 @@ class ShowTerminalOnSearch(tk.Frame):
                 sticky="e",
                 bind_to=self.button_set_true,
                 tip_show=True,
-                tip_text="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log",
+                tip_text="Show the terminal when searching for subtitles\nEverything shown in the terminal is avalible in search.log",
             )
             tools.Create.button(
                 self,
@@ -511,7 +532,12 @@ class CheckForUpdates(tk.Frame):
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
         tools.Create.label(
-            self, text=f"SubScene version {self.current_version}", row=1, col=1, sticky="w", font=tkd.Font.cas8b
+            self,
+            text=f"SubScene version {self.current_version}",
+            row=1,
+            col=1,
+            sticky="w",
+            font=tkd.Font.cas8b,
         )
         tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
