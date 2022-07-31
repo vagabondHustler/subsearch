@@ -12,6 +12,14 @@ from src.utilities import (
     version,
 )
 
+LANGUAGES = read_config_json.get("languages")
+OTHER_LANGUAGES = read_config_json.get("other_languages")
+LANGUAGE, LANG_ABBR = read_config_json.get("language")
+HEARING_IMPARED = read_config_json.get("hearing_impaired")
+PCT = read_config_json.get("percentage")
+TERMINAL_FOCUS = read_config_json.get("terminal_focus")
+CM_ICON = read_config_json.get("cm_icon")
+DL_WINDOW = read_config_json.get("show_download_window")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -533,25 +541,6 @@ class CheckForUpdates(tk.Frame):
 
     def button_download(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
-
-
-# # get the window position so it can be placed in the center of the screen
-# def set_window_position(width: int = tkd.Window.width, height: int = tkd.Window.height):
-#     ws = root.winfo_screenwidth()
-#     hs = root.winfo_screenheight()
-#     x = int((ws / 2) - (width / 2))
-#     y = int((hs / 2) - (height / 2))
-#     value = f"{width}x{height}+{x}+{y}"
-#     return value
-
-LANGUAGES = read_config_json.get("languages")
-OTHER_LANGUAGES = read_config_json.get("other_languages")
-LANGUAGE, LANG_ABBR = read_config_json.get("language")
-HEARING_IMPARED = read_config_json.get("hearing_impaired")
-PCT = read_config_json.get("percentage")
-TERMINAL_FOCUS = read_config_json.get("terminal_focus")
-CM_ICON = read_config_json.get("cm_icon")
-DL_WINDOW = read_config_json.get("show_download_window")
 
 
 def show_widget():
