@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Window:
     """
     Class for storing settings for window size.
-    
+
     Args:
     width: width of window in pixels.
     height: height of window in pixels.
@@ -13,12 +13,13 @@ class Window:
 
     width: int = 700
     height: int = 700
-    
+
+
 @dataclass
 class Color:
     """
     Class for storing colors for widgets.
-    
+
     Args:
     purple: "#b294bb"
     red: "#bc473b"
@@ -66,9 +67,9 @@ class Color:
 class Font:
     """
     Class for storing fonts for widgets
-    
+
     Args:
-     cas6b: "Cascadia 6 bold"
+    cas6b: "Cascadia 6 bold"
     cas8: "Cascadia 8"
     cas8i: "Cascadia 8 italic"
     cas8b: "Cascadia 8 bold"
@@ -90,7 +91,7 @@ class Font:
 class Misc:
     """
     Class for storing misc settings.
-    
+
     Args:
     col58: " " * 58
     """
