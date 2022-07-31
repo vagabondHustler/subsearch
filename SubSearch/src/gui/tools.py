@@ -6,6 +6,11 @@ from src.utilities import local_paths
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
+
+    # TODO add a way to create a new label and button in the grid
+    # TODO with less function arguments but no need to rewrite the same code
+    # TODO over and over
+
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=tkd.Color.dark_grey)
@@ -243,7 +248,9 @@ class ToolTip(tk.Toplevel):
         # offset the frame 1px from edge of the tooltip corner
         frame.place(x=1, y=1, anchor="nw")
         label.place(x=0, y=0, anchor="nw")
-        root_x = self.widget.winfo_rootx() + self.widget.winfo_width() + 4 # offset the tooltip by extra 4px so it doesn't overlap the widget
+        root_x = (
+            self.widget.winfo_rootx() + self.widget.winfo_width() + 4
+        )  # offset the tooltip by extra 4px so it doesn't overlap the widget
         root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
