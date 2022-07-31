@@ -1,42 +1,46 @@
 import ctypes
 import time
+import os
 
-from src.utilities.version import current_version
-from src.utilities.local_paths import cwd
 from src.scraper import opensubtitles, subscene
-from src.utilities import edit_config, edit_registry
-from src.utilities import file_manager as ufm
-from src.utilities import log
-from src.utilities.current_user import got_key
-from src.utilities.read_config_json import get
-from src.utilities.read_parameters import get_parameters
+from src.utilities import (
+    current_user,
+    edit_config,
+    edit_registry,
+    file_manager,
+    local_paths,
+    log,
+    read_config_json,
+    read_parameters,
+    version,
+)
 
 
 def main():
     # initializing
     start = time.perf_counter()
-    version = current_version()
-    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {version}")
-    if got_key() is False:
+    current_version = version.current()
+    ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {current_version}")
+    if current_user.got_key() is False:
         edit_config.set_default_values()
         edit_registry.add_context_menu()
         return
 
-    language, lang_abbr = get("language")
-    hearing_impaired = get("hearing_impaired")
-    pct = get("percentage")
-    show_download_window = get("show_download_window")
-    focus = get("terminal_focus")
-    video_ext: list = get("video_ext")
-    video = ufm.find_video(cwd(), video_ext, False)
-    video_with_ext = ufm.find_video(cwd(), video_ext, True)
+    language, lang_abbr = read_config_json.get("language")
+    hearing_impaired = read_config_json.get("hearing_impaired")
+    pct = read_config_json.get("percentage")
+    show_download_window = read_config_json.get("show_download_window")
+    focus = read_config_json.get("terminal_focus")
+    video_ext: list = read_config_json.get("video_ext")
+    video = file_manager.find_video(local_paths.cwd(), video_ext, False)
+    video_with_ext = file_manager.find_video(local_paths.cwd(), video_ext, True)
     if video_with_ext is not None:
-        file_hash = ufm.get_hash(video_with_ext)
+        file_hash = file_manager.get_hash(video_with_ext)
     elif video_with_ext is None:
         file_hash = None
 
     try:
-        param = get_parameters(cwd().lower(), lang_abbr, file_hash, video)
+        param = read_parameters.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video)
     except IndexError as err:
         log.output(err)
         if focus == "True":
@@ -54,8 +58,11 @@ def main():
     log.output("[Searching subscene]")
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
-        if show_download_window == "True":
-            import src.gui.widget_download
+        file = f"{local_paths.cwd()}\\tmp.txt"
+        if show_download_window == "True" and os.path.exists(file):
+            from src.gui import widget_download
+
+            widget_download.show_widget()
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
@@ -68,21 +75,21 @@ def main():
         log.output("")
         log.output("[Downloading from Opensubtitles]")
         for item in scrape_opensubtitles:
-            ufm.download_zip_auto(item)
+            file_manager.download_zip_auto(item)
     if scrape_subscene[0] is not None:
         log.output("")
         log.output("[Downloading from Subscene]")
         for item in scrape_subscene:
-            ufm.download_zip_auto(item)
+            file_manager.download_zip_auto(item)
 
     # process downloaded files
     log.output("")
     log.output("[Procsessing files]")
-    ufm.extract_zips(cwd(), ".zip")
-    ufm.clean_up(cwd(), ".zip")
-    ufm.clean_up(cwd(), ").nfo")
-    ufm.rename_srts(f"{param.release}.srt", cwd(), f"{param.group}.srt", ".srt")
-    ufm.move_files(cwd(), f"{param.release}.srt", ".srt")
+    file_manager.extract_zips(local_paths.cwd(), ".zip")
+    file_manager.clean_up(local_paths.cwd(), ".zip")
+    file_manager.clean_up(local_paths.cwd(), ").nfo")
+    file_manager.rename_srts(f"{param.release}.srt", local_paths.cwd(), f"{param.group}.srt", ".srt")
+    file_manager.move_files(local_paths.cwd(), f"{param.release}.srt", ".srt")
     log.output("")
 
     # finishing up

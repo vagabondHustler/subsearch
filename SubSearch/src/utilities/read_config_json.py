@@ -1,10 +1,8 @@
-from src.utilities.local_paths import root_directory
-from src.utilities.read_parameters import read_data
-
+from src.utilities import local_paths, read_parameters
 
 # get said value(s) from config.json
 def get(output: str):
-    config_json = read_data(root_directory("data", "config.json"))
+    config_json = read_parameters.read_data(local_paths.root_directory("data", "config.json"))
 
     def languages():
         return config_json.languages
@@ -13,7 +11,7 @@ def get(output: str):
         language = config_json.language
         lang, lang_abbr = language.split(", ")
         return lang, lang_abbr
-    
+
     def other_languages():
         return config_json.other_languages
 
