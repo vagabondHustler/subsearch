@@ -4,7 +4,7 @@ This includes:
  * an abstract base-class for different kinds of tooltips
  * a simple text-only Tooltip class
 """
-from tkinter import *
+import tkinter as tk
 
 
 class TooltipBase:
@@ -27,7 +27,7 @@ class TooltipBase:
         """display the tooltip"""
         if self.tipwindow:
             return
-        self.tipwindow = tw = Toplevel(self.anchor_widget)
+        self.tipwindow = tw = tk.Toplevel(self.anchor_widget)
         # show no border on the top level window
         tw.wm_overrideredirect(1)
         try:
@@ -35,7 +35,7 @@ class TooltipBase:
             # Without it, call tips intrude on the typing process by grabbing
             # the focus.
             tw.tk.call("::tk::unsupported::MacWindowStyle", "style", tw._w, "help", "noActivates")
-        except TclError:
+        except tk.TclError:
             pass
 
         self.position_window()
@@ -74,7 +74,7 @@ class TooltipBase:
         if tw:
             try:
                 tw.destroy()
-            except TclError:  # pragma: no cover
+            except tk.TclError:  # pragma: no cover
                 pass
 
 
@@ -104,7 +104,7 @@ class OnHoverTooltipBase(TooltipBase):
             self.anchor_widget.unbind("<Enter>", self._id1)
             self.anchor_widget.unbind("<Leave>", self._id2)  # pragma: no cover
             self.anchor_widget.unbind("<Button>", self._id3)  # pragma: no cover
-        except TclError:
+        except tk.TclError:
             pass
         super(OnHoverTooltipBase, self).__del__()
 
@@ -135,7 +135,7 @@ class OnHoverTooltipBase(TooltipBase):
         """hide the tooltip"""
         try:
             self.unschedule()
-        except TclError:  # pragma: no cover
+        except tk.TclError:  # pragma: no cover
             pass
         super(OnHoverTooltipBase, self).hidetip()
 
@@ -157,29 +157,29 @@ class Hovertip(OnHoverTooltipBase):
         self.text = text
 
     def showcontents(self):
-        label = Label(
+        label = tk.Label(
             self.tipwindow,
             text=f" {self.text} ",
-            justify=LEFT,
+            justify=tk.LEFT,
             background="#1A1A1A",
             fg="#bdbdbd",
-            relief=SOLID,
+            relief=tk.SOLID,
             borderwidth=1,
         )
         label.pack()
 
 
 def _tooltip(parent):  # htest #
-    top = Toplevel(parent)
+    top = tk.Toplevel(parent)
     top.title("Test tooltip")
     x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("+%d+%d" % (x, y + 150))
-    label = Label(top, text="Place your mouse over buttons")
+    label = tk.Label(top, text="Place your mouse over buttons")
     label.pack()
-    button1 = Button(top, text="Button 1 -- 1/2 second hover delay")
+    button1 = tk.Button(top, text="Button 1 -- 1/2 second hover delay")
     button1.pack()
     Hovertip(button1, "This is tooltip text for button1.", hover_delay=500)
-    button2 = Button(top, text="Button 2 -- no hover delay")
+    button2 = tk.Button(top, text="Button 2 -- no hover delay")
     button2.pack()
     Hovertip(button2, "This is tooltip\ntext for button2.", hover_delay=None)
 
