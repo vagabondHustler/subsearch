@@ -7,7 +7,7 @@ def get(output: str):
     def languages():
         return config_json.languages
 
-    def oter_language():
+    def language():
         language = config_json.language
         lang, lang_abbr = language.split(", ")
         return lang, lang_abbr
@@ -34,7 +34,7 @@ def get(output: str):
         return config_json.video_ext
 
     if output == "language":
-        return oter_language()
+        return language()
     if output == "languages":
         return languages()
     if output == "other_languages":
