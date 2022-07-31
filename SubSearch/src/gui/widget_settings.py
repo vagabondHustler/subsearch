@@ -1,9 +1,16 @@
-import sys
 import tkinter as tk
 import webbrowser
 
-from src.utilities import edit_registry, current_user, edit_config, read_config_json, updates, version
-from src.gui import widget_root, tools, tkinter_data as tkd
+from src.gui import tkinter_data as tkd
+from src.gui import tools, widget_root
+from src.utilities import (
+    current_user,
+    edit_config,
+    edit_registry,
+    read_config_json,
+    updates,
+    version,
+)
 
 
 # set which language of the subtitles  should be included in the search
