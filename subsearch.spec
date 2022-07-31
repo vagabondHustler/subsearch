@@ -6,11 +6,15 @@ added_files = [
          ( 'SubSearch/src/data/*.reg', 'src/data/' ),
          ( 'SubSearch/src/data/*.json', 'src/data/' )
          ]
+added_binaries = [
+        ('SubSearch/src/data/*.ico', 'src/data/'),
+        ('SubSearch/src/data/*.png', 'src/data/')
+        ]
 
 a = Analysis(
     ['SubSearch/main.py'],
     pathex=[],
-    binaries=[('SubSearch/src/data/*.ico', 'src/data/')],
+    binaries=added_binaries,
     datas=added_files,
     hiddenimports=[],
     hookspath=[],
