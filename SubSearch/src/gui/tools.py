@@ -2,7 +2,7 @@ import ctypes
 import tkinter as tk
 
 from src.gui import tooltip, tkinter_data as tkd
-from src.utilities.local_paths import root_directory
+from src.utilities import local_paths
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
@@ -88,7 +88,7 @@ class CustomTitleBar(tk.Frame):
         self.exit = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
         self.exit.place(relx=1, rely=0, anchor="ne")
         #place x in canvas
-        png_path = root_directory("data", "x.png")
+        png_path = local_paths.root_directory("data", "x.png")
         x_exit = tk.PhotoImage(file=png_path)
         self.exit.create_image(18, 18, image=x_exit)
         self.exit.photoimage = x_exit
