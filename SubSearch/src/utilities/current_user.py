@@ -1,5 +1,6 @@
-import winreg as reg
 import os
+import winreg as reg
+
 from src.utilities import local_paths
 
 # check if current user has the registry key
