@@ -1,7 +1,6 @@
 import json
 
-from src.utilities.edit_config import update_json
-from src.utilities.local_paths import root_directory
+from src.utilities import edit_config, local_paths
 
 
 def read_data(config_file: str):
@@ -11,12 +10,12 @@ def read_data(config_file: str):
         return version
 
 
-def current_version():
-    c_version = read_data(root_directory("data", "version.json"))
+def current():
+    c_version = read_data(local_paths.root_directory("data", "version.json"))
     return c_version
 
 
-version_on_load = current_version()
+version_on_load = current()
 
 
 def increase_version(current_version: str, release_type: str, i: int = 1):
@@ -49,8 +48,8 @@ def add_patch_minor_major(release_type: str):
 
     :param str release_type: "major", "minor", "patch", defaults to sys.argv[1]
     """
-    print(f"Current Version: {current_version()}")
-    new_version = increase_version(current_version(), release_type)
-    update_json("version", new_version, "data", "version.json")
+    print(f"Current Version: {current()}")
+    new_version = increase_version(current(), release_type)
+    edit_config.update_json("version", new_version, "data", "version.json")
 
     print(f"New Version: {new_version}, Old Version: {version_on_load}")

@@ -1,7 +1,7 @@
-from src.utilities.local_paths import cwd
-from src.scraper.subscene_soup import get_download_url, search_for_title, search_title_for_sub
-from src.utilities import log
-from src.utilities.compare import pct_value
+import os
+
+from src.scraper import subscene_soup
+from src.utilities import local_paths, log, compare
 
 
 # check if dict is of movies
@@ -58,10 +58,17 @@ def log_and_sort_list(list_of_tuples: list, pct: int):
 
 
 # decides what to do with all the scrape data
-def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str,):
+def scrape(
+    param,
+    lang: str,
+    lang_abbr: str,
+    hi: str,
+    pct: int,
+    show_dl_window: str,
+):
     # search for titles
     to_be_scraped: list = []
-    title_keys = search_for_title(param.url_subscene)
+    title_keys = subscene_soup.search_for_title(param.url_subscene)
     if title_keys == "ERROR: CAPTCHA PROTECTION":
         log.output(f"Captcha protection detected. Please try again later.")
         return None
@@ -90,10 +97,10 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
-            sub_keys = search_title_for_sub(lang, hi, url)
+            sub_keys = subscene_soup.search_title_for_sub(lang, hi, url)
             break
         for key, value in sub_keys.items():
-            number = pct_value(key, param.release)
+            number = compare.pct_value(key, param.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.percentage}% match]:")
             formatting_spaces = " " * lenght_str
@@ -118,7 +125,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
                     link = _link.replace(" ", "")
                     f.writelines(f"{name} {link}")
                     f.write("\n")
-            import src.gui.download_window
+
 
             return None
         else:
@@ -128,8 +135,8 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
-        root_dl_url = get_download_url(dl_url)
-        file_path = f"{cwd()}\\subscene_{current_num}.zip"
+        root_dl_url = subscene_soup.get_download_url(dl_url)
+        file_path = f"{local_paths.cwd()}\\subscene_{current_num}.zip"
         current_num = (file_path, root_dl_url, current_num, total_num)
         download_info.append(current_num)
     return download_info
