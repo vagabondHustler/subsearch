@@ -4,14 +4,15 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
-from src.gui.root import Tks, main
+from src.gui.data import Window, Color, Font
+from src.gui.widget_root import main
 from src.scraper.subscene_soup import get_download_url
 from src.utilities.file_manager import clean_up, download_zip_auto, extract_zips
 from src.utilities.local_paths import cwd
 
 
 # file with subtitles and corresponding dl links
-def read_tmp_file(file: str) -> list[str]:
+def read_tmp_file(file: str):
     if os.path.exists(file):
         with open(file, "r") as f:
             return [line.strip() for line in f]
@@ -28,9 +29,9 @@ class DownloadList(tk.Frame):
         self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
         sub_listbox = tk.Listbox(
             root,
-            bg=Tks.dark_grey,
-            fg=Tks.light_grey,
-            font=Tks.font8b,
+            bg=Color.dark_grey,
+            fg=Color.light_grey,
+            font=Font.cas8b,
             bd=0,
             border=0,
             borderwidth=0,
@@ -38,8 +39,8 @@ class DownloadList(tk.Frame):
             yscrollcommand=self.hs.set,
         )
         sub_listbox.place(
-            height=Tks.window_height - 60,
-            width=Tks.window_width - 20,
+            height=Window.height - 60,
+            width=Window.width - 20,
             relx=0.5,
             rely=0.525,
             bordermode="inside",
@@ -67,7 +68,7 @@ class DownloadList(tk.Frame):
             arrowsize=24,
         )
 
-        self.hs.place(x=Tks.window_width - 28, y=51, bordermode="inside", height=633)
+        self.hs.place(x=Window.width - 28, y=51, bordermode="inside", height=633)
         self.hs.config(command=self.sub_listbox.yview)
         self.hs.lift()
 
@@ -88,13 +89,13 @@ class DownloadList(tk.Frame):
             self.dicts_urls = dicts_urls
             self.dicts_names = dicts_names
             self.count += 1
-            
+
     def mouse_b1_press(self, event):
         self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
-        
+
     def mouse_b1_release(self, event):
         self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
-                              
+
     def download_button(self, event):
         self.sub_listbox.unbind("<<ListboxSelect>>")
         self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
@@ -107,7 +108,7 @@ class DownloadList(tk.Frame):
             if number == int(items):
                 self.sub_listbox.delete(int(number))
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
-                self.sub_listbox.itemconfig(int(number), {"fg": Tks.blue})
+                self.sub_listbox.itemconfig(int(number), {"fg": Color.blue})
                 try:
                     dl_url = get_download_url(url)
                     _name = name.replace("/", "").replace("\\", "").split(": ")
@@ -120,19 +121,19 @@ class DownloadList(tk.Frame):
                         clean_up(cwd(), ").nfo")
                         self.sub_listbox.delete(int(number))
                         self.sub_listbox.insert(int(number), f"✔ {name}")
-                        self.sub_listbox.itemconfig(int(number), {"fg": Tks.green})
+                        self.sub_listbox.itemconfig(int(number), {"fg": Color.green})
                         _error = False
                 except OSError:
                     _error = True
                     self.sub_listbox.delete(int(number))
                     self.sub_listbox.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
-                    self.sub_listbox.itemconfig(int(number), {"fg": Tks.red})
+                    self.sub_listbox.itemconfig(int(number), {"fg": Color.red})
 
 
 root = main()
 sv_ttk.set_theme("dark")
 DownloadList(root).pack(anchor="center")
-tk.Frame(root, bg=Tks.dark_grey).pack(anchor="center", expand=True)
+tk.Frame(root, bg=Color.dark_grey).pack(anchor="center", expand=True)
 root.mainloop()
 
 
