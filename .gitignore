@@ -148,3 +148,6 @@ subs/
 git_publish.py
 desktop.ini
 .vscode/settings.json
+
+# Adobe files
+*.psd
