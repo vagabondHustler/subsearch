@@ -26,7 +26,7 @@
 
 ## About <a name = "about"></a>
 
-- Automatically search, download and extract subtitles for any movie or tv-series with one easy mouse click from the context menu.
+- Automatically search, download and extract subtitles for any movie or show with one easy mouse click from the context menu.
 - Has a GUI for all the custom settings that can be configured.
 - For 69 different languages, of which 19 are fully supported and tested.
 - Can be configured to include hearing impaired subtitles only, none-hearing impaired subtitles only or both.
