@@ -101,6 +101,9 @@ class SelectLanguage(tk.Frame):
 
     # pop up window with list of other languages
     def popup_window(self, event):
+        #* see cleaner version of this function src.gui.tools.Tooltip
+        #TODO use src.gui.tools.Tooltip instead of this function
+        #TODO 'cus they are a so similar to each other
         self.clear_entry()
         rows = len(OTHER_LANGUAGES) / 2
         cols = 2
