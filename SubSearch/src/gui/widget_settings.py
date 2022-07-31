@@ -119,7 +119,7 @@ class SelectLanguage(tk.Frame):
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
 
         root_x = root.winfo_rootx() + Window.width + 10
-        root_y = root.winfo_rooty() + 38
+        root_y = root.winfo_rooty() + 37
         self.toplvl.geometry(f"{csx}x{csy}+{root_x}+{root_y}")
         for num, i in zip(range(0, 50), OTHER_LANGUAGES):
             Create.label(
