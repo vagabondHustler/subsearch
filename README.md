@@ -25,9 +25,16 @@
 
 ## About <a name = "about"></a>
 
-Download subtitles for movies and tv-series, automatically for well known scene groups with two easy mouse clicks inside the directory containing the video file, if there is no video file inside the directory, the directory name will be used as a search parameter.
+- Automatically search, download and extract subtitles for any movie or tv-series with one easy mouse click from the context menu.
+- Has a GUI for all the custom settings that can be configured.
+- For 69 different languages, of which 19 are fully supported and tested.
+- Can be configured to include hearing impaired subtitles only, none-hearing impaired subtitles only or both.
+- Configure how strictly the file name has to match the search results.
+- Can be ran from a compiled executable, without the need for a Python interpreter and importing modules.
 
-Made mainly to learn python and git, by doing. There are probably better repositories out there that grab subtitles automatically from the web. But feel free to check this one out if you want to. The average run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles.
+This started as a fun project to learn how to code in python and how to use git, has now developed into a application I use daily and enjoy working on. There are many similar repositories out there that grab subtitles automatically from the web, so this might not be the most unique project. But feel free to check this one out, might offer something new. Have tried to make the setup processes as painless as possible with the use of as few external modules as possible. The average run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles.
+
+Feel free to ask me anything about this project, request new features, contribute or give constructive feedback.
 
 ## Preview <a name = "preview"></a>
 
