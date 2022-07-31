@@ -6,7 +6,7 @@ Thank you for taking the time to contribute!
 * [Filing a bug report](#filing-a-bug-report)
 * [Submitting a pull request](#submitting-a-pull-request)
 
-Credit to [pimoroni](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for CONTRIBUTING.md templet.
+Credit to [pimoroni](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for CONTRIBUTING.md template.
 
 ## Suggesting a feature
 
