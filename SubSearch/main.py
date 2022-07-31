@@ -1,7 +1,7 @@
 import subprocess
 import sys
-from src.utilities.local_paths import cwd, root_directory
-from src.utilities.current_user import is_exe_version
+
+from src.utilities import current_user, local_paths
 
 
 def main():
@@ -14,20 +14,20 @@ def main():
             return
     except IndexError:
         pass
-
-    if cwd() == root_directory():
+    
+    if local_paths.cwd() == local_paths.root_directory():
         if str(sys.executable).endswith("python.exe"):
-            if is_exe_version() is False:
+            if current_user.is_exe() is False:
                 return subprocess.Popen(["pythonw", "main.py"])
         else:
-            import src.gui.widget_settings
+            from src.gui import widget_settings
+            widget_settings.show_widget()
 
-    elif cwd() != root_directory():
+    elif local_paths.cwd() != local_paths.root_directory():
         import src.subsearch
 
         src.subsearch.main()
 
 
 if __name__ == "__main__":
-    
     main()

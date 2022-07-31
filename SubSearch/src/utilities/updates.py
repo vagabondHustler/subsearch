@@ -3,7 +3,7 @@ import webbrowser
 import cloudscraper
 import json
 from bs4 import BeautifulSoup
-from src.utilities.version import current_version
+from src.utilities.version import current
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
@@ -40,7 +40,7 @@ def is_new_version_available() -> tuple:
     :return tuple: (bool, str)
     """
     _repo_version = check_for_updates()
-    _local_version = current_version()
+    _local_version = current()
     repo_version = _repo_version.replace("v", "").split(".")
     local_version = _local_version.replace("v", "").split(".")
 
