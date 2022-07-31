@@ -20,7 +20,7 @@ def main():
             if is_exe_version() is False:
                 return subprocess.Popen(["pythonw", "main.py"])
         else:
-            import src.gui.settings_menu
+            import src.gui.widget_settings
 
     elif cwd() != root_directory():
         import src.subsearch
@@ -29,4 +29,5 @@ def main():
 
 
 if __name__ == "__main__":
+    
     main()
