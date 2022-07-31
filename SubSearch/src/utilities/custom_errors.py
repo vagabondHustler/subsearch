@@ -1,2 +1,0 @@
-class NoSubtitlesFoundError(Exception):
-    pass
