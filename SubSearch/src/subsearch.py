@@ -55,7 +55,7 @@ def main():
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
         if show_download_window == "True":
-            import src.gui.download_window
+            import src.gui.widget_download
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
