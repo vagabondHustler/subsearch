@@ -6,11 +6,11 @@ from src.utilities import local_paths
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
-
-    # TODO add a way to create a new label and button in the grid
-    # TODO with less function arguments but no need to rewrite the same code
-    # TODO over and over
-
+    
+    # TODO 
+    # add a way to create a new labels and buttons in the grid
+    # with less function arguments but no need to rewrite the same code, over and over
+    
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=tkd.Color.dark_grey)
