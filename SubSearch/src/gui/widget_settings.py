@@ -23,11 +23,9 @@ class SelectLanguage(tk.Frame):
         self.rowcount = 0
         self.colcount = 1
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Selected language", sticky="w", row=1, col=1, font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.yellow, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Selected language", sticky="w", font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.yellow, col=2, font=tkd.Font.cas8b)
         for i in range(number_of_buttons):
             self.rowcount += 1
             if self.rowcount == 8:
@@ -183,18 +181,12 @@ class HearingImparedSubs(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Hearing impaired subtitles", sticky="w", row=1, col=1, font=tkd.Font.cas8b, anchor="w"
-        )
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Hearing impaired subtitles", sticky="w", font=tkd.Font.cas8b, anchor="w")
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             width=7,
             sticky="e",
             bind_to=self.button_set_true,
@@ -204,8 +196,6 @@ class HearingImparedSubs(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             width=7,
             sticky="w",
             bind_to=self.button_set_false,
@@ -215,8 +205,6 @@ class HearingImparedSubs(tk.Frame):
         tools.Create.button(
             self,
             text="Both",
-            row=1,
-            col=3,
             width=7,
             bind_to=self.button_set_both,
             tip_show=True,
@@ -253,16 +241,12 @@ class SearchThreshold(tk.Frame):
         self.string_var.set(f"{PCT} %")
         self.pct = PCT
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Search threshold", sticky="w", row=1, col=1, font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Search threshold", sticky="w", font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="+",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_add_5,
             tip_show=True,
@@ -271,8 +255,6 @@ class SearchThreshold(tk.Frame):
         tools.Create.button(
             self,
             text="-",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_sub_5,
             tip_show=True,
@@ -304,13 +286,12 @@ class ShowContextMenu(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"True")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show context menu", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
             fg=tkd.Color.blue,
-            row=1,
             col=2,
             font=tkd.Font.cas8b,
             anchor="center",
@@ -318,8 +299,6 @@ class ShowContextMenu(tk.Frame):
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -328,8 +307,6 @@ class ShowContextMenu(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
@@ -360,21 +337,18 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
             fg=tkd.Color.blue,
-            row=1,
             col=2,
             font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -383,8 +357,6 @@ class ShowContextMenuIcon(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
@@ -419,21 +391,18 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show download window", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show download window", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
             fg=tkd.Color.blue,
-            row=1,
             col=2,
             font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -442,8 +411,6 @@ class ShowDownloadWindow(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
@@ -473,13 +440,12 @@ class ShowTerminalOnSearch(tk.Frame):
 
         self.string_var.set(f"{TERMINAL_FOCUS}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
             fg=tkd.Color.blue,
-            row=1,
             col=2,
             font=tkd.Font.cas8b,
         )
@@ -487,8 +453,6 @@ class ShowTerminalOnSearch(tk.Frame):
             tools.Create.button(
                 self,
                 text="True",
-                row=1,
-                col=3,
                 sticky="e",
                 bind_to=self.button_set_true,
                 tip_show=True,
@@ -497,8 +461,6 @@ class ShowTerminalOnSearch(tk.Frame):
             tools.Create.button(
                 self,
                 text="False",
-                row=1,
-                col=3,
                 sticky="w",
                 bind_to=self.button_set_false,
                 tip_show=True,
@@ -530,21 +492,17 @@ class CheckForUpdates(tk.Frame):
         self.current_version = version.current()
         self.string_var.set(f"")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
         tools.Create.label(
             self,
             text=f"SubScene version {self.current_version}",
-            row=1,
-            col=1,
             sticky="w",
             font=tkd.Font.cas8b,
         )
-        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="Check for updates",
-            row=1,
-            col=3,
             height=2,
             width=18,
             fge=tkd.Color.green,
@@ -561,8 +519,6 @@ class CheckForUpdates(tk.Frame):
             tools.Create.button(
                 self,
                 text=f"Get {latest_version}",
-                row=1,
-                col=3,
                 height=2,
                 width=18,
                 bind_to=self.button_download,
