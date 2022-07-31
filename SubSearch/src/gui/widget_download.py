@@ -1,8 +1,5 @@
-import os
-import sys
 import tkinter as tk
 from tkinter import ttk
-import sys
 
 import sv_ttk
 from src.gui import tkinter_data as tkd
