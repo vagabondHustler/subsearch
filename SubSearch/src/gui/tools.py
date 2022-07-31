@@ -1,28 +1,27 @@
 import ctypes
 import tkinter as tk
 
-from src.gui.tooltip import Hovertip
-from src.gui.data import Window, Color, Font
+from src.gui import tooltip, tkinter_data as tkd
 from src.utilities.local_paths import root_directory
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=Color.dark_grey)
+        self.configure(bg=tkd.Color.dark_grey)
 
     # create a basic label
     def label(
         self,
-        bg=Color.dark_grey,
-        fg=Color.white_grey,
+        bg=tkd.Color.dark_grey,
+        fg=tkd.Color.white_grey,
         text=None,
         textvar=None,
         row=None,
         col=None,
         anchor=None,
         sticky=None,
-        font=Font.cas8b,
+        font=tkd.Font.cas8b,
         padx=2,
         pady=2,
     ):
@@ -34,11 +33,11 @@ class Create(tk.Frame):
     # create a basic button
     def button(
         self,
-        bg=Color.light_black,
-        abgc=Color.orange,
-        bge=Color.black,
-        fg=Color.white_grey,
-        fge=Color.orange,
+        bg=tkd.Color.light_black,
+        abgc=tkd.Color.orange,
+        bge=tkd.Color.black,
+        fg=tkd.Color.white_grey,
+        fge=tkd.Color.orange,
         text=None,
         height=2,
         width=10,
@@ -46,7 +45,7 @@ class Create(tk.Frame):
         row=None,
         col=None,
         sticky=None,
-        font=Font.cas8b,
+        font=tkd.Font.cas8b,
         padx=5,
         pady=2,
         bind_to=None,
@@ -57,7 +56,7 @@ class Create(tk.Frame):
         _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
         _button.bind("<Button-1>", bind_to)
-        tip = Hovertip(_button, tip_text) if tip_show else None
+        tip = tooltip.Hovertip(_button, tip_text) if tip_show else None
 
         def button_enter(self):
             _button.configure(bg=bge, fg=fge, font=font)
@@ -83,10 +82,10 @@ class CustomTitleBar(tk.Frame):
         self.parent.focus_force()
         self.parent.overrideredirect(True)
         # place new bar at top of window
-        self.bar = tk.Frame(height=37, width=Window.width, bg=Color.light_black)
+        self.bar = tk.Frame(height=37, width=tkd.Window.width, bg=tkd.Color.light_black)
         self.bar.place(x=0, y=0)
         # place exit canvas
-        self.exit = tk.Canvas(self.bar, width=37, height=37, bg=Color.light_black, highlightthickness=0)
+        self.exit = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
         self.exit.place(relx=1, rely=0, anchor="ne")
         #place x in canvas
         png_path = root_directory("data", "x.png")
@@ -97,9 +96,9 @@ class CustomTitleBar(tk.Frame):
         self.subsearch_label = tk.Label(
             self.bar,
             text="SubSearch",
-            bg=Color.light_black,
-            fg=Color.white_grey,
-            font=Font.cas10b,
+            bg=tkd.Color.light_black,
+            fg=tkd.Color.white_grey,
+            font=tkd.Font.cas10b,
             justify="center",
             anchor="w",
         )
@@ -114,7 +113,7 @@ class CustomTitleBar(tk.Frame):
         
         # hide 1px Frame
         self.place(relx=1, rely=1, anchor="n")
-        self.configure(bg=Color.green)
+        self.configure(bg=tkd.Color.green)
 
     def window_pos(self, parent, w: int = 80, h: int = 48):
         ws = parent.winfo_screenwidth()
@@ -150,15 +149,15 @@ class CustomTitleBar(tk.Frame):
         self.parent.destroy()
 
     def exit_press(self, event):
-        self.exit.configure(bg=Color.dark_red)
+        self.exit.configure(bg=tkd.Color.dark_red)
         self.exit.bind("<ButtonRelease-1>", self.exit_release)
 
     def exit_enter(self, event):
-        self.exit.configure(bg=Color.red)
+        self.exit.configure(bg=tkd.Color.red)
         self.exit.bind("<ButtonPress-1>", self.exit_press)
 
     def exit_leave(self, event):
-        self.exit.configure(bg=Color.light_black)
+        self.exit.configure(bg=tkd.Color.light_black)
         self.exit.unbind("<ButtonRelease-1>")
 
 
@@ -166,14 +165,14 @@ class CustomTitleBar(tk.Frame):
 class CustomBorder(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        csx = Window.width
-        csy = Window.height
-        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=Color.light_black, borderwidth=0)
+        csx = tkd.Window.width
+        csy = tkd.Window.height
+        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0)
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
-        self.canvas_bg = tk.Canvas(parent, width=csx - 4, height=csy - 4, bg=Color.dark_grey, highlightthickness=0)
+        self.canvas_bg = tk.Canvas(parent, width=csx - 4, height=csy - 4, bg=tkd.Color.dark_grey, highlightthickness=0)
         self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.configure(bg=Color.light_black)
+        self.configure(bg=tkd.Color.light_black)
 
 
 # get the window position so it can be placed in the center of the screen
@@ -181,7 +180,7 @@ class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
 
-    def set(self, w=Window.width, h=Window.height, ws_value_offset=0, hs_value_offset=0):
+    def set(self, w=tkd.Window.width, h=tkd.Window.height, ws_value_offset=0, hs_value_offset=0):
         ws = self.winfo_screenwidth() + ws_value_offset
         hs = self.winfo_screenheight() + hs_value_offset
         x = int((ws / 2) - (w / 2))
@@ -200,16 +199,16 @@ class ColorPicker:
 
     def pick(self):
         if self.string_var.get() == "True":
-            self.clabel.configure(fg=Color.green)
+            self.clabel.configure(fg=tkd.Color.green)
         if self.string_var.get() == "False":
-            self.clabel.configure(fg=Color.red)
+            self.clabel.configure(fg=tkd.Color.red)
         if self.string_var.get() == "Both":
-            self.clabel.configure(fg=Color.blue)
+            self.clabel.configure(fg=tkd.Color.blue)
         if self.pct in range(75, 100):
-            self.clabel.configure(fg=Color.green)
+            self.clabel.configure(fg=tkd.Color.green)
         if self.pct in range(50, 75):
-            self.clabel.configure(fg=Color.green_brown)
+            self.clabel.configure(fg=tkd.Color.green_brown)
         if self.pct in range(25, 50):
-            self.clabel.configure(fg=Color.red_brown)
+            self.clabel.configure(fg=tkd.Color.red_brown)
         if self.pct in range(0, 25):
-            self.clabel.configure(fg=Color.red)
+            self.clabel.configure(fg=tkd.Color.red)
