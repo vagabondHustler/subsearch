@@ -168,9 +168,9 @@ class CustomBorder(tk.Frame):
         tk.Frame.__init__(self, parent)
         csx = Window.width
         csy = Window.height
-        self.canvas_border = tk.Canvas(self, width=csx, height=csy, bg=Color.light_black, borderwidth=0)
+        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=Color.light_black, borderwidth=0)
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
-        self.canvas_bg = tk.Canvas(self, width=csx - 4, height=csy - 4, bg=Color.dark_grey, highlightthickness=0)
+        self.canvas_bg = tk.Canvas(parent, width=csx - 4, height=csy - 4, bg=Color.dark_grey, highlightthickness=0)
         self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
 
         self.configure(bg=Color.light_black)
