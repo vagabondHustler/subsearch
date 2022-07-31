@@ -113,58 +113,9 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ## Other languages <a name = "notsupport"></a>
 
-These languages are not tested at all, but should work if u know the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). These can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
+These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
-- Albanian, `sq`
-- Armenian, `hy`
-- Azerbaijani, `az`
-- Basque, `eu`
-- Belarusian, `be`
-- Bosnian, `bs`
-- Bulgarian, `bg`
-- Bulgarian/ English, `bg_en`
-- Burmese, `my`
-- Cambodian/Khmer, `km`
-- Catalan, `ca`
-- Croatian, `hr`
-- Czech, `cs`
-- Dutch/ English, `nl_en`
-- English/ German, `en_de`
-- Esperanto, `eo`
-- Estonian, `et`
-- Georgian, `ka`
-- Greenlandic, `kl`
-- Hindi, `hi`
-- Hungarian, `hu`
-- Hungarian/ English, `hu_en`
-- Icelandic, `is`
-- Japanese, `ja`
-- Kannada, `kn`
-- Kinyarwanda, `rw`
-- Kurdish, `ku`
-- Latvian, `lv`
-- Lithuanian, `lt`
-- Macedonian, `mk`
-- Malayalam, `ml`
-- Manipuri, `mn`
-- Mongolian, `mn`
-- Nepali, `ne`
-- Pashto, `ps`
-- Punjabi, `pa`
-- Russian, `ru`
-- Serbian, `sr`
-- Sinhala, `si`
-- Slovak, `sk`
-- Slovenian, `sl`
-- Somali, `so`
-- Sundanese, `su`
-- Swahili, `sw`
-- Tagalog, `tl`
-- Tamil, `ta`
-- Telugu, `te`
-- Ukrainian, `uk`
-- Urdu, `ur`
-- Yoruba, `yo`
+![other_languages](https://github.com/vagabondHustler/SubSearch/blob/main/assets/other_languages_21123.png)
 
 ## Authors <a name = "authors"></a>
 
