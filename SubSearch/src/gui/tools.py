@@ -17,8 +17,8 @@ class Create(tk.Frame):
         fg=tkd.Color.white_grey,
         text=None,
         textvar=None,
-        row=None,
-        col=None,
+        row=1,
+        col=1,
         anchor=None,
         sticky=None,
         font=tkd.Font.cas8b,
@@ -43,8 +43,8 @@ class Create(tk.Frame):
         height=2,
         width=10,
         bd=0,
-        row=None,
-        col=None,
+        row=1,
+        col=3,
         sticky=None,
         font=tkd.Font.cas8b,
         padx=5,
@@ -243,7 +243,7 @@ class ToolTip(tk.Toplevel):
         # offset the frame 1px from edge of the tooltip corner
         frame.place(x=1, y=1, anchor="nw")
         label.place(x=0, y=0, anchor="nw")
-        root_x = self.widget.winfo_rootx() + self.widget.winfo_width() + 4
+        root_x = self.widget.winfo_rootx() + self.widget.winfo_width() + 4 # offset the tooltip by extra 4px so it doesn't overlap the widget
         root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
