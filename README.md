@@ -22,6 +22,7 @@
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
 - [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md)
+- [Special Thanks to](#thanks)
 
 ## About <a name = "about"></a>
 
@@ -127,3 +128,9 @@ These languages are not tested at all, but should work if all the [ISO 639-1 cod
 ## Authors <a name = "authors"></a>
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
+
+## Special Thanks to <a name = "thanks"></a>
+
+- [othneildrew](https://github.com/othneildrew/Best-README-Template) for `README` template
+- [pimoroni](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
+- [manojmj92](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
