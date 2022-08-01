@@ -45,7 +45,7 @@ Feel free to ask me anything about this project, request new features, contribut
 
 What it looks like while searching for subs if show terminal is disabled
 
-![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
+![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/example21224.gif)
 
 What the settings menu looks like and available options
 
