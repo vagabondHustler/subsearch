@@ -17,7 +17,7 @@ def main():
     elif local_paths.cwd() != local_paths.root_directory():
         import src.subsearch
 
-        src.subsearch.main()
+        src.subsearch.main(sys.argv[-1])
 
 
 if __name__ == "__main__":
