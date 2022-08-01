@@ -9,7 +9,7 @@ from src.utilities import file_manager, local_paths
 
 
 # file with subtitles and corresponding dl links
-def read_tmp_file(file: str):
+def read_tmp_file(file: str = "__subsearch__dl_data.tmp"):
     with open(file, "r") as f:
         return [line.strip() for line in f]
 
@@ -20,7 +20,8 @@ class DownloadList(tk.Frame):
         tk.Frame.__init__(self, parent)
         # listbox for the subtitles
         self.extent = 0
-        self.sublist_lenght = len(SUBLIST)
+        self.sublist = read_tmp_file()
+        self.sublist_lenght = len(self.sublist)
         self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
         sub_listbox = tk.Listbox(
             root,
@@ -43,7 +44,6 @@ class DownloadList(tk.Frame):
         )
         self.count = 0
         self.sub_listbox = sub_listbox
-        self.sublist = SUBLIST
         self.fill_listbox()
         # custom scrollbar
         scrollbar_lengt = 50
@@ -123,9 +123,6 @@ class DownloadList(tk.Frame):
                     self.sub_listbox.delete(int(number))
                     self.sub_listbox.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
                     self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.red})
-
-
-SUBLIST = read_tmp_file("tmp.txt")
 
 
 def show_widget():

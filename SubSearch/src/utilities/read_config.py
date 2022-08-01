@@ -7,7 +7,7 @@ def get(output: str):
     def languages():
         return config_json.languages
 
-    def oter_language():
+    def language():
         language = config_json.language
         lang, lang_abbr = language.split(", ")
         return lang, lang_abbr
@@ -27,14 +27,14 @@ def get(output: str):
     def download_window():
         return config_json.show_download_window
 
-    def terminal_focus():
-        return config_json.terminal_focus
+    def show_terminal():
+        return config_json.show_terminal
 
     def video_ext():
         return config_json.video_ext
 
     if output == "language":
-        return oter_language()
+        return language()
     if output == "languages":
         return languages()
     if output == "other_languages":
@@ -47,7 +47,7 @@ def get(output: str):
         return cm_icon()
     if output == "show_download_window":
         return download_window()
-    if output == "terminal_focus":
-        return terminal_focus()
+    if output == "show_terminal":
+        return show_terminal()
     if output == "video_ext":
         return video_ext()

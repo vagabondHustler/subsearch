@@ -80,7 +80,7 @@ To access the settings, run main.py again
 
 Right-click inside any folder containing the movie/series and you're done!
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
 
 ### Executable <a name = "exe"></a>
 
@@ -96,7 +96,7 @@ If you get a PUA message, click `More info`
 
 Right-click inside any folder containing the movie/series and you're done!
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the search.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
 
 ## Supported languages <a name = "lsupport"></a>
 
