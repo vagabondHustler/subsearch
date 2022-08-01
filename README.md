@@ -18,7 +18,8 @@
 - [Source](#src)
 - [Executable](#exe)
 - [Supported Languages](#lsupport)
-- [Other Languages](#notsupport)
+- [Other Languages](#not_support)
+- [File Extensions](#file_ext)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
 - [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md)
@@ -44,7 +45,7 @@ Feel free to ask me anything about this project, request new features, contribut
 
 What it looks like while searching for subs if show terminal is disabled
 
-![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/preview.gif)
+![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/example21224.gif)
 
 What the settings menu looks like and available options
 
@@ -78,7 +79,7 @@ Run main.py from where it is located
 
 To access the settings, run main.py again
 
-Right-click inside any folder containing the movie/series and you're done!
+Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
 
@@ -94,7 +95,7 @@ If you get a PUA message, click `More info`
 
 ![prtsc4](https://github.com/vagabondHustler/SubSearch/blob/main/assets/runanyway.png)
 
-Right-click inside any folder containing the movie/series and you're done!
+Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
 
@@ -120,11 +121,17 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 - Turkish, `tr`
 - Vietnamese, `vi`
 
-## Other languages <a name = "notsupport"></a>
+## Other languages <a name = "not_support"></a>
 
 These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
 ![other_languages](https://github.com/vagabondHustler/SubSearch/blob/main/assets/other_languages_21123.png)
+
+## File extension <a name = "file_ext"></a>
+
+These are the file types that will have the option SubSearch
+
+`.avi`, `.mp4`, `.mkv`, `.mpg`, `.mpeg`, `.mov`, `.rm`, `.vob`, `.wmv`, `.flv`, `.3gp`, `.3g2`, `.swf`, `.mswmm`
 
 ## Authors <a name = "authors"></a>
 
