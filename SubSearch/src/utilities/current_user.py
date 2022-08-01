@@ -10,7 +10,7 @@ def got_key() -> bool:
 
     Returns: True or False
     """
-    sub_key = r"Software\Classes\Directory\Background\shell\SubSearch"
+    sub_key = r"Software\Classes\*\shell\0.SubSearch\command"
     try:
         with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
             reg.OpenKey(hkey, sub_key)
