@@ -12,7 +12,7 @@ class ConfigData:
     hearing_impaired: str
     percentage_pass: int
     context_menu_icon: str
-    terminal_focus: str
+    show_terminal: str
     show_download_window: str
     video_ext: list
 

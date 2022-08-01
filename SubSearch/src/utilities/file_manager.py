@@ -35,7 +35,7 @@ def download_zip_auto(item: str):
 # extract all zip file in said directory
 def extract_zips(cwd_path: str, extension: str):
     for file in os.listdir(cwd_path):
-        if file.endswith(extension):
+        if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Extracting: {file}")
             file_name = os.path.abspath(file)
             zip_ref = zipfile.ZipFile(file_name)
@@ -75,7 +75,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str):
 # remove .zips
 def clean_up(cwd_path: str, extension: str):
     for file in os.listdir(cwd_path):
-        if file.endswith(extension):
+        if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Removing: {file}")
             os.remove(file)
 
@@ -110,3 +110,4 @@ def get_hash(file_name: str):
 
     except IOError as err:
         return log.output(err)
+

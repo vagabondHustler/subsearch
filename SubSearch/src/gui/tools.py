@@ -1,11 +1,16 @@
 import ctypes
 import tkinter as tk
 
-from src.gui import tooltip, tkinter_data as tkd
+from src.gui import tkinter_data as tkd
 from src.utilities import local_paths
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
+    
+    # TODO 
+    # add a way to create a new labels and buttons in the grid
+    # with less function arguments but no need to rewrite the same code, over and over
+    
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=tkd.Color.dark_grey)
@@ -17,8 +22,8 @@ class Create(tk.Frame):
         fg=tkd.Color.white_grey,
         text=None,
         textvar=None,
-        row=None,
-        col=None,
+        row=1,
+        col=1,
         anchor=None,
         sticky=None,
         font=tkd.Font.cas8b,
@@ -33,6 +38,7 @@ class Create(tk.Frame):
     # create a basic button
     def button(
         self,
+        widget_refrence=None,
         bg=tkd.Color.light_black,
         abgc=tkd.Color.orange,
         bge=tkd.Color.black,
@@ -42,29 +48,29 @@ class Create(tk.Frame):
         height=2,
         width=10,
         bd=0,
-        row=None,
-        col=None,
+        row=1,
+        col=3,
         sticky=None,
         font=tkd.Font.cas8b,
         padx=5,
         pady=2,
         bind_to=None,
         tip_show=False,
-        tip_text=None,
+        tip_text="",
     ):
         _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
         _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
         _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
         _button.bind("<Button-1>", bind_to)
-        tip = tooltip.Hovertip(_button, tip_text) if tip_show else None
+        tip = ToolTip(_button, _button, tip_text) if tip_show else None
 
         def button_enter(self):
             _button.configure(bg=bge, fg=fge, font=font)
-            tip.showtip() if tip_show else None
+            tip.show() if tip_show else None
 
         def button_leave(self):
             _button.configure(bg=bg, fg=fg, font=font)
-            tip.hidetip() if tip_show else None
+            tip.hide() if tip is not None else None
 
         _button.bind("<Enter>", button_enter)
         _button.bind("<Leave>", button_leave)
@@ -87,7 +93,7 @@ class CustomTitleBar(tk.Frame):
         # place exit canvas
         self.exit = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
         self.exit.place(relx=1, rely=0, anchor="ne")
-        #place x in canvas
+        # place x in canvas
         png_path = local_paths.root_directory("data", "x.png")
         x_exit = tk.PhotoImage(file=png_path)
         self.exit.create_image(18, 18, image=x_exit)
@@ -110,7 +116,7 @@ class CustomTitleBar(tk.Frame):
         self.bar.bind("<B1-Motion>", self.tb_drag)
         self.exit.bind("<Enter>", self.exit_enter)
         self.exit.bind("<Leave>", self.exit_leave)
-        
+
         # hide 1px Frame
         self.place(relx=1, rely=1, anchor="n")
         self.configure(bg=tkd.Color.green)
@@ -212,3 +218,42 @@ class ColorPicker:
             self.clabel.configure(fg=tkd.Color.red_brown)
         if self.pct in range(0, 25):
             self.clabel.configure(fg=tkd.Color.red)
+
+
+class ToolTip(tk.Toplevel):
+    def __init__(self, parent, widget, *text):
+        self.parent = parent
+        self.widget = widget
+        self.text = text
+
+    def show(self):
+        tk.Toplevel.__init__(self, self.parent)
+        self.configure(background=tkd.Color.light_black)
+        # remove the standard window titlebar from the tooltip
+        self.overrideredirect(True)
+        # unpack *args and put each /n on a new line
+        lines = "\n".join(self.text)
+        frame = tk.Frame(self, background=tkd.Color.light_black)
+        label = tk.Label(
+            frame,
+            text=lines,
+            background=tkd.Color.dark_grey,
+            foreground=tkd.Color.white_grey,
+            justify="left",
+        )
+        # get size of the label to use later for positioning and sizing of the tooltip
+        x, y = label.winfo_reqwidth(), label.winfo_reqheight()
+        # set the size of the tooltip background to be 1px larger than the label
+        frame.configure(width=x + 1, height=y + 1)
+        # offset the frame 1px from edge of the tooltip corner
+        frame.place(x=1, y=1, anchor="nw")
+        label.place(x=0, y=0, anchor="nw")
+        root_x = (
+            self.widget.winfo_rootx() + self.widget.winfo_width() + 4
+        )  # offset the tooltip by extra 4px so it doesn't overlap the widget
+        root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
+        # set position of the tooltip, size and add 2px around the tooltip for a 1px border
+        self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
+
+    def hide(self):
+        self.destroy()

@@ -10,7 +10,7 @@ from src.utilities import (
     file_manager,
     local_paths,
     log,
-    read_config_json,
+    read_config,
     read_parameters,
     version,
 )
@@ -26,12 +26,12 @@ def main():
         edit_registry.add_context_menu()
         return
 
-    language, lang_abbr = read_config_json.get("language")
-    hearing_impaired = read_config_json.get("hearing_impaired")
-    pct = read_config_json.get("percentage")
-    show_download_window = read_config_json.get("show_download_window")
-    focus = read_config_json.get("terminal_focus")
-    video_ext: list = read_config_json.get("video_ext")
+    language, lang_abbr = read_config.get("language")
+    hearing_impaired = read_config.get("hearing_impaired")
+    pct = read_config.get("percentage")
+    show_download_window = read_config.get("show_download_window")
+    focus = read_config.get("show_terminal")
+    video_ext: list = read_config.get("video_ext")
     video = file_manager.find_video(local_paths.cwd(), video_ext, False)
     video_with_ext = file_manager.find_video(local_paths.cwd(), video_ext, True)
     if video_with_ext is not None:
@@ -58,11 +58,12 @@ def main():
     log.output("[Searching subscene]")
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
-        file = f"{local_paths.cwd()}\\tmp.txt"
+        file = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
         if show_download_window == "True" and os.path.exists(file):
             from src.gui import widget_download
 
             widget_download.show_widget()
+            file_manager.clean_up(local_paths.cwd(), "__subsearch__dl_data.tmp")
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")

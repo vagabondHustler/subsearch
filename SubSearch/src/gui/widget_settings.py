@@ -7,11 +7,19 @@ from src.utilities import (
     current_user,
     edit_config,
     edit_registry,
-    read_config_json,
+    read_config,
     updates,
     version,
 )
 
+LANGUAGES = read_config.get("languages")
+OTHER_LANGUAGES = read_config.get("other_languages")
+LANGUAGE, LANG_ABBR = read_config.get("language")
+HEARING_IMPARED = read_config.get("hearing_impaired")
+PCT = read_config.get("percentage")
+SHOW_TERMINAL = read_config.get("show_terminal")
+CM_ICON = read_config.get("cm_icon")
+DL_WINDOW = read_config.get("show_download_window")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -23,11 +31,9 @@ class SelectLanguage(tk.Frame):
         self.rowcount = 0
         self.colcount = 1
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Selected language", sticky="w", row=1, col=1, font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.yellow, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Selected language", sticky="w", font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.yellow, col=2, font=tkd.Font.cas8b)
         for i in range(number_of_buttons):
             self.rowcount += 1
             if self.rowcount == 8:
@@ -89,18 +95,23 @@ class SelectLanguage(tk.Frame):
             sticky="e",
         )
         self.entry.bind("<Enter>", self.entry_enter)
-        self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.see_other_langs.bind("<Enter>", self.popup_window)
         self.entry.bind("<Return>", self.add_language)
         self.configure(bg=tkd.Color.dark_grey)
 
     # pop up window with list of other languages
-    def other_langs_window(self, event):
+    def popup_window(self, event):
+        # * see cleaner version of this function src.gui.tools.Tooltip
+        # TODO
+        # use src.gui.tools.Tooltip instead of this function
+        # 'cus they are a so similar to each other
+
         self.clear_entry()
         rows = len(OTHER_LANGUAGES) / 2
         cols = 2
         row_size_y = 20.16
-        row_size_x = 113
-        csx = round(cols * row_size_x)
+        col_size_x = 113
+        csx = round(cols * col_size_x)
         csy = round(rows * row_size_y)
 
         self.toplvl = tk.Toplevel(background=tkd.Color.light_black, borderwidth=0)
@@ -125,12 +136,12 @@ class SelectLanguage(tk.Frame):
                 pady=0,
             )
         self.see_other_langs.configure(fg=tkd.Color.purple)
-        self.see_other_langs.bind("<Leave>", self.destroy_toplvl)
+        self.see_other_langs.bind("<Leave>", self.popup_window_destroy)
 
-    def destroy_toplvl(self, event):
+    def popup_window_destroy(self, event):
         self.fill_entry()
         self.see_other_langs.configure(fg=tkd.Color.white_grey)
-        self.see_other_langs.bind("<Enter>", self.other_langs_window)
+        self.see_other_langs.bind("<Enter>", self.popup_window)
         self.toplvl.destroy()
 
     # entry functions
@@ -183,18 +194,12 @@ class HearingImparedSubs(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Hearing impaired subtitles", sticky="w", row=1, col=1, font=tkd.Font.cas8b, anchor="w"
-        )
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Hearing impaired subtitles", sticky="w", font=tkd.Font.cas8b, anchor="w")
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             width=7,
             sticky="e",
             bind_to=self.button_set_true,
@@ -204,19 +209,15 @@ class HearingImparedSubs(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             width=7,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="Only use regular subtitles",
+            tip_text="Only use non-hearing impaired subtitles",
         )
         tools.Create.button(
             self,
             text="Both",
-            row=1,
-            col=3,
             width=7,
             bind_to=self.button_set_both,
             tip_show=True,
@@ -253,30 +254,24 @@ class SearchThreshold(tk.Frame):
         self.string_var.set(f"{PCT} %")
         self.pct = PCT
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Search threshold", sticky="w", row=1, col=1, font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
-        )
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Search threshold", sticky="w", font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="+",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_add_5,
             tip_show=True,
-            tip_text="Add 5% to the search threshold\n A higher value means less chance of finding subtitles that are not synced witht the movie/series",
+            tip_text="Add 5% to the search threshold\nA higher value means less chance of finding subtitles that are not synced witht the movie/series",
         )
         tools.Create.button(
             self,
             text="-",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_sub_5,
             tip_show=True,
-            tip_text="Subtract 5% from the search threshold\n A lower value means more subtitles will be found and downloaded",
+            tip_text="Subtract 5% from the search threshold\nA lower value means more subtitles will be found and downloaded",
         )
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         self.configure(bg=tkd.Color.dark_grey)
@@ -304,16 +299,19 @@ class ShowContextMenu(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"True")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show context menu", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b, anchor="center"
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            col=2,
+            font=tkd.Font.cas8b,
+            anchor="center",
         )
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -322,12 +320,10 @@ class ShowContextMenu(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="Remove SubSearch from the context menu\n Used to 'uninstall' SubSearch",
+            tip_text="Remove SubSearch from the context menu\nUsed to 'uninstall' SubSearch",
         )
         tools.ColorPicker(self.string_var, self.clabel)
         self.configure(bg=tkd.Color.dark_grey)
@@ -354,16 +350,18 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu icon", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -372,8 +370,6 @@ class ShowContextMenuIcon(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
@@ -408,16 +404,18 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show download window", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show download window", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         tools.Create.button(
             self,
             text="True",
-            row=1,
-            col=3,
             sticky="e",
             bind_to=self.button_set_true,
             tip_show=True,
@@ -426,12 +424,10 @@ class ShowDownloadWindow(tk.Frame):
         tools.Create.button(
             self,
             text="False",
-            row=1,
-            col=3,
             sticky="w",
             bind_to=self.button_set_false,
             tip_show=True,
-            tip_text="No window will be shown if no subtitles are found\n The list can be found in search.log",
+            tip_text="No window will be shown if no subtitles are found\nThe list can be found in search.log",
         )
         tools.ColorPicker(self.string_var, self.clabel)
         self.configure(bg=tkd.Color.dark_grey)
@@ -455,29 +451,29 @@ class ShowTerminalOnSearch(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
 
-        self.string_var.set(f"{TERMINAL_FOCUS}")
+        self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show terminal on search", row=1, col=1, sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.blue,
+            col=2,
+            font=tkd.Font.cas8b,
         )
         if current_user.is_exe() is False:
             tools.Create.button(
                 self,
                 text="True",
-                row=1,
-                col=3,
                 sticky="e",
                 bind_to=self.button_set_true,
                 tip_show=True,
-                tip_text="Show the terminal when searching for subtitles\n Everything shown in the terminal is avalible in search.log",
+                tip_text="Show the terminal when searching for subtitles\nEverything shown in the terminal is avalible in search.log",
             )
             tools.Create.button(
                 self,
                 text="False",
-                row=1,
-                col=3,
                 sticky="w",
                 bind_to=self.button_set_false,
                 tip_show=True,
@@ -490,14 +486,14 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("terminal_focus", update_svar)
+        edit_config.update_json("show_terminal", update_svar)
         edit_registry.write_command_subkey()
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("terminal_focus", update_svar)
+        edit_config.update_json("show_terminal", update_svar)
         edit_registry.write_command_subkey()
 
 
@@ -509,16 +505,17 @@ class CheckForUpdates(tk.Frame):
         self.current_version = version.current()
         self.string_var.set(f"")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, row=1, col=i, font=tkd.Font.cas8)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
         tools.Create.label(
-            self, text=f"SubScene version {self.current_version}", row=1, col=1, sticky="w", font=tkd.Font.cas8b
+            self,
+            text=f"SubScene version {self.current_version}",
+            sticky="w",
+            font=tkd.Font.cas8b,
         )
-        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, row=1, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="Check for updates",
-            row=1,
-            col=3,
             height=2,
             width=18,
             fge=tkd.Color.green,
@@ -535,8 +532,6 @@ class CheckForUpdates(tk.Frame):
             tools.Create.button(
                 self,
                 text=f"Get {latest_version}",
-                row=1,
-                col=3,
                 height=2,
                 width=18,
                 bind_to=self.button_download,
@@ -551,25 +546,6 @@ class CheckForUpdates(tk.Frame):
 
     def button_download(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
-
-
-# # get the window position so it can be placed in the center of the screen
-# def set_window_position(width: int = tkd.Window.width, height: int = tkd.Window.height):
-#     ws = root.winfo_screenwidth()
-#     hs = root.winfo_screenheight()
-#     x = int((ws / 2) - (width / 2))
-#     y = int((hs / 2) - (height / 2))
-#     value = f"{width}x{height}+{x}+{y}"
-#     return value
-
-LANGUAGES = read_config_json.get("languages")
-OTHER_LANGUAGES = read_config_json.get("other_languages")
-LANGUAGE, LANG_ABBR = read_config_json.get("language")
-HEARING_IMPARED = read_config_json.get("hearing_impaired")
-PCT = read_config_json.get("percentage")
-TERMINAL_FOCUS = read_config_json.get("terminal_focus")
-CM_ICON = read_config_json.get("cm_icon")
-DL_WINDOW = read_config_json.get("show_download_window")
 
 
 def show_widget():
