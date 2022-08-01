@@ -119,13 +119,12 @@ def scrape(
         log.output("")
         log.output(f"No subtitles to download for {param.release}")
         if show_dl_window:
-            with open("tmp.txt", "w") as f:
+            with open("dl_data.tmp", "w", encoding='utf8') as f:
                 for i in range(len(sorted_list)):
                     name, _link = sorted_list[i][1], sorted_list[i][2]
                     link = _link.replace(" ", "")
                     f.writelines(f"{name} {link}")
                     f.write("\n")
-
 
             return None
         else:
