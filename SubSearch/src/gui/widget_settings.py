@@ -7,19 +7,19 @@ from src.utilities import (
     current_user,
     edit_config,
     edit_registry,
-    read_config_json,
+    read_config,
     updates,
     version,
 )
 
-LANGUAGES = read_config_json.get("languages")
-OTHER_LANGUAGES = read_config_json.get("other_languages")
-LANGUAGE, LANG_ABBR = read_config_json.get("language")
-HEARING_IMPARED = read_config_json.get("hearing_impaired")
-PCT = read_config_json.get("percentage")
-TERMINAL_FOCUS = read_config_json.get("terminal_focus")
-CM_ICON = read_config_json.get("cm_icon")
-DL_WINDOW = read_config_json.get("show_download_window")
+LANGUAGES = read_config.get("languages")
+OTHER_LANGUAGES = read_config.get("other_languages")
+LANGUAGE, LANG_ABBR = read_config.get("language")
+HEARING_IMPARED = read_config.get("hearing_impaired")
+PCT = read_config.get("percentage")
+SHOW_TERMINAL = read_config.get("show_terminal")
+CM_ICON = read_config.get("cm_icon")
+DL_WINDOW = read_config.get("show_download_window")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -101,11 +101,11 @@ class SelectLanguage(tk.Frame):
 
     # pop up window with list of other languages
     def popup_window(self, event):
-        #* see cleaner version of this function src.gui.tools.Tooltip
-        #TODO 
+        # * see cleaner version of this function src.gui.tools.Tooltip
+        # TODO
         # use src.gui.tools.Tooltip instead of this function
         # 'cus they are a so similar to each other
-        
+
         self.clear_entry()
         rows = len(OTHER_LANGUAGES) / 2
         cols = 2
@@ -451,7 +451,7 @@ class ShowTerminalOnSearch(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
 
-        self.string_var.set(f"{TERMINAL_FOCUS}")
+        self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
         tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
@@ -486,14 +486,14 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("terminal_focus", update_svar)
+        edit_config.update_json("show_terminal", update_svar)
         edit_registry.write_command_subkey()
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("terminal_focus", update_svar)
+        edit_config.update_json("show_terminal", update_svar)
         edit_registry.write_command_subkey()
 
 
