@@ -16,7 +16,7 @@ from src.utilities import (
 )
 
 
-def main():
+def main(video_file_path: str):
     # initializing
     start = time.perf_counter()
     current_version = version.current()
@@ -30,20 +30,24 @@ def main():
     hearing_impaired = read_config.get("hearing_impaired")
     pct = read_config.get("percentage")
     show_download_window = read_config.get("show_download_window")
-    focus = read_config.get("show_terminal")
-    video_ext: list = read_config.get("video_ext")
-    video = file_manager.find_video(local_paths.cwd(), video_ext, False)
-    video_with_ext = file_manager.find_video(local_paths.cwd(), video_ext, True)
-    if video_with_ext is not None:
-        file_hash = file_manager.get_hash(video_with_ext)
-    elif video_with_ext is None:
-        file_hash = None
+    show_terminal = read_config.get("show_terminal")
+    video_file_name_ext = video_file_path.split("\\")[-1]
+    video_file_name, video_file_ext = video_file_name_ext.rsplit(".", 1)
+    video_file_name_ext = f"{video_file_name}.{video_file_ext}"
+    file_hash = file_manager.get_hash(video_file_name_ext)
+    # video_ext: list = read_config.get("video_ext")
+    # video = file_manager.find_video(local_paths.cwd(), video_ext, False)
+    # video_with_ext = file_manager.find_video(local_paths.cwd(), video_ext, True)
+    # if video_with_ext is not None:
+    #     file_hash = file_manager.get_hash(video_with_ext)
+    # elif video_with_ext is None:
+    #     file_hash = None
 
     try:
-        param = read_parameters.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video)
+        param = read_parameters.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
     except IndexError as err:
         log.output(err)
-        if focus == "True":
+        if show_terminal == "True":
             return input()
         return
 
@@ -67,7 +71,7 @@ def main():
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
-        if focus == "True":
+        if show_terminal == "True":
             return input()
         return
 
@@ -97,5 +101,5 @@ def main():
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
 
-    if focus == "True":
+    if show_terminal == "True":
         input()
