@@ -385,7 +385,7 @@ class ShowContextMenuIcon(tk.Frame):
         edit_config.update_json("context_menu_icon", update_svar)
         from src.utilities import edit_registry
 
-        edit_registry.context_menu_icon()
+        edit_registry.set_context_menu_icon()
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
@@ -394,7 +394,7 @@ class ShowContextMenuIcon(tk.Frame):
         edit_config.update_json("context_menu_icon", update_svar)
         from src.utilities import edit_registry
 
-        edit_registry.context_menu_icon()
+        edit_registry.set_context_menu_icon()
 
 
 # remove or restore the icon next to the context menu option when right clicking
