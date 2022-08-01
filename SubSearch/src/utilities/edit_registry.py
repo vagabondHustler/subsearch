@@ -9,9 +9,9 @@ COMPUTER_NAME = socket.gethostname()
 
 # write value to "Icon"
 def context_menu_icon():
-    from src.utilities import read_config_json
+    from src.utilities import read_config
 
-    use: str = read_config_json.get("cm_icon")
+    use: str = read_config.get("cm_icon")
     ss_path = "Software\Classes\Directory\Background\shell\SubSearch"
     icon_path = local_paths.root_directory("data", "16.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
@@ -24,21 +24,21 @@ def context_menu_icon():
 
 # write value to (Default)
 def write_command_subkey():
-    from src.utilities import read_config_json
+    from src.utilities import read_config
 
-    focus = read_config_json.get("terminal_focus")
+    focus = read_config.get("show_terminal")
 
     command_path = "Software\Classes\Directory\Background\shell\SubSearch\command"
     if current_user.is_exe():
         exe_path = local_paths.root_directory(file_name="SubSearch.exe")
     else:
-        ppath = os.path.dirname(sys.executable)
+        python_path = os.path.dirname(sys.executable)
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
         set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.root_directory()}');"
         run_main = "import main; os.chdir(working_path); main.main()"
 
-        tfocus = f'{ppath}\python.exe -c "{set_title} {set_wd} {run_main}"'
-        tsilent = f'{ppath}\pythonw.exe -c "{set_title} {set_wd} {run_main}"'
+        tfocus = f'{python_path}\python.exe -c "{set_title} {set_wd} {run_main}"'
+        tsilent = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {run_main}"'
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, command_path, 0, winreg.KEY_WRITE) as subkey_command:
