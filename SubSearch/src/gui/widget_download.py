@@ -9,7 +9,7 @@ from src.utilities import file_manager, local_paths
 
 
 # file with subtitles and corresponding dl links
-def read_tmp_file(file: str = "dl_data.tmp"):
+def read_tmp_file(file: str = "__subsearch__dl_data.tmp"):
     with open(file, "r") as f:
         return [line.strip() for line in f]
 

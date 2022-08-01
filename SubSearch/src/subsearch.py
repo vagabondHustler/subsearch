@@ -58,12 +58,12 @@ def main():
     log.output("[Searching subscene]")
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
-        file = f"{local_paths.cwd()}\\dl_data.tmp"
+        file = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
         if show_download_window == "True" and os.path.exists(file):
             from src.gui import widget_download
 
             widget_download.show_widget()
-            file_manager.clean_up(local_paths.cwd(), "dl_data.tmp")
+            file_manager.clean_up(local_paths.cwd(), "__subsearch__dl_data.tmp")
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")

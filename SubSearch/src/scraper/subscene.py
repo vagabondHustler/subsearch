@@ -119,7 +119,7 @@ def scrape(
         log.output("")
         log.output(f"No subtitles to download for {param.release}")
         if show_dl_window:
-            with open("dl_data.tmp", "w", encoding='utf8') as f:
+            with open("__subsearch__dl_data.tmp", "w", encoding="utf8") as f:
                 for i in range(len(sorted_list)):
                     name, _link = sorted_list[i][1], sorted_list[i][2]
                     link = _link.replace(" ", "")
@@ -135,7 +135,7 @@ def scrape(
         total_num = len(to_be_downloaded)
         current_num += 1
         root_dl_url = subscene_soup.get_download_url(dl_url)
-        file_path = f"{local_paths.cwd()}\\subscene_{current_num}.zip"
+        file_path = f"{local_paths.cwd()}\\__subsearch__subscene_{current_num}.zip"
         current_num = (file_path, root_dl_url, current_num, total_num)
         download_info.append(current_num)
     return download_info
