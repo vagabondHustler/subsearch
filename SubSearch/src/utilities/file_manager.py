@@ -9,17 +9,17 @@ from src.utilities import log
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if a video is in directory, returns video name without extension
-def find_video(cwd_path: str, video_ext: list, with_ext: bool):
-    for file in os.listdir(cwd_path):
-        for ext in video_ext:
-            if file.endswith(ext):
-                video_release_name_ext = file.replace(f"{ext}", "")
-                video_release_name = video_release_name_ext.lower()
-                if with_ext:
-                    return file
-                elif with_ext is False:
-                    return video_release_name
-    return None
+# def find_video(cwd_path: str, video_ext: list, with_ext: bool):
+#     for file in os.listdir(cwd_path):
+#         for ext in video_ext:
+#             if file.endswith(ext):
+#                 video_release_name_ext = file.replace(f"{ext}", "")
+#                 video_release_name = video_release_name_ext.lower()
+#                 if with_ext:
+#                     return file
+#                 elif with_ext is False:
+#                     return video_release_name
+#     return None
 
 
 # download zip files from url
