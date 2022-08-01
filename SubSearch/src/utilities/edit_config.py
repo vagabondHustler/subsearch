@@ -19,5 +19,5 @@ def set_default_values():
     update_json("hearing_impaired", "Both")
     update_json("percentage_pass", 90)
     update_json("context_menu_icon", "True")
-    update_json("show_download_window", "False")
-    update_json("terminal_focus", "False")
+    update_json("show_download_window", "True")
+    update_json("show_terminal", "False")
