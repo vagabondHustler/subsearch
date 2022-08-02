@@ -1,7 +1,6 @@
-import subprocess
 import sys
 
-from src.utilities import current_user, local_paths, read_config
+from src.utilities import local_paths
 
 
 def main():
