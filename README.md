@@ -1,6 +1,6 @@
-<div align="center">
+<h1 align="center"><img src="https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png"/></h1>
 
-![prtsc0](https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png)
+<div align="center">
 
 ![Status](https://img.shields.io/badge/status-active-success?color=9fa65d&style=flat-square)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?color=c49b5d&style=flat-square)
