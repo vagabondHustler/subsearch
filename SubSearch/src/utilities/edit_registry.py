@@ -53,7 +53,7 @@ def write_command_subkey():
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('src')}');"
+        set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('root')}');"
         run_main = "import main; os.chdir(working_path); main.main()"
 
         terminal_true = (
