@@ -4,7 +4,6 @@
 block_cipher = None
 added_files = [
          ( 'SubSearch/src/data/*.reg', 'src/data/' ),
-         ( '.venv/Lib/site-packages/sv_ttk', 'sv_ttk/' ),
          ( 'SubSearch/src/data/*.json', 'src/data/' )
          ]
 added_binaries = [
@@ -17,7 +16,7 @@ a = Analysis(
     pathex=[],
     binaries=added_binaries,
     datas=added_files,
-    hiddenimports=['sv_ttk'],
+    hiddenimports=['sv_ttk', 'beautifulsoup4', 'cloudscraper', 'num2words', 'requests', 'lxml'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -39,7 +38,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
