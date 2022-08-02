@@ -2,7 +2,7 @@ from src.utilities import local_paths, read_parameters
 
 # get said value(s) from config.json
 def get(output: str):
-    config_json = read_parameters.read_data(local_paths.root_directory("data", "config.json"))
+    config_json = read_parameters.read_data(local_paths.get_path("data", "config.json"))
 
     def languages():
         return config_json.languages

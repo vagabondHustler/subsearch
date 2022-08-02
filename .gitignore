@@ -143,6 +143,7 @@ subs/
 
 # Visual Sudio Code
 *.code-workspace
+.vscode/
 
 #Github Publish py-script
 git_publish.py
@@ -154,3 +155,4 @@ desktop.ini
 
 # README.md settings
 .markdownlint.json
+

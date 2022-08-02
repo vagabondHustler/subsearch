@@ -7,8 +7,8 @@ added_files = [
          ( 'SubSearch/src/data/*.json', 'src/data/' )
          ]
 added_binaries = [
-        ('SubSearch/src/data/*.ico', 'src/data/'),
-        ('SubSearch/src/data/*.png', 'src/data/')
+        ('SubSearch/src/gui/assets/icons/*.ico', 'src/gui/assets/icons/'),
+        ('SubSearch/src/data/assets/buttons/*.png', 'src/gui/assets/buttons/')
         ]
 
 a = Analysis(

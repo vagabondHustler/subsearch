@@ -11,5 +11,5 @@ def read_data(config_file: str):
 
 
 def current():
-    c_version = read_data(local_paths.root_directory("data", "version.json"))
+    c_version = read_data(local_paths.get_path("data", "version.json"))
     return c_version
