@@ -44,8 +44,8 @@ def write_command_subkey():
     command_path = r"Software\Classes\*\shell\0.SubSearch\command"
     if current_user.is_exe():
         # if SubSearch is compiled we dont need anything besides this
-        exe_path = local_paths.get_path(file_name="SubSearch.exe")
-        exe_version = f'"{exe_path}" %1'
+        exe_path = local_paths.get_path('cwd')
+        exe_version = f'"{exe_path}\SubSearch.exe" %1'
     else:
         # gets the location to the python executable
         python_path = os.path.dirname(sys.executable)

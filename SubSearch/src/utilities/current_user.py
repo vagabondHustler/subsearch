@@ -1,7 +1,10 @@
 import os
 import winreg as reg
+import socket
 
 from src.utilities import local_paths
+
+COMPUTER_NAME = socket.gethostname()
 
 # check if current user has the registry key
 def got_key() -> bool:
@@ -25,7 +28,7 @@ def is_exe() -> bool:
     Returns: True or False
     """
 
-    for file in os.listdir(local_paths.cwd()):
+    for file in os.listdir(local_paths.get_path("cwd")):
         if file.endswith("SubSearch.exe"):
             return True
     return False
