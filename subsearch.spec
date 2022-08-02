@@ -4,6 +4,7 @@
 block_cipher = None
 added_files = [
          ( 'SubSearch/src/data/*.reg', 'src/data/' ),
+         ( '.venv/Lib/site-packages/sv_ttk', 'sv_ttk/' ),
          ( 'SubSearch/src/data/*.json', 'src/data/' )
          ]
 added_binaries = [
@@ -16,7 +17,7 @@ a = Analysis(
     pathex=[],
     binaries=added_binaries,
     datas=added_files,
-    hiddenimports=[],
+    hiddenimports=['sv_ttk'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
