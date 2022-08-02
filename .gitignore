@@ -151,3 +151,6 @@ desktop.ini
 
 # Adobe files
 *.psd
+
+# README.md settings
+.markdownlint.json
