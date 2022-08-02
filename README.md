@@ -21,8 +21,8 @@
 - [Other Languages](#not_support)
 - [File Extensions](#file_ext)
 - [Authors](#authors)
-- [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/CONTRIBUTING.md)
-- [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/SECURITY.md)
+- [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md)
+- [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
 - [Special Thanks to](#thanks)
 
 ## About <a name = "about"></a>
