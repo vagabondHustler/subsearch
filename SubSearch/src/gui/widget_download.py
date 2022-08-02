@@ -107,7 +107,7 @@ class DownloadList(tk.Frame):
                 try:
                     dl_url = subscene_soup.get_download_url(url)
                     _name = name.replace("/", "").replace("\\", "").split(": ")
-                    path = f"{local_paths.cwd()}\\{_name[-1]}.zip"
+                    path = f"{local_paths.cwd()}\\__subsearch__{_name[-1]}.zip"
                     item = path, dl_url, 1, 1
                     file_manager.download_zip_auto(item)
                     if _error is False:

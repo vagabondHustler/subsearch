@@ -13,7 +13,7 @@ def set_context_menu_icon():
 
     use: str = read_config.get("cm_icon")
     subsearch_path = r"Software\Classes\*\shell\0.SubSearch"
-    icon_path = local_paths.root_directory("data", "16.ico")
+    icon_path = local_paths.get_path("icons", "16.ico")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, subsearch_path, 0, winreg.KEY_WRITE) as subkey_ss:
             if use == "True":
@@ -44,7 +44,7 @@ def write_command_subkey():
     command_path = r"Software\Classes\*\shell\0.SubSearch\command"
     if current_user.is_exe():
         # if SubSearch is compiled we dont need anything besides this
-        exe_path = local_paths.root_directory(file_name="SubSearch.exe")
+        exe_path = local_paths.get_path(file_name="SubSearch.exe")
         exe_version = f'"{exe_path}" %1'
     else:
         # gets the location to the python executable
@@ -53,7 +53,7 @@ def write_command_subkey():
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.root_directory()}');"
+        set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('root')}');"
         run_main = "import main; os.chdir(working_path); main.main()"
 
         terminal_true = (
@@ -80,7 +80,7 @@ def write_command_subkey():
 
 
 def restore_context_menu():
-    regkey = local_paths.root_directory("data", "regkey.reg")
+    regkey = local_paths.get_path("data", "regkey.reg")
     os.system(f'cmd /c "reg import "{regkey}"')
     set_context_menu_icon()
     write_command_subkey()
@@ -96,12 +96,12 @@ def remove_context_menu():
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, shell_path, 0, winreg.KEY_WRITE) as shell_key:
-            winreg.DeleteKey(shell_key, "SubSearch")
+            winreg.DeleteKey(shell_key, "0.SubSearch")
 
 
 # imports empty registry key to be filled in with values later
 def add_context_menu():
-    regkey = local_paths.root_directory("data", "regkey.reg")
+    regkey = local_paths.get_path("data", "regkey.reg")
     os.system(f'cmd /c "reg import "{regkey}"')
     set_context_menu_icon()
     write_command_subkey()
