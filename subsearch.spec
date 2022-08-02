@@ -8,7 +8,7 @@ added_files = [
          ]
 added_binaries = [
         ('SubSearch/src/gui/assets/icons/*.ico', 'src/gui/assets/icons/'),
-        ('SubSearch/src/data/assets/buttons/*.png', 'src/gui/assets/buttons/')
+        ('SubSearch/src/gui/assets/buttons/*.png', 'src/gui/assets/buttons/')
         ]
 
 a = Analysis(
@@ -44,7 +44,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='SubSearch/src/data/256.ico',
+    icon='SubSearch/src/gui/assets/icons/256.ico',
 )
 coll = COLLECT(
     exe,
