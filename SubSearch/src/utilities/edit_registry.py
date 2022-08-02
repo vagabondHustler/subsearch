@@ -96,7 +96,7 @@ def remove_context_menu():
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, shell_path, 0, winreg.KEY_WRITE) as shell_key:
-            winreg.DeleteKey(shell_key, "SubSearch")
+            winreg.DeleteKey(shell_key, "0.SubSearch")
 
 
 # imports empty registry key to be filled in with values later
