@@ -5,19 +5,6 @@ from num2words import num2words
 
 
 @dataclass
-class ConfigData:
-    language: str
-    languages: list[str]
-    other_languages: list[str]
-    hearing_impaired: str
-    percentage_pass: int
-    context_menu_icon: str
-    show_terminal: str
-    show_download_window: str
-    video_ext: list
-
-
-@dataclass
 class SearchParameters:
     url_subscene: str
     url_opensubtitles: str
@@ -31,13 +18,6 @@ class SearchParameters:
     release: str
     group: str
     file_hash: str
-
-
-def read_data(config_file: str) -> ConfigData:
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
-        return ConfigData(**data)
-
 
 def split_last_hyphen(string: str):
     group = string.rsplit("-", 1)[-1]
