@@ -62,7 +62,10 @@ jobs:
           pip install pyinstaller
           pip install -r docs/requirements.txt
           pyinstaller subsearch.spec -y --clean --distpath ./SubSearch-x64
+          mv C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
           python make_archive.py
+      - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
+      - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
       - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
