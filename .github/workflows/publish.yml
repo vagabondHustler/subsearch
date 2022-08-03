@@ -66,8 +66,6 @@ jobs:
           python make_archive.py
       - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
       - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
-      - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-      - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
