@@ -11,11 +11,6 @@ WS_EX_TOOLWINDOW = 0x00000080
 
 # create custom labels and buttons in grid
 class Create(tk.Frame):
-
-    # TODO
-    # add a way to create a new labels and buttons in the grid
-    # with less function arguments but no need to rewrite the same code, over and over
-
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=tkd.Color.dark_grey)
@@ -122,13 +117,13 @@ class CustomTitleBar(tk.Frame):
         self.exit = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
         self.exit.place(relx=1, rely=0, anchor="ne")
         self.update_img(self.exit, self.exit_grey_png)
-        #place maximize canvas and image
+        # place maximize canvas and image
         self.maximize = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
-        self.maximize.place(x=tkd.Window.width-37, rely=0, anchor="ne")
+        self.maximize.place(x=tkd.Window.width - 37, rely=0, anchor="ne")
         self.update_img(self.maximize, self.max_ina_png)
         # place tab canvas and image
         self.tab = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
-        self.tab.place(x=tkd.Window.width-74, rely=0, anchor="ne")
+        self.tab.place(x=tkd.Window.width - 74, rely=0, anchor="ne")
         self.update_img(self.tab, self.tab_grey_png)
         # binds
         # bind label for dragging around window
@@ -149,9 +144,7 @@ class CustomTitleBar(tk.Frame):
         # hide 1px Frame
         self.place(relx=1, rely=1, anchor="n")
         self.configure(bg=tkd.Color.green)
-        
-    
-    
+
     def window_pos(self, parent, w: int = 80, h: int = 48):
         ws = parent.winfo_screenwidth()
         hs = parent.winfo_screenheight()
@@ -179,7 +172,6 @@ class CustomTitleBar(tk.Frame):
         y = self.winfo_pointery() - self._offsety
         self.parent.geometry(f"+{x}+{y}")
 
-
     def check_window_state(self, event):
         if event.widget == self.parent:
             if self.parent.state() == "iconic":
@@ -188,7 +180,7 @@ class CustomTitleBar(tk.Frame):
                 self.parent.overrideredirect(True)
                 self.parent.attributes("-alpha", 1)
                 self.parent.deiconify()
-                
+
     def tabbing(self, event):
         self.parent.attributes("-topmost", False)
         self.parent.wm_attributes("-transparentcolor", tkd.Color.black)
@@ -196,10 +188,10 @@ class CustomTitleBar(tk.Frame):
         self.parent.overrideredirect(False)
         self.parent.iconify()
         self.parent.bind("<FocusIn>", self.check_window_state)
-                
+
     def exit_release(self, event):
         self.parent.destroy()
-        
+
     def exit_press(self, event):
         self.exit.configure(bg=tkd.Color.dark_red)
         self.exit.bind("<ButtonRelease-1>", self.exit_release)
@@ -227,18 +219,19 @@ class CustomTitleBar(tk.Frame):
         self.tab.configure(bg=tkd.Color.light_black)
         self.update_img(self.tab, self.tab_grey_png)
         self.tab.unbind("<ButtonRelease-1>")
-    
+
     def parent_enter(self, event):
         self.parent.attributes("-topmost", False)
-        
+
     def parent_leave(self, evnt):
         self.parent.attributes("-topmost", True)
-        
+
     def update_img(self, canvas, img):
         canvas.delete("all")
         canvas.create_image(18, 18, image=img)
         canvas.photoimage = img
-        
+
+
 # create a custom border for window
 class CustomBorder(tk.Frame):
     def __init__(self, parent):
@@ -276,19 +269,21 @@ class ColorPicker:
         self.pick()
 
     def pick(self):
+        # string boolean
         if self.string_var.get() == "True":
             self.clabel.configure(fg=tkd.Color.green)
-        if self.string_var.get() == "False":
+        elif self.string_var.get() == "False":
             self.clabel.configure(fg=tkd.Color.red)
-        if self.string_var.get() == "Both":
+        elif self.string_var.get() == "Both":
             self.clabel.configure(fg=tkd.Color.blue)
-        if self.pct in range(75, 100):
+        # range
+        elif self.pct in range(75, 100):
             self.clabel.configure(fg=tkd.Color.green)
-        if self.pct in range(50, 75):
+        elif self.pct in range(50, 75):
             self.clabel.configure(fg=tkd.Color.green_brown)
-        if self.pct in range(25, 50):
+        elif self.pct in range(25, 50):
             self.clabel.configure(fg=tkd.Color.red_brown)
-        if self.pct in range(0, 25):
+        elif self.pct in range(0, 25):
             self.clabel.configure(fg=tkd.Color.red)
 
 
