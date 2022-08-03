@@ -1,21 +1,15 @@
-from asyncore import write
 import os
 import socket
 import sys
 import winreg
 
-from src.utilities import local_paths, current_user
+from src.utilities import current_user, local_paths
 
 COMPUTER_NAME = socket.gethostname()
-# registry path to Classes
 ASTERISK_PATH = r"Software\Classes\*"
-# registry path to shell
 SHELL_PATH = r"Software\Classes\*\shell"
-# registry path to 0.SubSearch
 SUBSEARCH_PATH = r"Software\Classes\*\shell\0.SubSearch"
-# registry path to 0.SubSearch\command
 COMMAND_PATH = r"Software\Classes\*\shell\0.SubSearch\command"
-# write value to (Default)
 
 
 def write_keys():
@@ -27,8 +21,6 @@ def write_keys():
             winreg.CreateKey(sk, "0.SubSearch")
         with winreg.OpenKey(hkey, SUBSEARCH_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "command")
-
-
 
 
 def write_all_valuex():
@@ -145,9 +137,7 @@ def remove_context_menu():
             winreg.DeleteKey(sk, "0.SubSearch")
 
 
-# imports empty registry key to be filled in with values later
+# write keys to registry then write values
 def add_context_menu():
     write_keys()
     write_all_valuex()
-
-
