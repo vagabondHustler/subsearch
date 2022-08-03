@@ -1,18 +1,19 @@
 import logging
 from datetime import datetime
 
-from src.utilities import version
+from src.utilities import local_paths, version
 
 now = datetime.now()
 date = now.strftime("%y%m%d")
 
-logging.basicConfig(
-    filename=f"__subsearch__.log",
-    filemode="w",
-    level=logging.DEBUG,
-    format="%(asctime)s - %(message)s",
-    datefmt="%d-%b-%y %H:%M:%S",
-)
+if local_paths.get_path("cwd") == local_paths.get_path("root"):
+    logging.basicConfig(
+        filename=f"__subsearch__.log",
+        filemode="w",
+        level=logging.DEBUG,
+        format="%(asctime)s - %(message)s",
+        datefmt="%d-%b-%y %H:%M:%S",
+    )
 
 # log and print message
 def output(msg: str, print_to_terminal: bool = True):
