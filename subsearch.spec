@@ -3,7 +3,6 @@
 
 block_cipher = None
 added_files = [
-         ( 'SubSearch/src/data/*.reg', 'src/data/' ),
          ( 'SubSearch/src/data/*.json', 'src/data/' )
          ]
 added_binaries = [
