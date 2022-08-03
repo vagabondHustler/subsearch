@@ -49,7 +49,7 @@ What it looks like while searching for subs if show terminal is disabled
 
 What the settings menu looks like and available options
 
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_21123.png)
+![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_21227.png)
 
 What the download window looks like with subtitles that were not downloaded
 
