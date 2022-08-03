@@ -5,21 +5,20 @@ from src.gui import tkinter_data as tkd
 from src.gui import tools, widget_root
 from src.utilities import (
     current_user,
-    edit_config,
-    edit_registry,
-    read_config,
+    raw_config,
+    raw_registry,
     updates,
     version,
 )
 
-LANGUAGES = read_config.get("languages")
-OTHER_LANGUAGES = read_config.get("other_languages")
-LANGUAGE, LANG_ABBR = read_config.get("language")
-HEARING_IMPARED = read_config.get("hearing_impaired")
-PCT = read_config.get("percentage")
-SHOW_TERMINAL = read_config.get("show_terminal")
-CM_ICON = read_config.get("cm_icon")
-DL_WINDOW = read_config.get("show_download_window")
+LANGUAGES = raw_config.get("languages")
+OTHER_LANGUAGES = raw_config.get("other_languages")
+LANGUAGE, LANG_ABBR = raw_config.get("language")
+HEARING_IMPARED = raw_config.get("hearing_impaired")
+PCT = raw_config.get("percentage")
+SHOW_TERMINAL = raw_config.get("show_terminal")
+CM_ICON = raw_config.get("cm_icon")
+DL_WINDOW = raw_config.get("show_download_window")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -101,11 +100,7 @@ class SelectLanguage(tk.Frame):
 
     # pop up window with list of other languages
     def popup_window(self, event):
-        # * see cleaner version of this function src.gui.tools.Tooltip
-        # TODO
-        # use src.gui.tools.Tooltip instead of this function
-        # 'cus they are a so similar to each other
-
+        # * see 'cleaner' version of this function src.gui.tools.Tooltip
         self.clear_entry()
         rows = len(OTHER_LANGUAGES) / 2
         cols = 2
@@ -170,7 +165,7 @@ class SelectLanguage(tk.Frame):
         btn = event.widget
         self.string_var.set(btn.cget("text"))
         update_svar = self.string_var.get()
-        edit_config.update_json("language", update_svar)
+        raw_config.set_json("language", update_svar)
 
     # add language from entry
     def add_language(self, event):
@@ -180,7 +175,7 @@ class SelectLanguage(tk.Frame):
                 self.string_var.set(self.entry.get())
                 self.entry.configure(fg=tkd.Color.white_grey)
                 update_svar = self.string_var.get()
-                edit_config.update_json("language", update_svar)
+                raw_config.set_json("language", update_svar)
                 return
         self.entry.delete(0, "end")
         self.entry.insert(0, "E.g: Czech, cs")
@@ -231,19 +226,19 @@ class HearingImparedSubs(tk.Frame):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
-        edit_config.update_json("hearing_impaired", update_svar)
+        raw_config.set_json("hearing_impaired", update_svar)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get().split(" ")[0]
-        edit_config.update_json("hearing_impaired", update_svar)
+        raw_config.set_json("hearing_impaired", update_svar)
 
     def button_set_both(self, event):
         self.string_var.set(f"Both")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get().split(" ")[0]
-        edit_config.update_json("hearing_impaired", update_svar)
+        raw_config.set_json("hearing_impaired", update_svar)
 
 
 # set how closely the subtitle name should match the release name of the media file
@@ -282,14 +277,14 @@ class SearchThreshold(tk.Frame):
 
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         update_svar = int(self.pct)
-        edit_config.update_json("percentage_pass", update_svar)
+        raw_config.set_json("percentage_pass", update_svar)
 
     def button_sub_5(self, event):
         self.pct -= 5 if self.pct > 0 else 0
         self.string_var.set(f"{self.pct} %")
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         update_svar = int(self.pct)
-        edit_config.update_json("percentage_pass", update_svar)
+        raw_config.set_json("percentage_pass", update_svar)
 
 
 # remove or restore the context menu option when right-clicking
@@ -331,16 +326,17 @@ class ShowContextMenu(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        from src.utilities import edit_registry
+        from src.utilities import raw_registry
 
-        edit_registry.restore_context_menu()
+        raw_registry.add_context_menu()
+        raw_registry.write_all_valuex()
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        from src.utilities import edit_registry
+        from src.utilities import raw_registry
 
-        edit_registry.remove_context_menu()
+        raw_registry.remove_context_menu()
 
 
 # remove or restore the icon next to the context menu option when right clicking
@@ -382,19 +378,19 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("context_menu_icon", update_svar)
-        from src.utilities import edit_registry
+        raw_config.set_json("context_menu_icon", update_svar)
+        from src.utilities import raw_registry
 
-        edit_registry.set_context_menu_icon()
+        raw_registry.write_valuex("icon")
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("context_menu_icon", update_svar)
-        from src.utilities import edit_registry
+        raw_config.set_json("context_menu_icon", update_svar)
+        from src.utilities import raw_registry
 
-        edit_registry.set_context_menu_icon()
+        raw_registry.write_valuex("icon")
 
 
 # remove or restore the icon next to the context menu option when right clicking
@@ -436,13 +432,13 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
-        edit_config.update_json("show_download_window", update_svar)
+        raw_config.set_json("show_download_window", update_svar)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get()
-        edit_config.update_json("show_download_window", update_svar)
+        raw_config.set_json("show_download_window", update_svar)
 
 
 # show a terminal with what the code is doing while searching
@@ -486,15 +482,15 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var.set(f"True")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("show_terminal", update_svar)
-        edit_registry.write_command_subkey()
+        raw_config.set_json("show_terminal", update_svar)
+        raw_registry.write_valuex("command")
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        edit_config.update_json("show_terminal", update_svar)
-        edit_registry.write_command_subkey()
+        raw_config.set_json("show_terminal", update_svar)
+        raw_registry.write_valuex("command")
 
 
 # check for new updates on the github repository
@@ -551,8 +547,8 @@ class CheckForUpdates(tk.Frame):
 def show_widget():
     global root
     if current_user.got_key() is False:
-        edit_config.set_default_values()
-        edit_registry.add_context_menu()
+        raw_config.set_default_json()
+        raw_registry.add_context_menu()
 
     root = widget_root.main()
     SelectLanguage(root).pack(anchor="center")

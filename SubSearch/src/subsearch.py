@@ -3,14 +3,14 @@ import time
 import os
 
 from src.scraper import opensubtitles, subscene
+from src.gui import widget_download
 from src.utilities import (
     current_user,
-    edit_config,
-    edit_registry,
+    raw_registry,
     file_manager,
     local_paths,
     log,
-    read_config,
+    raw_config,
     read_parameters,
     version,
 )
@@ -22,26 +22,19 @@ def main(video_file_path: str):
     current_version = version.current()
     ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {current_version}")
     if current_user.got_key() is False:
-        edit_config.set_default_values()
-        edit_registry.add_context_menu()
+        raw_config.set_default_json()
+        raw_registry.add_context_menu()
         return
 
-    language, lang_abbr = read_config.get("language")
-    hearing_impaired = read_config.get("hearing_impaired")
-    pct = read_config.get("percentage")
-    show_download_window = read_config.get("show_download_window")
-    show_terminal = read_config.get("show_terminal")
+    language, lang_abbr = raw_config.get("language")
+    hearing_impaired = raw_config.get("hearing_impaired")
+    pct = raw_config.get("percentage")
+    show_download_window = raw_config.get("show_download_window")
+    show_terminal = raw_config.get("show_terminal")
     video_file_name_ext = video_file_path.split("\\")[-1]
     video_file_name, video_file_ext = video_file_name_ext.rsplit(".", 1)
     video_file_name_ext = f"{video_file_name}.{video_file_ext}"
     file_hash = file_manager.get_hash(video_file_name_ext)
-    # video_ext: list = read_config.get("video_ext")
-    # video = file_manager.find_video(local_paths.cwd(), video_ext, False)
-    # video_with_ext = file_manager.find_video(local_paths.cwd(), video_ext, True)
-    # if video_with_ext is not None:
-    #     file_hash = file_manager.get_hash(video_with_ext)
-    # elif video_with_ext is None:
-    #     file_hash = None
 
     try:
         param = read_parameters.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
@@ -62,12 +55,10 @@ def main(video_file_path: str):
     log.output("[Searching subscene]")
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
-        file = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
-        if show_download_window == "True" and os.path.exists(file):
-            from src.gui import widget_download
-
-            widget_download.show_widget()
-            file_manager.clean_up(local_paths.cwd(), "__subsearch__dl_data.tmp")
+        dl_data = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
+        if show_download_window == "True" and os.path.exists(dl_data):
+                widget_download.show_widget()
+                file_manager.clean_up(local_paths.cwd(), dl_data)
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")
