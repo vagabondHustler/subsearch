@@ -1,8 +1,8 @@
 import ctypes
 import tkinter as tk
 
-from src.gui import tkinter_data as tkd
-from src.utilities import local_paths
+from gui import tkinter_data as tkd
+from util import local_paths
 
 
 GWL_EXSTYLE = -20
