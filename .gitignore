@@ -135,6 +135,7 @@ old*
 *.srt
 subs/
 ./*.log
+__subsearch__*.*
 
 # Prevent users to commit the README
 *README.html
