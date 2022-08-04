@@ -42,30 +42,39 @@ jobs:
           git push
 
   # build and publish release with pushed tags as release name
-  publish-release:
-    name: Publish release
+  build-and-publish:
+    name: Build and publish
     runs-on: windows-latest
     needs: semantic-versioning
     steps:
       - uses: actions/checkout@v3
         with:
           ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.5"
       # pull main so everything is up to date
       - name: Pull main
         run: git pull origin main
       # install pyinstaller and requirements
-      - name: Build
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.5"
-      - run: |
+      - name: Initializing
+        run: |
           pip install pyinstaller
           pip install -r docs/requirements.txt
-          pyinstaller subsearch.spec -y --clean --distpath ./SubSearch-x64
-          mv C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
-          python make_archive.py
-      - run: mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-      - run: mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
+      # copy source code to workflows
+      - name: Copy source to .github/workflows/SubSearch
+        run: cp -r ./SubSearch .github/workflows/SubSearch
+      # build the executable and manually add sv_ttk otherwise it wont be included
+      - name: Build executable
+        run: |
+           pyinstaller .github/workflows/build.spec -y --distpath ./SubSearch-x64
+           cp -r C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
+      # make archives for publishing
+      - name: Make archives
+        run: | 
+          python .github/workflows/make_archive.py
+          mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
+          mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
