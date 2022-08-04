@@ -1,7 +1,5 @@
-import os
-
-from src.scraper import subscene_soup
-from src.utilities import local_paths, log, compare
+from scraper import subscene_soup
+from util import local_paths, log, word_parser
 
 
 # check if dict is of movies
@@ -93,7 +91,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
             sub_keys = subscene_soup.search_title_for_sub(lang, hi, url)
             break
         for key, value in sub_keys.items():
-            number = compare.pct_value(key, param.release)
+            number = word_parser.pct_value(key, param.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number.percentage}% match]:")
             formatting_spaces = " " * lenght_str
@@ -121,7 +119,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
 
             return None
         else:
-            
+
             return None
 
     download_info: list = []

@@ -18,7 +18,7 @@ def is_sub_hi(a1: Tag):
 
 
 # search for title
-def search_for_title(url: str) -> dict:
+def search_for_title(url: str):
     titles: dict = {}
     source = SCRAPER.get(url)
     scontent = source.content
