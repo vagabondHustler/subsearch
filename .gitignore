@@ -136,6 +136,7 @@ old*
 subs/
 ./*.log
 
+
 # Prevent users to commit the README
 *README.html
 *README_cache/
@@ -156,3 +157,5 @@ desktop.ini
 # README.md settings
 .markdownlint.json
 
+# Subsearch
+__subsearch__*.*
