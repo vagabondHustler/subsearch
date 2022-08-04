@@ -77,7 +77,7 @@
     "percentage_pass": 90,
     "context_menu_icon": "True",
     "show_download_window": "True",
-    "show_terminal": "False",
+    "show_terminal": "True",
     "video_ext": [
         ".avi",
         ".mp4",
