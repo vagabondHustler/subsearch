@@ -14,13 +14,12 @@ def paths(file_name: str = None):
         file = f"\\{file_name}"
     paths = {
         "cwd": cwd(),
-        "root": path.replace("\\src\\utilities", f"{file}"),
-        "src": path.replace("\\src\\utilities", f"\\src{file}"),
-        "data": path.replace("\\src\\utilities", f"\\src\\data{file}"),
-        "gui": path.replace("\\src\\utilities", f"\\src\\gui{file}"),
-        "scraper": path.replace("\\src\\utilities", f"\\src\\scraper{file}"),
-        "icons": path.replace("\\src\\utilities", f"\\src\\gui\\assets\\icons{file}"),
-        "buttons": path.replace("\\src\\utilities", f"\\src\\gui\\assets\\buttons{file}"),
+        "root": path.replace("\\util", f"{file}"),
+        "data": path.replace("\\util", f"\\data{file}"),
+        "gui": path.replace("\\util", f"\\gui{file}"),
+        "scraper": path.replace("\\util", f"\\scraper{file}"),
+        "icons": path.replace("\\util", f"\\gui\\assets\\icons{file}"),
+        "buttons": path.replace("\\util", f"\\gui\\assets\\buttons{file}"),
         "utilities": path,
     }
     return paths
