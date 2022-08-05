@@ -3,7 +3,7 @@ import json
 from util import local_paths
 
 # update config.json
-def set_json(key: str, value: str or int, directory: str = "data", file: str = "config.json"):
+def set_json(key: str, value: str | int, directory: str = "data", file: str = "config.json") -> None:
     with open(local_paths.get_path(directory, file), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
@@ -12,7 +12,7 @@ def set_json(key: str, value: str or int, directory: str = "data", file: str = "
         f.truncate()
 
 
-def get_json():
+def get_json() -> dict:
     config_file = local_paths.get_path("data", "config.json")
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
@@ -21,7 +21,7 @@ def get_json():
 
 
 # get said value(s) from config.json
-def get(output: str):
+def get(output: str) -> str:
     config_json_dict = {
         "language": get_json()["language"].split(", "),
         "languages": get_json()["languages"],
@@ -37,7 +37,7 @@ def get(output: str):
 
 
 # set default config.json values
-def set_default_json():
+def set_default_json() -> None:
     set_json("language", "English, en")
     set_json("hearing_impaired", "Both")
     set_json("percentage_pass", 90)

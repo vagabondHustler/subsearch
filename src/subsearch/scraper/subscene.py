@@ -39,7 +39,7 @@ def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
 
 
 # log and sort list
-def log_and_sort_list(list_of_tuples: list, pct: int):
+def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
     hbd_printed = False
@@ -58,7 +58,7 @@ def log_and_sort_list(list_of_tuples: list, pct: int):
 
 
 # decides what to do with all the scrape data
-def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str):
+def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
     # search for titles
     to_be_scraped: list = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)

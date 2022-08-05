@@ -3,7 +3,7 @@ from scraper import opensubtitles_soup
 
 
 # decides what to do with all the scrape data
-def scrape(param, lang: str, hi: str):
+def scrape(param, lang: str, hi: str) -> list | None:
     to_be_downloaded = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:
         if param.tv_series:

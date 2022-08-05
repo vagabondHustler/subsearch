@@ -12,7 +12,7 @@ SUBSEARCH_PATH = r"Software\Classes\*\shell\0.SubSearch"
 COMMAND_PATH = r"Software\Classes\*\shell\0.SubSearch\command"
 
 
-def write_keys():
+def write_keys() -> None:
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         # open key, with write permission
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
@@ -23,7 +23,7 @@ def write_keys():
             winreg.CreateKey(sk, "command")
 
 
-def write_all_valuex():
+def write_all_valuex() -> None:
     write_valuex("SubSearch")
     write_valuex("icon")
     write_valuex("appliesto")
@@ -31,7 +31,7 @@ def write_all_valuex():
         write_valuex("command")
 
 
-def write_valuex(key: str):
+def write_valuex(key: str) -> None:
     """
     Args:
         key: icon, appliesto or command
@@ -56,7 +56,7 @@ def write_valuex(key: str):
     open_write_valuex(key_type, value_name, value)
 
 
-def open_write_valuex(sub_key: str, value_name: str, value: str):
+def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
     """
     Args:
         sub_key: 0.SubSearch or command
@@ -71,7 +71,7 @@ def open_write_valuex(sub_key: str, value_name: str, value: str):
             winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
 
 
-def get_command_value():
+def get_command_value() -> str:
     # get latest json value from file
     from util import raw_config
 
@@ -97,7 +97,7 @@ def get_command_value():
     return value
 
 
-def get_icon_value():
+def get_icon_value() -> str:
     # get latest json value from file
     from util import raw_config
 
@@ -110,7 +110,7 @@ def get_icon_value():
     return value
 
 
-def get_appliesto_value():
+def get_appliesto_value() -> str:
     # get latest json value from file
     from util import raw_config
 
@@ -127,7 +127,7 @@ def get_appliesto_value():
     return value
 
 
-def remove_context_menu():
+def remove_context_menu() -> None:
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, SUBSEARCH_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.DeleteKey(sk, "command")
@@ -138,6 +138,6 @@ def remove_context_menu():
 
 
 # write keys to registry then write values
-def add_context_menu():
+def add_context_menu() -> None:
     write_keys()
     write_all_valuex()

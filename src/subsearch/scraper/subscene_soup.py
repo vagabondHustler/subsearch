@@ -7,7 +7,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
-def is_sub_hi(a1: Tag):
+def is_sub_hi(a1: Tag) -> str:
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted
@@ -18,7 +18,7 @@ def is_sub_hi(a1: Tag):
 
 
 # search for title
-def search_for_title(url: str) -> dict:
+def search_for_title(url: str) -> dict | str:
     titles: dict = {}
     source = SCRAPER.get(url)
     scontent = source.content
@@ -67,7 +67,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
 
 
 # get download url for subtitle(s)
-def get_download_url(url: str):
+def get_download_url(url: str) -> dict:
     source = SCRAPER.get(url).text
     doc = BeautifulSoup(source, "lxml")
     _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]

@@ -4,7 +4,7 @@ from util import log
 
 
 # search for file hash
-def search_for_hash(url: str, lang: str, hi: str):
+def search_for_hash(url: str, lang: str, hi: str) -> list | None:
     download_url: list = []
     source = requests.get(url)
     scontent = source.content
