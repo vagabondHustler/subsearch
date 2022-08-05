@@ -5,7 +5,7 @@ import sv_ttk
 from src.gui import tkinter_data as tkd
 from src.gui import widget_root
 from src.scraper import subscene_soup
-from src.utilities import file_manager, local_paths
+from src.util import file_manager, local_paths
 
 
 # file with subtitles and corresponding dl links

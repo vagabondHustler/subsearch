@@ -19,8 +19,8 @@ def paths(file_name: str = None):
         "data": path.replace("\\src\\utilities", f"\\src\\data{file}"),
         "gui": path.replace("\\src\\utilities", f"\\src\\gui{file}"),
         "scraper": path.replace("\\src\\utilities", f"\\src\\scraper{file}"),
-        "icons": path.replace("\\src\\utilities", f"\\src\\gui\\assets\\icons{file}"),
-        "buttons": path.replace("\\src\\utilities", f"\\src\\gui\\assets\\buttons{file}"),
+        "icons": path.replace("\\src\\utilities", f"\\src\\assets\\icons{file}"),
+        "buttons": path.replace("\\src\\utilities", f"\\src\\assets\\buttons{file}"),
         "utilities": path,
     }
     return paths
