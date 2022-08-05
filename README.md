@@ -71,7 +71,7 @@ Download SubScene
 
 Install dependencies
 
-`pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/docs/requirements.txt"`
+`pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/requirements.txt"`
 
 Run main.py from where it is located
 
@@ -81,7 +81,7 @@ To access the settings, run main.py again
 
 Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
 
 ### Executable <a name = "exe"></a>
 
@@ -97,7 +97,7 @@ If you get a PUA message, click `More info`
 
 Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the __subsearch__.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
 
 ## Supported languages <a name = "lsupport"></a>
 
@@ -123,7 +123,7 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ## Other languages <a name = "not_support"></a>
 
-These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field  `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
+These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
 ![other_languages](https://github.com/vagabondHustler/SubSearch/blob/main/assets/other_languages_21123.png)
 
