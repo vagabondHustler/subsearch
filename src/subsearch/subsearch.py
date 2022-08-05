@@ -16,7 +16,7 @@ from util import (
 )
 
 
-def main(video_file_path: str):
+def run_search(video_file_path: str):
     # initializing
     start = time.perf_counter()
     current_version = version.current()
