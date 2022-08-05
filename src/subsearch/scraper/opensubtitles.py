@@ -1,5 +1,5 @@
-from src.util import local_paths, log
-from src.scraper import opensubtitles_soup
+from util import local_paths, log
+from scraper import opensubtitles_soup
 
 
 # decides what to do with all the scrape data

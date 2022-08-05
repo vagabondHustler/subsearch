@@ -2,9 +2,9 @@ import ctypes
 import time
 import os
 
-from src.scraper import opensubtitles, subscene
-from src.gui import widget_download
-from src.util import (
+from scraper import opensubtitles, subscene
+from gui import widget_download
+from util import (
     current_user,
     raw_registry,
     file_manager,
