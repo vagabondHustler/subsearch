@@ -80,7 +80,7 @@ jobs:
         run: |
           python .github/workflows/_make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-          mv ./SubSearch.zip ./SubSearch-win-${{ github.ref_name }}-source.zip
+          mv ./SubSearch-source.zip ./SubSearch-win-${{ github.ref_name }}-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
