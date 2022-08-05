@@ -140,7 +140,6 @@ __subsearch__*.*
 # Prevent users to commit the README
 *README.html
 *README_cache/
-#*README_files/
 
 # Visual Sudio Code
 *.code-workspace
