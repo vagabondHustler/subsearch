@@ -14,7 +14,7 @@ def main():
         widget_settings.show_widget()
 
     elif local_paths.get_path("cwd") != local_paths.get_path("root"):
-        subsearch.main(sys.argv[-1])
+        subsearch.run_search(sys.argv[-1])
 
 
 if __name__ == "__main__":
