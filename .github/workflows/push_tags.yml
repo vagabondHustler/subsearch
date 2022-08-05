@@ -44,7 +44,7 @@ jobs:
           git pull origin main
           git add src/subsearch/data/version.json
           git add src/subsearch/data/__version__.py
-          git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
+          git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }} in /data"
           git push origin main
 
   # build and publish release with pushed tags as release name
@@ -66,7 +66,7 @@ jobs:
       - name: Initializing
         run: |
           pip install pyinstaller
-          pip install -r docs/requirements.txt
+          pip install -r requirements.txt
       # copy source code to workflows
       - name: Copy source to .github/workflows/subsearch
         run: cp -r ./src/subsearch/ .github/workflows/subsearch/
