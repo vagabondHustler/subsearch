@@ -1,7 +1,7 @@
 import os
 
-from src.scraper import subscene_soup
-from src.util import local_paths, log, string_parser
+from scraper import subscene_soup
+from util import local_paths, log, string_parser
 
 
 # check if dict is of movies
