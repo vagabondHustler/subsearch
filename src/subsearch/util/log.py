@@ -6,23 +6,23 @@ from util import local_paths, version
 now = datetime.now()
 date = now.strftime("%y%m%d")
 
-if local_paths.get_path("cwd") == local_paths.get_path("root"):
-    logging.basicConfig(
-        filename=f"__subsearch__.log",
-        filemode="w",
-        level=logging.DEBUG,
-        format="%(asctime)s - %(message)s",
-        datefmt="%d-%b-%y %H:%M:%S",
-    )
+
+logging.basicConfig(
+    filename=f"__subsearch__.log",
+    filemode="w",
+    level=logging.DEBUG,
+    format="%(asctime)s - %(message)s",
+    datefmt="%d-%b-%y %H:%M:%S",
+)
 
 # log and print message
-def output(msg: str, print_to_terminal: bool = True):
+def output(msg: str, print_to_terminal: bool = True) -> None:
     logging.info(msg)
     print(msg) if print_to_terminal else False
 
 
 # log and print all the used parameters from video/directory-name
-def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int):
+def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int) -> None:
     current_version = version.current()
     output(f"SubSearch - {current_version} ", False)
     output("[PARAMETERS]")

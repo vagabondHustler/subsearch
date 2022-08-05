@@ -1,12 +1,12 @@
 import os
 
 # current working directory path
-def cwd():
+def cwd() -> str:
     return os.getcwd()
 
 
 # get root directory path
-def paths(file_name: str = None):
+def paths(file_name: str = None) -> dict:
     path, _i = os.path.split(os.path.abspath(__file__))
     if file_name is None:
         file = ""
@@ -25,7 +25,7 @@ def paths(file_name: str = None):
     return paths
 
 
-def get_path(directory: str, file_name: str = None):
+def get_path(directory: str, file_name: str = None) -> str:
     """get_path to a directory or directory and file
 
     Args:
@@ -38,6 +38,6 @@ def get_path(directory: str, file_name: str = None):
     return paths(file_name)[f"{directory}"].lower()
 
 
-def add_file_to_path(root_dir_path: str, file_name: str):
+def add_file_to_path(root_dir_path: str, file_name: str) -> str:
     file_path = f"{root_dir_path}\{file_name}"
     return file_path
