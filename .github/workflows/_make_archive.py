@@ -6,11 +6,12 @@ Used by publish.yml in .github\workflows to create a zip files of the repository
 """
 
 
-path_subsearch_dir_src = f"{os.getcwd()}/src/subsearch"
+path_subsearch_dir_src = f"{os.getcwd()}/subsearch"
 path_subsearch_zip_dst = f"{os.getcwd()}/SubSearch.zip"
 path_x64_dir_src = f"{os.getcwd()}/SubSearch-x64/SubSearch"
 path_x64_zip_dst = f"{os.getcwd()}/SubSearch-x64.zip"
-    
+
+
 def make_archive(source: str, destination: str):
     """
     Adds folder and file contents to a zip file
