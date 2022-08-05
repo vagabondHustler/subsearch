@@ -42,8 +42,8 @@ jobs:
       - name: Commit version.json
         run: |
           git pull origin main
-          git add src/subsearch/d/data/version.json
-          git add src/subsearch/d/data/__version__.py
+          git add src/subsearch/data/version.json
+          git add src/subsearch/data/__version__.py
           git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
           git push origin main
 
