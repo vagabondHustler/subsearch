@@ -1,7 +1,7 @@
 import sys
 
 import src.subsearch
-from src.utilities import local_paths, current_user, raw_config, raw_registry
+from src.util import local_paths, current_user, raw_config, raw_registry
 from src.gui import widget_settings
 
 

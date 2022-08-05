@@ -1,4 +1,4 @@
-from src.utilities import local_paths, log
+from src.util import local_paths, log
 from src.scraper import opensubtitles_soup
 
 

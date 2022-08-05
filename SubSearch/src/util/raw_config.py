@@ -1,6 +1,6 @@
 import json
 
-from src.utilities import local_paths
+from src.util import local_paths
 
 # update config.json
 def set_json(key: str, value: str or int, directory: str = "data", file: str = "config.json"):

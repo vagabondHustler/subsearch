@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from src.gui import tools, tkinter_data as tkd
-from src.utilities import local_paths
+from src.util import local_paths
 
 
 def main():
