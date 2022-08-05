@@ -18,7 +18,7 @@ class SearchParameters:
     group: str
     file_hash: str
 
-def split_last_hyphen(string: str):
+def split_last_hyphen(string: str) -> str:
     group = string.rsplit("-", 1)[-1]
     return group
 

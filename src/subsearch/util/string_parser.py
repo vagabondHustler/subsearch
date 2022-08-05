@@ -7,7 +7,7 @@ class Percentage:
 
 
 # compare two lists  with each other and return match in %
-def pct_value(from_pc: str or int, from_browser: str or int) -> Percentage:
+def pct_value(from_pc: str | int, from_browser: str | int) -> Percentage:
     max_percentage = 100
     pc_list: list = mk_lst(from_pc)
     browser_list: list = mk_lst(from_browser)
@@ -21,7 +21,7 @@ def pct_value(from_pc: str or int, from_browser: str or int) -> Percentage:
 
 
 # create list from string
-def mk_lst(release: str or int):
+def mk_lst(release: str | int):
     new: list = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
     temp: list = release.split(".")
