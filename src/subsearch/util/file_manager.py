@@ -4,7 +4,7 @@ import struct
 import zipfile
 
 import cloudscraper
-from src.utilities import log
+from util import log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
@@ -110,4 +110,3 @@ def get_hash(file_name: str):
 
     except IOError as err:
         return log.output(err)
-

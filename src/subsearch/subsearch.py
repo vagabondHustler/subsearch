@@ -2,16 +2,16 @@ import ctypes
 import time
 import os
 
-from src.scraper import opensubtitles, subscene
-from src.gui import widget_download
-from src.utilities import (
+from scraper import opensubtitles, subscene
+from gui import widget_download
+from util import (
     current_user,
     raw_registry,
     file_manager,
     local_paths,
     log,
     raw_config,
-    read_parameters,
+    file_parser,
     version,
 )
 
@@ -37,7 +37,7 @@ def main(video_file_path: str):
     file_hash = file_manager.get_hash(video_file_name_ext)
 
     try:
-        param = read_parameters.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
+        param = file_parser.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
     except IndexError as err:
         log.output(err)
         if show_terminal == "True":
@@ -57,8 +57,8 @@ def main(video_file_path: str):
     if scrape_opensubtitles is None and scrape_subscene is None:
         dl_data = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
         if show_download_window == "True" and os.path.exists(dl_data):
-                widget_download.show_widget()
-                file_manager.clean_up(local_paths.cwd(), dl_data)
+            widget_download.show_widget()
+            file_manager.clean_up(local_paths.cwd(), dl_data)
 
         elapsed = time.perf_counter() - start
         log.output(f"Finished in {elapsed} seconds.")

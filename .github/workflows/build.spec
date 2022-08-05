@@ -3,15 +3,15 @@
 
 block_cipher = None
 added_files = [
-         ( 'SubSearch/src/data/*.json', 'src/data/' )
+         ( 'subsearch/data/*.json', 'data/' )
          ]
 added_binaries = [
-        ('SubSearch/src/gui/assets/icons/*.ico', 'src/gui/assets/icons/'),
-        ('SubSearch/src/gui/assets/buttons/*.png', 'src/gui/assets/buttons/')
+        ('subsearch/assets/icons/*.ico', 'assets/icons/'),
+        ('subsearch/assets/buttons/*.png', 'assets/buttons/')
         ]
 
 a = Analysis(
-    ['SubSearch/main.py'],
+    ['subsearch/main.py'],
     pathex=[],
     binaries=added_binaries,
     datas=added_files,
@@ -43,7 +43,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='SubSearch/src/gui/assets/icons/256.ico',
+    icon='subsearch/assets/icons/256.ico',
 )
 coll = COLLECT(
     exe,
