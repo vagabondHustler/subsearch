@@ -14,6 +14,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.5"
       # import GPG key for verified commits
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
@@ -33,13 +36,16 @@ jobs:
       # write pushed tags as version number into version.json in ../data
       - name: Set new version
         run: echo "`jq '.version="${{ github.ref_name }}"' src/subsearch/data/version.json`" > src/subsearch/data/version.json
+      - name: Update __version__.py
+        run: python .github/workflows/_set__version__.py
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
       - name: Commit version.json
         run: |
           git pull origin main
-          git add src/subsearch/d/data/version.json
+          git add src/subsearch/data/version.json
+          git add src/subsearch/data/__version__.py
           git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
-          git push
+          git push origin main
 
   # build and publish release with pushed tags as release name
   build-and-publish:
@@ -72,7 +78,7 @@ jobs:
       # make archives for publishing
       - name: Make archives
         run: |
-          python .github/workflows/make_archive.py
+          python .github/workflows/_make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
           mv ./SubSearch.zip ./SubSearch-win-${{ github.ref_name }}-source.zip
       # publish the release with ACTION_TOKEN for verified release
