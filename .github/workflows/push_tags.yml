@@ -29,15 +29,15 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          echo "::set-output name=version_output::$(echo "`jq '.version' SubSearch/src/data/version.json`")"
+          echo "::set-output name=version_output::$(echo "`jq '.version' src/subsearch/data/version.json`")"
       # write pushed tags as version number into version.json in ../data
       - name: Set new version
-        run: echo "`jq '.version="${{ github.ref_name }}"' SubSearch/src/data/version.json`" > SubSearch/src/data/version.json
+        run: echo "`jq '.version="${{ github.ref_name }}"' src/subsearch/data/version.json`" > src/subsearch/data/version.json
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
       - name: Commit version.json
         run: |
           git pull origin main
-          git add SubSearch/src/data/version.json
+          git add src/subsearch/d/data/version.json
           git commit -S -m "Bump version from ${{steps.current_version.outputs.version_output}} to ${{ github.ref_name }} in /data"
           git push
 
@@ -62,19 +62,19 @@ jobs:
           pip install pyinstaller
           pip install -r docs/requirements.txt
       # copy source code to workflows
-      - name: Copy source to .github/workflows/SubSearch
-        run: cp -r ./SubSearch .github/workflows/SubSearch
+      - name: Copy source to .github/workflows/subsearch
+        run: cp -r ./src/subsearch/ .github/workflows/subsearch/
       # build the executable and manually add sv_ttk otherwise it wont be included
       - name: Build executable
         run: |
-           pyinstaller .github/workflows/build.spec -y --distpath ./SubSearch-x64
-           cp -r C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
+          pyinstaller .github/workflows/build.spec -y --clean --distpath ./SubSearch-x64
+          cp -r C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
       # make archives for publishing
       - name: Make archives
-        run: | 
+        run: |
           python .github/workflows/make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-          mv ./SubSearch.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
+          mv ./SubSearch.zip ./SubSearch-win-${{ github.ref_name }}-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1

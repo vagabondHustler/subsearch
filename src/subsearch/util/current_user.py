@@ -2,7 +2,7 @@ import os
 import winreg as reg
 import socket
 
-from src.utilities import local_paths
+from util import local_paths
 
 COMPUTER_NAME = socket.gethostname()
 

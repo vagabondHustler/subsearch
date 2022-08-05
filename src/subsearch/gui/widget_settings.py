@@ -1,9 +1,9 @@
 import tkinter as tk
 import webbrowser
 
-from src.gui import tkinter_data as tkd
-from src.gui import tools, widget_root
-from src.utilities import (
+from gui import tkinter_data as tkd
+from gui import tools, widget_root
+from util import (
     current_user,
     raw_config,
     raw_registry,
@@ -326,7 +326,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        from src.utilities import raw_registry
+        from util import raw_registry
 
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
@@ -334,7 +334,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        from src.utilities import raw_registry
+        from util import raw_registry
 
         raw_registry.remove_context_menu()
 
@@ -379,7 +379,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from src.utilities import raw_registry
+        from util import raw_registry
 
         raw_registry.write_valuex("icon")
 
@@ -388,7 +388,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from src.utilities import raw_registry
+        from util import raw_registry
 
         raw_registry.write_valuex("icon")
 

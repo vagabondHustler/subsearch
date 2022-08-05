@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from src.utilities import local_paths, version
+from util import local_paths, version
 
 now = datetime.now()
 date = now.strftime("%y%m%d")
