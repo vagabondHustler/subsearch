@@ -334,7 +334,8 @@ class ShowContextMenu(tk.Frame):
 
         raw_registry.remove_context_menu()
 
-#? WORK IN PROGRESS
+
+# ? WORK IN PROGRESS
 # # remove or restore the context menu option when right-clicking
 # class AssociateExtensions(tk.Frame):
 #     def __init__(self, parent):

@@ -88,7 +88,7 @@ def get_command_value() -> str:
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
         # gets the path of the root directory of subsearch
         set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('root')}');"
-        import_main = "import subsearch; os.chdir(working_path); subsearch.main()"
+        import_main = "import main; os.chdir(working_path); main.main()"
         if show_terminal == "True":
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
         if show_terminal == "False":
