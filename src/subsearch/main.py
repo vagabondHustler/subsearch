@@ -1,13 +1,17 @@
 import sys
 
-from util import search, local_paths, current_user, raw_config, raw_registry
 from gui import widget_settings
+from util import current_user, local_paths, raw_config, raw_registry, search
 
 
 def main(input: str = None) -> None:
     """
-    Args:
-        input: --settings
+    main function for subsearch
+
+    Parameters
+    ----------
+    input : str, optional
+        --settings, by default None
     """
     if current_user.got_key() is False:
         raw_config.set_default_json()

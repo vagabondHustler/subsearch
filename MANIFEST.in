@@ -1,5 +1,0 @@
-include requirements.txt
-include assets\*.png
-include src\subsearch\data\*.json
-include src\subsearch\assets\buttons\*.png
-include src\subsearch\assets\icons\*.icon
