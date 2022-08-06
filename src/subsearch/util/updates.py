@@ -1,11 +1,15 @@
 import cloudscraper
 from util import version
 
-SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+SCRAPER = cloudscraper.create_scraper(
+    browser={"browser": "chrome", "platform": "android", "desktop": False}
+)
 
 
 def check_for_updates() -> str:
-    source = SCRAPER.get("https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/src/subsearch/data/version.json")
+    source = SCRAPER.get(
+        "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/src/subsearch/data/version.json"
+    )
     scontent = source.content
     _string = str(scontent)
     _string_no_qoute = _string.replace('"', " ")
