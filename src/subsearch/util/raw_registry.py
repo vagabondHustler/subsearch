@@ -114,7 +114,7 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from util import raw_config
 
-    video_ext = raw_config.get("video_ext")
+    video_ext = raw_config.get("current_ext")
     vide_ext_items = len(video_ext)
     # for which file types to show the SubSearch context entry on
     value = ""
