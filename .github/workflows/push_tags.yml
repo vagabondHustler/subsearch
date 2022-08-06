@@ -65,6 +65,7 @@ jobs:
       # install pyinstaller and requirements
       - name: Initializing
         run: |
+          python -m pip install --upgrade pip
           pip install pyinstaller
           pip install -r requirements.txt
       # copy source code to workflows
