@@ -67,7 +67,7 @@ def clean_up(cwd_path: str, extension: str) -> None:
 
 
 # get file hash
-def get_hash(file_name: str) -> str |None:
+def get_hash(file_name: str) -> str | None:
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
