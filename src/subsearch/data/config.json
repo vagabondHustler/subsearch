@@ -78,7 +78,23 @@
     "context_menu_icon": "True",
     "show_download_window": "True",
     "show_terminal": "False",
-    "video_ext": [
+    "current_ext": [
+        ".avi",
+        ".mp4",
+        ".mkv",
+        ".mpg",
+        ".mpeg",
+        ".mov",
+        ".rm",
+        ".vob",
+        ".wmv",
+        ".flv",
+        ".3gp",
+        ".3g2",
+        ".swf",
+        ".mswmm"
+    ],
+    "available_ext": [
         ".avi",
         ".mp4",
         ".mkv",
