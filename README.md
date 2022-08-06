@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/vagabondHustler/SubSearch/blob/main/assets/subsearch_transparent.png"/></h1>
+<h1 align="center"><img src="https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/subsearch_transparent.png"/></h1>
 
 <div align="center">
 
@@ -45,15 +45,15 @@ Feel free to ask me anything about this project, request new features, contribut
 
 What it looks like while searching for subs if show terminal is disabled
 
-![prtsc1](https://github.com/vagabondHustler/SubSearch/blob/main/assets/example21224.gif)
+![prtsc1](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
 
 What the settings menu looks like and available options
 
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_21227.png)
+![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21227.png)
 
 What the download window looks like with subtitles that were not downloaded
 
-![prtsc2](https://github.com/vagabondHustler/SubSearch/blob/main/assets/gui_dlw_2918.png)
+![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
 
 </div>
 
@@ -91,9 +91,9 @@ Unzip file and run SubSearch.exe
 
 If you get a PUA message, click `More info`
 
-![prtsc3](https://github.com/vagabondHustler/SubSearch/blob/main/assets/moreinfo.png)
+![prtsc3](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
 
-![prtsc4](https://github.com/vagabondHustler/SubSearch/blob/main/assets/runanyway.png)
+![prtsc4](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
 
 Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
@@ -125,7 +125,7 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
-![other_languages](https://github.com/vagabondHustler/SubSearch/blob/main/assets/other_languages_21123.png)
+![other_languages](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/other_languages_21123.png)
 
 ## File extension <a name = "file_ext"></a>
 
