@@ -1,10 +1,12 @@
-from util import local_paths, log
 from scraper import opensubtitles_soup
+from util import local_paths, log
 
 
 # decides what to do with all the scrape data
 def scrape(param, lang: str, hi: str) -> list | None:
-    to_be_downloaded = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
+    to_be_downloaded = opensubtitles_soup.search_for_hash(
+        param.url_opensubtitles, lang, hi
+    )
     if to_be_downloaded is None:
         if param.tv_series:
             log.output(f"No TV-series found matching hash {param.file_hash}")
