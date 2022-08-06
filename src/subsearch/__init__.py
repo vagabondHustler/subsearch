@@ -1,1 +1,1 @@
-from .subsearch import main 
+from .subsearch import main
