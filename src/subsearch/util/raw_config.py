@@ -31,7 +31,8 @@ def get(output: str) -> str:
         "cm_icon": get_json()["context_menu_icon"],
         "show_download_window": get_json()["show_download_window"],
         "show_terminal": get_json()["show_terminal"],
-        "video_ext": get_json()["video_ext"],
+        "current_ext": get_json()["current_ext"],
+        "available_ext": get_json()["available_ext"],
     }
     return config_json_dict[f"{output}"]
 
