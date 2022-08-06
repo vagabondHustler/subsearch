@@ -70,8 +70,11 @@ Download SubScene
 `git clone https://github.com/vagabondHustler/SubSearch`
 
 Install dependencies
+
 `pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/requirements.txt"`
+
 or
+
 `pip install git+https://github.com/vagabondhustler/SubSearch.git`
 
 Run main.py from where it is located
