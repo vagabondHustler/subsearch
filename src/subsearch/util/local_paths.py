@@ -1,5 +1,6 @@
 import os
 
+
 # current working directory path
 def cwd() -> str:
     return os.getcwd()

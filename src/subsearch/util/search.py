@@ -1,17 +1,17 @@
 import ctypes
-import time
 import os
+import time
 
-from scraper import opensubtitles, subscene
 from gui import widget_download
+from scraper import opensubtitles, subscene
 from util import (
     current_user,
-    raw_registry,
     file_manager,
+    file_parser,
     local_paths,
     log,
     raw_config,
-    file_parser,
+    raw_registry,
     version,
 )
 
@@ -37,7 +37,9 @@ def run_search(video_file_path: str) -> None:
     file_hash = file_manager.get_hash(video_file_name_ext)
 
     try:
-        param = file_parser.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
+        param = file_parser.get_parameters(
+            local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower()
+        )
     except IndexError as err:
         log.output(err)
         if show_terminal == "True":
@@ -50,10 +52,16 @@ def run_search(video_file_path: str) -> None:
     # scrape with parameters
     log.output("")
     log.output("[Searching opensubtitles]")
-    scrape_opensubtitles = opensubtitles.scrape(param, language, hearing_impaired) if file_hash is not None else None
+    scrape_opensubtitles = (
+        opensubtitles.scrape(param, language, hearing_impaired)
+        if file_hash is not None
+        else None
+    )
     log.output("")
     log.output("[Searching subscene]")
-    scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
+    scrape_subscene = subscene.scrape(
+        param, language, lang_abbr, hearing_impaired, pct, show_download_window
+    )
     if scrape_opensubtitles is None and scrape_subscene is None:
         dl_data = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
         if show_download_window == "True" and os.path.exists(dl_data):
@@ -84,7 +92,9 @@ def run_search(video_file_path: str) -> None:
     file_manager.extract_zips(local_paths.cwd(), ".zip")
     file_manager.clean_up(local_paths.cwd(), ".zip")
     file_manager.clean_up(local_paths.cwd(), ").nfo")
-    file_manager.rename_srts(f"{param.release}.srt", local_paths.cwd(), f"{param.group}.srt", ".srt")
+    file_manager.rename_srts(
+        f"{param.release}.srt", local_paths.cwd(), f"{param.group}.srt", ".srt"
+    )
     file_manager.move_files(local_paths.cwd(), f"{param.release}.srt", ".srt")
     log.output("")
 

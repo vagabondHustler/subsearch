@@ -85,14 +85,20 @@ def get_command_value() -> str:
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
-        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        set_title = (
+            "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        )
         # gets the path of the root directory of subsearch
         set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('root')}');"
         import_main = "import main; os.chdir(working_path); main.main()"
         if show_terminal == "True":
-            value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = (
+                f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
+            )
         if show_terminal == "False":
-            value = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = (
+                f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
+            )
 
     return value
 
