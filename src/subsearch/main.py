@@ -17,10 +17,15 @@ def main(input: str = None) -> None:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
 
-    if local_paths.get_path("cwd") == local_paths.get_path("root") or input == "--settings":
+    if (
+        local_paths.get_path("cwd") == local_paths.get_path("root")
+        or input == "--settings"
+    ):
         widget_settings.show_widget()
 
-    elif local_paths.get_path("cwd") != local_paths.get_path("root") and not sys.argv[-1].endswith(".py"):
+    elif local_paths.get_path("cwd") != local_paths.get_path("root") and not sys.argv[
+        -1
+    ].endswith(".py"):
         search.run_search(sys.argv[-1])
 
 
