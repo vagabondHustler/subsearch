@@ -75,7 +75,7 @@ Install dependencies
 
 Run main.py from where it is located
 
-`python ./SubSearch/main.py`
+`python ./SubSearch/subsearch.py`
 
 To access the settings, run main.py again
 
