@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from util import log
+from utils import log
 
 
 # search for file hash

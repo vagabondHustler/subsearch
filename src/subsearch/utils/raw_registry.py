@@ -3,7 +3,7 @@ import socket
 import sys
 import winreg
 
-from util import current_user, local_paths
+from utils import current_user, local_paths
 
 COMPUTER_NAME = socket.gethostname()
 ASTERISK_PATH = r"Software\Classes\*"
@@ -73,7 +73,7 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 
 def get_command_value() -> str:
     # get latest json value from file
-    from util import raw_config
+    from utils import raw_config
 
     show_terminal = raw_config.get("show_terminal")
     if current_user.is_exe():
@@ -99,7 +99,7 @@ def get_command_value() -> str:
 
 def get_icon_value() -> str:
     # get latest json value from file
-    from util import raw_config
+    from utils import raw_config
 
     show_icon: str = raw_config.get("cm_icon")
     icon_path = local_paths.get_path("icons", "16.ico")
@@ -112,7 +112,7 @@ def get_icon_value() -> str:
 
 def get_appliesto_value() -> str:
     # get latest json value from file
-    from util import raw_config
+    from utils import raw_config
 
     file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on
