@@ -4,7 +4,6 @@ import tkinter as tk
 from gui import tkinter_data as tkd
 from util import local_paths
 
-
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
@@ -31,7 +30,9 @@ class Create(tk.Frame):
         padx=2,
         pady=2,
     ):
-        _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
+        _label = tk.Label(
+            self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor
+        )
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
@@ -115,15 +116,33 @@ class CustomTitleBar(tk.Frame):
         self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
         self.max_ina_png = tk.PhotoImage(file=self.max_ina_path)
         # place exit canvas and image
-        self.exit = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
+        self.exit = tk.Canvas(
+            self.bar,
+            width=37,
+            height=37,
+            bg=tkd.Color.light_black,
+            highlightthickness=0,
+        )
         self.exit.place(relx=1, rely=0, anchor="ne")
         self.update_img(self.exit, self.exit_grey_png)
         # place maximize canvas and image
-        self.maximize = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
+        self.maximize = tk.Canvas(
+            self.bar,
+            width=37,
+            height=37,
+            bg=tkd.Color.light_black,
+            highlightthickness=0,
+        )
         self.maximize.place(x=tkd.Window.width - 37, rely=0, anchor="ne")
         self.update_img(self.maximize, self.max_ina_png)
         # place tab canvas and image
-        self.tab = tk.Canvas(self.bar, width=37, height=37, bg=tkd.Color.light_black, highlightthickness=0)
+        self.tab = tk.Canvas(
+            self.bar,
+            width=37,
+            height=37,
+            bg=tkd.Color.light_black,
+            highlightthickness=0,
+        )
         self.tab.place(x=tkd.Window.width - 74, rely=0, anchor="ne")
         self.update_img(self.tab, self.tab_grey_png)
         # binds
@@ -239,9 +258,17 @@ class CustomBorder(tk.Frame):
         tk.Frame.__init__(self, parent)
         csx = tkd.Window.width
         csy = tkd.Window.height
-        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0)
+        self.canvas_border = tk.Canvas(
+            parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0
+        )
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
-        self.canvas_bg = tk.Canvas(parent, width=csx - 4, height=csy - 4, bg=tkd.Color.dark_grey, highlightthickness=0)
+        self.canvas_bg = tk.Canvas(
+            parent,
+            width=csx - 4,
+            height=csy - 4,
+            bg=tkd.Color.dark_grey,
+            highlightthickness=0,
+        )
         self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
 
         self.configure(bg=tkd.Color.light_black)
@@ -252,7 +279,13 @@ class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
 
-    def set(self, w=tkd.Window.width, h=tkd.Window.height, ws_value_offset=0, hs_value_offset=0):
+    def set(
+        self,
+        w=tkd.Window.width,
+        h=tkd.Window.height,
+        ws_value_offset=0,
+        hs_value_offset=0,
+    ):
         ws = self.winfo_screenwidth() + ws_value_offset
         hs = self.winfo_screenheight() + hs_value_offset
         x = int((ws / 2) - (w / 2))
@@ -316,7 +349,9 @@ class ToolTip(tk.Toplevel):
         # offset the frame 1px from edge of the tooltip corner
         frame.place(x=1, y=1, anchor="nw")
         label.place(x=0, y=0, anchor="nw")
-        root_x = self.widget.winfo_rootx() + self.widget.winfo_width() + 4  # offset the tooltip by extra 4px so it doesn't overlap the widget
+        root_x = (
+            self.widget.winfo_rootx() + self.widget.winfo_width() + 4
+        )  # offset the tooltip by extra 4px so it doesn't overlap the widget
         root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")

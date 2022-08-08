@@ -99,7 +99,9 @@ class DownloadList(tk.Frame):
         _i = _i.replace(")", "")
         items = _i.replace(",", "")
         _error = False
-        for (number, url), (name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
+        for (number, url), (name) in zip(
+            self.dicts_urls.items(), self.dicts_names.values()
+        ):
             if number == int(items):
                 self.sub_listbox.delete(int(number))
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
@@ -116,7 +118,9 @@ class DownloadList(tk.Frame):
                         file_manager.clean_up(local_paths.cwd(), ").nfo")
                         self.sub_listbox.delete(int(number))
                         self.sub_listbox.insert(int(number), f"✔ {name}")
-                        self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.green})
+                        self.sub_listbox.itemconfig(
+                            int(number), {"fg": tkd.Color.green}
+                        )
                         _error = False
                 except OSError:
                     _error = True

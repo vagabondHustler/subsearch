@@ -119,15 +119,16 @@ def get_icon_value() -> str:
 def get_appliesto_value() -> str:
     # get latest json value from file
     from util import raw_config
+
     file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on
     value = ""
     for k, v in zip(file_ext.keys(), file_ext.values()):
         if v == "True":
             value += "".join(f'"{k}" OR ')
-    if value.endswith(" OR "): # remove last OR
+    if value.endswith(" OR "):  # remove last OR
         value = value[:-4]
-        
+
     return value
 
 
