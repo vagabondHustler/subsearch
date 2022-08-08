@@ -1,7 +1,7 @@
 import sys
 
 from gui import widget_settings
-from util import current_user, local_paths, raw_config, raw_registry, search
+from utils import current_user, local_paths, raw_config, raw_registry, search
 
 
 def main(enter: str = None) -> None:
