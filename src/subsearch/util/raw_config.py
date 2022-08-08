@@ -4,9 +4,7 @@ from util import local_paths
 
 
 # update config.json
-def set_json(
-    key: str, value: str | int, directory: str = "data", file: str = "config.json"
-) -> None:
+def set_json(key: str, value: str | int, directory: str = "data", file: str = "config.json") -> None:
     with open(local_paths.get_path(directory, file), "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value

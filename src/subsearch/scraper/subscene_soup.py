@@ -4,9 +4,7 @@ import cloudscraper
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-SCRAPER = cloudscraper.create_scraper(
-    browser={"browser": "chrome", "platform": "android", "desktop": False}
-)
+SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
 def is_sub_hi(a1: Tag) -> str:
