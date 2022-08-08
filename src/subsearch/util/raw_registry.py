@@ -119,17 +119,15 @@ def get_icon_value() -> str:
 def get_appliesto_value() -> str:
     # get latest json value from file
     from util import raw_config
-
-    video_ext = raw_config.get("current_ext")
-    vide_ext_items = len(video_ext)
+    file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on
     value = ""
-    for i, num in zip(video_ext, range(0, vide_ext_items)):
-        if num == vide_ext_items - 1:
-            value += "".join(f'"{i}"')
-        else:
-            value += "".join(f'"{i}" OR ')
-
+    for k, v in zip(file_ext.keys(), file_ext.values()):
+        if v == "True":
+            value += "".join(f'"{k}" OR ')
+    if value.endswith(" OR "): # remove last OR
+        value = value[:-4]
+        
     return value
 
 
