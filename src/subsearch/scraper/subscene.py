@@ -25,12 +25,7 @@ def try_the_year_before(key: str, param=None) -> bool:
 
 # check if dict is of tv-series
 def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
-    if (
-        param.title
-        and param.season_ordinal in key.lower()
-        and param.tv_series
-        and lang_abbr
-    ):
+    if param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
         log.output(f"TV-Series {key} found")
         return True
     return False
@@ -38,12 +33,7 @@ def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
 
 # check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
-    if (
-        number.percentage >= pct
-        or param.title
-        and f"{param.season}{param.episode}" in key.lower()
-        and param.tv_series
-    ):
+    if number.percentage >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
         return True
     return False
 
@@ -68,9 +58,7 @@ def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
 
 
 # decides what to do with all the scrape data
-def scrape(
-    param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str
-) -> list | None:
+def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
     # search for titles
     to_be_scraped: list = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
@@ -114,9 +102,7 @@ def scrape(
             to_be_sorted_value = number.percentage, _name, _url
             to_be_sorted.append(to_be_sorted_value)
             if is_threshold(key, number, pct, param):
-                to_be_downloaded.append(
-                    value
-                ) if value not in to_be_downloaded else None
+                to_be_downloaded.append(value) if value not in to_be_downloaded else None
         to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
         sorted_list = log_and_sort_list(to_be_sorted, pct)
         log.output("Done with tasks")

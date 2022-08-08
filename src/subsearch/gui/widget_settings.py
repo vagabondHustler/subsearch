@@ -27,9 +27,7 @@ class SelectLanguage(tk.Frame):
         self.colcount = 1
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Selected language", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Selected language", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -63,18 +61,14 @@ class SelectLanguage(tk.Frame):
             height=2,
             width=24,
         )
-        self.entry = tk.Entry(
-            self, text="asdf", width=28, bd=0, font=tkd.Font.cas8b, justify="center"
-        )
+        self.entry = tk.Entry(self, text="asdf", width=28, bd=0, font=tkd.Font.cas8b, justify="center")
         self.entry.insert(0, "🞂 Enter language here 🞀")
         self.entry.configure(
             bg=tkd.Color.light_black,
             fg=tkd.Color.purple,
             insertbackground=tkd.Color.purple,
         )
-        self.entry.grid(
-            ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount
-        )
+        self.entry.grid(ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount)
         self.add_button = tools.Create.button(
             self,
             text="Add",
@@ -159,10 +153,7 @@ class SelectLanguage(tk.Frame):
 
     # entry functions
     def entry_enter(self, event):
-        if (
-            self.entry.get() == "🞂 Enter language here 🞀"
-            or self.entry.get() == "E.g: Czech, cs"
-        ):
+        if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
             self.clear_entry()
             self.entry.bind("<Leave>", self.entry_leave)
 
@@ -218,9 +209,7 @@ class HearingImparedSubs(tk.Frame):
             font=tkd.Font.cas8b,
             anchor="w",
         )
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
-        )
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="True",
@@ -279,12 +268,8 @@ class SearchThreshold(tk.Frame):
         self.pct = PCT
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Search threshold", sticky="w", font=tkd.Font.cas8b
-        )
-        self.clabel = tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Search threshold", sticky="w", font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="+",
@@ -328,9 +313,7 @@ class ShowContextMenu(tk.Frame):
         self.string_var.set(f"True")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Show context menu", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Show context menu", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -383,9 +366,7 @@ class AssociateExtensions(tk.Frame):
         self.ext_window_show = False
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Associateded extensions", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Associateded extensions", sticky="w", font=tkd.Font.cas8b)
 
         self.ext_button = tools.Create.button(
             self,
@@ -475,12 +456,8 @@ class FileExtSubMenu(tk.Toplevel):
         top_bar.configure(width=x + border_size, height=y + border_size)
         # offset the frame 1px from edge of the tooltip corner
         _frame.place(x=2, y=exit_size)
-        root_x = (
-            self.parent.winfo_rootx() + x_offset
-        )  # offset tooltip by extra 4px so it doesn't overlap the parent
-        root_y = (
-            root.winfo_rooty() + y_offset
-        )  # place ext window at the bot of the roo offset by ext window hight
+        root_x = self.parent.winfo_rootx() + x_offset  # offset tooltip by extra 4px so it doesn't overlap the parent
+        root_y = root.winfo_rooty() + y_offset  # place ext window at the bot of the roo offset by ext window hight
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x}x{y+nrow}+{root_x}+{root_y}")
 
@@ -572,9 +549,7 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -628,9 +603,7 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Show download window", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Show download window", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -679,9 +652,7 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(
-            self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -739,9 +710,7 @@ class CheckForUpdates(tk.Frame):
             sticky="w",
             font=tkd.Font.cas8b,
         )
-        tools.Create.label(
-            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
-        )
+        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
         tools.Create.button(
             self,
             text="Check for updates",

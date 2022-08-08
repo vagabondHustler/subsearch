@@ -30,9 +30,7 @@ class Create(tk.Frame):
         padx=2,
         pady=2,
     ):
-        _label = tk.Label(
-            self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor
-        )
+        _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
         _label.configure(bg=bg, fg=fg, font=font)
         _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
         return _label
@@ -258,9 +256,7 @@ class CustomBorder(tk.Frame):
         tk.Frame.__init__(self, parent)
         csx = tkd.Window.width
         csy = tkd.Window.height
-        self.canvas_border = tk.Canvas(
-            parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0
-        )
+        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0)
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
         self.canvas_bg = tk.Canvas(
             parent,

@@ -1,9 +1,7 @@
 import cloudscraper
 from util import version
 
-SCRAPER = cloudscraper.create_scraper(
-    browser={"browser": "chrome", "platform": "android", "desktop": False}
-)
+SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
 def check_for_updates() -> str:
