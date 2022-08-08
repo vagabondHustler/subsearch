@@ -85,14 +85,20 @@ def get_command_value() -> str:
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
-        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        set_title = (
+            "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        )
         # gets the path of the root directory of subsearch
         set_wd = f"import os; working_path = os.getcwd(); os.chdir('{local_paths.get_path('root')}');"
         import_main = "import main; os.chdir(working_path); main.main()"
         if show_terminal == "True":
-            value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = (
+                f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
+            )
         if show_terminal == "False":
-            value = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = (
+                f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
+            )
 
     return value
 
@@ -114,15 +120,14 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from util import raw_config
 
-    video_ext = raw_config.get("current_ext")
-    vide_ext_items = len(video_ext)
+    file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on
     value = ""
-    for i, num in zip(video_ext, range(0, vide_ext_items)):
-        if num == vide_ext_items - 1:
-            value += "".join(f'"{i}"')
-        else:
-            value += "".join(f'"{i}" OR ')
+    for k, v in zip(file_ext.keys(), file_ext.values()):
+        if v == "True":
+            value += "".join(f'"{k}" OR ')
+    if value.endswith(" OR "):  # remove last OR
+        value = value[:-4]
 
     return value
 

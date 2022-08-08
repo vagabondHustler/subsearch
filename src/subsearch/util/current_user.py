@@ -1,6 +1,6 @@
 import os
-import winreg as reg
 import socket
+import winreg as reg
 
 from util import local_paths
 

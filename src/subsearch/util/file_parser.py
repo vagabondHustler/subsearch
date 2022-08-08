@@ -18,12 +18,15 @@ class SearchParameters:
     group: str
     file_hash: str
 
+
 def split_last_hyphen(string: str) -> str:
     group = string.rsplit("-", 1)[-1]
     return group
 
 
-def get_parameters(dir_path: str, lang_abbr: str, file_hash: str, file_name: str) -> SearchParameters:
+def get_parameters(
+    dir_path: str, lang_abbr: str, file_hash: str, file_name: str
+) -> SearchParameters:
     # default values
     _title = None
     year = "N/A"
@@ -74,7 +77,9 @@ def get_parameters(dir_path: str, lang_abbr: str, file_hash: str, file_name: str
         group = split_last_hyphen(release)
 
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
-    opensubtitles = "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-"
+    opensubtitles = (
+        "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-"
+    )
     url_subscene = f"{subscene}{title}".replace(" ", "%20")
     url_opensubtitles = f"{opensubtitles}{file_hash}"
 
