@@ -15,13 +15,13 @@ def paths(file_name: str = None) -> dict:
         file = f"\\{file_name}"
     paths = {
         "cwd": cwd(),
-        "root": path.replace("\\util", f"{file}"),
-        "data": path.replace("\\util", f"\\data{file}"),
-        "gui": path.replace("\\util", f"\\gui{file}"),
-        "scraper": path.replace("\\util", f"\\scraper{file}"),
-        "util": path,
-        "icons": path.replace("\\util", f"\\assets\\icons{file}"),
-        "buttons": path.replace("\\util", f"\\assets\\buttons{file}"),
+        "root": path.replace("\\utils", f"{file}"),
+        "data": path.replace("\\utils", f"\\data{file}"),
+        "gui": path.replace("\\utils", f"\\gui{file}"),
+        "scraper": path.replace("\\utils", f"\\scraper{file}"),
+        "utils": path,
+        "icons": path.replace("\\utils", f"\\assets\\icons{file}"),
+        "buttons": path.replace("\\utils", f"\\assets\\buttons{file}"),
     }
     return paths
 
