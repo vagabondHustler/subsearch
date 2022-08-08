@@ -453,9 +453,11 @@ class FileExtSubMenu(tk.Toplevel):
         y_offset = tkd.Window.height - y - nrow
         # set the size of the tooltip background to be 1px larger than the label
         _frame.configure(width=x + border_size, height=y + border_size)
-        top_bar.configure(width=x + border_size, height=y + border_size)
+        top_bar.configure(width=x + border_size, height=exit_size)
         # offset the frame 1px from edge of the tooltip corner
         _frame.place(x=2, y=exit_size)
+        top_bar.place(x=x, y=0, anchor="ne")
+        # top_bar.lift()
         root_x = self.parent.winfo_rootx() + x_offset  # offset tooltip by extra 4px so it doesn't overlap the parent
         root_y = root.winfo_rooty() + y_offset  # place ext window at the bot of the roo offset by ext window hight
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
