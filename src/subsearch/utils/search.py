@@ -4,7 +4,7 @@ import time
 
 from gui import widget_download
 from scraper import opensubtitles, subscene
-from util import (
+from utils import (
     current_user,
     file_manager,
     file_parser,

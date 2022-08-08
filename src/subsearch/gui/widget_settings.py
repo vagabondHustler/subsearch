@@ -4,7 +4,7 @@ import webbrowser
 
 from gui import tkinter_data as tkd
 from gui import tools, widget_root
-from util import current_user, local_paths, raw_config, raw_registry, updates, version
+from utils import current_user, local_paths, raw_config, raw_registry, updates, version
 
 LANGUAGES = raw_config.get("languages")
 OTHER_LANGUAGES = raw_config.get("other_languages")
@@ -344,7 +344,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
@@ -352,7 +352,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.remove_context_menu()
 
@@ -444,7 +444,7 @@ class FileExtSubMenu(tk.Toplevel):
             self.btn[i].bind("<Button-1>", self.set_language)
         # get size of the label to use later for positioning and sizing of the tooltip, + 2 to account padx/pady 1px
         _x, _y = self.btn[0].winfo_reqwidth() + 2, self.btn[0].winfo_reqheight() + 2
-        # 2 rows half is lenght, 2 columns is width
+        # 2 rows half is length, 2 columns is width
         nrow = round(len(AVAILABLE_EXT) / 2)
         ncol = round(2)
         x = round(_x * ncol)
@@ -453,9 +453,11 @@ class FileExtSubMenu(tk.Toplevel):
         y_offset = tkd.Window.height - y - nrow
         # set the size of the tooltip background to be 1px larger than the label
         _frame.configure(width=x + border_size, height=y + border_size)
-        top_bar.configure(width=x + border_size, height=y + border_size)
+        top_bar.configure(width=x + border_size, height=exit_size)
         # offset the frame 1px from edge of the tooltip corner
         _frame.place(x=2, y=exit_size)
+        top_bar.place(x=x, y=0, anchor="ne")
+        # top_bar.lift()
         root_x = self.parent.winfo_rootx() + x_offset  # offset tooltip by extra 4px so it doesn't overlap the parent
         root_y = root.winfo_rooty() + y_offset  # place ext window at the bot of the roo offset by ext window hight
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
@@ -496,14 +498,14 @@ class FileExtSubMenu(tk.Toplevel):
             f.truncate()
 
     def exit_release(self, event):
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_all_valuex()
         self.window_showing = False
         self.destroy()
 
     def toggle_window(self):
-        from util import raw_registry
+        from utils import raw_registry
 
         self.destroy()
         self.window_showing = False
@@ -581,7 +583,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_valuex("icon")
 
@@ -590,7 +592,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_valuex("icon")
 
