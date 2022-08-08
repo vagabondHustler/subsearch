@@ -1,5 +1,5 @@
 import cloudscraper
-from util import version
+from utils import version
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 

@@ -2,7 +2,7 @@ import tkinter as tk
 
 from gui import tkinter_data as tkd
 from gui import tools
-from util import local_paths
+from utils import local_paths
 
 
 def main():

@@ -2,7 +2,7 @@ import ctypes
 import tkinter as tk
 
 from gui import tkinter_data as tkd
-from util import local_paths
+from utils import local_paths
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000

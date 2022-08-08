@@ -4,7 +4,7 @@ import webbrowser
 
 from gui import tkinter_data as tkd
 from gui import tools, widget_root
-from util import current_user, local_paths, raw_config, raw_registry, updates, version
+from utils import current_user, local_paths, raw_config, raw_registry, updates, version
 
 LANGUAGES = raw_config.get("languages")
 OTHER_LANGUAGES = raw_config.get("other_languages")
@@ -344,7 +344,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
@@ -352,7 +352,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.remove_context_menu()
 
@@ -498,14 +498,14 @@ class FileExtSubMenu(tk.Toplevel):
             f.truncate()
 
     def exit_release(self, event):
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_all_valuex()
         self.window_showing = False
         self.destroy()
 
     def toggle_window(self):
-        from util import raw_registry
+        from utils import raw_registry
 
         self.destroy()
         self.window_showing = False
@@ -583,7 +583,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_valuex("icon")
 
@@ -592,7 +592,7 @@ class ShowContextMenuIcon(tk.Frame):
         update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", update_svar)
-        from util import raw_registry
+        from utils import raw_registry
 
         raw_registry.write_valuex("icon")
 

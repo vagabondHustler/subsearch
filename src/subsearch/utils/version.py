@@ -1,6 +1,6 @@
 import json
 
-from util import local_paths
+from utils import local_paths
 
 
 def read_data(config_file: str) -> dict:
