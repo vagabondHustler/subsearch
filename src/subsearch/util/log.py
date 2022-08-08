@@ -22,7 +22,9 @@ def output(msg: str, print_to_terminal: bool = True) -> None:
 
 
 # log and print all the used parameters from video/directory-name
-def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int) -> None:
+def parameters(
+    param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int
+) -> None:
     current_version = version.current()
     output(f"SubSearch - {current_version} ", False)
     output("[PARAMETERS]")

@@ -1,15 +1,10 @@
+import json
 import tkinter as tk
 import webbrowser
 
 from gui import tkinter_data as tkd
 from gui import tools, widget_root
-from util import (
-    current_user,
-    raw_config,
-    raw_registry,
-    updates,
-    version,
-)
+from util import current_user, local_paths, raw_config, raw_registry, updates, version
 
 LANGUAGES = raw_config.get("languages")
 OTHER_LANGUAGES = raw_config.get("other_languages")
@@ -19,6 +14,7 @@ PCT = raw_config.get("percentage")
 SHOW_TERMINAL = raw_config.get("show_terminal")
 CM_ICON = raw_config.get("cm_icon")
 DL_WINDOW = raw_config.get("show_download_window")
+AVAILABLE_EXT = raw_config.get("file_ext")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -31,8 +27,16 @@ class SelectLanguage(tk.Frame):
         self.colcount = 1
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Selected language", sticky="w", font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.yellow, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Selected language", sticky="w", font=tkd.Font.cas8b
+        )
+        self.clabel = tools.Create.label(
+            self,
+            textvar=self.string_var,
+            fg=tkd.Color.yellow,
+            col=2,
+            font=tkd.Font.cas8b,
+        )
         for i in range(number_of_buttons):
             self.rowcount += 1
             if self.rowcount == 8:
@@ -59,10 +63,18 @@ class SelectLanguage(tk.Frame):
             height=2,
             width=24,
         )
-        self.entry = tk.Entry(self, text="asdf", width=28, bd=0, font=tkd.Font.cas8b, justify="center")
+        self.entry = tk.Entry(
+            self, text="asdf", width=28, bd=0, font=tkd.Font.cas8b, justify="center"
+        )
         self.entry.insert(0, "🞂 Enter language here 🞀")
-        self.entry.configure(bg=tkd.Color.light_black, fg=tkd.Color.purple, insertbackground=tkd.Color.purple)
-        self.entry.grid(ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount)
+        self.entry.configure(
+            bg=tkd.Color.light_black,
+            fg=tkd.Color.purple,
+            insertbackground=tkd.Color.purple,
+        )
+        self.entry.grid(
+            ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount
+        )
         self.add_button = tools.Create.button(
             self,
             text="Add",
@@ -112,7 +124,13 @@ class SelectLanguage(tk.Frame):
         self.toplvl = tk.Toplevel(background=tkd.Color.light_black, borderwidth=0)
         self.toplvl.overrideredirect(True)
 
-        self.frame = tk.Frame(self.toplvl, background=tkd.Color.dark_grey, width=csx, height=csy, borderwidth=0)
+        self.frame = tk.Frame(
+            self.toplvl,
+            background=tkd.Color.dark_grey,
+            width=csx,
+            height=csy,
+            borderwidth=0,
+        )
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
 
         root_x = root.winfo_rootx() + tkd.Window.width + 10
@@ -141,7 +159,10 @@ class SelectLanguage(tk.Frame):
 
     # entry functions
     def entry_enter(self, event):
-        if self.entry.get() == "🞂 Enter language here 🞀" or self.entry.get() == "E.g: Czech, cs":
+        if (
+            self.entry.get() == "🞂 Enter language here 🞀"
+            or self.entry.get() == "E.g: Czech, cs"
+        ):
             self.clear_entry()
             self.entry.bind("<Leave>", self.entry_leave)
 
@@ -190,8 +211,16 @@ class HearingImparedSubs(tk.Frame):
         self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Hearing impaired subtitles", sticky="w", font=tkd.Font.cas8b, anchor="w")
-        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(
+            self,
+            text="Hearing impaired subtitles",
+            sticky="w",
+            font=tkd.Font.cas8b,
+            anchor="w",
+        )
+        self.clabel = tools.Create.label(
+            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
+        )
         tools.Create.button(
             self,
             text="True",
@@ -250,8 +279,12 @@ class SearchThreshold(tk.Frame):
         self.pct = PCT
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Search threshold", sticky="w", font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Search threshold", sticky="w", font=tkd.Font.cas8b
+        )
+        self.clabel = tools.Create.label(
+            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
+        )
         tools.Create.button(
             self,
             text="+",
@@ -295,7 +328,9 @@ class ShowContextMenu(tk.Frame):
         self.string_var.set(f"True")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu", sticky="w", font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Show context menu", sticky="w", font=tkd.Font.cas8b
+        )
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -339,6 +374,196 @@ class ShowContextMenu(tk.Frame):
         raw_registry.remove_context_menu()
 
 
+# * need cleanup and comments but works
+# remove or restore the context menu option when right-clicking
+class AssociateExtensions(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+
+        self.ext_window_show = False
+        for i in range(1, 4):
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+        tools.Create.label(
+            self, text="Associateded extensions", sticky="w", font=tkd.Font.cas8b
+        )
+
+        self.ext_button = tools.Create.button(
+            self,
+            text="Show menu",
+            height=1,
+            width=24,
+            tip_show=True,
+            tip_text="Which file extension to show the context menu on",
+        )
+        self.fesm = FileExtSubMenu(self)
+        self.ext_button.bind("<Button-1>", self.toggle_window)
+        self.configure(bg=tkd.Color.dark_grey)
+
+    def toggle_window(self, event):
+        self.ext_window_show = self.fesm.window_showing_check()
+        if self.ext_window_show:
+            self.fesm.toggle_window()
+            self.ext_window_show = self.fesm.window_showing_check()
+        else:
+            self.fesm.show()
+            self.ext_window_show = self.fesm.window_showing_check()
+
+
+class FileExtSubMenu(tk.Toplevel):
+    def __init__(self, parent):
+        self.parent = parent
+        self.window_showing = False
+
+    def show(self):
+        self.files = []
+        self.btn = []
+        self.window_showing = True
+        tk.Toplevel.__init__(self, self.parent)
+        self.configure(background=tkd.Color.light_black)
+        # remove the standard window titlebar from the tooltip
+        self.overrideredirect(True)
+        self.attributes("-topmost", True)
+        button_width = 10
+        exit_size = 19
+        border_size = 2 * 2
+        top_bar = tk.Frame(self, background=tkd.Color.light_black)
+        _frame = tk.Frame(self, background=tkd.Color.light_grey)
+        data = raw_config.get_json()
+        for i in range(len(AVAILABLE_EXT.keys())):
+            self.files.append("Button" + str(i))
+
+        for i, ext in zip(range(len(self.files)), AVAILABLE_EXT.keys()):
+            rownum = i
+            if (rownum % 2) == 0:
+                colnum = 0
+            else:
+                rownum -= 1
+                colnum = 1
+
+            self.btn.append(
+                tk.Button(
+                    _frame,
+                    text=ext,
+                    font=tkd.Font.cas8b,
+                    bg=tkd.Color.dark_grey,
+                    fg=tkd.Color.white_grey,
+                    activebackground=tkd.Color.dark_grey,
+                    activeforeground=tkd.Color.yellow,
+                    width=button_width,
+                    bd=0,
+                    command=lambda c=i: self.btn[c].cget("text"),
+                )
+            )
+            if data["file_ext"][ext] == "False":
+                self.btn[i].configure(fg=tkd.Color.red)
+            elif data["file_ext"][ext] == "True":
+                self.btn[i].configure(fg=tkd.Color.green)
+
+            self.btn[i].grid(row=rownum, column=colnum)
+            self.btn[i].bind("<Button-1>", self.set_language)
+        # get size of the label to use later for positioning and sizing of the tooltip, + 2 to account padx/pady 1px
+        _x, _y = self.btn[0].winfo_reqwidth() + 2, self.btn[0].winfo_reqheight() + 2
+        # 2 rows half is lenght, 2 columns is width
+        nrow = round(len(AVAILABLE_EXT) / 2)
+        ncol = round(2)
+        x = round(_x * ncol)
+        y = round(_y * nrow)
+        x_offset = tkd.Window.width + button_width - _x
+        y_offset = tkd.Window.height - y - nrow
+        # set the size of the tooltip background to be 1px larger than the label
+        _frame.configure(width=x + border_size, height=y + border_size)
+        top_bar.configure(width=x + border_size, height=y + border_size)
+        # offset the frame 1px from edge of the tooltip corner
+        _frame.place(x=2, y=exit_size)
+        root_x = (
+            self.parent.winfo_rootx() + x_offset
+        )  # offset tooltip by extra 4px so it doesn't overlap the parent
+        root_y = (
+            root.winfo_rooty() + y_offset
+        )  # place ext window at the bot of the roo offset by ext window hight
+        # set position of the tooltip, size and add 2px around the tooltip for a 1px border
+        self.geometry(f"{x}x{y+nrow}+{root_x}+{root_y}")
+
+        self.exit_path = local_paths.get_path("buttons", "exit.png")
+        self.exit_grey_path = local_paths.get_path("buttons", "exit_grey.png")
+        self.exit_png = tk.PhotoImage(file=self.exit_path)
+        self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
+        self.exit = tk.Canvas(
+            self,
+            width=exit_size,
+            height=exit_size,
+            bg=tkd.Color.light_black,
+            highlightthickness=0,
+        )
+        self.exit.place(relx=1, y=0, anchor="ne")
+        self.update_img(self.exit, self.exit_grey_png)
+        self.exit.bind("<Enter>", self.exit_enter)
+        self.exit.bind("<Leave>", self.exit_leave)
+        top_bar.bind("<Button-1>", self.tb_press)
+        top_bar.bind("<B1-Motion>", self.tb_drag)
+        return self.window_showing
+
+    def set_language(self, event):
+
+        btn = event.widget
+        data = raw_config.get_json()
+        if data["file_ext"][btn.cget("text")] == "True":
+            data["file_ext"][btn.cget("text")] = "False"
+            btn.configure(fg=tkd.Color.red)
+        else:
+            data["file_ext"][btn.cget("text")] = "True"
+            btn.configure(fg=tkd.Color.green)
+        with open(local_paths.get_path("data", "config.json"), "w") as f:
+            f.seek(0)
+            json.dump(data, f, indent=4)
+            f.truncate()
+
+    def exit_release(self, event):
+        from util import raw_registry
+
+        raw_registry.write_all_valuex()
+        self.window_showing = False
+        self.destroy()
+
+    def toggle_window(self):
+        from util import raw_registry
+
+        self.destroy()
+        self.window_showing = False
+        raw_registry.write_all_valuex()
+
+    def window_showing_check(self):
+        return self.window_showing
+
+    def exit_press(self, event):
+        self.exit.configure(bg=tkd.Color.dark_red)
+        self.exit.bind("<ButtonRelease-1>", self.exit_release)
+
+    def exit_enter(self, event):
+        self.exit.configure(bg=tkd.Color.red)
+        self.update_img(self.exit, self.exit_png)
+        self.exit.bind("<ButtonPress-1>", self.exit_press)
+
+    def exit_leave(self, event):
+        self.exit.configure(bg=tkd.Color.light_black)
+        self.update_img(self.exit, self.exit_grey_png)
+        self.exit.unbind("<ButtonRelease-1>")
+
+    def update_img(self, canvas, img):
+        canvas.delete("all")
+        canvas.create_image(9, 9, image=img)
+        canvas.photoimage = img
+
+    def tb_press(self, event):
+        self._offsetx = self.winfo_pointerx() - self.winfo_rootx()
+        self._offsety = self.winfo_pointery() - self.winfo_rooty()
+
+    def tb_drag(self, event):
+        x = self.winfo_pointerx() - self._offsetx
+        y = self.winfo_pointery() - self._offsety
+        self.geometry(f"+{x}+{y}")
+
+
 # remove or restore the icon next to the context menu option when right clicking
 class ShowContextMenuIcon(tk.Frame):
     def __init__(self, parent):
@@ -347,7 +572,9 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b
+        )
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -401,7 +628,9 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show download window", sticky="w", font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Show download window", sticky="w", font=tkd.Font.cas8b
+        )
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -450,7 +679,9 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b
+        )
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
@@ -508,12 +739,14 @@ class CheckForUpdates(tk.Frame):
             sticky="w",
             font=tkd.Font.cas8b,
         )
-        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(
+            self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b
+        )
         tools.Create.button(
             self,
             text="Check for updates",
             height=2,
-            width=18,
+            width=24,
             fge=tkd.Color.green,
             bind_to=self.button_check,
         )
@@ -529,7 +762,7 @@ class CheckForUpdates(tk.Frame):
                 self,
                 text=f"Get {latest_version}",
                 height=2,
-                width=18,
+                width=24,
                 bind_to=self.button_download,
             )
 
@@ -558,6 +791,7 @@ def show_widget():
     tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
+    AssociateExtensions(root).pack(anchor="center")
     ShowDownloadWindow(root).pack(anchor="center")
     if current_user.is_exe() is False:
         ShowTerminalOnSearch(root).pack(anchor="center")
