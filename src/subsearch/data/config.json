@@ -78,36 +78,20 @@
     "context_menu_icon": "True",
     "show_download_window": "True",
     "show_terminal": "False",
-    "current_ext": [
-        ".avi",
-        ".mp4",
-        ".mkv",
-        ".mpg",
-        ".mpeg",
-        ".mov",
-        ".rm",
-        ".vob",
-        ".wmv",
-        ".flv",
-        ".3gp",
-        ".3g2",
-        ".swf",
-        ".mswmm"
-    ],
-    "available_ext": [
-        ".avi",
-        ".mp4",
-        ".mkv",
-        ".mpg",
-        ".mpeg",
-        ".mov",
-        ".rm",
-        ".vob",
-        ".wmv",
-        ".flv",
-        ".3gp",
-        ".3g2",
-        ".swf",
-        ".mswmm"
-    ]
+    "file_ext": {
+        ".avi": "True",
+        ".mp4": "True",
+        ".mkv": "True",
+        ".mpg": "True",
+        ".mpeg": "True",
+        ".mov": "True",
+        ".rm": "True",
+        ".vob": "True",
+        ".wmv": "True",
+        ".flv": "True",
+        ".3gp": "True",
+        ".3g2": "True",
+        ".swf": "True",
+        ".mswmm": "True"
+    }
 }
