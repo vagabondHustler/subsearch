@@ -11,7 +11,7 @@ added_binaries = [
         ]
 
 a = Analysis(
-    ['subsearch/main.py'],
+    ['subsearch/subsearch.py'],
     pathex=[],
     binaries=added_binaries,
     datas=added_files,
