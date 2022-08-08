@@ -444,7 +444,7 @@ class FileExtSubMenu(tk.Toplevel):
             self.btn[i].bind("<Button-1>", self.set_language)
         # get size of the label to use later for positioning and sizing of the tooltip, + 2 to account padx/pady 1px
         _x, _y = self.btn[0].winfo_reqwidth() + 2, self.btn[0].winfo_reqheight() + 2
-        # 2 rows half is lenght, 2 columns is width
+        # 2 rows half is length, 2 columns is width
         nrow = round(len(AVAILABLE_EXT) / 2)
         ncol = round(2)
         x = round(_x * ncol)
