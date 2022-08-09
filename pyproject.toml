@@ -1,5 +1,9 @@
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
-line-lenght = 120
+line-length = 120
 
 [tool.isort]
 profile = "black"
