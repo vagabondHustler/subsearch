@@ -7,14 +7,14 @@ from gui import tools, widget_root
 from utils import current_user, local_paths, raw_config, raw_registry, updates, version
 
 LANGUAGES = raw_config.get("languages")
-OTHER_LANGUAGES = raw_config.get("other_languages")
+OTH_LANGUAGES = raw_config.get("other_languages")
 LANGUAGE, LANG_ABBR = raw_config.get("language")
 HEARING_IMPARED = raw_config.get("hearing_impaired")
 PCT = raw_config.get("percentage")
 SHOW_TERMINAL = raw_config.get("show_terminal")
 CM_ICON = raw_config.get("cm_icon")
 DL_WINDOW = raw_config.get("show_download_window")
-AVAILABLE_EXT = raw_config.get("file_ext")
+AVAIL_EXT = raw_config.get("file_ext")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -108,7 +108,7 @@ class SelectLanguage(tk.Frame):
     def popup_window(self, event):
         # * see 'cleaner' version of this function src.gui.tools.Tooltip
         self.clear_entry()
-        rows = len(OTHER_LANGUAGES) / 2
+        rows = len(OTH_LANGUAGES) / 2
         cols = 2
         row_size_y = 20.16
         col_size_x = 113
@@ -130,7 +130,7 @@ class SelectLanguage(tk.Frame):
         root_x = root.winfo_rootx() + tkd.Window.width + 10
         root_y = root.winfo_rooty() + 37
         self.toplvl.geometry(f"{csx}x{csy}+{root_x}+{root_y}")
-        for num, i in zip(range(0, 50), OTHER_LANGUAGES):
+        for num, i in zip(range(0, 50), OTH_LANGUAGES):
             tools.Create.label(
                 self.frame,
                 bg=tkd.Color.dark_grey,
@@ -182,7 +182,7 @@ class SelectLanguage(tk.Frame):
     # add language from entry
     def add_language(self, event):
         x = self.entry.get()
-        for i in OTHER_LANGUAGES:
+        for i in OTH_LANGUAGES:
             if x == i:
                 self.string_var.set(self.entry.get())
                 self.entry.configure(fg=tkd.Color.white_grey)
@@ -410,10 +410,10 @@ class FileExtSubMenu(tk.Toplevel):
         top_bar = tk.Frame(self, background=tkd.Color.light_black)
         _frame = tk.Frame(self, background=tkd.Color.light_grey)
         data = raw_config.get_json()
-        for i in range(len(AVAILABLE_EXT.keys())):
+        for i in range(len(AVAIL_EXT.keys())):
             self.files.append("Button" + str(i))
 
-        for i, ext in zip(range(len(self.files)), AVAILABLE_EXT.keys()):
+        for i, ext in zip(range(len(self.files)), AVAIL_EXT.keys()):
             rownum = i
             if (rownum % 2) == 0:
                 colnum = 0
@@ -445,7 +445,7 @@ class FileExtSubMenu(tk.Toplevel):
         # get size of the label to use later for positioning and sizing of the tooltip, + 2 to account padx/pady 1px
         _x, _y = self.btn[0].winfo_reqwidth() + 2, self.btn[0].winfo_reqheight() + 2
         # 2 rows half is length, 2 columns is width
-        nrow = round(len(AVAILABLE_EXT) / 2)
+        nrow = round(len(AVAIL_EXT) / 2)
         ncol = round(2)
         x = round(_x * ncol)
         y = round(_y * nrow)
