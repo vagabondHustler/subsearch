@@ -24,7 +24,7 @@ def split_last_hyphen(string: str) -> str:
     return group
 
 
-def get_parameters(dir_path: str, lang_abbr: str, file_hash: str, file_name: str) -> SearchParameters:
+def get_parameters(lang_abbr: str, file_hash: str, file_name: str) -> SearchParameters:
     # default values
     _title = None
     year = "N/A"
@@ -36,11 +36,7 @@ def get_parameters(dir_path: str, lang_abbr: str, file_hash: str, file_name: str
     tv_series = False
     year_found = False
 
-    # if no file is found use the current directory path
-    if file_name is None:
-        release = dir_path.split("\\")[-1]
-    else:
-        release = file_name
+    release = file_name
 
     # find season, episode, make it ordinal and set tv_series to true if it is a tv-series
     for item in release.lower().split("."):
