@@ -1,0 +1,35 @@
+name: Lint
+
+on:
+  push:
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  lint:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      - name: Install black & isort
+        run: |
+          pip install black
+          pip install isort
+          isort ./src --profile 'black'
+          black ./src -l 125
+      - name: Pull and Push
+        run: |
+          git pull origin main
+          git add -A
+          git commit -S -m "Format: blacken"
+          git push origin main
+
+
+
