@@ -102,7 +102,6 @@ celerybeat.pid
 # Environments
 .env
 .venv
-.test*
 env/
 venv/
 ENV/
@@ -127,17 +126,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Temporary files
-test/
-test*.*
-language
-old*
-*.zip
-*.srt
-subs/
-./*.log
-__subsearch__*.*
-
 # Prevent users to commit the README
 *README.html
 *README_cache/
@@ -156,4 +144,15 @@ desktop.ini
 
 # README.md settings
 .markdownlint.json
+
+# Subsearch
+src/*test*
+src/*/__subsearch__*.*
+src/__subsearch__*.*
+src/*language
+src/old*
+src/*.zip
+src/*.srt
+src/*subs/
+src/*.log
 
