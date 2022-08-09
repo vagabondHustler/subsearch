@@ -154,7 +154,7 @@ src/old*
 src/*.zip
 src/*.srt
 src/*subs/
-src/*.log
+/*.log
 
 # misc test
 test_launch.json
