@@ -17,7 +17,6 @@ CWD = f'{local_paths.get_path("cwd")}\\tests\\test_files'
 copy_and_rename(SRC, DST)
 
 
-
 # extract all zip file in said directory
 def test_extract_zips() -> None:
     """

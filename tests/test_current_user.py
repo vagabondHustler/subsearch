@@ -7,6 +7,7 @@ def test_got_key() -> None:
     """
     assert current_user.got_key() or current_user.got_key() is False
 
+
 def test_is_exe() -> None:
     """
     test to ensure that the current_user.is_exe function returns boolean
