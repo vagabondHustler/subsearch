@@ -63,7 +63,7 @@ def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
             if not os.path.exists(dir_subs):
                 os.mkdir(dir_subs)
             log.output(f"Moving: {file} to /subs/")
-            if not os.path.isfile(dir_sub_file):
+            if os.path.isfile(dir_sub_file):
                 os.remove(file_path)
             shutil.move(file_path, dir_sub_file)
 
