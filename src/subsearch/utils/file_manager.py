@@ -23,7 +23,8 @@ def extract_zips(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Extracting: {file}")
-            file_name = os.path.abspath(file)
+            file_name = os.path.join(cwd_path, file)
+            # file_name = os.path.abspath(file)
             zip_ref = zipfile.ZipFile(file_name)
             zip_ref.extractall(f"{cwd_path}")
             zip_ref.close()
