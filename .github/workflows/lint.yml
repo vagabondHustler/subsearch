@@ -25,8 +25,8 @@ jobs:
           black ./src -l 125
       - run: |
           git pull origin main
-          git add .
-          git -m "Format: blacken"
+          git add -A
+          git commit -S -m "Format: blacken"
           git push origin main
 
 
