@@ -2,9 +2,10 @@ import json
 import tkinter as tk
 import webbrowser
 
-from gui import tkinter_data as tkd
-from gui import tools, widget_root
 from utils import current_user, local_paths, raw_config, raw_registry, updates, version
+
+from . import tkinter_data as tkd
+from . import tools, widget_root
 
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")

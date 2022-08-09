@@ -2,10 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
-from gui import tkinter_data as tkd
-from gui import widget_root
 from scraper import subscene_soup
 from utils import file_manager, local_paths
+
+from . import tkinter_data as tkd
+from . import widget_root
 
 
 # file with subtitles and corresponding dl links
