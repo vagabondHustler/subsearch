@@ -4,7 +4,8 @@ import time
 
 from gui import widget_download
 from scraper import opensubtitles, subscene
-from utils import (
+
+from . import (
     current_user,
     file_manager,
     file_parser,
@@ -31,13 +32,13 @@ def run_search(video_file_path: str) -> None:
     pct = raw_config.get("percentage")
     show_download_window = raw_config.get("show_download_window")
     show_terminal = raw_config.get("show_terminal")
-    video_file_name_ext = video_file_path.split("\\")[-1]
+    video_file_name_ext = video_file_path.lower().split("\\")[-1]
     video_file_name, video_file_ext = video_file_name_ext.rsplit(".", 1)
     video_file_name_ext = f"{video_file_name}.{video_file_ext}"
     file_hash = file_manager.get_hash(video_file_name_ext)
 
     try:
-        param = file_parser.get_parameters(local_paths.cwd().lower(), lang_abbr, file_hash, video_file_name.lower())
+        param = file_parser.get_parameters(video_file_name, file_hash, lang_abbr)
     except IndexError as err:
         log.output(err)
         if show_terminal == "True":
