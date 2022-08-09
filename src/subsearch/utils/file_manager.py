@@ -4,9 +4,11 @@ import struct
 import zipfile
 
 import cloudscraper
-from utils import log
+
+from . import local_paths, log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+
 
 # download zip files from url
 def download_zip_auto(item: str) -> None:
@@ -31,11 +33,13 @@ def extract_zips(cwd_path: str, extension: str) -> None:
 
 
 # rename a .srts to the same as video release name
-def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str) -> None:
-    for file in os.listdir(cwd_path):
-        if file.endswith(prefered_extension) and os.path.exists(new_name) is False:
+def rename_srts(new_name: str, cwd: str, group_and_ext: str, extension: str) -> None:
+    for file in os.listdir(cwd):
+        if file.endswith(group_and_ext) and os.path.exists(new_name) is False:
             log.output(f"Renaming: {file} to {new_name}")
-            os.rename(file, new_name)
+            src_file = f"{cwd}\\{file}"
+            dst_file = f"{cwd}\\{new_name}"
+            os.rename(src_file, dst_file)
             return
 
         elif file.endswith(extension) and os.path.exists(new_name) is False:
