@@ -156,3 +156,5 @@ src/*.srt
 src/*subs/
 src/*.log
 
+# misc test
+test_launch.json
