@@ -19,7 +19,7 @@ def paths(file_name: str = None) -> dict:
         "data": path.replace("\\utils", f"\\data{file}"),
         "gui": path.replace("\\utils", f"\\gui{file}"),
         "scraper": path.replace("\\utils", f"\\scraper{file}"),
-        "utils": path,
+        "utils": f"{path}{file}",
         "icons": path.replace("\\utils", f"\\assets\\icons{file}"),
         "buttons": path.replace("\\utils", f"\\assets\\buttons{file}"),
     }
@@ -37,8 +37,3 @@ def get_path(directory: str, file_name: str = None) -> str:
         dict[str, str]: path to directory or directory and file
     """
     return paths(file_name)[f"{directory}"].lower()
-
-
-def add_file_to_path(root_dir_path: str, file_name: str) -> str:
-    file_path = f"{root_dir_path}\{file_name}"
-    return file_path
