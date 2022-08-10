@@ -2,7 +2,7 @@ import os
 import socket
 import winreg as reg
 
-from utils import local_paths
+from . import local_paths
 
 COMPUTER_NAME = socket.gethostname()
 
@@ -17,6 +17,7 @@ def got_key() -> bool:
     try:
         with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
             reg.OpenKey(hkey, sub_key)
+            return True
     except Exception:
         return False
 

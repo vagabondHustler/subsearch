@@ -3,7 +3,7 @@ import socket
 import sys
 import winreg
 
-from utils import current_user, local_paths
+from . import current_user, local_paths
 
 COMPUTER_NAME = socket.gethostname()
 ASTERISK_PATH = r"Software\Classes\*"

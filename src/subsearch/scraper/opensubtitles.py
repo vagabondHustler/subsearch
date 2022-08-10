@@ -1,5 +1,6 @@
-from scraper import opensubtitles_soup
 from utils import local_paths, log
+
+from . import opensubtitles_soup
 
 
 # decides what to do with all the scrape data

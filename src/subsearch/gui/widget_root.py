@@ -1,8 +1,9 @@
 import tkinter as tk
 
-from gui import tkinter_data as tkd
-from gui import tools
 from utils import local_paths
+
+from . import tkinter_data as tkd
+from . import tools
 
 
 def main():
