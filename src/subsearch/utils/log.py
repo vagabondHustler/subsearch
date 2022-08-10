@@ -3,8 +3,8 @@ from datetime import datetime
 
 from . import version
 
-now = datetime.now()
-date = now.strftime("%y%m%d")
+NOW = datetime.now()
+DATE = NOW.strftime("%y%m%d")
 
 
 logging.basicConfig(
