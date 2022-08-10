@@ -17,7 +17,6 @@ CWD = f'{local_paths.get_path("cwd")}\\tests\\test_files'
 copy_and_rename(SRC, DST)
 
 
-# extract all zip file in said directory
 def test_extract_zips() -> None:
     """
     test the extract_zips function in file_manager.py
@@ -25,7 +24,6 @@ def test_extract_zips() -> None:
     file_manager.extract_zips(CWD, ".zip")
 
 
-# rename a .srts to the same as video release name
 def test_rename_srts() -> None:
     """
     test the rename_srts function in file_manager.py
@@ -33,7 +31,6 @@ def test_rename_srts() -> None:
     file_manager.rename_srts(f"test.movie.2022.1080p-group.srt", CWD, f"group.srt", ".srt")
 
 
-# move unused .srt to /subs/
 def test_move_files() -> None:
     """
     test the move_files function in file_manager.py
@@ -41,7 +38,6 @@ def test_move_files() -> None:
     file_manager.move_files(CWD, "group.srt", ".srt")
 
 
-# remove .zips
 def test_clean_up() -> None:
     """
     test the clean_up function in file_manager.py
@@ -51,7 +47,6 @@ def test_clean_up() -> None:
     file_manager.clean_up(f"{CWD}\\subs", ".srt")
 
 
-# get file hash
 def test_get_hash() -> None:
     """
     test the get_hash function in file_manager.py
