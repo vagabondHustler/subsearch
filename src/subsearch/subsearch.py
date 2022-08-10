@@ -12,12 +12,14 @@ def main(enter: str = None) -> None:
     ----------
     input : str, optional
         --settings, by default None
+        if sys.argv[1] == "subsearch.py", enter = "--settings":
 
     """
     if current_user.got_key() is False:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
-
+    if sys.argv[-1].endswith("subsearch.py"):
+        enter = "--settings"
     if local_paths.get_path("cwd") == local_paths.get_path("root") or enter == "--settings":
         widget_settings.show_widget()
 

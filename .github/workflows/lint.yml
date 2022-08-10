@@ -2,9 +2,10 @@ name: Lint
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
+
 
 jobs:
   lint:
@@ -30,6 +31,4 @@ jobs:
           git add -A
           git commit -S -m "Format: blacken"
           git push origin main
-
-
 

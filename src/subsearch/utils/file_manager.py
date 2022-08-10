@@ -4,9 +4,11 @@ import struct
 import zipfile
 
 import cloudscraper
-from utils import log
+
+from . import log
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+
 
 # download zip files from url
 def download_zip_auto(item: str) -> None:
@@ -23,23 +25,27 @@ def extract_zips(cwd_path: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Extracting: {file}")
-            file_name = os.path.abspath(file)
+            file_name = os.path.join(cwd_path, file)
+            # file_name = os.path.abspath(file)
             zip_ref = zipfile.ZipFile(file_name)
             zip_ref.extractall(f"{cwd_path}")
             zip_ref.close()
 
 
 # rename a .srts to the same as video release name
-def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension: str) -> None:
-    for file in os.listdir(cwd_path):
-        if file.endswith(prefered_extension) and os.path.exists(new_name) is False:
+def rename_srts(new_name: str, cwd: str, group_and_ext: str, extension: str) -> None:
+    for file in os.listdir(cwd):
+        file_old_name = os.path.join(cwd, file)
+        file_new_name = os.path.join(cwd, new_name)
+        print(file_old_name, file_new_name)
+        if file.endswith(group_and_ext) and os.path.exists(file_new_name) is False:
             log.output(f"Renaming: {file} to {new_name}")
-            os.rename(file, new_name)
+            os.rename(file_old_name, file_new_name)
             return
 
-        elif file.endswith(extension) and os.path.exists(new_name) is False:
+        elif file.endswith(extension) and os.path.exists(file_new_name) is False:
             log.output(f"Renaming: {file} to {new_name}")
-            os.rename(file, new_name)
+            os.rename(file_old_name, file_new_name)
             return
 
 
@@ -47,23 +53,28 @@ def rename_srts(new_name: str, cwd_path: str, prefered_extension: str, extension
 def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
     for file in os.listdir(cwd_path):
         file = file.lower()
+        file_path = os.path.join(cwd_path, file)
         if file.endswith(prefered_extension):
             log.output(f"Keeping: {file}")
             continue
         elif file.endswith(extension) and not file.endswith(prefered_extension):
-            dir_subs = "subs/"
-            os.mkdir(dir_subs) if os.path.exists(dir_subs) is False else None
+            dir_subs = os.path.join(cwd_path, "subs")
+            dir_sub_file = os.path.join(dir_subs, file)
+            if not os.path.exists(dir_subs):
+                os.mkdir(dir_subs)
             log.output(f"Moving: {file} to /subs/")
-            os.remove(f"subs/{file}") if os.path.exists(f"subs/{file}") else None
-            shutil.move(file, f"subs/{file}")
+            if os.path.isfile(dir_sub_file):
+                os.remove(file_path)
+            shutil.move(file_path, dir_sub_file)
 
 
 # remove .zips
-def clean_up(cwd_path: str, extension: str) -> None:
-    for file in os.listdir(cwd_path):
+def clean_up(cwd: str, extension: str) -> None:
+    for file in os.listdir(cwd):
         if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Removing: {file}")
-            os.remove(file)
+            file_path = os.path.join(cwd, file)
+            os.remove(file_path)
 
 
 # get file hash
