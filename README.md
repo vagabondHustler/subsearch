@@ -63,7 +63,7 @@ Source is probably faster than the executable version, but the executable can be
 
 ### Source <a name = "src"></a>
 
-Download Python 3.10 - [Download URL](https://www.python.org/downloads/)
+Download Python >= 3.10 - [Download URL](https://www.python.org/downloads/)
 
 Download SubScene
 
