@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: ["main"]
 
+
 jobs:
   lint:
     runs-on: windows-latest
@@ -30,3 +31,4 @@ jobs:
           git add -A
           git commit -S -m "Format: blacken"
           git push origin main
+
