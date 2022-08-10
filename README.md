@@ -3,13 +3,12 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/status-active-success?color=9fa65d&style=flat-square)
+![Tests](https://img.shields.io/github/workflow/status/vagabondhustler/subsearch/Tests/main?color=9fa65d&label=tests&style=flat-square)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?color=c49b5d&style=flat-square)
 ![Version](https://img.shields.io/github/v/release/vagabondHustler/SubSearch?color=de935e&display_name=tag&include_prereleases&style=flat-square)
 ![Downloads](https://img.shields.io/github/downloads/vagabondHustler/SubSearch/total?color=ba9888&style=flat-square)
 ![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?color=82a2bd&style=flat-square)
 
-
-[![Tests](https://github.com/vagabondHustler/subsearch/actions/workflows/tests.yml/badge.svg?branch=main&event=push)](https://github.com/vagabondHustler/subsearch/actions/workflows/tests.yml)
 </div>
 
 ## Table of Contents
