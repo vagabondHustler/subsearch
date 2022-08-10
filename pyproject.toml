@@ -2,8 +2,14 @@
 requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+addopts = "--cov=subsearch"
+testpaths = [
+    "tests",
+]
+
 [tool.black]
-line-length = 120
+line-length = 125
 
 [tool.isort]
 profile = "black"
