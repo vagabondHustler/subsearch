@@ -57,7 +57,7 @@ def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
 
 
 # decides what to do with all the scrape data
-def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
+def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
     # search for titles
     to_be_scraped: list = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
