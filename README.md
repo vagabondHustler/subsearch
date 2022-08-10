@@ -8,6 +8,8 @@
 ![Downloads](https://img.shields.io/github/downloads/vagabondHustler/SubSearch/total?color=ba9888&style=flat-square)
 ![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?color=82a2bd&style=flat-square)
 
+
+[![Tests](https://github.com/vagabondHustler/subsearch/actions/workflows/tests.yml/badge.svg?branch=main&event=push)](https://github.com/vagabondHustler/subsearch/actions/workflows/tests.yml)
 </div>
 
 ## Table of Contents
