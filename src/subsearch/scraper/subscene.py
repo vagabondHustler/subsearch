@@ -1,5 +1,3 @@
-import os
-
 from utils import local_paths, log, string_parser
 
 from . import subscene_soup
@@ -121,9 +119,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
                     f.write("\n")
 
             return None
-        else:
-
-            return None
+        return None
 
     download_info: list = []
     for current_num, (dl_url) in enumerate(to_be_downloaded):
