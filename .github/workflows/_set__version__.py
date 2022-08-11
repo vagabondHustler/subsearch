@@ -17,8 +17,8 @@ def current():
 
 
 v = current().replace("v", "")
-version = f'__version__ = "{v}"'
+version = f"""__version__ = "{v}"
+"""
 
-# Write the file out again
 with open(f"{cwd}/src/subsearch/data/__version__.py", "w") as file:
     file.write(str(version))
