@@ -763,7 +763,7 @@ def show_widget():
     tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
-    AssociatedExtensions(root).pack(anchor="center")
+    AssociateExtensions(root).pack(anchor="center")
     ShowDownloadWindow(root).pack(anchor="center")
     if current_user.is_exe() is False:
         ShowTerminalOnSearch(root).pack(anchor="center")
