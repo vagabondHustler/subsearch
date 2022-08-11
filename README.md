@@ -44,17 +44,21 @@ Feel free to ask me anything about this project, request new features, contribut
 
 <div align="center">
 
-What it looks like while searching for subs if show terminal is disabled
+While searching for subs if show terminal is disabled
 
 ![prtsc1](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
 
-What the settings menu looks like and available options
+Settings menu  and available options
 
-![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21227.png)
+![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21332.png)
 
-What the download window looks like with subtitles that were not downloaded
+Download window with subtitles that were not downloaded
 
-![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
+![prtsc3](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
+
+Associated extensions (Green = True, Red = False)
+
+![prtsc4](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/associated_extensions_21332.png)
 
 </div>
 
@@ -92,9 +96,9 @@ Unzip file and run SubSearch.exe
 
 If you get a PUA message, click `More info`
 
-![prtsc3](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
+![prtsc5](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
 
-![prtsc4](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
+![prtsc6](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
 
 Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
