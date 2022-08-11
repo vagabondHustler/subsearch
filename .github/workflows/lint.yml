@@ -26,7 +26,8 @@ jobs:
           black ./tests -l 125
       - name: Pull and Push
         run: |
-          git pull origin main
+          git status
           git add -A
           git commit -S -m "Format: blacken"
-          git push origin main
+          git fetch origin main
+          git push origin HEAD:main
