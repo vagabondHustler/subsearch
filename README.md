@@ -85,9 +85,28 @@ Access GUI settings menu
 
 For more options
 
+Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
+
 `subsearch --help`
 
-Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
+```
+
+    Usages: subsearch [OPTIONS]
+
+    Options:
+        --settings                                  Open the GUI settings menu
+
+        --registry-key [add, del]                   Edit the registry
+                                                    add: adds the context menu  / replaces the context menu with default values
+                                                    del: deletes the context menu
+                                                    e.g: subsearch --registry-key add
+
+        --help                                      Prints usage information
+
+        --search [release]                          Search for subtitles and download to current working directory
+                                                    release: release.ext
+                                                    e.g subsearch --search foo.bar.the.movie.2021.1080p.web-foobar.mkv
+```
 
 ### Source <a name = "src"></a>
 
