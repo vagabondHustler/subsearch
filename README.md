@@ -16,7 +16,7 @@
 - [About](#about)
 - [Getting Started](#getting_started_src)
 - [Preview](#preview)
-- [PyPi-- CURRENTLY BROKEN DONT USE --](#PyPi)
+- [PyPi](#PyPi)
 - [Source](#src)
 - [Executable](#exe)
 - [Supported Languages](#lsupport)
@@ -67,7 +67,7 @@ Associated extensions (Green = True, Red = False)
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
-### PyPi -- CURRENTLY BROKEN DONT USE --<a name = "pypi"></a>
+### PyPi <a name = "pypi"></a>
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
