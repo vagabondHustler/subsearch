@@ -16,6 +16,7 @@
 - [About](#about)
 - [Getting Started](#getting_started_src)
 - [Preview](#preview)
+- [PyPi](#PyPi)
 - [Source](#src)
 - [Executable](#exe)
 - [Supported Languages](#lsupport)
@@ -48,7 +49,7 @@ While searching for subs if show terminal is disabled
 
 ![prtsc1](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
 
-Settings menu  and available options
+Settings menu and available options
 
 ![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21332.png)
 
@@ -66,9 +67,50 @@ Associated extensions (Green = True, Red = False)
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
+### PyPi <a name = "pypi"></a>
+
+Download [Python](https://www.python.org/downloads/) >= 3.10
+
+Install subsearch
+
+`pip install subsearch`
+
+Add the context-menu
+
+`subsearch --registry-key add`
+
+Access GUI settings menu
+
+`subsearch --settings`
+
+For more options
+
+Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
+
+`subsearch --help`
+
+```
+
+    Usages: subsearch [OPTIONS]
+
+    Options:
+        --settings                                  Open the GUI settings menu
+
+        --registry-key [add, del]                   Edit the registry
+                                                    add: adds the context menu  / replaces the context menu with default values
+                                                    del: deletes the context menu
+                                                    e.g: subsearch --registry-key add
+
+        --help                                      Prints usage information
+
+        --search [release]                          Search for subtitles and download to current working directory
+                                                    release: release.ext
+                                                    e.g subsearch --search foo.bar.the.movie.2021.1080p.web-foobar.mkv
+```
+
 ### Source <a name = "src"></a>
 
-Download Python >= 3.10 - [Download URL](https://www.python.org/downloads/)
+Download [Python](https://www.python.org/downloads/) >= 3.10
 
 Download SubScene
 
