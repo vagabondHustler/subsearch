@@ -1,7 +1,7 @@
 import sys
 
 from gui import widget_settings
-from utils import raw_registry, search
+from utils import raw_registry
 
 
 def main() -> None:
@@ -17,10 +17,6 @@ def main() -> None:
                                                     e.g: subsearch --registry-key add
 
         --help                                      Prints usage information
-
-        --search [release]                          Search for subtitles and download to current working directory
-                                                    release: release.ext
-                                                    e.g subsearch --search foo.bar.the.movie.2021.1080p.web-foobar.mkv
     """
     if sys.argv[-1].endswith("subsearch"):
         print(main.__doc__)
@@ -32,7 +28,7 @@ def main() -> None:
                 break
             elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
                 if sys.argv[num + 1] == "add":
-                    raw_registry.write_all_valuex()
+                    raw_registry.add_context_menu()
                     break
                 elif sys.argv[num + 1] == "del":
                     raw_registry.remove_context_menu()
@@ -40,10 +36,10 @@ def main() -> None:
             elif arg.startswith("--help"):
                 print(main.__doc__)
                 break
-            elif arg.startswith("--search"):
-                video_file = sys.argv[num + 1]
-                search.run_search(video_file)
-                break
+            # elif arg.startswith("--search"):
+            #     video_file = sys.argv[num + 1]
+            #     search.run_search(video_file)
+            #     break
             elif len(sys.argv[1:]) == num:
                 print("Invalid argument")
                 print(main.__doc__)
