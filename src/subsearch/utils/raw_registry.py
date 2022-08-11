@@ -26,7 +26,7 @@ def write_keys() -> None:
 def write_all_valuex() -> None:
     write_valuex("SubSearch")
     write_valuex("icon")
-    write_valuex("appliesto")    
+    write_valuex("appliesto")
     write_valuex("command")
 
 
