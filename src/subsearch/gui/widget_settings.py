@@ -367,7 +367,7 @@ class AssociateExtensions(tk.Frame):
         self.ext_window_show = False
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Associateded extensions", sticky="w", font=tkd.Font.cas8b)
+        tools.Create.label(self, text="Associated extensions", sticky="w", font=tkd.Font.cas8b)
 
         self.ext_button = tools.Create.button(
             self,
@@ -763,7 +763,7 @@ def show_widget():
     tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
-    AssociateExtensions(root).pack(anchor="center")
+    AssociatedExtensions(root).pack(anchor="center")
     ShowDownloadWindow(root).pack(anchor="center")
     if current_user.is_exe() is False:
         ShowTerminalOnSearch(root).pack(anchor="center")
