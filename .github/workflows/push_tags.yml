@@ -39,7 +39,7 @@ jobs:
       - name: Update __version__.py
         run: python .github/workflows/_set__version__.py
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
-      - name: Commit version.json
+      - name: status, add, commit, fetch, push
         run: |
           git status
           git add src/subsearch/data/version.json
@@ -61,8 +61,14 @@ jobs:
         with:
           python-version: "3.10.5"
       # pull main so everything is up to date
-      - name: Pull main
-        run: git pull origin main
+      - name: status, add, commit, fetch, push
+        run: |
+          git status
+          git add -A
+          git commit -S -m "Release: ${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
+          git fetch origin main
+          git push origin HEAD:main
+
       # install pyinstaller and requirements
       - name: Initializing
         run: |

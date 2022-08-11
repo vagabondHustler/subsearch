@@ -24,7 +24,7 @@ jobs:
           black ./src -l 125
           isort ./tests --profile 'black'
           black ./tests -l 125
-      - name: Pull and Push
+      - name: status, add, commit, fetch, push
         run: |
           git status
           git add -A
