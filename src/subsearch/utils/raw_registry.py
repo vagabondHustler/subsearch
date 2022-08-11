@@ -26,9 +26,8 @@ def write_keys() -> None:
 def write_all_valuex() -> None:
     write_valuex("SubSearch")
     write_valuex("icon")
-    write_valuex("appliesto")
-    if current_user.is_exe() is False:
-        write_valuex("command")
+    write_valuex("appliesto")    
+    write_valuex("command")
 
 
 def write_valuex(key: str) -> None:
@@ -75,12 +74,12 @@ def get_command_value() -> str:
     # get latest json value from file
     from utils import raw_config
 
-    show_terminal = raw_config.get("show_terminal")
     if current_user.is_exe():
         exe_path = local_paths.get_path("cwd")
         value = f'"{exe_path}\SubSearch.exe" %1'
         # if SubSearch is compiled we dont need anything besides this
     elif current_user.is_exe() is False:
+        show_terminal = raw_config.get("show_terminal")
         # gets the location to the python executable
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on

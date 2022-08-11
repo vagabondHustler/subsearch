@@ -29,7 +29,7 @@ def is_exe() -> bool:
     Returns: True or False
     """
 
-    for file in os.listdir(local_paths.get_path("root")):
+    for file in os.listdir(local_paths.get_path("cwd")):
         if file.endswith("SubSearch.exe"):
             return True
     return False
