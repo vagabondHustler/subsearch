@@ -70,7 +70,10 @@ jobs:
           pip install -r docs/requirements.txt
       # copy source code to workflows
       - name: Copy source to .github/workflows/subsearch
-        run: cp -r ./src/subsearch/ .github/workflows/subsearch/
+        run: |
+          cp -r ./src/subsearch/ .github/workflows/subsearch/
+          rm .github\workflows\subsearch\__init__.py
+          rm .github\workflows\subsearch\__main__.py
       # build the executable and manually add sv_ttk otherwise it wont be included
       - name: Build executable
         run: |
