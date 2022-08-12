@@ -1,5 +1,5 @@
-import os
 import socket
+import sys
 import winreg as reg
 
 from . import local_paths
@@ -35,7 +35,6 @@ def check_is_exe() -> bool:
         returns True or False
     """
 
-    for file in os.listdir(local_paths.get_path("cwd")):
-        if file.endswith("SubSearch.exe"):
-            return True
+    if sys.argv[0].endswith("SubSearch.exe"):
+        return True
     return False

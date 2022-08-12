@@ -43,10 +43,10 @@ def set_default_json() -> None:
     data["language"] = "English, en"
     data["hearing_impaired"] = "Both"
     data["percentage_pass"] = 90
-    data["context_menu_icon"] = "True"
-    data["show_download_window"] = "True"
-    data["show_terminal"] = "False"
-    data["file_ext"] = dict.fromkeys(data["file_ext"], "True")
+    data["context_menu_icon"] = True
+    data["show_download_window"] = True
+    data["show_terminal"] = False
+    data["file_ext"] = dict.fromkeys(data["file_ext"], True)
     config_file = local_paths.get_path("data", "config.json")
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
