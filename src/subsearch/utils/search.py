@@ -47,7 +47,7 @@ def run_search(file_name_ext, file_path) -> None:
     scrape_subscene = subscene.scrape(param, language, lang_abbr, hearing_impaired, pct, show_download_window)
     if scrape_opensubtitles is None and scrape_subscene is None:
         dl_data = f"{local_paths.cwd()}\\__subsearch__dl_data.tmp"
-        if show_download_window == "True" and os.path.exists(dl_data):
+        if show_download_window is True and os.path.exists(dl_data):
             widget_download.show_widget()
             file_manager.clean_up(local_paths.cwd(), dl_data)
             if local_paths.cwd() != local_paths.get_path("root"):
