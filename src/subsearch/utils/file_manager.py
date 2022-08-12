@@ -5,7 +5,7 @@ import zipfile
 
 import cloudscraper
 
-from . import log
+from . import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
@@ -21,52 +21,39 @@ def download_zip_auto(item: str) -> None:
 
 
 # extract all zip file in said directory
-def extract_zips(cwd_path: str, extension: str) -> None:
-    for file in os.listdir(cwd_path):
+def extract_zips(cwd: str, extension: str) -> None:
+    subs_folder = os.path.join(cwd, "subs")
+    if not os.path.exists(subs_folder):
+        os.mkdir(subs_folder)
+    for file in os.listdir(cwd):
         if file.startswith("__subsearch__") and file.endswith(extension):
-            log.output(f"Extracting: {file}")
-            file_name = os.path.join(cwd_path, file)
+            log.output(f"Extracting: {file} -> ..\\subs\\{file}")
+            file_name = os.path.join(cwd, file)
             # file_name = os.path.abspath(file)
             zip_ref = zipfile.ZipFile(file_name)
-            zip_ref.extractall(f"{cwd_path}")
+            zip_ref.extractall(subs_folder)
             zip_ref.close()
 
 
 # rename a .srts to the same as video release name
-def rename_srts(new_name: str, cwd: str, group_and_ext: str, extension: str) -> None:
-    for file in os.listdir(cwd):
-        file_old_name = os.path.join(cwd, file)
-        file_new_name = os.path.join(cwd, new_name)
-        print(file_old_name, file_new_name)
-        if file.endswith(group_and_ext) and os.path.exists(file_new_name) is False:
-            log.output(f"Renaming: {file} to {new_name}")
-            os.rename(file_old_name, file_new_name)
-            return
+def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
+    higest_value = (0, "")
+    subs_folder = os.path.join(cwd, "subs")
+    for file in os.listdir(subs_folder):
+        if file.endswith(extension):
+            value = string_parser.pct_value(file, release_name)
+            if value >= higest_value[0]:
+                higest_value = value, file
 
-        elif file.endswith(extension) and os.path.exists(file_new_name) is False:
-            log.output(f"Renaming: {file} to {new_name}")
-            os.rename(file_old_name, file_new_name)
-            return
-
-
-# move unused .srt to /subs/
-def move_files(cwd_path: str, prefered_extension: str, extension: str) -> None:
-    for file in os.listdir(cwd_path):
-        file = file.lower()
-        file_path = os.path.join(cwd_path, file)
-        if file.endswith(prefered_extension):
-            log.output(f"Keeping: {file}")
-            continue
-        elif file.endswith(extension) and not file.endswith(prefered_extension):
-            dir_subs = os.path.join(cwd_path, "subs")
-            dir_sub_file = os.path.join(dir_subs, file)
-            if not os.path.exists(dir_subs):
-                os.mkdir(dir_subs)
-            log.output(f"Moving: {file} to /subs/")
-            if os.path.isfile(dir_sub_file):
-                os.remove(file_path)
-            shutil.move(file_path, dir_sub_file)
-
+    file_to_rename = higest_value[1]
+    old_name_src = os.path.join(subs_folder, file_to_rename)
+    new_name_dst = os.path.join(subs_folder, release_name)
+    log.output(f"Renaming: {file} -> {release_name}")
+    os.rename(old_name_src, new_name_dst)
+    move_src = new_name_dst
+    move_dst = os.path.join(cwd, release_name)
+    log.output(f"Moving: {release_name} -> {cwd}")
+    shutil.move(move_src, move_dst)
 
 # remove .zips
 def clean_up(cwd: str, extension: str) -> None:
@@ -76,6 +63,12 @@ def clean_up(cwd: str, extension: str) -> None:
             file_path = os.path.join(cwd, file)
             os.remove(file_path)
 
+def copy_log(src, dst):
+    for file in os.listdir(src):
+        if file.endswith("__subsearch__.log"):
+            src_path = os.path.join(src, file)
+            dst_path = os.path.join(dst, file)
+            shutil.copy(src_path, dst_path)
 
 # get file hash
 def get_hash(file_name: str) -> str | None:
