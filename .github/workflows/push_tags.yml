@@ -46,7 +46,10 @@ jobs:
           git add src/subsearch/data/__version__.py
           git commit -S -m "Release: ${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
           git fetch origin main
-          git push origin HEAD:main
+          git tag -d ${{ github.ref_name }}
+          git push --delete origin ${{ github.ref_name }}
+          git tag ${{ github.ref_name }}
+          git push --tags origin HEAD:main
 
   # build and publish release with pushed tags as release name
   build-and-publish:
@@ -59,16 +62,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10.5"
-      # pull main so everything is up to date
-      - name: status, add, commit, fetch, push
-        run: |
-          git status
-          git add -A
-          git commit -S -m "Release: ${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
-          git fetch origin main
-          git push origin HEAD:main
-
+          python-version: "3.10.*"
       # install pyinstaller and requirements
       - name: Initializing
         run: |
