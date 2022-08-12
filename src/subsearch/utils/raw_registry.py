@@ -14,7 +14,7 @@ COMMAND_PATH = r"Software\Classes\*\shell\0.SubSearch\command"
 
 def write_keys() -> None:
     """
-    write the necessary keys to the registry 
+    write the necessary keys to the registry
     """
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         # open key, with write permission
