@@ -3,7 +3,7 @@ from src.subsearch.utils import file_parser
 
 def test_file_parser_movie() -> None:
     """
-    test to ensure that the file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
+    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
     """
     file_name = "the.foo.bar.2021.1080p.web.h264-foobar"
     param = file_parser.get_parameters(file_name, None, "en")
@@ -27,7 +27,7 @@ def test_file_parser_movie() -> None:
 
 def test_file_parser_show() -> None:
     """
-    test to ensure that the file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
+    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
     """
     file_name = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     param = file_parser.get_parameters(file_name, None, "en")
