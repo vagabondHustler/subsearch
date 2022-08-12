@@ -17,10 +17,10 @@ def search_for_hash(url: str, lang: str, hi: str) -> list | None:
         tl = [a["title"] for a in item.find_all("a", title=lang)]
         if lang in tl:
             hi = item.find("img", alt="Subtitles for hearing impaired")
-            if hi is not None and hi == "False":
+            if hi is not None and hi is False:
                 log.output(f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'")
                 continue
-            if hi is None and hi == "True":
+            if hi is None and hi is True:
                 log.output(f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'")
                 continue
 

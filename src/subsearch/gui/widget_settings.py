@@ -244,14 +244,12 @@ class HearingImparedSubs(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        update_svar = self.string_var.get()
-        raw_config.set_json("hearing_impaired", update_svar)
+        raw_config.set_json("hearing_impaired", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        update_svar = self.string_var.get().split(" ")[0]
-        raw_config.set_json("hearing_impaired", update_svar)
+        raw_config.set_json("hearing_impaired", False)
 
     def button_set_both(self, event):
         self.string_var.set(f"Both")
@@ -436,9 +434,9 @@ class FileExtSubMenu(tk.Toplevel):
                     command=lambda c=i: self.btn[c].cget("text"),
                 )
             )
-            if data["file_ext"][ext] == "False":
+            if data["file_ext"][ext] is False:
                 self.btn[i].configure(fg=tkd.Color.red)
-            elif data["file_ext"][ext] == "True":
+            elif data["file_ext"][ext] is True:
                 self.btn[i].configure(fg=tkd.Color.green)
 
             self.btn[i].grid(row=rownum, column=colnum)
@@ -487,11 +485,11 @@ class FileExtSubMenu(tk.Toplevel):
 
         btn = event.widget
         data = raw_config.get_json()
-        if data["file_ext"][btn.cget("text")] == "True":
-            data["file_ext"][btn.cget("text")] = "False"
+        if data["file_ext"][btn.cget("text")] is True:
+            data["file_ext"][btn.cget("text")] = False
             btn.configure(fg=tkd.Color.red)
         else:
-            data["file_ext"][btn.cget("text")] = "True"
+            data["file_ext"][btn.cget("text")] = True
             btn.configure(fg=tkd.Color.green)
         with open(local_paths.get_path("data", "config.json"), "w") as f:
             f.seek(0)
@@ -581,18 +579,16 @@ class ShowContextMenuIcon(tk.Frame):
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("context_menu_icon", update_svar)
+        raw_config.set_json("context_menu_icon", True)
         from utils import raw_registry
 
         raw_registry.write_valuex("icon")
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("context_menu_icon", update_svar)
+        raw_config.set_json("context_menu_icon", False)
         from utils import raw_registry
 
         raw_registry.write_valuex("icon")
@@ -636,14 +632,12 @@ class ShowDownloadWindow(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        update_svar = self.string_var.get()
-        raw_config.set_json("show_download_window", update_svar)
+        raw_config.set_json("show_download_window", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        update_svar = self.string_var.get()
-        raw_config.set_json("show_download_window", update_svar)
+        raw_config.set_json("show_download_window", False)
 
 
 # show a terminal with what the code is doing while searching
@@ -685,16 +679,14 @@ class ShowTerminalOnSearch(tk.Frame):
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_terminal", update_svar)
+        raw_config.set_json("show_terminal", True)
         raw_registry.write_valuex("command")
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        update_svar = self.string_var.get()
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_terminal", update_svar)
+        raw_config.set_json("show_terminal", False)
         raw_registry.write_valuex("command")
 
 

@@ -109,9 +109,9 @@ def get_command_value() -> str:
         # gets the path of the root directory of subsearch
         set_wd = f"import os; os.chdir(r'{local_paths.get_path('root')}');"
         import_main = "import subsearch; subsearch.main()"
-        if show_terminal == "True":
+        if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
-        if show_terminal == "False":
+        if show_terminal is False:
             value = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
 
     return value
@@ -124,16 +124,16 @@ def get_icon_value() -> str:
     Returns
     -------
     str
-        if cm_icon value is "True" returns path to 16.ico\n
+        if cm_icon value is True returns path to 16.ico\n
         if cm_value is "False return  ""
     """
     from utils import raw_config
 
     show_icon: str = raw_config.get("cm_icon")
     icon_path = local_paths.get_path("icons", "16.ico")
-    if show_icon == "True":
+    if show_icon is True:
         value = icon_path
-    if show_icon == "False":
+    if show_icon is False:
         value = ""
     return value
 
@@ -146,7 +146,7 @@ def get_appliesto_value() -> str:
     # for which file types to show the SubSearch context entry on
     value = '"subsearch.py" OR '
     for k, v in zip(file_ext.keys(), file_ext.values()):
-        if v == "True":
+        if v is True:
             value += "".join(f'"{k}" OR ')
     if value.endswith(" OR "):  # remove last OR
         value = value[:-4]

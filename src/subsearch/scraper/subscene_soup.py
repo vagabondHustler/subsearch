@@ -12,9 +12,9 @@ def is_sub_hi(a1: Tag) -> str:
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted
     if a40 is None:
-        return "True"
+        return True
     elif a41 is None:
-        return "False"
+        return False
 
 
 # search for title
