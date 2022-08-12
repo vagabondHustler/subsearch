@@ -2,9 +2,12 @@ name: Tests
 
 on:
   push:
+    paths: ["./src"]
     branches: ["main"]
   pull_request:
+    paths: ["./src"]
     branches: ["main"]
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
