@@ -32,7 +32,7 @@ def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
 
 # check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
-    if number.percentage >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
+    if number >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
         return True
     return False
 
@@ -94,11 +94,11 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
         for key, value in sub_keys.items():
             number = string_parser.pct_value(key, param.release)
             log.output(f"[Found]: {key}")
-            lenght_str = sum(1 for char in f"[{number.percentage}% match]:")
+            lenght_str = sum(1 for char in f"[{number}% match]:")
             formatting_spaces = " " * lenght_str
-            _name = f"[{number.percentage}% match]: {key}"
+            _name = f"[{number}% match]: {key}"
             _url = f"{formatting_spaces} {value}"
-            to_be_sorted_value = number.percentage, _name, _url
+            to_be_sorted_value = number, _name, _url
             to_be_sorted.append(to_be_sorted_value)
             if is_threshold(key, number, pct, param):
                 to_be_downloaded.append(value) if value not in to_be_downloaded else None
