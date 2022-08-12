@@ -25,7 +25,7 @@ def got_key() -> bool:
         return False
 
 
-def is_exe() -> bool:
+def check_is_exe() -> bool:
     """
     check if the current user is running subsearch from the executable
 
