@@ -1,5 +1,5 @@
 from setuptools import setup
 
 setup(
-    package_data={"": ["requirements.text", "dev_requirements.text", "*.json", "*.png", "*.ico"]},
+    package_data={"": ["requirements.txt", "dev_requirements.txt", "optional_requirement.txt","*.json", "*.png", "*.ico"]},
 )
