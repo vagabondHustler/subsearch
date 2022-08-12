@@ -27,13 +27,12 @@ def paths(file_name: str = None) -> dict:
 
 
 def get_path(directory: str, file_name: str = None) -> str:
-    """get_path to a directory or directory and file
+    """
+    get path to a directory or directory and file
 
-    Args:
-        directory: src, data, gui, scraper, icons, buttons, utilities
-        file_name: any. Defaults to None.
-
-    Returns:
-        dict[str, str]: path to directory or directory and file
+    Returns
+    -------
+    str
+        the directory or directory and file
     """
     return paths(file_name)[f"{directory}"].lower()
