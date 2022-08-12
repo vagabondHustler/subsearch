@@ -71,8 +71,6 @@ Source is probably faster than the executable version, but the executable can be
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
-FYI, the package on github and pypi are the same, my workflow semantic versioning isnt working corectlly. As of writing this v2.14.35 on github and v2.14.34 on pypi are the same version, gonna fix it soon :)
-
 Install subsearch
 
 `pip install subsearch`
@@ -85,20 +83,7 @@ Right-click on a video file that ends with [extensions](#file_ext) and press Sub
 
 More options
 
-```
-Usages: subsearch [OPTIONS]
-
-Options:
-    --settings                                  Open the GUI settings menu
-
-    --registry-key [add, del]                   Edit the registry
-                                                add: adds the context menu  / replaces the context menu with default values
-                                                del: deletes the context menu
-                                                e.g: subsearch --registry-key add
-
-    --help                                      Prints usage information
-
-```
+`subsearch --help`
 
 ### Source <a name = "src"></a>
 
