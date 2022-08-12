@@ -5,7 +5,7 @@ from src.subsearch.utils import local_paths
 
 def test_local_paths_endswith() -> None:
     """
-    test so to ensure that the local_paths.get_path function returns a with the correct extension or ends with the correct directory name
+    test so to ensure that the src/subsearch/utils/local_paths.get_path function returns a with the correct extension or ends with the correct directory name
     """
     paths = ["data", "gui", "scraper", "utils", "icons", "buttons"]
     for p in paths:
@@ -15,7 +15,7 @@ def test_local_paths_endswith() -> None:
 
 def test_local_paths_isdir() -> None:
     """
-    test to ensure that the local_paths.get_path function finds the correct directory
+    test to ensure that the src/subsearch/utils/local_paths.get_path function finds the correct directory
     """
     paths = ["cwd", "root", "data", "gui", "scraper", "utils", "icons", "buttons"]
     for p in paths:
