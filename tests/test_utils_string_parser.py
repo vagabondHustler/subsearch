@@ -18,9 +18,9 @@ def test_file_parser_movie() -> None:
     pct4 = string_parser.pct_value(movie_1080p, movie_1080p)
     pct5 = string_parser.pct_value(movie_1080p, no_match)
 
-    assert pct0.percentage == 100
-    assert pct1.percentage == 100
-    assert pct2.percentage == 83
-    assert pct3.percentage == 83
-    assert pct4.percentage == 100
-    assert pct5.percentage == 0
+    assert pct0 == 100
+    assert pct1 == 100
+    assert pct2 == 83
+    assert pct3 == 83
+    assert pct4 == 100
+    assert pct5 == 0

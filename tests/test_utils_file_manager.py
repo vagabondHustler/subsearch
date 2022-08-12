@@ -11,32 +11,25 @@ def copy_and_rename(src: str, dst: str):
     shutil.copy2(src, new_dst)
 
 
-SRC = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
-DST = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
+
 CWD = f'{local_paths.get_path("cwd")}\\tests\\test_files'
-copy_and_rename(SRC, DST)
 
 
 def test_extract_zips() -> None:
+    src = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
+    dst = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
+    copy_and_rename(src, dst)
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
     """
     file_manager.extract_zips(CWD, ".zip")
 
 
-def test_rename_srts() -> None:
+def test_rename_best_match() -> None:
     """
     test the rename_srts function in src/subsearch/utils/file_manager.py
     """
-    file_manager.rename_srts(f"test.movie.2022.1080p-group.srt", CWD, f"group.srt", ".srt")
-
-
-def test_move_files() -> None:
-    """
-    test the move_files function in src/subsearch/utils/file_manager.py
-    """
-    file_manager.move_files(CWD, "group.srt", ".srt")
-
+    file_manager.rename_best_match(f"test.movie.2022.1080p-group.srt", CWD, ".srt")
 
 def test_clean_up() -> None:
     """
@@ -46,7 +39,6 @@ def test_clean_up() -> None:
     file_manager.clean_up(CWD, ".srt")
     file_manager.clean_up(f"{CWD}\\subs", ".srt")
 
-
 def test_get_hash() -> None:
     """
     test the get_hash function in src/subsearch/utils/file_manager.py
@@ -55,3 +47,8 @@ def test_get_hash() -> None:
     hash1 = file_manager.get_hash(f"{CWD}\\none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == None
+
+def test_copy_log() -> None:
+    src = f'{local_paths.get_path("cwd")}\\src\\subsearch'
+    dst = f'{local_paths.get_path("cwd")}\\tests'
+    file_manager.copy_log(src, dst)

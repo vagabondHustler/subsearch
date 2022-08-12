@@ -3,6 +3,9 @@ requires = ["setuptools>=63.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
+filterwarnings =[
+    'ignore::DeprecationWarning'
+]
 addopts = "--cov=subsearch"
 testpaths = [
     "tests",
