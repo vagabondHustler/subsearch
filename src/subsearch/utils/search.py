@@ -17,7 +17,7 @@ from . import (
 )
 
 
-def run_search(video_file_path: str) -> None:
+def run_search(file_name_ext, file_path) -> None:
     # initializing
     start = time.perf_counter()
     current_version = version.current()
@@ -31,19 +31,10 @@ def run_search(video_file_path: str) -> None:
     hearing_impaired = raw_config.get("hearing_impaired")
     pct = raw_config.get("percentage")
     show_download_window = raw_config.get("show_download_window")
-    show_terminal = raw_config.get("show_terminal")
-    video_file_name_ext = video_file_path.lower().split("\\")[-1]
-    video_file_name, video_file_ext = video_file_name_ext.rsplit(".", 1)
-    video_file_name_ext = f"{video_file_name}.{video_file_ext}"
-    file_hash = file_manager.get_hash(video_file_name_ext)
+    video_file_name, video_file_ext = file_name_ext.rsplit(".", 1)
+    file_hash = file_manager.get_hash(file_name_ext)
+    param = file_parser.get_parameters(video_file_name, file_hash, lang_abbr)
 
-    try:
-        param = file_parser.get_parameters(video_file_name, file_hash, lang_abbr)
-    except IndexError as err:
-        log.output(err)
-        if show_terminal == "True":
-            return input()
-        return
 
     # log parameters
     log.parameters(param, language, lang_abbr, hearing_impaired, pct)
@@ -60,11 +51,8 @@ def run_search(video_file_path: str) -> None:
         if show_download_window == "True" and os.path.exists(dl_data):
             widget_download.show_widget()
             file_manager.clean_up(local_paths.cwd(), dl_data)
-
-        elapsed = time.perf_counter() - start
-        log.output(f"Finished in {elapsed} seconds.")
-        if show_terminal == "True":
-            return input()
+            if local_paths.cwd() != local_paths.get_path("root"):
+                file_manager.copy_log(local_paths.get_path("root"), local_paths.cwd())
         return
 
     # download files from scrape results
@@ -85,13 +73,12 @@ def run_search(video_file_path: str) -> None:
     file_manager.extract_zips(local_paths.cwd(), ".zip")
     file_manager.clean_up(local_paths.cwd(), ".zip")
     file_manager.clean_up(local_paths.cwd(), ").nfo")
-    file_manager.rename_srts(f"{param.release}.srt", local_paths.cwd(), f"{param.group}.srt", ".srt")
-    file_manager.move_files(local_paths.cwd(), f"{param.release}.srt", ".srt")
+    file_manager.rename_best_match(f"{param.release}.srt", local_paths.cwd(), ".srt")
+    if local_paths.cwd() != local_paths.get_path("root"):
+        file_manager.copy_log(local_paths.get_path("root"), local_paths.cwd())
     log.output("")
 
     # finishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
 
-    if show_terminal == "True":
-        input()
