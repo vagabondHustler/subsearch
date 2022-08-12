@@ -93,10 +93,10 @@ jobs:
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
             SubSearch-${{ github.ref_name }}-win-source.zip
-            
+
   pypi-upload:
     name: PyPI Upload
-    needs: versioning
+    needs: build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
