@@ -19,21 +19,21 @@ copy_and_rename(SRC, DST)
 
 def test_extract_zips() -> None:
     """
-    test the extract_zips function in file_manager.py
+    test the extract_zips function in src/subsearch/utils/file_manager.py
     """
     file_manager.extract_zips(CWD, ".zip")
 
 
 def test_rename_srts() -> None:
     """
-    test the rename_srts function in file_manager.py
+    test the rename_srts function in src/subsearch/utils/file_manager.py
     """
     file_manager.rename_srts(f"test.movie.2022.1080p-group.srt", CWD, f"group.srt", ".srt")
 
 
 def test_move_files() -> None:
     """
-    test the move_files function in file_manager.py
+    test the move_files function in src/subsearch/utils/file_manager.py
     """
     file_manager.move_files(CWD, "group.srt", ".srt")
 
@@ -49,7 +49,7 @@ def test_clean_up() -> None:
 
 def test_get_hash() -> None:
     """
-    test the get_hash function in file_manager.py
+    test the get_hash function in src/subsearch/utils/file_manager.py
     """
     hash0 = file_manager.get_hash(f"{CWD}\\test.movie.2022.1080p-group.mkv")
     hash1 = file_manager.get_hash(f"{CWD}\\none.hash.movie.mkv")
