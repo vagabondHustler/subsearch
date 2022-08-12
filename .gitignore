@@ -156,5 +156,4 @@ src/*.srt
 src/*subs/
 /*.log
 /publish.py
-# misc test
-test_launch.json
+
