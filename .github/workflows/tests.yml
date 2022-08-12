@@ -2,11 +2,14 @@ name: Tests
 
 on:
   push:
-    paths: ["./src"]
     branches: ["main"]
+    paths:
+      - "src/**"
+
   pull_request:
-    paths: ["./src"]
     branches: ["main"]
+    paths:
+      - "src/**"
 
 jobs:
   test:
