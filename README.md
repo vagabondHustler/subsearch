@@ -47,19 +47,15 @@ Feel free to ask me anything about this project, request new features, contribut
 
 While searching for subs if show terminal is disabled
 
-![prtsc1](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
+![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
 
 Settings menu and available options
 
-![prtsc2](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21332.png)
+![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21332.png)
 
 Download window with subtitles that were not downloaded
 
-![prtsc3](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
-
-Associated extensions (Green = True, Red = False)
-
-![prtsc4](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/associated_extensions_21332.png)
+![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
 
 </div>
 
@@ -115,9 +111,9 @@ Unzip file and run SubSearch.exe
 
 If you get a PUA message, click `More info`
 
-![prtsc5](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
+![prtsc_moreinfo](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
 
-![prtsc6](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
+![prtsc_runanyway](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
 
 Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
 
@@ -149,7 +145,7 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
 
-![other_languages](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/other_languages_21123.png)
+![prtsc_oth_languages](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/other_languages_21123.png)
 
 ## File extension <a name = "file_ext"></a>
 
@@ -157,12 +153,17 @@ These are the file types that will have the option SubSearch
 
 `.avi`, `.mp4`, `.mkv`, `.mpg`, `.mpeg`, `.mov`, `.rm`, `.vob`, `.wmv`, `.flv`, `.3gp`, `.3g2`, `.swf`, `.mswmm`
 
+Associated extensions (Green = True, Red = False)
+
+![prtsc_ext](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/associated_extensions_21332.png)
+
 ## Authors <a name = "authors"></a>
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
 
 ## Special Thanks to <a name = "thanks"></a>
 
-- [othneildrew](https://github.com/othneildrew/Best-README-Template) for `README` template
-- [pimoroni](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
-- [manojmj92](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
+- To the people at [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template) for `README` template
+- To the people at [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
+- To the people at [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
+- To the people at [psf/black](https://github.com/psf/black) for ways of doing workflow related tasks
