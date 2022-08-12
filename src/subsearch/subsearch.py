@@ -13,7 +13,7 @@ def main() -> None:
             file_full_path = sys.argv[-1]
             index = file_full_path.rfind("\\")
             file_path = file_full_path[0:index]
-            file_name_ext = file_full_path[index+1:]
+            file_name_ext = file_full_path[index + 1 :]
             os.chdir(file_path)
 
     if current_user.got_key() is False:
@@ -21,6 +21,7 @@ def main() -> None:
         raw_registry.add_context_menu()
     if local_paths.cwd() == local_paths.get_path("root") or sys.argv[-1].endswith("subsearch.py"):
         from gui import widget_settings
+
         widget_settings.show_widget()
     elif local_paths.cwd() != local_paths.get_path("root"):
         search.run_search(file_name_ext, file_path)
@@ -28,7 +29,6 @@ def main() -> None:
     show_terminal = raw_config.get("show_terminal")
     if show_terminal:
         input()
-    
 
 
 if __name__ == "__main__":
