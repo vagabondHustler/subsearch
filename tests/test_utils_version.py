@@ -5,7 +5,7 @@ from src.subsearch.utils import version
 
 def test_current() -> None:
     """
-    test to ensure that the version is of the correct format
+    test so to ensure that the src/subsearch/utils/version.current function returns a with the correct format
     """
     c_version = version.current()
     version_digits = "".join(re.findall(r"\d+", c_version))
