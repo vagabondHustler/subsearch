@@ -11,12 +11,12 @@ def main() -> None:
     file_path = ""
     file_name_ext = ""
     file_exist = False
-
     if current_user.got_key() is False:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
     if current_user.check_is_exe():
         raw_config.set_json("show_terminal", "False")
+    show_terminal = raw_config.get("show_terminal")
     for ext in raw_config.get("file_ext"):
         if sys.argv[-1].endswith(ext):
             file_exist = True
@@ -37,7 +37,6 @@ def main() -> None:
 
         search.run_search(file_name_ext, file_path)
 
-    show_terminal = raw_config.get("show_terminal")
     if show_terminal == "True":
         input()
 
