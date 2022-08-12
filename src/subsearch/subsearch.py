@@ -7,16 +7,8 @@ from utils import current_user, local_paths, raw_config, raw_registry, search
 
 def main() -> None:
     """
-    main function for subsearch
-
-    Parameters
-    ----------
-    input : str, optional
-        --settings, by default None
-        if sys.argv[1] == "subsearch.py", enter = "--settings":
-
+    main function of subsearch
     """
-
     for ext in raw_config.get("file_ext"):
         if sys.argv[-1].endswith(ext):
             file_path = sys.argv[-1]

@@ -13,6 +13,9 @@ COMMAND_PATH = r"Software\Classes\*\shell\0.SubSearch\command"
 
 
 def write_keys() -> None:
+    """
+    write the necessary keys to the registry 
+    """
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         # open key, with write permission
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
@@ -32,8 +35,12 @@ def write_all_valuex() -> None:
 
 def write_valuex(key: str) -> None:
     """
-    Args:
-        key: icon, appliesto or command
+    write valuex into the different keys
+
+    Parameters
+    ----------
+    key : str
+        subsearch, icon, appliesto, command
     """
     # decide in which registry key to write the value
     if key == "SubSearch":
@@ -57,10 +64,16 @@ def write_valuex(key: str) -> None:
 
 def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
     """
-    Args:
-        sub_key: 0.SubSearch or command
-        value_name: Icon, AppliesTo or ""
-        value: str
+    connects to the rigistry, opens sub-key then set valuex with value
+
+    Parameters
+    ----------
+    sub_key : str
+        sub-key of HKEY_CURRENT_USER
+    value_name : str
+        name of the value
+    value : str
+        value of the value_name
     """
     # connect to Computer_NAME\HKEY_CURRENT_USER\
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
@@ -71,6 +84,14 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 
 
 def get_command_value() -> str:
+    """
+    get the correct command value
+
+    Returns
+    -------
+    str
+        returns command value for subsearch.exe, python.exe or pythonw.exe
+    """
     # get latest json value from file
     from utils import raw_config
 
@@ -97,7 +118,15 @@ def get_command_value() -> str:
 
 
 def get_icon_value() -> str:
-    # get latest json value from file
+    """
+    check config.json cm_icon value
+
+    Returns
+    -------
+    str
+        if cm_icon value is "True" returns path to 16.ico\n
+        if cm_value is "False return  ""
+    """
     from utils import raw_config
 
     show_icon: str = raw_config.get("cm_icon")
