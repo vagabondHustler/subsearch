@@ -663,7 +663,7 @@ class ShowTerminalOnSearch(tk.Frame):
             col=2,
             font=tkd.Font.cas8b,
         )
-        if current_user.is_exe() is False:
+        if current_user.check_is_exe() is False:
             tools.Create.button(
                 self,
                 text="True",
@@ -765,7 +765,7 @@ def show_widget():
     ShowContextMenuIcon(root).pack(anchor="center")
     AssociateExtensions(root).pack(anchor="center")
     ShowDownloadWindow(root).pack(anchor="center")
-    if current_user.is_exe() is False:
+    if current_user.check_is_exe() is False:
         ShowTerminalOnSearch(root).pack(anchor="center")
     tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
     CheckForUpdates(root).pack(anchor="center")
