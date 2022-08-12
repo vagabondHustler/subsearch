@@ -36,14 +36,6 @@ def main() -> None:
             elif arg.startswith("--help"):
                 print(main.__doc__)
                 break
-            # elif arg.startswith("--search"):
-            #     video_file = sys.argv[num + 1]
-            #     search.run_search(video_file)
-            #     break
             elif len(sys.argv[1:]) == num:
                 print("Invalid argument")
                 print(main.__doc__)
-
-
-if __name__ == "__main__":
-    main()

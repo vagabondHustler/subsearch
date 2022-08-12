@@ -16,7 +16,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10.*"
+          python-version: "3.10.6"
       # import GPG key for verified commits
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
@@ -58,7 +58,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10.*"
+          python-version: "3.10.6"
       # install pyinstaller and requirements
       - name: Initializing
         run: |
@@ -76,7 +76,7 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller .github/workflows/build.spec -y --clean --distpath ./SubSearch-x64
-          cp -r C:/hostedtoolcache/windows/Python/3.10.5/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
+          cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
       # make archives for publishing
       - name: Make archives
         run: |
@@ -93,10 +93,10 @@ jobs:
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
             SubSearch-${{ github.ref_name }}-win-source.zip
-            
+
   pypi-upload:
     name: PyPI Upload
-    needs: versioning
+    needs: build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -104,7 +104,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10.*"
+          python-version: "3.10.6"
 
       - name: Install latest pip, build, twine
         run: |
