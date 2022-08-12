@@ -3,10 +3,10 @@ name: Tests
 on:
   push:
     branches: ["main"]
-    paths: ["src/**"]
+    paths: ["subsearch/src/**"]
   pull_request:
     branches: ["main"]
-    paths: ["src/**"]
+    paths: ["subsearch/src/**"]
 
 jobs:
   test:
