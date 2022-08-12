@@ -35,7 +35,6 @@ def run_search(file_name_ext, file_path) -> None:
     file_hash = file_manager.get_hash(file_name_ext)
     param = file_parser.get_parameters(video_file_name, file_hash, lang_abbr)
 
-
     # log parameters
     log.parameters(param, language, lang_abbr, hearing_impaired, pct)
 
@@ -81,4 +80,3 @@ def run_search(file_name_ext, file_path) -> None:
     # finishing up
     elapsed = time.perf_counter() - start
     log.output(f"Finished in {elapsed} seconds")
-

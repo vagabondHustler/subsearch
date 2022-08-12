@@ -55,6 +55,7 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
     log.output(f"Moving: {release_name} -> {cwd}")
     shutil.move(move_src, move_dst)
 
+
 # remove .zips
 def clean_up(cwd: str, extension: str) -> None:
     for file in os.listdir(cwd):
@@ -63,12 +64,14 @@ def clean_up(cwd: str, extension: str) -> None:
             file_path = os.path.join(cwd, file)
             os.remove(file_path)
 
+
 def copy_log(src, dst):
     for file in os.listdir(src):
         if file.endswith("__subsearch__.log"):
             src_path = os.path.join(src, file)
             dst_path = os.path.join(dst, file)
             shutil.copy(src_path, dst_path)
+
 
 # get file hash
 def get_hash(file_name: str) -> str | None:
