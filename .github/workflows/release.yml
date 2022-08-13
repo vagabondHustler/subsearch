@@ -25,26 +25,22 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
-      # install jq to reading/writing .json files
-      - name: Install jq
-        run: sudo apt install jq
-      # read version.json in ../data, save as variable version_output
+      # read __version__.py in ../data, save as variable version_output
       - name: Get current version
         id: current_version
         run: |
-          echo "::set-output name=version_output::$(echo "`jq '.version' src/subsearch/data/version.json`")"
+          cp -r ./src/subsearch/ .github/workflows/subsearch/
+          output=$(python .github/workflows/_get__version__.py)
+          echo "::set-output name=version_output::$output"
       # write pushed tags as version number into version.json in ../data
-      - name: Set new version
-        run: echo "`jq '.version="${{ github.ref_name }}"' src/subsearch/data/version.json`" > src/subsearch/data/version.json
       - name: Update __version__.py
-        run: python .github/workflows/_set__version__.py
+        run: python .github/workflows/_set__version__.py ${{ github.ref_name }}
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
       - name: Commit version.json
         run: |
           git status
-          git add src/subsearch/data/version.json
           git add src/subsearch/data/__version__.py
-          git commit -S -m "release:: ${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
+          git commit -S -m "release:: v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
           git fetch origin main
           git push origin HEAD:main
 
