@@ -1,6 +1,7 @@
-import cloudscraper
+import re
 
-from . import version
+import cloudscraper
+from data import __version__
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
@@ -17,16 +18,7 @@ def check_for_updates() -> str:
             return latest_version
 
 
-def version_release(i: int) -> str:
-    if i == 0:
-        return "major"
-    if i == 1:
-        return "minor"
-    if i == 2:
-        return "patch"
-
-
-def is_new_version_available() -> tuple:
+def is_new_version_available() -> tuple[bool, str]:
     """
     Returns a tuple of (bool, str), where the bool is True if a new version is available, and the str is the type of release available.
     The str is either "major", "minor", "patch", "newer" or None.
@@ -34,14 +26,12 @@ def is_new_version_available() -> tuple:
 
     :return tuple: (bool, str)
     """
-    _repo_version = check_for_updates()
-    _local_version = version.current()
-    repo_version = _repo_version.replace("v", "").split(".")
-    local_version = _local_version.replace("v", "").split(".")
 
-    for i, (rv, lv) in enumerate(zip(repo_version, local_version)):
-        if int(rv) > int(lv):
-            return True, version_release(i)
-        if int(rv) < int(lv):
-            return False, "newer"
+    local_version = re.findall(r"\d+", __version__)
+    repo_version = re.findall(r"\d+", check_for_updates())
+
+    if local_version < repo_version:
+        return True, None
+    if local_version > repo_version:
+        return False, "newer"
     return False, None

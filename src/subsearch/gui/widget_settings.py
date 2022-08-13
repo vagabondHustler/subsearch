@@ -2,7 +2,8 @@ import json
 import tkinter as tk
 import webbrowser
 
-from utils import current_user, local_paths, raw_config, raw_registry, updates, version
+from data import __version__
+from utils import current_user, local_paths, raw_config, raw_registry, updates
 
 from . import tkinter_data as tkd
 from . import tools, widget_root
@@ -695,13 +696,12 @@ class CheckForUpdates(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
-        self.current_version = version.current()
         self.string_var.set(f"")
         for i in range(1, 4):
             tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
         tools.Create.label(
             self,
-            text=f"SubScene version {self.current_version}",
+            text=f"SubScene version {__version__}",
             sticky="w",
             font=tkd.Font.cas8b,
         )
@@ -732,9 +732,9 @@ class CheckForUpdates(tk.Frame):
 
         if value is False and release_type is None:
             self.string_var.set(f"You are up to date!")
-        elif value is False and release_type != "newer":
+        elif value is False and release_type is None:
             self.string_var.set(f"New {release_type} update available")
-        elif value is False and release_type == "newer":
+        elif value is False and release_type is not None:
             self.string_var.set(f"Branch ahead of main branch")
 
     def button_download(self, event):
