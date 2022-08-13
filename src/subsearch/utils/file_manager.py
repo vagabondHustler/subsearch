@@ -70,7 +70,10 @@ def copy_log(src, dst):
         if file.endswith("__subsearch__.log"):
             src_path = os.path.join(src, file)
             dst_path = os.path.join(dst, file)
-            shutil.copy(src_path, dst_path)
+            try:
+                shutil.copy(src_path, dst_path)
+            except shutil.SameFileError:
+                pass
 
 
 # get file hash
