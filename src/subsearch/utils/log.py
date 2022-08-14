@@ -3,12 +3,14 @@ from datetime import datetime
 
 from data import __version__
 
+from . import local_paths
+
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
-
+CWD = local_paths.cwd()
 
 logging.basicConfig(
-    filename=f"__subsearch__.log",
+    filename=f"{CWD}\\__subsearch__.log",
     filemode="w",
     level=logging.DEBUG,
     format="%(asctime)s - %(message)s",
