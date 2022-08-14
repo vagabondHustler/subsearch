@@ -25,7 +25,7 @@ class SubSearch:
         self.file_path = None
         self.full_filename = None
         self.file_exist = False
-        self.show_terminal = True
+        self.show_terminal = raw_config.get("show_terminal")
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
@@ -97,7 +97,7 @@ class SubSearch:
             file_manager.clean_up(local_paths.cwd(), ").nfo")
             file_manager.rename_best_match(f"{self.param.release}.srt", local_paths.cwd(), ".srt")
 
-    def on_exit(self):
+    def _exit_(self):
         if local_paths.cwd() != local_paths.get_path("root"):
             file_manager.copy_log(local_paths.get_path("root"), local_paths.cwd())
         elapsed = time.perf_counter() - self.start
@@ -112,7 +112,7 @@ def main():
     ss.opensubtitles_scrape()
     ss.subscene_scrape()
     ss.procsess_files()
-    ss.on_exit()
+    ss._exit_()
 
 
 if __name__ == "__main__":
