@@ -65,17 +65,6 @@ def clean_up(cwd: str, extension: str) -> None:
             os.remove(file_path)
 
 
-def copy_log(src, dst):
-    for file in os.listdir(src):
-        if file.endswith("__subsearch__.log"):
-            src_path = os.path.join(src, file)
-            dst_path = os.path.join(dst, file)
-            try:
-                shutil.copy(src_path, dst_path)
-            except shutil.SameFileError:
-                pass
-
-
 # get file hash
 def get_hash(file_name: str) -> str | None:
     try:
