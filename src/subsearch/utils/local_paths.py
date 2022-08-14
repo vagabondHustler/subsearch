@@ -1,9 +1,13 @@
 import os
+import sys
 
+
+def video_file() -> str:
+    return sys.argv[-1][sys.argv[-1].rfind("\\") + 1 :]
 
 # current working directory path
 def cwd() -> str:
-    return os.getcwd()
+    return sys.argv[-1][: sys.argv[-1].rfind("\\")]
 
 
 # get root directory path
