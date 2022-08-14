@@ -34,10 +34,8 @@ class SubSearch:
         for ext in raw_config.get("file_ext"):
             if sys.argv[-1].endswith(ext):
                 self.file_exist = True
-                file_full_path = sys.argv[-1]
-                index = file_full_path.rfind("\\")
-                self.file_path = file_full_path[0:index]
-                self.full_filename = file_full_path[index + 1 :]
+                self.file_path = local_paths.cwd()
+                self.full_filename = local_paths.video_file()
                 os.chdir(self.file_path)
                 break
 
@@ -98,8 +96,6 @@ class SubSearch:
             file_manager.rename_best_match(f"{self.param.release}.srt", local_paths.cwd(), ".srt")
 
     def _exit_(self):
-        if local_paths.cwd() != local_paths.get_path("root"):
-            file_manager.copy_log(local_paths.get_path("root"), local_paths.cwd())
         elapsed = time.perf_counter() - self.start
         log.output("")
         log.output(f"Finished in {elapsed} seconds")
