@@ -56,8 +56,10 @@ def get_parameters(file_name: str, file_hash: str, lang_abbr: str) -> SearchPara
     tv_series = False
     year_found = False
 
-    release = file_name
-
+    if " " in file_name:
+        release = file_name.replace(" ", ".")
+    else:
+        release = file_name
     # find season, episode, make it ordinal and set tv_series to true if it is a tv-series
     for item in release.lower().split("."):
         if item.startswith("s") and item[-1].isdigit() and "e" in item:
@@ -85,7 +87,10 @@ def get_parameters(file_name: str, file_hash: str, lang_abbr: str) -> SearchPara
     if tv_series:
         title = " ".join(x for x in _title).replace(f"s{season}e{episode}", f"- {season_ordinal} season").strip()
     else:
-        title = " ".join(x for x in _title)
+        try:
+            title = " ".join(x for x in _title)
+        except UnboundLocalError:
+            title = file_name
 
     if "-" in release:
         group = split_last_hyphen(release)
