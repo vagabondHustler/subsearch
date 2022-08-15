@@ -3,6 +3,10 @@ name: Lint
 on:
   push:
     branches: ["main"]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
 
 jobs:
   lint:
