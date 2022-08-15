@@ -83,7 +83,7 @@ def get_command_value() -> str:
     from utils import raw_config
 
     if current_user.check_is_exe():
-        value = f'"{sys.argv[0]}" %1'
+        value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif current_user.check_is_exe() is False:
         show_terminal = raw_config.get("show_terminal")
@@ -96,9 +96,9 @@ def get_command_value() -> str:
         set_wd = f"import os; os.chdir(r'{__root__}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
-            value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" "%1"'
         if show_terminal is False:
-            value = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" %1'
+            value = f'{python_path}\pythonw.exe -c "{set_title} {set_wd} {import_main}" "%1"'
 
     return value
 
