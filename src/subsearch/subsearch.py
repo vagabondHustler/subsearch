@@ -50,7 +50,7 @@ class SubSearch:
                 for item in self.scrape_opensubtitles:
                     file_manager.download_zip(item)
 
-            if self.scrape_subscene[0] is not None:
+            if self.scrape_subscene is not None:
                 log.output("")
                 log.output("[Downloading from Subscene]")
                 for item in self.scrape_subscene:
