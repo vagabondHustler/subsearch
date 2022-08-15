@@ -29,12 +29,12 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          cp -r ./src/subsearch/ .github/workflows/subsearch/
-          output=$(python .github/workflows/_get__version__.py)
+          cp -r ./src/subsearch/ scripts/subsearch/
+          output=$(python scripts/_get__version__.py)
           echo "::set-output name=version_output::$output"
       # write pushed tags as version number into version.json in ../data
       - name: Update __version__.py
-        run: python .github/workflows/_set__version__.py ${{ github.ref_name }}
+        run: python scripts/_set__version__.py ${{ github.ref_name }}
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
       - name: Commit version.json
         run: |
@@ -63,20 +63,20 @@ jobs:
           pip install pyinstaller
           pip install -r docs/requirements.txt
       # copy source code to workflows
-      - name: Copy source to .github/workflows/subsearch
+      - name: Copy source to scripts/subsearch
         run: |
-          cp -r ./src/subsearch/ .github/workflows/subsearch/
-          rm .github\workflows\subsearch\__init__.py
-          rm .github\workflows\subsearch\__main__.py
+          cp -r ./src/subsearch/ scripts/subsearch/
+          rm scripts/subsearch/__init__.py
+          rm scripts/subsearch/__main__.py
       # build the executable and manually add sv_ttk otherwise it wont be included
       - name: Build executable
         run: |
-          pyinstaller .github/workflows/build.spec -y --clean --distpath ./SubSearch-x64
+          pyinstaller scripts/build.spec -y --clean --distpath ./SubSearch-x64
           cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
       # make archives for publishing
       - name: Make archives
         run: |
-          python .github/workflows/_make_archive.py
+          python scripts/_make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
           mv ./SubSearch-source.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
