@@ -1,4 +1,4 @@
-from utils._set_data_ import Paths
+from .__set_data__ import Paths
 
 __root__ = getattr(Paths, "root")
 __data__ = getattr(Paths, "data")
