@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk
 
@@ -11,7 +12,8 @@ from . import widget_root
 
 
 # file with subtitles and corresponding dl links
-def read_tmp_file(file: str = "__subsearch__dl_data.tmp"):
+def read_tmp_file():
+    file = os.path.join(__video_directory__, "__subsearch__dl_data.tmp")
     with open(file, "r") as f:
         return [line.strip() for line in f]
 
