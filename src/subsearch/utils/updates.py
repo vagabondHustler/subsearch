@@ -20,11 +20,10 @@ def check_for_updates() -> str:
 
 def is_new_version_available() -> tuple[bool, str]:
     """
-    Returns a tuple of (bool, str), where the bool is True if a new version is available, and the str is the type of release available.
-    The str is either "major", "minor", "patch", "newer" or None.
-    The bool is False if the current version is the latest version or your version is greater than the latest version on github.
+    Compare local version with latest version on github
 
-    :return tuple: (bool, str)
+    Returns:
+        tuple[bool, str]: True, None if local version is less than repo, False, "newer" if local version is greater than repo, False, else False None
     """
 
     local_version = re.findall(r"\d+", __version__)
