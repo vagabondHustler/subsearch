@@ -1,4 +1,5 @@
-black==22.6.0
-isort==5.10.1
-twine==4.0.1
-build==0.8.0
+black
+isort
+twine
+build
+pyinstaller

@@ -2,7 +2,7 @@ import os
 import shutil
 
 """
-Used by release.yml in .github\workflows to create a zip files of the repository contents
+Used by release.yml in .github/workflows to create a zip files of the repository contents
 """
 ss_upper = f"{os.getcwd()}/src/SubSearch"
 ss_lower = f"{os.getcwd()}/src/subsearch"
@@ -19,12 +19,9 @@ def make_archive(source: str, destination: str):
     """
     Adds folder and file contents to a zip file
 
-    Parameters
-    ----------
-    source : str
-        source: Source folder and file contents to be added into a zip file
-    destination : str
-        Destination of the zip file
+    Args:
+        source (str): Source folder and file contents to be added into a zip file
+        destination (str): Destination of the zip file
     """
     base = os.path.basename(destination)
     name = base.split(".")[0]
