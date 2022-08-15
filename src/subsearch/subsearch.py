@@ -48,13 +48,13 @@ class SubSearch:
                 log.output("")
                 log.output("[Downloading from Opensubtitles]")
                 for item in self.scrape_opensubtitles:
-                    file_manager.download_zip_auto(item)
+                    file_manager.download_zip(item)
 
             if self.scrape_subscene[0] is not None:
                 log.output("")
                 log.output("[Downloading from Subscene]")
                 for item in self.scrape_subscene:
-                    file_manager.download_zip_auto(item)
+                    file_manager.download_zip(item)
 
             if self.scrape_opensubtitles is None and self.scrape_subscene is None:
                 dl_data = f"{__video_directory__}\\__subsearch__dl_data.tmp"

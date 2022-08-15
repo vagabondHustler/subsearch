@@ -8,6 +8,15 @@ SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": 
 
 # check if subtitle is hearing impaired or not
 def is_sub_hi(a1: Tag) -> str:
+    """
+    Check if subtitle is hearing impaired or not
+
+    Args:
+        a1 (Tag): lxml tag
+
+    Returns:
+        str: True if str is a40, False if str is a41
+    """
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted
@@ -19,6 +28,15 @@ def is_sub_hi(a1: Tag) -> str:
 
 # search for title
 def search_for_title(url: str) -> dict | str:
+    """
+    Search subscene for matching titles
+
+    Args:
+        url (str): search url
+
+    Returns:
+        dict | str: title, url if found, None if not found
+    """
     titles: dict = {}
     source = SCRAPER.get(url)
     scontent = source.content
@@ -38,6 +56,17 @@ def search_for_title(url: str) -> dict | str:
 
 # search title(s) for subtitle
 def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict:
+    """
+    Search for subtitles matching the provided titles
+
+    Args:
+        language (str): subtitle language
+        hearing_impaired (str): if the user wants hearing impaired subtitles, regular or both
+        url (str):
+
+    Returns:
+        dict: title, url, percentage match
+    """
     searching = True
     subtitles: dict = {}
     while searching:
@@ -68,6 +97,15 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
 
 # get download url for subtitle(s)
 def get_download_url(url: str) -> dict:
+    """
+    Get the download url for the subtitle
+
+    Args:
+        url (str): url for the subtitle
+
+    Returns:
+        dict: name of subtitle, url for zip file
+    """
     source = SCRAPER.get(url).text
     doc = BeautifulSoup(source, "lxml")
     _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]

@@ -6,6 +6,17 @@ from . import opensubtitles_soup
 
 # decides what to do with all the scrape data
 def scrape(param, lang: str, hi: str) -> list | None:
+    """
+    Scrape opensubtitles for subtitles using the given parameters.
+
+    Args:
+        param (_type_): url_opensubtitles, file_hash
+        lang (str): desired language
+        hi (str): if hearing impaired subtitles are desired
+
+    Returns:
+        list | None: download links for the subtitle
+    """
     to_be_downloaded = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:
         if param.tv_series:

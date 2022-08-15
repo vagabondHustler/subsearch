@@ -27,11 +27,10 @@ class SetValues:
 
     def _paths(self) -> Paths:
         """
-        set all the paths SubSearch uses
+        Set all the paths SubSearch uses
 
-        Returns
-        -------
-        PackagePaths
+        Returns:
+            Paths: root, data, gui, scraper, utils, icons, buttons
         """
         root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
         all_paths = {
@@ -48,11 +47,10 @@ class SetValues:
 
     def _video(self) -> VideoFile:
         """
-        set path, name, directory and ext for the video file
+        Set path, name, directory and ext for the video file
 
-        Returns
-        -------
-        VideoFilePaths
+        Returns:
+            VideoFilePaths: name, ext, path, directory
         """
         exts = [
             ".avi",
