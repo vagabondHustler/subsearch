@@ -1,13 +1,18 @@
 import ctypes
+import os
 import tkinter as tk
 
-from utils import local_paths
+from data import __buttons__
 
 from . import tkinter_data as tkd
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
+
+
+def buttons(btn: str):
+    return os.path.join(__buttons__, btn)
 
 
 # create custom labels and buttons in grid
@@ -103,11 +108,11 @@ class CustomTitleBar(tk.Frame):
         )
         self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
         # png paths
-        self.exit_path = local_paths.get_path("buttons", "exit.png")
-        self.tab_path = local_paths.get_path("buttons", "tab.png")
-        self.exit_grey_path = local_paths.get_path("buttons", "exit_grey.png")
-        self.tab_grey_path = local_paths.get_path("buttons", "tab_grey.png")
-        self.max_ina_path = local_paths.get_path("buttons", "maximize_inactive.png")
+        self.exit_path = buttons("exit.png")
+        self.tab_path = buttons("tab.png")
+        self.exit_grey_path = buttons("exit_grey.png")
+        self.tab_grey_path = buttons("tab_grey.png")
+        self.max_ina_path = buttons("maximize_inactive.png")
         # PhotoImages
         self.tab_png = tk.PhotoImage(file=self.tab_path)
         self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)

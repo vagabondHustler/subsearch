@@ -1,9 +1,10 @@
 import json
+import os
 import tkinter as tk
 import webbrowser
 
-from data import __version__
-from utils import current_user, local_paths, raw_config, raw_registry, updates
+from data import __data__, __version__
+from utils import current_user, raw_config, raw_registry, updates
 
 from . import tkinter_data as tkd
 from . import tools, widget_root
@@ -63,7 +64,7 @@ class SelectLanguage(tk.Frame):
             height=2,
             width=24,
         )
-        self.entry = tk.Entry(self, text="asdf", width=28, bd=0, font=tkd.Font.cas8b, justify="center")
+        self.entry = tk.Entry(self, text="", width=28, bd=0, font=tkd.Font.cas8b, justify="center")
         self.entry.insert(0, "🞂 Enter language here 🞀")
         self.entry.configure(
             bg=tkd.Color.light_black,
@@ -463,8 +464,8 @@ class FileExtSubMenu(tk.Toplevel):
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x}x{y+nrow}+{root_x}+{root_y}")
 
-        self.exit_path = local_paths.get_path("buttons", "exit.png")
-        self.exit_grey_path = local_paths.get_path("buttons", "exit_grey.png")
+        self.exit_path = tools.buttons("exit.png")
+        self.exit_grey_path = tools.buttons("exit_grey.png")
         self.exit_png = tk.PhotoImage(file=self.exit_path)
         self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
         self.exit = tk.Canvas(
@@ -492,7 +493,8 @@ class FileExtSubMenu(tk.Toplevel):
         else:
             data["file_ext"][btn.cget("text")] = True
             btn.configure(fg=tkd.Color.green)
-        with open(local_paths.get_path("data", "config.json"), "w") as f:
+        file = os.path.join(__data__, "config.json")
+        with open(file, "w") as f:
             f.seek(0)
             json.dump(data, f, indent=4)
             f.truncate()
