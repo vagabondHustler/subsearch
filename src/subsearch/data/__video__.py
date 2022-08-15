@@ -1,4 +1,4 @@
-from utils._set_data_ import VideoFile
+from .__set_data__ import VideoFile
 
 __video_name__ = getattr(VideoFile, "name")
 __video_ext__ = getattr(VideoFile, "ext")
