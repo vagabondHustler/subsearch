@@ -10,7 +10,6 @@ from . import log, string_parser
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-# download zip files from url
 def download_zip(item: str) -> None:
     """
     download zip file from url
@@ -67,14 +66,15 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
                 higest_value = value, file
 
     file_to_rename = higest_value[1]
-    old_name_src = os.path.join(subs_folder, file_to_rename)
-    new_name_dst = os.path.join(subs_folder, release_name)
-    log.output(f"Renaming: {file} -> {release_name}")
-    os.rename(old_name_src, new_name_dst)
-    move_src = new_name_dst
-    move_dst = os.path.join(cwd, release_name)
-    log.output(f"Moving: {release_name} -> {cwd}")
-    shutil.move(move_src, move_dst)
+    if file_to_rename.endswith(extension):
+        old_name_src = os.path.join(subs_folder, file_to_rename)
+        new_name_dst = os.path.join(subs_folder, release_name)
+        log.output(f"Renaming: {file_to_rename } -> {release_name}")
+        os.rename(old_name_src, new_name_dst)
+        move_src = new_name_dst
+        move_dst = os.path.join(cwd, release_name)
+        log.output(f"Moving: {release_name} -> {cwd}")
+        shutil.move(move_src, move_dst)
 
 
 # remove .zips
