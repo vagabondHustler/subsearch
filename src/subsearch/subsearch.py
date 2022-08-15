@@ -25,6 +25,8 @@ class SubSearch:
             self.file_hash = file_manager.get_hash(__video_path__)
             self.param = file_parser.get_parameters(__video_name__, self.file_hash, self.lang_abbr)
             log.parameters(self.param, self.lang, self.lang_abbr, self.hi, self.pct)
+            if " " in __video_name__:
+                log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
             widget_settings.show_widget()
 
@@ -73,12 +75,9 @@ class SubSearch:
         elapsed = time.perf_counter() - self.start
         log.output("")
         log.output(f"Finished in {elapsed} seconds")
-        try:
-            while self.show_terminal and current_user.check_is_exe() is False:
-                print("\nCtrl + c to exit")
-                time.sleep(900)
-        except KeyboardInterrupt:
-            pass
+
+        if self.show_terminal and current_user.check_is_exe() is False:
+            input("Ctrl + c or Enter to exit")
 
 
 def main():
