@@ -1,4 +1,5 @@
-from utils import local_paths, log
+from data import __video_directory__
+from utils import log
 
 from . import opensubtitles_soup
 
@@ -18,7 +19,7 @@ def scrape(param, lang: str, hi: str) -> list | None:
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
-        file_path = f"{local_paths.cwd()}\\opensubtitles_{current_num}.zip"
+        file_path = f"{__video_directory__}\\opensubtitles_{current_num}.zip"
         current_num = (file_path, dl_url, current_num, total_num)
         download_info.append(current_num)
     log.output(f"Done with tasks")

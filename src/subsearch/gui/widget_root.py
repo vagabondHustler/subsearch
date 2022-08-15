@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from utils import local_paths
+from data import __icons__
 
 from . import tkinter_data as tkd
 from . import tools
@@ -10,7 +10,7 @@ def main():
     global root
     root = tk.Tk(className=f" SubSearch")
     root.configure(background=tkd.Color.black)
-    icon_path = local_paths.get_path("icons", "16.ico")
+    icon_path = f"{__icons__}\\16.ico"
     root.iconbitmap(icon_path)
     root.geometry(tools.WindowPosition.set(root))
     root.resizable(False, False)

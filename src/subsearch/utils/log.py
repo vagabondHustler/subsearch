@@ -1,14 +1,19 @@
 import logging
+import os
 from datetime import datetime
 
-from data import __version__
+from data import __version__, __video_directory__
+
+CWD = __video_directory__
+if __video_directory__ is None:
+    CWD = os.getcwd()
+
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
-
 logging.basicConfig(
-    filename=f"__subsearch__.log",
+    filename=f"{CWD}\\__subsearch__.log",
     filemode="w",
     level=logging.DEBUG,
     format="%(asctime)s - %(message)s",
@@ -18,8 +23,7 @@ logging.basicConfig(
 # log and print message
 def output(msg: str, print_to_terminal: bool = True) -> None:
     logging.info(msg)
-    print(msg) if print_to_terminal else False
-
+    return print(msg) if print_to_terminal else False
 
 # log and print all the used parameters from video/directory-name
 def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int) -> None:

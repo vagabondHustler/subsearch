@@ -1,4 +1,5 @@
-from utils import local_paths, log, string_parser
+from data import __video_directory__
+from utils import log, string_parser
 
 from . import subscene_soup
 
@@ -126,7 +127,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
         total_num = len(to_be_downloaded)
         current_num += 1
         root_dl_url = subscene_soup.get_download_url(dl_url)
-        file_path = f"{local_paths.cwd()}\\__subsearch__subscene_{current_num}.zip"
+        file_path = f"{__video_directory__}\\__subsearch__subscene_{current_num}.zip"
         current_num = (file_path, root_dl_url, current_num, total_num)
         download_info.append(current_num)
     return download_info
