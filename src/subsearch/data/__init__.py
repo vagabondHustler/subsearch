@@ -1,6 +1,6 @@
 from .__set_data__ import SetValues
 
-SetValues()
+__set_values__ = SetValues()
 from .__paths__ import (
     __buttons__,
     __data__,
