@@ -36,6 +36,7 @@
 - Configure how strictly the file name has to match the search results.
 - Can be ran from a compiled executable, without the need for a Python interpreter and importing modules.
 - Subtitles are gathered from subscene and opensubtitles.
+- Works inside and outside of a env.
 
 This started as a fun project to learn how to code in python and how to use git, has now developed into a application I use daily and enjoy working on. There are many similar repositories out there that grab subtitles automatically from the web, so this might not be the most unique project. But feel free to check this one out, might offer something new. Have tried to make the setup processes as painless as possible with the use of as few external modules as possible. The average run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles.
 
