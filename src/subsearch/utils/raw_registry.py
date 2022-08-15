@@ -3,7 +3,9 @@ import socket
 import sys
 import winreg
 
-from . import current_user, local_paths
+from data import __icons__, __root__
+
+from . import current_user
 
 COMPUTER_NAME = socket.gethostname()
 ASTERISK_PATH = r"Software\Classes\*"
@@ -64,7 +66,7 @@ def write_valuex(key: str) -> None:
 
 def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
     """
-    connects to the rigistry, opens sub-key then set valuex with value
+    connects to the registry, opens sub-key then set valuex with value
 
     Parameters
     ----------
@@ -75,12 +77,15 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
     value : str
         value of the value_name
     """
-    # connect to Computer_NAME\HKEY_CURRENT_USER\
-    with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
-        # open key, with write permission
-        with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
-            # write valuex to matching value name
-            winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
+    try:
+        # connect to Computer_NAME\HKEY_CURRENT_USER\
+        with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
+            # open key, with write permission
+            with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
+                # write valuex to matching value name
+                winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
+    except FileNotFoundError:
+        pass
 
 
 def get_command_value() -> str:
@@ -96,8 +101,7 @@ def get_command_value() -> str:
     from utils import raw_config
 
     if current_user.check_is_exe():
-        exe_path = local_paths.get_path("cwd")
-        value = f'"{exe_path}\SubSearch.exe" %1'
+        value = f'"{sys.argv[0]}" %1'
         # if SubSearch is compiled we dont need anything besides this
     elif current_user.check_is_exe() is False:
         show_terminal = raw_config.get("show_terminal")
@@ -107,7 +111,7 @@ def get_command_value() -> str:
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; os.chdir(r'{local_paths.get_path('root')}');"
+        set_wd = f"import os; os.chdir(r'{__root__}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" %1'
@@ -130,7 +134,7 @@ def get_icon_value() -> str:
     from utils import raw_config
 
     show_icon: str = raw_config.get("cm_icon")
-    icon_path = local_paths.get_path("icons", "16.ico")
+    icon_path = os.path.join(__icons__, "16.ico")
     if show_icon is True:
         value = icon_path
     if show_icon is False:
