@@ -1,6 +1,6 @@
 import os
 
-from src.subsearch.data import (
+from data import (
     __buttons__,
     __data__,
     __gui__,
