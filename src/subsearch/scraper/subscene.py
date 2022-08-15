@@ -6,6 +6,16 @@ from . import subscene_soup
 
 # check if dict is of movies
 def is_movie(key: str, param=None) -> bool:
+    """
+    Check if key is a movie, by checking if the title is followed by a year. Title.Of.The.Movie.YEAR.Source.Codec-GROUP
+
+    Args:
+        key (str): name of the file plus release information
+        param (SearchParameters, optional): title, year. Defaults to None.
+
+    Returns:
+        bool: True if title is followed by a year, False otherwise
+    """
     if key.lower() == f"{param.title} ({param.year})":
         log.output(f"Movie {key} found")
         return True
@@ -14,6 +24,17 @@ def is_movie(key: str, param=None) -> bool:
 
 # check if the movie might have been released the year before
 def try_the_year_before(key: str, param=None) -> bool:
+    """
+    Some releases are released close to the next year. If so, the year might differ from the year in the title.
+    This function subtracts one year from the year in the title and checks if the release is in the list.
+
+    Args:
+        key (str): name of the file plus release information
+        param (SearchParameters, optional): title, year. Defaults to None.
+
+    Returns:
+        bool: True if the release is found one year before, False otherwise
+    """
     if param.year == "N/A":
         return False
     year = int(param.year) - 1
@@ -25,6 +46,17 @@ def try_the_year_before(key: str, param=None) -> bool:
 
 # check if dict is of tv-series
 def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
+    """
+    Check if key is a movie, by checking if the title is followed by a SeasonEpisode. Title.Of.The.S00E00.Source.Codec-GROUP
+
+    Args:
+        key (str): name of the file plus release information
+        lang_abbr (str): language abbreviation for ordinal numbers
+        param (SearchParameters, optional): title, season_ordinal, tv_series. Defaults to None.
+
+    Returns:
+        bool: True if title is followed by a SeasonEpisode, False otherwise
+    """
     if param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
         log.output(f"TV-Series {key} found")
         return True
@@ -33,6 +65,18 @@ def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
 
 # check str is above percentage threshold
 def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
+    """
+    Check if the title and release information is equal or above the percentage threshold.
+
+    Args:
+        key (str): name of the file plus release information
+        number (int): percentage threshold
+        pct (int): actual percentage
+        param (_type_, optional): title, season, episode, tv_series. Defaults to None.
+
+    Returns:
+        bool: True if the percentage is equal or above the threshold, False otherwise
+    """
     if number >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
         return True
     return False
@@ -40,6 +84,16 @@ def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
 
 # log and sort list
 def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
+    """
+    Log all the result and sort the list from highest to lowest percentage.
+
+    Args:
+        list_of_tuples (list): name of the file plus release information
+        pct (int): matching percentage
+
+    Returns:
+        list: sorted list of tuples(release, url)
+    """
     list_of_tuples.sort(key=lambda x: x[0], reverse=True)
     log.output("\n[Sorted List from Subscene]")
     hbd_printed = False

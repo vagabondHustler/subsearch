@@ -20,11 +20,31 @@ class SearchParameters:
 
 
 def split_last_hyphen(string: str) -> str:
+    """
+    Split last hyphen in a string, keep last part of the string
+
+    Args:
+        string (str): any string with a hyphen
+
+    Returns:
+        str: last item in the list of the string split by hyphen
+    """
     group = string.rsplit("-", 1)[-1]
     return group
 
 
 def get_parameters(file_name: str, file_hash: str, lang_abbr: str) -> SearchParameters:
+    """
+    Parse file name and get parameters for searching on subscene and opensubtitles
+
+    Args:
+        file_name (str): name of the file
+        file_hash (str): hash of the file
+        lang_abbr (str): language abbreviation for ordinal numbers
+
+    Returns:
+        SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
+    """
     # default values
     title = "N/A"
     year = "N/A"
