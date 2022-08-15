@@ -24,16 +24,22 @@ def main() -> None:
     else:
         for num, arg in enumerate(sys.argv[1:], 1):
             if arg.startswith("--settings"):
+                sys.argv.pop(num)
                 widget_settings.show_widget()
                 break
             elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
                 if sys.argv[num + 1] == "add":
+                    sys.argv.pop(num)  # remove registry argument
+                    sys.argv.pop(num)  # remove add argument
                     raw_registry.add_context_menu()
                     break
                 elif sys.argv[num + 1] == "del":
+                    sys.argv.pop(num)  # remove registry argument
+                    sys.argv.pop(num)  # remove del argument
                     raw_registry.remove_context_menu()
                     break
             elif arg.startswith("--help"):
+                sys.argv.pop(num)
                 print(main.__doc__)
                 break
             elif len(sys.argv[1:]) == num:
