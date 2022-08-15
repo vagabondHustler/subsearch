@@ -2,8 +2,6 @@ import socket
 import sys
 import winreg as reg
 
-from . import local_paths
-
 COMPUTER_NAME = socket.gethostname()
 
 

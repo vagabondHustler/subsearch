@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
+from data import __video_directory__
 from scraper import subscene_soup
-from utils import file_manager, local_paths
+from utils import file_manager
 
 from . import tkinter_data as tkd
 from . import widget_root
@@ -108,13 +109,13 @@ class DownloadList(tk.Frame):
                 try:
                     dl_url = subscene_soup.get_download_url(url)
                     _name = name.replace("/", "").replace("\\", "").split(": ")
-                    path = f"{local_paths.cwd()}\\__subsearch__{_name[-1]}.zip"
+                    path = f"{__video_directory__}\\__subsearch__{_name[-1]}.zip"
                     item = path, dl_url, 1, 1
                     file_manager.download_zip_auto(item)
                     if _error is False:
-                        file_manager.extract_zips(local_paths.cwd(), ".zip")
-                        file_manager.clean_up(local_paths.cwd(), ".zip")
-                        file_manager.clean_up(local_paths.cwd(), ").nfo")
+                        file_manager.extract_zips(__video_directory__, ".zip")
+                        file_manager.clean_up(__video_directory__, ".zip")
+                        file_manager.clean_up(__video_directory__, ").nfo")
                         self.sub_listbox.delete(int(number))
                         self.sub_listbox.insert(int(number), f"✔ {name}")
                         self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.green})

@@ -1,11 +1,12 @@
 import json
 
-from . import local_paths
+from data import __data__
 
 
 # update config.json
-def set_json(key: str, value: str | int, directory: str = "data", file: str = "config.json") -> None:
-    with open(local_paths.get_path(directory, file), "r+", encoding="utf-8") as f:
+def set_json(key: str, value: str | int) -> None:
+    config_file = f"{__data__}\\config.json"
+    with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -14,7 +15,7 @@ def set_json(key: str, value: str | int, directory: str = "data", file: str = "c
 
 
 def get_json() -> dict:
-    config_file = local_paths.get_path("data", "config.json")
+    config_file = f"{__data__}\\config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
 
@@ -47,7 +48,7 @@ def set_default_json() -> None:
     data["show_download_window"] = True
     data["show_terminal"] = False
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
-    config_file = local_paths.get_path("data", "config.json")
+    config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
