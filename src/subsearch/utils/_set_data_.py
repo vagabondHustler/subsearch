@@ -27,12 +27,11 @@ class SetValues:
 
     def _paths(self) -> Paths:
         """
-        package_paths _summary_
+        set all the paths SubSearch uses
 
         Returns
         -------
         PackagePaths
-            _description_
         """
         root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
         all_paths = {
@@ -49,12 +48,11 @@ class SetValues:
 
     def _video(self) -> VideoFile:
         """
-        video_paths _summary_
+        set path, name, directory and ext for the video file
 
         Returns
         -------
         VideoFilePaths
-            _description_
         """
         exts = [
             ".avi",
