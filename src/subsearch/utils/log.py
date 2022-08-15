@@ -25,6 +25,7 @@ def output(msg: str, print_to_terminal: bool = True) -> None:
     logging.info(msg)
     return print(msg) if print_to_terminal else False
 
+
 # log and print all the used parameters from video/directory-name
 def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int) -> None:
     output(f"SubSearch - {__version__} ", False)
