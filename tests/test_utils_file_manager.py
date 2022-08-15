@@ -1,7 +1,8 @@
+import os
 import shutil
 from pathlib import Path
 
-from src.subsearch.utils import file_manager, local_paths
+from src.subsearch.utils import file_manager
 
 
 def copy_and_rename(src: str, dst: str):
@@ -11,12 +12,12 @@ def copy_and_rename(src: str, dst: str):
     shutil.copy2(src, new_dst)
 
 
-CWD = f'{local_paths.get_path("cwd")}\\tests\\test_files'
+CWD = os.path.join(os.getcwd(), "tests\\test_files")
 
 
 def test_extract_zips() -> None:
-    src = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
-    dst = f'{local_paths.get_path("cwd")}\\tests\\test_files\\test.subtitles.zip'
+    src = f"{CWD}\\test.subtitles.zip"
+    dst = f"{CWD}\\test.subtitles.zip"
     copy_and_rename(src, dst)
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
@@ -48,9 +49,3 @@ def test_get_hash() -> None:
     hash1 = file_manager.get_hash(f"{CWD}\\none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == None
-
-
-def test_copy_log() -> None:
-    src = f'{local_paths.get_path("cwd")}\\src\\subsearch'
-    dst = f'{local_paths.get_path("cwd")}\\tests'
-    file_manager.copy_log(src, dst)
