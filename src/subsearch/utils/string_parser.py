@@ -1,5 +1,14 @@
 # compare two lists  with each other and return match in %
 def pct_value(from_pc: str | int, from_browser: str | int) -> int:
+    """
+    Parse two lists and return match in %
+
+    Args:
+        from_pc (str | int): list from pc
+        from_browser (str | int): list from browser
+    Returns:
+        int: value in percentage of how many words match
+    """
     max_percentage = 100
     pc_list: list = mk_lst(from_pc)
     browser_list: list = mk_lst(from_browser)
