@@ -25,7 +25,7 @@
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md)
 - [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
-- [Special Thanks to](#thanks)
+- [Special Thanks](#thanks)
 
 ## About <a name = "about"></a>
 
@@ -162,7 +162,7 @@ Associated extensions (Green = True, Red = False)
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
 
-## Special Thanks to <a name = "thanks"></a>
+## Special Thanks<a name = "thanks"></a>
 
 - To the people at [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template) for `README` template
 - To the people at [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
