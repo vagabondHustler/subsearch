@@ -17,14 +17,14 @@ class SubSearch:
             raw_registry.add_context_menu()
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get("show_terminal")
         self.file_exist = True if __video_name__ is not None else False
-        self.lang, self.lang_abbr = raw_config.get("language")
+        self.lang, self.lang_abbr_ISO6391 = raw_config.get("language")
         self.hi = raw_config.get("hearing_impaired")
         self.pct = raw_config.get("percentage")
         self.show_dl_window = raw_config.get("show_download_window")
         if self.file_exist:
             self.file_hash = file_manager.get_hash(__video_path__)
-            self.param = file_parser.get_parameters(__video_name__, self.file_hash, self.lang_abbr)
-            log.parameters(self.param, self.lang, self.lang_abbr, self.hi, self.pct)
+            self.param = file_parser.get_parameters(__video_name__, self.file_hash, self.lang, self.lang_abbr_ISO6391)
+            log.parameters(self.param, self.lang, self.lang_abbr_ISO6391, self.hi, self.pct)
             if " " in __video_name__:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
@@ -41,7 +41,7 @@ class SubSearch:
             log.output("")
             log.output("[Searching on subscene]")
             self.scrape_subscene = subscene.scrape(
-                self.param, self.lang, self.lang_abbr, self.hi, self.pct, self.show_dl_window
+                self.param, self.lang, self.lang_abbr_ISO6391, self.hi, self.pct, self.show_dl_window
             )
 
     def procsess_files(self):
