@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 filterwarnings =[
     'ignore::DeprecationWarning'
 ]
+log_cli = true
+log_cli_level = 'DEBUG'
 addopts = "--cov=subsearch"
 testpaths = [
     "tests",
