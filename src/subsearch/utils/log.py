@@ -36,7 +36,7 @@ def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str,
     output(f"Year: {param.year}")
     output(f"Season: {param.season}, {param.season_ordinal}")
     output(f"Episode: {param.episode}, {param.episode_ordinal}")
-    output(f"TV-Series: {param.tv_series}")
+    output(f"TV-Series: {param.show_bool}")
     output(f"Release: {param.release}")
     output(f"Group: {param.group}")
     output(f"Match threshold: {percentage}%")
