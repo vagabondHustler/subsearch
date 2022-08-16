@@ -7,22 +7,19 @@ def test_file_parser_movie() -> None:
     """
     file_name = "the.foo.bar.2021.1080p.web.h264-foobar"
     param = file_parser.get_parameters(file_name, None, "en")
-    param_list = [
-        param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar",
-        param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None",
-        param.title == "the foo bar",
-        param.year == "2021",
-        param.season == "N/A",
-        param.season_ordinal == "N/A",
-        param.episode == "N/A",
-        param.episode_ordinal == "N/A",
-        param.tv_series is False,
-        param.release == "the.foo.bar.2021.1080p.web.h264-foobar",
-        param.group == "foobar",
-        param.file_hash == None,
-    ]
-    for p in param_list:
-        assert p
+    print(param)
+    assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
+    assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None"
+    assert param.title == "the foo bar"
+    assert param.year == "2021"
+    assert param.season == "N/A"
+    assert param.season_ordinal == "N/A"
+    assert param.episode == "N/A"
+    assert param.episode_ordinal == "N/A"
+    assert param.show_bool is False
+    assert param.release == "the.foo.bar.2021.1080p.web.h264-foobar"
+    assert param.group == "foobar"
+    assert param.file_hash == None
 
 
 def test_file_parser_show() -> None:
@@ -32,19 +29,15 @@ def test_file_parser_show() -> None:
     file_name = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     param = file_parser.get_parameters(file_name, None, "en")
     print(param)
-    param_list = [
-        param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season",
-        param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None",
-        param.title == "the foo bar - first season",
-        param.year == "N/A",
-        param.season == "01",
-        param.season_ordinal == "first",
-        param.episode == "01",
-        param.episode_ordinal == "first",
-        param.tv_series is True,
-        param.release == "the.foo.bar.s01e01.1080p.web.h264-foobar",
-        param.group == "foobar",
-        param.file_hash == None,
-    ]
-    for p in param_list:
-        assert p
+    assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
+    assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None"
+    assert param.title == "the foo bar - first season"
+    assert param.year == "N/A"
+    assert param.season == "01"
+    assert param.season_ordinal == "first"
+    assert param.episode == "01"
+    assert param.episode_ordinal == "first"
+    assert param.show_bool is True
+    assert param.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    assert param.group == "foobar"
+    assert param.file_hash == None
