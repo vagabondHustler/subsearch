@@ -19,7 +19,7 @@ def scrape(param, lang: str, hi: str) -> list | None:
     """
     to_be_downloaded = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:
-        if param.tv_series:
+        if param.show_bool:
             log.output(f"No TV-series found matching hash {param.file_hash}")
         else:
             log.output(f"No movies found matching hash {param.file_hash}")
