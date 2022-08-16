@@ -1,4 +1,7 @@
 # compare two lists  with each other and return match in %
+from typing import Any
+
+
 def pct_value(from_pc: str | int, from_browser: str | int) -> int:
     """
     Parse two lists and return match in %
@@ -22,10 +25,10 @@ def pct_value(from_pc: str | int, from_browser: str | int) -> int:
 
 
 # create list from string
-def mk_lst(release: str | int):
-    new: list = []
+def mk_lst(release: Any) -> list:
+    new = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
-    temp: list = release.split(".")
+    temp= release.split(".")
 
     for item in temp:
         if item not in qualities:

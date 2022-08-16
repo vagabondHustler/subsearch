@@ -1,3 +1,5 @@
+from typing import Any
+
 from data import __video_directory__
 from utils import log
 
@@ -5,7 +7,7 @@ from . import opensubtitles_soup
 
 
 # decides what to do with all the scrape data
-def scrape(param, lang: str, hi: str) -> list | None:
+def scrape(param: Any, lang: str, hi: bool) -> (list | None):
     """
     Scrape opensubtitles for subtitles using the given parameters.
 
@@ -25,9 +27,9 @@ def scrape(param, lang: str, hi: str) -> list | None:
             log.output(f"No movies found matching hash {param.file_hash}")
         return None
 
-    download_info: list = []
+    download_info = []
     log.output(f"Preparing  hash {param.file_hash} for download")
-    for current_num, (dl_url) in enumerate(to_be_downloaded):
+    for current_num, dl_url in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
         file_path = f"{__video_directory__}\\opensubtitles_{current_num}.zip"
