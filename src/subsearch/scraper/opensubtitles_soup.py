@@ -4,8 +4,8 @@ from utils import log
 
 
 # search for file hash
-def search_for_hash(url: str, lang: str, hi: str) -> list | None:
-    download_url: list = []
+def search_for_hash(url: str, lang: str, hi: str | bool | None) -> list| None:
+    download_url = []
     source = requests.get(url)
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")

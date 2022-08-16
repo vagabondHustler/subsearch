@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, Tuple
 
 from num2words import num2words
 
@@ -80,13 +80,14 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-ordinal_return = (
+ORDINAL_FALSE = (
     tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal[False]]
     | tuple[str, Any, str, Any, Literal[True]]
 )
+ORDINAL_TRUE = Tuple[str, str, str, str, bool]
 
 
-def find_ordinal(string: str, lang_abbr_ISO6391: str) -> ordinal_return:
+def find_ordinal(string: str, lang_abbr_ISO6391: str) -> ORDINAL_FALSE | ORDINAL_TRUE:
     """
     Convert numbers into ordinal strings, 01 = First, 02 = Second...
 

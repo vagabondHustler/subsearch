@@ -2,6 +2,7 @@ import os
 import shutil
 import struct
 import zipfile
+from typing import Type
 
 import cloudscraper
 
@@ -130,5 +131,6 @@ def get_hash(file_name: str) -> str | None:
         returnedhash = "%016x" % hash
         return returnedhash
 
-    except IOError as err:
-        return log.output(err)
+    except IOError:
+        log.output("IOError")
+        return None

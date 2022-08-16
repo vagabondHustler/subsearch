@@ -114,7 +114,7 @@ def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
 # decides what to do with all the scrape data
 def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
     # search for titles
-    to_be_scraped: list = []
+    to_be_scraped = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
     if title_keys == "ERROR: CAPTCHA PROTECTION":
         log.output(f"Captcha protection detected. Please try again later.")
@@ -139,8 +139,8 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
         return None
 
     # search title for subtitles
-    to_be_downloaded: list = []
-    to_be_sorted: list = []
+    to_be_downloaded = []
+    to_be_sorted = []
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
@@ -177,7 +177,7 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
             return None
         return None
 
-    download_info: list = []
+    download_info = []
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1

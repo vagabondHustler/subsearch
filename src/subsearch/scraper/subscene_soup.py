@@ -7,7 +7,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
-def is_sub_hi(a1: Tag) -> str:
+def is_sub_hi(a1: Tag) -> (bool | None):
     """
     Check if subtitle is hearing impaired or not
 
@@ -96,7 +96,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
 
 
 # get download url for subtitle(s)
-def get_download_url(url: str) -> dict:
+def get_download_url(url: str) -> str:
     """
     Get the download url for the subtitle
 

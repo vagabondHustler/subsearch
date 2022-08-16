@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from datetime import datetime
+from typing import Literal
 
 from data import __version__, __video_directory__
 
@@ -22,12 +23,12 @@ logging.basicConfig(
 )
 
 # log and print message
-def output(msg: str, print_to_terminal: bool = True) -> None:
+def output(msg: str, print_to_terminal: bool = True) -> (Literal[False] | None):
     logging.info(msg)
     return print(msg) if print_to_terminal else False
 
 
-def tprint(msg: str):
+def tprint(msg: str) -> None:
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
