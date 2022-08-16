@@ -157,3 +157,4 @@ src/*subs/
 /*.log
 /publish.py
 tests/__subsearch__.log
+old*
