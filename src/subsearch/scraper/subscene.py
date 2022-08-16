@@ -45,19 +45,19 @@ def try_the_year_before(key: str, param=None) -> bool:
 
 
 # check if dict is of tv-series
-def is_tv_series(key: str, lang_abbr: str, param=None) -> bool:
+def is_show_bool(key: str, lang_abbr: str, param=None) -> bool:
     """
     Check if key is a movie, by checking if the title is followed by a SeasonEpisode. Title.Of.The.S00E00.Source.Codec-GROUP
 
     Args:
         key (str): name of the file plus release information
         lang_abbr (str): language abbreviation for ordinal numbers
-        param (SearchParameters, optional): title, season_ordinal, tv_series. Defaults to None.
+        param (SearchParameters, optional): title, season_ordinal, show_bool. Defaults to None.
 
     Returns:
         bool: True if title is followed by a SeasonEpisode, False otherwise
     """
-    if param.title and param.season_ordinal in key.lower() and param.tv_series and lang_abbr:
+    if param.title and param.season_ordinal in key.lower() and param.show_bool and lang_abbr:
         log.output(f"TV-Series {key} found")
         return True
     return False
@@ -72,12 +72,12 @@ def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
         key (str): name of the file plus release information
         number (int): percentage threshold
         pct (int): actual percentage
-        param (_type_, optional): title, season, episode, tv_series. Defaults to None.
+        param (_type_, optional): title, season, episode, show_bool. Defaults to None.
 
     Returns:
         bool: True if the percentage is equal or above the threshold, False otherwise
     """
-    if number >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.tv_series:
+    if number >= pct or param.title and f"{param.season}{param.episode}" in key.lower() and param.show_bool:
         return True
     return False
 
@@ -124,13 +124,13 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
         if try_the_year_before(key, param):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
-        if is_tv_series(key, lang_abbr, param):
+        if is_show_bool(key, lang_abbr, param):
             to_be_scraped.append(value) if value not in (to_be_scraped) else None
     log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
     # exit if no titles found
     if len(to_be_scraped) == 0:
-        if param.tv_series:
+        if param.show_bool:
             log.output("")
             log.output(f"No TV-series found matching {param.title}")
         else:
