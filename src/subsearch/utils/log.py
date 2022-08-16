@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from datetime import datetime
 
 from data import __version__, __video_directory__
@@ -26,11 +27,24 @@ def output(msg: str, print_to_terminal: bool = True) -> None:
     return print(msg) if print_to_terminal else False
 
 
+def tprint(msg: str):
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+    return logging.info(msg)
+
+
 # log and print all the used parameters from video/directory-name
-def parameters(param: str, language: str, lang_abbr: str, hearing_impaired: str, percentage: int) -> None:
+def parameters(param: str, language: str, lang_abbr_ISO6391: str, hearing_impaired: str, percentage: int) -> None:
+    lang_abbr_ISO6392B = language[:3].lower()
     output(f"SubSearch - {__version__} ", False)
     output("[PARAMETERS]")
-    output(f"Language: {language}, {lang_abbr}")
+    output(f"Language: {language}, {lang_abbr_ISO6391}, {lang_abbr_ISO6392B}")
     output(f"Hearing impaired: {hearing_impaired}")
     output(f"Title: {param.title}")
     output(f"Year: {param.year}")
