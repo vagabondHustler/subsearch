@@ -4,8 +4,8 @@ from utils import log
 
 
 # search for file hash
-def search_for_hash(url: str, lang: str, hi: str) -> list | None:
-    download_url: list = []
+def search_for_hash(url: str, lang: str, hi: str | bool) -> list[str] | None:
+    download_url: list[str] = []
     source = requests.get(url)
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
@@ -16,11 +16,11 @@ def search_for_hash(url: str, lang: str, hi: str) -> list | None:
     for item in tr_name:
         tl = [a["title"] for a in item.find_all("a", title=lang)]
         if lang in tl:
-            hi = item.find("img", alt="Subtitles for hearing impaired")
-            if hi is not None and hi is False:
+            hi_site = item.find("img", alt="Subtitles for hearing impaired")
+            if hi_site is not None and hi is False:
                 log.output(f"Found HI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'")
                 continue
-            if hi is None and hi is True:
+            if hi_site is None and hi is True:
                 log.output(f"Found nonHI-subtitle but skipping, 'cus hearing impaired is set to '{hi}'")
                 continue
 

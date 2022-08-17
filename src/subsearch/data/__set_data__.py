@@ -25,7 +25,7 @@ class SetValues:
         self._video()
         self._paths()
 
-    def _paths(self) -> Paths:
+    def _paths(self) -> None:
         """
         Set all the paths SubSearch uses
 
@@ -45,7 +45,7 @@ class SetValues:
         for k, v in all_paths.items():
             setattr(Paths, k, v)
 
-    def _video(self) -> VideoFile:
+    def _video(self) -> None:
         """
         Set path, name, directory and ext for the video file
 

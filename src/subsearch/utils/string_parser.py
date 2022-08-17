@@ -1,5 +1,8 @@
 # compare two lists  with each other and return match in %
-def pct_value(from_pc: str | int, from_browser: str | int) -> int:
+from typing import Any
+
+
+def pct_value(from_pc: Any, from_browser: Any) -> int:
     """
     Parse two lists and return match in %
 
@@ -10,8 +13,8 @@ def pct_value(from_pc: str | int, from_browser: str | int) -> int:
         int: value in percentage of how many words match
     """
     max_percentage = 100
-    pc_list: list = mk_lst(from_pc)
-    browser_list: list = mk_lst(from_browser)
+    pc_list: list[Any] = mk_lst(from_pc)
+    browser_list: list[Any] = mk_lst(from_browser)
     not_matching = list(set(pc_list) - set(browser_list))
     not_matching_value = len(not_matching)
     number_of_items = len(pc_list)
@@ -22,10 +25,10 @@ def pct_value(from_pc: str | int, from_browser: str | int) -> int:
 
 
 # create list from string
-def mk_lst(release: str | int):
-    new: list = []
+def mk_lst(release: Any) -> list[Any]:
+    new: list[Any] = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
-    temp: list = release.split(".")
+    temp= release.split(".")
 
     for item in temp:
         if item not in qualities:
