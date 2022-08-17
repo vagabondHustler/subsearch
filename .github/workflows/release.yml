@@ -49,6 +49,7 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
+          pip install -e .
           output=$(python scripts/get__version__.py)
           echo "::set-output name=version_output::$output"
       # write pushed tags as version number into version.json in ../data
