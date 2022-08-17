@@ -1,11 +1,14 @@
+from typing import Any, List, Optional
+
 from data import __video_directory__
 from utils import log, string_parser
+from utils.file_parser import SearchParameters
 
 from . import subscene_soup
 
 
 # check if dict is of movies
-def is_movie(key: str, param=None) -> bool:
+def is_movie(key: str, param: SearchParameters) -> bool:
     """
     Check if key is a movie, by checking if the title is followed by a year. Title.Of.The.Movie.YEAR.Source.Codec-GROUP
 
@@ -23,7 +26,7 @@ def is_movie(key: str, param=None) -> bool:
 
 
 # check if the movie might have been released the year before
-def try_the_year_before(key: str, param=None) -> bool:
+def try_the_year_before(key: str, param: SearchParameters) -> bool:
     """
     Some releases are released close to the next year. If so, the year might differ from the year in the title.
     This function subtracts one year from the year in the title and checks if the release is in the list.
@@ -35,17 +38,18 @@ def try_the_year_before(key: str, param=None) -> bool:
     Returns:
         bool: True if the release is found one year before, False otherwise
     """
-    if param.year == "N/A":
+    if param.year == 0:
         return False
     year = int(param.year) - 1
     the_year_before = f"{param.title} ({year})"
     if key.lower().startswith(the_year_before):
         log.output(f"Movie {key} found")
         return True
+    return False
 
 
 # check if dict is of tv-series
-def is_show_bool(key: str, lang_abbr_ISO6391: str, param=None) -> bool:
+def is_show_bool(key: str, lang_abbr_iso6391: str, param: SearchParameters) -> bool:
     """
     Check if key is a movie, by checking if the title is followed by a SeasonEpisode. Title.Of.The.S00E00.Source.Codec-GROUP
 
@@ -57,14 +61,14 @@ def is_show_bool(key: str, lang_abbr_ISO6391: str, param=None) -> bool:
     Returns:
         bool: True if title is followed by a SeasonEpisode, False otherwise
     """
-    if param.title and param.season_ordinal in key.lower() and param.show_bool and lang_abbr_ISO6391:
+    if param.title and param.season_ordinal in key.lower() and param.show_bool and lang_abbr_iso6391:
         log.output(f"TV-Series {key} found")
         return True
     return False
 
 
 # check str is above percentage threshold
-def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
+def is_threshold(key: str, number: int, pct: int, param: SearchParameters) -> bool:
     """
     Check if the title and release information is equal or above the percentage threshold.
 
@@ -83,7 +87,7 @@ def is_threshold(key: str, number: int, pct: int, param=None) -> bool:
 
 
 # log and sort list
-def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
+def log_and_sort_list(list_of_tuples: list[tuple[int, str, str]], pct: int):
     """
     Log all the result and sort the list from highest to lowest percentage.
 
@@ -112,9 +116,9 @@ def log_and_sort_list(list_of_tuples: list, pct: int) -> list:
 
 
 # decides what to do with all the scrape data
-def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> list | None:
+def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> Any | None:
     # search for titles
-    to_be_scraped: list = []
+    to_be_scraped: list[str] = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
     if title_keys == "ERROR: CAPTCHA PROTECTION":
         log.output(f"Captcha protection detected. Please try again later.")
@@ -139,8 +143,8 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
         return None
 
     # search title for subtitles
-    to_be_downloaded: list = []
-    to_be_sorted: list = []
+    to_be_downloaded: list[Any] = []
+    to_be_sorted: list[Any] = []
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
@@ -177,12 +181,12 @@ def scrape(param, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: 
             return None
         return None
 
-    download_info: list = []
+    download_info = []
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1
         root_dl_url = subscene_soup.get_download_url(dl_url)
         file_path = f"{__video_directory__}\\__subsearch__subscene_{current_num}.zip"
-        current_num = (file_path, root_dl_url, current_num, total_num)
-        download_info.append(current_num)
+        items = (file_path, root_dl_url, current_num, total_num)
+        download_info.append(items)
     return download_info

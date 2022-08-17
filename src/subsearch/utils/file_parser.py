@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, Tuple, Union
 
 from num2words import num2words
 
 
-def find_year(string: str) -> str:
+def find_year(string: str) -> int:
     """
     Parse string from start, until last instance of a year between .1000-2999. found, keep last instance of year
     https://regex101.com/r/r5TwxJ/1
@@ -20,8 +20,8 @@ def find_year(string: str) -> str:
     _year = re.findall("^.*\.([1-2][0-9]{3})\.", string)
     if len(_year) > 0:
         year = _year[0]
-        return year
-    return "N/A"
+        return int(year)
+    return 0
 
 
 def find_title_by_year(string: str) -> str:
@@ -37,7 +37,7 @@ def find_title_by_year(string: str) -> str:
     """
     _title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)
     if len(_title) > 0:
-        title = _title[0]
+        title: str = _title[0]
         title = title.replace(".", " ")
         return title
     return "N/A"
@@ -56,7 +56,7 @@ def find_title_by_show(string: str) -> str:
     """
     _title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)
     if len(_title) > 0:
-        title = _title[0]
+        title: str = _title[0]
         title = title.replace(".", " ")
         return title
     return "N/A"
@@ -75,18 +75,12 @@ def find_season_episode(string: str) -> str:
     """
     _se = re.findall("\.([s]\d*[e]\d*)\.", string)
     if len(_se) > 0:
-        se = _se[0]
+        se: str = _se[0]
         return se
     return "N/A"
 
 
-ordinal_return = (
-    tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal[False]]
-    | tuple[str, Any, str, Any, Literal[True]]
-)
-
-
-def find_ordinal(string: str, lang_abbr_ISO6391: str) -> ordinal_return:
+def find_ordinal(string: str, lang_abbr_iso6391: str) -> tuple[Any | str, str, str, str, bool]:
     """
     Convert numbers into ordinal strings, 01 = First, 02 = Second...
 
@@ -100,13 +94,14 @@ def find_ordinal(string: str, lang_abbr_ISO6391: str) -> ordinal_return:
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
-        return season, season_ordinal, episode, episode_ordinal, show_bool
 
-    season, episode = string.replace("s", "").replace("e", " ").split(" ")
-    season_ordinal = num2words(int(season), lang=lang_abbr_ISO6391, to="ordinal")
-    episode_ordinal = num2words(int(episode), lang=lang_abbr_ISO6391, to="ordinal")
-    show_bool = True
-    return season, season_ordinal, episode, episode_ordinal, show_bool
+        return season, season_ordinal, episode, episode_ordinal, show_bool
+    else:
+        season, episode = string.replace("s", "").replace("e", " ").split(" ")
+        season_ordinal = num2words(int(season), lang=lang_abbr_iso6391, to="ordinal")
+        episode_ordinal = num2words(int(episode), lang=lang_abbr_iso6391, to="ordinal")
+        show_bool = True
+        return season, season_ordinal, episode, episode_ordinal, show_bool
 
 
 def find_group(string: str) -> str:
@@ -114,7 +109,7 @@ def find_group(string: str) -> str:
     return group
 
 
-@dataclass
+@dataclass(frozen=True, order=True)
 class SearchParameters:
     url_subscene: str
     url_opensubtitles: str
@@ -130,7 +125,7 @@ class SearchParameters:
     file_hash: str
 
 
-def get_parameters(filename: str, file_hash: str, language: str, lang_abbr_ISO6391: str) -> SearchParameters:
+def get_parameters(filename: str, file_hash: str, language: str, lang_abbr_iso6391: str) -> SearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -144,43 +139,39 @@ def get_parameters(filename: str, file_hash: str, language: str, lang_abbr_ISO63
         SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
     """
     filename = filename.lower()
-    lang_abbr_ISO6392B = language[:3].lower()
+    lang_abbr_iso6392b = language[:3].lower()
 
     year = find_year(filename)
-    if year.isnumeric():
-        title = find_title_by_year(filename)
 
     season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_abbr_ISO6391)
+    season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_abbr_iso6391)
 
-    if show_bool:
+    if year > 0:
+        title = find_title_by_year(filename)
+    elif show_bool:
         title = find_title_by_show(filename)
         title = f"{title} - {season_ordinal} season"
-
-    group = find_group(filename)
-
-    try:
-        title
-    except UnboundLocalError:
+    else:
         title = filename.rsplit("-", 1)[0]
 
+    group = find_group(filename)
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
-    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_abbr_ISO6392B}/moviename-"
+    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_abbr_iso6392b}/moviename-"
     url_subscene = f"{subscene}{title}".replace(" ", "%20")
     url_opensubtitles = f"{opensubtitles}{file_hash}"
 
-    parameters = {
-        "url_subscene": url_subscene,
-        "url_opensubtitles": url_opensubtitles,
-        "title": title,
-        "year": year,
-        "season": season,
-        "season_ordinal": season_ordinal,
-        "episode": episode,
-        "episode_ordinal": episode_ordinal,
-        "show_bool": show_bool,
-        "release": filename,
-        "group": group,
-        "file_hash": file_hash,
-    }
-    return SearchParameters(**parameters)
+    parameters = SearchParameters(
+        url_subscene,
+        url_opensubtitles,
+        title,
+        year,
+        season,
+        season_ordinal,
+        episode,
+        episode_ordinal,
+        show_bool,
+        filename,
+        group,
+        file_hash,
+    )
+    return parameters

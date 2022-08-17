@@ -2,8 +2,10 @@ import os
 import socket
 import sys
 import winreg
+from typing import Literal
 
 from data import __icons__, __root__
+from typing_extensions import LiteralString
 
 from . import current_user
 
@@ -103,7 +105,7 @@ def get_command_value() -> str:
     return value
 
 
-def get_icon_value() -> str:
+def get_icon_value() -> (LiteralString | Literal['']):
     """
     Check config.json cm_icon value
 
@@ -112,11 +114,10 @@ def get_icon_value() -> str:
 
     show_icon: str = raw_config.get("cm_icon")
     icon_path = os.path.join(__icons__, "16.ico")
-    if show_icon is True:
-        value = icon_path
-    if show_icon is False:
-        value = ""
-    return value
+    if show_icon:
+        return icon_path
+    else:
+        return ""
 
 
 def get_appliesto_value() -> str:

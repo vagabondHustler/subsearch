@@ -1,6 +1,6 @@
 from .__set_data__ import VideoFile
 
-__video_name__ = getattr(VideoFile, "name")
-__video_ext__ = getattr(VideoFile, "ext")
-__video_path__ = getattr(VideoFile, "path")
-__video_directory__ = getattr(VideoFile, "directory")
+__video_name__: str = getattr(VideoFile, "name")
+__video_ext__: str = getattr(VideoFile, "ext")
+__video_path__: str = getattr(VideoFile, "path")
+__video_directory__: str = getattr(VideoFile, "directory")

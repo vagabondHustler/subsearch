@@ -18,7 +18,7 @@ def check_for_updates() -> str:
             return latest_version
 
 
-def is_new_version_available() -> tuple[bool, str]:
+def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
     """
     Compare local version with latest version on github
 

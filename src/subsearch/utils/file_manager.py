@@ -2,6 +2,7 @@ import os
 import shutil
 import struct
 import zipfile
+from typing import Any
 
 import cloudscraper
 
@@ -10,7 +11,7 @@ from . import log, string_parser
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_zip(item: str) -> None:
+def download_zip(item: Any) -> None:
     """
     download zip file from url
 
@@ -130,5 +131,6 @@ def get_hash(file_name: str) -> str | None:
         returnedhash = "%016x" % hash
         return returnedhash
 
-    except IOError as err:
-        return log.output(err)
+    except IOError:
+        log.output("IOError")
+        return None
