@@ -28,4 +28,3 @@ def make_archive(source: str, destination: str):
 
 
 make_archive(path_x64_dir_src, path_x64_zip_dst)
-make_archive(path_py_dir_src, path_py_zip_dst)
