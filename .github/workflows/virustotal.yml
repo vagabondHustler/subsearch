@@ -16,4 +16,3 @@ jobs:
           update_release_body: true
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
-            SubSearch-${{ github.ref_name }}-win-source.zip

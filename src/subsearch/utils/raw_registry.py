@@ -4,10 +4,8 @@ import sys
 import winreg
 from typing import Literal
 
-from data import __icons__, __root__
-from typing_extensions import LiteralString
-
-from . import current_user
+from subsearch.data import __icons__, __root__
+from subsearch.utils import current_user
 
 COMPUTER_NAME = socket.gethostname()
 ASTERISK_PATH = r"Software\Classes\*"
@@ -82,7 +80,7 @@ def get_command_value() -> str:
     Get the correct command value
     """
     # get latest json value from file
-    from utils import raw_config
+    from subsearch.utils import raw_config
 
     if current_user.check_is_exe():
         value = f'"{sys.argv[0]}" "%1"'
@@ -105,12 +103,12 @@ def get_command_value() -> str:
     return value
 
 
-def get_icon_value() -> (LiteralString | Literal[""]):
+def get_icon_value() -> str:
     """
     Check config.json cm_icon value
 
     """
-    from utils import raw_config
+    from subsearch.utils import raw_config
 
     show_icon: str = raw_config.get("cm_icon")
     icon_path = os.path.join(__icons__, "16.ico")
@@ -122,7 +120,7 @@ def get_icon_value() -> (LiteralString | Literal[""]):
 
 def get_appliesto_value() -> str:
     # get latest json value from file
-    from utils import raw_config
+    from subsearch.utils import raw_config
 
     file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on

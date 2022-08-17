@@ -1,8 +1,7 @@
-from data import __video_directory__
-from utils import log
-from utils.file_parser import SearchParameters
-
-from . import opensubtitles_soup
+from subsearch.data import __video_directory__
+from subsearch.scraper import opensubtitles_soup
+from subsearch.utils import log
+from subsearch.utils.string_parser import SearchParameters
 
 
 # decides what to do with all the scrape data

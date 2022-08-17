@@ -3,12 +3,12 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
-from data import __video_directory__
-from scraper import subscene_soup
-from utils import file_manager
 
-from . import tkinter_data as tkd
-from . import widget_root
+from subsearch.data import __video_directory__
+from subsearch.gui import tkinter_data as tkd
+from subsearch.gui import widget_root
+from subsearch.scraper import subscene_soup
+from subsearch.utils import file_manager
 
 
 # file with subtitles and corresponding dl links
