@@ -1,10 +1,9 @@
 from typing import Any, List, Optional
 
-from data import __video_directory__
-from utils import log, string_parser
-from utils.file_parser import SearchParameters
-
-from . import subscene_soup
+from subsearch.data import __video_directory__
+from subsearch.scraper import subscene_soup
+from subsearch.utils import log, string_parser
+from subsearch.utils.string_parser import SearchParameters
 
 
 # check if dict is of movies
@@ -151,7 +150,7 @@ def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int
             sub_keys = subscene_soup.search_title_for_sub(lang, hi, url)
             break
         for key, value in sub_keys.items():
-            number = string_parser.pct_value(key, param.release)
+            number = string_parser.get_pct_value(key, param.release)
             log.output(f"[Found]: {key}")
             lenght_str = sum(1 for char in f"[{number}% match]:")
             formatting_spaces = " " * lenght_str

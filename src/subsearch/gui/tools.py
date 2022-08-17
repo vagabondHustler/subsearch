@@ -3,9 +3,8 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar
 
-from data import __buttons__
-
-from . import tkinter_data as tkd
+from subsearch.data import __buttons__
+from subsearch.gui import tkinter_data as tkd
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000

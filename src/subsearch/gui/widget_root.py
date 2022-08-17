@@ -1,10 +1,9 @@
 import tkinter as tk
 from typing import Any
 
-from data import __icons__
-
-from . import tkinter_data as tkd
-from . import tools
+from subsearch.data import __icons__
+from subsearch.gui import tkinter_data as tkd
+from subsearch.gui import tools
 
 
 def main():

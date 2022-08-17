@@ -3,11 +3,10 @@ import os
 import tkinter as tk
 import webbrowser
 
-from data import __data__, __version__
-from utils import current_user, raw_config, raw_registry, updates
-
-from . import tkinter_data as tkd
-from . import tools, widget_root
+from subsearch.data import __data__, __version__
+from subsearch.gui import tkinter_data as tkd
+from subsearch.gui import tools, widget_root
+from subsearch.utils import current_user, raw_config, raw_registry, updates
 
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")
@@ -345,7 +344,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
@@ -353,7 +352,7 @@ class ShowContextMenu(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         raw_registry.remove_context_menu()
 
@@ -500,14 +499,14 @@ class FileExtSubMenu(tk.Toplevel):
             f.truncate()
 
     def exit_release(self, event):
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         raw_registry.write_all_valuex()
         self.window_showing = False
         self.destroy()
 
     def toggle_window(self):
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         self.destroy()
         self.window_showing = False
@@ -584,7 +583,7 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", True)
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         raw_registry.write_valuex("icon")
 
@@ -592,7 +591,7 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
         raw_config.set_json("context_menu_icon", False)
-        from utils import raw_registry
+        from subsearch.utils import raw_registry
 
         raw_registry.write_valuex("icon")
 

@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from data import __data__
+from subsearch.data import __data__
 
 
 # update config.json

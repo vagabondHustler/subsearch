@@ -6,7 +6,7 @@ from typing import Any
 
 import cloudscraper
 
-from . import log, string_parser
+from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
@@ -62,7 +62,7 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
     subs_folder = os.path.join(cwd, "subs")
     for file in os.listdir(subs_folder):
         if file.endswith(extension):
-            value = string_parser.pct_value(file, release_name)
+            value = string_parser.get_pct_value(file, release_name)
             if value >= higest_value[0]:
                 higest_value = value, file
 
@@ -95,21 +95,21 @@ def clean_up(cwd: str, extension: str) -> None:
 
 
 # get file hash
-def get_hash(file_name: str) -> str | None:
+def get_hash(file_path: str) -> str | Any:
     """
     Tries to get the hash of the file
 
     Args:
-        file_name (str): path/file_name to get the hash of
+        file_path (str): path/file_name to get the hash of
 
     Returns:
-        str | None: the hash of the file or None if the size is 0
+        str | Any: the hash of the file or None if the size is 0
     """
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
-        with open(file_name, "rb") as f:
-            filesize = os.path.getsize(file_name)
+        with open(file_path, "rb") as f:
+            filesize = os.path.getsize(file_path)
             hash = filesize
             if filesize < 65536 * 2:
                 log.output(f"SizeError: filesize is {filesize} bytes", False)
