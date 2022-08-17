@@ -49,8 +49,7 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          pip install -e .
-          output=$(python scripts/get__version__.py)
+          output=$(python src/subsearch/data/__version__.py --get-version)
           echo "::set-output name=version_output::$output"
       # write pushed tags as version number into version.json in ../data
       - name: Update __version__.py
