@@ -49,12 +49,11 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          cp -r ./src/subsearch/ scripts/subsearch/
-          output=$(python scripts/_get__version__.py)
+          output=$(python scripts/get__version__.py)
           echo "::set-output name=version_output::$output"
       # write pushed tags as version number into version.json in ../data
       - name: Update __version__.py
-        run: python scripts/_set__version__.py ${{ github.ref_name }}
+        run: python scripts/set__version__.py ${{ github.ref_name }}
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
       - name: Commit version.json
         run: |
@@ -82,12 +81,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
           pip install -r docs/requirements.txt
-      # copy source code to workflows
-      - name: Copy source to scripts/subsearch
-        run: |
-          cp -r ./src/subsearch/ scripts/subsearch/
-          rm scripts/subsearch/__init__.py
-          rm scripts/subsearch/__main__.py
       # build the executable and manually add sv_ttk otherwise it wont be included
       - name: Build executable
         run: |
@@ -96,9 +89,8 @@ jobs:
       # make archives for publishing
       - name: Make archives
         run: |
-          python scripts/_make_archive.py
+          python scripts/make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-          mv ./SubSearch-source.zip ./SubSearch-${{ github.ref_name }}-win-source.zip
       # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -108,7 +100,6 @@ jobs:
           generate_release_notes: True
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
-            SubSearch-${{ github.ref_name }}-win-source.zip
 
   pypi-upload:
     name: PyPI Upload
