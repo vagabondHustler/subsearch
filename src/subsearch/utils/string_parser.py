@@ -28,7 +28,7 @@ def pct_value(from_pc: Any, from_browser: Any) -> int:
 def mk_lst(release: Any) -> list[Any]:
     new: list[Any] = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
-    temp= release.split(".")
+    temp = release.split(".")
 
     for item in temp:
         if item not in qualities:
