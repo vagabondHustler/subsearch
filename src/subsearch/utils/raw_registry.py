@@ -105,7 +105,7 @@ def get_command_value() -> str:
     return value
 
 
-def get_icon_value() -> (LiteralString | Literal['']):
+def get_icon_value() -> (LiteralString | Literal[""]):
     """
     Check config.json cm_icon value
 

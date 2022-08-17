@@ -126,9 +126,6 @@ class DownloadList(tk.Frame):
                     self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.red})
 
 
-
-
-
 def show_widget():
     global root
     root = widget_root.main()
