@@ -2,7 +2,7 @@ import os
 import shutil
 import struct
 import zipfile
-from typing import Type
+from typing import Any
 
 import cloudscraper
 
@@ -11,7 +11,7 @@ from . import log, string_parser
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_zip(item: str) -> None:
+def download_zip(item: Any) -> None:
     """
     download zip file from url
 

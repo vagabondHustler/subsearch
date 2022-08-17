@@ -1,4 +1,5 @@
 import tkinter as tk
+from typing import Any
 
 from data import __icons__
 

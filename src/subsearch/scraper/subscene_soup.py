@@ -1,4 +1,5 @@
 import time
+from typing import Any, Literal
 
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -7,7 +8,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
-def is_sub_hi(a1: Tag) -> (bool | None):
+def is_sub_hi(a1: Tag) -> bool | None:
     """
     Check if subtitle is hearing impaired or not
 
@@ -25,9 +26,11 @@ def is_sub_hi(a1: Tag) -> (bool | None):
     elif a41 is None:
         return False
 
+    return None
+
 
 # search for title
-def search_for_title(url: str) -> dict | str:
+def search_for_title(url: str) -> (dict[str, str] | Literal["ERROR: CAPTCHA PROTECTION"]):
     """
     Search subscene for matching titles
 
@@ -37,7 +40,7 @@ def search_for_title(url: str) -> dict | str:
     Returns:
         dict | str: title, url if found, None if not found
     """
-    titles: dict = {}
+    titles: dict[str, str] = {}
     source = SCRAPER.get(url)
     scontent = source.content
     doc = BeautifulSoup(scontent, "lxml")
@@ -55,7 +58,7 @@ def search_for_title(url: str) -> dict | str:
 
 
 # search title(s) for subtitle
-def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict:
+def search_title_for_sub(language: str, hearing_impaired: bool | str, url: str) -> dict[str, str]:
     """
     Search for subtitles matching the provided titles
 
@@ -68,7 +71,7 @@ def search_title_for_sub(language: str, hearing_impaired: str, url: str) -> dict
         dict: title, url, percentage match
     """
     searching = True
-    subtitles: dict = {}
+    subtitles: dict[str, str] = {}
     while searching:
         source = SCRAPER.get(url)
         scontent = source.content

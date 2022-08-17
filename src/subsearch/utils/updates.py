@@ -1,5 +1,4 @@
 import re
-from typing import Any, Tuple
 
 import cloudscraper
 from data import __version__
@@ -19,7 +18,7 @@ def check_for_updates() -> str:
             return latest_version
 
 
-def is_new_version_available() -> Any:
+def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
     """
     Compare local version with latest version on github
 
