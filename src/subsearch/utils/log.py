@@ -12,7 +12,6 @@ if __video_directory__ is not None:
     CWD = __video_directory__
 
 
-
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
