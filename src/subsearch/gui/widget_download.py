@@ -25,7 +25,6 @@ class DownloadList(tk.Frame):
         # listbox for the subtitles
         self.extent = 0
         self.sublist = read_tmp_file()
-        self.sublist_lenght = len(self.sublist)
         self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
         sub_listbox = tk.Listbox(
             root,
@@ -46,7 +45,6 @@ class DownloadList(tk.Frame):
             bordermode="inside",
             anchor="center",
         )
-        self.count = 0
         self.sub_listbox = sub_listbox
         self.fill_listbox()
         # custom scrollbar
@@ -75,19 +73,18 @@ class DownloadList(tk.Frame):
         dicts_names = {}
         dicts_urls = {}
         # fil list box with all available subtitles that were found and not downloaded
-        for x, i in zip(range(0, self.sublist_lenght), self.sublist):
-            x = i.split(" ")
+        for enu, item in enumerate(self.sublist):
+            x = item.split(" ")
             match = f"{x[0]} {x[1]}"
             name = x[2]
             url = x[-1]
             txt = f"{match} {name}"
             self.sub_listbox.insert(tk.END, f"{match} {name}\n")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
-            dicts_names[self.count] = txt
-            dicts_urls[self.count] = url
+            dicts_names[enu] = txt
+            dicts_urls[enu] = url
             self.dicts_urls = dicts_urls
             self.dicts_names = dicts_names
-            self.count += 1
 
     def mouse_b1_press(self, event):
         self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
@@ -127,6 +124,9 @@ class DownloadList(tk.Frame):
                     self.sub_listbox.delete(int(number))
                     self.sub_listbox.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
                     self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.red})
+
+
+
 
 
 def show_widget():

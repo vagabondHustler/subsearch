@@ -1,6 +1,7 @@
 import ctypes
 import os
 import tkinter as tk
+from tkinter import Label, StringVar
 
 from data import __buttons__
 
@@ -298,14 +299,13 @@ class WindowPosition(tk.Frame):
 
 # pick a appropriate color for StringVar based on the string
 class ColorPicker:
-    def __init__(self, string_var: str = None, clabel: str = None, pct: int = -1):
+    def __init__(self, string_var: StringVar, clabel: Label, pct: int = -1):
         self.string_var = string_var
         self.clabel = clabel
         self.pct = pct
         self.pick()
 
-    def pick(self):
-        # string boolean
+    def pick(self):  # string boolean
         if self.string_var.get() == "True":
             self.clabel.configure(fg=tkd.Color.green)
         elif self.string_var.get() == "False":

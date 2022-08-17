@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from data import __data__
 
@@ -14,7 +15,7 @@ def set_json(key: str, value: str | int) -> None:
         f.truncate()
 
 
-def get_json() -> dict:
+def get_json() -> Any:
     config_file = f"{__data__}\\config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
@@ -23,7 +24,7 @@ def get_json() -> dict:
 
 
 # get said value(s) from config.json
-def get(output: str) -> str:
+def get(output: str) -> Any:
     config_json_dict = {
         "language": get_json()["language"].split(", "),
         "languages": get_json()["languages"],

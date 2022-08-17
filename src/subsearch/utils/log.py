@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Literal
 
 from data import __version__, __video_directory__
+from utils.file_parser import SearchParameters
 
 CWD = __video_directory__
 if __video_directory__ is None:
@@ -23,9 +24,9 @@ logging.basicConfig(
 )
 
 # log and print message
-def output(msg: str, print_to_terminal: bool = True) -> (Literal[False] | None):
+def output(msg: str, to_terminal: bool = True) -> (Literal[False] | None):
     logging.info(msg)
-    return print(msg) if print_to_terminal else False
+    return print(msg) if to_terminal else False
 
 
 def tprint(msg: str) -> None:
@@ -41,11 +42,11 @@ def tprint(msg: str) -> None:
 
 
 # log and print all the used parameters from video/directory-name
-def parameters(param: str, language: str, lang_abbr_ISO6391: str, hearing_impaired: str, percentage: int) -> None:
-    lang_abbr_ISO6392B = language[:3].lower()
+def parameters(param: SearchParameters, lang: str, lang_abbr_iso6391: str, hearing_impaired: str, pct: int) -> None:
+    lang_abbr_iso6392b = lang[:3].lower()
     output(f"SubSearch - {__version__} ", False)
     output("[PARAMETERS]")
-    output(f"Language: {language}, {lang_abbr_ISO6391}, {lang_abbr_ISO6392B}")
+    output(f"Language: {lang}, {lang_abbr_iso6391}, {lang_abbr_iso6392b}")
     output(f"Hearing impaired: {hearing_impaired}")
     output(f"Title: {param.title}")
     output(f"Year: {param.year}")
@@ -54,7 +55,7 @@ def parameters(param: str, language: str, lang_abbr_ISO6391: str, hearing_impair
     output(f"TV-Series: {param.show_bool}")
     output(f"Release: {param.release}")
     output(f"Group: {param.group}")
-    output(f"Match threshold: {percentage}%")
+    output(f"Match threshold: {pct}%")
     output(f"File hash: {param.file_hash}")
     output(f"URL: {param.url_subscene}")
     output(f"URL: {param.url_opensubtitles}\n")
