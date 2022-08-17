@@ -1,6 +1,6 @@
 import re
 
-from data import __version__
+from subsearch.data import __version__
 
 
 def test_current() -> None:
