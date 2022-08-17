@@ -5,7 +5,7 @@ cwd = os.getcwd()
 
 
 v = sys.argv[-1].replace("v", "")
-version = f"""__version__ = "2.15.47"
+version = f"""__version__ = "{v}"
 
 import sys
 
