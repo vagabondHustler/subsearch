@@ -1,7 +1,8 @@
 import re
 
 import cloudscraper
-from data import __version__
+
+from subsearch.data import __version__
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 

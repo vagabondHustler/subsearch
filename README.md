@@ -82,6 +82,8 @@ More options
 
 `subsearch --help`
 
+See [Source](#src) for imports
+
 ### Source <a name = "src"></a>
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
@@ -90,13 +92,28 @@ Download SubScene
 
 `git clone https://github.com/vagabondHustler/SubSearch`
 
-Install dependencies
+Install package locally
 
-`pip install -r "https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/requirements.txt"`
+`pip install -e .`
 
-Run main.py from where it is located
+Code
 
-`python ./SubSearch/subsearch.py`
+```
+from subsearch import SubSearch
+
+
+def main() -> None:
+    ss = SubSearch
+    ss.subscene_scrape()
+    ss.opensubtitles_scrape()
+    ss.process_files()
+    ss.end()
+
+
+if __name__ == "__main__":
+    main()
+
+```
 
 To access the settings, run main.py again
 
