@@ -1,13 +1,10 @@
 import tkinter as tk
-from typing import Any
-
-from gui import tkdata as tkd
 
 from subsearch.data import __icons__
-from subsearch.gui import tools
+from subsearch.gui import tkdata, tools
 
-TKCOLOR = tkd.Color()
-TKWINDOW = tkd.Window()
+TKWINDOW = tkdata.Window()
+TKCOLOR = tkdata.Color()
 
 
 def main():
