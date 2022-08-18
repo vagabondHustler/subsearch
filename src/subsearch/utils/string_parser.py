@@ -83,7 +83,7 @@ def find_season_episode(string: str) -> str:
 NA = tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal[False]]
 
 
-def find_ordinal(string: str, lang_abbr_iso6391: str) -> Union[tuple[str, str, str, str, bool], NA]:
+def find_ordinal(string: str, lang_code2: str) -> Union[tuple[str, str, str, str, bool], NA]:
     """
     Convert numbers into ordinal strings, 01 = First, 02 = Second...
 
@@ -101,8 +101,8 @@ def find_ordinal(string: str, lang_abbr_iso6391: str) -> Union[tuple[str, str, s
         return season, season_ordinal, episode, episode_ordinal, show_bool
     else:
         season, episode = string.replace("s", "").replace("e", " ").split(" ")
-        season_ordinal = num2words(int(season), lang=lang_abbr_iso6391, to="ordinal")
-        episode_ordinal = num2words(int(episode), lang=lang_abbr_iso6391, to="ordinal")
+        season_ordinal = num2words(int(season), lang=lang_code2, to="ordinal")
+        episode_ordinal = num2words(int(episode), lang=lang_code2, to="ordinal")
         show_bool = True
         return season, season_ordinal, episode, episode_ordinal, show_bool
 
@@ -128,7 +128,7 @@ class SearchParameters:
     file_hash: Optional[str]
 
 
-def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_abbr_iso6391: str) -> SearchParameters:
+def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_code2: str) -> SearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -142,12 +142,12 @@ def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_
         SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
     """
     filename = filename.lower()
-    lang_abbr_iso6392b = language[:3].lower()
+    lang_code3 = language[:3].lower()
 
     year = find_year(filename)
 
     season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_abbr_iso6391)
+    season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_code2)
 
     if year != "N/A":
         title = find_title_by_year(filename)
@@ -159,7 +159,7 @@ def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_
 
     group = find_group(filename)
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
-    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_abbr_iso6392b}/moviename-"
+    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/moviename-"
     url_subscene = f"{subscene}{title}".replace(" ", "%20")
     url_opensubtitles = f"{opensubtitles}{file_hash}"
 
