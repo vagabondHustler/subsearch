@@ -3,13 +3,13 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar
 
-from gui import tkdata as tkd
-
 from subsearch.data import __buttons__
+from subsearch.gui import tkdata
 
-TKCOLOR = tkd.Color()
-TKFONT = tkd.Font()
-TKWINDOW = tkd.Window()
+TKCOLOR = tkdata.Color()
+TKFONT = tkdata.Font()
+TKWINDOW = tkdata.Window()
+
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080

@@ -3,16 +3,15 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
-from gui import tkdata as tkd
 
 from subsearch.data import __video_directory__
-from subsearch.gui import widget_root
+from subsearch.gui import tkdata, widget_root
 from subsearch.scraper import subscene_soup
 from subsearch.utils import file_manager
 
-TKCOLOR = tkd.Color()
-TKFONT = tkd.Font()
-TKWINDOW = tkd.Window()
+TKWINDOW = tkdata.Window()
+TKCOLOR = tkdata.Color()
+TKFONT = tkdata.Font()
 # file with subtitles and corresponding dl links
 def read_tmp_file():
     file = os.path.join(__video_directory__, "__subsearch__dl_data.tmp")
