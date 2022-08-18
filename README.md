@@ -82,7 +82,7 @@ More options
 
 `subsearch --help`
 
-See [Source](#src) for imports
+See [code](#code) for imports
 
 ### Source <a name = "src"></a>
 
@@ -96,7 +96,7 @@ Install package locally
 
 `pip install -e .`
 
-Code
+Code <a name = "code"></a>
 
 ```
 from subsearch import SubSearch
