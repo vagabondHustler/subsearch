@@ -26,7 +26,6 @@ def test_str_parser_movie() -> None:
     assert pct5 == 0
 
 
-
 def test_string_parser_movie() -> None:
     """
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
@@ -38,10 +37,10 @@ def test_string_parser_movie() -> None:
     assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None"
     assert param.title == "the foo bar"
     assert param.year == 2021
-    assert param.season == 'N/A'
-    assert param.season_ordinal == 'N/A'
-    assert param.episode == 'N/A'
-    assert param.episode_ordinal == 'N/A'
+    assert param.season == "N/A"
+    assert param.season_ordinal == "N/A"
+    assert param.episode == "N/A"
+    assert param.episode_ordinal == "N/A"
     assert param.show_bool is False
     assert param.release == "the.foo.bar.2021.1080p.web.h264-foobar"
     assert param.group == "foobar"
