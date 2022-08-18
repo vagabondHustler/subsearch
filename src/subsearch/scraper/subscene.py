@@ -48,7 +48,7 @@ def try_the_year_before(key: str, param: SearchParameters) -> bool:
 
 
 # check if dict is of tv-series
-def is_show_bool(key: str, lang_abbr_iso6391: str, param: SearchParameters) -> bool:
+def is_show_bool(key: str, lang_code2: str, param: SearchParameters) -> bool:
     """
     Check if key is a movie, by checking if the title is followed by a SeasonEpisode. Title.Of.The.S00E00.Source.Codec-GROUP
 
@@ -60,7 +60,7 @@ def is_show_bool(key: str, lang_abbr_iso6391: str, param: SearchParameters) -> b
     Returns:
         bool: True if title is followed by a SeasonEpisode, False otherwise
     """
-    if param.title and param.season_ordinal in key.lower() and param.show_bool and lang_abbr_iso6391:
+    if param.title and param.season_ordinal in key.lower() and param.show_bool and lang_code2:
         log.output(f"TV-Series {key} found")
         return True
     return False
