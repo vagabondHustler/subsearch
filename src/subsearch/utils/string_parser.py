@@ -1,11 +1,11 @@
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal, Optional, Union
 
 from num2words import num2words
 
 
-def find_year(string: str) -> int:
+def find_year(string: str) -> Union[int, str]:
     """
     Parse string from start, until last instance of a year between .1000-2999. found, keep last instance of year
     https://regex101.com/r/r5TwxJ/1
@@ -21,7 +21,7 @@ def find_year(string: str) -> int:
     if len(_year) > 0:
         year = _year[0]
         return int(year)
-    return 0
+    return "N/A"
 
 
 def find_title_by_year(string: str) -> str:
@@ -80,7 +80,10 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-def find_ordinal(string: str, lang_abbr_iso6391: str) -> tuple[Any | str, str, str, str, bool]:
+NA = tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal[False]]
+
+
+def find_ordinal(string: str, lang_abbr_iso6391: str) -> Union[tuple[str, str, str, str, bool], NA]:
     """
     Convert numbers into ordinal strings, 01 = First, 02 = Second...
 
@@ -114,7 +117,7 @@ class SearchParameters:
     url_subscene: str
     url_opensubtitles: str
     title: str
-    year: int
+    year: Union[int, str]
     season: str
     season_ordinal: str
     episode: str
@@ -122,10 +125,10 @@ class SearchParameters:
     show_bool: bool
     release: str
     group: str
-    file_hash: str
+    file_hash: Optional[str]
 
 
-def get_parameters(filename: str, file_hash: str | Any, language: str, lang_abbr_iso6391: str) -> SearchParameters:
+def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_abbr_iso6391: str) -> SearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -146,9 +149,9 @@ def get_parameters(filename: str, file_hash: str | Any, language: str, lang_abbr
     season_episode = find_season_episode(filename)
     season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_abbr_iso6391)
 
-    if year > 0:
+    if year != "N/A":
         title = find_title_by_year(filename)
-    elif show_bool and year == 0:
+    elif show_bool and year == "N/A":
         title = find_title_by_show(filename)
         title = f"{title} - {season_ordinal} season"
     else:
