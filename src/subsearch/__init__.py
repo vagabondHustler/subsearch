@@ -22,7 +22,6 @@ from subsearch.utils import (
 
 PACKAGEPATH = os.path.abspath(os.path.dirname(__file__))
 HOMEPATH = os.path.dirname(PACKAGEPATH)
-
 sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 
@@ -33,20 +32,22 @@ class SubSearch:
         Setup and gather all available parameters
         """
         self.start = time.perf_counter()
+        self.scrape_opensubtitles = None
+        self.scrape_subscene = None
         ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {__version__}")
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get("show_terminal")
         self.file_exist = True if __video_name__ is not None else False
-        self.lang, self.lang_abbr_iso6391 = raw_config.get("language")
+        self.lang, self.lang_code2 = raw_config.get("language")
         self.hearing_impared = raw_config.get("hearing_impaired")
         self.pct = raw_config.get("percentage")
         self.show_dl_window = raw_config.get("show_download_window")
         if self.file_exist:
             file_hash = file_manager.get_hash(__video_path__)
-            self.param = string_parser.get_parameters(__video_name__, file_hash, self.lang, self.lang_abbr_iso6391)
-            log.parameters(self.param, self.lang, self.lang_abbr_iso6391, self.hearing_impared, self.pct)
+            self.param = string_parser.get_parameters(__video_name__, file_hash, self.lang, self.lang_code2)
+            log.parameters(self.param, self.lang, self.lang_code2, self.hearing_impared, self.pct)
             if " " in __video_name__:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
@@ -69,31 +70,33 @@ class SubSearch:
             log.output("")
             log.output("[Searching on subscene]")
             self.scrape_subscene = subscene.scrape(
-                self.param, self.lang, self.lang_abbr_iso6391, self.hearing_impared, self.pct, self.show_dl_window
+                self.param, self.lang, self.lang_code2, self.hearing_impared, self.pct, self.show_dl_window
             )
 
     def process_files(self) -> None:
         """
         Download zip files containing the .srt files, extract, rename and clean up tmp files
         """
-        if self.file_exist:
-            if self.scrape_opensubtitles is not None:
-                log.output("")
-                log.output("[Downloading from Opensubtitles]")
-                for item in self.scrape_opensubtitles:
-                    file_manager.download_zip(item)
+        if self.file_exist is False:
+            return None
 
-            if self.scrape_subscene is not None:
-                log.output("")
-                log.output("[Downloading from Subscene]")
-                for item in self.scrape_subscene:
-                    file_manager.download_zip(item)
+        if self.scrape_opensubtitles is not None:
+            log.output("")
+            log.output("[Downloading from Opensubtitles]")
+            for item in self.scrape_opensubtitles:
+                file_manager.download_zip(item)
 
-            if self.scrape_opensubtitles is None and self.scrape_subscene is None:
-                dl_data = f"{__video_directory__}\\__subsearch__dl_data.tmp"
-                if self.show_dl_window is True and os.path.exists(dl_data):
-                    widget_download.show_widget()
-                    file_manager.clean_up(__video_directory__, dl_data)
+        if self.scrape_subscene is not None:
+            log.output("")
+            log.output("[Downloading from Subscene]")
+            for item in self.scrape_subscene:
+                file_manager.download_zip(item)
+
+        if self.scrape_opensubtitles is None and self.scrape_subscene is None:
+            dl_data = f"{__video_directory__}\\__subsearch__dl_data.tmp"
+            if self.show_dl_window is True and os.path.exists(dl_data):
+                widget_download.show_widget()
+                file_manager.clean_up(__video_directory__, dl_data)
 
             log.output("")
             log.output("[Procsessing files]")
