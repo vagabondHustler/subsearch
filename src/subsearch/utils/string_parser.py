@@ -148,7 +148,7 @@ def get_parameters(filename: str, file_hash: str | Any, language: str, lang_abbr
 
     if year > 0:
         title = find_title_by_year(filename)
-    elif show_bool:
+    elif show_bool and year == 0:
         title = find_title_by_show(filename)
         title = f"{title} - {season_ordinal} season"
     else:

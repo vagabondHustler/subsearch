@@ -3,11 +3,15 @@ import os
 import tkinter as tk
 import webbrowser
 
+from gui import tkdata as tkd
+
 from subsearch.data import __data__, __version__
-from subsearch.gui import tkinter_data as tkd
 from subsearch.gui import tools, widget_root
 from subsearch.utils import current_user, raw_config, raw_registry, updates
 
+TKCOLOR = tkd.Color()
+TKFONT = tkd.Font()
+TKWINDOW = tkd.Window()
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")
 LANGUAGE, lang_abbr_iso6391 = raw_config.get("language")
@@ -28,14 +32,14 @@ class SelectLanguage(tk.Frame):
         self.rowcount = 0
         self.colcount = 1
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Selected language", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Selected language", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
-            fg=tkd.Color.yellow,
+            fg=TKCOLOR.yellow,
             col=2,
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
         )
         for i in range(number_of_buttons):
             self.rowcount += 1
@@ -54,30 +58,30 @@ class SelectLanguage(tk.Frame):
             )
         tools.Create.button(
             self,
-            abgc=tkd.Color.light_black,
-            bge=tkd.Color.light_black,
-            fg=tkd.Color.light_black,
-            fge=tkd.Color.light_black,
+            abgc=TKCOLOR.light_black,
+            bge=TKCOLOR.light_black,
+            fg=TKCOLOR.light_black,
+            fge=TKCOLOR.light_black,
             row=self.rowcount + 2,
             col=self.colcount,
             height=2,
             width=24,
         )
-        self.entry = tk.Entry(self, width=28, bd=0, font=tkd.Font.cas8b, justify="center")
+        self.entry = tk.Entry(self, width=28, bd=0, font=TKFONT.cas8b, justify="center")
         self.entry.insert(0, "🞂 Enter language here 🞀")
         self.entry.configure(
-            bg=tkd.Color.light_black,
-            fg=tkd.Color.purple,
-            insertbackground=tkd.Color.purple,
+            bg=TKCOLOR.light_black,
+            fg=TKCOLOR.purple,
+            insertbackground=TKCOLOR.purple,
         )
         self.entry.grid(ipady=8, padx=2, pady=2, row=self.rowcount + 2, column=self.colcount)
         self.add_button = tools.Create.button(
             self,
             text="Add",
-            abgc=tkd.Color.purple,
-            bge=tkd.Color.black,
-            fg=tkd.Color.white_grey,
-            fge=tkd.Color.purple,
+            abgc=TKCOLOR.purple,
+            bge=TKCOLOR.black,
+            fg=TKCOLOR.white_grey,
+            fge=TKCOLOR.purple,
             row=self.rowcount + 3,
             col=self.colcount,
             height=2,
@@ -90,10 +94,10 @@ class SelectLanguage(tk.Frame):
         self.see_other_langs = tools.Create.button(
             self,
             text="∙ ∙ ∙",
-            abgc=tkd.Color.purple,
-            bge=tkd.Color.black,
-            fg=tkd.Color.white_grey,
-            fge=tkd.Color.purple,
+            abgc=TKCOLOR.purple,
+            bge=TKCOLOR.black,
+            fg=TKCOLOR.white_grey,
+            fge=TKCOLOR.purple,
             row=self.rowcount + 3,
             col=self.colcount,
             height=2,
@@ -104,7 +108,7 @@ class SelectLanguage(tk.Frame):
         self.entry.bind("<Enter>", self.entry_enter)
         self.see_other_langs.bind("<Enter>", self.popup_window)
         self.entry.bind("<Return>", self.add_language)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     # pop up window with list of other languages
     def popup_window(self, event):
@@ -117,39 +121,39 @@ class SelectLanguage(tk.Frame):
         csx = round(cols * col_size_x)
         csy = round(rows * row_size_y)
 
-        self.toplvl = tk.Toplevel(background=tkd.Color.light_black, borderwidth=0)
+        self.toplvl = tk.Toplevel(background=TKCOLOR.light_black, borderwidth=0)
         self.toplvl.overrideredirect(True)
 
         self.frame = tk.Frame(
             self.toplvl,
-            background=tkd.Color.dark_grey,
+            background=TKCOLOR.dark_grey,
             width=csx,
             height=csy,
             borderwidth=0,
         )
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        root_x = root.winfo_rootx() + tkd.Window.width + 10
+        root_x = root.winfo_rootx() + TKWINDOW.width + 10
         root_y = root.winfo_rooty() + 37
         self.toplvl.geometry(f"{csx}x{csy}+{root_x}+{root_y}")
         for num, i in zip(range(0, 50), OTH_LANGUAGES):
             tools.Create.label(
                 self.frame,
-                bg=tkd.Color.dark_grey,
+                bg=TKCOLOR.dark_grey,
                 text=i,
-                font=tkd.Font.cas8,
+                font=TKFONT.cas8,
                 row=num if num < 25 else num - 25,
                 col=0 if num < 25 else 1,
                 sticky="w",
                 padx=0,
                 pady=0,
             )
-        self.see_other_langs.configure(fg=tkd.Color.purple)
+        self.see_other_langs.configure(fg=TKCOLOR.purple)
         self.see_other_langs.bind("<Leave>", self.popup_window_destroy)
 
     def popup_window_destroy(self, event):
         self.fill_entry()
-        self.see_other_langs.configure(fg=tkd.Color.white_grey)
+        self.see_other_langs.configure(fg=TKCOLOR.white_grey)
         self.see_other_langs.bind("<Enter>", self.popup_window)
         self.toplvl.destroy()
 
@@ -167,12 +171,12 @@ class SelectLanguage(tk.Frame):
     def clear_entry(self):
         self.entry.delete(0, "end")
         self.entry.insert(0, "")
-        self.entry.configure(fg=tkd.Color.purple)
+        self.entry.configure(fg=TKCOLOR.purple)
 
     def fill_entry(self):
         self.entry.delete(0, "end")
         self.entry.insert(0, "🞂 Enter language here 🞀")
-        self.entry.configure(fg=tkd.Color.purple)
+        self.entry.configure(fg=TKCOLOR.purple)
 
     # set language
     def set_language(self, event):
@@ -187,13 +191,13 @@ class SelectLanguage(tk.Frame):
         for i in OTH_LANGUAGES:
             if x == i:
                 self.string_var.set(self.entry.get())
-                self.entry.configure(fg=tkd.Color.white_grey)
+                self.entry.configure(fg=TKCOLOR.white_grey)
                 update_svar = self.string_var.get()
                 raw_config.set_json("language", update_svar)
                 return
         self.entry.delete(0, "end")
         self.entry.insert(0, "E.g: Czech, cs")
-        self.entry.configure(fg=tkd.Color.red)
+        self.entry.configure(fg=TKCOLOR.red)
 
 
 # set HI, none-HI or both HI and none-HI subtitles should be included in the search
@@ -203,15 +207,15 @@ class HearingImparedSubs(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(
             self,
             text="Hearing impaired subtitles",
             sticky="w",
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
             anchor="w",
         )
-        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=TKCOLOR.blue, col=2, font=TKFONT.cas8b)
         tools.Create.button(
             self,
             text="True",
@@ -240,7 +244,7 @@ class HearingImparedSubs(tk.Frame):
         )
 
         tools.ColorPicker(self.string_var, self.clabel)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
@@ -267,9 +271,9 @@ class SearchThreshold(tk.Frame):
         self.string_var.set(f"{PCT} %")
         self.pct = PCT
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Search threshold", sticky="w", font=tkd.Font.cas8b)
-        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Search threshold", sticky="w", font=TKFONT.cas8b)
+        self.clabel = tools.Create.label(self, textvar=self.string_var, fg=TKCOLOR.blue, col=2, font=TKFONT.cas8b)
         tools.Create.button(
             self,
             text="+",
@@ -287,7 +291,7 @@ class SearchThreshold(tk.Frame):
             tip_text="Subtract 5% from the search threshold\nA lower value means more subtitles will be found and downloaded",
         )
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_add_5(self, event):
         self.pct += 5 if self.pct < 100 else 0
@@ -312,14 +316,14 @@ class ShowContextMenu(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"True")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Show context menu", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
-            fg=tkd.Color.blue,
+            fg=TKCOLOR.blue,
             col=2,
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
             anchor="center",
         )
         tools.Create.button(
@@ -339,7 +343,7 @@ class ShowContextMenu(tk.Frame):
             tip_text="Remove SubSearch from the context menu\nUsed to 'uninstall' SubSearch",
         )
         tools.ColorPicker(self.string_var, self.clabel)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
@@ -365,8 +369,8 @@ class AssociateExtensions(tk.Frame):
 
         self.ext_window_show = False
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Associated extensions", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Associated extensions", sticky="w", font=TKFONT.cas8b)
 
         self.ext_button = tools.Create.button(
             self,
@@ -378,7 +382,7 @@ class AssociateExtensions(tk.Frame):
         )
         self.fesm = FileExtSubMenu(self)
         self.ext_button.bind("<Button-1>", self.toggle_window)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def toggle_window(self, event):
         self.ext_window_show = self.fesm.window_showing_check()
@@ -400,15 +404,15 @@ class FileExtSubMenu(tk.Toplevel):
         self.btn = []
         self.window_showing = True
         tk.Toplevel.__init__(self, self.parent)
-        self.configure(background=tkd.Color.light_black)
+        self.configure(background=TKCOLOR.light_black)
         # remove the standard window titlebar from the tooltip
         self.overrideredirect(True)
         self.attributes("-topmost", True)
         button_width = 10
         exit_size = 19
         border_size = 2 * 2
-        top_bar = tk.Frame(self, background=tkd.Color.light_black)
-        _frame = tk.Frame(self, background=tkd.Color.light_grey)
+        top_bar = tk.Frame(self, background=TKCOLOR.light_black)
+        _frame = tk.Frame(self, background=TKCOLOR.light_grey)
         data = raw_config.get_json()
         for i in range(len(AVAIL_EXT.keys())):
             self.files.append("Button" + str(i))
@@ -425,20 +429,20 @@ class FileExtSubMenu(tk.Toplevel):
                 tk.Button(
                     _frame,
                     text=ext,
-                    font=tkd.Font.cas8b,
-                    bg=tkd.Color.dark_grey,
-                    fg=tkd.Color.white_grey,
-                    activebackground=tkd.Color.dark_grey,
-                    activeforeground=tkd.Color.yellow,
+                    font=TKFONT.cas8b,
+                    bg=TKCOLOR.dark_grey,
+                    fg=TKCOLOR.white_grey,
+                    activebackground=TKCOLOR.dark_grey,
+                    activeforeground=TKCOLOR.yellow,
                     width=button_width,
                     bd=0,
                     command=lambda c=i: self.btn[c].cget("text"),
                 )
             )
             if data["file_ext"][ext] is False:
-                self.btn[i].configure(fg=tkd.Color.red)
+                self.btn[i].configure(fg=TKCOLOR.red)
             elif data["file_ext"][ext] is True:
-                self.btn[i].configure(fg=tkd.Color.green)
+                self.btn[i].configure(fg=TKCOLOR.green)
 
             self.btn[i].grid(row=rownum, column=colnum)
             self.btn[i].bind("<Button-1>", self.set_language)
@@ -449,8 +453,8 @@ class FileExtSubMenu(tk.Toplevel):
         ncol = round(2)
         x = round(_x * ncol)
         y = round(_y * nrow)
-        x_offset = tkd.Window.width + button_width - _x
-        y_offset = tkd.Window.height - y - nrow
+        x_offset = TKWINDOW.width + button_width - _x
+        y_offset = TKWINDOW.height - y - nrow
         # set the size of the tooltip background to be 1px larger than the label
         _frame.configure(width=x + border_size, height=y + border_size)
         top_bar.configure(width=x + border_size, height=exit_size)
@@ -471,7 +475,7 @@ class FileExtSubMenu(tk.Toplevel):
             self,
             width=exit_size,
             height=exit_size,
-            bg=tkd.Color.light_black,
+            bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
         self.exit.place(relx=1, y=0, anchor="ne")
@@ -488,10 +492,10 @@ class FileExtSubMenu(tk.Toplevel):
         data = raw_config.get_json()
         if data["file_ext"][btn.cget("text")] is True:
             data["file_ext"][btn.cget("text")] = False
-            btn.configure(fg=tkd.Color.red)
+            btn.configure(fg=TKCOLOR.red)
         else:
             data["file_ext"][btn.cget("text")] = True
-            btn.configure(fg=tkd.Color.green)
+            btn.configure(fg=TKCOLOR.green)
         file = os.path.join(__data__, "config.json")
         with open(file, "w") as f:
             f.seek(0)
@@ -516,16 +520,16 @@ class FileExtSubMenu(tk.Toplevel):
         return self.window_showing
 
     def exit_press(self, event):
-        self.exit.configure(bg=tkd.Color.dark_red)
+        self.exit.configure(bg=TKCOLOR.dark_red)
         self.exit.bind("<ButtonRelease-1>", self.exit_release)
 
     def exit_enter(self, event):
-        self.exit.configure(bg=tkd.Color.red)
+        self.exit.configure(bg=TKCOLOR.red)
         self.update_img(self.exit, self.exit_png)
         self.exit.bind("<ButtonPress-1>", self.exit_press)
 
     def exit_leave(self, event):
-        self.exit.configure(bg=tkd.Color.light_black)
+        self.exit.configure(bg=TKCOLOR.light_black)
         self.update_img(self.exit, self.exit_grey_png)
         self.exit.unbind("<ButtonRelease-1>")
 
@@ -551,14 +555,14 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show context menu icon", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Show context menu icon", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
-            fg=tkd.Color.blue,
+            fg=TKCOLOR.blue,
             col=2,
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
         )
         tools.Create.button(
             self,
@@ -577,7 +581,7 @@ class ShowContextMenuIcon(tk.Frame):
             tip_text="Remove the icon next to SubSearch in the context menu",
         )
         tools.ColorPicker(self.string_var, self.clabel)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
@@ -603,14 +607,14 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show download window", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Show download window", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
-            fg=tkd.Color.blue,
+            fg=TKCOLOR.blue,
             col=2,
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
         )
         tools.Create.button(
             self,
@@ -629,7 +633,7 @@ class ShowDownloadWindow(tk.Frame):
             tip_text="No window will be shown if no subtitles are found\nThe list can be found in search.log",
         )
         tools.ColorPicker(self.string_var, self.clabel)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
@@ -650,14 +654,14 @@ class ShowTerminalOnSearch(tk.Frame):
 
         self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
-        tools.Create.label(self, text="Show terminal on search", sticky="w", font=tkd.Font.cas8b)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+        tools.Create.label(self, text="Show terminal on search", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
             textvar=self.string_var,
-            fg=tkd.Color.blue,
+            fg=TKCOLOR.blue,
             col=2,
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
         )
         if current_user.check_is_exe() is False:
             tools.Create.button(
@@ -677,7 +681,7 @@ class ShowTerminalOnSearch(tk.Frame):
                 tip_text="Hide the terminal when searching for subtitles",
             )
         tools.ColorPicker(self.string_var, self.clabel)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
@@ -699,23 +703,23 @@ class CheckForUpdates(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=tkd.Font.cas8)
+            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(
             self,
             text=f"SubScene version {__version__}",
             sticky="w",
-            font=tkd.Font.cas8b,
+            font=TKFONT.cas8b,
         )
-        tools.Create.label(self, textvar=self.string_var, fg=tkd.Color.blue, col=2, font=tkd.Font.cas8b)
+        tools.Create.label(self, textvar=self.string_var, fg=TKCOLOR.blue, col=2, font=TKFONT.cas8b)
         tools.Create.button(
             self,
             text="Check for updates",
             height=2,
             width=24,
-            fge=tkd.Color.green,
+            fge=TKCOLOR.green,
             bind_to=self.button_check,
         )
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     def button_check(self, event):
         self.string_var.set(f"Searching for updates...")
@@ -750,18 +754,18 @@ def show_widget():
 
     root = widget_root.main()
     SelectLanguage(root).pack(anchor="center")
-    tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
     HearingImparedSubs(root).pack(anchor="center")
     SearchThreshold(root).pack(anchor="center")
-    tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
     ShowContextMenu(root).pack(anchor="center")
     ShowContextMenuIcon(root).pack(anchor="center")
     AssociateExtensions(root).pack(anchor="center")
     ShowDownloadWindow(root).pack(anchor="center")
     if current_user.check_is_exe() is False:
         ShowTerminalOnSearch(root).pack(anchor="center")
-    tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
     CheckForUpdates(root).pack(anchor="center")
-    tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
 
     root.mainloop()

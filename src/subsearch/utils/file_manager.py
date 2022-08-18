@@ -41,9 +41,8 @@ def extract_zips(cwd: str, extension: str) -> None:
     for file in os.listdir(cwd):
         if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
-            file_name = os.path.join(cwd, file)
-            # file_name = os.path.abspath(file)
-            zip_ref = zipfile.ZipFile(file_name)
+            filename = os.path.join(cwd, file)
+            zip_ref = zipfile.ZipFile(filename)
             zip_ref.extractall(subs_folder)
             zip_ref.close()
 
@@ -100,7 +99,7 @@ def get_hash(file_path: str) -> str | Any:
     Tries to get the hash of the file
 
     Args:
-        file_path (str): path/file_name to get the hash of
+        file_path (str): path/filename to get the hash of
 
     Returns:
         str | Any: the hash of the file or None if the size is 0
