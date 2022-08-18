@@ -7,6 +7,9 @@ from gui import tkdata as tkd
 
 from subsearch.data import __buttons__
 
+TKCOLOR = tkd.Color()
+TKFONT = tkd.Font()
+TKWINDOW = tkd.Window()
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
