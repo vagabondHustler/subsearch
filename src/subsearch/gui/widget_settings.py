@@ -3,16 +3,14 @@ import os
 import tkinter as tk
 import webbrowser
 
-from gui import tkdata as tkd
-
 from subsearch.data import __data__, __version__
-from subsearch.gui import tools, widget_root
+from subsearch.gui import tkdata, tools, widget_root
 from subsearch.utils import current_user, raw_config, raw_registry, updates
 
-TKCOLOR = tkd.Color()
-TKFONT = tkd.Font()
-TKWINDOW = tkd.Window()
-TKMISC = tkd.Misc()
+TKWINDOW = tkdata.Window()
+TKCOLOR = tkdata.Color()
+TKFONT = tkdata.Font()
+TKMISC = tkdata.Misc()
 
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")
