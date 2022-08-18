@@ -179,7 +179,7 @@
     "percentage_pass": 90,
     "context_menu_icon": true,
     "show_download_window": true,
-    "show_terminal": true,
+    "show_terminal": false,
     "file_ext": {
         ".avi": true,
         ".mp4": true,
