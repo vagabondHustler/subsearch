@@ -3,14 +3,16 @@ import tkinter as tk
 from tkinter import ttk
 
 import sv_ttk
+from gui import tkdata as tkd
 
 from subsearch.data import __video_directory__
-from subsearch.gui import tkinter_data as tkd
 from subsearch.gui import widget_root
 from subsearch.scraper import subscene_soup
 from subsearch.utils import file_manager
 
-
+TKCOLOR = tkd.Color()
+TKFONT = tkd.Font()
+TKWINDOW = tkd.Window()
 # file with subtitles and corresponding dl links
 def read_tmp_file():
     file = os.path.join(__video_directory__, "__subsearch__dl_data.tmp")
@@ -28,9 +30,9 @@ class DownloadList(tk.Frame):
         self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
         sub_listbox = tk.Listbox(
             root,
-            bg=tkd.Color.dark_grey,
-            fg=tkd.Color.light_grey,
-            font=tkd.Font.cas8b,
+            bg=TKCOLOR.dark_grey,
+            fg=TKCOLOR.light_grey,
+            font=TKFONT.cas8b,
             bd=0,
             border=0,
             borderwidth=0,
@@ -38,8 +40,8 @@ class DownloadList(tk.Frame):
             yscrollcommand=self.hs.set,
         )
         sub_listbox.place(
-            height=tkd.Window.height - 60,
-            width=tkd.Window.width - 20,
+            height=TKWINDOW.height - 60,
+            width=TKWINDOW.width - 20,
             relx=0.5,
             rely=0.525,
             bordermode="inside",
@@ -65,7 +67,7 @@ class DownloadList(tk.Frame):
             arrowsize=24,
         )
 
-        self.hs.place(x=tkd.Window.width - 28, y=51, bordermode="inside", height=633)
+        self.hs.place(x=TKWINDOW.width - 28, y=51, bordermode="inside", height=633)
         self.hs.config(command=self.sub_listbox.yview)
         self.hs.lift()
 
@@ -104,7 +106,7 @@ class DownloadList(tk.Frame):
             if number == int(items):
                 self.sub_listbox.delete(int(number))
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
-                self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.blue})
+                self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
                 try:
                     dl_url = subscene_soup.get_download_url(url)
                     _name = name.replace("/", "").replace("\\", "").split(": ")
@@ -117,13 +119,13 @@ class DownloadList(tk.Frame):
                         file_manager.clean_up(__video_directory__, ").nfo")
                         self.sub_listbox.delete(int(number))
                         self.sub_listbox.insert(int(number), f"✔ {name}")
-                        self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.green})
+                        self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
                         _error = False
                 except OSError:
                     _error = True
                     self.sub_listbox.delete(int(number))
                     self.sub_listbox.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
-                    self.sub_listbox.itemconfig(int(number), {"fg": tkd.Color.red})
+                    self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.red})
 
 
 def show_widget():
@@ -131,5 +133,5 @@ def show_widget():
     root = widget_root.main()
     sv_ttk.set_theme("dark")
     DownloadList(root).pack(anchor="center")
-    tk.Frame(root, bg=tkd.Color.dark_grey).pack(anchor="center", expand=True)
+    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
     root.mainloop()

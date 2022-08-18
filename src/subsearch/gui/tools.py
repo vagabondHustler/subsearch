@@ -3,8 +3,9 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar
 
+from gui import tkdata as tkd
+
 from subsearch.data import __buttons__
-from subsearch.gui import tkinter_data as tkd
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
@@ -19,20 +20,20 @@ def buttons(btn: str):
 class Create(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=tkd.Color.dark_grey)
+        self.configure(bg=TKCOLOR.dark_grey)
 
     # create a basic label
     def label(
         self,
-        bg=tkd.Color.dark_grey,
-        fg=tkd.Color.white_grey,
+        bg=TKCOLOR.dark_grey,
+        fg=TKCOLOR.white_grey,
         text=None,
         textvar=None,
         row=1,
         col=1,
         anchor=None,
         sticky=None,
-        font=tkd.Font.cas8b,
+        font=TKFONT.cas8b,
         padx=2,
         pady=2,
     ):
@@ -45,11 +46,11 @@ class Create(tk.Frame):
     def button(
         self,
         widget_refrence=None,
-        bg=tkd.Color.light_black,
-        abgc=tkd.Color.orange,
-        bge=tkd.Color.black,
-        fg=tkd.Color.white_grey,
-        fge=tkd.Color.orange,
+        bg=TKCOLOR.light_black,
+        abgc=TKCOLOR.orange,
+        bge=TKCOLOR.black,
+        fg=TKCOLOR.white_grey,
+        fge=TKCOLOR.orange,
         text=None,
         height=2,
         width=10,
@@ -57,7 +58,7 @@ class Create(tk.Frame):
         row=1,
         col=3,
         sticky=None,
-        font=tkd.Font.cas8b,
+        font=TKFONT.cas8b,
         padx=5,
         pady=2,
         bind_to=None,
@@ -94,15 +95,15 @@ class CustomTitleBar(tk.Frame):
         self.parent.focus_force()
         self.parent.overrideredirect(True)
         # place new bar at top of window
-        self.bar = tk.Frame(height=37, width=tkd.Window.width, bg=tkd.Color.light_black)
+        self.bar = tk.Frame(height=37, width=TKWINDOW.width, bg=TKCOLOR.light_black)
         self.bar.place(x=0, y=0)
         # place SubSearch in bar
         self.subsearch_label = tk.Label(
             self.bar,
             text="SubSearch",
-            bg=tkd.Color.light_black,
-            fg=tkd.Color.white_grey,
-            font=tkd.Font.cas10b,
+            bg=TKCOLOR.light_black,
+            fg=TKCOLOR.white_grey,
+            font=TKFONT.cas10b,
             justify="center",
             anchor="w",
         )
@@ -124,7 +125,7 @@ class CustomTitleBar(tk.Frame):
             self.bar,
             width=37,
             height=37,
-            bg=tkd.Color.light_black,
+            bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
         self.exit.place(relx=1, rely=0, anchor="ne")
@@ -134,20 +135,20 @@ class CustomTitleBar(tk.Frame):
             self.bar,
             width=37,
             height=37,
-            bg=tkd.Color.light_black,
+            bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
-        self.maximize.place(x=tkd.Window.width - 37, rely=0, anchor="ne")
+        self.maximize.place(x=TKWINDOW.width - 37, rely=0, anchor="ne")
         self.update_img(self.maximize, self.max_ina_png)
         # place tab canvas and image
         self.tab = tk.Canvas(
             self.bar,
             width=37,
             height=37,
-            bg=tkd.Color.light_black,
+            bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
-        self.tab.place(x=tkd.Window.width - 74, rely=0, anchor="ne")
+        self.tab.place(x=TKWINDOW.width - 74, rely=0, anchor="ne")
         self.update_img(self.tab, self.tab_grey_png)
         # binds
         # bind label for dragging around window
@@ -167,7 +168,7 @@ class CustomTitleBar(tk.Frame):
 
         # hide 1px Frame
         self.place(relx=1, rely=1, anchor="n")
-        self.configure(bg=tkd.Color.green)
+        self.configure(bg=TKCOLOR.green)
 
     def window_pos(self, parent, w: int = 80, h: int = 48):
         ws = parent.winfo_screenwidth()
@@ -207,7 +208,7 @@ class CustomTitleBar(tk.Frame):
 
     def tabbing(self, event):
         self.parent.attributes("-topmost", False)
-        self.parent.wm_attributes("-transparentcolor", tkd.Color.black)
+        self.parent.wm_attributes("-transparentcolor", TKCOLOR.black)
         self.parent.attributes("-alpha", 0.1)
         self.parent.overrideredirect(False)
         self.parent.iconify()
@@ -217,30 +218,30 @@ class CustomTitleBar(tk.Frame):
         self.parent.destroy()
 
     def exit_press(self, event):
-        self.exit.configure(bg=tkd.Color.dark_red)
+        self.exit.configure(bg=TKCOLOR.dark_red)
         self.exit.bind("<ButtonRelease-1>", self.exit_release)
 
     def exit_enter(self, event):
-        self.exit.configure(bg=tkd.Color.red)
+        self.exit.configure(bg=TKCOLOR.red)
         self.update_img(self.exit, self.exit_png)
         self.exit.bind("<ButtonPress-1>", self.exit_press)
 
     def exit_leave(self, event):
-        self.exit.configure(bg=tkd.Color.light_black)
+        self.exit.configure(bg=TKCOLOR.light_black)
         self.update_img(self.exit, self.exit_grey_png)
         self.exit.unbind("<ButtonRelease-1>")
 
     def tab_press(self, event):
-        self.tab.configure(bg=tkd.Color.light_grey)
+        self.tab.configure(bg=TKCOLOR.light_grey)
         self.tab.bind("<ButtonRelease-1>", self.tabbing)
 
     def tab_enter(self, event):
-        self.tab.configure(bg=tkd.Color.dark_grey)
+        self.tab.configure(bg=TKCOLOR.dark_grey)
         self.update_img(self.tab, self.tab_png)
         self.tab.bind("<ButtonPress-1>", self.tab_press)
 
     def tab_leave(self, event):
-        self.tab.configure(bg=tkd.Color.light_black)
+        self.tab.configure(bg=TKCOLOR.light_black)
         self.update_img(self.tab, self.tab_grey_png)
         self.tab.unbind("<ButtonRelease-1>")
 
@@ -260,20 +261,20 @@ class CustomTitleBar(tk.Frame):
 class CustomBorder(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        csx = tkd.Window.width
-        csy = tkd.Window.height
-        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=tkd.Color.light_black, borderwidth=0)
+        csx = TKWINDOW.width
+        csy = TKWINDOW.height
+        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=TKCOLOR.light_black, borderwidth=0)
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
         self.canvas_bg = tk.Canvas(
             parent,
             width=csx - 4,
             height=csy - 4,
-            bg=tkd.Color.dark_grey,
+            bg=TKCOLOR.dark_grey,
             highlightthickness=0,
         )
         self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.configure(bg=tkd.Color.light_black)
+        self.configure(bg=TKCOLOR.light_black)
 
 
 # get the window position so it can be placed in the center of the screen
@@ -283,8 +284,8 @@ class WindowPosition(tk.Frame):
 
     def set(
         self,
-        w=tkd.Window.width,
-        h=tkd.Window.height,
+        w=TKWINDOW.width,
+        h=TKWINDOW.height,
         ws_value_offset=0,
         hs_value_offset=0,
     ):
@@ -306,20 +307,20 @@ class ColorPicker:
 
     def pick(self):  # string boolean
         if self.string_var.get() == "True":
-            self.clabel.configure(fg=tkd.Color.green)
+            self.clabel.configure(fg=TKCOLOR.green)
         elif self.string_var.get() == "False":
-            self.clabel.configure(fg=tkd.Color.red)
+            self.clabel.configure(fg=TKCOLOR.red)
         elif self.string_var.get() == "Both":
-            self.clabel.configure(fg=tkd.Color.blue)
+            self.clabel.configure(fg=TKCOLOR.blue)
         # range
         elif self.pct in range(75, 100):
-            self.clabel.configure(fg=tkd.Color.green)
+            self.clabel.configure(fg=TKCOLOR.green)
         elif self.pct in range(50, 75):
-            self.clabel.configure(fg=tkd.Color.green_brown)
+            self.clabel.configure(fg=TKCOLOR.green_brown)
         elif self.pct in range(25, 50):
-            self.clabel.configure(fg=tkd.Color.red_brown)
+            self.clabel.configure(fg=TKCOLOR.red_brown)
         elif self.pct in range(0, 25):
-            self.clabel.configure(fg=tkd.Color.red)
+            self.clabel.configure(fg=TKCOLOR.red)
 
 
 class ToolTip(tk.Toplevel):
@@ -330,17 +331,17 @@ class ToolTip(tk.Toplevel):
 
     def show(self):
         tk.Toplevel.__init__(self, self.parent)
-        self.configure(background=tkd.Color.light_black)
+        self.configure(background=TKCOLOR.light_black)
         # remove the standard window titlebar from the tooltip
         self.overrideredirect(True)
         # unpack *args and put each /n on a new line
         lines = "\n".join(self.text)
-        frame = tk.Frame(self, background=tkd.Color.light_black)
+        frame = tk.Frame(self, background=TKCOLOR.light_black)
         label = tk.Label(
             frame,
             text=lines,
-            background=tkd.Color.dark_grey,
-            foreground=tkd.Color.white_grey,
+            background=TKCOLOR.dark_grey,
+            foreground=TKCOLOR.white_grey,
             justify="left",
         )
         # get size of the label to use later for positioning and sizing of the tooltip
