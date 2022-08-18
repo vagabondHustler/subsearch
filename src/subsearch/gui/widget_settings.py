@@ -14,7 +14,7 @@ TKMISC = tkdata.Misc()
 
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")
-LANGUAGE, LANG_ABBR_ISO6391 = raw_config.get("language")
+LANGUAGE, LANG_CODE2 = raw_config.get("language")
 HEARING_IMPARED = raw_config.get("hearing_impaired")
 PCT = raw_config.get("percentage")
 SHOW_TERMINAL = raw_config.get("show_terminal")
@@ -27,7 +27,7 @@ class SelectLanguage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{LANGUAGE}, {LANG_ABBR_ISO6391}")
+        self.string_var.set(f"{LANGUAGE}, {LANG_CODE2}")
         number_of_buttons = len(LANGUAGES)
         self.rowcount = 0
         self.colcount = 1

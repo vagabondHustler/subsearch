@@ -42,11 +42,11 @@ def tprint(msg: str) -> None:
 
 
 # log and print all the used parameters from video/directory-name
-def parameters(param: SearchParameters, lang: str, lang_abbr_iso6391: str, hearing_impaired: str, pct: int) -> None:
-    lang_abbr_iso6392b = lang[:3].lower()
+def parameters(param: SearchParameters, lang: str, lang_code2: str, hearing_impaired: str, pct: int) -> None:
+    lang_code3 = lang[:3].lower()
     output(f"SubSearch - {__version__} ", False)
     output("[PARAMETERS]")
-    output(f"Language: {lang}, {lang_abbr_iso6391}, {lang_abbr_iso6392b}")
+    output(f"Language: {lang}, {lang_code2}, {lang_code3}")
     output(f"Hearing impaired: {hearing_impaired}")
     output(f"Title: {param.title}")
     output(f"Year: {param.year}")
