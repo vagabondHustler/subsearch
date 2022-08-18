@@ -1,5 +1,5 @@
 import time
-from typing import Any, Literal
+from typing import Literal, Optional, Union
 
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -8,7 +8,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 # check if subtitle is hearing impaired or not
-def is_sub_hi(a1: Tag) -> bool | None:
+def is_sub_hi(a1: Tag) -> Optional[bool]:
     """
     Check if subtitle is hearing impaired or not
 
@@ -30,7 +30,7 @@ def is_sub_hi(a1: Tag) -> bool | None:
 
 
 # search for title
-def search_for_title(url: str) -> (dict[str, str] | Literal["ERROR: CAPTCHA PROTECTION"]):
+def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA PROTECTION"]]):
     """
     Search subscene for matching titles
 
@@ -58,7 +58,7 @@ def search_for_title(url: str) -> (dict[str, str] | Literal["ERROR: CAPTCHA PROT
 
 
 # search title(s) for subtitle
-def search_title_for_sub(language: str, hearing_impaired: bool | str, url: str) -> dict[str, str]:
+def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url: str) -> dict[str, str]:
     """
     Search for subtitles matching the provided titles
 

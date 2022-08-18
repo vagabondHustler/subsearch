@@ -37,7 +37,7 @@ def try_the_year_before(key: str, param: SearchParameters) -> bool:
     Returns:
         bool: True if the release is found one year before, False otherwise
     """
-    if param.year == 0:
+    if param.year == "N/A":
         return False
     year = int(param.year) - 1
     the_year_before = f"{param.title} ({year})"
@@ -115,7 +115,9 @@ def log_and_sort_list(list_of_tuples: list[tuple[int, str, str]], pct: int):
 
 
 # decides what to do with all the scrape data
-def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str) -> Any | None:
+def scrape(
+    param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str
+) -> Optional[list[Any]]:
     # search for titles
     to_be_scraped: list[str] = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
@@ -142,8 +144,8 @@ def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int
         return None
 
     # search title for subtitles
-    to_be_downloaded: list[Any] = []
-    to_be_sorted: list[Any] = []
+    to_be_downloaded: list[str] = []
+    to_be_sorted: list[tuple[int, str, str]] = []
     while len(to_be_scraped) > 0:
         for url in to_be_scraped:
             log.output(f"[Searching for subtitles]")
@@ -180,7 +182,7 @@ def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int
             return None
         return None
 
-    download_info = []
+    download_info: list[tuple[str, str, int, int]] = []
     for current_num, (dl_url) in enumerate(to_be_downloaded):
         total_num = len(to_be_downloaded)
         current_num += 1

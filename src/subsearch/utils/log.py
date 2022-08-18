@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 
 from subsearch.data import __version__, __video_directory__
 from subsearch.utils.string_parser import SearchParameters
@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 
 # log and print message
-def output(msg: str, to_terminal: bool = True) -> (Literal[False] | None):
+def output(msg: str, to_terminal: bool = True) -> Optional[Literal[False]]:
     logging.info(msg)
     return print(msg) if to_terminal else False
 
