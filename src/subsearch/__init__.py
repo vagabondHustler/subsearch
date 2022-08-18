@@ -168,7 +168,7 @@ def main() -> None:
 
     ss = SubSearch()
     ss.opensubtitles_scrape()
-    # ss.subscene_scrape()
+    ss.subscene_scrape()
     ss.process_files()
     ss.end()
 
