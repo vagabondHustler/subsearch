@@ -8,15 +8,13 @@ SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": 
 
 
 def check_for_updates() -> str:
-    source = SCRAPER.get("https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/src/subsearch/data/version.json")
+    source = SCRAPER.get(
+        "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/__version__.py"
+    )
     scontent = source.content
     _string = str(scontent)
-    _string_no_qoute = _string.replace('"', " ")
-    _string_items = _string_no_qoute.split(" ")
-    for i in _string_items:
-        if i.startswith("v") and i[-1].isnumeric():
-            latest_version = i
-            return latest_version
+    latest_version = "".join(re.findall('^.*["]([0-9]*).([0-9]*).([0-9]*)["]', _string)[0])
+    return latest_version
 
 
 def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
@@ -27,9 +25,8 @@ def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
         tuple[bool, str]: True, None if local version is less than repo, False, "newer" if local version is greater than repo, False, else False None
     """
 
-    local_version = re.findall(r"\d+", __version__)
-    repo_version = re.findall(r"\d+", check_for_updates())
-
+    local_version = "".join(re.findall("([0-9]*).([0-9]*).([0-9]*)", __version__)[0])
+    repo_version = check_for_updates()
     if local_version < repo_version:
         return True, None
     if local_version > repo_version:
