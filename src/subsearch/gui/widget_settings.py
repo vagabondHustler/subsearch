@@ -12,6 +12,8 @@ from subsearch.utils import current_user, raw_config, raw_registry, updates
 TKCOLOR = tkd.Color()
 TKFONT = tkd.Font()
 TKWINDOW = tkd.Window()
+TKMISC = tkd.Misc()
+
 LANGUAGES = raw_config.get("languages")
 OTH_LANGUAGES = raw_config.get("other_languages")
 LANGUAGE, lang_abbr_iso6391 = raw_config.get("language")
@@ -32,7 +34,7 @@ class SelectLanguage(tk.Frame):
         self.rowcount = 0
         self.colcount = 1
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Selected language", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
@@ -207,7 +209,7 @@ class HearingImparedSubs(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{HEARING_IMPARED}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(
             self,
             text="Hearing impaired subtitles",
@@ -271,7 +273,7 @@ class SearchThreshold(tk.Frame):
         self.string_var.set(f"{PCT} %")
         self.pct = PCT
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Search threshold", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(self, textvar=self.string_var, fg=TKCOLOR.blue, col=2, font=TKFONT.cas8b)
         tools.Create.button(
@@ -316,7 +318,7 @@ class ShowContextMenu(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"True")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Show context menu", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
@@ -369,7 +371,7 @@ class AssociateExtensions(tk.Frame):
 
         self.ext_window_show = False
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Associated extensions", sticky="w", font=TKFONT.cas8b)
 
         self.ext_button = tools.Create.button(
@@ -555,7 +557,7 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CM_ICON}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Show context menu icon", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
@@ -607,7 +609,7 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DL_WINDOW}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Show download window", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
@@ -654,7 +656,7 @@ class ShowTerminalOnSearch(tk.Frame):
 
         self.string_var.set(f"{SHOW_TERMINAL}")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(self, text="Show terminal on search", sticky="w", font=TKFONT.cas8b)
         self.clabel = tools.Create.label(
             self,
@@ -703,7 +705,7 @@ class CheckForUpdates(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         for i in range(1, 4):
-            tools.Create.label(self, text=tkd.Misc.col58, col=i, font=TKFONT.cas8)
+            tools.Create.label(self, text=TKMISC.col58, col=i, font=TKFONT.cas8)
         tools.Create.label(
             self,
             text=f"SubScene version {__version__}",
