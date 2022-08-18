@@ -2,7 +2,7 @@ import os
 import shutil
 import struct
 import zipfile
-from typing import Any
+from typing import Any, Optional
 
 import cloudscraper
 
@@ -94,7 +94,7 @@ def clean_up(cwd: str, extension: str) -> None:
 
 
 # get file hash
-def get_hash(file_path: str) -> str | Any:
+def get_hash(file_path: str) -> Optional[str]:
     """
     Tries to get the hash of the file
 

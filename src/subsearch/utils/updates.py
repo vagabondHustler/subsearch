@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 import cloudscraper
 
@@ -17,7 +18,7 @@ def check_for_updates() -> str:
     return latest_version
 
 
-def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
+def is_new_version_available() -> tuple[bool, Optional[str]]:
     """
     Compare local version with latest version on github
 

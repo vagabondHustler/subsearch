@@ -82,7 +82,7 @@ More options
 
 `subsearch --help`
 
-See [Source](#src) for imports
+See [code](#code) for imports
 
 ### Source <a name = "src"></a>
 
@@ -90,13 +90,13 @@ Download [Python](https://www.python.org/downloads/) >= 3.10
 
 Download SubScene
 
-`git clone https://github.com/vagabondHustler/SubSearch`
+`git clone https://github.com/vagabondHustler/subsearch.git`
 
 Install package locally
 
 `pip install -e .`
 
-Code
+Code <a name = "code"></a>
 
 ```
 from subsearch import SubSearch
