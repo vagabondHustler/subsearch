@@ -90,7 +90,7 @@ Download [Python](https://www.python.org/downloads/) >= 3.10
 
 Download SubScene
 
-`git clone https://github.com/vagabondHustler/SubSearch`
+`git clone https://github.com/vagabondHustler/subsearch.git`
 
 Install package locally
 
