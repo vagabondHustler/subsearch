@@ -1,3 +1,5 @@
+from typing import Optional
+
 from subsearch.data import __video_directory__
 from subsearch.scraper import opensubtitles_soup
 from subsearch.utils import log
@@ -17,7 +19,7 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
     Returns:
         list | None: download links for the subtitle
     """
-    to_be_downloaded: list[str] | None = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
+    to_be_downloaded: Optional[list[str]] = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:
         if param.show_bool:
             log.output(f"No TV-series found matching hash {param.file_hash}")

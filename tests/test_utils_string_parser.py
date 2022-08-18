@@ -57,7 +57,7 @@ def test_string_parser_show() -> None:
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None"
     assert param.title == "the foo bar - first season"
-    assert param.year == 0
+    assert param.year == "N/A"
     assert param.season == "01"
     assert param.season_ordinal == "first"
     assert param.episode == "01"
@@ -76,7 +76,7 @@ def test_string_parser_bad_filename() -> None:
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264"
     assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-None"
     assert param.title == "the foo bar 1080p web h264"
-    assert param.year == 0
+    assert param.year == "N/A"
     assert param.season == "N/A"
     assert param.season_ordinal == "N/A"
     assert param.episode == "N/A"

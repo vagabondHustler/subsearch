@@ -8,10 +8,10 @@ from subsearch.data import __icons__, __root__
 from subsearch.utils import current_user
 
 COMPUTER_NAME = socket.gethostname()
-ASTERISK_PATH = r"Software\Classes\*"
-SHELL_PATH = r"Software\Classes\*\shell"
-SUBSEARCH_PATH = r"Software\Classes\*\shell\0.SubSearch"
-COMMAND_PATH = r"Software\Classes\*\shell\0.SubSearch\command"
+ASTERISK_PATH = "Software\\Classes\\*"
+SHELL_PATH = "Software\\Classes\\*\\shell"
+SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\0.SubSearch"
+COMMAND_PATH = "Software\\Classes\\*\\shell\\0.SubSearch\\command"
 
 
 def write_keys() -> None:
