@@ -13,7 +13,7 @@ def check_for_updates() -> str:
     )
     scontent = source.content
     _string = str(scontent)
-    latest_version = "".join(re.findall('^.*["]([0-9]*).([0-9]*).([0-9]*)["]', _string)[0])
+    latest_version = "".join(re.findall('^.*["]([0-9]*)\.([0-9]*)\.([0-9]*)["]', _string)[0])
     return latest_version
 
 
@@ -25,7 +25,7 @@ def is_new_version_available() -> tuple[bool, str] | tuple[bool, None]:
         tuple[bool, str]: True, None if local version is less than repo, False, "newer" if local version is greater than repo, False, else False None
     """
 
-    local_version = "".join(re.findall("([0-9]*).([0-9]*).([0-9]*)", __version__)[0])
+    local_version = "".join(re.findall("([0-9]*)\.([0-9]*)\.([0-9]*)", __version__)[0])
     repo_version = check_for_updates()
     if local_version < repo_version:
         return True, None
