@@ -33,7 +33,7 @@ jobs:
 
   pr-feature:
     runs-on: ubuntu-latest
-    if: ${{ (!startsWith(github.event.commits[0].message, 'Feature')) }}
+    if: ${{ !startsWith(github.event.commits[0].message, 'Feature') }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-feature
@@ -50,7 +50,7 @@ jobs:
 
   pr-fix:
     runs-on: ubuntu-latest
-    if: ${{ (!startsWith(github.event.commits[0].message, 'Fix')) }}
+    if: ${{ !startsWith(github.event.commits[0].message, 'Fix') }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-other
