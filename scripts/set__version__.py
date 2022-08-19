@@ -3,7 +3,7 @@ import re
 import sys
 
 cwd = os.getcwd()
-version = sys.argv[-1]  # new version number
+version = sys.argv[-1].replace("v", "")  # new version number
 file_path = f"{cwd}/src/subsearch/data/__version__.py"
 
 
