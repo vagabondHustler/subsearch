@@ -44,7 +44,7 @@ def write_valuex(key: str) -> None:
     if key == "SubSearch":
         key_type = SUBSEARCH_PATH
         value_name = ""
-        value = "SubSearch"
+        value = "Subsearch"
     if key.lower() == "icon":
         key_type = SUBSEARCH_PATH
         value_name = "Icon"
@@ -91,7 +91,7 @@ def get_command_value() -> str:
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
-        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('SubSearch');"
+        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('Subsearch');"
         # gets the path of the root directory of subsearch
         set_wd = f"import os; os.chdir(r'{__root__}');"
         import_main = "import subsearch; subsearch.main()"
@@ -124,7 +124,7 @@ def get_appliesto_value() -> str:
 
     file_ext = raw_config.get("file_ext")
     # for which file types to show the SubSearch context entry on
-    value = '"subsearch.py" OR '
+    value = '"__main__.py" OR '
     for k, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:
             value += "".join(f'"{k}" OR ')
@@ -141,7 +141,7 @@ def remove_context_menu() -> None:
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
-            winreg.DeleteKey(sk, "0.SubSearch")
+            winreg.DeleteKey(sk, "0.Subsearch")
 
 
 # write keys to registry then write values
