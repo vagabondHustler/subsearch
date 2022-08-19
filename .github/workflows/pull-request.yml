@@ -5,18 +5,18 @@ on:
 
 jobs:
   pr-other:
-    runs-on: ubuntu-latest
     if: |
       ${{ 
-       (!startsWith(github.event.commits[0].message, 'Update')) && 
-       (!startsWith(github.event.commits[0].message, 'Del')) &&
-       (!startsWith(github.event.commits[0].message, 'Rename')) &&
-       (!startsWith(github.event.commits[0].message, 'Move')) &&
-       (!startsWith(github.event.commits[0].message, 'Docs')) &&
-       (!startsWith(github.event.commits[0].message, 'Initial commit')) &&
-       (!startsWith(github.event.commits[0].message, 'Reformat')) &&
-       (!startsWith(github.event.commits[0].message, 'Tests'))
+       (!startsWith(github.event.head_commit.message, 'Update')) && 
+       (!startsWith(github.event.head_commit.message, 'Del')) &&
+       (!startsWith(github.event.head_commit.message, 'Rename')) &&
+       (!startsWith(github.event.head_commit.message, 'Move')) &&
+       (!startsWith(github.event.head_commit.message, 'Docs')) &&
+       (!startsWith(github.event.head_commit.message, 'Initial commit')) &&
+       (!startsWith(github.event.head_commit.message, 'Reformat')) &&
+       (!startsWith(github.event.head_commit.message, 'Tests'))
        }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-other
@@ -32,8 +32,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   pr-feature:
+    if: ${{ !startsWith(github.event.head_commit.message, 'Feature') }}
     runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.event.commits[0].message, 'Feature') }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-feature
@@ -49,8 +49,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   pr-fix:
+    if: ${{ !startsWith(github.event.head_commit.message, 'Fix') }}
     runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.event.commits[0].message, 'Fix') }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-fix
