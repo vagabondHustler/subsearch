@@ -22,7 +22,7 @@ jobs:
           assignees: vagabondHustler
           reviewers: vagabondHustler
           branch: main
-          base: dev
+
 
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v4
@@ -37,7 +37,7 @@ jobs:
           assignees: vagabondHustler
           reviewers: vagabondHustler
           branch: main
-          base: dev
+
 
       - name: Create PR Other
         uses: peter-evans/create-pull-request@v4
@@ -52,4 +52,4 @@ jobs:
           assignees: vagabondHustler
           reviewers: vagabondHustler
           branch: main
-          base: dev
+
