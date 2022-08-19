@@ -133,3 +133,4 @@ def get_hash(file_path: str) -> Optional[str]:
     except IOError:
         log.output("IOError")
         return None
+

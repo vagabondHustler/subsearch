@@ -140,28 +140,28 @@ jobs:
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
 
-  # pypi-upload:
-  #   name: PyPI Upload
-  #   needs: versioning
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         ref: main
-  #     - uses: actions/setup-python@v4
-  #       with:
-  #         python-version: "3.10.6"
+  pypi-upload:
+    name: PyPI Upload
+    needs: versioning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.6"
 
-  #     - name: Install latest pip, build, twine
-  #       run: |
-  #         git fetch origin main
-  #         python -m pip install --upgrade --disable-pip-version-check pip
-  #         python -m pip install --upgrade build twine
-  #     - name: Build wheel and source distributions
-  #       run: |
-  #         python -m build
-  #     - name: Upload to PyPI via Twine
-  #       env:
-  #         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-  #       run: |
-  #         twine upload --verbose -u '__token__' dist/*
+      - name: Install latest pip, build, twine
+        run: |
+          git fetch origin main
+          python -m pip install --upgrade --disable-pip-version-check pip
+          python -m pip install --upgrade build twine
+      - name: Build wheel and source distributions
+        run: |
+          python -m build
+      - name: Upload to PyPI via Twine
+        env:
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          twine upload --verbose -u '__token__' dist/*

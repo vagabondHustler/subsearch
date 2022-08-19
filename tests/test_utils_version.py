@@ -13,3 +13,4 @@ def test_current() -> None:
 
     assert version_digits.isnumeric() is True
     assert version_dots == ".."
+
