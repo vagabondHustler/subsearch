@@ -18,6 +18,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ steps.pr_other.outputs.pr_title }}
           body: ${{ steps.pr_other.outputs.pr_body }}
           labels: other
+          branch: main
+          base: dev
