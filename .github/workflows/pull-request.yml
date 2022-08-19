@@ -10,7 +10,7 @@ jobs:
         
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v4
-        if: ${{ startsWith(github.event.head_commit.message, 'Fix') }}
+        if: startsWith(github.event.head_commit.message, 'Fix')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Fix | ${{ github.ref }}"
@@ -22,7 +22,7 @@ jobs:
 
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v4
-        if: ${{ startsWith(github.event.head_commit.message, 'feature') }}
+        if: startsWith(github.event.head_commit.message, 'feature')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Features - ${{ github.ref }}"
@@ -34,7 +34,7 @@ jobs:
 
       - name: Create PR Other
         uses: peter-evans/create-pull-request@v4
-        if: ${{ !startsWith(github.event.head_commit.message, 'feature') && !startsWith(github.event.head_commit.message, 'feature') }}
+        if: ${{ (!startsWith(github.event.head_commit.message, 'feature')) && (!startsWith(github.event.head_commit.message, 'feature')) }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Other - ${{ github.ref }}"
