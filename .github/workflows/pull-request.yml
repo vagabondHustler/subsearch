@@ -24,7 +24,7 @@ jobs:
         with:
           destination_branch: "main"
           pr_title: "Other | ${{ github.ref }}  into main"
-          pr_body: "``` An automated PR ```"
+          pr_body: "An automated PR"
           pr_assignee: "vagabondHustler"
           pr_label: "other"
           pr_draft: true
@@ -37,7 +37,7 @@ jobs:
         with:
           destination_branch: "main"
           pr_title: "Features | ${{ github.ref }}  into main"
-          pr_body: "``` An automated PR ```"
+          pr_body: "An automated PR"
           pr_assignee: "vagabondHustler"
           pr_label: "feature"
           pr_draft: true
@@ -50,7 +50,7 @@ jobs:
         with:
           destination_branch: "main"
           pr_title: "Fixes | ${{ github.ref }} into main"
-          pr_body: "``` An automated PR ```"
+          pr_body: "An automated PR"
           pr_assignee: "vagabondHustler"
           pr_label: "fix"
           pr_draft: true
