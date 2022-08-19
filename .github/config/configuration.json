@@ -3,13 +3,13 @@
     {
       "title": "## Features",
       "labels": [
-        "feature"
+        "feature:"
       ]
     },
     {
       "title": "## Fixes",
       "labels": [
-        "fix"
+        "fix:"
       ]
     },
     {
@@ -21,13 +21,13 @@
     {
       "title": "## Other",
       "labels": [
-        "update",
-        "del",
-        "reformat",
-        "rename",
-        "move",
-        "docs",
-        "initial commit"
+        "update:",
+        "del:",
+        "reformat:",
+        "rename:",
+        "move:",
+        "docs:",
+        "initial commit:"
               ]
     }
   ]
