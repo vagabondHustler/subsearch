@@ -18,8 +18,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: ${{ steps.vars.outputs.pr_title }}
-          body: ${{ steps.vars.outputs.pr_body }}
-          event-type: create-pull-request
-          branch: main
+          title: ${{ steps.pr_other.outputs.pr_title }}
+          body: ${{ steps.pr_other.outputs.pr_body }}
           labels: other
