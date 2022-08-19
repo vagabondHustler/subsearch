@@ -33,4 +33,3 @@ def is_new_version_available() -> tuple[bool, Optional[str]]:
     if local_version > repo_version:
         return False, "newer"
     return False, None
-

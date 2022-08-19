@@ -32,4 +32,3 @@ def check_is_exe() -> bool:
     if sys.argv[0].endswith("SubSearch.exe"):
         return True
     return False
-

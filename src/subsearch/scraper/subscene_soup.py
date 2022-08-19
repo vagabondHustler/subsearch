@@ -114,4 +114,3 @@ def get_download_url(url: str) -> str:
     _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
     download_url = f"https://subscene.com/{_link[0]}"
     return download_url
-

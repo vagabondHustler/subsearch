@@ -85,4 +85,3 @@ def test_string_parser_bad_filename() -> None:
     assert param.release == "the foo bar 1080p web h264"
     assert param.group == "the foo bar 1080p web h264"
     assert param.file_hash == None
-

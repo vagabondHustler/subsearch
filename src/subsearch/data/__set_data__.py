@@ -88,4 +88,3 @@ class SetValues:
             setattr(VideoFile, "ext", None)
             setattr(VideoFile, "name", None)
             setattr(VideoFile, "directory", None)
-
