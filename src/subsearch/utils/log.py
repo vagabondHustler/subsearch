@@ -59,3 +59,4 @@ def parameters(param: SearchParameters, lang: str, lang_code2: str, hearing_impa
     output(f"File hash: {param.file_hash}")
     output(f"URL: {param.url_subscene}")
     output(f"URL: {param.url_opensubtitles}\n")
+
