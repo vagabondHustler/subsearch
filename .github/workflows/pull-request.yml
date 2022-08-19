@@ -12,7 +12,7 @@ jobs:
         id: var
         run: |
           echo ::set-output name=pr_title::"github.event.head_commit.message"
-          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y)""
+          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y)"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
