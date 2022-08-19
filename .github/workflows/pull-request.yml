@@ -34,7 +34,7 @@ jobs:
 
       - name: Create PR Other
         uses: peter-evans/create-pull-request@v4
-        if: ${{ !startsWith(github.event.head_commit.message, 'Fix') && !startsWith(github.event.head_commit.message, 'Feature')) }}
+        if: ${{ !startsWith(github.event.head_commit.message, 'Fix') && !startsWith(github.event.head_commit.message, 'Feature') }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Other - ${{ github.ref }}"
