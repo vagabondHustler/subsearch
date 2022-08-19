@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - "dev"
+      - "dev*"
 
 jobs:
   pr:
@@ -12,14 +12,14 @@ jobs:
         uses: repo-sync/pull-request@v2
         if: |
           ${{ 
-           (!startsWith(github.event.head_commit.message, 'update::')) && 
-           (!startsWith(github.event.head_commit.message, 'del::')) &&
-           (!startsWith(github.event.head_commit.message, 'rename::')) &&
-           (!startsWith(github.event.head_commit.message, 'move::')) &&
-           (!startsWith(github.event.head_commit.message, 'docs::')) &&
-           (!startsWith(github.event.head_commit.message, 'initial commit::')) &&
-           (!startsWith(github.event.head_commit.message, 'reformat::')) &&
-           (!startsWith(github.event.head_commit.message, 'tests::'))
+           (!startsWith(github.event.head_commit.message, 'Update')) && 
+           (!startsWith(github.event.head_commit.message, 'Del')) &&
+           (!startsWith(github.event.head_commit.message, 'Rename')) &&
+           (!startsWith(github.event.head_commit.message, 'Move')) &&
+           (!startsWith(github.event.head_commit.message, 'Docs')) &&
+           (!startsWith(github.event.head_commit.message, 'Initial commit')) &&
+           (!startsWith(github.event.head_commit.message, 'Reformat')) &&
+           (!startsWith(github.event.head_commit.message, 'Tests'))
            }}
         with:
           destination_branch: "main"
@@ -33,7 +33,7 @@ jobs:
 
       - name: pull-request-feature
         uses: repo-sync/pull-request@v2
-        if: "!startsWith(github.event.head_commit.message, 'feature::')"
+        if: "!startsWith(github.event.head_commit.message, 'Feature')"
         with:
           destination_branch: "main"
           pr_title: "Features | ${{ github.ref }}  into main"
@@ -46,7 +46,7 @@ jobs:
 
       - name: pull-request-feature
         uses: repo-sync/pull-request@v2
-        if: "!startsWith(github.event.head_commit.message, 'fix::')"
+        if: "!startsWith(github.event.head_commit.message, 'Fix')"
         with:
           destination_branch: "main"
           pr_title: "Fixes | ${{ github.ref }} into main"

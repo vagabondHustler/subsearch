@@ -49,7 +49,7 @@ jobs:
         run: |
           git status
           git add -A
-          git commit -S -m "reformat:: codebase with black & isort"
+          git commit -S -m "Reformat codebase with black & isort"
           git fetch origin main
           git push origin HEAD:main
   # get the current version, update version.json in ../data with new version with pushed tags
@@ -86,7 +86,7 @@ jobs:
         run: |
           git status
           git add src/subsearch/data/__version__.py
-          git commit -S -m "release:: v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
+          git commit -S -m "Release v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
           git fetch origin main
           git push origin HEAD:main
 

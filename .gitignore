@@ -150,11 +150,9 @@ src/*test*
 src/*/__subsearch__*.*
 src/__subsearch__*.*
 src/*language
-src/old*
 src/*.zip
 src/*.srt
 src/*subs/
 /*.log
-/publish.py
 tests/__subsearch__.log
 old*
