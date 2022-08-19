@@ -1,5 +1,3 @@
-from typing import Any, List, Optional
-
 from subsearch.data import __video_directory__
 from subsearch.scraper import subscene_soup
 from subsearch.utils import log, string_parser
@@ -115,9 +113,7 @@ def log_and_sort_list(list_of_tuples: list[tuple[int, str, str]], pct: int):
 
 
 # decides what to do with all the scrape data
-def scrape(
-    param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str
-) -> Optional[list[Any]]:
+def scrape(param: SearchParameters, lang: str, lang_abbr: str, hi: str, pct: int, show_dl_window: str):
     # search for titles
     to_be_scraped: list[str] = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
