@@ -4,23 +4,23 @@ on:
       - "dev*"
 
 jobs:
-  pr:
+  pr-other:
     runs-on: ubuntu-latest
+    if: |
+      ${{ 
+       (!startsWith(github.event.head_commit.message, 'Update')) && 
+       (!startsWith(github.event.head_commit.message, 'Del')) &&
+       (!startsWith(github.event.head_commit.message, 'Rename')) &&
+       (!startsWith(github.event.head_commit.message, 'Move')) &&
+       (!startsWith(github.event.head_commit.message, 'Docs')) &&
+       (!startsWith(github.event.head_commit.message, 'Initial commit')) &&
+       (!startsWith(github.event.head_commit.message, 'Reformat')) &&
+       (!startsWith(github.event.head_commit.message, 'Tests'))
+       }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-other
         uses: repo-sync/pull-request@v2
-        if: |
-          ${{ 
-           (!startsWith(github.event.head_commit.message, 'Update')) && 
-           (!startsWith(github.event.head_commit.message, 'Del')) &&
-           (!startsWith(github.event.head_commit.message, 'Rename')) &&
-           (!startsWith(github.event.head_commit.message, 'Move')) &&
-           (!startsWith(github.event.head_commit.message, 'Docs')) &&
-           (!startsWith(github.event.head_commit.message, 'Initial commit')) &&
-           (!startsWith(github.event.head_commit.message, 'Reformat')) &&
-           (!startsWith(github.event.head_commit.message, 'Tests'))
-           }}
         with:
           destination_branch: "main"
           pr_title: "Other | ${{ github.ref }}  into main"
@@ -31,9 +31,13 @@ jobs:
           pr_allow_empty: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+  pr-feature:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'Feature')"
+    steps:
+      - uses: actions/checkout@v3
       - name: pull-request-feature
         uses: repo-sync/pull-request@v2
-        if: "!startsWith(github.event.head_commit.message, 'Feature')"
         with:
           destination_branch: "main"
           pr_title: "Features | ${{ github.ref }}  into main"
@@ -43,10 +47,12 @@ jobs:
           pr_draft: true
           pr_allow_empty: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
+  pr-fix:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'Fix')"
+    steps:
       - name: pull-request-feature
         uses: repo-sync/pull-request@v2
-        if: "!startsWith(github.event.head_commit.message, 'Fix')"
         with:
           destination_branch: "main"
           pr_title: "Fixes | ${{ github.ref }} into main"
