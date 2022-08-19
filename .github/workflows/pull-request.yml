@@ -1,12 +1,14 @@
 on:
   push:
     branches:
-      - "dev*"
+      - "dev"
 jobs:
   create-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: dev
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v4
         if: startsWith(github.event.head_commit.message, 'Fix')
