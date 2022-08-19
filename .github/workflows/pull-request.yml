@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Create PR Other
+      - name: Create PR Fix
         uses: peter-evans/create-pull-request@v3
+        if: startsWith(github.event.head_commit.message, 'Fix')
         with:
-          if: "!startsWith(github.event.head_commit.message, 'Fix')"
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Fix | ${{ github.ref }}"
           body: >
@@ -19,8 +19,8 @@ jobs:
           labels: fix
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v3
+        if: startsWith(github.event.head_commit.message, 'feature')
         with:
-          if: "!startsWith(github.event.head_commit.message, 'feature')"
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Features | ${{ github.ref }}"
           body: >
