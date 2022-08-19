@@ -1,36 +1,39 @@
 on:
   push:
     branches:
-    - "dev"
+      - "dev"
 
 jobs:
-  pull-request:
+  pr-other:
+    if: "!startsWith(github.event.head_commit.message, 'other:')"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: pull-request-other
-      if: "!startsWith(github.event.head_commit.message, 'other:')"
-      uses: repo-sync/pull-request@v2
-      with:                           
-        destination_branch: "main"                       
-        pr_title: "other ${{ github.head_ref }} into main"     
-        pr_body: ":crown: *An automated PR*"              
-        pr_assignee: "vagabondHustler"                        
-        pr_label: "other"                              
-        pr_draft: true                                   
-        pr_allow_empty: true                             
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: pull-request-feature
-      if: "!startsWith(github.event.head_commit.message, 'feature:')"
-      uses: repo-sync/pull-request@v2
-      with:                           
-        destination_branch: "main"                       
-        pr_title: "feature ${{ github.head_ref }} into main"     
-        pr_body: ":crown: *An automated PR*"              
-        pr_assignee: "vagabondHustler"                        
-        pr_label: "feature"                              
-        pr_draft: true                                   
-        pr_allow_empty: true                             
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    
+      - uses: actions/checkout@v3
+      - name: pull-request-other
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "main"
+          pr_title: "other ${{ github.head_ref }} into main"
+          pr_body: ":crown: *An automated PR*"
+          pr_assignee: "vagabondHustler"
+          pr_label: "other"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  pr-feature:
+    if: "!startsWith(github.event.head_commit.message, 'feature:')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: pull-request-feature
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "main"
+          pr_title: "feature ${{ github.head_ref }} into main"
+          pr_body: ":crown: *An automated PR*"
+          pr_assignee: "vagabondHustler"
+          pr_label: "feature"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
