@@ -19,5 +19,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ steps.vars.outputs.pr_title }}
-          body: ${{ steps.vars.outputs.pr_body }}
+          body: |
+            ${{ steps.vars.outputs.pr_body }}
+          delete-branch: true
+          assignees: vagabondHustler
+          draft: True
           
