@@ -11,11 +11,10 @@ jobs:
         id: vars
         run: |
           echo ::set-output name=pr_title::"[Test] Add report file $(date +%d-%m-%Y)"
-          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y) \
-            by [create-pull-request](https://github.com/peter-evans/create-pull-request)."
+          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y)"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: ${{ steps.vars.outputs.pr_title }}
-          body: ${{ steps.vars.outputs.pr_body }}
+          title: "${{ steps.vars.outputs.pr_title }}"
+          body: "${{ steps.vars.outputs.pr_body }}"
