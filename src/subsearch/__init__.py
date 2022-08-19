@@ -98,12 +98,12 @@ class SubSearch:
                 widget_download.show_widget()
                 file_manager.clean_up(__video_directory__, dl_data)
 
-            log.output("")
-            log.output("[Procsessing files]")
-            file_manager.extract_zips(__video_directory__, ".zip")
-            file_manager.clean_up(__video_directory__, ".zip")
-            file_manager.clean_up(__video_directory__, ").nfo")
-            file_manager.rename_best_match(f"{self.param.release}.srt", __video_directory__, ".srt")
+        log.output("")
+        log.output("[Procsessing files]")
+        file_manager.extract_zips(__video_directory__, ".zip")
+        file_manager.clean_up(__video_directory__, ".zip")
+        file_manager.clean_up(__video_directory__, ").nfo")
+        file_manager.rename_best_match(f"{self.param.release}.srt", __video_directory__, ".srt")
 
     def end(self) -> None:
         """
