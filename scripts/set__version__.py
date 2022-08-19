@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-cwd = os.getcwd()
+cwd = os.getcwd() # get current working directory for workflow
 version = sys.argv[-1].replace("v", "")  # new version number
 file_path = f"{cwd}/src/subsearch/data/__version__.py"
 
