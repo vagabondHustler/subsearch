@@ -33,7 +33,7 @@ jobs:
 
   pr-feature:
     runs-on: ubuntu-latest
-    if: "!startsWith(github.event.head_commit.message, 'Feature')"
+    if: ${{ !startsWith(github.event.head_commit.message, 'Feature') }}
     steps:
       - uses: actions/checkout@v3
       - name: pull-request-feature
@@ -49,9 +49,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
   pr-fix:
     runs-on: ubuntu-latest
-    if: "!startsWith(github.event.head_commit.message, 'Fix')"
+    if: ${{ !startsWith(github.event.head_commit.message, 'Fix') }}
     steps:
-      - name: pull-request-feature
+      - uses: actions/checkout@v3
+      - name: pull-request-other
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: "main"
