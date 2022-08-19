@@ -55,7 +55,7 @@ jobs:
   # get the current version, update version.json in ../data with new version with pushed tags
   versioning:
     name: Versioning
-    needs: ["versioning", "black-isort"]
+    needs: ["test", "black-isort"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
