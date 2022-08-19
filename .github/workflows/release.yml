@@ -78,17 +78,17 @@ jobs:
         run: |
           output=$(python src/subsearch/data/__version__.py --get-version)
           echo "::set-output name=version_output::$output"
-      # # write pushed tags as version number into version.json in ../data
-      # - name: Update __version__.py
-      #   run: python scripts/set__version__.py ${{ github.ref_name }}
-      # # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
-      # - name: Commit version.json
-      #   run: |
-      #     git status
-      #     git add src/subsearch/data/__version__.py
-      #     git commit -S -m "release: v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
-      #     git fetch origin main
-      #     git push origin HEAD:main
+      # write pushed tags as version number into version.json in ../data
+      - name: Update __version__.py
+        run: python scripts/set__version__.py ${{ github.ref_name }}
+      # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
+      - name: Commit version.json
+        run: |
+          git status
+          git add src/subsearch/data/__version__.py
+          git commit -S -m "release: v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
+          git fetch origin main
+          git push origin HEAD:main
 
   build-and-publish:
     name: Build and Publish
