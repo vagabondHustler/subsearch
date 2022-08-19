@@ -116,12 +116,12 @@ jobs:
           pip install -r docs/requirements.txt
       - name: Build executable
         run: |
-          pyinstaller scripts/build.spec -y --clean --distpath ./SubSearch-x64
-          cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
+          pyinstaller scripts/build.spec -y --clean --distpath ./Subsearch-x64
+          cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./Subsearch-x64/Subsearch/sv_ttk
       - name: Make archives
         run: |
           python scripts/make_archive.py
-          mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
+          mv ./Subsearch-x64.zip ./Subsearch-${{ github.ref_name }}-win-x64.zip
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
@@ -129,7 +129,7 @@ jobs:
           body: ${{steps.github_release.outputs.changelog}}
           token: ${{ secrets.ACTIONS_TOKEN }}
           files: |
-            SubSearch-${{ github.ref_name }}-win-x64.zip
+            Subsearch-${{ github.ref_name }}-win-x64.zip
 
   pypi-upload:
     name: PyPI Upload
