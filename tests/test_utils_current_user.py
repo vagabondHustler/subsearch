@@ -13,4 +13,3 @@ def test_is_exe() -> None:
     test to ensure that the src/subsearch/utils/current_user.is_exe function returns boolean
     """
     assert current_user.check_is_exe() or current_user.check_is_exe() is False
-

@@ -212,4 +212,3 @@ def mk_lst(release: Any) -> list[Any]:
         if item not in qualities:
             new.append(item.lower())
     return new
-

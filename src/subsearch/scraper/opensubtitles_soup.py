@@ -42,4 +42,3 @@ def search_for_hash(url: str, lang: str, hi: Union[str, bool]) -> Optional[list[
     if len(download_url) == 0:
         return None
     return download_url
-
