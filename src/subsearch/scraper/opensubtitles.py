@@ -37,3 +37,4 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
             download_info.append(x)
         log.output(f"Done with tasks")
         return download_info
+

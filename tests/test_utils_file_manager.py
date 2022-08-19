@@ -49,3 +49,4 @@ def test_get_hash() -> None:
     hash1 = file_manager.get_hash(f"{CWD}\\none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == None
+
