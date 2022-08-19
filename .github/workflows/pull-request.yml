@@ -23,7 +23,7 @@ jobs:
            }}
         with:
           destination_branch: "main"
-          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }}  into main"
+          pr_title: "Other | ${{ github.ref }}  into main"
           pr_body: "``` An automated PR ```"
           pr_assignee: "vagabondHustler"
           pr_label: "other"
@@ -36,7 +36,7 @@ jobs:
         if: "!startsWith(github.event.head_commit.message, 'feature::')"
         with:
           destination_branch: "main"
-          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }}  into main"
+          pr_title: "Features | ${{ github.ref }}  into main"
           pr_body: "``` An automated PR ```"
           pr_assignee: "vagabondHustler"
           pr_label: "feature"
@@ -49,7 +49,7 @@ jobs:
         if: "!startsWith(github.event.head_commit.message, 'fix::')"
         with:
           destination_branch: "main"
-          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }} into main"
+          pr_title: "Fixes | ${{ github.ref }} into main"
           pr_body: "``` An automated PR ```"
           pr_assignee: "vagabondHustler"
           pr_label: "fix"
