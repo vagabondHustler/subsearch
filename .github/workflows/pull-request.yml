@@ -4,7 +4,7 @@ on:
       - "dev"
 
 jobs:
-  pr-other:
+  dev-other:
     if: "!startsWith(github.event.head_commit.message, 'other:')"
     runs-on: ubuntu-latest
     steps:
@@ -12,6 +12,7 @@ jobs:
       - name: pull-request-other
         uses: repo-sync/pull-request@v2
         with:
+          source_branch: "dev-other"
           destination_branch: "main"
           pr_title: "other ${{ github.head_ref }} into main"
           pr_body: "*An automated PR*"
@@ -21,7 +22,7 @@ jobs:
           pr_allow_empty: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  pr-feature:
+  dev-feature:
     if: "!startsWith(github.event.head_commit.message, 'feature:')"
     runs-on: ubuntu-latest
     steps:
@@ -29,11 +30,30 @@ jobs:
       - name: pull-request-feature
         uses: repo-sync/pull-request@v2
         with:
+          source_branch: "dev-feature"
           destination_branch: "main"
           pr_title: "feature ${{ github.head_ref }} into main"
           pr_body: "*An automated PR*"
           pr_assignee: "vagabondHustler"
           pr_label: "feature"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  dev-fix:
+    if: "!startsWith(github.event.head_commit.message, 'feature:')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: pull-request-feature
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "dev-fix"
+          destination_branch: "main"
+          pr_title: "fix ${{ github.head_ref }} into main"
+          pr_body: "*An automated PR*"
+          pr_assignee: "vagabondHustler"
+          pr_label: "fix"
           pr_draft: true
           pr_allow_empty: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
