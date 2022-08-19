@@ -48,7 +48,7 @@ Feel free to ask me anything about this project, request new features, contribut
 
 While searching for subs if show terminal is disabled
 
-![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example21224.gif)
+![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example_21224.gif)
 
 Settings menu and available options
 
@@ -173,7 +173,7 @@ These are the file types that will have the option SubSearch
 
 Associated extensions (Green = True, Red = False)
 
-![prtsc_ext](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/associated_extensions_21332.png)
+![prtsc_ext](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/extensions_21332.png)
 
 ## Authors <a name = "authors"></a>
 
