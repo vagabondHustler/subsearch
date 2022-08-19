@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: tests
+          ref: main
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10.6"
@@ -73,11 +73,11 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
       # read __version__.py in ../data, save as variable version_output
-      # - name: Get current version
-      #   id: current_version
-      #   run: |
-      #     output=$(python src/subsearch/data/__version__.py --get-version)
-      #     echo "::set-output name=version_output::$output"
+      - name: Get current version
+        id: current_version
+        run: |
+          output=$(python src/subsearch/data/__version__.py --get-version)
+          echo "::set-output name=version_output::$output"
       # # write pushed tags as version number into version.json in ../data
       # - name: Update __version__.py
       #   run: python scripts/set__version__.py ${{ github.ref_name }}
@@ -97,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: tests
+          ref: main
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v2
@@ -148,7 +148,7 @@ jobs:
   #   steps:
   #     - uses: actions/checkout@v3
   #       with:
-  #         ref: tests
+  #         ref: main
   #     - uses: actions/setup-python@v4
   #       with:
   #         python-version: "3.10.6"
