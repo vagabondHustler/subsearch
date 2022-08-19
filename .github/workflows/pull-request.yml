@@ -1,0 +1,67 @@
+on:
+  push:
+    branches:
+      - "dev"
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: pull-request-other
+        uses: repo-sync/pull-request@v2
+        if: |
+          ${{ 
+           (!startsWith(github.event.head_commit.message, 'update::')) && 
+           (!startsWith(github.event.head_commit.message, 'del::')) &&
+           (!startsWith(github.event.head_commit.message, 'rename::')) &&
+           (!startsWith(github.event.head_commit.message, 'move::')) &&
+           (!startsWith(github.event.head_commit.message, 'docs::')) &&
+           (!startsWith(github.event.head_commit.message, 'initial commit::')) &&
+           (!startsWith(github.event.head_commit.message, 'reformat::')) &&
+           (!startsWith(github.event.head_commit.message, 'tests::'))
+           }}
+        with:
+          destination_branch: "main"
+          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }}  into main"
+          pr_body: |
+            "``` 
+            An automated PR 
+            ```"
+          pr_assignee: "vagabondHustler"
+          pr_label: "other"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: pull-request-feature
+        uses: repo-sync/pull-request@v2
+        if: "!startsWith(github.event.head_commit.message, 'feature::')"
+        with:
+          destination_branch: "main"
+          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }}  into main"
+          pr_body: |
+            "``` 
+            An automated PR 
+            ```"
+          pr_assignee: "vagabondHustler"
+          pr_label: "feature"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: pull-request-feature
+        uses: repo-sync/pull-request@v2
+        if: "!startsWith(github.event.head_commit.message, 'fix::')"
+        with:
+          destination_branch: "main"
+          pr_title: "${{ github.event.head_commit.message }} | ${{ github.ref }} into main"
+          pr_body: |
+            "``` 
+            An automated PR 
+            ```"
+          pr_assignee: "vagabondHustler"
+          pr_label: "fix"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
