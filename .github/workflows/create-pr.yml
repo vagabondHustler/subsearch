@@ -9,13 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
       - name: Create PR Fix
         uses: peter-evans/create-pull-request@v4
         if: startsWith(github.event.head_commit.message, 'Fix')
