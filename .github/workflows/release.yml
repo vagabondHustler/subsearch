@@ -105,7 +105,6 @@ jobs:
         with:
           configuration: ".github/config/configuration.json"
           ignorePreReleases: ${{ !contains(github.ref, '-') }}
-          commitMode: True
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
