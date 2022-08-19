@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        python-version: ["3.10.*"]
+        python-version: ["3.10.0", "3.10.6"]
 
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
           black ./src -l 125
           isort ./tests --profile 'black'
           black ./tests -l 125
-      - name: status, add, commit, fetch, push
+      - name: Push black & isort changes
         run: |
           git status
           git add -A
@@ -82,7 +82,7 @@ jobs:
       - name: Update __version__.py
         run: python scripts/set__version__.py ${{ github.ref_name }}
       # commit version.json in ../data, with msg Bump version from vx.x.x to vx.x.x in /data
-      - name: Commit version.json
+      - name: Push new version
         run: |
           git status
           git add src/subsearch/data/__version__.py
@@ -98,44 +98,30 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v3
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          configuration: ".github/config/changelog_builder.json"
-          ignorePreReleases: ${{ !contains(github.ref, '-') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Update version
         uses: actions/setup-python@v4
         with:
           python-version: "3.10.6"
-      # install pyinstaller and requirements
       - name: Initializing
         run: |
           git fetch origin main
           python -m pip install --upgrade pip
           pip install pyinstaller
           pip install -r docs/requirements.txt
-      # build the executable and manually add sv_ttk otherwise it wont be included
       - name: Build executable
         run: |
           pyinstaller scripts/build.spec -y --clean --distpath ./SubSearch-x64
           cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./SubSearch-x64/SubSearch/sv_ttk
-      # make archives for publishing
       - name: Make archives
         run: |
           python scripts/make_archive.py
           mv ./SubSearch-x64.zip ./SubSearch-${{ github.ref_name }}-win-x64.zip
-      # publish the release with ACTION_TOKEN for verified release
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body: ${{steps.github_release.outputs.changelog}}
           token: ${{ secrets.ACTIONS_TOKEN }}
+          generate_release_notes: True
           files: |
             SubSearch-${{ github.ref_name }}-win-x64.zip
 
@@ -150,7 +136,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10.6"
-
       - name: Install latest pip, build, twine
         run: |
           git fetch origin main
