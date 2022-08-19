@@ -82,7 +82,7 @@ More options
 
 `subsearch --help`
 
-See [code](#code) for imports
+See [code block](#code) for imports
 
 ### Source <a name = "src"></a>
 
