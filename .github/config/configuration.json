@@ -2,19 +2,19 @@
 	"categories": [
 		{
 			"title": "## Features",
-			"labels": ["feature::"]
+			"labels": ["feature"]
 		},
 		{
 			"title": "## Fixes",
-			"labels": ["fix::"]
+			"labels": ["fix"]
 		},
 		{
 			"title": "## Tests",
-			"labels": ["tests::"]
+			"labels": ["tests"]
 		},
 		{
 			"title": "## Other",
-			"labels": ["update::", "del::", "reformat::", "rename::", "move::", "docs::", "initial commit::"]
+			"labels": ["other"]
 		}
 	]
 }
