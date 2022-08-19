@@ -1,34 +1,20 @@
 {
-  "categories": [
-    {
-      "title": "## Features",
-      "labels": [
-        "feature:"
-      ]
-    },
-    {
-      "title": "## Fixes",
-      "labels": [
-        "fix:"
-      ]
-    },
-    {
-      "title": "## Tests",
-      "labels": [
-        "tests"
-      ]
-    },
-    {
-      "title": "## Other",
-      "labels": [
-        "update:",
-        "del:",
-        "reformat:",
-        "rename:",
-        "move:",
-        "docs:",
-        "initial commit:"
-              ]
-    }
-  ]
+	"categories": [
+		{
+			"title": "## Features",
+			"labels": ["feature::"]
+		},
+		{
+			"title": "## Fixes",
+			"labels": ["fix::"]
+		},
+		{
+			"title": "## Tests",
+			"labels": ["tests::"]
+		},
+		{
+			"title": "## Other",
+			"labels": ["update::", "del::", "reformat::", "rename::", "move::", "docs::", "initial commit::"]
+		}
+	]
 }
