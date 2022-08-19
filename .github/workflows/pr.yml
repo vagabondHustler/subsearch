@@ -4,14 +4,13 @@ on:
   push:
     branches: ["dev"]
 
-
 jobs:
   create-pr:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Create PR other
-        if: "!startsWith(github.event.head_commit.message, 'other')"
+        if: "!startsWith(github.event.head_commit.message, 'other:')"
         id: pr_other
         run: |
           echo ::set-output name=pr_title::"[other] Test other $(date +%d-%m-%Y)"
@@ -22,4 +21,3 @@ jobs:
           title: ${{ steps.vars.outputs.pr_title }}
           body: ${{ steps.vars.outputs.pr_body }}
           labels: other
-          branch: main
