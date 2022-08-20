@@ -1,10 +1,10 @@
 name: PR labels & assignees
 on:
   pull_request:
-    branches: ["feature/**", "fix/**", "other/**", "test/**"]
+    branches: ["dev/feature", "dev/fix", "dev/other", "dev/test"]
     types: [opened, reopened, synchronize]
   pull_request_target:
-    branches: ["feature/**", "fix/**", "other/**", "test/**"]
+    branches: ["dev/feature", "dev/fix", "dev/other", "dev/test"]
     types: [opened, reopened, synchronize]
 
 jobs:
