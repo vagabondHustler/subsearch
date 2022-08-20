@@ -156,3 +156,4 @@ src/*subs/
 /*.log
 tests/__subsearch__.log
 old*
+scripts/git_branch.py
