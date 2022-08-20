@@ -1,12 +1,11 @@
 name: PR labels & assignees
 on:
   pull_request:
-    branches:
-      - feature/*
-      - fix/*
-      - other/*
-      - test/*
-    types: [opened]
+    branches: ["feature/**", "fix/**", "other/**", "test/**"]
+    types: [opened, reopened, synchronize]
+  pull_request_target:
+    branches: ["feature/**", "fix/**", "other/**", "test/**"]
+    types: [opened, reopened, synchronize]
 
 jobs:
   pr-labeler:
@@ -16,7 +15,7 @@ jobs:
         with:
           configuration-path: .github/auto_label.yml
         env:
-          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
       - uses: kentaro-m/auto-assign-action@v1.2.1
         with:
           configuration-path: ".github/auto_assign.yml"
