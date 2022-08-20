@@ -5,3 +5,14 @@ include assets\*.png
 include src\subsearch\data\*.json
 include src\subsearch\assets\buttons\*.png
 include src\subsearch\assets\icons\*.ico
+exclude .vscode
+exclude .venv
+exclude .mypy_cache
+exclude htmlcov
+exclude *\__subsearch__.log
+exclude .coverage
+exclude .tox
+exclude *\.pytest_cache
+exclude *\__pycache__
+exclude *\old*.py
+exclude .git
