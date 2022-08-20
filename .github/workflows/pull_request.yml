@@ -1,4 +1,6 @@
-name: PR labels & assignees
+# feat
+name: Add labels & assignees to PR's
+
 on:
   pull_request:
     types: [opened]
