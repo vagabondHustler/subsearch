@@ -1,12 +1,8 @@
 name: PR labels & assignees
 on:
   pull_request:
-    branches:
-      - feature/*
-      - fix/*
-      - other/*
-      - test/*
-    types: [opened]
+    branches: ["feature-*", "fix-*", "other-*", "test-*"]
+    types: [opened, synchronize]
 
 jobs:
   pr-labeler:
