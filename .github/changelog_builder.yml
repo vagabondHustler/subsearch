@@ -8,6 +8,8 @@ categories:
   - title: "## 🧪Tests"
     labels:
       - test
-  - title: "## 📄 Other"
+  - title: "## :🚧 Chores"
     labels:
+      - chore
       - other
+
