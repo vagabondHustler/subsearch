@@ -1,4 +1,4 @@
-feature: feature/*
-fix: fix/*
-test: test/*
-other: other/*
+feature: feature_*
+fix: fix_*
+test: test_*
+other: other_*
