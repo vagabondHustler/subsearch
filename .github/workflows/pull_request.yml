@@ -1,0 +1,22 @@
+name: PR labels & assignees
+on:
+  pull_request:
+    branches:
+      - feature/*
+      - fix/*
+      - other/*
+      - test/*
+    types: [opened]
+
+jobs:
+  pr-labeler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: TimonVS/pr-labeler-action@v3
+        with:
+          configuration-path: .github/auto_label.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+      - uses: kentaro-m/auto-assign-action@v1.2.1
+        with:
+          configuration-path: ".github/auto_assign.yml"

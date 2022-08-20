@@ -1,0 +1,4 @@
+feature: feature/*
+fix: fix/*
+test: test/*
+other: other/*

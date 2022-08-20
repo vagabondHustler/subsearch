@@ -52,7 +52,7 @@ jobs:
           git commit -S -m "Reformat codebase with black & isort"
           git fetch origin main
           git push origin HEAD:main
-          
+
   versioning:
     name: Versioning
     needs: ["test", "black-isort"]
@@ -99,7 +99,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          configuration: ".github/config/changelog_builder.json"
+          configuration: ".github/changelog_builder.yml"
           ignorePreReleases: ${{ !contains(github.ref, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
