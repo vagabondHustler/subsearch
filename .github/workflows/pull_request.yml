@@ -16,7 +16,7 @@ jobs:
         with:
           configuration-path: .github/auto_label.yml
         env:
-          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
       - uses: kentaro-m/auto-assign-action@v1.2.1
         with:
           configuration-path: ".github/auto_assign.yml"
