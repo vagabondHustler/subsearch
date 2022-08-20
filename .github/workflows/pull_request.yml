@@ -1,10 +1,10 @@
 name: PR labels & assignees
 on:
   pull_request:
-    branches: ["feature-*", "fix-*", "other-*", "test-*"]
+    branches: ["feature*", "fix*", "other*", "test*"]
     types: [opened, synchronize]
   pull_request_target:
-    branches: ["feature-*", "fix-*", "other-*", "test-*"]
+    branches: ["feature*", "fix*", "other*", "test*"]
     types: [opened, synchronize]
 
 jobs:
