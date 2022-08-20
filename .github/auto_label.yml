@@ -1,4 +1,4 @@
-feature: dev/feature
-fix: dev/fix
-test: dev/test
-other: dev/other
+feature: vagabondHuslter:dev/feature
+fix: vagabondHuslter:dev/fix
+test: vagabondHuslter:dev/test
+other: vagabondHuslter:dev/other
