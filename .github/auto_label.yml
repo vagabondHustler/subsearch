@@ -1,4 +1,4 @@
-feature: 'feature/*'
-fix: 'fix/*'
-test: 'test/*'
-other: 'other/*'
+feature: ["feature/*", "feat/*"]
+fix: "fix/*"
+test: "test/*"
+chore: "chore/*"
