@@ -1,6 +1,8 @@
 name: Add labels & assignees to PR's
 
 on:
+  pull_request:
+    types: [opened, unassigned, unlabeled]
   pull_request_target:
     types: [opened, unassigned, unlabeled]
 
