@@ -723,11 +723,16 @@ class CheckForUpdates(tk.Frame):
 
     def button_check(self, event):
         self.string_var.set(f"Searching for updates...")
-        value, rc = updates.is_new_version_avail()
+        value, pre = updates.is_new_version_avail()
         latest_version = updates.get_latest_version(semantic=True)
-        if value and rc:
+        if value and pre:
+            if '-rc' in latest_version:
             self.string_var.set(f"New release candidate available")
-        elif value and rc is False:
+            elif "-alpha"in latest_version:
+                self.string_var.set(f"New alpha release available")
+            elif "-beta"in latest_version:
+                self.string_var.set(f"New beta release available")
+        elif value and pre is False:
             self.string_var.set(f"New stable release available")
         else:
             self.string_var.set(f"You are up to date")
