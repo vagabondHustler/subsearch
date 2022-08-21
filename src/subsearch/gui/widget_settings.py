@@ -724,7 +724,7 @@ class CheckForUpdates(tk.Frame):
     def button_check(self, event):
         self.string_var.set(f"Searching for updates...")
         value, rc = updates.is_new_version_avail()
-        latest_version = updates.latest_version_str()
+        latest_version = updates.get_latest_version(semantic=True)
         if value and rc:
             self.string_var.set(f"New release candidate available")
         elif value and rc is False:
