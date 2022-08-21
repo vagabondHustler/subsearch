@@ -22,7 +22,7 @@ def test_extract_zips() -> None:
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
     """
-    file_manager.extract_zips(CWD, ".zip")
+    file_manager.extract_files(CWD, ".zip")
 
 
 def test_rename_best_match() -> None:

@@ -12,15 +12,15 @@ TKCOLOR = tkdata.Color()
 TKFONT = tkdata.Font()
 TKMISC = tkdata.Misc()
 
-LANGUAGES = raw_config.get("languages")
-OTH_LANGUAGES = raw_config.get("other_languages")
-LANGUAGE, LANG_CODE2 = raw_config.get("language")
-HEARING_IMPARED = raw_config.get("hearing_impaired")
-PCT = raw_config.get("percentage")
-SHOW_TERMINAL = raw_config.get("show_terminal")
-CM_ICON = raw_config.get("cm_icon")
-DL_WINDOW = raw_config.get("show_download_window")
-AVAIL_EXT = raw_config.get("file_ext")
+LANGUAGES = raw_config.get_config_key("languages")
+OTH_LANGUAGES = raw_config.get_config_key("other_languages")
+LANGUAGE, LANG_CODE2 = raw_config.get_config_key("language")
+HEARING_IMPARED = raw_config.get_config_key("hearing_impaired")
+PCT = raw_config.get_config_key("percentage")
+SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
+CM_ICON = raw_config.get_config_key("cm_icon")
+DL_WINDOW = raw_config.get_config_key("show_download_window")
+AVAIL_EXT = raw_config.get_config_key("file_ext")
 
 # set which language of the subtitles  should be included in the search
 class SelectLanguage(tk.Frame):
@@ -183,7 +183,7 @@ class SelectLanguage(tk.Frame):
         btn = event.widget
         self.string_var.set(btn.cget("text"))
         update_svar = self.string_var.get()
-        raw_config.set_json("language", update_svar)
+        raw_config.set_config_json("language", update_svar)
 
     # add language from entry
     def add_language(self, event):
@@ -193,7 +193,7 @@ class SelectLanguage(tk.Frame):
                 self.string_var.set(self.entry.get())
                 self.entry.configure(fg=TKCOLOR.white_grey)
                 update_svar = self.string_var.get()
-                raw_config.set_json("language", update_svar)
+                raw_config.set_config_json("language", update_svar)
                 return
         self.entry.delete(0, "end")
         self.entry.insert(0, "E.g: Czech, cs")
@@ -249,18 +249,18 @@ class HearingImparedSubs(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("hearing_impaired", True)
+        raw_config.set_config_json("hearing_impaired", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("hearing_impaired", False)
+        raw_config.set_config_json("hearing_impaired", False)
 
     def button_set_both(self, event):
         self.string_var.set(f"Both")
         tools.ColorPicker(self.string_var, self.clabel)
         update_svar = self.string_var.get().split(" ")[0]
-        raw_config.set_json("hearing_impaired", update_svar)
+        raw_config.set_config_json("hearing_impaired", update_svar)
 
 
 # set how closely the subtitle name should match the release name of the media file
@@ -299,14 +299,14 @@ class SearchThreshold(tk.Frame):
 
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         update_svar = int(self.pct)
-        raw_config.set_json("percentage_pass", update_svar)
+        raw_config.set_config_json("percentage_pass", update_svar)
 
     def button_sub_5(self, event):
         self.pct -= 5 if self.pct > 0 else 0
         self.string_var.set(f"{self.pct} %")
         tools.ColorPicker(self.string_var, self.clabel, self.pct)
         update_svar = int(self.pct)
-        raw_config.set_json("percentage_pass", update_svar)
+        raw_config.set_config_json("percentage_pass", update_svar)
 
 
 # remove or restore the context menu option when right-clicking
@@ -586,7 +586,7 @@ class ShowContextMenuIcon(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("context_menu_icon", True)
+        raw_config.set_config_json("context_menu_icon", True)
         from subsearch.utils import raw_registry
 
         raw_registry.write_valuex("icon")
@@ -594,7 +594,7 @@ class ShowContextMenuIcon(tk.Frame):
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("context_menu_icon", False)
+        raw_config.set_config_json("context_menu_icon", False)
         from subsearch.utils import raw_registry
 
         raw_registry.write_valuex("icon")
@@ -638,12 +638,12 @@ class ShowDownloadWindow(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_download_window", True)
+        raw_config.set_config_json("show_download_window", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_download_window", False)
+        raw_config.set_config_json("show_download_window", False)
 
 
 # show a terminal with what the code is doing while searching
@@ -686,13 +686,13 @@ class ShowTerminalOnSearch(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_terminal", True)
+        raw_config.set_config_json("show_terminal", True)
         raw_registry.write_valuex("command")
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tools.ColorPicker(self.string_var, self.clabel)
-        raw_config.set_json("show_terminal", False)
+        raw_config.set_config_json("show_terminal", False)
         raw_registry.write_valuex("command")
 
 

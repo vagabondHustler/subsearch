@@ -86,7 +86,7 @@ def get_command_value() -> str:
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif current_user.check_is_exe() is False:
-        show_terminal = raw_config.get("show_terminal")
+        show_terminal = raw_config.get_config_key("show_terminal")
         # gets the location to the python executable
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -110,7 +110,7 @@ def get_icon_value() -> str:
     """
     from subsearch.utils import raw_config
 
-    show_icon: str = raw_config.get("cm_icon")
+    show_icon: str = raw_config.get_config_key("cm_icon")
     icon_path = os.path.join(__icons__, "16.ico")
     if show_icon:
         return icon_path
@@ -122,7 +122,7 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from subsearch.utils import raw_config
 
-    file_ext = raw_config.get("file_ext")
+    file_ext = raw_config.get_config_key("file_ext")
     # for which file types to show the SubSearch context entry on
     value = '"__main__.py" OR '
     for k, v in zip(file_ext.keys(), file_ext.values()):
