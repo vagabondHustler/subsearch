@@ -8,18 +8,18 @@ from subsearch.data import __version__
 
 def re_version(version: str, semantic: bool = False) -> str:
     try:
-        rc = re.findall("[0-9]*\.[0-9]*\.[0-9]*-rc([0-9]*)", version)[0]
+        pre_num = re.findall(f"\d*\.\d*\.\d*-\w*\.(\d*)", version)[0]
     except IndexError:
-        rc = 0
+        pre_num = 0
 
     if semantic:
         # semantic expression https://regex101.com/r/2PNppl/1
-        version_dots = ".".join(re.findall("(\d*\.\d*\.\d*-\w*\.\d*)|(\d*\.\d*\.\d*)", version)[0])
-        return str(f"{version_dots}") if rc == 0 else str(f"{version_dots}-rc.{rc}")
+        version_semantic = "".join(re.findall("(\d*\.\d*\.\d*-\w*\.\d*)|(\d*\.\d*\.\d*)", version)[0])
+        return str(f"{version_semantic}")
     else:
         # float expression https://regex101.com/r/wt2fo6/1
-        version_int = "".join(re.findall("(\d*)\.(\d*)\.(\d*)-\w*\.(\d*)|(\d*)\.(\d*)\.(\d*)", version)[0])
-        return str(f"{version_int}.{rc}")
+        version_num = "".join(re.findall("(\d*)\.(\d*)\.(\d*)-\w*\.(\d*)|(\d*)\.(\d*)\.(\d*)", version)[0])
+        return str(f"{version_num}.{pre_num}")
 
 
 def scrape_github() -> str:
@@ -37,7 +37,9 @@ def scrape_github() -> str:
     return file_content
 
 
-def get_current_version() -> str:
+def get_current_version(semantic: bool = False) -> str:
+    if semantic:
+        return __version__
     return re_version(__version__)
 
 
@@ -60,6 +62,28 @@ def get_latest_version(semantic: bool = False) -> str:
     return re_version(version_github)
 
 
+def define_pre_release_worth(cver: str, csemantic: str, lver: str, lsemantic: str) -> tuple[float, float]:
+    current_float = float(decimal.Decimal(cver) % 1)
+    latest_float = float(decimal.Decimal(lver) % 1)
+    semantic_versions = [csemantic, lsemantic]
+    for num, item in enumerate(semantic_versions):
+        if "-rc" in item:
+            if num == 0:
+                current_float += 3
+            if num == 1:
+                latest_float += 3
+        elif "-beta" in item:
+            if num == 0:
+                current_float += 2
+            if num == 1:
+                latest_float += 2
+        elif "-alpha" in item:
+            if num == 0:
+                current_float += 1
+            if num == 1:
+                latest_float += 1
+
+    return current_float, latest_float
 def is_new_version_avail() -> tuple[bool, bool]:
     """
     Check if there is a new version available over at github
@@ -68,15 +92,15 @@ def is_new_version_avail() -> tuple[bool, bool]:
         tuple[bool, bool]:
         stable release if True and False, release candidate if True and True
     """
-
-    current_version = get_current_version()
-    latest_version = get_latest_version()
-    latest_rc = float(decimal.Decimal(latest_version) % 1)
-
-    pre_release = False
     new_version = False
-    if current_version < latest_version:
-        if latest_rc > 0.0:
+    pre_release = False
+
+    curr_ver, curr_semantic = get_current_version(), get_current_version(semantic=True)
+    ltst_ver, ltst_semantic = get_latest_version(), get_latest_version(semantic=True)
+    curr_float, ltst_float = define_pre_release_worth(curr_ver, curr_semantic, ltst_ver, ltst_semantic)
+
+    if curr_ver < ltst_ver:
+        if curr_float < ltst_float:
             pre_release = True
         else:
             pre_release = False
