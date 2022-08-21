@@ -1,5 +1,5 @@
+import decimal
 import re
-from typing import Optional
 
 import cloudscraper
 
@@ -8,28 +8,67 @@ from subsearch.data import __version__
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def check_for_updates() -> str:
+def re_version(_version: str, return_str: bool = False) -> str:
+    try:
+        rc = re.findall("[0-9]*\.[0-9]*\.[0-9]*-rc([0-9]*)", _version)[0]
+    except IndexError:
+        rc = 0
+
+    if return_str:
+        version = ".".join(re.findall("([0-9]*)\.([0-9]*)\.([0-9]*)", _version)[0])
+        if rc == 0:
+            return str(f"{version}")
+        return str(f"{version}-rc{rc}")
+
+    version = "".join(re.findall("([0-9]*)\.([0-9]*)\.([0-9]*)", _version)[0])
+    return str(f"{version}.{rc}")
+
+
+def scrape_github() -> str:
     source = SCRAPER.get(
         "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/__version__.py"
     )
     scontent = source.content
     _string = str(scontent)
-    latest_version = "".join(re.findall('^.*["]([0-9]*)\.([0-9]*)\.([0-9]*)["]', _string)[0])
-    return latest_version
+    return _string
 
 
-def is_new_version_available() -> tuple[bool, Optional[str]]:
+def latest_version_strfloat() -> str:
+    version_github = scrape_github()
+    return re_version(version_github)
+
+
+def latest_version_str() -> str:
+    version_github = scrape_github()
+    return re_version(version_github, True)
+
+
+def current_version_strfloat() -> str:
+    return re_version(__version__)
+
+
+def is_new_version_avail() -> tuple[bool, bool]:
     """
-    Compare local version with latest version on github
+    Check if there is a new version available @ https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/__version__.py
 
     Returns:
-        tuple[bool, str]: True, None if local version is less than repo, False, "newer" if local version is greater than repo, False, else False None
+        tuple[bool, bool]:
+        stable release if True and False, release candidate if True and True
     """
 
-    local_version = "".join(re.findall("([0-9]*)\.([0-9]*)\.([0-9]*)", __version__)[0])
-    repo_version = check_for_updates()
-    if local_version < repo_version:
-        return True, None
-    if local_version > repo_version:
-        return False, "newer"
-    return False, None
+    current_version = current_version_strfloat()
+    latest_version = latest_version_strfloat()
+
+    latest_rc = float(decimal.Decimal(latest_version) % 1)
+
+    # new version
+    pre_release = False
+    new_version = False
+    if current_version < latest_version:
+        if latest_rc > 0.0:
+            pre_release = True
+        else:
+            pre_release = False
+        new_version = True
+
+    return new_version, pre_release

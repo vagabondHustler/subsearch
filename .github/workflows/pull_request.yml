@@ -1,9 +1,10 @@
-# feat
 name: Add labels & assignees to PR's
 
 on:
+  pull_request:
+    types: [opened]
   pull_request_target:
-    types: [unassigned, unlabeled]
+    types: [opened, unassigned, unlabeled]
 
 jobs:
   pr-labeler:
