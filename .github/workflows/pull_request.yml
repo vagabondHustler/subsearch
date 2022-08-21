@@ -2,10 +2,8 @@
 name: Add labels & assignees to PR's
 
 on:
-  pull_request:
-    types: [opened]
   pull_request_target:
-    types: [opened, reopened, synchronize]
+    types: [unassigned, unlabeled]
 
 jobs:
   pr-labeler:
