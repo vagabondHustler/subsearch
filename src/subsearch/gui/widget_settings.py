@@ -723,24 +723,24 @@ class CheckForUpdates(tk.Frame):
 
     def button_check(self, event):
         self.string_var.set(f"Searching for updates...")
-        value, release_type = updates.is_new_version_available()
-        latest_version = updates.check_for_updates()
+        value, rc = updates.is_new_version_avail()
+        latest_version = updates.latest_version_str()
+        if value and rc:
+            self.string_var.set(f"New release candidate available")
+        elif value and rc is False:
+            self.string_var.set(f"New stable release available")
+        else:
+            self.string_var.set(f"You are up to date")
+
         if value:
-            self.string_var.set(f"New version available!")
             tools.Create.button(
                 self,
-                text=f"Get {latest_version}",
+                text=f"Get v{latest_version}",
                 height=2,
                 width=24,
                 bind_to=self.button_download,
             )
 
-        if value is False and release_type is None:
-            self.string_var.set(f"You are up to date!")
-        elif value is False and release_type is None:
-            self.string_var.set(f"New {release_type} update available")
-        elif value is False and release_type is not None:
-            self.string_var.set(f"Branch ahead of main branch")
 
     def button_download(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
