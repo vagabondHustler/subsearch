@@ -727,7 +727,7 @@ class CheckForUpdates(tk.Frame):
         latest_version = updates.get_latest_version(semantic=True)
         if value and pre:
             if '-rc' in latest_version:
-            self.string_var.set(f"New release candidate available")
+                self.string_var.set(f"New release candidate available")
             elif "-alpha"in latest_version:
                 self.string_var.set(f"New alpha release available")
             elif "-beta"in latest_version:
