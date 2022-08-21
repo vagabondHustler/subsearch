@@ -1,11 +1,18 @@
 import json
-from typing import Any
+from typing import Any, Union
 
 from subsearch.data import __data__
 
 
 # update config.json
-def set_json(key: str, value: str | int) -> None:
+def set_config_json(key: str, value: Union[str, int, bool]) -> None:
+    """
+    Set values of keys in config.json
+
+    Args:
+        key (str):
+        value (str | int | bool): store language:str (lang, abbr... eg English, en)
+    """
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
@@ -24,7 +31,26 @@ def get_json() -> Any:
 
 
 # get said value(s) from config.json
-def get(output: str) -> Any:
+def get_config_key(key: str) -> Any:
+    """
+    Get values of keys in config.json
+
+    Args:
+        key (str):
+
+        - User settings
+
+        "language: tuple", "languages: list", "other_languages: list",
+        "hearing_impaired: bool | str", "percentage: int"
+
+        - GUI stuff
+
+        "cm_icon: bool", "show_download_window: bool",
+        "show_terminal: bool", "file_ext: dict"
+
+    Returns:
+        Any: value
+    """
     config_json_dict = {
         "language": get_json()["language"].split(", "),
         "languages": get_json()["languages"],
@@ -36,7 +62,7 @@ def get(output: str) -> Any:
         "show_terminal": get_json()["show_terminal"],
         "file_ext": get_json()["file_ext"],
     }
-    return config_json_dict[f"{output}"]
+    return config_json_dict[f"{key}"]
 
 
 # set default config.json values

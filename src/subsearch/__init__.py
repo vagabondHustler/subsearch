@@ -36,12 +36,12 @@ class SubSearch:
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
-        self.show_terminal = False if current_user.check_is_exe() else raw_config.get("show_terminal")
+        self.show_terminal = False if current_user.check_is_exe() else raw_config.get_config_key("show_terminal")
         self.file_exist = True if __video_name__ is not None else False
-        self.lang, self.lang_code2 = raw_config.get("language")
-        self.hi = raw_config.get("hearing_impaired")
-        self.pct = raw_config.get("percentage")
-        self.show_dl_win = raw_config.get("show_download_window")
+        self.lang, self.lang_code2 = raw_config.get_config_key("language")
+        self.hi = raw_config.get_config_key("hearing_impaired")
+        self.pct = raw_config.get_config_key("percentage")
+        self.show_dl_win = raw_config.get_config_key("show_download_window")
         if self.file_exist:
             file_hash = file_manager.get_hash(__video_path__)
             self.param = string_parser.get_parameters(__video_name__, file_hash, self.lang, self.lang_code2)
@@ -96,7 +96,7 @@ class SubSearch:
 
         log.output("")
         log.output("[Procsessing files]")
-        file_manager.extract_zips(__video_directory__, ".zip")
+        file_manager.extract_files(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ").nfo")
         file_manager.rename_best_match(f"{self.param.release}.srt", __video_directory__, ".srt")
