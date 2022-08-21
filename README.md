@@ -52,7 +52,7 @@ While searching for subs if show terminal is disabled
 
 Settings menu and available options
 
-![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_211651.png)
+![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21651.png)
 
 Download window with subtitles that were not downloaded
 
