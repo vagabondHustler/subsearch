@@ -52,7 +52,7 @@ def get_latest_version(semantic: bool = False) -> str:
         semantic (bool, optional): Decide which typ of string to return. Defaults to False.
 
     Returns:
-        str:  xxx.x | x.x.x / x.x.x-rc.x
+        str:  xxx.x | x.x.x / x.x.x-type.x
     """
     if semantic:
         version_github = scrape_github()
@@ -63,6 +63,23 @@ def get_latest_version(semantic: bool = False) -> str:
 
 
 def define_pre_release_worth(cver: str, csemantic: str, lver: str, lsemantic: str) -> tuple[float, float]:
+    """
+    Add int to float if rc, beta or alpha is found in semantic version
+
+    rc = 3, beta = 2, alpha = 1
+
+    x.x.x-beta.1 would equal float(2.1)
+
+    Args:
+        cver (str): current version as xxx.x
+        csemantic (str): current version as semantic
+        lver (str): latest version as xxx.x
+        lsemantic (str): latest version as semantic
+
+    Returns:
+        tuple[float, float]:
+    """
+    # cver and lver needs to be a str otherwise it would return as 0.10.....something and not 0.1
     current_float = float(decimal.Decimal(cver) % 1)
     latest_float = float(decimal.Decimal(lver) % 1)
     semantic_versions = [csemantic, lsemantic]
@@ -84,13 +101,15 @@ def define_pre_release_worth(cver: str, csemantic: str, lver: str, lsemantic: st
                 latest_float += 1
 
     return current_float, latest_float
+
+
 def is_new_version_avail() -> tuple[bool, bool]:
     """
-    Check if there is a new version available over at github
+    Check if there is a new version available over at the subsearch repo
 
     Returns:
         tuple[bool, bool]:
-        stable release if True and False, release candidate if True and True
+        stable release if True and False, pre-release if True and True
     """
     new_version = False
     pre_release = False
@@ -107,6 +126,3 @@ def is_new_version_avail() -> tuple[bool, bool]:
         new_version = True
 
     return new_version, pre_release
-
-
-print(scrape_github())
