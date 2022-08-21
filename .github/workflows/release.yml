@@ -128,10 +128,12 @@ jobs:
         with:
           body: ${{steps.github_release.outputs.changelog}}
           token: ${{ secrets.ACTIONS_TOKEN }}
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
           files: |
             Subsearch-${{ github.ref_name }}-win-x64.zip
 
   pypi-upload:
+    if: ${{ !contains(github.ref, '-') }}
     name: PyPI Upload
     needs: versioning
     runs-on: ubuntu-latest
