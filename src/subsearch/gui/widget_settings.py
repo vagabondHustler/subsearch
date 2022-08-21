@@ -741,7 +741,6 @@ class CheckForUpdates(tk.Frame):
                 bind_to=self.button_download,
             )
 
-
     def button_download(self, event):
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
 
