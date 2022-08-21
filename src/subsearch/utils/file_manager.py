@@ -27,7 +27,7 @@ def download_zip(item: Any) -> None:
 
 
 # extract all zip file in said directory
-def extract_zips(cwd: str, extension: str) -> None:
+def extract_files(cwd: str, extension: str) -> None:
     """
     extract all zip file in said directory that start with __subsearch__
 
