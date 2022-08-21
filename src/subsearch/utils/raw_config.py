@@ -1,10 +1,11 @@
 import json
-from typing import Any
+from typing import Any, Union
 
 from subsearch.data import __data__
 
 
 # update config.json
+def set_config_json(key: str, value: Union[str, int, bool]) -> None:
 def set_json(key: str, value: str | int) -> None:
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
@@ -24,6 +25,7 @@ def get_json() -> Any:
 
 
 # get said value(s) from config.json
+def get_config_key(key: str) -> Any:
 def get(output: str) -> Any:
     config_json_dict = {
         "language": get_json()["language"].split(", "),
@@ -36,7 +38,7 @@ def get(output: str) -> Any:
         "show_terminal": get_json()["show_terminal"],
         "file_ext": get_json()["file_ext"],
     }
-    return config_json_dict[f"{output}"]
+    return config_json_dict[f"{key}"]
 
 
 # set default config.json values
