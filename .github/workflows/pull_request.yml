@@ -11,11 +11,11 @@ jobs:
       - name: Auto label
         uses: TimonVS/pr-labeler-action@v3
         with:
-          configuration-path: .github/auto_label.yml
+          configuration-path: .github/configs/auto_label.yml
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
       - name: Auto assign
         uses: kentaro-m/auto-assign-action@v1.2.1
         with:
-          configuration-path: ".github/auto_assign.yml"
+          configuration-path: .github/configs/auto_assign.yml
