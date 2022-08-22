@@ -4,3 +4,4 @@ twine==4.0.1
 build==0.8.0
 pyinstaller==5.3
 mypy==0.971
+pipreqs==0.4.11
