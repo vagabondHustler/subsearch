@@ -1,6 +1,6 @@
 beautifulsoup4==4.11.1
 cloudscraper==1.2.60
-num2words==0.5.12
+num2words==0.5.11
+packaging==21.3
 requests==2.28.1
-lxml==4.9.1
-sv-ttk==1.0
+sv_ttk==1.0
