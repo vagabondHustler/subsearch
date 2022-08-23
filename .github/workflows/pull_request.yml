@@ -3,6 +3,7 @@ name: Add labels & assignees to PR's
 on:
   pull_request:
     types: [opened]
+    branches: ["feat/**", "fix/**", "chore/**", "test/**"]
 
 jobs:
   pr-labeler:
