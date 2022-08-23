@@ -3,10 +3,11 @@ name: Add labels & assignees to PR's
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [feat/*, fix/*, chore/*, test/*]
+    branches: [main]
 
 jobs:
   pr-labeler:
+    if: ${{ startsWith(github.ref, 'feat') || startsWith(github.ref, 'fix') || startsWith(github.ref, 'chore') || startsWith(github.ref, 'test') }}
     runs-on: ubuntu-latest
     steps:
       - name: Auto label
