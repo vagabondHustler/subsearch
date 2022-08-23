@@ -6,7 +6,7 @@ on:
 
 jobs:
   pr-labeler:
-    if: ${{ contains(github.ref, 'feat/') || contains(github.ref, 'fix/') || contains(github.ref, 'chore/') || contains(github.ref, 'test/') }}
+    if: ${{ startsWith(${GITHUB_REF##*/}, 'feat/') || startsWith(${GITHUB_REF##*/} 'fix/') || startsWith(${GITHUB_REF##*/}, 'chore/') || startsWith(${GITHUB_REF##*/} 'test/') }}
     runs-on: ubuntu-latest
     steps:
       - name: Auto label
