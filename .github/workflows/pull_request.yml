@@ -9,7 +9,12 @@ jobs:
     # if: ${{ contains(github.ref, 'feat') || contains(github.ref, 'fix') || contains(github.ref, 'chore') || contains(github.ref, 'test') }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${GITHUB_REF##*/}
+      - run: |
+          echo ${GITHUB_REF}
+          echo ${GITHUB_HEAD_REF}
+          echo ${GITHUB_REF_NAME}
+          echo ${GITHUB_REF_TYP}
+          echo ${GITHUB_PATH}
       - name: Auto label
         uses: TimonVS/pr-labeler-action@v3
         with:
