@@ -6,7 +6,7 @@ on:
 
 jobs:
   pr-labeler:
-    if: startsWith(github.head_ref, 'releases/')
+    if: startsWith(github.head_ref, 'chore/')
     runs-on: ubuntu-latest
     steps:
       - name: Auto label
