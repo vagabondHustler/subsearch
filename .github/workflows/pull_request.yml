@@ -14,7 +14,7 @@ jobs:
         id: var
 
       - name: Auto label
-        if: ${{ !contains(steps.var.outputs.branch 'chore') }}
+        if: ${{ !contains(steps.var.outputs.branch, 'chore') }}
         uses: TimonVS/pr-labeler-action@v3
         with:
           configuration-path: .github/configs/auto_label.yml
