@@ -6,10 +6,10 @@ on:
 
 jobs:
   pr-labeler:
-    if: ${{ contains(github.head_ref, 'feat') || contains(github.head_ref 'fix') || contains(github.head_ref 'chore') || contains(github.head_ref 'test') }}
     runs-on: ubuntu-latest
     steps:
       - name: Auto label
+        if: ${{ contains(github.head_ref, 'feat') || contains(github.head_ref 'fix') || contains(github.head_ref 'chore') || contains(github.head_ref 'test') }}
         uses: TimonVS/pr-labeler-action@v3
         with:
           configuration-path: .github/configs/auto_label.yml
