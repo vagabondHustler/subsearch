@@ -8,8 +8,13 @@ jobs:
   pr-labeler:
     runs-on: ubuntu-latest
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: var
+
       - name: Auto label
-        if: ${{ contains(github.head_ref, 'feat') || contains(github.head_ref 'fix') || contains(github.head_ref 'chore') || contains(github.head_ref 'test') }}
+        if: ${{ contains(steps.var.outputs.branch, 'feat') || contains(steps.var.outputs.branch 'fix') || contains(steps.var.outputs.branch 'chore') || contains(steps.var.outputs.branch 'test') }}
         uses: TimonVS/pr-labeler-action@v3
         with:
           configuration-path: .github/configs/auto_label.yml
@@ -17,6 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
       - name: Auto assign
+        if: ${{ contains(steps.var.outputs.branch, 'feat') || contains(steps.var.outputs.branch 'fix') || contains(steps.var.outputs.branch 'chore') || contains(steps.var.outputs.branch 'test') }}
         uses: kentaro-m/auto-assign-action@v1.2.1
         with:
           configuration-path: .github/configs/auto_assign.yml
