@@ -6,11 +6,9 @@ on:
 
 jobs:
   pr-labeler:
-    if: ${{ startsWith(${GITHUB_HEAD_REF}, 'feat') || startsWith(${GITHUB_HEAD_REF}, 'fix') || startsWith(${GITHUB_HEAD_REF}, 'chore') || startsWith(${GITHUB_HEAD_REF}, 'test') }}
+    if: ${{ contains(github.head_ref, 'feat') || contains(github.head_ref 'fix') || contains(github.head_ref 'chore') || contains(github.head_ref 'test') }}
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo 'u did it'
       - name: Auto label
         uses: TimonVS/pr-labeler-action@v3
         with:
