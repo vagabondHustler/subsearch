@@ -3,7 +3,6 @@ name: Add labels & assignees to PR's
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [main]
 
 jobs:
   pr-labeler:
