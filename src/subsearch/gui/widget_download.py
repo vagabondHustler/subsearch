@@ -111,7 +111,7 @@ class DownloadList(tk.Frame):
                     _name = name.replace("/", "").replace("\\", "").split(": ")
                     path = f"{__video_directory__}\\__subsearch__{_name[-1]}.zip"
                     item = path, dl_url, 1, 1
-                    file_manager.download_zip(item)
+                    file_manager.download_subtitle(item)
                     if _error is False:
                         file_manager.extract_files(__video_directory__, ".zip")
                         file_manager.clean_up(__video_directory__, ".zip")
