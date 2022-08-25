@@ -57,7 +57,7 @@ def log_and_sort_list(list_of_tuples: list[tuple[int, str, str]], pct: int):
     return list_of_tuples
 
 
-class SubsceneDownloadData(NamedTuple):
+class SubsceneData(NamedTuple):
     file_path: str
     url: str
     idx_num: int
@@ -142,13 +142,11 @@ def scrape(param: SearchParameters, lang: str, lang_code2: str, hi: str, pct: in
             return None
         return None
 
-    download_info: list[tuple[str, str, int, int]] = []
+    download_info = []
     tbd_lenght = len(to_be_downloaded)
     for zip_idx, dl_url in enumerate(to_be_downloaded, start=1):
         zip_url = subscene_soup.get_download_url(dl_url)
         zip_fp = f"{__video_directory__}\\__subsearch__subscene_{zip_idx}.zip"
-        data = SubsceneDownloadData(
-            file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght
-        )
+        data = SubsceneData(file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
         download_info.append(data)
     return download_info
