@@ -31,10 +31,10 @@ def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA
         if doc_captcha.text == "Why do I have to complete a CAPTCHA?":
             return "ERROR: CAPTCHA PROTECTION"
     results = doc_result.find_all("div", class_="title")
-    for i in results:
-        get_title = i.get_text().strip().replace("'", "").replace(":", "").lower()
-        link = [a["href"] for a in i.find_all("a", href=True) if a.text]
-        titles[get_title] = f"https://subscene.com/{link[0]}"
+    for result in results:
+        title_name = result.contents[1].contents[0].strip().replace(":", "")
+        title_url = result.contents[1].attrs["href"]
+        titles[title_name] = f"https://subscene.com{title_url}"
     return titles
 
 
@@ -51,18 +51,17 @@ def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url:
             searching = False
         else:
             time.sleep(1)
-
     for a1 in tda1:
         sub_hi = is_sub_hi(a1)
+        subtitle_language = a1.contents[1].contents[1].contents[0].strip()
         if hearing_impaired != "Both" and hearing_impaired != sub_hi:
             continue
-        if language == a1.span.get_text().strip():
-            _release_name = [x.get_text().strip() for x in a1.find("a")]
-            release_name = _release_name[-2]
+        if language == subtitle_language:
+            release_name = a1.contents[1].contents[3].string.strip()
             if " " in release_name:
                 release_name = release_name.replace(" ", ".")
-            link = [y["href"] for y in a1.find_all("a", href=True) if y.text]
-            subtitles[release_name] = f"https://subscene.com/{link[0]}"
+            subtitle_url = a1.contents[1].attrs["href"]
+            subtitles[release_name] = f"https://subscene.com{subtitle_url}"
 
     return subtitles
 
@@ -70,6 +69,6 @@ def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url:
 def get_download_url(url: str) -> str:
     source = SCRAPER.get(url).text
     doc = BeautifulSoup(source, "lxml")
-    _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
-    download_url = f"https://subscene.com/{_link[0]}"
+    button_url = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
+    download_url = f"https://subscene.com/{button_url[0]}"
     return download_url
