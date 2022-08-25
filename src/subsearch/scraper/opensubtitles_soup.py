@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 import requests
 from bs4 import BeautifulSoup
@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from subsearch.utils import log
 
 
-def search_for_hash(url: str, lang: str, hi: Union[str, bool]) -> Optional[list[str]]:
+def search_for_hash(url: str, lang: str, hi: Union[str, bool]) -> list[str] | None:
     download_url: list[str] = []
     source = requests.get(url)
     scontent = source.content
