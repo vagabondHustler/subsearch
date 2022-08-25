@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from subsearch.data import __video_directory__
 from subsearch.scraper import subscene_soup
 from subsearch.utils import log, string_parser
@@ -55,6 +57,13 @@ def log_and_sort_list(list_of_tuples: list[tuple[int, str, str]], pct: int):
     return list_of_tuples
 
 
+class SubsceneDownloadData(NamedTuple):
+    file_path: str
+    url: str
+    idx_num: int
+    idx_lenght: int
+
+
 def scrape(param: SearchParameters, lang: str, lang_code2: str, hi: str, pct: int, show_dl_window: str):
     """
     Scrape subscene for subtitles using the given parameters.
@@ -69,7 +78,7 @@ def scrape(param: SearchParameters, lang: str, lang_code2: str, hi: str, pct: in
 
     Returns:
         tuple: file_path, dl_url, current_num, total_num
-    """    
+    """
     to_be_scraped: list[str] = []
     title_keys = subscene_soup.search_for_title(param.url_subscene)
     if title_keys == "ERROR: CAPTCHA PROTECTION":
@@ -134,11 +143,12 @@ def scrape(param: SearchParameters, lang: str, lang_code2: str, hi: str, pct: in
         return None
 
     download_info: list[tuple[str, str, int, int]] = []
-    for current_num, (dl_url) in enumerate(to_be_downloaded):
-        total_num = len(to_be_downloaded)
-        current_num += 1
+    number_of_items = len(to_be_downloaded)
+    for current_item_num, dl_url in enumerate(to_be_downloaded, start=1):
         root_dl_url = subscene_soup.get_download_url(dl_url)
-        file_path = f"{__video_directory__}\\__subsearch__subscene_{current_num}.zip"
-        items = (file_path, root_dl_url, current_num, total_num)
-        download_info.append(items)
+        zip_path = f"{__video_directory__}\\__subsearch__subscene_{current_item_num}.zip"
+        data = SubsceneDownloadData(
+            file_path=zip_path, url=root_dl_url, idx_num=current_item_num, idx_lenght=number_of_items
+        )
+        download_info.append(data)
     return download_info

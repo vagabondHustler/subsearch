@@ -2,20 +2,21 @@ import os
 import shutil
 import struct
 import zipfile
-from typing import Any, Optional
+from typing import Optional
 
 import cloudscraper
+from scraper.opensubtitles import OpenSubtitlesDownloadData
+from scraper.subscene import SubsceneDownloadData
 
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_zip(item: tuple[Any]) -> None:
-    file_path, url, current_num, total_num = item
-    log.output(f"Downloading: {current_num}/{total_num}")
-    r = SCRAPER.get(url, stream=True)
-    with open(file_path, "wb") as fd:
+def download_zip(download_data: SubsceneDownloadData | OpenSubtitlesDownloadData) -> None:
+    log.output(f"Downloading: {download_data.idx_num}/{download_data.idx_lenght}")
+    r = SCRAPER.get(download_data.url, stream=True)
+    with open(download_data.file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
 
