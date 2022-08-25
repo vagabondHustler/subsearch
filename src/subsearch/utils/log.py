@@ -23,8 +23,8 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
 )
 
-# log and print message
 def output(msg: str, to_terminal: bool = True) -> Optional[Literal[False]]:
+    # log and print message
     logging.info(msg)
     return print(msg) if to_terminal else False
 
@@ -41,8 +41,8 @@ def tprint(msg: str) -> None:
     return logging.info(msg)
 
 
-# log and print all the used parameters from video/directory-name
 def parameters(param: SearchParameters, lang: str, lang_code2: str, hearing_impaired: str, pct: int) -> None:
+    # log and print all the used parameters from video/directory-name
     lang_code3 = lang[:3].lower()
     output(f"SubSearch - {__version__} ", False)
     output("[PARAMETERS]")
