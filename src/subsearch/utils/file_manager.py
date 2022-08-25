@@ -2,21 +2,18 @@ import os
 import shutil
 import struct
 import zipfile
-from typing import Optional
 
 import cloudscraper
 
-from subsearch.scraper.opensubtitles import OpenSubtitlesDownloadData
-from subsearch.scraper.subscene import SubsceneDownloadData
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_zip(download_data: SubsceneDownloadData | OpenSubtitlesDownloadData) -> None:
-    log.output(f"Downloading: {download_data.idx_num}/{download_data.idx_lenght}")
-    r = SCRAPER.get(download_data.url, stream=True)
-    with open(download_data.file_path, "wb") as fd:
+def download_subtitle(data) -> None:
+    log.output(f"Downloading: {data.idx_num}/{data.idx_lenght}")
+    r = SCRAPER.get(data.url, stream=True)
+    with open(data.file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
 
@@ -67,7 +64,7 @@ def clean_up(cwd: str, extension: str) -> None:
 
 
 # get file hash
-def get_hash(file_path: str) -> Optional[str]:
+def get_hash(file_path: str) -> str | None:
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)

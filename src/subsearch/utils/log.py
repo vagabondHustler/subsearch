@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from subsearch.data import __version__, __video_directory__
 from subsearch.utils.string_parser import SearchParameters
@@ -23,7 +23,8 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
 )
 
-def output(msg: str, to_terminal: bool = True) -> Optional[Literal[False]]:
+
+def output(msg: str, to_terminal: bool = True) -> Literal[False] | None:
     # log and print message
     logging.info(msg)
     return print(msg) if to_terminal else False
