@@ -1,5 +1,5 @@
 import time
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -8,7 +8,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def is_sub_hi(a1: Tag) -> Optional[bool]:
+def is_sub_hi(a1: Tag) -> bool | None:
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted

@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from subsearch.data import __video_directory__
 from subsearch.scraper import opensubtitles_soup
@@ -6,7 +6,7 @@ from subsearch.utils import log
 from subsearch.utils.string_parser import SearchParameters
 
 
-class OpenSubtitlesDownloadData(NamedTuple):
+class OpenSubtitlesData(NamedTuple):
     file_path: str
     url: str
     idx_num: int
@@ -25,7 +25,7 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
     Returns:
         tuple: file_path, dl_url, current_num, total_num
     """
-    to_be_downloaded: Optional[list[str]] = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
+    to_be_downloaded: list[str] | None = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:
         if param.show_bool:
             log.output(f"No TV-series found matching hash {param.file_hash}")
@@ -38,9 +38,7 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
         tbd_lenght = len(to_be_downloaded)
         for zip_idx, zip_url in enumerate(to_be_downloaded, start=1):
             zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
-            data = OpenSubtitlesDownloadData(
-                file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght
-            )
+            data = OpenSubtitlesData(file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
             download_info.append(data)
         log.output(f"Done with tasks")
         return download_info
