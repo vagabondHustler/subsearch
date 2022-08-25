@@ -6,76 +6,35 @@ from num2words import num2words
 
 
 def find_year(string: str) -> Union[int, str]:
-    """
-    Parse string from start, until last instance of a year between .1000-2999. found, keep last instance of year
-    https://regex101.com/r/r5TwxJ/1
-
-    Args:
-        string (str): Title.Of.The.Movie.YEAR.Source.Codec-GROUP
-
-    Returns:
-        str: YEAR
-    """
-    # from start of string until number between 1000-2999 ending with. found
-    _year = re.findall("^.*\.([1-2][0-9]{3})\.", string)
-    if len(_year) > 0:
-        year = _year[0]
+    re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)  # https://regex101.com/r/r5TwxJ/1
+    if len(re_year) > 0:
+        year = re_year[0]
         return int(year)
     return "N/A"
 
 
 def find_title_by_year(string: str) -> str:
-    """
-    Parse string from start, until last instance of a year between .1000-2999. found, keep everything before last instance of .year
-    https://regex101.com/r/FKUpY0/1
-
-    Args:
-        string (str): Title.Of.The.Movie.YEAR.Source.Codec-GROUP
-
-    Returns:
-        str: Title.Of.The.Movie
-    """
-    _title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)
-    if len(_title) > 0:
-        title: str = _title[0]
+    re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)  # https://regex101.com/r/FKUpY0/1
+    if len(re_title) > 0:
+        title: str = re_title[0]
         title = title.replace(".", " ")
         return title
     return "N/A"
 
 
 def find_title_by_show(string: str) -> str:
-    """
-    Parse string from start, until last instance of .s00e00. found, keep everything before .season
-    https://regex101.com/r/41OZE5/1
-
-    Args:
-        string (str): Title.Of.The.Show.s01e01.Source.Codec-GROUP
-
-    Returns:
-        str: Title.Of.The.Show
-    """
-    _title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)
-    if len(_title) > 0:
-        title: str = _title[0]
+    re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)  # https://regex101.com/r/41OZE5/1
+    if len(re_title) > 0:
+        title: str = re_title[0]
         title = title.replace(".", " ")
         return title
     return "N/A"
 
 
 def find_season_episode(string: str) -> str:
-    """
-    Parse string from start, until last instance of .s00e00. found, keep .s00e00.
-    https://regex101.com/r/8Nwlr6/1
-
-    Args:
-        string (str): Title.Of.The.Show.s01e01.Source.Codec-GROUP
-
-    Returns:
-        str: s01e01
-    """
-    _se = re.findall("\.([s]\d*[e]\d*)\.", string)
-    if len(_se) > 0:
-        se: str = _se[0]
+    re_se = re.findall("\.([s]\d*[e]\d*)\.", string)  # https://regex101.com/r/8Nwlr6/1
+    if len(re_se) > 0:
+        se: str = re_se[0]
         return se
     return "N/A"
 
@@ -84,16 +43,6 @@ NA = tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Liter
 
 
 def find_ordinal(string: str, lang_code2: str) -> Union[tuple[str, str, str, str, bool], NA]:
-    """
-    Convert numbers into ordinal strings, 01 = First, 02 = Second...
-
-    Args:
-        string (str): s01e01
-        lang_abbr (str): abbreviation of ordinal language
-
-    Returns:
-        str | int: _description_
-    """
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
@@ -202,8 +151,8 @@ def get_pct_value(from_pc: Any, from_browser: Any) -> int:
     return pct
 
 
-# create list from string
 def mk_lst(release: Any) -> list[Any]:
+    # create list from string
     new: list[Any] = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
     temp = release.split(".")

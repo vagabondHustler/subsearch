@@ -15,9 +15,6 @@ COMMAND_PATH = "Software\\Classes\\*\\shell\\0.SubSearch\\command"
 
 
 def write_keys() -> None:
-    """
-    Write the necessary keys to the registry
-    """
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         # open key, with write permission
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
@@ -36,10 +33,6 @@ def write_all_valuex() -> None:
 
 
 def write_valuex(key: str) -> None:
-    """
-    Write valuex into the different keys
-
-    """
     # decide in which registry key to write the value
     if key == "SubSearch":
         key_type = SUBSEARCH_PATH
@@ -61,9 +54,6 @@ def write_valuex(key: str) -> None:
 
 
 def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
-    """
-    Connects to the registry, opens sub-key then set valuex with value
-    """
     try:
         # connect to Computer_NAME\HKEY_CURRENT_USER\
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
@@ -76,9 +66,6 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 
 
 def get_command_value() -> str:
-    """
-    Get the correct command value
-    """
     # get latest json value from file
     from subsearch.utils import raw_config
 
@@ -104,10 +91,6 @@ def get_command_value() -> str:
 
 
 def get_icon_value() -> str:
-    """
-    Check config.json cm_icon value
-
-    """
     from subsearch.utils import raw_config
 
     show_icon: str = raw_config.get_config_key("cm_icon")

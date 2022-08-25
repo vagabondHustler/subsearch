@@ -22,13 +22,6 @@ def got_key() -> bool:
 
 
 def check_is_exe() -> bool:
-    """
-    Check if the current user is running subsearch from the executable
-
-    Returns:
-        bool: True if subsearch is running as executable, False if subsearch is not running as executable
-    """
-
     if sys.argv[0].endswith("SubSearch.exe"):
         return True
     return False
