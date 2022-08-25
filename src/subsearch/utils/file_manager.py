@@ -5,9 +5,9 @@ import zipfile
 from typing import Optional
 
 import cloudscraper
-from scraper.opensubtitles import OpenSubtitlesDownloadData
-from scraper.subscene import SubsceneDownloadData
 
+from subsearch.scraper.opensubtitles import OpenSubtitlesDownloadData
+from subsearch.scraper.subscene import SubsceneDownloadData
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
