@@ -6,13 +6,6 @@ from subsearch.data import __data__
 
 # update config.json
 def set_config_json(key: str, value: Union[str, int, bool]) -> None:
-    """
-    Set values of keys in config.json
-
-    Args:
-        key (str):
-        value (str | int | bool): store language:str (lang, abbr... eg English, en)
-    """
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
@@ -65,8 +58,8 @@ def get_config_key(key: str) -> Any:
     return config_json_dict[f"{key}"]
 
 
-# set default config.json values
 def set_default_json() -> None:
+    # set default config.json values
     data = get_json()
     data["language"] = "English, en"
     data["hearing_impaired"] = "Both"

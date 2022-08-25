@@ -11,13 +11,7 @@ from subsearch.utils import log, string_parser
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_zip(item: Any) -> None:
-    """
-    download zip file from url
-
-    Args:
-        item (str): url to download
-    """
+def download_zip(item: tuple[Any]) -> None:
     file_path, url, current_num, total_num = item
     log.output(f"Downloading: {current_num}/{total_num}")
     r = SCRAPER.get(url, stream=True)
@@ -26,15 +20,8 @@ def download_zip(item: Any) -> None:
             fd.write(chunk)
 
 
-# extract all zip file in said directory
 def extract_files(cwd: str, extension: str) -> None:
-    """
-    extract all zip file in said directory that start with __subsearch__
-
-    Args:
-        cwd (str): directory to extract zip files from
-        extension (str): extension to extract
-    """
+    # extract all zip file in said directory
     subs_folder = os.path.join(cwd, "subs")
     if not os.path.exists(subs_folder):
         os.mkdir(subs_folder)
@@ -47,16 +34,8 @@ def extract_files(cwd: str, extension: str) -> None:
             zip_ref.close()
 
 
-# rename a .srts to the same as video release name
 def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
-    """
-    rename the best matching srt file compared to the video file for e.g MPC-HC to auto import
-
-    Args:
-        release_name (str): name of the video name
-        cwd (str): current working directory
-        extension (str): suffix of the subtitle file
-    """
+    # rename a .srts to the same as video release name
     higest_value = (0, "")
     subs_folder = os.path.join(cwd, "subs")
     for file in os.listdir(subs_folder):
@@ -79,13 +58,6 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
 
 # remove .zips
 def clean_up(cwd: str, extension: str) -> None:
-    """
-    Remove all the temporary files in the current working directory
-
-    Args:
-        cwd (str): current working directory
-        extension (str): suffix of the file to remove
-    """
     for file in os.listdir(cwd):
         if file.startswith("__subsearch__") and file.endswith(extension):
             log.output(f"Removing: {file}")
@@ -95,15 +67,6 @@ def clean_up(cwd: str, extension: str) -> None:
 
 # get file hash
 def get_hash(file_path: str) -> Optional[str]:
-    """
-    Tries to get the hash of the file
-
-    Args:
-        file_path (str): path/filename to get the hash of
-
-    Returns:
-        str | Any: the hash of the file or None if the size is 0
-    """
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)

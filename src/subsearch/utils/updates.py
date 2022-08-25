@@ -6,19 +6,13 @@ from packaging.version import Version
 from subsearch.data import __version__
 
 
-def re_version(version: str) -> str:
+def find_semantic_version(version: str) -> str:
     # semantic expression https://regex101.com/r/2PNppl/1
     version_semantic = "".join(re.findall("(\d*\.\d*\.\d*-\w*\.\d*)|(\d*\.\d*\.\d*)", version)[0])
     return version_semantic
 
 
 def scrape_github() -> str:
-    """
-    Scrape file  https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/__version__.py
-
-    Returns:
-        str: returns the content of __version__.py
-    """
     scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
     url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/__version__.py"
     source = scraper.get(url)
@@ -28,15 +22,8 @@ def scrape_github() -> str:
 
 
 def get_latest_version() -> str:
-    """
-    Get the latest version from the subsearch repository.
-
-    Returns:
-        str:  semantic version
-    """
-
     version_github = scrape_github()
-    return re_version(version_github)
+    return find_semantic_version(version_github)
 
 
 def is_new_version_avail() -> tuple[bool, bool]:
