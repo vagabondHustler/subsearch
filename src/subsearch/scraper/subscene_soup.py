@@ -7,17 +7,8 @@ from bs4.element import Tag
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
-# check if subtitle is hearing impaired or not
+
 def is_sub_hi(a1: Tag) -> Optional[bool]:
-    """
-    Check if subtitle is hearing impaired or not
-
-    Args:
-        a1 (Tag): lxml tag
-
-    Returns:
-        str: True if str is a40, False if str is a41
-    """
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted
@@ -29,17 +20,7 @@ def is_sub_hi(a1: Tag) -> Optional[bool]:
     return None
 
 
-# search for title
 def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA PROTECTION"]]):
-    """
-    Search subscene for matching titles
-
-    Args:
-        url (str): search url
-
-    Returns:
-        dict | str: title, url if found, None if not found
-    """
     titles: dict[str, str] = {}
     source = SCRAPER.get(url)
     scontent = source.content
@@ -57,19 +38,7 @@ def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA
     return titles
 
 
-# search title(s) for subtitle
 def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url: str) -> dict[str, str]:
-    """
-    Search for subtitles matching the provided titles
-
-    Args:
-        language (str): subtitle language
-        hearing_impaired (str): if the user wants hearing impaired subtitles, regular or both
-        url (str):
-
-    Returns:
-        dict: title, url, percentage match
-    """
     searching = True
     subtitles: dict[str, str] = {}
     while searching:
@@ -98,17 +67,7 @@ def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url:
     return subtitles
 
 
-# get download url for subtitle(s)
 def get_download_url(url: str) -> str:
-    """
-    Get the download url for the subtitle
-
-    Args:
-        url (str): url for the subtitle
-
-    Returns:
-        dict: name of subtitle, url for zip file
-    """
     source = SCRAPER.get(url).text
     doc = BeautifulSoup(source, "lxml")
     _link = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]

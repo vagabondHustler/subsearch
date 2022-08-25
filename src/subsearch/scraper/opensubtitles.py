@@ -6,7 +6,6 @@ from subsearch.utils import log
 from subsearch.utils.string_parser import SearchParameters
 
 
-# decides what to do with all the scrape data
 def scrape(param: SearchParameters, lang: str, hi: bool):
     """
     Scrape opensubtitles for subtitles using the given parameters.
@@ -17,7 +16,7 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
         hi (str): if hearing impaired subtitles are desired
 
     Returns:
-        list | None: download links for the subtitle
+        tuple: file_path, dl_url, current_num, total_num
     """
     to_be_downloaded: Optional[list[str]] = opensubtitles_soup.search_for_hash(param.url_opensubtitles, lang, hi)
     if to_be_downloaded is None:

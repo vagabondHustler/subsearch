@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 from subsearch.utils import log
 
 
-# search for file hash
 def search_for_hash(url: str, lang: str, hi: Union[str, bool]) -> Optional[list[str]]:
     download_url: list[str] = []
     source = requests.get(url)
