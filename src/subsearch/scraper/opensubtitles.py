@@ -35,11 +35,11 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
     else:
         download_info = []
         log.output(f"Preparing  hash {param.file_hash} for download")
-        number_of_items = len(to_be_downloaded)
-        for current_item_num, dl_url in enumerate(to_be_downloaded, start=1):
-            zip_path = f"{__video_directory__}\\__subsearch__opensubtitles_{current_item_num}.zip"
+        tbd_lenght = len(to_be_downloaded)
+        for zip_idx, zip_url in enumerate(to_be_downloaded, start=1):
+            zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
             data = OpenSubtitlesDownloadData(
-                file_path=zip_path, url=dl_url, idx_num=current_item_num, idx_lenght=number_of_items
+                file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght
             )
             download_info.append(data)
         log.output(f"Done with tasks")
