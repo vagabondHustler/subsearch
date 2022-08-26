@@ -8,7 +8,7 @@ from bs4.element import Tag
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def is_sub_hi(a1: Tag) -> bool | None:
+def is_subtitle_hearing_impaired(a1: Tag) -> bool:
     a1_parent = a1.parent
     a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
     a41 = a1_parent.find("td", class_="a41")  # hearing imparted
@@ -17,14 +17,17 @@ def is_sub_hi(a1: Tag) -> bool | None:
     elif a41 is None:
         return False
 
-    return None
+
+def get_lxml_doc(url: str) -> BeautifulSoup:
+    source = SCRAPER.get(url)
+    scontent = source.content
+    doc = BeautifulSoup(scontent, "lxml")
+    return doc
 
 
 def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA PROTECTION"]]):
     titles: dict[str, str] = {}
-    source = SCRAPER.get(url)
-    scontent = source.content
-    doc = BeautifulSoup(scontent, "lxml")
+    doc = get_lxml_doc(url)
     doc_result = doc.find("div", class_="search-result")
     if doc_result is None:
         doc_captcha = doc.find("h2", text="Why do I have to complete a CAPTCHA?")
@@ -39,30 +42,26 @@ def search_for_title(url: str) -> (Union[dict[str, str], Literal["ERROR: CAPTCHA
 
 
 def search_title_for_sub(language: str, hearing_impaired: Union[bool, str], url: str) -> dict[str, str]:
-    searching = True
     subtitles: dict[str, str] = {}
-    while searching:
-        source = SCRAPER.get(url)
-        scontent = source.content
-        doc = BeautifulSoup(scontent, "lxml")
+    while True:
+        doc = get_lxml_doc(url)
         tbody = doc.find("tbody")
-        if tbody is not None:
-            td_a1 = tbody.find_all("td", class_="a1")
-            searching = False
-        else:
+        if tbody is None:
             time.sleep(1)
+            continue
+        td_a1 = tbody.find_all("td", class_="a1")
+        break
     for a1 in td_a1:
-        sub_hi = is_sub_hi(a1)
+        sub_hi = is_subtitle_hearing_impaired(a1)
         subtitle_language = a1.contents[1].contents[1].contents[0].strip()
         if hearing_impaired != "Both" and hearing_impaired != sub_hi:
             continue
-        if language == subtitle_language:
-            release_name = a1.contents[1].contents[3].string.strip()
-            if " " in release_name:
-                release_name = release_name.replace(" ", ".")
-            subtitle_url = a1.contents[1].attrs["href"]
-            subtitles[release_name] = f"https://subscene.com{subtitle_url}"
-
+        if language != subtitle_language:
+            continue
+        release_name = a1.contents[1].contents[3].string.strip()
+        release_name = release_name.replace(" ", ".")
+        subtitle_url = a1.contents[1].attrs["href"]
+        subtitles[release_name] = f"https://subscene.com{subtitle_url}"
     return subtitles
 
 
