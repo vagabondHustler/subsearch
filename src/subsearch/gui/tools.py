@@ -201,13 +201,10 @@ class CustomTitleBar(tk.Frame):
         self.parent.geometry(f"+{x}+{y}")
 
     def check_window_state(self, event):
-        if event.widget == self.parent:
-            if self.parent.state() == "iconic":
-                pass
-            if self.parent.state() == "normal":
-                self.parent.overrideredirect(True)
-                self.parent.attributes("-alpha", 1)
-                self.parent.deiconify()
+        if event.widget == self.parent and self.parent.state() == "normal":
+            self.parent.overrideredirect(True)
+            self.parent.attributes("-alpha", 1)
+            self.parent.deiconify()
 
     def tabbing(self, event):
         self.parent.attributes("-topmost", False)
