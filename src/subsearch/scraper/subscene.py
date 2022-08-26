@@ -130,16 +130,15 @@ def scrape(param: SearchParameters, lang: str, lang_code2: str, hi: str, pct: in
     if len(to_be_downloaded) == 0:
         log.output("")
         log.output(f"No subtitles to download for {param.release}")
-        if show_dl_window and len(sorted_list) > 0:
-            file = f"{__video_directory__}\\__subsearch__dl_data.tmp"
-            with open(file, "w", encoding="utf8") as f:
-                for i in range(len(sorted_list)):
-                    name, _link = sorted_list[i][1], sorted_list[i][2]
-                    link = _link.replace(" ", "")
-                    f.writelines(f"{name} {link}")
-                    f.write("\n")
+    if show_dl_window and len(sorted_list) > 0 and len(to_be_downloaded) == 0:
+        file = f"{__video_directory__}\\__subsearch__dl_data.tmp"
+        with open(file, "w", encoding="utf8") as f:
+            for i in range(len(sorted_list)):
+                name, _link = sorted_list[i][1], sorted_list[i][2]
+                link = _link.replace(" ", "")
+                f.writelines(f"{name} {link}")
+                f.write("\n")
 
-            return None
         return None
 
     download_info = []
