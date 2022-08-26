@@ -29,8 +29,7 @@ def scrape(param: SearchParameters, lang: str, hi: bool):
     if to_be_downloaded is None:
         if param.show_bool:
             log.output(f"No TV-series found matching hash {param.file_hash}")
-        else:
-            log.output(f"No movies found matching hash {param.file_hash}")
+        log.output(f"No movies found matching hash {param.file_hash}")
         return None
     else:
         download_info = []
