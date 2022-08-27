@@ -10,7 +10,7 @@ from subsearch.data import (
     __video_path__,
 )
 from subsearch.gui import widget_download, widget_settings
-from subsearch.scraper import opensubtitles, subscene
+from subsearch.providers import opensubtitles, subscene
 from subsearch.utils import (
     current_user,
     file_manager,
@@ -38,14 +38,21 @@ class SubSearch:
             raw_registry.add_context_menu()
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get_config_key("show_terminal")
         self.file_exist = True if __video_name__ is not None else False
-        self.lang, self.lang_code2 = raw_config.get_config_key("language")
+        self.language, self.lang_code2 = raw_config.get_config_key("language")
         self.hi = raw_config.get_config_key("hearing_impaired")
         self.pct = raw_config.get_config_key("percentage")
         self.show_dl_win = raw_config.get_config_key("show_download_window")
+        self.user_parameters = raw_config.UserParameters(
+            language=self.language,
+            lang_code2=self.lang_code2,
+            hearing_impaired=self.hi,
+            pct=self.pct,
+            show_dl_window=self.show_dl_win,
+        )
         if self.file_exist:
             file_hash = file_manager.get_hash(__video_path__)
-            self.param = string_parser.get_parameters(__video_name__, file_hash, self.lang, self.lang_code2)
-            log.parameters(self.param, self.lang, self.lang_code2, self.hi, self.pct)
+            self.parameters = string_parser.get_parameters(__video_name__, file_hash, self.language, self.lang_code2)
+            log.parameters(self.parameters, self.user_parameters)
             if " " in __video_name__:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
@@ -58,7 +65,8 @@ class SubSearch:
         if self.file_exist:
             log.output("")
             log.output("[Searching on opensubtitles]")
-            self.opensubtitles = opensubtitles.scrape(self.param, self.lang, self.hi)
+            _opensubtitles = opensubtitles.OpenSubtitles(self.parameters, self.user_parameters)
+            self.opensubtitles = _opensubtitles.parse_hash()
 
     def subscene_scrape(self) -> None:
         """
@@ -67,7 +75,8 @@ class SubSearch:
         if self.file_exist:
             log.output("")
             log.output("[Searching on subscene]")
-            self.subscene = subscene.scrape(self.param, self.lang, self.lang_code2, self.hi, self.pct, self.show_dl_win)
+            _subscene = subscene.Subscene(self.parameters, self.user_parameters)
+            self.subscene = _subscene.parse()
 
     def process_files(self) -> None:
         """
@@ -99,7 +108,7 @@ class SubSearch:
         file_manager.extract_files(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ").nfo")
-        file_manager.rename_best_match(f"{self.param.release}.srt", __video_directory__, ".srt")
+        file_manager.rename_best_match(f"{self.parameters.release}.srt", __video_directory__, ".srt")
 
     def end(self) -> None:
         """
@@ -110,7 +119,10 @@ class SubSearch:
         log.output(f"Finished in {elapsed} seconds")
 
         if self.show_terminal and current_user.check_is_exe() is False:
-            input("Ctrl + c or Enter to exit")
+            try:
+                input("Ctrl + c or Enter to exit")
+            except KeyboardInterrupt:
+                pass
 
 
 def con() -> None:

@@ -19,7 +19,7 @@ def buttons(btn: str):
     return os.path.join(__buttons__, btn)
 
 
-# create custom labels and buttons in grid
+# create custom labels and __buttons__ in grid
 class Create(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
