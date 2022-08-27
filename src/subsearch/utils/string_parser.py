@@ -62,7 +62,7 @@ def find_group(string: str) -> str:
 
 
 @dataclass(frozen=True, order=True)
-class SearchParameters:
+class FileSearchParameters:
     url_subscene: str
     url_opensubtitles: str
     title: str
@@ -77,7 +77,7 @@ class SearchParameters:
     file_hash: Optional[str]
 
 
-def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_code2: str) -> SearchParameters:
+def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_code2: str) -> FileSearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -108,11 +108,11 @@ def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_
 
     group = find_group(filename)
     subscene = "https://subscene.com/subtitles/searchbytitle?query="
-    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/moviename-"
+    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/moviehash-"
     url_subscene = f"{subscene}{title}".replace(" ", "%20")
     url_opensubtitles = f"{opensubtitles}{file_hash}"
 
-    parameters = SearchParameters(
+    parameters = FileSearchParameters(
         url_subscene,
         url_opensubtitles,
         title,
