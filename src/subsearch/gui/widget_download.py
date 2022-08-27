@@ -6,8 +6,8 @@ import sv_ttk
 
 from subsearch.data import __video_directory__
 from subsearch.gui import tkdata, widget_root
-from subsearch.scraper import subscene_soup
-from subsearch.utils import file_manager
+from subsearch.providers import subscene
+from subsearch.utils import file_manager, string_parser
 
 TKWINDOW = tkdata.Window()
 TKCOLOR = tkdata.Color()
@@ -24,6 +24,7 @@ class DownloadList(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         # listbox for the subtitles
+        self.subscene_scrape = subscene.SubsceneScrape()
         self.extent = 0
         self.sublist = read_tmp_file()
         self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
@@ -107,7 +108,7 @@ class DownloadList(tk.Frame):
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
                 self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
                 try:
-                    dl_url = subscene_soup.get_download_url(url)
+                    dl_url = self.subscene_scrape.download_url(url)
                     _name = name.replace("/", "").replace("\\", "").split(": ")
                     path = f"{__video_directory__}\\__subsearch__{_name[-1]}.zip"
                     item = path, dl_url, 1, 1

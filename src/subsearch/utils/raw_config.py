@@ -1,5 +1,5 @@
 import json
-from typing import Any, Union
+from typing import Any, NamedTuple, Union
 
 from subsearch.data import __data__
 
@@ -73,3 +73,11 @@ def set_default_json() -> None:
         file.seek(0)
         json.dump(data, file, indent=4)
         file.truncate()
+
+
+class UserParameters(NamedTuple):
+    language: str
+    lang_code2: str
+    hearing_impaired: bool | str
+    pct: int
+    show_dl_window: bool
