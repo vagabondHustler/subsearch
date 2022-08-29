@@ -54,6 +54,7 @@ def get_config_key(key: str) -> Any:
         "show_download_window": get_json()["show_download_window"],
         "show_terminal": get_json()["show_terminal"],
         "file_ext": get_json()["file_ext"],
+        "providers": get_json()["providers"],
     }
     return config_json_dict[f"{key}"]
 
@@ -68,6 +69,7 @@ def set_default_json() -> None:
     data["show_download_window"] = True
     data["show_terminal"] = False
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
+    data["providers"] = dict.fromkeys(data["providers"], True)
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
