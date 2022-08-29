@@ -195,5 +195,10 @@
         ".3g2": true,
         ".swf": true,
         ".mswmm": true
+    },
+    "providers": {
+        "subscene": true,
+        "opensubtitles_rss": true,
+        "opensubtitles_hash": true
     }
 }
