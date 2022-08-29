@@ -37,6 +37,7 @@ class SubSearch:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get_config_key("show_terminal")
+        self.providers = raw_config.get_config_key("providers")
         self.file_exist = True if __video_name__ is not None else False
         self.language, self.lang_code2 = raw_config.get_config_key("language")
         self.hi = raw_config.get_config_key("hearing_impaired")
@@ -62,49 +63,65 @@ class SubSearch:
         """
         Scrape on opensubtitles by filehash
         """
-        if self.file_exist:
-            log.output("")
-            log.output("[Searching on opensubtitles]")
+        if self.file_exist and (self.providers['opensubtitles_hash'] or self.providers['opensubtitles_rss']):
             _opensubtitles = opensubtitles.OpenSubtitles(self.parameters, self.user_parameters)
-            self.opensubtitles = _opensubtitles.parse_hash()
+            if self.providers['opensubtitles_hash']:
+                log.output("\n[Searching on opensubtitles - hash]")
+                self.opensubtitles_hash = _opensubtitles.parse_hash()
+            if self.providers['opensubtitles_rss']:
+                log.output("\n[Searching on opensubtitles - rss]")
+                self.opensubtitles_rss = _opensubtitles.parse_rss()
+            self.opensubtitles_sorted_list = _opensubtitles.sorted_list()
 
     def subscene_scrape(self) -> None:
         """
         Scrape subscene from parsing filename of the video
         """
-        if self.file_exist:
-            log.output("")
-            log.output("[Searching on subscene]")
+        if self.file_exist and self.providers["subscene"]:
+            log.output("\n[Searching on subscene - title]")
             _subscene = subscene.Subscene(self.parameters, self.user_parameters)
             self.subscene = _subscene.parse()
+            self.subscene_sorted_list = _subscene.sorted_list()
 
     def process_files(self) -> None:
         """
         Download zip files containing the .srt files, extract, rename and clean up tmp files
         """
+        os_hash_dls = 0
+        os_rss_dls = 0
+        ss_dls = 0
         if self.file_exist is False:
             return None
 
-        if self.opensubtitles is not None:
-            log.output("")
-            log.output("[Downloading from Opensubtitles]")
-            for item in self.opensubtitles:
-                file_manager.download_subtitle(item)
+        if self.opensubtitles_hash is not None and self.providers['opensubtitles_hash']:
+            log.output("\n[Downloading from opensubtitles - hash]")
+            for item in self.opensubtitles_hash:
+                os_hash_dls = file_manager.download_subtitle(item)
+                log.output("\n")
 
-        if self.subscene is not None:
-            log.output("")
-            log.output("[Downloading from Subscene]")
+
+        if self.opensubtitles_rss is not None and self.providers["opensubtitles_rss"]:
+            log.output("\n[Downloading from opensubtitles - rss]")
+            for item in self.opensubtitles_rss:
+               os_rss_dls = file_manager.download_subtitle(item)
+
+
+        if self.subscene is not None and self.providers["subscene"]:
+            log.output("\n[Downloading from subscene]")
             for item in self.subscene:
-                file_manager.download_subtitle(item)
+                ss_dls =file_manager.download_subtitle(item)
 
-        if self.opensubtitles is None and self.subscene is None:
-            dl_data = f"{__video_directory__}\\__subsearch__dl_data.tmp"
-            if self.show_dl_win is True and os.path.exists(dl_data):
+        total_dls = os_hash_dls + os_rss_dls + ss_dls
+        if self.show_dl_win and total_dls == 0:
+            not_downloaded = list(self.opensubtitles_sorted_list)
+            not_downloaded.extend(x for x in self.subscene_sorted_list if x not in not_downloaded)
+            not_downloaded.sort(key=lambda x: x[0], reverse=True)
+            if len(not_downloaded) > 0:
+                tmp_file = file_manager.write_not_downloaded_tmp(__video_directory__, not_downloaded)
                 widget_download.show_widget()
-                file_manager.clean_up(__video_directory__, dl_data)
+                file_manager.clean_up(__video_directory__, tmp_file)
 
-        log.output("")
-        log.output("[Procsessing files]")
+        log.output("\n[Procsessing files]")
         file_manager.extract_files(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ".zip")
         file_manager.clean_up(__video_directory__, ").nfo")
@@ -115,8 +132,7 @@ class SubSearch:
         Stop pref counter, log elapsed time and keep the terminal open if show_terminal is True
         """
         elapsed = time.perf_counter() - self.start
-        log.output("")
-        log.output(f"Finished in {elapsed} seconds")
+        log.output(f"\nFinished in {elapsed} seconds")
 
         if self.show_terminal and current_user.check_is_exe() is False:
             try:
