@@ -4,18 +4,21 @@ import struct
 import zipfile
 
 import cloudscraper
+from providers.generic import DownloadData
 
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def download_subtitle(data) -> None:
-    log.output(f"Downloading: {data.idx_num}/{data.idx_lenght}")
+def download_subtitle(data: DownloadData) -> int:
+    log.output(f"Downloading: {data.idx_num}/{data.idx_lenght}: {data.name}")
     r = SCRAPER.get(data.url, stream=True)
     with open(data.file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
+
+    return data.idx_num
 
 
 def extract_files(cwd: str, extension: str) -> None:
@@ -61,6 +64,17 @@ def clean_up(cwd: str, extension: str) -> None:
             log.output(f"Removing: {file}")
             file_path = os.path.join(cwd, file)
             os.remove(file_path)
+
+
+def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
+    file_dst = f"{dst}\\__subsearch__dl_data.tmp"
+    with open(file_dst, "w", encoding="utf8") as f:
+        for i in range(len(not_downloaded)):
+            name, _link = not_downloaded[i][1], not_downloaded[i][2]
+            link = _link.replace(" ", "")
+            f.writelines(f"{name} {link}")
+            f.write("\n")
+    return file_dst
 
 
 # get file hash

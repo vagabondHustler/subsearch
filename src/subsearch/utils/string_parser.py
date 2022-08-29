@@ -61,20 +61,26 @@ def find_group(string: str) -> str:
     return group
 
 
+def rpl_sp_pct20(x: str) -> str:
+    return x.replace(" ", "%20")
+
+
 @dataclass(frozen=True, order=True)
 class FileSearchParameters:
     url_subscene: str
     url_opensubtitles: str
+    url_opensubtitles_hash: str
     title: str
     year: Union[int, str]
     season: str
     season_ordinal: str
     episode: str
     episode_ordinal: str
-    show_bool: bool
+    series: bool
     release: str
     group: str
     file_hash: Optional[str]
+    definitive_match: str
 
 
 def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_code2: str) -> FileSearchParameters:
@@ -92,39 +98,50 @@ def get_parameters(filename: str, file_hash: Optional[str], language: str, lang_
     """
     filename = filename.lower()
     lang_code3 = language[:3].lower()
-
     year = find_year(filename)
-
     season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, show_bool = find_ordinal(season_episode, lang_code2)
+    season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode, lang_code2)
 
     if year != "N/A":
         title = find_title_by_year(filename)
-    elif show_bool and year == "N/A":
+    elif series and year == "N/A":
         title = find_title_by_show(filename)
-        title = f"{title} - {season_ordinal} season"
     else:
         title = filename.rsplit("-", 1)[0]
 
     group = find_group(filename)
-    subscene = "https://subscene.com/subtitles/searchbytitle?query="
-    opensubtitles = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/moviehash-"
-    url_subscene = f"{subscene}{title}".replace(" ", "%20")
-    url_opensubtitles = f"{opensubtitles}{file_hash}"
+
+    base_ss = "https://subscene.com/subtitles/searchbytitle?query="
+    base_os = f"https://www.opensubtitles.org/{lang_code2}/search/sublanguageid-{lang_code3}"
+    url_opensubtitles_hash = f"{base_os}/moviehash-{file_hash}"
+
+    if series:
+        url_subscene = f"{base_ss}{title} - {season_ordinal} season"
+        url_opensubtitles = f"{base_os}/searchonlytvseries-on/season-{season}/episode-{episode}/moviename-{title}/rss_2_00"
+    else:
+        url_subscene = f"{base_ss}{title} ({year})"
+        url_opensubtitles = f"{base_os}/searchonlymovies-on/moviename-{title} ({year})/rss_2_00"
+
+    definitive_match = url_subscene.rsplit("query=", 1)[-1]
+
+    url_subscene = url_subscene.replace(" ", "%20")
+    url_opensubtitles = url_opensubtitles.replace(" ", "%20")
 
     parameters = FileSearchParameters(
         url_subscene,
         url_opensubtitles,
+        url_opensubtitles_hash,
         title,
         year,
         season,
         season_ordinal,
         episode,
         episode_ordinal,
-        show_bool,
+        series,
         filename,
         group,
         file_hash,
+        definitive_match,
     )
     return parameters
 
