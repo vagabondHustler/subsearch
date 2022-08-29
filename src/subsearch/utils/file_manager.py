@@ -63,6 +63,17 @@ def clean_up(cwd: str, extension: str) -> None:
             os.remove(file_path)
 
 
+def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
+    file_dst = f"{dst}\\__subsearch__dl_data.tmp"
+    with open(file_dst, "w", encoding="utf8") as f:
+        for i in range(len(not_downloaded)):
+            name, _link = not_downloaded[i][1], not_downloaded[i][2]
+            link = _link.replace(" ", "")
+            f.writelines(f"{name} {link}")
+            f.write("\n")
+    return file_dst
+
+
 # get file hash
 def get_hash(file_path: str) -> str | None:
     try:
