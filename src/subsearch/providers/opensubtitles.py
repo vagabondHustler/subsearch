@@ -1,81 +1,96 @@
-from typing import NamedTuple, Union
-
-import requests
-from bs4 import BeautifulSoup
+import re
+from typing import Union
 
 from subsearch.data import __video_directory__
-from subsearch.utils import log
+from subsearch.providers import generic
+from subsearch.providers.generic import BaseChecks, BaseProvider, DownloadData
+from subsearch.utils import log, string_parser
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
 
 
-def get_lxml_doc(url: str) -> BeautifulSoup:
-    source = requests.get(url)
-    scontent = source.content
-    doc = BeautifulSoup(scontent, "lxml")
-    return doc
-
-
-class OpenSubtitlesData(NamedTuple):
-    file_path: str
-    url: str
-    idx_num: int
-    idx_lenght: int
-
-
-class OpenSubtitles:
+class OpenSubtitles(BaseProvider):
     def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
-        # file parameters
-        self.url_opensubtitles = parameters.url_opensubtitles
-        self.title = parameters.title
-        self.year = parameters.year
-        self.season = parameters.season
-        self.season_ordinal = parameters.season_ordinal
-        self.episode = parameters.episode
-        self.episode_ordinal = parameters.episode_ordinal
-        self.show_bool = parameters.show_bool
-        self.release = parameters.release
-        self.group = parameters
-        self.file_hash = parameters.file_hash
-        # user parameters
-        self.language = user_parameters.language
-        self.lang_code2 = user_parameters.lang_code2
-        self.hearing_impaired = user_parameters.hearing_impaired
-        self.pct = user_parameters.pct
-        self.show_download_window = user_parameters.show_dl_window
-        # scraper
+        BaseProvider.__init__(self, parameters, user_parameters)
         self.scrape = OpenSubtitlesScrape()
-        # checks
-        self.check = OpenSubtitlesChecks()
+        self.check = BaseChecks()
 
     def parse_hash(self):
-        to_be_downloaded: list[str] | None = self.scrape.search_for_hash(
-            self.url_opensubtitles, self.language, self.hearing_impaired
-        )
-        if to_be_downloaded is None:
-            if self.show_bool:
-                log.output(f"No TV-series found matching hash {self.file_hash}")
-            log.output(f"No movies found matching hash {self.file_hash}")
+        to_be_downloaded: list[str] | None = self.scrape.hash(self.url_hash, self.language, self.hearing_impaired)
+        if to_be_downloaded is None and self.series:
+            log.output(f"No TV-series found matching hash {self.file_hash}")
+            log.output(f"Done with tasks\n")
             return None
-        else:
-            download_info = []
-            log.output(f"Preparing  hash {self.file_hash} for download")
-            tbd_lenght = len(to_be_downloaded)
-            for zip_idx, zip_url in enumerate(to_be_downloaded, start=1):
-                zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
-                data = OpenSubtitlesData(file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
-                download_info.append(data)
-            log.output(f"Done with tasks")
-            return download_info
+        if to_be_downloaded is None:
+            log.output(f"No movies found matching hash {self.file_hash}")
+            log.output(f"Done with tasks\n")
+            return None
+
+        download_info = []
+        log.output(f"Preparing  hash {self.file_hash} for download")
+        tbd_lenght = len(to_be_downloaded)
+        for zip_idx, zip_url in enumerate(to_be_downloaded, start=1):
+            zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
+            data = DownloadData(file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
+            download_info.append(data)
+        log.output(f"Done with tasks\n")
+        return download_info
+
+    def parse_rss(self):
+        to_be_sorted = []
+        results = self.scrape.rss_subtitles(self.url_opensubtitles)
+        to_be_downloaded: dict[str, str] = {}
+        to_be_sorted: list[tuple[int, str, str]] = []
+        for key, value in results.items():
+            number = string_parser.get_pct_value(key, self.release)
+            log.output(f"[Found]: {key}")
+            lenght_str = sum(1 for char in f"[{number}% match]:")
+            formatting_spaces = " " * lenght_str
+            _name = f"[{number}% match]: {key}"
+            _url = f"{formatting_spaces} {value}"
+            to_be_sorted_value = number, _name, _url
+            to_be_sorted.append(to_be_sorted_value)
+            if self.check.is_threshold_met(key, self.title, self.season, self.episode, self.series, number, self.pct):
+                to_be_downloaded[key] = value if key not in to_be_downloaded else None
+        self._sorted_list = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.pct)
+        # exit if no subtitles found
+        if len(to_be_downloaded) == 0:
+            log.output(f"No subtitles to download for {self.release}")
+            log.output("Done with tasks\n")
+            return None
+
+
+        download_info = []
+        tbd_lenght = len(to_be_downloaded)
+        for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):
+            zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
+            data = DownloadData(name=zip_name, file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
+            download_info.append(data)
+        log.output("Done with tasks\n")
+        return download_info
+
+    def sorted_list(self):
+        return self._sorted_list
 
 
 class OpenSubtitlesScrape:
     def __init__(self):
-        self.check = OpenSubtitlesChecks()
+        self.check = BaseChecks()
 
-    def search_for_hash(self, url: str, language: str, hearing_impaired: Union[str, bool]) -> list[str] | None:
+    def rss_subtitles(self, url: str):
+        subtitles: dict[str, str] = {}
+        doc = generic.get_lxml_doc(url, "xml")
+        items = doc.find_all("item")
+        for item in items:
+            dl_url = item.enclosure["url"]
+            released_as = item.description.text.strip()
+            release_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
+            subtitles[release_name] = dl_url
+        return subtitles
+
+    def hash(self, url: str, language: str, hearing_impaired: Union[str, bool]) -> list[str] | None:
         download_url: list[str] = []
-        doc = get_lxml_doc(url)
+        doc = generic.get_lxml_doc(url, "lxml")
         doc_results = doc.find("table", id="search_results")
         if doc_results is None:
             return None
@@ -107,8 +122,3 @@ class OpenSubtitlesScrape:
         if len(download_url) == 0:
             return None
         return download_url
-
-
-class OpenSubtitlesChecks:
-    def __init__(self) -> None:
-        pass
