@@ -7,6 +7,7 @@ import sv_ttk
 from subsearch.data import __video_directory__
 from subsearch.gui import tkdata, widget_root
 from subsearch.providers import subscene
+from subsearch.providers.generic import DownloadData
 from subsearch.utils import file_manager, string_parser
 
 TKWINDOW = tkdata.Window()
@@ -102,23 +103,23 @@ class DownloadList(tk.Frame):
         _i = _i.replace(")", "")
         items = _i.replace(",", "")
         _error = False
-        for (number, url), (name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
+        for (number, _url), (_name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
             if number == int(items):
                 self.sub_listbox.delete(int(number))
                 self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
                 self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
                 try:
-                    dl_url = self.subscene_scrape.download_url(url)
-                    _name = name.replace("/", "").replace("\\", "").split(": ")
+                    dl_url = self.subscene_scrape.download_url(_url)
+                    _name = _name.replace("/", "").replace("\\", "").split(": ")
                     path = f"{__video_directory__}\\__subsearch__{_name[-1]}.zip"
-                    item = path, dl_url, 1, 1
+                    item = DownloadData(name=_name, file_path=path, url=dl_url, idx_num=1, idx_lenght=1)
                     file_manager.download_subtitle(item)
                     if _error is False:
                         file_manager.extract_files(__video_directory__, ".zip")
                         file_manager.clean_up(__video_directory__, ".zip")
                         file_manager.clean_up(__video_directory__, ").nfo")
                         self.sub_listbox.delete(int(number))
-                        self.sub_listbox.insert(int(number), f"✔ {name}")
+                        self.sub_listbox.insert(int(number), f"✔ {_name[0]}{_name[1]}")
                         self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
                         _error = False
                 except OSError:
