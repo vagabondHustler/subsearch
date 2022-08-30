@@ -3,12 +3,13 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar
 
-from subsearch.data import __buttons__
-from subsearch.gui import tkdata
+from subsearch.data import __buttons__, __version__
+from subsearch.gui import tk_data
 
-TKCOLOR = tkdata.Color()
-TKFONT = tkdata.Font()
-TKWINDOW = tkdata.Window()
+TKCOLOR = tk_data.Color()
+TKFONT = tk_data.Font()
+TKWINDOW = tk_data.Window()
+TKMISC = tk_data.Misc()
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
@@ -19,72 +20,22 @@ def buttons(btn: str):
     return os.path.join(__buttons__, btn)
 
 
-# create custom labels and __buttons__ in grid
-class Create(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+def row_col_minsize(_widget, _width=18):
+    btn_size = tk.Button(_widget, width=_width, height=2)
+    x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
+    col_count, row_count = _widget.grid_size()
+    for col in range(col_count):
+        _widget.grid_columnconfigure(col, minsize=x)
 
-    # create a basic label
-    def label(
-        self,
-        bg=TKCOLOR.dark_grey,
-        fg=TKCOLOR.white_grey,
-        text=None,
-        textvar=None,
-        row=1,
-        col=1,
-        anchor=None,
-        sticky=None,
-        font=TKFONT.cas8b,
-        padx=2,
-        pady=2,
-    ):
-        _label = tk.Label(self, text=text, textvariable=textvar, font=font, fg=fg, anchor=anchor)
-        _label.configure(bg=bg, fg=fg, font=font)
-        _label.grid(row=row, column=col, sticky=sticky, padx=padx, pady=pady)
-        return _label
+    for row in range(row_count):
+        _widget.grid_rowconfigure(row, minsize=0)
 
-    # create a basic button
-    def button(
-        self,
-        widget_refrence=None,
-        bg=TKCOLOR.light_black,
-        abgc=TKCOLOR.orange,
-        bge=TKCOLOR.black,
-        fg=TKCOLOR.white_grey,
-        fge=TKCOLOR.orange,
-        text=None,
-        height=2,
-        width=10,
-        bd=0,
-        row=1,
-        col=3,
-        sticky=None,
-        font=TKFONT.cas8b,
-        padx=5,
-        pady=2,
-        bind_to=None,
-        tip_show=False,
-        tip_text="",
-    ):
-        _button = tk.Button(self, text=text, height=height, width=width, bd=bd)
-        _button.configure(activebackground=abgc, bg=bg, fg=fg, font=font)
-        _button.grid(row=row, column=col, padx=padx, pady=pady, sticky=sticky)
-        _button.bind("<Button-1>", bind_to)
-        tip = ToolTip(_button, _button, tip_text) if tip_show else None
 
-        def button_enter(self):
-            _button.configure(bg=bge, fg=fge, font=font)
-            tip.show() if tip_show else None
-
-        def button_leave(self):
-            _button.configure(bg=bg, fg=fg, font=font)
-            tip.hide() if tip is not None else None
-
-        _button.bind("<Enter>", button_enter)
-        _button.bind("<Leave>", button_leave)
-        return _button
+def add_cols(_widget):
+    for i in range(1, 4):
+        col = tk.Label(_widget, text=TKMISC.col58)
+        col.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        col.grid(row=1, column=i, sticky="w", padx=2, pady=2)
 
 
 # replace the regular windows-style title bar with a custom one
@@ -103,7 +54,7 @@ class CustomTitleBar(tk.Frame):
         # place SubSearch in bar
         self.subsearch_label = tk.Label(
             self.bar,
-            text="SubSearch",
+            text=f"Subsearch - v{__version__}",
             bg=TKCOLOR.light_black,
             fg=TKCOLOR.white_grey,
             font=TKFONT.cas10b,
