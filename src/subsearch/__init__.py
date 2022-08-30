@@ -9,7 +9,7 @@ from subsearch.data import (
     __video_name__,
     __video_path__,
 )
-from subsearch.gui import widget_download, widget_settings
+from subsearch.gui import widget_config, widget_downloads
 from subsearch.providers import opensubtitles, subscene
 from subsearch.utils import (
     current_user,
@@ -26,7 +26,7 @@ sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 
 
-class SubSearch:
+class Subsearch:
     def __init__(self) -> None:
         """
         Setup and gather all available parameters
@@ -39,36 +39,43 @@ class SubSearch:
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get_config_key("show_terminal")
         self.providers = raw_config.get_config_key("providers")
         self.file_exist = True if __video_name__ is not None else False
-        self.language, self.lang_code2 = raw_config.get_config_key("language")
+        self.current_language = raw_config.get_config_key("current_language")
+        self.languages = raw_config.get_config_key("languages")
         self.hi = raw_config.get_config_key("hearing_impaired")
         self.pct = raw_config.get_config_key("percentage")
         self.show_dl_win = raw_config.get_config_key("show_download_window")
         self.user_parameters = raw_config.UserParameters(
-            language=self.language,
-            lang_code2=self.lang_code2,
+            current_language=self.current_language,
             hearing_impaired=self.hi,
             pct=self.pct,
             show_dl_window=self.show_dl_win,
         )
         if self.file_exist:
             file_hash = file_manager.get_hash(__video_path__)
-            self.parameters = string_parser.get_parameters(__video_name__, file_hash, self.language, self.lang_code2)
+            self.parameters = string_parser.get_parameters(__video_name__, file_hash, self.current_language, self.languages)
             log.parameters(self.parameters, self.user_parameters)
             if " " in __video_name__:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
-            widget_settings.show_widget()
+            widget_config.show_widget()
 
     def opensubtitles_scrape(self) -> None:
         """
         Scrape on opensubtitles by filehash
         """
-        if self.file_exist and (self.providers['opensubtitles_hash'] or self.providers['opensubtitles_rss']):
+        if self.languages[self.current_language] == "N/A":
+            log.output("\n[Searching on opensubtitles]")
+            log.output(f"{self.current_language} not supported on opensubtitles\n")
+            self.opensubtitles_hash = None
+            self.opensubtitles_rss = None
+            self.opensubtitles_sorted_list = []
+            return
+        if self.file_exist and (self.providers["opensubtitles_hash"] or self.providers["opensubtitles_rss"]):
             _opensubtitles = opensubtitles.OpenSubtitles(self.parameters, self.user_parameters)
-            if self.providers['opensubtitles_hash']:
+            if self.providers["opensubtitles_hash"]:
                 log.output("\n[Searching on opensubtitles - hash]")
                 self.opensubtitles_hash = _opensubtitles.parse_hash()
-            if self.providers['opensubtitles_rss']:
+            if self.providers["opensubtitles_rss"]:
                 log.output("\n[Searching on opensubtitles - rss]")
                 self.opensubtitles_rss = _opensubtitles.parse_rss()
             self.opensubtitles_sorted_list = _opensubtitles.sorted_list()
@@ -82,6 +89,8 @@ class SubSearch:
             _subscene = subscene.Subscene(self.parameters, self.user_parameters)
             self.subscene = _subscene.parse()
             self.subscene_sorted_list = _subscene.sorted_list()
+        else:
+            self.subscene = None
 
     def process_files(self) -> None:
         """
@@ -93,23 +102,21 @@ class SubSearch:
         if self.file_exist is False:
             return None
 
-        if self.opensubtitles_hash is not None and self.providers['opensubtitles_hash']:
+        if self.providers["opensubtitles_hash"] and self.opensubtitles_hash is not None:
             log.output("\n[Downloading from opensubtitles - hash]")
             for item in self.opensubtitles_hash:
                 os_hash_dls = file_manager.download_subtitle(item)
                 log.output("\n")
 
-
-        if self.opensubtitles_rss is not None and self.providers["opensubtitles_rss"]:
+        if self.providers["opensubtitles_rss"] and self.opensubtitles_rss is not None:
             log.output("\n[Downloading from opensubtitles - rss]")
             for item in self.opensubtitles_rss:
-               os_rss_dls = file_manager.download_subtitle(item)
+                os_rss_dls = file_manager.download_subtitle(item)
 
-
-        if self.subscene is not None and self.providers["subscene"]:
+        if self.providers["subscene"] and self.subscene is not None:
             log.output("\n[Downloading from subscene]")
             for item in self.subscene:
-                ss_dls =file_manager.download_subtitle(item)
+                ss_dls = file_manager.download_subtitle(item)
 
         total_dls = os_hash_dls + os_rss_dls + ss_dls
         if self.show_dl_win and total_dls == 0:
@@ -118,7 +125,7 @@ class SubSearch:
             not_downloaded.sort(key=lambda x: x[0], reverse=True)
             if len(not_downloaded) > 0:
                 tmp_file = file_manager.write_not_downloaded_tmp(__video_directory__, not_downloaded)
-                widget_download.show_widget()
+                widget_downloads.show_widget()
                 file_manager.clean_up(__video_directory__, tmp_file)
 
         log.output("\n[Procsessing files]")
@@ -162,7 +169,7 @@ def con() -> None:
         for num, arg in enumerate(sys.argv[1:], 1):
             if arg.startswith("--settings"):
                 sys.argv.pop(num)  # pop settings argument
-                widget_settings.show_widget()
+                widget_config.show_widget()
                 break
             elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
                 if sys.argv[num + 1] == "add":
@@ -190,7 +197,7 @@ def main() -> None:
             con()
             return None
 
-    ss = SubSearch()
+    ss = Subsearch()
     ss.opensubtitles_scrape()
     ss.subscene_scrape()
     ss.process_files()
