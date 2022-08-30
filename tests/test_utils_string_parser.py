@@ -1,5 +1,6 @@
-from src.subsearch.utils import log, string_parser
+from src.subsearch.utils import log, raw_config, string_parser
 
+LANGUAGES = raw_config.get_config_key("languages")
 
 def test_str_parser_movie() -> None:
     """
@@ -30,11 +31,15 @@ def test_string_parser_movie() -> None:
     """
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
     """
+
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    param = string_parser.get_parameters(filename, None, "English", "en")
+    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
     log.tprint(param)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20(2021)"
-    assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    assert (
+        param.url_opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    )
     assert param.title == "the foo bar"
     assert param.year == 2021
     assert param.season == "N/A"
@@ -52,10 +57,13 @@ def test_string_parser_show() -> None:
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
     """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    param = string_parser.get_parameters(filename, None, "English", "en")
+    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
     log.tprint(param)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
-    assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    assert (
+        param.url_opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    )
     assert param.title == "the foo bar"
     assert param.year == "N/A"
     assert param.season == "01"
@@ -70,11 +78,16 @@ def test_string_parser_show() -> None:
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    param = string_parser.get_parameters(filename, None, "English", "en")
-    log.tprint(param)
+    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
 
-    assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264%20(N/A)"
-    assert param.url_opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%201080p%20web%20h264%20(N/A)/rss_2_00"
+    assert (
+        param.url_subscene
+        == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264%20(N/A)"
+    )
+    assert (
+        param.url_opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%201080p%20web%20h264%20(N/A)/rss_2_00"
+    )
     assert param.title == "the foo bar 1080p web h264"
     assert param.year == "N/A"
     assert param.season == "N/A"
