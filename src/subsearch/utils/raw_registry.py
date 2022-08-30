@@ -93,7 +93,7 @@ def get_command_value() -> str:
 def get_icon_value() -> str:
     from subsearch.utils import raw_config
 
-    show_icon: str = raw_config.get_config_key("cm_icon")
+    show_icon: str = raw_config.get_config_key("context_menu_icon")
     icon_path = os.path.join(__icons__, "16.ico")
     if show_icon:
         return icon_path
