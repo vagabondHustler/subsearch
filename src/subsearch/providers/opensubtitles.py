@@ -16,7 +16,7 @@ class OpenSubtitles(BaseProvider):
         self.check = BaseChecks()
 
     def parse_hash(self):
-        to_be_downloaded: list[str] | None = self.scrape.hash(self.url_hash, self.language, self.hearing_impaired)
+        to_be_downloaded: list[str] | None = self.scrape.hash(self.url_hash, self.current_language, self.hearing_impaired)
         if to_be_downloaded is None and self.series:
             log.output(f"No TV-series found matching hash {self.file_hash}")
             log.output(f"Done with tasks\n")
@@ -59,7 +59,6 @@ class OpenSubtitles(BaseProvider):
             log.output("Done with tasks\n")
             return None
 
-
         download_info = []
         tbd_lenght = len(to_be_downloaded)
         for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):
@@ -88,7 +87,7 @@ class OpenSubtitlesScrape:
             subtitles[release_name] = dl_url
         return subtitles
 
-    def hash(self, url: str, language: str, hearing_impaired: Union[str, bool]) -> list[str] | None:
+    def hash(self, url: str, current_language: str, hearing_impaired: Union[str, bool]) -> list[str] | None:
         download_url: list[str] = []
         doc = generic.get_lxml_doc(url, "lxml")
         doc_results = doc.find("table", id="search_results")
@@ -96,8 +95,8 @@ class OpenSubtitlesScrape:
             return None
         tr_name = doc_results.find_all("tr", id=lambda value: value and value.startswith("name"))
         for item in tr_name:
-            tl = [a["title"] for a in item.find_all("a", title=language)]
-            if language not in tl:
+            tl = [a["title"] for a in item.find_all("a", title=current_language)]
+            if current_language not in tl:
                 continue
             hi_site = item.find("img", alt="Subtitles for hearing impaired")
             if hi_site is not None and hearing_impaired is False:
