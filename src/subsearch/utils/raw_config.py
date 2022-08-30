@@ -1,11 +1,12 @@
 import json
+import os
 from typing import Any, NamedTuple, Union
 
 from subsearch.data import __data__
 
 
 # update config.json
-def set_config_json(key: str, value: Union[str, int, bool]) -> None:
+def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
@@ -15,7 +16,15 @@ def set_config_json(key: str, value: Union[str, int, bool]) -> None:
         f.truncate()
 
 
-def get_json() -> Any:
+def set_config(data):
+    config_file = os.path.join(__data__, "config.json")
+    with open(config_file, "w") as f:
+        f.seek(0)
+        json.dump(data, f, indent=4)
+        f.truncate()
+
+
+def get_config() -> Any:
     config_file = f"{__data__}\\config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
@@ -33,7 +42,6 @@ def get_config_key(key: str) -> Any:
 
         - User settings
 
-        "language: tuple", "languages: list", "other_languages: list",
         "hearing_impaired: bool | str", "percentage: int"
 
         - GUI stuff
@@ -45,26 +53,25 @@ def get_config_key(key: str) -> Any:
         Any: value
     """
     config_json_dict = {
-        "language": get_json()["language"].split(", "),
-        "languages": get_json()["languages"],
-        "other_languages": get_json()["other_languages"],
-        "hearing_impaired": get_json()["hearing_impaired"],
-        "percentage": get_json()["percentage_pass"],
-        "cm_icon": get_json()["context_menu_icon"],
-        "show_download_window": get_json()["show_download_window"],
-        "show_terminal": get_json()["show_terminal"],
-        "file_ext": get_json()["file_ext"],
-        "providers": get_json()["providers"],
+        "current_language": get_config()["current_language"],
+        "languages": get_config()["languages"],
+        "hearing_impaired": get_config()["hearing_impaired"],
+        "percentage": get_config()["percentage"],
+        "context_menu_icon": get_config()["context_menu_icon"],
+        "show_download_window": get_config()["show_download_window"],
+        "show_terminal": get_config()["show_terminal"],
+        "file_ext": get_config()["file_ext"],
+        "providers": get_config()["providers"],
     }
     return config_json_dict[f"{key}"]
 
 
 def set_default_json() -> None:
     # set default config.json values
-    data = get_json()
-    data["language"] = "English, en"
+    data = get_config()
+    data["current_language"] = "English"
     data["hearing_impaired"] = "Both"
-    data["percentage_pass"] = 90
+    data["percentage"] = 90
     data["context_menu_icon"] = True
     data["show_download_window"] = True
     data["show_terminal"] = False
@@ -78,8 +85,7 @@ def set_default_json() -> None:
 
 
 class UserParameters(NamedTuple):
-    language: str
-    lang_code2: str
+    current_language: str
     hearing_impaired: bool | str
     pct: int
     show_dl_window: bool

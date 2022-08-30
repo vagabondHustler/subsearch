@@ -23,7 +23,7 @@ class Subscene(BaseProvider):
                 to_be_scraped.append(value) if value not in (to_be_scraped) else None
             if self.check.try_the_year_before(key, self.title, self.year):
                 to_be_scraped.append(value) if value not in (to_be_scraped) else None
-            if self.check.is_series(key, self.title, self.season_ordinal, self.series, self.lang_code2):
+            if self.check.is_series(key, self.title, self.season_ordinal, self.series):
                 to_be_scraped.append(value) if value not in (to_be_scraped) else None
         log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
@@ -41,7 +41,7 @@ class Subscene(BaseProvider):
         while len(to_be_scraped) > 0:
             for subtitle_url in to_be_scraped:
                 log.output(f"[Searching for on subscene - subtitle]")
-                sub_keys = self.scrape.subtitle(self.language, self.hearing_impaired, subtitle_url)
+                sub_keys = self.scrape.subtitle(self.current_language, self.hearing_impaired, subtitle_url)
                 break
             for key, value in sub_keys.items():
                 number = string_parser.get_pct_value(key, self.release)
@@ -94,7 +94,7 @@ class SubsceneScrape:
                 break
         return titles
 
-    def subtitle(self, language: str, hearing_impaired: bool | str, url: str) -> dict[str, str]:
+    def subtitle(self, current_language: str, hearing_impaired: bool | str, url: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
         doc = generic.get_lxml_doc(url)
         tag_tbody = doc.find("tbody")
@@ -107,7 +107,7 @@ class SubsceneScrape:
             subtitle_language = class_a1.contents[1].contents[1].contents[0].strip()
             if hearing_impaired != "Both" and hearing_impaired != sub_hi:
                 continue
-            if language != subtitle_language:
+            if current_language.lower() != subtitle_language.lower():
                 continue
             release_name = class_a1.contents[1].contents[3].string.strip()
             release_name = release_name.replace(" ", ".")
