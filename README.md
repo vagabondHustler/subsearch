@@ -20,8 +20,6 @@
 - [Source](#src)
 - [Executable](#exe)
 - [Supported Languages](#lsupport)
-- [Other Languages](#not_support)
-- [File Extensions](#file_ext)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md)
 - [Reporting a Vulnerability](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
@@ -81,8 +79,6 @@ Add the context-menu
 
 `subsearch --registry-key add`
 
-Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
-
 More options
 
 `subsearch --help`
@@ -137,31 +133,13 @@ If you get a PUA message, click `More info`
 
 ![prtsc_runanyway](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
 
-Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
-
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
 
 ## Supported languages <a name = "lsupport"></a>
 
-`N/A` is not supported on opensubtitles
+`N/A` = not supported on opensubtitles
 
 `Albanian alb` `Arabic ara` `Armenian arm` `Azerbaijani aze` `Basque baq` `Belarusian bel` `Bosnian bos` `Brazillian-Portuguese pob` `Bulgarian bul` `Bulgarian-English N/A` `Burmese bur` `Cambodian-Khmer khm` `Catalan cat` `Chinese-BG-code zht` `Croatian hrv` `Czech cze` `Danish dan` `Dutch dut` `Dutch-English N/A` `English eng` `English-German N/A` `Esperanto epo` `Estonian est` `Finnish fin` `French fre` `Georgian geo` `German ger` `Greenlandic N/A` `Hebrew heb` `Hindi hin` `Hungarian hun` `Hungarian-English N/A` `Icelandic ice` `Indonesian ind` `Italian ita` `Japanese jpn` `Kannada kan` `Kinyarwanda N/A` `Korean kor` `Kurdish kur` `Latvian lav` `Lithuanian lit` `Macedonian mac` `Malayalam mal` `Manipuri mni` `Mongolian mon` `Nepali nep` `Norwegian nor` `Pashto N/A` `Punjabi N/A` `Romanian rum` `Russian rus` `Serbian scc` `Sinhala sin` `Slovak slo` `Slovenian slv` `Somali som` `Spanish spa` `Sundanese sun` `Swahili swa` `Swedish swe` `Tagalog tgl` `Tamil tam` `Telugu tel` `Thai tha` `Turkish tur` `Ukrainian ukr` `Urdu urd` `Vietnamese vie` `Yoruba N/A`
-
-## Other languages <a name = "not_support"></a>
-
-These languages are not tested at all, but should work if all the [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) are correct. These languages can be entered manually in the settings GUI, in the entry field `🞂 Enter language here 🞀` and then pressing the button Add, the button `...` brings up this list.
-
-![prtsc_oth_languages](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/other_languages_21123.png)
-
-## File extension <a name = "file_ext"></a>
-
-These are the file types that will have the option SubSearch
-
-`.avi`, `.mp4`, `.mkv`, `.mpg`, `.mpeg`, `.mov`, `.rm`, `.vob`, `.wmv`, `.flv`, `.3gp`, `.3g2`, `.swf`, `.mswmm`
-
-Associated extensions (Green = True, Red = False)
-
-![prtsc_ext](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/extensions_21332.png)
 
 ## Authors <a name = "authors"></a>
 
@@ -173,3 +151,4 @@ Associated extensions (Green = True, Red = False)
 - To the people at [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
 - To the people at [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
 - To the people at [psf/black](https://github.com/psf/black) for ways of doing workflow related tasks
+- To the people at [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) for amazing icons
