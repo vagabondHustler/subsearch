@@ -2,6 +2,7 @@ from src.subsearch.utils import log, raw_config, string_parser
 
 LANGUAGES = raw_config.get_config_key("languages")
 
+
 def test_str_parser_movie() -> None:
     """
     test so to ensure that the src/subsearch/utils/string_parser.pct_value function returns a with the correct percentage
