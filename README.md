@@ -16,7 +16,7 @@
 - [About](#about)
 - [Getting Started](#getting_started_src)
 - [Preview](#preview)
-- [PyPi](#PyPi)
+- [PyPi](#pypi)
 - [Source](#src)
 - [Executable](#exe)
 - [Supported Languages](#lsupport)
@@ -31,11 +31,12 @@
 
 - Automatically search, download and extract subtitles for any movie or show with one easy mouse click from the context menu.
 - Has a GUI for all the custom settings that can be configured.
-- For 69 different languages, of which 19 are fully supported and tested.
+- For 70 different languages, of which most work on all available subtitle sites.
 - Can be configured to include hearing impaired subtitles only, none-hearing impaired subtitles only or both.
 - Configure how strictly the file name has to match the search results.
 - Can be ran from a compiled executable, without the need for a Python interpreter and importing modules.
 - Subtitles are gathered from subscene and opensubtitles.
+- Pick where you get the subtitles from.
 - Works inside and outside of a env.
 
 This started as a fun project to learn how to code in python and how to use git, has now developed into a application I use daily and enjoy working on. There are many similar repositories out there that grab subtitles automatically from the web, so this might not be the most unique project. But feel free to check this one out, might offer something new. Have tried to make the setup processes as painless as possible with the use of as few external modules as possible. The average run time is around 1 second, a little bit longer for TV-Series due to the high amount of titles.
@@ -50,9 +51,13 @@ While searching for subs if show terminal is disabled
 
 ![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example_21224.gif)
 
-Settings menu and available options
+Available options in the widget
 
-![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_21651.png)
+![prtsc_language_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_language_settings_21752)
+
+![prtsc_search_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_search_settings_21752)
+
+![prtsc_app_settings](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_app_settings_21752)
 
 Download window with subtitles that were not downloaded
 
@@ -88,7 +93,7 @@ See [code block](#code) for imports
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
-Download SubScene
+Download subsearch
 
 `git clone https://github.com/vagabondHustler/subsearch.git`
 
@@ -99,11 +104,15 @@ Install package locally
 Code <a name = "code"></a>
 
 ```
-from subsearch import SubSearch
+from subsearch import Subsearch
+from subsearch.utils.raw_config import get_config, set_config
 
 
 def main() -> None:
-    ss = SubSearch
+    config = get_config()
+    config["providers"]["opensubtitles_hash"] = False
+    set_config(config)
+    ss = Subsearch()
     ss.subscene_scrape()
     ss.opensubtitles_scrape()
     ss.process_files()
@@ -112,14 +121,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 ```
 
-To access the settings, run main.py again
-
-Right-click on a video file that ends with [extensions](#file_ext) and press SubSearch to search
-
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from main.py
+`python -m main c:\users\vagabondhustler\desktop\foo.bar.the.movie.2022.1080p-foobar.mkv`
 
 ### Executable <a name = "exe"></a>
 
@@ -139,25 +143,9 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 
 ## Supported languages <a name = "lsupport"></a>
 
-- Arabic, `ar`
-- Brazillian Portuguese, `pt_BR`
-- Danish, `dk`
-- Dutch, `nl`
-- English, `en`
-- Finnish, `fi`
-- French, `fr`
-- German, `de`
-- Hebrew, `he`
-- Indonesian, `id`
-- Italian, `it`
-- Korean, `ko`
-- Norwegian, `no`
-- Romanian, `ro`
-- Spanish, `es`
-- Swedish, `sv`
-- Thai, `th`
-- Turkish, `tr`
-- Vietnamese, `vi`
+`N/A` is not supported on opensubtitles
+
+`Albanian alb` `Arabic ara` `Armenian arm` `Azerbaijani aze` `Basque baq` `Belarusian bel` `Bosnian bos` `Brazillian-Portuguese pob` `Bulgarian bul` `Bulgarian-English N/A` `Burmese bur` `Cambodian-Khmer khm` `Catalan cat` `Chinese-BG-code zht` `Croatian hrv` `Czech cze` `Danish dan` `Dutch dut` `Dutch-English N/A` `English eng` `English-German N/A` `Esperanto epo` `Estonian est` `Finnish fin` `French fre` `Georgian geo` `German ger` `Greenlandic N/A` `Hebrew heb` `Hindi hin` `Hungarian hun` `Hungarian-English N/A` `Icelandic ice` `Indonesian ind` `Italian ita` `Japanese jpn` `Kannada kan` `Kinyarwanda N/A` `Korean kor` `Kurdish kur` `Latvian lav` `Lithuanian lit` `Macedonian mac` `Malayalam mal` `Manipuri mni` `Mongolian mon` `Nepali nep` `Norwegian nor` `Pashto N/A` `Punjabi N/A` `Romanian rum` `Russian rus` `Serbian scc` `Sinhala sin` `Slovak slo` `Slovenian slv` `Somali som` `Spanish spa` `Sundanese sun` `Swahili swa` `Swedish swe` `Tagalog tgl` `Tamil tam` `Telugu tel` `Thai tha` `Turkish tur` `Ukrainian ukr` `Urdu urd` `Vietnamese vie` `Yoruba N/A`
 
 ## Other languages <a name = "not_support"></a>
 
