@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Literal
 
 from subsearch.data import __version__, __video_directory__
+from subsearch.utils import raw_config
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
 
@@ -44,10 +45,11 @@ def tprint(msg: str) -> None:
 
 def parameters(param: FileSearchParameters, user_parameters: UserParameters) -> None:
     # log and print all the used parameters from video/directory-name
-    lang_code3 = user_parameters.language[:3].lower()
+    languages = raw_config.get_config_key("languages")
+    lang_code3 = languages[user_parameters.current_language]
     output(f"[PARAMETERS]                [VALUES]")
     output(f"subsearch:                  v{__version__} ")
-    output(f"Language:                   {user_parameters.language}, {user_parameters.lang_code2}, {lang_code3}")
+    output(f"Language:                   {user_parameters.current_language}, {lang_code3}")
     output(f"Hearing impaired:           {user_parameters.hearing_impaired}")
     output(f"Title:                      {param.title}")
     output(f"Year:                       {param.year}")

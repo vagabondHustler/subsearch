@@ -5,14 +5,14 @@ from tkinter import ttk
 import sv_ttk
 
 from subsearch.data import __video_directory__
-from subsearch.gui import tkdata, widget_root
+from subsearch.gui import base_root, tk_data
 from subsearch.providers import subscene
 from subsearch.providers.generic import DownloadData
-from subsearch.utils import file_manager, string_parser
+from subsearch.utils import file_manager
 
-TKWINDOW = tkdata.Window()
-TKCOLOR = tkdata.Color()
-TKFONT = tkdata.Font()
+TKWINDOW = tk_data.Window()
+TKCOLOR = tk_data.Color()
+TKFONT = tk_data.Font()
 # file with subtitles and corresponding dl links
 def read_tmp_file():
     file = os.path.join(__video_directory__, "__subsearch__dl_data.tmp")
@@ -28,9 +28,9 @@ class DownloadList(tk.Frame):
         self.subscene_scrape = subscene.SubsceneScrape()
         self.extent = 0
         self.sublist = read_tmp_file()
-        self.hs = ttk.Scrollbar(root, orient="vertical", style="Vertical.TScrollbar")
+        self.hs = ttk.Scrollbar(base_root, orient="vertical", style="Vertical.TScrollbar")
         sub_listbox = tk.Listbox(
-            root,
+            base_root,
             bg=TKCOLOR.dark_grey,
             fg=TKCOLOR.light_grey,
             font=TKFONT.cas8b,
@@ -130,9 +130,10 @@ class DownloadList(tk.Frame):
 
 
 def show_widget():
-    global root
-    root = widget_root.main()
+    global base_root
+    base_root = base_root.main()
     sv_ttk.set_theme("dark")
-    DownloadList(root).pack(anchor="center")
-    tk.Frame(root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
-    root.mainloop()
+    DownloadList(base_root).pack(anchor="center")
+    tk.Frame(base_root, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
+
+    base_root.mainloop()

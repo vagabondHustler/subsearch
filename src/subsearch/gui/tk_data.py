@@ -7,8 +7,8 @@ class Window:
     Class for storing settings for window size.
     """
 
-    width: int = 700
-    height: int = 700
+    width: int = 738
+    height: int = 720
 
 
 @dataclass(frozen=True, order=True)
@@ -30,9 +30,10 @@ class Color:
     green_brown: str = "#a59256"
     grey: str = "#4c4c4c"
     light_grey: str = "#727272"
-    dark_grey: str = "#1A1A1A"
     silver_grey: str = "#8a8a8a"
     white_grey: str = "#bdbdbd"
+    dark_grey: str = "#1A1A1A"
+    mid_grey_black: str = "#111111"
     light_black: str = "#0e0e0e"
     black: str = "#151515"
     dark_black: str = "#000000"
