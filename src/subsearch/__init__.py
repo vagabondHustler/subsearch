@@ -9,7 +9,7 @@ from subsearch.data import (
     __video_name__,
     __video_path__,
 )
-from subsearch.gui import widget_config, widget_downloads
+from subsearch.gui import widget_downloads, widget_menu
 from subsearch.providers import opensubtitles, subscene
 from subsearch.utils import (
     current_user,
@@ -57,7 +57,7 @@ class Subsearch:
             if " " in __video_name__:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
-            widget_config.show_widget()
+            widget_menu.show_widget()
 
     def opensubtitles_scrape(self) -> None:
         """
@@ -169,7 +169,7 @@ def con() -> None:
         for num, arg in enumerate(sys.argv[1:], 1):
             if arg.startswith("--settings"):
                 sys.argv.pop(num)  # pop settings argument
-                widget_config.show_widget()
+                widget_menu.show_widget()
                 break
             elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
                 if sys.argv[num + 1] == "add":
