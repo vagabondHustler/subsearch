@@ -28,6 +28,7 @@ class SelectLanguage(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CURRENT_LANGUAGE}")
         number_of_buttons = len(LANGUAGES)
+        self.btns = []
         self.rownum = 0
         self.colnum = 0
         self.btn_active = None
@@ -53,18 +54,24 @@ class SelectLanguage(tk.Frame):
                 btn.configure(fg=TKCOLOR.yellow)
                 self.btn_active = btn
 
-            # btn.bind("<Button-1>", self.enter_button)
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
             tk_tools.row_col_minsize(self, 18)
 
+        
     def enter_button(self, event):
         btn = event.widget
+        if LANGUAGES[btn["text"]] == 'N/A':
+            tip_text = "N/A with opensubtitles, provider will be skipped on search"
+            self.tip = tk_tools.ToolTip(btn, btn, tip_text)
+            self.tip.show()
         btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.orange)
         btn.bind("<ButtonRelease>", self.set_current_language)
 
     def leave_button(self, event):
         btn = event.widget
+        if LANGUAGES[btn["text"]] == 'N/A':
+            self.tip.hide()
         btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.white_grey)
         if btn["text"] == self.string_var.get():
             btn.configure(fg=TKCOLOR.yellow)
