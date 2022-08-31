@@ -299,12 +299,18 @@ class ToolTip(tk.Toplevel):
         x, y = label.winfo_reqwidth(), label.winfo_reqheight()
         # set the size of the tooltip background to be 1px larger than the label
         frame.configure(width=x + 1, height=y + 1)
+        
+        widget_pos = self.widget.winfo_rootx()
+        widget_width = self.widget.winfo_reqwidth()
+        widget_center = round(widget_width/2)
+        btn_pos_middle = widget_pos + widget_center
+        frame_width = frame.winfo_reqwidth()
+        frame_center = round(frame_width / 2)
+        center_tip_over_mouse = btn_pos_middle - frame_center
         # offset the frame 1px from edge of the tooltip corner
         frame.place(x=1, y=1, anchor="nw")
         label.place(x=0, y=0, anchor="nw")
-        root_x = (
-            self.widget.winfo_rootx() + self.widget.winfo_width() + 4
-        )  # offset the tooltip by extra 4px so it doesn't overlap the widget
+        root_x = center_tip_over_mouse   # offset the tooltip by extra 4px so it doesn't overlap the widget
         root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
