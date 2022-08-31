@@ -85,13 +85,13 @@
         ".mpeg": true,
         ".mov": true,
         ".rm": true,
-        ".vob": false,
+        ".vob": true,
         ".wmv": true,
-        ".flv": false,
-        ".3gp": false,
-        ".3g2": false,
-        ".swf": false,
-        ".mswmm": false
+        ".flv": true,
+        ".3gp": true,
+        ".3g2": true,
+        ".swf": true,
+        ".mswmm": true
     },
     "providers": {
         "subscene": true,
