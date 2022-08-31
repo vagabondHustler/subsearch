@@ -1,8 +1,6 @@
-include docs\requirements.txt
-include docs\dev_requirements.txt
-include docs\optional_requirement.txt
+include docs\*.txt
 include assets\*.png
-include src\subsearch\data\*.json
+include src\subsearch\data\config.json
 include src\subsearch\assets\buttons\*.png
 include src\subsearch\assets\icons\*.ico
 
