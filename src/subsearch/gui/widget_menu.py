@@ -907,35 +907,35 @@ class Footer(tk.Frame):
         canvas.photoimage = img
 
 
-class LanguageWindow(tk.Frame):
+class TabLanguageSettings(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        SelectLanguage(self).pack(anchor="center")
+        tab_language.SelectLanguage(self).pack(anchor="center")
 
 
-class SearchWindow(tk.Frame):
+class TabSearchSettings(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        Providers(self).pack(anchor="center")
-        HearingImparedSubs(self).pack(anchor="center")
-        SearchThreshold(self).pack(anchor="center")
+        tab_search.Providers(self).pack(anchor="center")
+        tab_search.HearingImparedSubs(self).pack(anchor="center")
+        tab_search.SearchThreshold(self).pack(anchor="center")
 
 
-class SettingsWindow(tk.Frame):
+class TabSubsearchSettings(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        FileExtensions(self).pack(anchor="center")
+        tab_subsearch.FileExtensions(self).pack(anchor="center")
         tk.Frame(self, height=80, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
-        ShowContextMenu(self).pack(anchor="center")
-        ShowContextMenuIcon(self).pack(anchor="center")
-        ShowDownloadWindow(self).pack(anchor="center")
+        tab_subsearch.ShowContextMenu(self).pack(anchor="center")
+        tab_subsearch.ShowContextMenuIcon(self).pack(anchor="center")
+        tab_subsearch.ShowDownloadWindow(self).pack(anchor="center")
         if current_user.check_is_exe() is False:
-            ShowTerminalOnSearch(self).pack(anchor="center")
+            tab_subsearch.ShowTerminalOnSearch(self).pack(anchor="center")
         tk.Frame(self, height=20, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
-        CheckForUpdates(self).pack(anchor="center")
+        tab_subsearch.CheckForUpdates(self).pack(anchor="center")
 
 
 def show_widget():
