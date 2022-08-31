@@ -1,9 +1,15 @@
 import tkinter as tk
 import webbrowser
 
-from subsearch.data import __data__, __version__
-from subsearch.gui import base_root, tk_data, tk_tools
-from subsearch.utils import current_user, raw_config, raw_registry, updates
+from subsearch.gui import (
+    base_root,
+    tab_language,
+    tab_search,
+    tab_subsearch,
+    tk_data,
+    tk_tools,
+)
+from subsearch.utils import current_user
 
 TKWINDOW = tk_data.Window()
 TKCOLOR = tk_data.Color()
