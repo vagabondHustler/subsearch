@@ -939,18 +939,15 @@ class TabSubsearchSettings(tk.Frame):
 
 
 def show_widget():
-    global base_root, language_window, search_window, settings_window
-    if current_user.got_key() is False:
-        raw_config.set_default_json()
-        raw_registry.add_context_menu()
+    global _tab_language, _tab_search, _subsearch_tab
 
-    base_root = base_root.main()
-    content = tk.Frame(base_root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 120)
+    root = base_root.main()
+    content = tk.Frame(root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 120)
     content.place(x=2, y=40)
-    language_window = LanguageWindow(content)
-    search_window = SearchWindow(content)
-    settings_window = SettingsWindow(content)
-    footer = Footer(base_root)
+    _tab_language = TabLanguageSettings(content)
+    _tab_search = TabSearchSettings(content)
+    _subsearch_tab = TabSubsearchSettings(content)
+    footer = Footer(root)
     footer.place(x=2, y=TKWINDOW.height - 82)
 
-    base_root.mainloop()
+    root.mainloop()
