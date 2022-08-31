@@ -842,74 +842,64 @@ class Footer(tk.Frame):
         self.active_window = "language"
         self.activate_window()
 
-    def release_search(self, event):
+    def release_tab(self, event):
+        if event.widget == self.language:
+            self.active_window = "language"
+            _tab_language.place(relx=0.5, rely=0.5, anchor="center")
+            self.update_img(self.language, self.language_white_png)
+        if event.widget == self.search:
         self.active_window = "search"
-        self.activate_window()
-
-    def release_settings(self, event):
+            _tab_search.place(relx=0.5, rely=0.5, anchor="center")
+            self.update_img(self.search, self.search_white_png)
+        if event.widget == self.settings:
         self.active_window = "settings"
-        self.activate_window()
+            _subsearch_tab.place(relx=0.5, rely=0.5, anchor="center")
+            self.update_img(self.settings, self.settings_white_png)
+        self.deactivate_tabs()
 
-    def press_language(self, event):
-        self.language.bind("<ButtonRelease>", self.release_language)
+    def press_tab(self, event):
+        if event.widget == self.language:
+            self.language.bind("<ButtonRelease>", self.release_tab)
         self.update_img(self.language, self.language_white_png, y=20)
-
-    def press_search(self, event):
-        self.search.bind("<ButtonRelease>", self.release_search)
+        if event.widget == self.search:
+            self.search.bind("<ButtonRelease>", self.release_tab)
         self.update_img(self.search, self.search_white_png, y=20)
-
-    def press_settings(self, event):
-        self.settings.bind("<ButtonRelease>", self.release_settings)
+        if event.widget == self.settings:
+            self.settings.bind("<ButtonRelease>", self.release_tab)
         self.update_img(self.settings, self.settings_white_png, y=20)
 
-    def activate_window(self):
-        # language window
-        if self.active_window == "language":
-            language_window.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.language, self.language_white_png)
-        else:
-            language_window.place(relx=1, rely=0.5, anchor="nw")
+    def deactivate_tabs(self):
+        if self.active_window != "language":
+            _tab_language.place(relx=1, rely=0.5, anchor="nw")
             self.update_img(self.language, self.language_grey_png)
 
-        # search window
-        if self.active_window == "search":
-            search_window.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.search, self.search_white_png)
-        else:
-            search_window.place(relx=1, rely=0.5, anchor="nw")
+        if self.active_window != "search":
+            _tab_search.place(relx=1, rely=0.5, anchor="nw")
             self.update_img(self.search, self.search_grey_png)
 
-        # settings window
-        if self.active_window == "settings":
-            settings_window.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.settings, self.settings_white_png)
-        else:
-            settings_window.place(relx=1, rely=0.5, anchor="nw")
+        if self.active_window != "settings":
+            _subsearch_tab.place(relx=1, rely=0.5, anchor="nw")
             self.update_img(self.settings, self.settings_grey_png)
 
-    def enter_search(self, event):
-        self.search.bind("<ButtonPress>", self.press_search)
+    def enter_tab(self, event):
+        if event.widget == self.language:
+            self.language.bind("<ButtonPress>", self.press_tab)
+            self.update_img(self.language, self.language_silver_png, y=25)
+        if event.widget == self.search:
+            self.search.bind("<ButtonPress>", self.press_tab)
         self.update_img(self.search, self.search_silver_png, y=25)
+        if event.widget == self.settings:
+            self.settings.bind("<ButtonPress>", self.press_tab)
+            self.update_img(self.settings, self.settings_silver_png, y=25)
 
-    def leave_search(self, event):
+    def leave_tab(self, event):
+        if event.widget == self.language:
+            self.language.unbind("<ButtonPress>")
+        if event.widget == self.search:
         self.search.unbind("<ButtonPress>")
-        self.activate_window()
-
-    def enter_settings(self, event):
-        self.settings.bind("<ButtonPress>", self.press_settings)
-        self.update_img(self.settings, self.settings_silver_png, y=25)
-
-    def leave_settings(self, event):
+        if event.widget == self.settings:
         self.settings.unbind("<ButtonPress>")
-        self.activate_window()
-
-    def enter_language(self, event):
-        self.language.bind("<ButtonPress>", self.press_language)
-        self.update_img(self.language, self.language_silver_png, y=25)
-
-    def leave_language(self, event):
-        self.language.unbind("<ButtonPress>")
-        self.activate_window()
+        self.deactivate_tabs()
 
     def update_img(self, canvas, img, x=27, y=27):
         canvas.delete("all")
