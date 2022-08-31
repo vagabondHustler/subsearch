@@ -9,18 +9,17 @@ from subsearch.gui import tk_data
 TKCOLOR = tk_data.Color()
 TKFONT = tk_data.Font()
 TKWINDOW = tk_data.Window()
-TKMISC = tk_data.Misc()
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
 
 
-def buttons(btn: str):
+def get_button_path(btn: str):
     return os.path.join(__buttons__, btn)
 
 
-def row_col_minsize(_widget, _width=18):
+def set_default_grid_size(_widget, _width=18):
     btn_size = tk.Button(_widget, width=_width, height=2)
     x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
     col_count, row_count = _widget.grid_size()
@@ -31,21 +30,13 @@ def row_col_minsize(_widget, _width=18):
         _widget.grid_rowconfigure(row, minsize=0)
 
 
-def add_cols(_widget):
-    for i in range(1, 4):
-        col = tk.Label(_widget, text=TKMISC.col58)
-        col.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
-        col.grid(row=1, column=i, sticky="w", padx=2, pady=2)
-
-
-# replace the regular windows-style title bar with a custom one
 class CustomTitleBar(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self._offsetx = 0
         self._offsety = 0
         self.parent = parent
-        self.after(10, self.remove_old_tb(), self.parent)
+        self.after(10, self.set_deiconify(), self.parent)
         self.parent.focus_force()
         self.parent.overrideredirect(True)
         # place new bar at top of window
@@ -63,11 +54,11 @@ class CustomTitleBar(tk.Frame):
         )
         self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
         # png paths
-        self.exit_path = buttons("exit.png")
-        self.tab_path = buttons("tab.png")
-        self.exit_grey_path = buttons("exit_grey.png")
-        self.tab_grey_path = buttons("tab_grey.png")
-        self.max_ina_path = buttons("maximize_inactive.png")
+        self.exit_path = get_button_path("exit.png")
+        self.tab_path = get_button_path("tab.png")
+        self.exit_grey_path = get_button_path("exit_grey.png")
+        self.tab_grey_path = get_button_path("tab_grey.png")
+        self.max_ina_path = get_button_path("maximize_inactive.png")
         # PhotoImages
         self.tab_png = tk.PhotoImage(file=self.tab_path)
         self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)
@@ -106,25 +97,25 @@ class CustomTitleBar(tk.Frame):
         self.update_img(self.tab, self.tab_grey_png)
         # binds
         # bind label for dragging around window
-        self.subsearch_label.bind("<Button-1>", self.tb_press)
-        self.subsearch_label.bind("<B1-Motion>", self.tb_drag)
+        self.subsearch_label.bind("<Button-1>", self.press_titlebar)
+        self.subsearch_label.bind("<B1-Motion>", self.drag_titlebar)
         # bind titlebar for dragging around window
-        self.bar.bind("<Button-1>", self.tb_press)
-        self.bar.bind("<B1-Motion>", self.tb_drag)
+        self.bar.bind("<Button-1>", self.press_titlebar)
+        self.bar.bind("<B1-Motion>", self.drag_titlebar)
         # bind exit to close window and update png
-        self.exit.bind("<Enter>", self.exit_enter)
-        self.exit.bind("<Leave>", self.exit_leave)
+        self.exit.bind("<Enter>", self.enter_exit)
+        self.exit.bind("<Leave>", self.leave_exit)
         # bind tab to tab window and update png
-        self.tab.bind("<Enter>", self.tab_enter)
-        self.tab.bind("<Leave>", self.tab_leave)
-        self.parent.bind("<Enter>", self.parent_enter)
-        self.parent.bind("<Leave>", self.parent_leave)
+        self.tab.bind("<Enter>", self.enter_tab)
+        self.tab.bind("<Leave>", self.leave_tab)
+        self.parent.bind("<Enter>", self.enter_parent)
+        self.parent.bind("<Leave>", self.leave_parent)
 
         # hide 1px Frame
         self.place(relx=1, rely=1, anchor="n")
         self.configure(bg=TKCOLOR.green)
 
-    def window_pos(self, parent, w: int = 80, h: int = 48):
+    def get_window_pos(self, parent, w: int = 80, h: int = 48):
         ws = parent.winfo_screenwidth()
         hs = parent.winfo_screenheight()
 
@@ -133,7 +124,7 @@ class CustomTitleBar(tk.Frame):
         value = f"{w}x{h}+{x}+{y}"
         return value
 
-    def remove_old_tb(self):
+    def set_deiconify(self):
         hwnd = ctypes.windll.user32.GetParent(self.parent.winfo_id())
         style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
         style = style & ~WS_EX_TOOLWINDOW
@@ -142,11 +133,11 @@ class CustomTitleBar(tk.Frame):
         self.parent.withdraw()
         self.parent.after(100, lambda: self.parent.wm_deiconify())
 
-    def tb_press(self, event):
+    def press_titlebar(self, event):
         self._offsetx = self.parent.winfo_pointerx() - self.parent.winfo_rootx()
         self._offsety = self.parent.winfo_pointery() - self.parent.winfo_rooty()
 
-    def tb_drag(self, event):
+    def drag_titlebar(self, event):
         x = self.winfo_pointerx() - self._offsetx
         y = self.winfo_pointery() - self._offsety
         self.parent.geometry(f"+{x}+{y}")
@@ -165,41 +156,41 @@ class CustomTitleBar(tk.Frame):
         self.parent.iconify()
         self.parent.bind("<FocusIn>", self.check_window_state)
 
-    def exit_release(self, event):
+    def release_exit(self, event):
         self.parent.destroy()
 
-    def exit_press(self, event):
+    def press_exit(self, event):
         self.exit.configure(bg=TKCOLOR.dark_red)
-        self.exit.bind("<ButtonRelease-1>", self.exit_release)
+        self.exit.bind("<ButtonRelease-1>", self.release_exit)
 
-    def exit_enter(self, event):
+    def enter_exit(self, event):
         self.exit.configure(bg=TKCOLOR.red)
         self.update_img(self.exit, self.exit_png)
-        self.exit.bind("<ButtonPress-1>", self.exit_press)
+        self.exit.bind("<ButtonPress-1>", self.press_exit)
 
-    def exit_leave(self, event):
+    def leave_exit(self, event):
         self.exit.configure(bg=TKCOLOR.light_black)
         self.update_img(self.exit, self.exit_grey_png)
         self.exit.unbind("<ButtonRelease-1>")
 
-    def tab_press(self, event):
+    def press_tab(self, event):
         self.tab.configure(bg=TKCOLOR.light_grey)
         self.tab.bind("<ButtonRelease-1>", self.tabbing)
 
-    def tab_enter(self, event):
+    def enter_tab(self, event):
         self.tab.configure(bg=TKCOLOR.dark_grey)
         self.update_img(self.tab, self.tab_png)
-        self.tab.bind("<ButtonPress-1>", self.tab_press)
+        self.tab.bind("<ButtonPress-1>", self.press_tab)
 
-    def tab_leave(self, event):
+    def leave_tab(self, event):
         self.tab.configure(bg=TKCOLOR.light_black)
         self.update_img(self.tab, self.tab_grey_png)
         self.tab.unbind("<ButtonRelease-1>")
 
-    def parent_enter(self, event):
+    def enter_parent(self, event):
         self.parent.attributes("-topmost", False)
 
-    def parent_leave(self, evnt):
+    def leave_parent(self, evnt):
         self.parent.attributes("-topmost", True)
 
     def update_img(self, canvas, img):
@@ -208,7 +199,6 @@ class CustomTitleBar(tk.Frame):
         canvas.photoimage = img
 
 
-# create a custom border for window
 class CustomBorder(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -228,7 +218,6 @@ class CustomBorder(tk.Frame):
         self.configure(bg=TKCOLOR.light_black)
 
 
-# get the window position so it can be placed in the center of the screen
 class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -248,7 +237,6 @@ class WindowPosition(tk.Frame):
         return value
 
 
-# pick a appropriate color for StringVar based on the string
 class ColorPicker:
     def __init__(self, string_var: StringVar, clabel: Label, pct: int = -1):
         self.string_var = string_var
