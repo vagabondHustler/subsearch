@@ -19,7 +19,7 @@ class Footer(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.mid_grey_black, width=TKWINDOW.width - 4, height=80)
-        
+
         self.language_grey_path = tk_tools.get_button_path("language_grey.png")
         self.search_grey_path = tk_tools.get_button_path("search_grey.png")
         self.settings_grey_path = tk_tools.get_button_path("settings_grey.png")
@@ -31,19 +31,19 @@ class Footer(tk.Frame):
         self.language_white_path = tk_tools.get_button_path("language_white.png")
         self.search_white_path = tk_tools.get_button_path("search_white.png")
         self.settings_white_path = tk_tools.get_button_path("settings_white.png")
-        
+
         self.language_grey_png = tk.PhotoImage(file=self.language_grey_path)
         self.search_grey_png = tk.PhotoImage(file=self.search_grey_path)
         self.settings_grey_png = tk.PhotoImage(file=self.settings_grey_path)
-        
+
         self.language_silver_png = tk.PhotoImage(file=self.language_silver_path)
         self.search_silver_png = tk.PhotoImage(file=self.search_silver_path)
         self.settings_silver_png = tk.PhotoImage(file=self.settings_silver_path)
-        
+
         self.language_white_png = tk.PhotoImage(file=self.language_white_path)
         self.search_white_png = tk.PhotoImage(file=self.search_white_path)
         self.settings_white_png = tk.PhotoImage(file=self.settings_white_path)
-        
+
         self.language = tk.Canvas(
             self,
             width=54,
@@ -72,11 +72,11 @@ class Footer(tk.Frame):
         self.language.bind("<Enter>", self.enter_tab)
         self.search.bind("<Enter>", self.enter_tab)
         self.settings.bind("<Enter>", self.enter_tab)
-        
+
         self.language.bind("<Leave>", self.leave_tab)
         self.search.bind("<Leave>", self.leave_tab)
         self.settings.bind("<Leave>", self.leave_tab)
-        
+
         self.update_img(self.language, self.language_grey_png)
         self.update_img(self.search, self.search_grey_png)
         self.update_img(self.settings, self.settings_grey_png)
@@ -163,7 +163,7 @@ class TabSearchSettings(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_search.Providers(self).pack(anchor="center")
-        tab_search.HearingImparedSubs(self).pack(anchor="center")
+        tab_search.HearingImpairedSubs(self).pack(anchor="center")
         tab_search.SearchThreshold(self).pack(anchor="center")
 
 

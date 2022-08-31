@@ -84,7 +84,7 @@ class Providers(tk.Frame):
         raw_config.set_config(self.data)
 
 
-class HearingImparedSubs(tk.Frame):
+class HearingImpairedSubs(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
