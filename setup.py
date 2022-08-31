@@ -1,3 +1,3 @@
 from setuptools import setup
 
-setup()
+setup(package_data={"": ["*requirements.txt", "config.json", "*.png", "*.ico"]})
