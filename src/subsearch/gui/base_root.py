@@ -1,14 +1,17 @@
 import tkinter as tk
 
-from subsearch.data import __icons__, __version__
+from subsearch.data import __icons__
 from subsearch.gui import tk_data, tk_tools
+from subsearch.utils import current_user, raw_config, raw_registry
 
 TKWINDOW = tk_data.Window()
 TKCOLOR = tk_data.Color()
 
 
 def main():
-    global root
+    if current_user.got_key() is False:
+        raw_config.set_default_json()
+        raw_registry.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=TKCOLOR.black)
     icon_path = f"{__icons__}\\16.ico"
