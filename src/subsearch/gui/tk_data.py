@@ -52,12 +52,3 @@ class Font:
     cas10b: str = "Cascadia 10 bold"
     cas11: str = "Cascadia 11"
     cas20b: str = "Cascadia 20 bold"
-
-
-@dataclass(frozen=True, order=True)
-class Misc:
-    """
-    Class for storing misc settings.
-    """
-
-    col58: str = " " * 58
