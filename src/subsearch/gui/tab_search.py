@@ -1,5 +1,6 @@
 import tkinter as tk
 
+from subsearch.data import __set_video__
 from subsearch.gui import tk_data, tk_tools
 from subsearch.utils import raw_config
 

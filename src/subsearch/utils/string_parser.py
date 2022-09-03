@@ -79,12 +79,12 @@ class FileSearchParameters:
     series: bool
     release: str
     group: str
-    file_hash: Optional[str]
+    file_hash: str | None
     definitive_match: str
 
 
 def get_parameters(
-    filename: str, file_hash: Optional[str], current_language: str, languages: dict[str, str]
+    filename: str, file_hash: str | None, current_language: str, languages: dict[str, str]
 ) -> FileSearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles

@@ -157,3 +157,4 @@ src/*subs/
 tests/__subsearch__.log
 old*
 scripts/git_branch.py
+src/subsearch/assets/tabs.ai

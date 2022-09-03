@@ -4,14 +4,14 @@ import sys
 from datetime import datetime
 from typing import Literal
 
-from subsearch.data import __version__, __video_directory__
+from subsearch.data import __version__, __video__
 from subsearch.utils import raw_config
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
 
 CWD = os.getcwd()
-if __video_directory__ is not None:
-    CWD = __video_directory__
+if __video__.directory is not None:
+    CWD = __video__.directory
 
 
 NOW = datetime.now()

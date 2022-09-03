@@ -3,13 +3,8 @@ import os
 import sys
 import time
 
-from subsearch.data import (
-    __version__,
-    __video_directory__,
-    __video_name__,
-    __video_path__,
-)
-from subsearch.gui import widget_downloads, widget_menu
+from subsearch.data import __version__, __video__
+from subsearch.gui import widget_menu
 from subsearch.providers import opensubtitles, subscene
 from subsearch.utils import (
     current_user,
@@ -38,7 +33,8 @@ class Subsearch:
             raw_registry.add_context_menu()
         self.show_terminal = False if current_user.check_is_exe() else raw_config.get_config_key("show_terminal")
         self.providers = raw_config.get_config_key("providers")
-        self.file_exist = True if __video_name__ is not None else False
+
+        self.file_exist = True if __video__.name is not None else False
         self.current_language = raw_config.get_config_key("current_language")
         self.languages = raw_config.get_config_key("languages")
         self.hi = raw_config.get_config_key("hearing_impaired")
@@ -51,13 +47,16 @@ class Subsearch:
             show_dl_window=self.show_dl_win,
         )
         if self.file_exist:
-            file_hash = file_manager.get_hash(__video_path__)
-            self.parameters = string_parser.get_parameters(__video_name__, file_hash, self.current_language, self.languages)
+            self.file_hash = file_manager.get_hash(__video__.path)
+            self.parameters = string_parser.get_parameters(
+                __video__.name, self.file_hash, self.current_language, self.languages
+            )
             log.parameters(self.parameters, self.user_parameters)
-            if " " in __video_name__:
+            if " " in __video__.name:
                 log.output("[Warning: Filename contains spaces]")
         if self.file_exist is False:
-            widget_menu.show_widget()
+            widget_menu.open_tab("search")
+            return None
 
     def opensubtitles_scrape(self) -> None:
         """
@@ -72,7 +71,7 @@ class Subsearch:
             return
         if self.file_exist and (self.providers["opensubtitles_hash"] or self.providers["opensubtitles_rss"]):
             _opensubtitles = opensubtitles.OpenSubtitles(self.parameters, self.user_parameters)
-            if self.providers["opensubtitles_hash"]:
+            if self.providers["opensubtitles_hash"] and self.file_hash is not None:
                 log.output("\n[Searching on opensubtitles - hash]")
                 self.opensubtitles_hash = _opensubtitles.parse_hash()
             if self.providers["opensubtitles_rss"]:
@@ -124,15 +123,15 @@ class Subsearch:
             not_downloaded.extend(x for x in self.subscene_sorted_list if x not in not_downloaded)
             not_downloaded.sort(key=lambda x: x[0], reverse=True)
             if len(not_downloaded) > 0:
-                tmp_file = file_manager.write_not_downloaded_tmp(__video_directory__, not_downloaded)
-                widget_downloads.show_widget()
-                file_manager.clean_up(__video_directory__, tmp_file)
+                tmp_file = file_manager.write_not_downloaded_tmp(__video__.directory, not_downloaded)
+                widget_menu.open_tab("download")
+                file_manager.clean_up(__video__.directory, tmp_file)
 
         log.output("\n[Procsessing files]")
-        file_manager.extract_files(__video_directory__, ".zip")
-        file_manager.clean_up(__video_directory__, ".zip")
-        file_manager.clean_up(__video_directory__, ").nfo")
-        file_manager.rename_best_match(f"{self.parameters.release}.srt", __video_directory__, ".srt")
+        file_manager.extract_files(__video__.directory, ".zip")
+        file_manager.clean_up(__video__.directory, ".zip")
+        file_manager.clean_up(__video__.directory, ").nfo")
+        file_manager.rename_best_match(f"{self.parameters.release}.srt", __video__.directory, ".srt")
 
     def end(self) -> None:
         """
@@ -153,42 +152,52 @@ def con() -> None:
     Usages: subsearch [OPTIONS]
 
     Options:
-        --settings                                  Open the GUI settings menu
+        --settings [lang, search, app, dl]        Open the GUI settings menu
+                                                            lang: opens tab with available languages
+                                                            search: opens tab with settings such as available providers
+                                                            app: opens tab with app settings
+                                                            dl: opens tab for subtitles not downloaded
 
-        --registry-key [add, del]                   Edit the registry
-                                                    add: adds the context menu  / replaces the context menu with default values
-                                                    del: deletes the context menu
-                                                    e.g: subsearch --registry-key add
+        --registry-key [add, del]                           Edit the registry
+                                                            add: adds the context menu  / replaces the context menu with default values
+                                                            del: deletes the context menu
+                                                            e.g: subsearch --registry-key add
 
-        --help                                      Prints usage information
+        --help                                              Prints usage information
     """
-    if sys.argv[-1].endswith("subsearch"):
-        print(con.__doc__)
-        return
-    else:
-        for num, arg in enumerate(sys.argv[1:], 1):
-            if arg.startswith("--settings"):
-                sys.argv.pop(num)  # pop settings argument
-                widget_menu.show_widget()
+
+    for num, arg in enumerate(sys.argv[1:], 1):
+        if arg.startswith("--settings"):
+            if sys.argv[num + 1] == "lang":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("language")
+            elif sys.argv[num + 1] == "search":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("search")
+            elif sys.argv[num + 1] == "app":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("settings")
+            elif sys.argv[num + 1] == "dl":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("download")
+
+            break
+        elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
+            if sys.argv[num + 1] == "add":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                raw_registry.add_context_menu()
                 break
-            elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
-                if sys.argv[num + 1] == "add":
-                    sys.argv.pop(num)  # pop registry argument
-                    sys.argv.pop(num)  # pop add argument
-                    raw_registry.add_context_menu()
-                    break
-                elif sys.argv[num + 1] == "del":
-                    sys.argv.pop(num)  # pop registry argument
-                    sys.argv.pop(num)  # pop del argument
-                    raw_registry.remove_context_menu()
-                    break
-            elif arg.startswith("--help"):
-                sys.argv.pop(num)  # pop help argument
-                print(con.__doc__)
+            elif sys.argv[num + 1] == "del":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                raw_registry.remove_context_menu()
                 break
-            elif len(sys.argv[1:]) == num:
-                print("Invalid argument")
-                print(con.__doc__)
+        elif arg.startswith("--help"):
+            sys.argv.pop(num)  # pop argument
+            print(con.__doc__)
+            break
+        elif len(sys.argv[1:]) == num:
+            print("Invalid argument")
+            print(con.__doc__)
 
 
 def main() -> None:
@@ -197,11 +206,11 @@ def main() -> None:
             con()
             return None
 
-    ss = Subsearch()
-    ss.opensubtitles_scrape()
-    ss.subscene_scrape()
-    ss.process_files()
-    ss.end()
+    step = Subsearch()
+    step.opensubtitles_scrape()
+    step.subscene_scrape()
+    step.process_files()
+    step.end()
 
 
 if __name__ == "__main__":
