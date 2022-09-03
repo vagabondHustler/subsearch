@@ -4,7 +4,7 @@ import sys
 import winreg
 from typing import Literal
 
-from subsearch.data import __icons__, __root__
+from subsearch.data import __home__, __icons__
 from subsearch.utils import current_user
 
 COMPUTER_NAME = socket.gethostname()
@@ -80,7 +80,7 @@ def get_command_value() -> str:
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('Subsearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; os.chdir(r'{__root__}');"
+        set_wd = f"import os; os.chdir(r'{__home__}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" "%1"'
