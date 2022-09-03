@@ -8,6 +8,7 @@ added_files = [
 added_binaries = [
         ('..\\src\\subsearch\\assets\\icons\\*.ico', 'subsearch\\assets\\icons\\'),
         ('..\\src\\subsearch\\assets\\buttons\\*.png', 'subsearch\\assets\\buttons\\')
+        ('..\\src\\subsearch\\assets\\tabs\\*.png', 'subsearch\\assets\\tabs\\')
         ]
 
 a = Analysis(
