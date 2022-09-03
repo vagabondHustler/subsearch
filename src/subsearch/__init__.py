@@ -153,37 +153,47 @@ def con() -> None:
     Usages: subsearch [OPTIONS]
 
     Options:
-        --settings                                  Open the GUI settings menu
+        --settings [language, search, app, download]  Open the GUI settings menu
+                                                            language: opens tab with available languages
+                                                            search: opens tab with settings such as available providers
+                                                            app: opens tab with app settings
+                                                            download: opens tab for subtitles not downloaded
 
-        --registry-key [add, del]                   Edit the registry
+        --registry-key [add, del]                           Edit the registry
                                                     add: adds the context menu  / replaces the context menu with default values
                                                     del: deletes the context menu
                                                     e.g: subsearch --registry-key add
 
-        --help                                      Prints usage information
+        --help                                              Prints usage information
     """
-    if sys.argv[-1].endswith("subsearch"):
-        print(con.__doc__)
-        return
-    else:
+
         for num, arg in enumerate(sys.argv[1:], 1):
             if arg.startswith("--settings"):
-                sys.argv.pop(num)  # pop settings argument
-                widget_menu.show_widget()
+            if sys.argv[num + 1] == "language":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("language")
+            elif sys.argv[num + 1] == "search":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("search")
+            elif sys.argv[num + 1] == "app":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("app")
+            elif sys.argv[num + 1] == "download":
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                widget_menu.open_tab("download")
+
                 break
             elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
                 if sys.argv[num + 1] == "add":
-                    sys.argv.pop(num)  # pop registry argument
-                    sys.argv.pop(num)  # pop add argument
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                     raw_registry.add_context_menu()
                     break
                 elif sys.argv[num + 1] == "del":
-                    sys.argv.pop(num)  # pop registry argument
-                    sys.argv.pop(num)  # pop del argument
+                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                     raw_registry.remove_context_menu()
                     break
             elif arg.startswith("--help"):
-                sys.argv.pop(num)  # pop help argument
+            sys.argv.pop(num)  # pop argument
                 print(con.__doc__)
                 break
             elif len(sys.argv[1:]) == num:
