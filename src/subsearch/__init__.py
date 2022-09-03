@@ -176,7 +176,7 @@ def con() -> None:
                 widget_menu.open_tab("search")
             elif sys.argv[num + 1] == "app":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                widget_menu.open_tab("app")
+                widget_menu.open_tab("settings")
             elif sys.argv[num + 1] == "dl":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                 widget_menu.open_tab("download")
