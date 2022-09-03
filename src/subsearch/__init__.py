@@ -3,13 +3,8 @@ import os
 import sys
 import time
 
-from subsearch.data import (
-    __version__,
-    __video_directory__,
-    __video_name__,
-    __video_path__,
-)
-from subsearch.gui import widget_downloads, widget_menu
+from subsearch.data import __version__, __video__
+from subsearch.gui import widget_menu
 from subsearch.providers import opensubtitles, subscene
 from subsearch.utils import (
     current_user,
