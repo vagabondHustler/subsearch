@@ -5,12 +5,13 @@ from itertools import product
 
 @dataclass(order=True)
 class VideoFileData:
-    name: str
-    ext: str
-    path: str
-    directory: str
+    name: str | None
+    ext: str |None
+    path: str | None
+    directory: str | None
 
-def get_video_file_data() -> VideoFileData | None:
+
+def get_video_file_data() -> VideoFileData:
 
     """
     Set path, name, directory and ext for the video file
