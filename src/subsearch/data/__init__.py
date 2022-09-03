@@ -7,7 +7,7 @@ from .__paths__ import (
     __gui__,
     __icons__,
     __root__,
-    __scraper__,
+    __tabs__,
     __utils__,
 )
 from .__version__ import __version__
