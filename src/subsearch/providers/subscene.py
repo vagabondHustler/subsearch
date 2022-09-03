@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from subsearch.data import __video_directory__
+from subsearch.data import __video__
 from subsearch.providers import generic
 from subsearch.providers.generic import SCRAPER, BaseChecks, BaseProvider, DownloadData
 from subsearch.utils import log, string_parser
@@ -66,7 +66,7 @@ class Subscene(BaseProvider):
         tbd_lenght = len(to_be_downloaded)
         for zip_idx, (zip_name, _zip_url) in enumerate(to_be_downloaded.items(), start=1):
             zip_url = self.scrape.download_url(_zip_url)
-            zip_fp = f"{__video_directory__}\\__subsearch__subscene_{zip_idx}.zip"
+            zip_fp = f"{__video__.directory}\\__subsearch__subscene_{zip_idx}.zip"
             data = DownloadData(name=zip_name, file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
             download_info.append(data)
         log.output("Done with tasks\n")

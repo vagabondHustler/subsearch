@@ -1,7 +1,7 @@
 import re
 from typing import Union
 
-from subsearch.data import __video_directory__
+from subsearch.data import __video__
 from subsearch.providers import generic
 from subsearch.providers.generic import BaseChecks, BaseProvider, DownloadData
 from subsearch.utils import log, string_parser
@@ -30,7 +30,7 @@ class OpenSubtitles(BaseProvider):
         log.output(f"Preparing  hash {self.file_hash} for download")
         tbd_lenght = len(to_be_downloaded)
         for zip_idx, zip_url in enumerate(to_be_downloaded, start=1):
-            zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
+            zip_fp = f"{__video__.directory}\\__subsearch__opensubtitles_{zip_idx}.zip"
             data = DownloadData(file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
             download_info.append(data)
         log.output(f"Done with tasks\n")
@@ -62,7 +62,7 @@ class OpenSubtitles(BaseProvider):
         download_info = []
         tbd_lenght = len(to_be_downloaded)
         for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):
-            zip_fp = f"{__video_directory__}\\__subsearch__opensubtitles_{zip_idx}.zip"
+            zip_fp = f"{__video__.directory}\\__subsearch__opensubtitles_{zip_idx}.zip"
             data = DownloadData(name=zip_name, file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght)
             download_info.append(data)
         log.output("Done with tasks\n")
