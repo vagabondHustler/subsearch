@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar
 
-from subsearch.data import __buttons__, __version__
+from subsearch.data import __buttons__, __tabs__, __version__
 from subsearch.gui import tk_data
 
 TKCOLOR = tk_data.Color()
@@ -15,8 +15,18 @@ WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
 
 
-def get_button_path(btn: str):
+def get_btn_png(btn: str):
     return os.path.join(__buttons__, btn)
+
+
+def get_tabs_png(tab: str):
+    return os.path.join(__tabs__, tab)
+
+
+def calculate_btn_size(_widget, _width=18, _height=2):
+    generic_btn = tk.Button(_widget, width=_width, height=_height)
+    x, y = generic_btn.winfo_reqwidth(), generic_btn.winfo_reqheight()
+    return x, y
 
 
 def set_default_grid_size(_widget, _width=18):
@@ -54,11 +64,11 @@ class CustomTitleBar(tk.Frame):
         )
         self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
         # png paths
-        self.exit_path = get_button_path("exit.png")
-        self.tab_path = get_button_path("tab.png")
-        self.exit_grey_path = get_button_path("exit_grey.png")
-        self.tab_grey_path = get_button_path("tab_grey.png")
-        self.max_ina_path = get_button_path("maximize_inactive.png")
+        self.exit_path = get_btn_png("exit.png")
+        self.tab_path = get_btn_png("tab.png")
+        self.exit_grey_path = get_btn_png("exit_grey.png")
+        self.tab_grey_path = get_btn_png("tab_grey.png")
+        self.max_ina_path = get_btn_png("maximize_inactive.png")
         # PhotoImages
         self.tab_png = tk.PhotoImage(file=self.tab_path)
         self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)
@@ -287,10 +297,10 @@ class ToolTip(tk.Toplevel):
         x, y = label.winfo_reqwidth(), label.winfo_reqheight()
         # set the size of the tooltip background to be 1px larger than the label
         frame.configure(width=x + 1, height=y + 1)
-        
+
         widget_pos = self.widget.winfo_rootx()
         widget_width = self.widget.winfo_reqwidth()
-        widget_center = round(widget_width/2)
+        widget_center = round(widget_width / 2)
         btn_pos_middle = widget_pos + widget_center
         frame_width = frame.winfo_reqwidth()
         frame_center = round(frame_width / 2)
@@ -298,7 +308,7 @@ class ToolTip(tk.Toplevel):
         # offset the frame 1px from edge of the tooltip corner
         frame.place(x=1, y=1, anchor="nw")
         label.place(x=0, y=0, anchor="nw")
-        root_x = center_tip_over_mouse   # offset the tooltip by extra 4px so it doesn't overlap the widget
+        root_x = center_tip_over_mouse  # offset the tooltip by extra 4px so it doesn't overlap the widget
         root_y = self.widget.winfo_rooty() - self.widget.winfo_height() - 4
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
