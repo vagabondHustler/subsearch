@@ -74,7 +74,9 @@ def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
     return file_dst
 
 
-def get_hash(file_path: str) -> str | None:
+def get_hash(file_path: str | None) -> str | None:
+    if file_path is None:
+        return None
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
