@@ -22,7 +22,6 @@ def download_subtitle(data: DownloadData) -> int:
 
 
 def extract_files(cwd: str, extension: str) -> None:
-    # extract all zip file in said directory
     subs_folder = os.path.join(cwd, "subs")
     if not os.path.exists(subs_folder):
         os.mkdir(subs_folder)
@@ -36,7 +35,6 @@ def extract_files(cwd: str, extension: str) -> None:
 
 
 def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
-    # rename a .srts to the same as video release name
     higest_value = (0, "")
     subs_folder = os.path.join(cwd, "subs")
     for file in os.listdir(subs_folder):
@@ -57,7 +55,6 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
         shutil.move(move_src, move_dst)
 
 
-# remove .zips
 def clean_up(cwd: str, extension: str) -> None:
     for file in os.listdir(cwd):
         if file.startswith("__subsearch__") and file.endswith(extension):
@@ -77,8 +74,9 @@ def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
     return file_dst
 
 
-# get file hash
-def get_hash(file_path: str) -> str | None:
+def get_hash(file_path: str | None) -> str | None:
+    if file_path is None:
+        return None
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
