@@ -152,11 +152,11 @@ def con() -> None:
     Usages: subsearch [OPTIONS]
 
     Options:
-        --settings [language, search, app, download]  Open the GUI settings menu
-                                                            language: opens tab with available languages
+        --settings [lang, search, app, dl]        Open the GUI settings menu
+                                                            lang: opens tab with available languages
                                                             search: opens tab with settings such as available providers
                                                             app: opens tab with app settings
-                                                            download: opens tab for subtitles not downloaded
+                                                            dl: opens tab for subtitles not downloaded
 
         --registry-key [add, del]                           Edit the registry
                                                             add: adds the context menu  / replaces the context menu with default values
@@ -168,7 +168,7 @@ def con() -> None:
 
     for num, arg in enumerate(sys.argv[1:], 1):
         if arg.startswith("--settings"):
-            if sys.argv[num + 1] == "language":
+            if sys.argv[num + 1] == "lang":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                 widget_menu.open_tab("language")
             elif sys.argv[num + 1] == "search":
@@ -177,7 +177,7 @@ def con() -> None:
             elif sys.argv[num + 1] == "app":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                 widget_menu.open_tab("app")
-            elif sys.argv[num + 1] == "download":
+            elif sys.argv[num + 1] == "dl":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
                 widget_menu.open_tab("download")
 
