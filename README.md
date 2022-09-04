@@ -51,7 +51,7 @@ While searching for subs if show terminal is disabled
 
 Available options in the widget
 
-![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_22054.png.png)
+![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_22054.png)
 
 ![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_22054.png)
 
