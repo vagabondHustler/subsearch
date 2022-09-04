@@ -121,7 +121,7 @@ class DownloadList(tk.Frame):
                         file_manager.clean_up(__video__.directory, ".zip")
                         file_manager.clean_up(__video__.directory, ").nfo")
                         self.sub_listbox.delete(int(number))
-                        self.sub_listbox.insert(int(number), f"✔ {_name[0]}{_name[1]}")
+                        self.sub_listbox.insert(int(number), f"✔ {_name[0]} {_name[1]}")
                         self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
                         _error = False
                 except OSError:
