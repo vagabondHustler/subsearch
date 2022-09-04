@@ -51,15 +51,13 @@ While searching for subs if show terminal is disabled
 
 Available options in the widget
 
-![prtsc_language_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_settings_21752.png)
+![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_22054.png.png)
 
-![prtsc_search_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_settings_21752.png)
+![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_22054.png)
 
-![prtsc_app_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_app_settings_21752.png)
+![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_settings_22054.png)
 
-Download window with subtitles that were not downloaded
-
-![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_dlw_2918.png)
+![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_download_22054.png)
 
 </div>
 
