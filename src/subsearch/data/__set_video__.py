@@ -6,7 +6,7 @@ from itertools import product
 @dataclass(order=True)
 class VideoFileData:
     name: str | None
-    ext: str |None
+    ext: str | None
     path: str | None
     directory: str | None
 
@@ -46,6 +46,6 @@ def get_video_file_data() -> VideoFileData:
             break
 
     if file_exist:
-        return  VideoFileData(name, ext, path, directory)
+        return VideoFileData(name, ext, path, directory)
     else:
         return VideoFileData(None, None, None, None)
