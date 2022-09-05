@@ -40,8 +40,8 @@ class Subscene(BaseProvider):
         to_be_sorted: list[tuple[int, str, str]] = []
         while len(to_be_scraped) > 0:
             for subtitle_url in to_be_scraped:
-                log.output(f"[Searching for on subscene - subtitle]")
-                sub_keys = self.scrape.subtitle(self.current_language, self.hearing_impaired, subtitle_url)
+                log.output(f"[Searching on subscene - subtitle]")
+                sub_keys = self.scrape.subtitle(self.current_language, self.hi_sub, self.non_hi_sub, subtitle_url)
                 break
             for key, value in sub_keys.items():
                 number = string_parser.get_pct_value(key, self.release)
@@ -94,7 +94,7 @@ class SubsceneScrape:
                 break
         return titles
 
-    def subtitle(self, current_language: str, hearing_impaired: bool | str, url: str) -> dict[str, str]:
+    def subtitle(self, current_language: str, hi_sub: bool, regular_sub: bool, url: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
         doc = generic.get_lxml_doc(url)
         tag_tbody = doc.find("tbody")
@@ -103,9 +103,11 @@ class SubsceneScrape:
             tag_tbody = doc.find("tbody")
         tag_td = tag_tbody.find_all("td", class_="a1")
         for class_a1 in tag_td:
-            sub_hi = self.check.is_subtitle_hearing_impaired(class_a1)
+            is_sub_hi = self.check.is_subtitle_hearing_impaired(class_a1)
             subtitle_language = class_a1.contents[1].contents[1].contents[0].strip()
-            if hearing_impaired != "Both" and hearing_impaired != sub_hi:
+            if hi_sub and regular_sub is False and is_sub_hi is False:
+                continue
+            if hi_sub is False and regular_sub and is_sub_hi:
                 continue
             if current_language.lower() != subtitle_language.lower():
                 continue
