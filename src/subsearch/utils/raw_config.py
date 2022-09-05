@@ -70,7 +70,7 @@ def set_default_json() -> None:
     # set default config.json values
     data = get_config()
     data["current_language"] = "English"
-    data["hearing_impaired"] = "Both"
+    data["subtitle_type"] = dict.fromkeys(data["subtitle_type"], True)
     data["percentage"] = 90
     data["context_menu_icon"] = True
     data["show_download_window"] = True
