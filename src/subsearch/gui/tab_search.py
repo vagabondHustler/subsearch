@@ -173,7 +173,7 @@ class SubtitleType(tk.Frame):
         if hi_sub and nonhi_sub is False:
             self.string_var.set(f"Only HI")
         if hi_sub is False and nonhi_sub:
-            self.string_var.set(f"Only none-HI")
+            self.string_var.set(f"Only non-HI")
         tk_tools.ColorPicker(self.string_var, self.clabel)
 
 
