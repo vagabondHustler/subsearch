@@ -206,7 +206,8 @@ class TabSearch(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_search.Providers(self).pack(anchor="center")
-        tab_search.HearingImpairedSubs(self).pack(anchor="center")
+        tk.Frame(self, height=80, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
+        tab_search.SubtitleType(self).pack(anchor="center")
         tab_search.SearchThreshold(self).pack(anchor="center")
 
 
@@ -247,5 +248,4 @@ def open_tab(active_tab: str):
         TabDownload(content, conx, cony),
     )
     footer.place(x=2, y=TKWINDOW.height - 82)
-
     root.mainloop()
