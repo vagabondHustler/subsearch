@@ -1,14 +1,15 @@
 import sys
 from dataclasses import dataclass
 from itertools import product
+from typing import Any
 
 
 @dataclass(order=True)
 class VideoFileData:
-    name: str | None
-    ext: str | None
-    path: str | None
-    directory: str | None
+    name: str | Any
+    ext: str | Any
+    path: str | Any
+    directory: str | Any
 
 
 def get_video_file_data() -> VideoFileData:
