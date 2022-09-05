@@ -70,7 +70,8 @@ class BaseProvider:
         self.definitive_match = parameters.definitive_match
         # user parameters
         self.current_language = user_parameters.current_language
-        self.hearing_impaired = user_parameters.hearing_impaired
+        self.hi_sub = user_parameters.hearing_impaired
+        self.non_hi_sub = user_parameters.non_hearing_impaired
         self.pct = user_parameters.pct
         self.show_download_window = user_parameters.show_dl_window
         # sorted_list
@@ -118,12 +119,12 @@ class BaseChecks:
 
     def is_subtitle_hearing_impaired(self, a1: Tag) -> bool | None:
         a1_parent = a1.parent
-        class_a40 = a1_parent.find("td", class_="a40")  # non-hearing impaired
-        class_a41 = a1_parent.find("td", class_="a41")  # hearing imparted
-        if class_a40 is None:
-            return True
-        elif class_a41 is None:
+        regular_subtitle = a1_parent.find("td", class_="a40")  # regular
+        hearing_impaired_subtitle = a1_parent.find("td", class_="a41")  # hearing impaired
+        if regular_subtitle is not None:
             return False
+        elif hearing_impaired_subtitle is not None:
+            return True
         return None
 
     def to_many_requests(body: Tag):

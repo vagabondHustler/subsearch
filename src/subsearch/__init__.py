@@ -37,12 +37,13 @@ class Subsearch:
         self.file_exist = True if __video__.name is not None else False
         self.current_language = raw_config.get_config_key("current_language")
         self.languages = raw_config.get_config_key("languages")
-        self.hi = raw_config.get_config_key("hearing_impaired")
+        self.subtitle_type = raw_config.get_config_key("subtitle_type")
         self.pct = raw_config.get_config_key("percentage")
         self.show_dl_win = raw_config.get_config_key("show_download_window")
         self.user_parameters = raw_config.UserParameters(
             current_language=self.current_language,
-            hearing_impaired=self.hi,
+            hearing_impaired=self.subtitle_type["hearing_impaired"],
+            non_hearing_impaired=self.subtitle_type["non_hearing_impaired"],
             pct=self.pct,
             show_dl_window=self.show_dl_win,
         )
