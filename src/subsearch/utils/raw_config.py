@@ -55,7 +55,7 @@ def get_config_key(key: str) -> Any:
     config_json_dict = {
         "current_language": get_config()["current_language"],
         "languages": get_config()["languages"],
-        "hearing_impaired": get_config()["hearing_impaired"],
+        "subtitle_type": get_config()["subtitle_type"],
         "percentage": get_config()["percentage"],
         "context_menu_icon": get_config()["context_menu_icon"],
         "show_download_window": get_config()["show_download_window"],
@@ -86,6 +86,7 @@ def set_default_json() -> None:
 
 class UserParameters(NamedTuple):
     current_language: str
-    hearing_impaired: bool | str
+    hearing_impaired: bool
+    non_hearing_impaired: bool
     pct: int
     show_dl_window: bool
