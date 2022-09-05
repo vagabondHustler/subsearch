@@ -40,21 +40,29 @@ def set_default_grid_size(_widget, _width=18):
         _widget.grid_rowconfigure(row, minsize=0)
 
 
-class CustomTitleBar(tk.Frame):
-    def __init__(self, parent):
+class TitleBar(tk.Frame):
+    def __init__(self, parent, root):
         tk.Frame.__init__(self, parent)
-        self._offsetx = 0
-        self._offsety = 0
+        self.configure(height=37, width=TKWINDOW.width, bg=TKCOLOR.light_black)
+
+        self.root = root
         self.parent = parent
-        self.after(10, self.set_deiconify(), self.parent)
-        self.parent.focus_force()
-        self.parent.overrideredirect(True)
-        # place new bar at top of window
-        self.bar = tk.Frame(height=37, width=TKWINDOW.width, bg=TKCOLOR.light_black)
-        self.bar.place(x=0, y=0)
-        # place SubSearch in bar
+
+        self.exit_path = get_btn_png("exit.png")
+        self.tab_path = get_btn_png("tab.png")
+
+        self.exit_grey_path = get_btn_png("exit_grey.png")
+        self.tab_grey_path = get_btn_png("tab_grey.png")
+        self.maximize_path = get_btn_png("maximize_inactive.png")
+
+        self.tab_png = tk.PhotoImage(file=self.tab_path)
+        self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)
+        self.exit_png = tk.PhotoImage(file=self.exit_path)
+        self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
+        self.maximize_png = tk.PhotoImage(file=self.maximize_path)
+
         self.subsearch_label = tk.Label(
-            self.bar,
+            self,
             text=f"Subsearch - v{__version__}",
             bg=TKCOLOR.light_black,
             fg=TKCOLOR.white_grey,
@@ -62,151 +70,96 @@ class CustomTitleBar(tk.Frame):
             justify="center",
             anchor="w",
         )
-        self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
-        # png paths
-        self.exit_path = get_btn_png("exit.png")
-        self.tab_path = get_btn_png("tab.png")
-        self.exit_grey_path = get_btn_png("exit_grey.png")
-        self.tab_grey_path = get_btn_png("tab_grey.png")
-        self.max_ina_path = get_btn_png("maximize_inactive.png")
-        # PhotoImages
-        self.tab_png = tk.PhotoImage(file=self.tab_path)
-        self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)
-        self.exit_png = tk.PhotoImage(file=self.exit_path)
-        self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
-        self.max_ina_png = tk.PhotoImage(file=self.max_ina_path)
-        # place exit canvas and image
-        self.exit = tk.Canvas(
-            self.bar,
-            width=37,
-            height=37,
-            bg=TKCOLOR.light_black,
-            highlightthickness=0,
-        )
-        self.exit.place(relx=1, rely=0, anchor="ne")
-        self.update_img(self.exit, self.exit_grey_png)
-        # place maximize canvas and image
-        self.maximize = tk.Canvas(
-            self.bar,
-            width=37,
-            height=37,
-            bg=TKCOLOR.light_black,
-            highlightthickness=0,
-        )
-        self.maximize.place(x=TKWINDOW.width - 37, rely=0, anchor="ne")
-        self.update_img(self.maximize, self.max_ina_png)
-        # place tab canvas and image
         self.tab = tk.Canvas(
-            self.bar,
+            self,
             width=37,
             height=37,
             bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
+        self.maximize = tk.Canvas(
+            self,
+            width=37,
+            height=37,
+            bg=TKCOLOR.light_black,
+            highlightthickness=0,
+        )
+        self.exit = tk.Canvas(
+            self,
+            width=37,
+            height=37,
+            bg=TKCOLOR.light_black,
+            highlightthickness=0,
+        )
+        self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
+        self.maximize.place(x=TKWINDOW.width - 37, rely=0, anchor="ne")
+        self.exit.place(relx=1, rely=0, anchor="ne")
         self.tab.place(x=TKWINDOW.width - 74, rely=0, anchor="ne")
+
         self.update_img(self.tab, self.tab_grey_png)
-        # binds
-        # bind label for dragging around window
+        self.update_img(self.maximize, self.maximize_png)
+        self.update_img(self.exit, self.exit_grey_png)
+
         self.subsearch_label.bind("<Button-1>", self.press_titlebar)
         self.subsearch_label.bind("<B1-Motion>", self.drag_titlebar)
-        # bind titlebar for dragging around window
-        self.bar.bind("<Button-1>", self.press_titlebar)
-        self.bar.bind("<B1-Motion>", self.drag_titlebar)
-        # bind exit to close window and update png
-        self.exit.bind("<Enter>", self.enter_exit)
-        self.exit.bind("<Leave>", self.leave_exit)
-        # bind tab to tab window and update png
-        self.tab.bind("<Enter>", self.enter_tab)
-        self.tab.bind("<Leave>", self.leave_tab)
-        self.parent.bind("<Enter>", self.enter_parent)
-        self.parent.bind("<Leave>", self.leave_parent)
 
-        # hide 1px Frame
-        self.place(relx=1, rely=1, anchor="n")
-        self.configure(bg=TKCOLOR.green)
+        self.bind("<Button-1>", self.press_titlebar)
+        self.bind("<B1-Motion>", self.drag_titlebar)
 
-    def get_window_pos(self, parent, w: int = 80, h: int = 48):
-        ws = parent.winfo_screenwidth()
-        hs = parent.winfo_screenheight()
+        self.tab.bind("<Enter>", self.enter_event)
+        self.exit.bind("<Enter>", self.enter_event)
 
-        x = int((ws / 2) - (w / 2))
-        y = int((hs / 2) - (h / 2))
-        value = f"{w}x{h}+{x}+{y}"
-        return value
+        self.tab.bind("<Leave>", self.leave_event)
+        self.exit.bind("<Leave>", self.leave_event)
 
-    def set_deiconify(self):
-        hwnd = ctypes.windll.user32.GetParent(self.parent.winfo_id())
-        style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
-        style = style & ~WS_EX_TOOLWINDOW
-        style = style | WS_EX_APPWINDOW
-        res = ctypes.windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
-        self.parent.withdraw()
-        self.parent.after(100, lambda: self.parent.wm_deiconify())
+    def update_img(self, canvas, img):
+        canvas.delete("all")
+        canvas.create_image(18, 18, image=img)
+        canvas.photoimage = img
 
     def press_titlebar(self, event):
-        self._offsetx = self.parent.winfo_pointerx() - self.parent.winfo_rootx()
-        self._offsety = self.parent.winfo_pointery() - self.parent.winfo_rooty()
+        self._offsetx = self.winfo_pointerx() - self.winfo_rootx()
+        self._offsety = self.winfo_pointery() - self.winfo_rooty()
 
     def drag_titlebar(self, event):
         x = self.winfo_pointerx() - self._offsetx
         y = self.winfo_pointery() - self._offsety
         self.parent.geometry(f"+{x}+{y}")
 
-    def check_window_state(self, event):
-        if event.widget == self.parent and self.parent.state() == "normal":
-            self.parent.overrideredirect(True)
-            self.parent.attributes("-alpha", 1)
-            self.parent.deiconify()
+    def release_event(self, event):
+        if event.widget == self.tab:
+            self.parent.wm_withdraw()
+            self.root.wm_state("iconic")
+        if event.widget == self.exit:
+            self.root.destroy()
 
-    def tabbing(self, event):
-        self.parent.attributes("-topmost", False)
-        self.parent.wm_attributes("-transparentcolor", TKCOLOR.black)
-        self.parent.attributes("-alpha", 0.1)
-        self.parent.overrideredirect(False)
-        self.parent.iconify()
-        self.parent.bind("<FocusIn>", self.check_window_state)
+    def press_event(self, event):
+        if event.widget == self.tab:
+            self.tab.configure(bg=TKCOLOR.light_grey)
+            self.tab.bind("<ButtonRelease-1>", self.release_event)
+        if event.widget == self.exit:
+            self.exit.configure(bg=TKCOLOR.dark_red)
+            self.exit.bind("<ButtonRelease-1>", self.release_event)
 
-    def release_exit(self, event):
-        self.parent.destroy()
+    def enter_event(self, event):
+        if event.widget == self.tab:
+            self.tab.configure(bg=TKCOLOR.dark_grey)
+            self.update_img(self.tab, self.tab_png)
+            self.tab.bind("<ButtonPress-1>", self.press_event)
+        if event.widget == self.exit:
+            self.exit.configure(bg=TKCOLOR.red)
+            self.update_img(self.exit, self.exit_png)
+            self.exit.bind("<ButtonPress-1>", self.press_event)
 
-    def press_exit(self, event):
-        self.exit.configure(bg=TKCOLOR.dark_red)
-        self.exit.bind("<ButtonRelease-1>", self.release_exit)
-
-    def enter_exit(self, event):
-        self.exit.configure(bg=TKCOLOR.red)
-        self.update_img(self.exit, self.exit_png)
-        self.exit.bind("<ButtonPress-1>", self.press_exit)
-
-    def leave_exit(self, event):
-        self.exit.configure(bg=TKCOLOR.light_black)
-        self.update_img(self.exit, self.exit_grey_png)
-        self.exit.unbind("<ButtonRelease-1>")
-
-    def press_tab(self, event):
-        self.tab.configure(bg=TKCOLOR.light_grey)
-        self.tab.bind("<ButtonRelease-1>", self.tabbing)
-
-    def enter_tab(self, event):
-        self.tab.configure(bg=TKCOLOR.dark_grey)
-        self.update_img(self.tab, self.tab_png)
-        self.tab.bind("<ButtonPress-1>", self.press_tab)
-
-    def leave_tab(self, event):
-        self.tab.configure(bg=TKCOLOR.light_black)
-        self.update_img(self.tab, self.tab_grey_png)
-        self.tab.unbind("<ButtonRelease-1>")
-
-    def enter_parent(self, event):
-        self.parent.attributes("-topmost", False)
-
-    def leave_parent(self, evnt):
-        self.parent.attributes("-topmost", True)
-
-    def update_img(self, canvas, img):
-        canvas.delete("all")
-        canvas.create_image(18, 18, image=img)
-        canvas.photoimage = img
+    def leave_event(self, event):
+        if event.widget == self.tab:
+            self.tab.configure(bg=TKCOLOR.light_black)
+            self.update_img(self.tab, self.tab_grey_png)
+            self.tab.unbind("<ButtonRelease-1>")
+        if event.widget == self.exit:
+            self.exit.configure(bg=TKCOLOR.light_black)
+            self.update_img(self.exit, self.exit_grey_png)
+            self.exit.unbind("<ButtonRelease-1>")
 
 
 class CustomBorder(tk.Frame):
@@ -232,18 +185,14 @@ class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
 
-    def set(
-        self,
-        w=TKWINDOW.width,
-        h=TKWINDOW.height,
-        ws_value_offset=0,
-        hs_value_offset=0,
-    ):
+    def set(self, w=TKWINDOW.width, h=TKWINDOW.height, ws_value_offset=0, hs_value_offset=0, other: bool = False):
         ws = self.winfo_screenwidth() + ws_value_offset
         hs = self.winfo_screenheight() + hs_value_offset
         x = int((ws / 2) - (w / 2))
         y = int((hs / 2) - (h / 2))
         value = f"{w}x{h}+{x}+{y}"
+        if other:
+            return w, h, x, y
         return value
 
 
@@ -261,6 +210,8 @@ class ColorPicker:
             self.clabel.configure(fg=TKCOLOR.red)
         elif self.string_var.get() == "Both":
             self.clabel.configure(fg=TKCOLOR.blue)
+        elif self.string_var.get().startswith("Only"):
+            self.clabel.configure(fg=TKCOLOR.green)
         # range
         elif self.pct in range(75, 100):
             self.clabel.configure(fg=TKCOLOR.green)
