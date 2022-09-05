@@ -16,7 +16,7 @@ class OpenSubtitles(BaseProvider):
         self.check = BaseChecks()
 
     def parse_hash(self):
-        to_be_downloaded: list[str] | None = self.scrape.hash(self.url_hash, self.current_language, self.hearing_impaired)
+        to_be_downloaded: list[str] | None = self.scrape.hash(self.url_hash, self.current_language, self.hi_sub)
         if to_be_downloaded is None and self.series:
             log.output(f"No TV-series found matching hash {self.file_hash}")
             log.output(f"Done with tasks\n")
