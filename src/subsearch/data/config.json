@@ -72,7 +72,10 @@
         "Vietnamese": "vie",
         "Yoruba": "N/A"
     },
-    "hearing_impaired": "Both",
+    "subtitle_type": {
+        "hearing_impaired": true,
+        "non_hearing_impaired": true
+    },
     "percentage": 90,
     "context_menu_icon": true,
     "show_download_window": true,
