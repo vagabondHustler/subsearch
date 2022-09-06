@@ -209,6 +209,7 @@ class TabSearch(tk.Frame):
         tk.Frame(self, height=80, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
         tab_search.SubtitleType(self).pack(anchor="center")
         tab_search.SearchThreshold(self).pack(anchor="center")
+        tab_search.RenameBestMatch(self).pack(anchor="center")
 
 
 class TabSettings(tk.Frame):
