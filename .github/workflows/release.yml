@@ -117,7 +117,6 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller scripts/build.spec -y --clean --distpath ./Subsearch-x64
-          cp -r C:/hostedtoolcache/windows/Python/3.10.6/x64/lib/site-packages/sv_ttk/ ./Subsearch-x64/Subsearch/sv_ttk
       - name: Make archives
         run: |
           python scripts/make_archive.py
