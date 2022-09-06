@@ -141,6 +141,7 @@ desktop.ini
 
 # Adobe files
 *.psd
+*.ai
 
 # README.md settings
 .markdownlint.json
@@ -157,4 +158,3 @@ src/*subs/
 tests/__subsearch__.log
 old*
 scripts/git_branch.py
-src/subsearch/assets/tabs.ai
