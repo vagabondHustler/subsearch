@@ -37,6 +37,8 @@ def test_clean_up() -> None:
     test the clean_up function in file_manager.py
     """
     subs = os.path.join(CWD, "subs")
+    if not os.path.exists(subs):
+        os.mkdir(subs)
     file_manager.clean_up_files(subs, "srt")
     file_manager.clean_up_files(CWD, "srt")
     file_manager.clean_up_files(CWD, "__subsearch__test.subtitles.zip")
