@@ -86,6 +86,7 @@ def set_default_json() -> None:
 
 class UserParameters(NamedTuple):
     current_language: str
+    languages: str
     hearing_impaired: bool
     non_hearing_impaired: bool
     percentage: int

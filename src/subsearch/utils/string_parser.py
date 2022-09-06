@@ -4,6 +4,8 @@ from typing import Any, Literal, Optional, Union
 
 from num2words import num2words
 
+from subsearch.utils.raw_config import UserParameters
+
 
 def find_year(string: str) -> Union[int, str]:
     re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)  # https://regex101.com/r/r5TwxJ/1
@@ -83,9 +85,7 @@ class FileSearchParameters:
     definitive_match: str
 
 
-def get_parameters(
-    filename: str, file_hash: str | None, current_language: str, languages: dict[str, str]
-) -> FileSearchParameters:
+def get_parameters(filename: str, file_hash: str | None, user_parameters: UserParameters) -> FileSearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -99,7 +99,7 @@ def get_parameters(
         SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
     """
     filename = filename.lower()
-    lang_code3 = languages[current_language]
+    lang_code3 = user_parameters.languages[user_parameters.current_language]
     year = find_year(filename)
     season_episode = find_season_episode(filename)
     season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
@@ -114,7 +114,12 @@ def get_parameters(
     group = find_group(filename)
 
     base_ss = "https://subscene.com/subtitles/searchbytitle?query="
-    base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}"
+
+    if user_parameters.hearing_impaired and user_parameters.non_hearing_impaired is False:
+        base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/hearingimpaired-on"
+    else:
+        base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}"
+
     url_opensubtitles_hash = f"{base_os}/moviehash-{file_hash}"
 
     if series:
