@@ -22,7 +22,7 @@ def test_extract_zips() -> None:
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
     """
-    file_manager.extract_files(CWD, ".zip")
+    file_manager.extract_files(CWD, CWD, ".zip")
 
 
 def test_rename_best_match() -> None:
@@ -36,10 +36,10 @@ def test_clean_up() -> None:
     """
     test the clean_up function in file_manager.py
     """
-    file_manager.clean_up(CWD, ".zip")
-    file_manager.clean_up(CWD, ".srt")
-    file_manager.clean_up(f"{CWD}\\subs", ".srt")
-
+    subs = os.path.join(CWD, "subs")
+    file_manager.clean_up_files(subs, "srt")
+    file_manager.clean_up_files(CWD, "srt")
+    file_manager.clean_up_files(CWD, "__subsearch__test.subtitles.zip")
 
 def test_get_hash() -> None:
     """

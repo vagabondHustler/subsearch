@@ -77,6 +77,7 @@
         "non_hearing_impaired": true
     },
     "percentage": 90,
+    "rename_best_match": true,
     "context_menu_icon": true,
     "show_download_window": true,
     "show_terminal": false,

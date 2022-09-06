@@ -5,7 +5,6 @@ from typing import Any, NamedTuple, Union
 from subsearch.data import __data__
 
 
-# update config.json
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
     config_file = f"{__data__}\\config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
@@ -32,7 +31,6 @@ def get_config() -> Any:
     return data
 
 
-# get said value(s) from config.json
 def get_config_key(key: str) -> Any:
     """
     Get values of keys in config.json
@@ -57,6 +55,7 @@ def get_config_key(key: str) -> Any:
         "languages": get_config()["languages"],
         "subtitle_type": get_config()["subtitle_type"],
         "percentage": get_config()["percentage"],
+        "rename_best_match": get_config()["rename_best_match"],
         "context_menu_icon": get_config()["context_menu_icon"],
         "show_download_window": get_config()["show_download_window"],
         "show_terminal": get_config()["show_terminal"],
@@ -72,6 +71,7 @@ def set_default_json() -> None:
     data["current_language"] = "English"
     data["subtitle_type"] = dict.fromkeys(data["subtitle_type"], True)
     data["percentage"] = 90
+    data["rename_best_match"] = True
     data["context_menu_icon"] = True
     data["show_download_window"] = True
     data["show_terminal"] = False
@@ -88,5 +88,5 @@ class UserParameters(NamedTuple):
     current_language: str
     hearing_impaired: bool
     non_hearing_impaired: bool
-    pct: int
-    show_dl_window: bool
+    percentage: int
+    show_download_window: bool
