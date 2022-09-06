@@ -21,14 +21,14 @@ def download_subtitle(data: DownloadData) -> int:
     return data.idx_num
 
 
-def extract_files(cwd: str, extension: str) -> None:
-    subs_folder = os.path.join(cwd, "subs")
+def extract_files(src: str, dst: str, extension: str) -> None:
+    subs_folder = os.path.join(dst, "subs")
     if not os.path.exists(subs_folder):
         os.mkdir(subs_folder)
-    for file in os.listdir(cwd):
-        if file.startswith("__subsearch__") and file.endswith(extension):
+    for file in os.listdir(src):
+        if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
-            filename = os.path.join(cwd, file)
+            filename = os.path.join(src, file)
             zip_ref = zipfile.ZipFile(filename)
             zip_ref.extractall(subs_folder)
             zip_ref.close()
@@ -55,16 +55,23 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
         shutil.move(move_src, move_dst)
 
 
-def clean_up(cwd: str, extension: str) -> None:
+def clean_up_files(cwd: str, extension: str) -> None:
     for file in os.listdir(cwd):
-        if file.startswith("__subsearch__") and file.endswith(extension):
+        if file.endswith(extension):
             log.output(f"Removing: {file}")
             file_path = os.path.join(cwd, file)
             os.remove(file_path)
 
 
+def del_directory(directory: str) -> None:
+    for file in os.listdir(directory):
+        log.output(f"Removing: {file}")
+    log.output(f"Removing: {directory}")
+    shutil.rmtree(directory)
+
+
 def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
-    file_dst = f"{dst}\\__subsearch__dl_data.tmp"
+    file_dst = f"{dst}\\download_data.tmp"
     with open(file_dst, "w", encoding="utf8") as f:
         for i in range(len(not_downloaded)):
             name, _link = not_downloaded[i][1], not_downloaded[i][2]

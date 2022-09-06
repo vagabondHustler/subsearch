@@ -5,6 +5,7 @@ from tkinter import Label, StringVar
 
 from subsearch.data import __buttons__, __tabs__, __version__
 from subsearch.gui import tk_data
+from subsearch.utils import raw_config
 
 TKCOLOR = tk_data.Color()
 TKFONT = tk_data.Font()
@@ -34,10 +35,10 @@ def set_default_grid_size(_widget, _width=18):
     x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
     col_count, row_count = _widget.grid_size()
     for col in range(col_count):
-        _widget.grid_columnconfigure(col, minsize=x)
+            _widget.grid_columnconfigure(col, minsize=x)
 
     for row in range(row_count):
-        _widget.grid_rowconfigure(row, minsize=0)
+            _widget.grid_rowconfigure(row, minsize=0)
 
 
 class TitleBar(tk.Frame):
@@ -197,10 +198,10 @@ class WindowPosition(tk.Frame):
 
 
 class ColorPicker:
-    def __init__(self, string_var: StringVar, clabel: Label, pct: int = -1):
+    def __init__(self, string_var: StringVar, clabel: Label, is_pct: bool = False):
         self.string_var = string_var
         self.clabel = clabel
-        self.pct = pct
+        self.is_pct = is_pct
         self.pick()
 
     def pick(self):  # string boolean
@@ -212,15 +213,17 @@ class ColorPicker:
             self.clabel.configure(fg=TKCOLOR.blue)
         elif self.string_var.get().startswith("Only"):
             self.clabel.configure(fg=TKCOLOR.green)
-        # range
-        elif self.pct in range(75, 100):
-            self.clabel.configure(fg=TKCOLOR.green)
-        elif self.pct in range(50, 75):
-            self.clabel.configure(fg=TKCOLOR.green_brown)
-        elif self.pct in range(25, 50):
-            self.clabel.configure(fg=TKCOLOR.red_brown)
-        elif self.pct in range(0, 25):
-            self.clabel.configure(fg=TKCOLOR.red)
+
+        if self.is_pct:
+            _pct = raw_config.get_config_key("percentage")
+            if _pct in range(75, 101):
+                self.clabel.configure(fg=TKCOLOR.green)
+            elif _pct in range(50, 75):
+                self.clabel.configure(fg=TKCOLOR.green_brown)
+            elif _pct in range(25, 50):
+                self.clabel.configure(fg=TKCOLOR.red_brown)
+            elif _pct in range(0, 25):
+                self.clabel.configure(fg=TKCOLOR.red)
 
 
 class ToolTip(tk.Toplevel):
