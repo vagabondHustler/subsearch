@@ -148,8 +148,6 @@ desktop.ini
 
 # Subsearch
 src/*test*
-src/*/__subsearch__*.*
-src/__subsearch__*.*
 src/*language
 src/*.zip
 src/*.srt
