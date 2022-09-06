@@ -34,6 +34,7 @@ class BaseInitializer:
         self.file_hash = file_manager.get_hash(__video__.path)
         self.user_parameters = raw_config.UserParameters(
             current_language=self.current_language,
+            languages=self.languages,
             hearing_impaired=self.hearing_impaired,
             non_hearing_impaired=self.non_hearing_impaired,
             percentage=self.percentage,
@@ -50,9 +51,7 @@ class BaseInitializer:
         self.subscene_downloads = 0
         if self.file_exist:
             self.file_hash = file_manager.get_hash(__video__.path)
-            self.parameters = string_parser.get_parameters(
-                __video__.name, self.file_hash, self.current_language, self.languages
-            )
+            self.parameters = string_parser.get_parameters(__video__.name, self.file_hash, self.user_parameters)
             log.parameters(self.parameters, self.user_parameters)
 
 
