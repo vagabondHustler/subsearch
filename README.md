@@ -98,7 +98,7 @@ Install package locally
 Code <a name = "code"></a>
 
 ```
-from subsearch import Subsearch
+from subsearch import __subsearch__
 from subsearch.utils.raw_config import get_config, set_config
 
 
@@ -106,11 +106,11 @@ def main() -> None:
     config = get_config()
     config["providers"]["opensubtitles_hash"] = False
     set_config(config)
-    ss = Subsearch()
-    ss.subscene_scrape()
-    ss.opensubtitles_scrape()
-    ss.process_files()
-    ss.end()
+    app = __subsearch__.Subsearch()
+    app.provider_opensubtitles()
+    app.provider_subscene()
+    app.process_files()
+    app.on_exit()
 
 
 if __name__ == "__main__":
