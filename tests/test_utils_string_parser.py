@@ -1,5 +1,5 @@
-from src.subsearch.utils import log, raw_config, string_parser
 from src.subsearch.__subsearch__ import BaseInitializer
+from src.subsearch.utils import log, raw_config, string_parser
 
 LANGUAGES = raw_config.get_config_key("languages")
 

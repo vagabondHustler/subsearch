@@ -41,6 +41,7 @@ def test_clean_up() -> None:
     file_manager.clean_up_files(CWD, "srt")
     file_manager.clean_up_files(CWD, "__subsearch__test.subtitles.zip")
 
+
 def test_get_hash() -> None:
     """
     test the get_hash function in src/subsearch/utils/file_manager.py
