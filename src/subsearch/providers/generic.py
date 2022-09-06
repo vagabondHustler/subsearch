@@ -72,8 +72,8 @@ class BaseProvider:
         self.current_language = user_parameters.current_language
         self.hi_sub = user_parameters.hearing_impaired
         self.non_hi_sub = user_parameters.non_hearing_impaired
-        self.pct = user_parameters.pct
-        self.show_download_window = user_parameters.show_dl_window
+        self.pct = user_parameters.percentage
+        self.show_download_window = user_parameters.show_download_window
         # sorted_list
         self._sorted_list: list[DownloadData] = []
 
