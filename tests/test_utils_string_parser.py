@@ -1,4 +1,5 @@
 from src.subsearch.utils import log, raw_config, string_parser
+from src.subsearch.__subsearch__ import BaseInitializer
 
 LANGUAGES = raw_config.get_config_key("languages")
 
@@ -34,8 +35,9 @@ def test_string_parser_movie() -> None:
     """
 
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
-    log.tprint(param)
+    base = BaseInitializer()
+    base.user_parameters
+    param = string_parser.get_parameters(filename, None, base.user_parameters)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20(2021)"
     assert (
         param.url_opensubtitles
@@ -58,7 +60,9 @@ def test_string_parser_show() -> None:
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
     """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
+    base = BaseInitializer()
+    base.user_parameters
+    param = string_parser.get_parameters(filename, None, base.user_parameters)
     log.tprint(param)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert (
@@ -79,8 +83,9 @@ def test_string_parser_show() -> None:
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    param = string_parser.get_parameters(filename, None, "English", LANGUAGES)
-
+    base = BaseInitializer()
+    base.user_parameters
+    param = string_parser.get_parameters(filename, None, base.user_parameters)
     assert (
         param.url_subscene
         == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264%20(N/A)"
