@@ -35,10 +35,10 @@ def set_default_grid_size(_widget, _width=18):
     x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
     col_count, row_count = _widget.grid_size()
     for col in range(col_count):
-            _widget.grid_columnconfigure(col, minsize=x)
+        _widget.grid_columnconfigure(col, minsize=x)
 
     for row in range(row_count):
-            _widget.grid_rowconfigure(row, minsize=0)
+        _widget.grid_rowconfigure(row, minsize=0)
 
 
 class TitleBar(tk.Frame):
