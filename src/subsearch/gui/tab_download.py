@@ -1,4 +1,5 @@
 import os
+import re
 import tkinter as tk
 from tkinter import ttk
 
@@ -16,7 +17,7 @@ def read_tmp_file():
     if __video__.directory == None:
         return None
 
-    file = os.path.join(__video__.directory, "__subsearch__dl_data.tmp")
+    file = os.path.join(__video__.directory, "download_data.tmp")
     with open(file, "r") as f:
         return [line.strip() for line in f]
 
@@ -100,32 +101,22 @@ class DownloadList(tk.Frame):
     def download_button(self, event):
         self.sub_listbox.unbind("<<ListboxSelect>>")
         self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
-        _i = str(self.sub_listbox.curselection())
-        _i = _i.replace("(", "")
-        _i = _i.replace(")", "")
-        items = _i.replace(",", "")
-        _error = False
+        selection = str(self.sub_listbox.curselection())
+        item_num = re.findall("(\d+)", selection)[0]
         for (number, _url), (_name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
-            if number == int(items):
-                self.sub_listbox.delete(int(number))
-                self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
-                self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
-                try:
-                    dl_url = self.subscene_scrape.download_url(_url)
-                    _name = _name.replace("/", "").replace("\\", "").split(": ")
-                    path = f"{__video__.directory}\\__subsearch__{_name[-1]}.zip"
-                    item = DownloadData(name=_name, file_path=path, url=dl_url, idx_num=1, idx_lenght=1)
-                    file_manager.download_subtitle(item)
-                    if _error is False:
-                        file_manager.extract_files(__video__.directory, ".zip")
-                        file_manager.clean_up(__video__.directory, ".zip")
-                        file_manager.clean_up(__video__.directory, ").nfo")
-                        self.sub_listbox.delete(int(number))
-                        self.sub_listbox.insert(int(number), f"✔ {_name[0]} {_name[1]}")
-                        self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
-                        _error = False
-                except OSError:
-                    _error = True
-                    self.sub_listbox.delete(int(number))
-                    self.sub_listbox.insert(int(number), f"⚠⚠⚠ Download failed ⚠⚠⚠")
-                    self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.red})
+            if number != int(item_num):
+                continue
+            self.sub_listbox.delete(int(number))
+            self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
+            self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
+            dl_url = self.subscene_scrape.download_url(_url)
+            _name = "".join(re.findall("[^\/\\\:\?\<\>\|\*]*", _name))
+            path = f"{__video__.directory}\\__subsearch__{_name[-1]}.zip"
+            item = DownloadData(name=_name, file_path=path, url=dl_url, idx_num=1, idx_lenght=1)
+            file_manager.download_subtitle(item)
+            file_manager.extract_files(__video__.directory, ".zip")
+            file_manager.clean_up_files(__video__.directory, ".zip")
+            file_manager.clean_up_files(__video__.directory, ").nfo")
+            self.sub_listbox.delete(int(number))
+            self.sub_listbox.insert(int(number), f"✔ {_name}")
+            self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})

@@ -1,7 +1,6 @@
 import tkinter as tk
 
-import sv_ttk
-
+from subsearch.assets import sv_ttk
 from subsearch.gui import (
     base_root,
     tab_download,
@@ -231,12 +230,12 @@ class TabDownload(tk.Frame):
     def __init__(self, parent, con_x, con_y):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        sv_ttk.set_theme("dark")
         tab_download.DownloadList(self, con_x, con_y).pack(anchor="center")
 
 
 def open_tab(active_tab: str):
     root = base_root.main()
+    sv_ttk.set_theme("grey")
     content = tk.Frame(root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 118)
     content.place(x=2, y=37)
     conx, cony = content.winfo_reqwidth(), content.winfo_reqheight()
