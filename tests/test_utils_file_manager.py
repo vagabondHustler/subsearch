@@ -36,9 +36,9 @@ def test_clean_up() -> None:
     """
     test the clean_up function in file_manager.py
     """
-    file_manager.clean_up(CWD, ".zip")
-    file_manager.clean_up(CWD, ".srt")
-    file_manager.clean_up(f"{CWD}\\subs", ".srt")
+    file_manager.clean_up_files(CWD, ".zip")
+    file_manager.clean_up_files(CWD, ".srt")
+    file_manager.clean_up_files(f"{CWD}\\subs", ".srt")
 
 
 def test_get_hash() -> None:
