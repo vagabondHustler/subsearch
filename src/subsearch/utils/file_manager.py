@@ -23,8 +23,6 @@ def download_subtitle(data: DownloadData) -> int:
 
 def extract_files(src: str, dst: str, extension: str) -> None:
     subs_folder = os.path.join(dst, "subs")
-    if not os.path.exists(subs_folder):
-        os.mkdir(subs_folder)
     for file in os.listdir(src):
         if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
