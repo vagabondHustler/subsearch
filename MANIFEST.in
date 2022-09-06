@@ -4,3 +4,6 @@ include src\subsearch\data\config.json
 include src\subsearch\assets\buttons\*.png
 include src\subsearch\assets\tabs\*.png
 include src\subsearch\assets\icons\*.ico
+include src\subsearch\assets\sv_ttk\theme\grey\*.png
+include src\subsearch\assets\sv_ttk\sun-valley.tcl
+include src\subsearch\assets\sv_ttk\theme\grey.tcl
