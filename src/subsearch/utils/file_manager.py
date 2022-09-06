@@ -22,13 +22,12 @@ def download_subtitle(data: DownloadData) -> int:
 
 
 def extract_files(src: str, dst: str, extension: str) -> None:
-    subs_folder = os.path.join(dst, "subs")
     for file in os.listdir(src):
         if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
             filename = os.path.join(src, file)
             zip_ref = zipfile.ZipFile(filename)
-            zip_ref.extractall(subs_folder)
+            zip_ref.extractall(dst)
             zip_ref.close()
 
 
