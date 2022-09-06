@@ -13,7 +13,9 @@ def copy_and_rename(src: str, dst: str):
 
 
 CWD = os.path.join(os.getcwd(), "tests\\test_files")
-
+SUBS = os.path.join(CWD, "subs")
+if not os.path.isdir(SUBS):
+    os.mkdir(SUBS)
 
 def test_extract_zips() -> None:
     src = f"{CWD}\\test.subtitles.zip"
@@ -36,10 +38,7 @@ def test_clean_up() -> None:
     """
     test the clean_up function in file_manager.py
     """
-    subs = os.path.join(CWD, "subs")
-    if not os.path.exists(subs):
-        os.mkdir(subs)
-    file_manager.clean_up_files(subs, "srt")
+    file_manager.clean_up_files(SUBS, "srt")
     file_manager.clean_up_files(CWD, "srt")
     file_manager.clean_up_files(CWD, "__subsearch__test.subtitles.zip")
 
