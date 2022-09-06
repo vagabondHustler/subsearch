@@ -53,7 +53,7 @@ Available options in the widget
 
 ![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_22054.png)
 
-![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_22054.png)
+![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_22154.png)
 
 ![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_settings_22054.png)
 
