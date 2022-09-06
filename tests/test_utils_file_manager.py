@@ -17,6 +17,7 @@ SUBS = os.path.join(CWD, "subs")
 if not os.path.isdir(SUBS):
     os.mkdir(SUBS)
 
+
 def test_extract_zips() -> None:
     src = f"{CWD}\\test.subtitles.zip"
     dst = f"{CWD}\\test.subtitles.zip"
