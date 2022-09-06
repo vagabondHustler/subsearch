@@ -18,7 +18,7 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
 logging.basicConfig(
-    filename=f"{CWD}\\__subsearch__.log",
+    filename=f"{CWD}\\subsearch.log",
     filemode="w",
     level=logging.DEBUG,
     format="%(asctime)s - %(message)s",
@@ -59,7 +59,7 @@ def parameters(param: FileSearchParameters, user_parameters: UserParameters) -> 
     output(f"Series:                     {param.series}")
     output(f"Release:                    {param.release}")
     output(f"Group:                      {param.group}")
-    output(f"Match threshold:            {user_parameters.pct}%")
+    output(f"Match threshold:            {user_parameters.percentage}%")
     output(f"File hash:                  {param.file_hash}")
     output(f"URL Subscene:               {param.url_subscene}")
     output(f"URL OpenSubtitles - rss:    {param.url_opensubtitles}")
