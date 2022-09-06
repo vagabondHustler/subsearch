@@ -186,15 +186,23 @@ class SearchThreshold(tk.Frame):
         self.pct = PCT
         label = tk.Label(self, text="Search threshold")
         label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+class RenameBestMatch(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=TKCOLOR.dark_grey)
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{RENAME_BEST_MATCH}")
+        label = tk.Label(self, text="Rename best match")
+        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.ColorPicker(self.string_var, self.clabel, self.pct)
-        btn_add = tk.Button(
+        tk_tools.ColorPicker(self.string_var, self.clabel)
+        btn_true = tk.Button(
             self,
             font=TKFONT.cas8b,
-            text="+",
+            text="True",
             bd=0,
             bg=TKCOLOR.light_black,
             fg=TKCOLOR.white_grey,
@@ -202,11 +210,11 @@ class SearchThreshold(tk.Frame):
             height=2,
             width=18,
         )
-        btn_add.grid(row=0, column=3, pady=2)
-        btn_sub = tk.Button(
+        btn_true.grid(row=0, column=3, pady=2)
+        btn_false = tk.Button(
             self,
             font=TKFONT.cas8b,
-            text="-",
+            text="False",
             bd=0,
             bg=TKCOLOR.light_black,
             fg=TKCOLOR.white_grey,
@@ -214,38 +222,32 @@ class SearchThreshold(tk.Frame):
             height=2,
             width=18,
         )
-        btn_sub.grid(row=0, column=2, pady=2)
-        btn_add.bind("<Enter>", self.enter_button)
-        btn_add.bind("<Leave>", self.leave_button)
-        btn_sub.bind("<Enter>", self.enter_button)
-        btn_sub.bind("<Leave>", self.leave_button)
+        btn_false.grid(row=0, column=2, pady=2)
+        btn_true.bind("<Enter>", self.enter_button)
+        btn_true.bind("<Leave>", self.leave_button)
+        btn_false.bind("<Enter>", self.enter_button)
+        btn_false.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
-        if btn["text"] == "+":
+        if btn["text"] == "True":
             btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.green)
-            btn.bind("<ButtonRelease>", self.button_add_5)
-        if btn["text"] == "-":
+            btn.bind("<ButtonRelease>", self.button_set_true)
+        if btn["text"] == "False":
             btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.red)
-            btn.bind("<ButtonRelease>", self.button_sub_5)
+            btn.bind("<ButtonRelease>", self.button_set_false)
 
     def leave_button(self, event):
         btn = event.widget
         btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.white_grey)
+
+    def button_set_true(self, event):
+        self.string_var.set(f"True")
         tk_tools.ColorPicker(self.string_var, self.clabel)
+        raw_config.set_config_key_value("rename_best_match", True)
 
-    def button_add_5(self, event):
-        self.pct += 5 if self.pct < 100 else 0
-        self.string_var.set(f"{self.pct} %")
-
-        tk_tools.ColorPicker(self.string_var, self.clabel, self.pct)
-        update_svar = int(self.pct)
-        raw_config.set_config_key_value("percentage", update_svar)
-
-    def button_sub_5(self, event):
-        self.pct -= 5 if self.pct > 0 else 0
-        self.string_var.set(f"{self.pct} %")
-        tk_tools.ColorPicker(self.string_var, self.clabel, self.pct)
-        update_svar = int(self.pct)
-        raw_config.set_config_key_value("percentage", update_svar)
+    def button_set_false(self, event):
+        self.string_var.set(f"False")
+        tk_tools.ColorPicker(self.string_var, self.clabel)
+        raw_config.set_config_key_value("rename_best_match", False)
