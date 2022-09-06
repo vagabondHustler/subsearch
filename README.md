@@ -150,3 +150,4 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 - To the people at [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
 - To the people at [psf/black](https://github.com/psf/black) for ways of doing workflow related tasks
 - To the people at [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) for amazing icons
+- To the people at [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) for an amazing ttk theme
