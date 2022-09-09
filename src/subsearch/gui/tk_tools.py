@@ -208,10 +208,11 @@ class ColorPicker:
 
 
 class ToolTip(tk.Toplevel):
-    def __init__(self, parent, widget, *text):
+    def __init__(self, parent, _widget, *_text, _background=TKCOLOR.dark_black):
         self.parent = parent
-        self.widget = widget
-        self.text = text
+        self.widget = _widget
+        self.text = _text
+        self.background = _background
 
     def show(self):
         tk.Toplevel.__init__(self, self.parent)
@@ -224,7 +225,7 @@ class ToolTip(tk.Toplevel):
         label = tk.Label(
             frame,
             text=lines,
-            background=TKCOLOR.dark_grey,
+            background=self.background,
             foreground=TKCOLOR.white_grey,
             justify="left",
         )
