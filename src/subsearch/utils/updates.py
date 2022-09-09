@@ -7,8 +7,9 @@ from subsearch.data import __version__
 
 
 def find_semantic_version(version: str) -> str:
-    # semantic expression https://regex101.com/r/2PNppl/1
-    version_semantic = "".join(re.findall("(\d*\.\d*\.\d*-\w*\.\d*)|(\d*\.\d*\.\d*)", version)[0])
+    # semantic expression https://regex101.com/r/M4qItH/2
+    pattern = '"(\d*\.\d*\.\d*-\w*\d*)"|"(\d*\.\d*\.\d*-\w*\.\d*)"|"(\d*\.\d*\.\d*)"'
+    version_semantic = "".join(re.findall(pattern, version)[0])
     return version_semantic
 
 
