@@ -32,7 +32,7 @@ class Color:
     light_grey: str = "#727272"
     silver_grey: str = "#8a8a8a"
     white_grey: str = "#bdbdbd"
-    dark_grey: str = "#1A1A1A"
+    dark_grey: str = "#1a1b1b"
     mid_grey_black: str = "#111111"
     light_black: str = "#0e0e0e"
     black: str = "#151515"
