@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from subsearch.data import __icons__
+from subsearch.data import __icon__
 from subsearch.gui import tk_data, tk_tools
 from subsearch.utils import current_user, raw_config, raw_registry
 
@@ -20,10 +20,9 @@ def main():
     if current_user.got_key() is False:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
-    hidden_root = tk.Tk(className=f"Subsearch")
+    hidden_root = tk.Tk(className=f"subsearch")
     hidden_root.configure(background=TKCOLOR.black)
-    icon_path = f"{__icons__}\\16.ico"
-    hidden_root.iconbitmap(icon_path)
+    hidden_root.iconbitmap(__icon__)
     hidden_root.geometry(tk_tools.WindowPosition.set(hidden_root))
     hidden_root.attributes("-alpha", 0)
     hidden_root.resizable(False, False)
