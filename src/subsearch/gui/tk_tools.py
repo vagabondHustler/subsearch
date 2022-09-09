@@ -48,28 +48,12 @@ class TitleBar(tk.Frame):
 
         self.root = root
         self.parent = parent
-
-        self.exit_path = get_btn_png("exit.png")
-        self.tab_path = get_btn_png("tab.png")
-
-        self.exit_grey_path = get_btn_png("exit_grey.png")
-        self.tab_grey_path = get_btn_png("tab_grey.png")
-        self.maximize_path = get_btn_png("maximize_inactive.png")
-
-        self.tab_png = tk.PhotoImage(file=self.tab_path)
-        self.tab_grey_png = tk.PhotoImage(file=self.tab_grey_path)
-        self.exit_png = tk.PhotoImage(file=self.exit_path)
-        self.exit_grey_png = tk.PhotoImage(file=self.exit_grey_path)
-        self.maximize_png = tk.PhotoImage(file=self.maximize_path)
-
-        self.subsearch_label = tk.Label(
+        self.icon = tk.Canvas(
             self,
-            text=f"Subsearch - v{__version__}",
+            width=37,
+            height=37,
             bg=TKCOLOR.light_black,
-            fg=TKCOLOR.white_grey,
-            font=TKFONT.cas10b,
-            justify="center",
-            anchor="w",
+            highlightthickness=0,
         )
         self.tab = tk.Canvas(
             self,
@@ -92,17 +76,19 @@ class TitleBar(tk.Frame):
             bg=TKCOLOR.light_black,
             highlightthickness=0,
         )
-        self.subsearch_label.place(bordermode="inside", relx=0, y=18, anchor="w")
+
         self.maximize.place(x=TKWINDOW.width - 37, rely=0, anchor="ne")
         self.exit.place(relx=1, rely=0, anchor="ne")
         self.tab.place(x=TKWINDOW.width - 74, rely=0, anchor="ne")
+        self.icon.place(x=0, y=0, anchor="nw")
 
-        self.update_img(self.tab, self.tab_grey_png)
-        self.update_img(self.maximize, self.maximize_png)
-        self.update_img(self.exit, self.exit_grey_png)
+        asset_icon(self.icon)
+        asset_titlebar(self.tab, "tab", "rest")
+        asset_titlebar(self.maximize, "maximize", "disabled")
+        asset_titlebar(self.exit, "exit", "rest")
 
-        self.subsearch_label.bind("<Button-1>", self.press_titlebar)
-        self.subsearch_label.bind("<B1-Motion>", self.drag_titlebar)
+        self.icon.bind("<Button-1>", self.press_titlebar)
+        self.icon.bind("<B1-Motion>", self.drag_titlebar)
 
         self.bind("<Button-1>", self.press_titlebar)
         self.bind("<B1-Motion>", self.drag_titlebar)
@@ -112,11 +98,6 @@ class TitleBar(tk.Frame):
 
         self.tab.bind("<Leave>", self.leave_event)
         self.exit.bind("<Leave>", self.leave_event)
-
-    def update_img(self, canvas, img):
-        canvas.delete("all")
-        canvas.create_image(18, 18, image=img)
-        canvas.photoimage = img
 
     def press_titlebar(self, event):
         self._offsetx = self.winfo_pointerx() - self.winfo_rootx()
@@ -145,21 +126,21 @@ class TitleBar(tk.Frame):
     def enter_event(self, event):
         if event.widget == self.tab:
             self.tab.configure(bg=TKCOLOR.dark_grey)
-            self.update_img(self.tab, self.tab_png)
+            asset_titlebar(self.tab, "tab", "hover")
             self.tab.bind("<ButtonPress-1>", self.press_event)
         if event.widget == self.exit:
             self.exit.configure(bg=TKCOLOR.red)
-            self.update_img(self.exit, self.exit_png)
+            asset_titlebar(self.exit, "exit", "hover")
             self.exit.bind("<ButtonPress-1>", self.press_event)
 
     def leave_event(self, event):
         if event.widget == self.tab:
             self.tab.configure(bg=TKCOLOR.light_black)
-            self.update_img(self.tab, self.tab_grey_png)
+            asset_titlebar(self.tab, "tab", "rest")
             self.tab.unbind("<ButtonRelease-1>")
         if event.widget == self.exit:
             self.exit.configure(bg=TKCOLOR.light_black)
-            self.update_img(self.exit, self.exit_grey_png)
+            asset_titlebar(self.exit, "exit", "rest")
             self.exit.unbind("<ButtonRelease-1>")
 
 
