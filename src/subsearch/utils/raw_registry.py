@@ -4,14 +4,14 @@ import sys
 import winreg
 from typing import Literal
 
-from subsearch.data import __home__, __icons__
+from subsearch.data import __home__, __icon__
 from subsearch.utils import current_user
 
 COMPUTER_NAME = socket.gethostname()
 ASTERISK_PATH = "Software\\Classes\\*"
 SHELL_PATH = "Software\\Classes\\*\\shell"
-SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\0.SubSearch"
-COMMAND_PATH = "Software\\Classes\\*\\shell\\0.SubSearch\\command"
+SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\0.subsearch"
+COMMAND_PATH = "Software\\Classes\\*\\shell\\0.subsearch\\command"
 
 
 def write_keys() -> None:
@@ -20,13 +20,13 @@ def write_keys() -> None:
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "shell")
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
-            winreg.CreateKey(sk, "0.SubSearch")
+            winreg.CreateKey(sk, "0.subsearch")
         with winreg.OpenKey(hkey, SUBSEARCH_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "command")
 
 
 def write_all_valuex() -> None:
-    write_valuex("SubSearch")
+    write_valuex("subsearch")
     write_valuex("icon")
     write_valuex("appliesto")
     write_valuex("command")
@@ -34,10 +34,10 @@ def write_all_valuex() -> None:
 
 def write_valuex(key: str) -> None:
     # decide in which registry key to write the value
-    if key == "SubSearch":
+    if key == "subsearch":
         key_type = SUBSEARCH_PATH
         value_name = ""
-        value = "Subsearch"
+        value = "subsearch"
     if key.lower() == "icon":
         key_type = SUBSEARCH_PATH
         value_name = "Icon"
@@ -78,7 +78,7 @@ def get_command_value() -> str:
         python_path = os.path.dirname(sys.executable)
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
-        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('Subsearch');"
+        set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
         # gets the path of the root directory of subsearch
         set_wd = f"import os; os.chdir(r'{__home__}');"
         import_main = "import subsearch; subsearch.main()"
@@ -94,9 +94,8 @@ def get_icon_value() -> str:
     from subsearch.utils import raw_config
 
     show_icon: str = raw_config.get_config_key("context_menu_icon")
-    icon_path = os.path.join(__icons__, "16.ico")
     if show_icon:
-        return icon_path
+        return __icon__
     else:
         return ""
 
@@ -124,7 +123,7 @@ def remove_context_menu() -> None:
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
-            winreg.DeleteKey(sk, "0.Subsearch")
+            winreg.DeleteKey(sk, "0.subsearch")
 
 
 # write keys to registry then write values
