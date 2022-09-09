@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 
 from subsearch.gui import tk_data, tk_tools
 from subsearch.utils import raw_config
@@ -15,37 +16,30 @@ class SelectLanguage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{CURRENT_LANGUAGE}")
-        number_of_buttons = len(LANGUAGES)
-        self.btns = []
+        self.active_btn = None
         self.rownum = 0
-        self.colnum = 0
-        self.btn_active = None
-        for i, key in zip(range(number_of_buttons), LANGUAGES.keys()):
-            self.rownum += 1
-            if self.rownum == 15:
-                self.rownum = 1
+        self.colnum = 1
+        self.checkbox_values = {}
+        for key in LANGUAGES.keys():
+            if self.rownum == 14:
+                self.rownum = 0
                 self.colnum += 1
-            btn = tk.Button(
-                self,
-                font=TKFONT.cas8b,
-                text=key,
-                bd=0,
-                bg=TKCOLOR.light_black,
-                fg=TKCOLOR.white_grey,
-                activebackground=TKCOLOR.orange,
-                height=2,
-                width=18,
-            )
-            btn.grid(row=self.rownum + 1, column=self.colnum, pady=2)
-            if btn["text"] == self.string_var.get():
-                btn.configure(fg=TKCOLOR.yellow)
-                self.btn_active = btn
+            valuevar = tk.IntVar()
+            btn = ttk.Checkbutton(self, text=key, onvalue=1, offvalue=9, variable=valuevar, width=20)
+            if CURRENT_LANGUAGE == key:
+                valuevar.set(1)
+                self.checkbox_values[btn] = valuevar
+            else:
+                valuevar.set(0)
+                self.checkbox_values[btn] = valuevar
+            btn.grid(row=self.rownum, column=self.colnum, pady=8)
+            if valuevar.get() == 1:
+                self.active_btn = btn
 
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
-            tk_tools.set_default_grid_size(self, 18)
+            self.rownum += 1
+        tk_tools.set_default_grid_size(self, _width =6)
 
     def enter_button(self, event):
         btn = event.widget
@@ -53,24 +47,21 @@ class SelectLanguage(tk.Frame):
             tip_text = "N/A with opensubtitles, provider will be skipped on search"
             self.tip = tk_tools.ToolTip(btn, btn, tip_text)
             self.tip.show()
-        btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.orange)
-        btn.bind("<ButtonRelease>", self.set_current_language)
+        btn.bind("<ButtonPress-1>", self.press_button)
 
     def leave_button(self, event):
         btn = event.widget
         if LANGUAGES[btn["text"]] == "N/A":
             self.tip.hide()
-        btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.white_grey)
-        if btn["text"] == self.string_var.get():
-            btn.configure(fg=TKCOLOR.yellow)
+
+    def press_button(self, event):
+        btn = event.widget
+        btn.bind("<ButtonRelease-1>", self.set_current_language)
 
     def set_current_language(self, event):
         btn = event.widget
-        event.widget.configure(fg=TKCOLOR.yellow)
-        self.string_var.set(btn.cget("text"))
-        update_svar = btn["text"]
-        raw_config.set_config_key_value("current_language", update_svar)
-        if btn["text"] == self.string_var.get():
-            btn.configure(fg=TKCOLOR.yellow)
-            self.btn_active.configure(fg=TKCOLOR.white_grey)
-            self.btn_active = btn
+        self.checkbox_values[self.active_btn].set(0)
+        self.active_btn.state(["!alternate"])
+        self.active_btn = btn
+
+        raw_config.set_config_key_value("current_language", btn["text"])
