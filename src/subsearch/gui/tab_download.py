@@ -31,7 +31,7 @@ class DownloadList(tk.Frame):
         self.subscene_scrape = subscene.SubsceneScrape()
         self.extent = 0
         self.sublist = read_tmp_file()
-        self.hs = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
             self,
             height=con_y,
@@ -43,9 +43,9 @@ class DownloadList(tk.Frame):
             borderwidth=0,
             highlightthickness=0,
             activestyle=None,
-            yscrollcommand=self.hs.set,
+            yscrollcommand=self.scrollbar.set,
         )
-        hsx, hsy = self.hs.winfo_reqwidth(), self.hs.winfo_reqheight()
+        hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
         self.sub_listbox.place(
             height=con_y - 36,
             width=con_x - hsx - 20,
@@ -56,24 +56,9 @@ class DownloadList(tk.Frame):
         )
         if self.sublist is not None:
             self.fill_listbox()
-        # custom scrollbar
-        style = ttk.Style()
-        style.theme_use("sun-valley-dark")
-        style.element_options("Vertical.TScrollbar.thumb")
-        # configure the style
-        style.configure(
-            "Vertical.TScrollbar",
-            gripcount=0,
-            state="disable",
-            relief="flat",
-            borderwidth=0,
-            bd=0,
-            arrowsize=24,
-        )
-
-        self.hs.place(x=con_x - 17, y=0, bordermode="inside", height=con_y)
-        self.hs.config(command=self.sub_listbox.yview)
-        self.hs.lift()
+        self.scrollbar.place(x=con_x - 17, y=0, bordermode="inside", height=con_y)
+        self.scrollbar.config(command=self.sub_listbox.yview)
+        self.scrollbar.lift()
 
     def fill_listbox(self):
         dicts_names = {}

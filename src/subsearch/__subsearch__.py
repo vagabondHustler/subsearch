@@ -27,7 +27,7 @@ class BaseInitializer:
         self.hearing_impaired = subtitle_type["hearing_impaired"]
         self.non_hearing_impaired = subtitle_type["non_hearing_impaired"]
         providers = raw_config.get_config_key("providers")
-        self.pro_subscene = providers["subscene"]
+        self.pro_subscene = providers["subscene_site"]
         self.pro_opensubtitles_rss = providers["opensubtitles_rss"]
         self.pro_opensubtitles_hash = providers["opensubtitles_hash"]
         self.file_exist = True if __video__.name is not None else False
@@ -59,7 +59,7 @@ class Steps(BaseInitializer):
     def __init__(self):
         self.start = time.perf_counter()
         BaseInitializer.__init__(self)
-        ctypes.windll.kernel32.SetConsoleTitleW(f"SubSearch - {__version__}")
+        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
