@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from subsearch.assets import sv_ttk
+from subsearch import gui
 from subsearch.gui import (
     base_root,
     tab_download,
@@ -25,37 +25,6 @@ class Footer(tk.Frame):
         self.search_tab = search_tab
         self.settings_tab = settings_tab
         self.download_tab = download_tab
-
-        self.language_grey_path = tk_tools.get_tabs_png("language_grey.png")
-        self.search_grey_path = tk_tools.get_tabs_png("search_grey.png")
-        self.settings_grey_path = tk_tools.get_tabs_png("settings_grey.png")
-        self.download_grey_path = tk_tools.get_tabs_png("download_grey.png")
-
-        self.language_silver_path = tk_tools.get_tabs_png("language_silver.png")
-        self.search_silver_path = tk_tools.get_tabs_png("search_silver.png")
-        self.settings_silver_path = tk_tools.get_tabs_png("settings_silver.png")
-        self.download_silver_path = tk_tools.get_tabs_png("download_silver.png")
-
-        self.language_white_path = tk_tools.get_tabs_png("language_white.png")
-        self.search_white_path = tk_tools.get_tabs_png("search_white.png")
-        self.settings_white_path = tk_tools.get_tabs_png("settings_white.png")
-        self.download_white_path = tk_tools.get_tabs_png("download_white.png")
-
-        self.language_grey_png = tk.PhotoImage(file=self.language_grey_path)
-        self.search_grey_png = tk.PhotoImage(file=self.search_grey_path)
-        self.settings_grey_png = tk.PhotoImage(file=self.settings_grey_path)
-        self.download_grey_png = tk.PhotoImage(file=self.download_grey_path)
-
-        self.language_silver_png = tk.PhotoImage(file=self.language_silver_path)
-        self.search_silver_png = tk.PhotoImage(file=self.search_silver_path)
-        self.settings_silver_png = tk.PhotoImage(file=self.settings_silver_path)
-        self.download_silver_png = tk.PhotoImage(file=self.download_silver_path)
-
-        self.language_white_png = tk.PhotoImage(file=self.language_white_path)
-        self.search_white_png = tk.PhotoImage(file=self.search_white_path)
-        self.settings_white_png = tk.PhotoImage(file=self.settings_white_path)
-        self.download_white_png = tk.PhotoImage(file=self.download_white_path)
-
         self.language = tk.Canvas(
             self,
             width=54,
@@ -98,11 +67,10 @@ class Footer(tk.Frame):
         self.search.bind("<Leave>", self.leave_tab)
         self.settings.bind("<Leave>", self.leave_tab)
         self.download.bind("<Leave>", self.leave_tab)
-
-        self.update_img(self.language, self.language_grey_png)
-        self.update_img(self.search, self.search_grey_png)
-        self.update_img(self.settings, self.settings_grey_png)
-        self.update_img(self.download, self.download_grey_png)
+        tk_tools.asset_tab(self.language, "language", "rest")
+        tk_tools.asset_tab(self.search, "search", "rest")
+        tk_tools.asset_tab(self.settings, "settings", "rest")
+        tk_tools.asset_tab(self.download, "download", "rest")
         tk_tools.set_default_grid_size(self)
         self.active_tab = active_tab
         self.activate_tabs()
@@ -110,16 +78,16 @@ class Footer(tk.Frame):
     def activate_tabs(self):
         if self.active_tab == "language":
             self.language_tab.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.language, self.language_white_png)
+            tk_tools.asset_tab(self.language, "language", "press")
         elif self.active_tab == "search":
             self.search_tab.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.search, self.search_white_png)
+            tk_tools.asset_tab(self.search, "search", "press")
         elif self.active_tab == "settings":
             self.settings_tab.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.settings, self.settings_white_png)
+            tk_tools.asset_tab(self.settings, "settings", "press")
         elif self.active_tab == "download":
             self.download_tab.place(relx=0.5, rely=0.5, anchor="center")
-            self.update_img(self.download, self.download_white_png)
+            tk_tools.asset_tab(self.download, "download", "press")
 
     def release_tab(self, event):
         if event.widget == self.language:
@@ -136,44 +104,44 @@ class Footer(tk.Frame):
     def press_tab(self, event):
         if event.widget == self.language:
             self.language.bind("<ButtonRelease>", self.release_tab)
-            self.update_img(self.language, self.language_white_png, y=20)
+            tk_tools.asset_tab(self.language, "language", "press", y=20)
         if event.widget == self.search:
             self.search.bind("<ButtonRelease>", self.release_tab)
-            self.update_img(self.search, self.search_white_png, y=20)
+            tk_tools.asset_tab(self.search, "search", "press", y=20)
         if event.widget == self.settings:
             self.settings.bind("<ButtonRelease>", self.release_tab)
-            self.update_img(self.settings, self.settings_white_png, y=20)
+            tk_tools.asset_tab(self.settings, "settings", "press", y=20)
         if event.widget == self.download:
             self.download.bind("<ButtonRelease>", self.release_tab)
-            self.update_img(self.download, self.download_white_png, y=20)
+            tk_tools.asset_tab(self.download, "download", "press", y=20)
 
     def deactivate_tabs(self):
         if self.active_tab != "language":
             self.language_tab.place(relx=1, rely=0.5, anchor="nw")
-            self.update_img(self.language, self.language_grey_png)
+            tk_tools.asset_tab(self.language, "language", "rest")
         if self.active_tab != "search":
             self.search_tab.place(relx=1, rely=0.5, anchor="nw")
-            self.update_img(self.search, self.search_grey_png)
+            tk_tools.asset_tab(self.search, "search", "rest")
         if self.active_tab != "settings":
             self.settings_tab.place(relx=1, rely=0.5, anchor="nw")
-            self.update_img(self.settings, self.settings_grey_png)
+            tk_tools.asset_tab(self.settings, "settings", "rest")
         if self.active_tab != "download":
             self.download_tab.place(relx=1, rely=0.5, anchor="nw")
-            self.update_img(self.download, self.download_grey_png)
+            tk_tools.asset_tab(self.download, "download", "rest")
 
     def enter_tab(self, event):
         if event.widget == self.language:
             self.language.bind("<ButtonPress>", self.press_tab)
-            self.update_img(self.language, self.language_silver_png, y=25)
+            tk_tools.asset_tab(self.language, "language", "hover", y=25)
         if event.widget == self.search:
             self.search.bind("<ButtonPress>", self.press_tab)
-            self.update_img(self.search, self.search_silver_png, y=25)
+            tk_tools.asset_tab(self.search, "search", "hover", y=25)
         if event.widget == self.settings:
             self.settings.bind("<ButtonPress>", self.press_tab)
-            self.update_img(self.settings, self.settings_silver_png, y=25)
+            tk_tools.asset_tab(self.settings, "settings", "hover", y=25)
         if event.widget == self.download:
             self.download.bind("<ButtonPress>", self.press_tab)
-            self.update_img(self.download, self.download_silver_png, y=25)
+            tk_tools.asset_tab(self.download, "download", "hover", y=25)
 
     def leave_tab(self, event):
         if event.widget == self.language:
@@ -187,21 +155,16 @@ class Footer(tk.Frame):
         self.activate_tabs()
         self.deactivate_tabs()
 
-    def update_img(self, canvas, img, x=27, y=27):
-        canvas.delete("all")
-        canvas.create_image(x, y, image=img)
-        canvas.photoimage = img
-
 
 class TabLanguage(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        tab_language.SelectLanguage(self).pack(anchor="center")
+        tab_language.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
 class TabSearch(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_search.Providers(self).pack(anchor="center")
@@ -212,7 +175,7 @@ class TabSearch(tk.Frame):
 
 
 class TabSettings(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_subsearch.FileExtensions(self).pack(anchor="center")
@@ -227,25 +190,26 @@ class TabSettings(tk.Frame):
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, con_x, con_y):
+    def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        tab_download.DownloadList(self, con_x, con_y).pack(anchor="center")
+        tab_download.DownloadList(self, content_posx, content_posy).pack(anchor="center")
 
 
 def open_tab(active_tab: str):
     root = base_root.main()
-    sv_ttk.set_theme("grey")
+    gui.set_theme("dark")
     content = tk.Frame(root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 118)
     content.place(x=2, y=37)
-    conx, cony = content.winfo_reqwidth(), content.winfo_reqheight()
+    content_posx, content_posy = content.winfo_reqwidth(), content.winfo_reqheight()
+
     footer = Footer(
         root,
         active_tab.lower(),
-        TabLanguage(content),
-        TabSearch(content),
-        TabSettings(content),
-        TabDownload(content, conx, cony),
+        TabLanguage(content, content_posx, content_posy),
+        TabSearch(content, content_posx, content_posy),
+        TabSettings(content, content_posx, content_posy),
+        TabDownload(content, content_posx, content_posy),
     )
     footer.place(x=2, y=TKWINDOW.height - 82)
     root.mainloop()
