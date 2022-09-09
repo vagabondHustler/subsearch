@@ -226,31 +226,20 @@ class RenameBestMatch(tk.Frame):
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.ColorPicker(self.string_var, self.clabel)
-        btn_true = tk.Button(
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn_true = ttk.Button(
             self,
-            font=TKFONT.cas8b,
             text="True",
-            bd=0,
-            bg=TKCOLOR.light_black,
-            fg=TKCOLOR.white_grey,
-            activebackground=TKCOLOR.green,
-            height=2,
             width=18,
         )
         btn_true.grid(row=0, column=3, pady=2)
-        btn_false = tk.Button(
+        btn_false = ttk.Button(
             self,
-            font=TKFONT.cas8b,
             text="False",
-            bd=0,
-            bg=TKCOLOR.light_black,
-            fg=TKCOLOR.white_grey,
-            activebackground=TKCOLOR.red,
-            height=2,
             width=18,
         )
         btn_false.grid(row=0, column=2, pady=2)
+
         btn_true.bind("<Enter>", self.enter_button)
         btn_true.bind("<Leave>", self.leave_button)
         btn_false.bind("<Enter>", self.enter_button)
@@ -260,22 +249,19 @@ class RenameBestMatch(tk.Frame):
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.green)
             btn.bind("<ButtonRelease>", self.button_set_true)
         if btn["text"] == "False":
-            btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.red)
             btn.bind("<ButtonRelease>", self.button_set_false)
 
     def leave_button(self, event):
         btn = event.widget
-        btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.white_grey)
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
-        tk_tools.ColorPicker(self.string_var, self.clabel)
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
         raw_config.set_config_key_value("rename_best_match", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
-        tk_tools.ColorPicker(self.string_var, self.clabel)
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
         raw_config.set_config_key_value("rename_best_match", False)
