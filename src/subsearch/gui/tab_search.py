@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import BooleanVar, ttk
 
 from subsearch.data import __set_video__
 from subsearch.gui import tk_data, tk_tools
@@ -34,7 +34,7 @@ class Providers(tk.Frame):
             if self.last_key.startswith(lbl_txt):
                 self.colnum += 1
             if self.last_key != lbl_txt:
-            self.rownum += 1
+                self.rownum += 1
                 _lbl = tk.Label(self, text=lbl_txt)
                 _lbl.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
                 _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
@@ -49,7 +49,7 @@ class Providers(tk.Frame):
                 btn.configure(state="normal")
 
             btn.bind("<Enter>", self.enter_button)
-            tk_tools.set_default_grid_size(self)
+        tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
@@ -161,11 +161,9 @@ class SearchThreshold(tk.Frame):
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.ColorPicker(self.string_var, self.clabel, True)
+        tk_tools.VarColorPicker(self.string_var, self.clabel, True)
         x, y = tk_tools.calculate_btn_size(self, 36)
-        self.slider = ttk.Scale(
-            self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x
-        )  # vertical
+        self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x-2)
         self.slider.grid(column=2, row=0, sticky="we", padx=4)
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
@@ -211,7 +209,7 @@ class SearchThreshold(tk.Frame):
     def update_config(self):
         update_svar = self.current_value.get()
         raw_config.set_config_key_value("percentage", update_svar)
-        tk_tools.ColorPicker(self.string_var, self.clabel, True)
+        tk_tools.VarColorPicker(self.string_var, self.clabel, True)
 
 
 class RenameBestMatch(tk.Frame):
