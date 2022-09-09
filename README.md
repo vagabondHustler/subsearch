@@ -47,17 +47,17 @@ Feel free to ask me anything about this project, request new features, contribut
 
 While searching for subs if show terminal is disabled
 
-![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example_21224.gif)
+![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example.gif)
 
 Available options in the widget
 
-![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language_22054.png)
+![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language.png)
 
-![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search_22154.png)
+![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_search.png)
 
-![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_settings_22054.png)
+![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_settings.png)
 
-![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_download_22054.png)
+![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_download.png)
 
 </div>
 
@@ -150,4 +150,4 @@ If no subtitles are found or no subtitles (including the folder subs with extra 
 - To the people at [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
 - To the people at [psf/black](https://github.com/psf/black) for ways of doing workflow related tasks
 - To the people at [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) for amazing icons
-- To the people at [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) for an amazing ttk theme
+- To the people at [rdbende/subsearch-ttk-theme](https://github.com/rdbende/subsearch-ttk-theme) for an amazing ttk theme

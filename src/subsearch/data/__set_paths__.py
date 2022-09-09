@@ -7,8 +7,8 @@ class Paths:
     gui: str
     providers: str
     utils: str
-    icons: str
-    buttons: str
+    icon: str
+    titlebar: str
     tabs: str
 
 
@@ -19,11 +19,11 @@ class SetPaths:
             "home": home,
             "data": os.path.join(home, "data"),
             "gui": os.path.join(home, "gui"),
-            "scraper": os.path.join(home, "scraper"),
+            "providers": os.path.join(home, "providers"),
             "utils": os.path.join(home, "utils"),
-            "icons": os.path.join(home, "assets", "icons"),
-            "buttons": os.path.join(home, "assets", "buttons"),
-            "tabs": os.path.join(home, "assets", "tabs"),
+            "icon": os.path.join(home, "gui", "assets", "icon", "subsearch.ico"),
+            "titlebar": os.path.join(home, "gui", "assets", "titlebar"),
+            "tabs": os.path.join(home, "gui", "assets", "tabs"),
         }
         for k, v in all_paths.items():
             setattr(Paths, k, v)
@@ -38,8 +38,8 @@ if __name__ != "__main__":
     __home__: str = getattr(Paths, "home")
     __data__: str = getattr(Paths, "data")
     __gui__: str = getattr(Paths, "gui")
-    __providers__: str = getattr(Paths, "scraper")
+    __providers__: str = getattr(Paths, "providers")
     __utils__: str = getattr(Paths, "utils")
-    __icons__: str = getattr(Paths, "icons")
-    __buttons__: str = getattr(Paths, "buttons")
+    __icon__: str = getattr(Paths, "icon")
+    __titlebar__: str = getattr(Paths, "titlebar")
     __tabs__: str = getattr(Paths, "tabs")

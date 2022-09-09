@@ -6,12 +6,16 @@ added_files = [
          ( '..\\src\\subsearch\\data\\*.json', 'subsearch\\data\\' )
          ]
 added_binaries = [
-        ('..\\src\\subsearch\\assets\\icons\\*.ico', 'subsearch\\assets\\icons\\'),
-        ('..\\src\\subsearch\\assets\\buttons\\*.png', 'subsearch\\assets\\buttons\\'),
-        ('..\\src\\subsearch\\assets\\tabs\\*.png', 'subsearch\\assets\\tabs\\'),
-        ('..\\src\\subsearch\\assets\\sv_ttk\\theme\\grey\\*.png', 'subsearch\\assets\\sv_ttk\\theme\\grey\\'),
-        ('..\\src\\subsearch\\assets\\sv_ttk\\sun-valley.tcl', 'subsearch\\assets\\sv_ttk\\'),
-        ('..\\src\\subsearch\\assets\\sv_ttk\\theme\\grey.tcl', 'subsearch\\assets\\sv_ttk\\theme\\')
+        ('..\\src\\subsearch\\gui\\assets\\btn\\*.png', 'subsearch\\gui\\assets\\btn\\'),
+        ('..\\src\\subsearch\\gui\\assets\\checkbox\\*.png', 'subsearch\\gui\\assets\\checkbox\\'),
+        ('..\\src\\subsearch\\gui\\assets\\icon\\*.ico', 'subsearch\\gui\\assets\\icon\\'),
+        ('..\\src\\subsearch\\gui\\assets\\icon\\*.png', 'subsearch\\gui\\assets\\icon\\'),
+        ('..\\src\\subsearch\\gui\\assets\\scale\\*.png', 'subsearch\\gui\\assets\\scale\\'),
+        ('..\\src\\subsearch\\gui\\assets\\scrollbar\\*.png', 'subsearch\\gui\\assets\\scrollbar\\'),
+        ('..\\src\\subsearch\\gui\\assets\\tabs\\*.png', 'subsearch\\gui\\assets\\tabs\\'),
+        ('..\\src\\subsearch\\gui\\assets\\titlebar\\*.png', 'subsearch\\gui\\assets\\titlebar\\'),
+        ('..\\src\\subsearch\\gui\\assets\\*.tcl', 'subsearch\\gui\\assets\\')
+
         ]
 
 a = Analysis(
@@ -47,7 +51,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='..\\src\\subsearch\\assets\\icons\\256.ico',
+    icon='..\\src\\subsearch\\gui\\assets\\icon\\subsearch.ico',
 )
 coll = COLLECT(
     exe,

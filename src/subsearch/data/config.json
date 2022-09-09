@@ -98,7 +98,7 @@
         ".mswmm": true
     },
     "providers": {
-        "subscene": true,
+        "subscene_site": true,
         "opensubtitles_rss": true,
         "opensubtitles_hash": true
     }
