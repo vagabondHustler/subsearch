@@ -19,61 +19,55 @@ class Providers(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         self.data = raw_config.get_config()
-        number_of_buttons = len(PROVIDERS.items())
         label = tk.Label(self, text="Search providers")
         label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.rownum = 0
         self.colnum = 2
-        for i, key in zip(range(number_of_buttons), PROVIDERS.keys()):
-            if self.rownum == 2:
-                self.rownum = 1
+        self.checkbox_value = {}
+        self.last_key = ""
+        for key, value in PROVIDERS.items():
+            btn_txt = key.split("_")[-1].capitalize()
+            lbl_txt = f"{key.split('_')[0]}:".capitalize()
+            valuevar = tk.BooleanVar()
+            valuevar.set(value)
+            if self.last_key.startswith(lbl_txt):
                 self.colnum += 1
+            if self.last_key != lbl_txt:
             self.rownum += 1
-
-            btn = tk.Button(
-                self,
-                font=TKFONT.cas8b,
-                text=key.replace("_", " ").capitalize(),
-                bd=0,
-                bg=TKCOLOR.light_black,
-                fg=TKCOLOR.white_grey,
-                activebackground=TKCOLOR.orange,
-                height=2,
-                width=18,
-            )
+                _lbl = tk.Label(self, text=lbl_txt)
+                _lbl.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+                _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
+            else:
+                self.rownum -= 1
+            self.rownum += 1
+            self.last_key = lbl_txt
+            btn = ttk.Checkbutton(self, text=btn_txt, onvalue=True, offvalue=False, variable=valuevar)
             btn.grid(row=self.rownum, column=self.colnum, pady=2)
-            if self.data["providers"][key] is False:
-                btn.configure(fg=TKCOLOR.red)
-            elif self.data["providers"][key] is True:
-                btn.configure(fg=TKCOLOR.green)
+            self.checkbox_value[btn] = key, valuevar
+            if self.data["providers"][key] is True:
+                btn.configure(state="normal")
 
             btn.bind("<Enter>", self.enter_button)
-            btn.bind("<Leave>", self.leave_button)
             tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
-        btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.orange)
-        btn.bind("<ButtonPress>", self.press_button)
-
-    def leave_button(self, event):
-        btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["providers"][key] is True:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.green)
-        if self.data["providers"][key] is False:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.red)
+        btn.bind("<ButtonPress-1>", self.press_button)
 
     def press_button(self, event):
         btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["providers"][key] is True:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.green)
-            btn.bind("<ButtonRelease>", self.toggle_providers)
-        if self.data["providers"][key] is False:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.red)
-            btn.bind("<ButtonRelease>", self.toggle_providers)
+        btn.bind("<ButtonRelease-1>", self.toggle_types)
+
+    def toggle_types(self, event):
+        btn = event.widget
+        key = self.checkbox_value[btn][0]
+        value = self.checkbox_value[btn][1]
+        if value.get() is True:
+            self.data["providers"][key] = False
+        elif value.get() is False:
+            self.data["providers"][key] = True
+        raw_config.set_config(self.data)
 
     def toggle_providers(self, event):
         btn = event.widget
