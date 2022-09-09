@@ -163,7 +163,7 @@ class SearchThreshold(tk.Frame):
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel, True)
         x, y = tk_tools.calculate_btn_size(self, 36)
-        self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x-2)
+        self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x - 2)
         self.slider.grid(column=2, row=0, sticky="we", padx=4)
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
