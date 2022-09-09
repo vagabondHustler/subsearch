@@ -22,6 +22,6 @@ def got_key() -> bool:
 
 
 def check_is_exe() -> bool:
-    if sys.argv[0].endswith("Subsearch.exe"):
+    if sys.argv[0].endswith("subsearch.exe"):
         return True
     return False
