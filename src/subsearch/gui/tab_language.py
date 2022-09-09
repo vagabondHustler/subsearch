@@ -39,7 +39,7 @@ class SelectLanguage(tk.Frame):
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
             self.rownum += 1
-        tk_tools.set_default_grid_size(self, _width =6)
+        tk_tools.set_default_grid_size(self, _width=6)
 
     def enter_button(self, event):
         btn = event.widget
