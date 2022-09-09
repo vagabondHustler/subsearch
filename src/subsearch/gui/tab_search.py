@@ -86,9 +86,7 @@ class SubtitleType(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         self.string_var = tk.StringVar()
-
         self.data = raw_config.get_config()
-        number_of_buttons = len(SUBTILE_TYPE.items())
         label = tk.Label(self, text="Subtitle type")
         label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
@@ -96,68 +94,44 @@ class SubtitleType(tk.Frame):
         self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
         self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.sub_type_txt()
-        tk_tools.ColorPicker(self.string_var, self.clabel)
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
         self.rownum = 0
         self.colnum = 2
-        for i, key in zip(range(number_of_buttons), SUBTILE_TYPE.keys()):
+        self.checkbox_values = {}
+        for key, value in SUBTILE_TYPE.items():
+            if key.startswith("non"):
+                _text = "Regular"
+            else:
+                _text = key.replace("_", " ").title()
+            valuevar = tk.BooleanVar()
+            valuevar.set(value)
             self.rownum += 1
             if self.rownum > 1:
                 self.rownum = 1
                 self.colnum += 1
-
-            btn = tk.Button(
-                self,
-                font=TKFONT.cas8b,
-                text=key.replace("_", " ").title(),
-                bd=0,
-                bg=TKCOLOR.light_black,
-                fg=TKCOLOR.white_grey,
-                activebackground=TKCOLOR.orange,
-                height=2,
-                width=18,
-            )
+            btn = ttk.Checkbutton(self, text=_text, onvalue=True, offvalue=False, variable=valuevar)
             btn.grid(row=self.rownum, column=self.colnum, pady=2)
-            if self.data["subtitle_type"][key] is False:
-                btn.configure(fg=TKCOLOR.red)
-            elif self.data["subtitle_type"][key] is True:
-                btn.configure(fg=TKCOLOR.green)
+            self.checkbox_values[btn] = key, valuevar
 
             btn.bind("<Enter>", self.enter_button)
-            btn.bind("<Leave>", self.leave_button)
             tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
-        btn.configure(bg=TKCOLOR.black, fg=TKCOLOR.orange)
-        btn.bind("<ButtonPress>", self.press_button)
-
-    def leave_button(self, event):
-        btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["subtitle_type"][key] is True:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.green)
-        if self.data["subtitle_type"][key] is False:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.red)
+        btn.bind("<ButtonPress-1>", self.press_button)
 
     def press_button(self, event):
         btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["subtitle_type"][key] is True:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.green)
-            btn.bind("<ButtonRelease>", self.toggle_types)
-        if self.data["subtitle_type"][key] is False:
-            btn.configure(bg=TKCOLOR.light_black, fg=TKCOLOR.red)
-            btn.bind("<ButtonRelease>", self.toggle_types)
+        btn.bind("<ButtonRelease-1>", self.toggle_types)
 
     def toggle_types(self, event):
         btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["subtitle_type"][key] is True:
+        key = self.checkbox_values[btn][0]
+        value = self.checkbox_values[btn][1]
+        if value.get() is True:
             self.data["subtitle_type"][key] = False
-            btn.configure(fg=TKCOLOR.red)
-        elif self.data["subtitle_type"][key] is False:
+        elif value.get() is False:
             self.data["subtitle_type"][key] = True
-            btn.configure(fg=TKCOLOR.green)
         raw_config.set_config(self.data)
         self.sub_type_txt()
 
@@ -170,7 +144,7 @@ class SubtitleType(tk.Frame):
             self.string_var.set(f"Only HI")
         if hi_sub is False and nonhi_sub:
             self.string_var.set(f"Only non-HI")
-        tk_tools.ColorPicker(self.string_var, self.clabel)
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
 
 
 class SearchThreshold(tk.Frame):
