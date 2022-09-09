@@ -1,9 +1,8 @@
-import ctypes
 import os
 import tkinter as tk
-from tkinter import Label, StringVar
+from tkinter import Label, StringVar, ttk
 
-from subsearch.data import __buttons__, __tabs__, __version__
+from subsearch.data import __icon__, __tabs__, __titlebar__, __version__
 from subsearch.gui import tk_data
 from subsearch.utils import raw_config
 
@@ -16,11 +15,11 @@ WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
 
 
-def get_btn_png(btn: str):
-    return os.path.join(__buttons__, btn)
+def get_titlebar_png(btn: str):
+    return os.path.join(__titlebar__, btn)
 
 
-def get_tabs_png(tab: str):
+def get_tab_png(tab: str):
     return os.path.join(__tabs__, tab)
 
 
@@ -28,6 +27,11 @@ def calculate_btn_size(_widget, _width=18, _height=2):
     generic_btn = tk.Button(_widget, width=_width, height=_height)
     x, y = generic_btn.winfo_reqwidth(), generic_btn.winfo_reqheight()
     return x, y
+
+
+def calculate_checkbtn_size(_widget, _width=16):
+    generic_checkbtn = ttk.Checkbutton(_widget, width=_width)
+    return generic_checkbtn.winfo_reqwidth()
 
 
 def set_default_grid_size(_widget, _width=18):
@@ -39,6 +43,30 @@ def set_default_grid_size(_widget, _width=18):
 
     for row in range(row_count):
         _widget.grid_rowconfigure(row, minsize=0)
+
+
+def asset_tab(_widget, img, type, x=27, y=27):
+    path = get_tab_png(f"{img}_{type}.png")
+    png = tk.PhotoImage(file=path)
+    update_asset(_widget, png, x, y)
+
+
+def asset_titlebar(_widget, img, type, x=18, y=18):
+    path = get_titlebar_png(f"{img}_{type}.png")
+    png = tk.PhotoImage(file=path)
+    update_asset(_widget, png, x, y)
+
+
+def asset_icon(_widget, x=18, y=18):
+    path = __icon__.replace(".ico", ".png")
+    ico = tk.PhotoImage(file=path)
+    update_asset(_widget, ico, x, y)
+
+
+def update_asset(_widget, img, x, y):
+    _widget.delete("all")
+    _widget.create_image(x, y, image=img)
+    _widget.photoimage = img
 
 
 class TitleBar(tk.Frame):
@@ -178,7 +206,7 @@ class WindowPosition(tk.Frame):
         return value
 
 
-class ColorPicker:
+class VarColorPicker:
     def __init__(self, string_var: StringVar, clabel: Label, is_pct: bool = False):
         self.string_var = string_var
         self.clabel = clabel
