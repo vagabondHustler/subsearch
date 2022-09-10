@@ -12,7 +12,7 @@ def got_key() -> bool:
     Returns:
         bool: True if key exists, False if key does not exist
     """
-    sub_key = r"Software\Classes\*\shell\0.SubSearch\command"
+    sub_key = r"Software\Classes\*\shell\0.subsearch\command"
     try:
         with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
             reg.OpenKey(hkey, sub_key)
@@ -22,6 +22,6 @@ def got_key() -> bool:
 
 
 def check_is_exe() -> bool:
-    if sys.argv[0].endswith("subsearch.exe"):
+    if sys.argv[0].endswith(".exe"):
         return True
     return False
