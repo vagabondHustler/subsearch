@@ -90,7 +90,7 @@ class DownloadList(tk.Frame):
         selection = str(self.sub_listbox.curselection())
         item_num = re.findall("(\d+)", selection)[0]
         self.sub_listbox.delete(int(item_num))
-        self.sub_listbox.insert(int(item_num), f"»»» DOWNLOADING «««")
+        self.sub_listbox.insert(int(item_num), f"» DOWNLOADING «")
         for (number, _url), (_name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
             if number != int(item_num):
                 continue
