@@ -37,7 +37,7 @@ def write_valuex(key: str) -> None:
     if key == "subsearch":
         key_type = SUBSEARCH_PATH
         value_name = ""
-        value = "subsearch"
+        value = "Subsearch"
     if key.lower() == "icon":
         key_type = SUBSEARCH_PATH
         value_name = "Icon"

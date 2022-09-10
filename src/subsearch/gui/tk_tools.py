@@ -2,9 +2,9 @@ import os
 import tkinter as tk
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import __icon__, __tabs__, __titlebar__, __version__
+from subsearch.data import __icon__, __tabs__, __titlebar__, __version__, __video__
 from subsearch.gui import tk_data
-from subsearch.utils import raw_config
+from subsearch.utils import file_manager, raw_config
 
 TKCOLOR = tk_data.Color()
 TKFONT = tk_data.Font()

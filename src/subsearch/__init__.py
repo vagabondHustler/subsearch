@@ -36,6 +36,7 @@ class Subsearch(__subsearch__.Steps):
         """
         self._download_files()
         self._not_downloaded()
+        self._extract_zip_files()
         self._clean_up()
 
     def pre_exit(self) -> None:
