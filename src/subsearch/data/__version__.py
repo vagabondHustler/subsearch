@@ -1,4 +1,4 @@
-__version__ = "2.22.54-rc2"
+__version__ = 2.22.54-rc3
 
 import sys
 
