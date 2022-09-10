@@ -106,7 +106,7 @@ def get_appliesto_value() -> str:
 
     file_ext = raw_config.get_config_key("file_ext")
     # for which file types to show the SubSearch context entry on
-    value = '"__main__.py" OR '
+    value = ''
     for k, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:
             value += "".join(f'"{k}" OR ')
