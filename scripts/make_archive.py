@@ -6,8 +6,8 @@ Used by release.yml in .github/workflows to create a zip files of the repository
 """
 
 
-path_x64_dir_src = f"{os.getcwd()}/Subsearch-x64/Subsearch"
-path_x64_zip_dst = f"{os.getcwd()}/Subsearch-x64.zip"
+path_x64_dir_src = f"{os.getcwd()}/subsearch-x64/subsearch"
+path_x64_zip_dst = f"{os.getcwd()}/subsearch-x64.zip"
 
 
 def make_archive(source: str, destination: str):
