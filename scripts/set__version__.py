@@ -9,7 +9,8 @@ file_path = f"{cwd}/src/subsearch/data/__version__.py"
 
 with open(file_path, "r+") as f:
     file_content = f.read()  # open file and read the content
-    pattern = re.compile("(\d*\.\d*\.\d*-\w*\d*)"|"(\d*\.\d*\.\d*-\w*\.\d*)"|"(\d*\.\d*\.\d*)")  # semantic expression https://regex101.com/r/M4qItH/2
+    expression = '"(\d*\.\d*\.\d*-\w*\d*)"|"(\d*\.\d*\.\d*-\w*\.\d*)"|"(\d*\.\d*\.\d*)"'
+    pattern = re.compile(expression)  # semantic expression https://regex101.com/r/M4qItH/2
     new_content = pattern.sub(version, file_content)  # replace current version number with new version number
     f.seek(0)
     f.truncate()
