@@ -7,17 +7,17 @@ from subsearch.data import __video__
 from subsearch.gui import tk_data
 from subsearch.providers import subscene
 from subsearch.providers.generic import DownloadData
-from subsearch.utils import file_manager
+from subsearch.utils import file_manager, log
 
 TKWINDOW = tk_data.Window()
 TKCOLOR = tk_data.Color()
 TKFONT = tk_data.Font()
 # file with subtitles and corresponding dl links
 def read_tmp_file():
-    if __video__.directory == None:
+    if __video__.tmp_directory == None:
         return None
 
-    file = os.path.join(__video__.directory, "download_data.tmp")
+    file = os.path.join(__video__.tmp_directory, "download_data.tmp")
     with open(file, "r") as f:
         return [line.strip() for line in f]
 
@@ -63,6 +63,7 @@ class DownloadList(tk.Frame):
     def fill_listbox(self):
         dicts_names = {}
         dicts_urls = {}
+        log.output("\n[Proccessing downloads]")
         # fil list box with all available subtitles that were found and not downloaded
         for enu, item in enumerate(self.sublist):
             x = item.split(" ")
@@ -96,12 +97,10 @@ class DownloadList(tk.Frame):
             self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
             dl_url = self.subscene_scrape.download_url(_url)
             _name = "".join(re.findall("[^\/\\\:\?\<\>\|\*]*", _name))
-            path = f"{__video__.directory}\\__subsearch__{_name[-1]}.zip"
+            path = f"{__video__.tmp_directory}\\__subsearch__{item_num}.zip"
             item = DownloadData(name=_name, file_path=path, url=dl_url, idx_num=1, idx_lenght=1)
             file_manager.download_subtitle(item)
-            file_manager.extract_files(__video__.directory, ".zip")
-            file_manager.clean_up_files(__video__.directory, ".zip")
-            file_manager.clean_up_files(__video__.directory, ").nfo")
+            file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
             self.sub_listbox.delete(int(number))
             self.sub_listbox.insert(int(number), f"✔ {_name}")
             self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
