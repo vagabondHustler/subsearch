@@ -41,6 +41,9 @@ This started as a fun project to learn how to code in python and how to use git,
 
 Feel free to ask me anything about this project, request new features, contribute or give constructive feedback.
 
+FYI:
+If takes a long time for anything to happen, it's most likely because subscene is under heavy load and all connections takes longer than usual. Nothing I can do about that. But you can disabled them as a provider in the GUI.
+
 ## Preview <a name = "preview"></a>
 
 <div align="center">
