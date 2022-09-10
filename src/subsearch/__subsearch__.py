@@ -49,6 +49,7 @@ class BaseInitializer:
         self.opensubtitles_hash_downloads = 0
         self.opensubtitles_rss_downloads = 0
         self.subscene_downloads = 0
+        self.ran_download_tab = False
         if self.file_exist:
             self.file_hash = file_manager.get_hash(__video__.path)
             self.parameters = string_parser.get_parameters(__video__.name, self.file_hash, self.user_parameters)
@@ -66,6 +67,8 @@ class Steps(BaseInitializer):
         if __video__.tmp_directory is not None:
             if not os.path.exists(__video__.tmp_directory):
                 os.mkdir(__video__.tmp_directory)
+            if not os.path.exists(__video__.subs_directory):
+                os.mkdir(__video__.subs_directory)
         if self.file_exist is False:
             widget_menu.open_tab("search")
             return None
@@ -130,19 +133,25 @@ class Steps(BaseInitializer):
             self.combined_sorted_list.extend(x for x in self.subscene_sorted_list if x not in self.combined_sorted_list)
             self.combined_sorted_list.sort(key=lambda x: x[0], reverse=True)
         if len(self.combined_sorted_list) > 0:
-            tmp_file = file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_sorted_list)
+            file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_sorted_list)
             widget_menu.open_tab("download")
-            file_manager.clean_up_files(__video__.tmp_directory, tmp_file)
+            self.ran_download_tab = True
 
-    def _clean_up(self):
+    def _extract_zip_files(self):
         if self.file_exist is False:
+            return None
+        if self.ran_download_tab:
             return None
         log.output("\n[Proccessing downloads]")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
-        file_manager.clean_up_files(__video__.subs_directory, "nfo")
-        file_manager.del_directory(__video__.tmp_directory)
+    def _clean_up(self):
+        if self.file_exist is False:
+            return None
         if self.rename_best_match:
             file_manager.rename_best_match(f"{self.parameters.release}.srt", __video__.directory, ".srt")
+        log.output("\n[Cleaning up]")
+        file_manager.clean_up_files(__video__.subs_directory, "nfo")
+        file_manager.del_directory(__video__.tmp_directory)
         log.output("Done with tasks")
 
     def _pre_exit(self):
