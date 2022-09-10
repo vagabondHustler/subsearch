@@ -77,7 +77,7 @@ jobs:
           output=$(python src/subsearch/data/__version__.py --get-version)
           echo "::set-output name=version_output::$output"
       - name: Update __version__.py
-        run: python scripts/set__version__.py ${{ github.ref_name }}
+        run: python scripts/update_version.py ${{ github.ref_name }}
       - name: Push new version
         run: |
           git status
