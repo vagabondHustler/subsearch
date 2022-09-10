@@ -144,6 +144,7 @@ class Steps(BaseInitializer):
             return None
         log.output("\n[Proccessing downloads]")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
+
     def _clean_up(self):
         if self.file_exist is False:
             return None
