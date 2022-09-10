@@ -89,11 +89,11 @@ class DownloadList(tk.Frame):
         self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
         selection = str(self.sub_listbox.curselection())
         item_num = re.findall("(\d+)", selection)[0]
+        self.sub_listbox.delete(int(item_num))
+        self.sub_listbox.insert(int(item_num), f"»»» DOWNLOADING «««")
         for (number, _url), (_name) in zip(self.dicts_urls.items(), self.dicts_names.values()):
             if number != int(item_num):
                 continue
-            self.sub_listbox.delete(int(number))
-            self.sub_listbox.insert(int(number), f"»»» DOWNLOADING «««")
             self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.blue})
             dl_url = self.subscene_scrape.download_url(_url)
             _name = "".join(re.findall("[^\/\\\:\?\<\>\|\*]*", _name))
@@ -101,6 +101,7 @@ class DownloadList(tk.Frame):
             item = DownloadData(name=_name, file_path=path, url=dl_url, idx_num=1, idx_lenght=1)
             file_manager.download_subtitle(item)
             file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
-            self.sub_listbox.delete(int(number))
-            self.sub_listbox.insert(int(number), f"✔ {_name}")
-            self.sub_listbox.itemconfig(int(number), {"fg": TKCOLOR.green})
+            break
+        self.sub_listbox.delete(int(item_num))
+        self.sub_listbox.insert(int(item_num), f"✔ {_name}")
+        self.sub_listbox.itemconfig(int(item_num), {"fg": TKCOLOR.green})
