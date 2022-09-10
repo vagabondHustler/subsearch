@@ -15,4 +15,4 @@ jobs:
           github_token: ${{ secrets.ACTIONS_TOKEN }}
           update_release_body: true
           files: |
-            Subsearch-${{ github.ref_name }}-win-x64.zip
+            subsearch-${{ github.ref_name }}-win-x64.zip
