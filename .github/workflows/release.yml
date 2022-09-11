@@ -61,6 +61,8 @@ jobs:
     name: Versioning
     needs: ["test", "black-isort"]
     runs-on: ubuntu-latest
+    outputs:
+      prev_version: ${{ steps.current_version.outputs.prev_version_output }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -81,7 +83,7 @@ jobs:
         id: current_version
         run: |
           output=$(python src/subsearch/data/__version__.py --get-version)
-          echo "::set-output name=version_output::$output"
+          echo "::set-output name=prev_version_output::$output"
 
       - name: Update __version__.py
         run: python scripts/update_version.py ${{ github.ref_name }}
@@ -90,7 +92,7 @@ jobs:
         run: |
           git status
           git add src/subsearch/data/__version__.py
-          git commit -S -m "Release v${{steps.current_version.outputs.version_output}} -> ${{ github.ref_name }}"
+          git commit -S -m "Release v${{steps.current_version.outputs.prev_version_output}} -> ${{ github.ref_name }}"
           git fetch origin main
           git push origin HEAD:main
 
@@ -137,10 +139,16 @@ jobs:
         id: update_changelog
         run: |
           echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
-          $sha256_string = Get-FileHash -Path "subsearch-${{ github.ref_name }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+
+          $sha256_hash = Get-FileHash -Path "subsearch-${{ github.ref_name }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+
+          $previous_version = "v${{needs.versioning.outputs.prev_version}}"
+
           $line1 = "###### Full changelog: "
-          $line2 = "[${{ github.ref_name }}](https://github.com/vagabondHustler/subsearch/compare/v${{steps.current_version.outputs.version_output}}...${{ github.ref_name }})"
-          $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_string)"
+          $http_subsearch = "https://github.com/vagabondHustler/subsearch"
+          $line2 = "[${{ github.ref_name }}]($http_subsearch/compare/$previous_version...${{ github.ref_name }})"
+          $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
+
           echo $line1$line2$line3 >> tmp_changelog.md
 
       - name: Publish release
