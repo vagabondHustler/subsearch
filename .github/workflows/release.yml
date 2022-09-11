@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -30,6 +31,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
@@ -37,6 +39,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
       - name: Install black & isort
         run: |
           pip install black
@@ -45,6 +48,7 @@ jobs:
           black ./src -l 125
           isort ./tests --profile 'black'
           black ./tests -l 125
+
       - name: Push black & isort changes
         run: |
           git status
@@ -64,6 +68,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10.6"
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
@@ -71,13 +76,16 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
       - name: Get current version
         id: current_version
         run: |
           output=$(python src/subsearch/data/__version__.py --get-version)
           echo "::set-output name=version_output::$output"
+
       - name: Update __version__.py
         run: python scripts/update_version.py ${{ github.ref_name }}
+
       - name: Push new version
         run: |
           git status
@@ -94,6 +102,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+
       - name: Build changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v3
@@ -104,16 +113,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update version
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10.6"
-      - name: Initializing
+
+      - name: Install requirements
         run: |
           git fetch origin main
           python -m pip install --upgrade pip
           pip install pyinstaller
           pip install -r docs/requirements.txt
+
       - name: Build executable
         run: |
           pyinstaller scripts/build.spec -y --clean --distpath ./subsearch-x64
@@ -121,11 +132,22 @@ jobs:
         run: |
           python scripts/make_archive.py
           mv ./subsearch-x64.zip ./subsearch-${{ github.ref_name }}-win-x64.zip
-      - name: Publish
+
+      - name: Update changelog
+        id: update_changelog
+        run: |
+          echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
+          $sha256_string = Get-FileHash -Path "subsearch-${{ github.ref_name }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $line1 = "###### Full changelog: "
+          $line2 = "[${{ github.ref_name }}](https://github.com/vagabondHustler/subsearch/compare/v${{steps.current_version.outputs.version_output}}...${{ github.ref_name }})"
+          $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_string)"
+          echo $line1$line2$line3 >> tmp_changelog.md
+
+      - name: Publish release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body: ${{steps.github_release.outputs.changelog}}
+          body_path: tmp_changelog.md
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
           files: |
@@ -133,7 +155,7 @@ jobs:
 
   pypi-upload:
     if: ${{ !contains(github.ref, '-') }}
-    name: PyPI Upload
+    name: Upload to PyPi
     needs: versioning
     runs-on: ubuntu-latest
     steps:
@@ -144,14 +166,16 @@ jobs:
         with:
           python-version: "3.10.6"
 
-      - name: Install latest pip, build, twine
+      - name: Install requirements
         run: |
           git fetch origin main
           python -m pip install --upgrade --disable-pip-version-check pip
           python -m pip install --upgrade build twine
+
       - name: Build wheel and source distributions
         run: |
           python -m build
+
       - name: Upload to PyPI via Twine
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

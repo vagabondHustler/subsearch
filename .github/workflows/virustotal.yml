@@ -1,4 +1,4 @@
-name: VirusTotal
+name: Virustotal
 
 on:
   release:
@@ -13,6 +13,6 @@ jobs:
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
           github_token: ${{ secrets.ACTIONS_TOKEN }}
-          update_release_body: true
+          update_release_body: false
           files: |
             subsearch-${{ github.ref_name }}-win-x64.zip
