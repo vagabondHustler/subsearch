@@ -18,5 +18,6 @@
 		}
 	],
 	"template": "${{CHANGELOG}}\n\n",
+	"empty_template": "No changes\n\n",
 	"pr_template": "- ${{TITLE}} - [PR${{NUMBER}}](${{URL}})"
 }
