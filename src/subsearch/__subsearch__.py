@@ -61,7 +61,7 @@ class BaseInitializer:
 
 
 class Steps(BaseInitializer):
-    def __init__(self):
+    def __init__(self) -> None:
         self.start = time.perf_counter()
         BaseInitializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
@@ -80,7 +80,7 @@ class Steps(BaseInitializer):
         if " " in __video__.name:
             log.output("[Warning: Filename contains spaces]")
 
-    def _provider_opensubtitles(self):
+    def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None
         if self.languages[self.current_language] == "N/A":
@@ -89,59 +89,85 @@ class Steps(BaseInitializer):
             return None
 
         _opensubtitles = opensubtitles.OpenSubtitles(self.parameters, self.user_parameters)
-        if self.pro_opensubtitles_hash and self.file_hash is not None:
+        if self.pro_opensubtitles_hash and self.file_hash != "000000000000000000":
             log.output("\n[Searching on opensubtitles - hash]")
-            self.opensubtitles_hash = _opensubtitles.parse_hash()
+            self.opensubtitles_hash_results = _opensubtitles.parse_hash_results()
         if self.pro_opensubtitles_rss:
             log.output("\n[Searching on opensubtitles - rss]")
-            self.opensubtitles_rss = _opensubtitles.parse_rss()
+            self.opensubtitles_rss_results = _opensubtitles.parse_site_results()()
 
         self.opensubtitles_sorted_list = _opensubtitles.sorted_list()
 
-    def _provider_subscene(self):
+    def _provider_subscene(self) -> None:
         if self.file_exist is False:
             return None
         if self.pro_subscene is False:
             return None
         log.output("\n[Searching on subscene - title]")
         _subscene = subscene.Subscene(self.parameters, self.user_parameters)
-        self.subscene = _subscene.parse()
+        self.subscene_results = _subscene.parse_site_results()
         self.subscene_sorted_list = _subscene.sorted_list()
 
-    def _download_files(self):
+    def _provider_yifysubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.pro_opensubtitles_hash and self.opensubtitles_hash is not None:
+        if self.parameters.series:
+            log.output("\n[Searching on yifysubtitles - subtitle]]")
+            log.output("yifysubtitles only have subtitles for movies")
+            log.output("Done with tasks")
+            log.output("\n")
+            return None
+        if self.pro_yifysubtitles:
+            log.output("\n[Searching on yifysubtitles - subtitle]")
+            _yifysubtitles = yifysubtitles.YifiSubtitles(self.parameters, self.user_parameters)
+            self.yifysubtitles_results = _yifysubtitles.parse_site_results()
+            self.subscene_sorted_list = _yifysubtitles.sorted_list()
+
+    def _download_files(self) -> None:
+        if self.file_exist is False:
+            return None
+        if self.pro_opensubtitles_hash and self.opensubtitles_hash_results is not None:
             log.output("\n[Downloading from opensubtitles - hash]")
-            for item in self.opensubtitles_hash:
+            for item in self.opensubtitles_hash_results:
                 self.opensubtitles_hash_downloads = file_manager.download_subtitle(item)
                 log.output("Done with tasks")
                 log.output("\n")
-        if self.pro_opensubtitles_rss and self.opensubtitles_rss is not None:
+        if self.pro_opensubtitles_rss and self.opensubtitles_rss_results is not None:
             log.output("\n[Downloading from opensubtitles - rss]")
-            for item in self.opensubtitles_rss:
+            for item in self.opensubtitles_rss_results:
                 self.opensubtitles_rss_downloads = file_manager.download_subtitle(item)
                 log.output("Done with tasks")
-        if self.pro_subscene and self.subscene is not None:
+        if self.pro_subscene and self.subscene_results is not None:
             log.output("\n[Downloading from subscene]")
-            for item in self.subscene:
+            for item in self.subscene_results:
                 self.subscene_downloads = file_manager.download_subtitle(item)
                 log.output("Done with tasks")
+        if self.pro_yifysubtitles and self.yifysubtitles_results is not None:
+            log.output("\n[Downloading from yifysubtitles]")
+            for item in self.yifysubtitles_results:
+                self.yifysubtitles_downloads = file_manager.download_subtitle(item)
+                log.output("Done with tasks")
 
-    def _not_downloaded(self):
+    def _not_downloaded(self) -> None:
         if self.file_exist is False:
             return None
-        total_dls = self.opensubtitles_hash_downloads + self.opensubtitles_rss_downloads + self.subscene_downloads
+        total_dls = (
+            self.opensubtitles_hash_downloads
+            + self.opensubtitles_rss_downloads
+            + self.subscene_downloads
+            + self.yifysubtitles_downloads
+        )
         if self.show_download_window and total_dls == 0:
-            self.combined_sorted_list = list(self.opensubtitles_sorted_list)
-            self.combined_sorted_list.extend(x for x in self.subscene_sorted_list if x not in self.combined_sorted_list)
+            self.combined_sorted_list = list(
+                set(self.opensubtitles_sorted_list + self.subscene_sorted_list + self.yifysubtitles_sorted_list)
+            )
             self.combined_sorted_list.sort(key=lambda x: x[0], reverse=True)
         if len(self.combined_sorted_list) > 0:
             file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_sorted_list)
             widget_menu.open_tab("download")
             self.ran_download_tab = True
 
-    def _extract_zip_files(self):
+    def _extract_zip_files(self) -> None:
         if self.file_exist is False:
             return None
         if self.ran_download_tab:
