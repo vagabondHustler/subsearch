@@ -64,7 +64,7 @@ class Subscene(BaseProvider):
         for key, value in _to_be_downloaded.items():
             zip_url = self.scrape.get_download_url(value)
             to_be_downloaded[key] = zip_url
-            
+
         download_info = generic.named_tuple_zip_data("subscene", __video__.tmp_directory, to_be_downloaded)
 
         log.output("Done with tasks\n")
