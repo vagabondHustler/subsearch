@@ -16,7 +16,7 @@ from subsearch.utils import (
 
 
 class BaseInitializer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.current_language = raw_config.get_config_key("current_language")
         self.languages = raw_config.get_config_key("languages")
         self.percentage = raw_config.get_config_key("percentage")
@@ -26,10 +26,11 @@ class BaseInitializer:
         subtitle_type = raw_config.get_config_key("subtitle_type")
         self.hearing_impaired = subtitle_type["hearing_impaired"]
         self.non_hearing_impaired = subtitle_type["non_hearing_impaired"]
-        providers = raw_config.get_config_key("providers")
-        self.pro_subscene = providers["subscene_site"]
-        self.pro_opensubtitles_rss = providers["opensubtitles_rss"]
-        self.pro_opensubtitles_hash = providers["opensubtitles_hash"]
+        self.providers = raw_config.get_config_key("providers")
+        self.pro_subscene = self.providers["subscene_site"]
+        self.pro_opensubtitles_rss = self.providers["opensubtitles_rss"]
+        self.pro_opensubtitles_hash = self.providers["opensubtitles_hash"]
+        self.pro_yifysubtitles = self.providers["yifysubtitles_site"]
         self.file_exist = True if __video__.name is not None else False
         self.file_hash = file_manager.get_hash(__video__.path)
         self.user_parameters = raw_config.UserParameters(
@@ -43,12 +44,15 @@ class BaseInitializer:
         self.opensubtitles_hash_results = None
         self.opensubtitles_rss_results = None
         self.subscene_results = None
-        self.opensubtitles_sorted_list = []
-        self.subscene_sorted_list = []
-        self.combined_sorted_list = []
+        self.yifysubtitles_results = None
+        self.opensubtitles_sorted_list: list = []
+        self.subscene_sorted_list: list  = []
+        self.yifysubtitles_sorted_list: list  = []
+        self.combined_sorted_list: list  = []
         self.opensubtitles_hash_downloads = 0
         self.opensubtitles_rss_downloads = 0
         self.subscene_downloads = 0
+        self.yifysubtitles_downloads = 0
         self.ran_download_tab = False
         if self.file_exist:
             self.file_hash = file_manager.get_hash(__video__.path)
