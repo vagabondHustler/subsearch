@@ -28,13 +28,14 @@ class Providers(tk.Frame):
         self.last_key = ""
         for key, value in PROVIDERS.items():
             btn_txt = key.split("_")[-1].capitalize()
-            lbl_txt = f"{key.split('_')[0]}:".capitalize()
+            lbl_txt = f"{key.split('_')[0]}".capitalize()
             valuevar = tk.BooleanVar()
             valuevar.set(value)
             if self.last_key.startswith(lbl_txt):
                 self.colnum += 1
             if self.last_key != lbl_txt:
                 self.rownum += 1
+                self.colnum = 2
                 _lbl = tk.Label(self, text=lbl_txt)
                 _lbl.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
                 _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
@@ -49,11 +50,23 @@ class Providers(tk.Frame):
                 btn.configure(state="normal")
 
             btn.bind("<Enter>", self.enter_button)
+            btn.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
+        key = self.checkbox_value[btn][0]
+        if key == "yifysubtitles_site":
+            tip_text = "No filter for subtitle type on yifysubtitles"
+            self.tip = tk_tools.ToolTip(btn, btn, tip_text)
+            self.tip.show()
         btn.bind("<ButtonPress-1>", self.press_button)
+
+    def leave_button(self, event):
+        btn = event.widget
+        key = self.checkbox_value[btn][0]
+        if key == "yifysubtitles_site":
+            self.tip.hide()
 
     def press_button(self, event):
         btn = event.widget
