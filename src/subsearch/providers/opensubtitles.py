@@ -58,7 +58,7 @@ class OpenSubtitles(BaseProvider):
             log.output(f"No subtitles to download for {self.release}")
             log.output("Done with tasks\n")
             return None
-        
+
         download_info = generic.named_tuple_zip_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
         log.output("Done with tasks\n")
         return download_info

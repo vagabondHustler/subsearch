@@ -110,7 +110,7 @@ def get_lxml_doc(url: str, features: str = "lxml") -> BeautifulSoup:
     return doc
 
 
-def named_tuple_zip_data(provider:str, video_tmp_directory: str, to_be_downloaded: dict[str, str] ) -> list[DownloadData]:
+def named_tuple_zip_data(provider: str, video_tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
     download_info = []
     tbd_lenght = len(to_be_downloaded)
     for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):

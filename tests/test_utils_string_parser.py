@@ -37,7 +37,7 @@ def test_string_parser_movie() -> None:
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     base = BaseInitializer()
     base.user_parameters
-    param = string_parser.get_parameters(filename, '000000000000000000', base.user_parameters)
+    param = string_parser.get_parameters(filename, "000000000000000000", base.user_parameters)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20(2021)"
     assert (
         param.url_opensubtitles
@@ -52,7 +52,7 @@ def test_string_parser_movie() -> None:
     assert param.series is False
     assert param.release == "the.foo.bar.2021.1080p.web.h264-foobar"
     assert param.group == "foobar"
-    assert param.file_hash == '000000000000000000'
+    assert param.file_hash == "000000000000000000"
 
 
 def test_string_parser_show() -> None:
@@ -62,7 +62,7 @@ def test_string_parser_show() -> None:
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     base = BaseInitializer()
     base.user_parameters
-    param = string_parser.get_parameters(filename, '000000000000000000', base.user_parameters)
+    param = string_parser.get_parameters(filename, "000000000000000000", base.user_parameters)
     log.tprint(param)
     assert param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert (
@@ -78,17 +78,16 @@ def test_string_parser_show() -> None:
     assert param.series is True
     assert param.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
     assert param.group == "foobar"
-    assert param.file_hash == '000000000000000000'
+    assert param.file_hash == "000000000000000000"
 
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
     base = BaseInitializer()
     base.user_parameters
-    param = string_parser.get_parameters(filename, '000000000000000000', base.user_parameters)
+    param = string_parser.get_parameters(filename, "000000000000000000", base.user_parameters)
     assert (
-        param.url_subscene
-        == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264%20(0)"
+        param.url_subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%201080p%20web%20h264%20(0)"
     )
     assert (
         param.url_opensubtitles
@@ -103,4 +102,4 @@ def test_string_parser_bad_filename() -> None:
     assert param.series is False
     assert param.release == "the foo bar 1080p web h264"
     assert param.group == "the foo bar 1080p web h264"
-    assert param.file_hash == '000000000000000000'
+    assert param.file_hash == "000000000000000000"
