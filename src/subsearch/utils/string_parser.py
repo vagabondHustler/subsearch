@@ -1,18 +1,19 @@
 import re
 from dataclasses import dataclass
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Union
 
+import imdb
 from num2words import num2words
 
 from subsearch.utils.raw_config import UserParameters
 
 
-def find_year(string: str) -> Union[int, str]:
+def find_year(string: str) -> int:
     re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)  # https://regex101.com/r/r5TwxJ/1
     if len(re_year) > 0:
         year = re_year[0]
         return int(year)
-    return "N/A"
+    return 0000
 
 
 def find_title_by_year(string: str) -> str:
@@ -63,6 +64,20 @@ def find_group(string: str) -> str:
     return group
 
 
+def find_imdb_tt_id(base_yts: str, title: str, year: int) -> str:
+    ia = imdb.Cinemagoer()
+    movies = ia.search_movie(title)
+    url_yifysubtitles = base_yts
+    for movie in movies:
+        movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
+        if movie_no_colon.lower() == title.lower() and movie.data["year"] == (year or year - 1):
+            _movie_id: str = movie.movieID
+            tt_id = f"tt{_movie_id}"
+            url_yifysubtitles = f"{base_yts}/{tt_id}"
+            break
+    return url_yifysubtitles
+
+
 def rpl_sp_pct20(x: str) -> str:
     return x.replace(" ", "%20")
 
@@ -72,8 +87,9 @@ class FileSearchParameters:
     url_subscene: str
     url_opensubtitles: str
     url_opensubtitles_hash: str
+    url_yifysubtitles: str
     title: str
-    year: Union[int, str]
+    year: int
     season: str
     season_ordinal: str
     episode: str
@@ -81,11 +97,11 @@ class FileSearchParameters:
     series: bool
     release: str
     group: str
-    file_hash: str | None
+    file_hash: str
     definitive_match: str
 
 
-def get_parameters(filename: str, file_hash: str | None, user_parameters: UserParameters) -> FileSearchParameters:
+def get_parameters(filename: str, file_hash: str, user_parameters: UserParameters) -> FileSearchParameters:
     """
     Parse filename and get parameters for searching on subscene and opensubtitles
     Uses regex expressions to find the parameters
@@ -99,14 +115,15 @@ def get_parameters(filename: str, file_hash: str | None, user_parameters: UserPa
         SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
     """
     filename = filename.lower()
+
     lang_code3 = user_parameters.languages[user_parameters.current_language]
     year = find_year(filename)
     season_episode = find_season_episode(filename)
     season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
 
-    if year != "N/A":
+    if year != 0000:
         title = find_title_by_year(filename)
-    elif series and year == "N/A":
+    elif series and year == 0000:
         title = find_title_by_show(filename)
     else:
         title = filename.rsplit("-", 1)[0]
@@ -114,6 +131,7 @@ def get_parameters(filename: str, file_hash: str | None, user_parameters: UserPa
     group = find_group(filename)
 
     base_ss = "https://subscene.com/subtitles/searchbytitle?query="
+    base_yts = "https://yifysubtitles.org/movie-imdb"
 
     if user_parameters.hearing_impaired and user_parameters.non_hearing_impaired is False:
         base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/hearingimpaired-on"
@@ -125,9 +143,11 @@ def get_parameters(filename: str, file_hash: str | None, user_parameters: UserPa
     if series:
         url_subscene = f"{base_ss}{title} - {season_ordinal} season"
         url_opensubtitles = f"{base_os}/searchonlytvseries-on/season-{season}/episode-{episode}/moviename-{title}/rss_2_00"
+        url_yifysubtitles = base_yts
     else:
         url_subscene = f"{base_ss}{title} ({year})"
         url_opensubtitles = f"{base_os}/searchonlymovies-on/moviename-{title} ({year})/rss_2_00"
+        url_yifysubtitles = find_imdb_tt_id(base_yts, title, year)
 
     definitive_match = url_subscene.rsplit("query=", 1)[-1]
 
@@ -138,6 +158,7 @@ def get_parameters(filename: str, file_hash: str | None, user_parameters: UserPa
         url_subscene,
         url_opensubtitles,
         url_opensubtitles_hash,
+        url_yifysubtitles,
         title,
         year,
         season,
