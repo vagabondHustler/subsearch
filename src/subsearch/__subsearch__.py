@@ -59,6 +59,12 @@ class BaseInitializer:
             self.parameters = string_parser.get_parameters(__video__.name, self.file_hash, self.user_parameters)
             log.parameters(self.parameters, self.user_parameters)
 
+    def all_providers_disabled(self) -> bool:
+        providers = raw_config.get_config_key("providers")
+        if any(providers.values()):
+            return True
+        return False
+
 
 class Steps(BaseInitializer):
     def __init__(self) -> None:
@@ -171,6 +177,8 @@ class Steps(BaseInitializer):
         if self.file_exist is False:
             return None
         if self.ran_download_tab:
+            return None
+        if self.all_providers_disabled():
             return None
         log.output("\n[Proccessing downloads]")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
