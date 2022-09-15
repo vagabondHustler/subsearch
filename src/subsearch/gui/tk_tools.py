@@ -236,7 +236,7 @@ class VarColorPicker:
 
 
 class ToolTip(tk.Toplevel):
-    def __init__(self, parent, _widget, *_text, _background=TKCOLOR.dark_black):
+    def __init__(self, parent, _widget, *_text, _background=TKCOLOR.light_black):
         self.parent = parent
         self.widget = _widget
         self.text = _text
