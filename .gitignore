@@ -11,6 +11,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+dist_x64/
 downloads/
 eggs/
 .eggs/
@@ -156,3 +157,4 @@ src/*subs/
 tests/__subsearch__.log
 old*
 scripts/git_branch.py
+src/subsearch/subsearch.log
