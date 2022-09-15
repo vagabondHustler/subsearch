@@ -35,7 +35,7 @@ class Subscene(BaseProvider):
             return None
 
         # search title for subtitles
-        to_be_downloaded: dict[str, str] = {}
+        _to_be_downloaded: dict[str, str] = {}
         to_be_sorted: list[tuple[int, str, str]] = []
         while len(to_be_scraped) > 0:
             for subtitle_url in to_be_scraped:
@@ -49,18 +49,24 @@ class Subscene(BaseProvider):
                 to_be_sorted.append(formatted_data)
                 if self.is_threshold_met(key, pct_result) is False:
                     continue
-                if key in to_be_downloaded.keys():
+                if key in _to_be_downloaded.keys():
                     continue
-                to_be_downloaded[key] = value
+                _to_be_downloaded[key] = value
             to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
             self._sorted_list = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
         # exit if no subtitles found
-        if len(to_be_downloaded) == 0:
+        if len(_to_be_downloaded) == 0:
             log.output(f"No subtitles to download for {self.release}")
             log.output("Done with tasks\n")
             return None
 
+        to_be_downloaded: dict[str, str] = {}
+        for key, value in _to_be_downloaded.items():
+            zip_url = self.scrape.get_download_url(value)
+            to_be_downloaded[key] = zip_url
+            
         download_info = generic.named_tuple_zip_data("subscene", __video__.tmp_directory, to_be_downloaded)
+
         log.output("Done with tasks\n")
         return download_info
 
