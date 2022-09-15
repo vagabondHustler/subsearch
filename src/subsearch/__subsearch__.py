@@ -100,8 +100,7 @@ class Steps(BaseInitializer):
             self.opensubtitles_hash_results = _opensubtitles.parse_hash_results()
         if self.pro_opensubtitles_rss:
             log.output("\n[Searching on opensubtitles - rss]")
-            self.opensubtitles_rss_results = _opensubtitles.parse_site_results()()
-
+            self.opensubtitles_rss_results = _opensubtitles.parse_site_results()
         self.opensubtitles_sorted_list = _opensubtitles.sorted_list()
 
     def _provider_subscene(self) -> None:
