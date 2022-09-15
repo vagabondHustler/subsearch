@@ -4,7 +4,7 @@ import time
 
 from subsearch.data import __version__, __video__
 from subsearch.gui import widget_menu
-from subsearch.providers import opensubtitles, subscene
+from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
     current_user,
     file_manager,
