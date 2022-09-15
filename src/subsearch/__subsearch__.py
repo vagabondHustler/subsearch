@@ -60,8 +60,13 @@ class BaseInitializer:
             log.parameters(self.parameters, self.user_parameters)
 
     def all_providers_disabled(self) -> bool:
-        providers = raw_config.get_config_key("providers")
-        if any(providers.values()):
+        self.providers = raw_config.get_config_key("providers")
+        if (
+            self.pro_subscene is False
+            and self.pro_opensubtitles_rss is False
+            and self.pro_opensubtitles_hash is False
+            and self.pro_yifysubtitles is False
+        ):
             return True
         return False
 
