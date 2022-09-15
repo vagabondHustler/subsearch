@@ -175,7 +175,7 @@ class Steps(BaseInitializer):
         log.output("\n[Proccessing downloads]")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
 
-    def _clean_up(self):
+    def _clean_up(self) -> None:
         if self.file_exist is False:
             return None
         if self.rename_best_match:
@@ -185,7 +185,7 @@ class Steps(BaseInitializer):
         file_manager.del_directory(__video__.tmp_directory)
         log.output("Done with tasks")
 
-    def _pre_exit(self):
+    def _pre_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
         log.output(f"\nFinished in {elapsed} seconds")
 
@@ -194,5 +194,3 @@ class Steps(BaseInitializer):
                 input("Ctrl + c or Enter to exit")
             except KeyboardInterrupt:
                 pass
-    def _clean_up(self) -> None:
-    def _pre_exit(self) -> None:
