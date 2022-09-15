@@ -78,9 +78,9 @@ def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
     return file_dst
 
 
-def get_hash(file_path: str | None) -> str | None:
+def get_hash(file_path: str | None) -> str:
     if file_path is None:
-        return None
+        return "000000000000000000"
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
@@ -89,7 +89,7 @@ def get_hash(file_path: str | None) -> str | None:
             hash = filesize
             if filesize < 65536 * 2:
                 log.output(f"SizeError: filesize is {filesize} bytes", False)
-                return None
+                return "000000000000000000"
             n1 = 65536 // bytesize
             for _x in range(n1):
                 buffer = f.read(bytesize)
@@ -108,5 +108,4 @@ def get_hash(file_path: str | None) -> str | None:
         return returnedhash
 
     except IOError:
-        log.output("IOError")
-        return None
+        return "000000000000000000"

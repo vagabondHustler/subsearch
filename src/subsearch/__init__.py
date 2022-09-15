@@ -30,6 +30,12 @@ class Subsearch(__subsearch__.Steps):
         """
         self._provider_subscene()
 
+    def provider_yifysubtitles(self) -> None:
+        """
+        Scrape subscene from parsing filename of the video
+        """
+        self._provider_yifysubtitles()
+
     def process_files(self) -> None:
         """
         Download zip files containing the .srt files, extract, rename and clean up tmp files
@@ -108,6 +114,7 @@ def main() -> None:
     app = Subsearch()
     app.provider_opensubtitles()
     app.provider_subscene()
+    app.provider_yifysubtitles()
     app.process_files()
     app.pre_exit()
 
