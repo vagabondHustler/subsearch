@@ -46,9 +46,9 @@ class BaseInitializer:
         self.subscene_results = None
         self.yifysubtitles_results = None
         self.opensubtitles_sorted_list: list = []
-        self.subscene_sorted_list: list  = []
-        self.yifysubtitles_sorted_list: list  = []
-        self.combined_sorted_list: list  = []
+        self.subscene_sorted_list: list = []
+        self.yifysubtitles_sorted_list: list = []
+        self.combined_sorted_list: list = []
         self.opensubtitles_hash_downloads = 0
         self.opensubtitles_rss_downloads = 0
         self.subscene_downloads = 0
