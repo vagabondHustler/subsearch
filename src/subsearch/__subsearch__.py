@@ -164,3 +164,5 @@ class Steps(BaseInitializer):
                 input("Ctrl + c or Enter to exit")
             except KeyboardInterrupt:
                 pass
+    def _clean_up(self) -> None:
+    def _pre_exit(self) -> None:
