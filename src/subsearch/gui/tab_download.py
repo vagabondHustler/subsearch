@@ -30,7 +30,7 @@ class DownloadList(tk.Frame):
         # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
-        self.formatted_data  = formatted_data
+        self.formatted_data = formatted_data
         self.subscene_scrape = subscene.SubsceneScrape()
         self.extent = 0
         # self.sublist = read_tmp_file()
@@ -89,7 +89,9 @@ class DownloadList(tk.Frame):
         item_num = re.findall("(\d+)", selection)[0]
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"» DOWNLOADING «")
-        for enum, _provider, _release, _url in zip(self._providers.keys(), self._providers.values(), self._releases.values(), self._urls.values()):
+        for enum, _provider, _release, _url in zip(
+            self._providers.keys(), self._providers.values(), self._releases.values(), self._urls.values()
+        ):
             if enum != int(item_num):
                 continue
             self.sub_listbox.itemconfig(int(enum), {"fg": TKCOLOR.blue})
