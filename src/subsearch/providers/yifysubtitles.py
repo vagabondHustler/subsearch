@@ -10,7 +10,7 @@ class YifiSubtitles(BaseProvider):
     def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
         BaseProvider.__init__(self, parameters, user_parameters)
         self.scrape = YifySubtitlesScrape()
-        self.logged_and_sorted:list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedData] = []
 
     def parse_site_results(self):
         subtitle_data = self.scrape.get_subtitle(self.url_yifysubtitles, self.current_language)

@@ -13,7 +13,7 @@ class OpenSubtitles(BaseProvider):
     def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
         BaseProvider.__init__(self, parameters, user_parameters)
         self.scrape = OpenSubtitlesScrape()
-        self.logged_and_sorted:list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedData] = []
 
     def parse_hash_results(self):
         to_be_downloaded: list[str] | None = self.scrape.with_hash(

@@ -12,7 +12,7 @@ class Subscene(BaseProvider):
     def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
         BaseProvider.__init__(self, parameters, user_parameters)
         self.scrape = SubsceneScrape()
-        self.logged_and_sorted:list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedData] = []
 
     def parse_site_results(self):
         to_be_scraped: list[str] = []
@@ -65,13 +65,13 @@ class Subscene(BaseProvider):
         for release, subtitle_url in _to_be_downloaded.items():
             zip_url = self.scrape.get_download_url(subtitle_url)
             to_be_downloaded[release] = zip_url
-            
+
         download_info = generic.named_tuple_zip_data("subscene", __video__.tmp_directory, to_be_downloaded)
         log.output("Done with tasks\n")
         return download_info
 
     def _sorted_list(self):
-        return self.logged_and_sorted 
+        return self.logged_and_sorted
 
 
 class SubsceneScrape(Subscene):
