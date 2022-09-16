@@ -91,7 +91,7 @@ jobs:
       - name: Set latest version
         if: ${{ !contains(github.ref, '-') }}
         run: |
-          echo "v${{steps.current_version.outputs.prev_version_output}} > .github/configs/latest_release.yml
+          echo "v${{steps.current_version.outputs.prev_version_output}} > .github/configs/latest_release.yml"
 
       - name: Push new version
         run: |
