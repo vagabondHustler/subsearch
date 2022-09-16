@@ -151,16 +151,6 @@ jobs:
 
           echo "$line1$line2$line3" >> tmp_changelog.md
 
-      - name: Update latest_release
-        if: ${{ !contains(github.ref, '-') }}
-        run: |
-          echo "v${{needs.versioning.outputs.version_output}}" > .github/configs/latest_release.yml
-          git status
-          git add .github/configs/latest_release.yml
-          git commit -S -m "Chore update latest_release.yml"
-          git fetch origin main
-          git push origin HEAD:main
-
       - name: Publish release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
@@ -199,3 +189,23 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           twine upload --verbose -u '__token__' dist/*
+
+  latest-release-yml:
+    if: ${{ !contains(github.ref, '-') }}
+    name: Update latest_release.yml
+    needs: [versioning, pypi-upload, build-and-publish]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Write to latest_release
+        run: |
+          echo "v${{needs.versioning.outputs.version_output}}" > .github/configs/latest_release.yml
+      - name: Push origin HEAD:main
+        run: |
+          git status
+          git add .github/configs/latest_release.yml
+          git commit -S -m "Chore update latest_release.yml"
+          git fetch origin main
+          git push origin HEAD:main
