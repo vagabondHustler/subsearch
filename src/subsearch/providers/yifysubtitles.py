@@ -1,6 +1,6 @@
 from subsearch.data import __video__
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider, DownloadData
+from subsearch.providers.generic import BaseProvider, FormattedData
 from subsearch.utils import log, string_parser
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
@@ -10,22 +10,23 @@ class YifiSubtitles(BaseProvider):
     def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
         BaseProvider.__init__(self, parameters, user_parameters)
         self.scrape = YifySubtitlesScrape()
+        self.logged_and_sorted:list[FormattedData] = []
 
     def parse_site_results(self):
         subtitle_data = self.scrape.get_subtitle(self.url_yifysubtitles, self.current_language)
         to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[tuple[int, str, str]] = []
+        to_be_sorted: list[FormattedData] = []
         for key, value in subtitle_data.items():
             pct_result = string_parser.get_pct_value(key, self.release)
             log.output(f"[{pct_result:>3}%  match]: {key}")
-            formatted_data = generic.format_key_value_pct(key, value, pct_result)
+            formatted_data = generic.format_key_value_pct("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(key, pct_result) is False:
                 continue
             if value in to_be_downloaded.values():
                 continue
             to_be_downloaded[key] = value
-        self._sorted_list = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.pct_threashold)
+        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
 
         if len(to_be_downloaded) == 0:
             log.output(f"No subtitles to download for {self.release}")
@@ -36,8 +37,8 @@ class YifiSubtitles(BaseProvider):
         log.output("Done with tasks\n")
         return download_info
 
-    def sorted_list(self):
-        return self._sorted_list
+    def _sorted_list(self):
+        return self.logged_and_sorted
 
 
 class YifySubtitlesScrape(YifiSubtitles):

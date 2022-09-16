@@ -21,6 +21,15 @@ class DownloadData(NamedTuple):
     idx_lenght: int
 
 
+class FormattedData(NamedTuple):
+    provider: str
+    release: str
+    url: str
+    pct_result: str
+    formatted_release: str
+    formatted_url: str
+
+
 class BaseProvider:
     """
     Base class for providers
@@ -51,8 +60,6 @@ class BaseProvider:
         self.non_hi_sub = user_parameters.non_hearing_impaired
         self.pct_threashold = user_parameters.percentage
         self.show_download_window = user_parameters.show_download_window
-        # sorted_list
-        self._sorted_list: list[DownloadData] = []
 
     def is_movie(self, key: str) -> bool:
         if key.lower() == f"{self.title} ({self.year})":
@@ -120,28 +127,34 @@ def named_tuple_zip_data(provider: str, video_tmp_directory: str, to_be_download
     return download_info
 
 
-def format_key_value_pct(key: str, value: str, pct_result: int) -> tuple[int, str, str]:
-    lenght_str = sum(1 for char in f"[{pct_result:>3}%  match]:")
-    formatting_spaces = " " * lenght_str
-    _name = f"[{pct_result:>3}%  match]: {key}"
-    _url = f"{formatting_spaces} {value}"
-    return pct_result, _name, _url
+def format_key_value_pct(_provider: str, key: str, value: str, _pct_result: int) -> FormattedData:
+    lenght_str = sum(1 for char in f"[{_pct_result:>3}%  match]:")
+    number_of_spaces = " " * lenght_str
+    _match_release = f"[{_pct_result:>3}%  match]: {key}"
+    _url = f"{number_of_spaces} {value}"
+    data = FormattedData(
+        provider=_provider,
+        release=key,
+        url=value,
+        pct_result=_pct_result,
+        formatted_release=_match_release,
+        formatted_url=_url,
+    )
+    return data
 
 
-def log_and_sort_list(_provider: str, list_of_tuples: list[tuple[int, str, str]], pct: int):
-    list_of_tuples.sort(key=lambda x: x[0], reverse=True)
+def log_and_sort_list(_provider: str, _list: list[FormattedData], pct: int) -> list[FormattedData]:
+    _list.sort(key=lambda x: x.pct_result, reverse=True)
     log.output(f"\n[Sorted List from {_provider}]", False)
     hbd_printed = False
     hnbd_printed = False
-    for i in list_of_tuples:
-        name = i[1]
-        url = i[2]
-        if i[0] >= pct and not hbd_printed:
+    for data in _list:
+        if data.pct_result >= pct and not hbd_printed:
             log.output(f"--- Has been downloaded ---\n", False)
             hbd_printed = True
-        if i[0] <= pct and not hnbd_printed:
+        if data.pct_result <= pct and not hnbd_printed:
             log.output(f"--- Has not been downloaded ---\n", False)
             hnbd_printed = True
-        log.output(f"{name}", False)
-        log.output(f"{url}\n", False)
-    return list_of_tuples
+        log.output(f"{data.formatted_release}", False)
+        log.output(f"{data.formatted_url}\n", False)
+    return _list

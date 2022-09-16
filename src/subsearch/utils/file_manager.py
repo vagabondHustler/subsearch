@@ -5,7 +5,7 @@ import zipfile
 
 import cloudscraper
 
-from subsearch.providers.generic import DownloadData
+from subsearch.providers.generic import DownloadData, FormattedData
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
@@ -65,17 +65,6 @@ def del_directory(directory: str) -> None:
         log.output(f"Removing: {file}")
     log.output(f"Removing: {directory}")
     shutil.rmtree(directory)
-
-
-def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
-    file_dst = f"{dst}\\download_data.tmp"
-    with open(file_dst, "w", encoding="utf8") as f:
-        for i in range(len(not_downloaded)):
-            name, _link = not_downloaded[i][1], not_downloaded[i][2]
-            link = _link.replace(" ", "")
-            f.writelines(f"{name} {link}")
-            f.write("\n")
-    return file_dst
 
 
 def get_hash(file_path: str | None) -> str:
