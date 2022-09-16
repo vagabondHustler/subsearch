@@ -149,7 +149,7 @@ jobs:
           $line2 = "[${{ github.ref_name }}]($http_subsearch/compare/$ver...${{ github.ref_name }})"
           $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
 
-          echo $line1$line2$line3 >> tmp_changelog.md
+          echo "$line1$line2$line3" >> tmp_changelog.md
 
       - name: Update latest_release
         if: ${{ !contains(github.ref, '-') }}
