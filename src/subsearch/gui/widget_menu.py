@@ -193,10 +193,15 @@ class TabDownload(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
-        tab_download.DownloadList(self, content_posx, content_posy).pack(anchor="center")
+        tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
 
 
-def open_tab(active_tab: str):
+def open_tab(active_tab: str, **kwargs):
+    global formatted_data
+    try:
+        formatted_data = kwargs["formatted_data"]
+    except KeyError:
+        formatted_data = None
     root = base_root.main()
     gui.set_theme("dark")
     content = tk.Frame(root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 118)
