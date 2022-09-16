@@ -173,7 +173,6 @@ class Steps(BaseInitializer):
                 self.opensubtitles_sorted_list + self.subscene_sorted_list + self.yifysubtitles_sorted_list
             )
         if len(self.combined_list) > 0:
-            # file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_list)
             widget_menu.open_tab("download", formatted_data=self.combined_list)
             self.ran_download_tab = True
 
