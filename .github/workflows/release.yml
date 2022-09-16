@@ -62,7 +62,7 @@ jobs:
     needs: ["test", "black-isort"]
     runs-on: ubuntu-latest
     outputs:
-      prev_version: ${{ steps.current_version.outputs.prev_version_output }}
+      version_output: ${{ steps.current_version.outputs.prev_version_output }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -87,11 +87,6 @@ jobs:
 
       - name: Update __version__.py
         run: python scripts/update_version.py ${{ github.ref_name }}
-
-      - name: Set latest version
-        if: ${{ !contains(github.ref, '-') }}
-        run: |
-          echo "v${{steps.current_version.outputs.prev_version_output}}" > .github/configs/latest_release.yml
 
       - name: Push new version
         run: |
@@ -155,6 +150,16 @@ jobs:
           $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
 
           echo $line1$line2$line3 >> tmp_changelog.md
+
+      - name: Update latest_release
+        if: ${{ !contains(github.ref, '-') }}
+        run: |
+          echo "v${{needs.versioning.outputs.version_output}}" > .github/configs/latest_release.yml
+          git status
+          git add .github/configs/latest_release.yml
+          git commit -S -m "Chore update latest_release.yml"
+          git fetch origin main
+          git push origin HEAD:main
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
