@@ -67,16 +67,6 @@ def del_directory(directory: str) -> None:
     shutil.rmtree(directory)
 
 
-def write_not_downloaded_tmp(dst: str, _list: list[FormattedData]) -> str:
-    file_dst = f"{dst}\\download_data.tmp"
-    with open(file_dst, "w", encoding="utf8") as f:
-        for item in _list:
-            url = item.url.replace(" ", "")
-            f.writelines(f"{item.provider}|{item.pct_release}|{url}")
-            f.write("\n")
-    return file_dst
-
-
 def get_hash(file_path: str | None) -> str:
     if file_path is None:
         return "000000000000000000"
