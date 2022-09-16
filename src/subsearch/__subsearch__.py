@@ -5,6 +5,7 @@ import time
 from subsearch.data import __version__, __video__
 from subsearch.gui import widget_menu
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
+from subsearch.providers.generic import FormattedData
 from subsearch.utils import (
     current_user,
     file_manager,
@@ -48,7 +49,7 @@ class BaseInitializer:
         self.opensubtitles_sorted_list: list = []
         self.subscene_sorted_list: list = []
         self.yifysubtitles_sorted_list: list = []
-        self.combined_sorted_list: list = []
+        self.combined_list: list[FormattedData] = []
         self.opensubtitles_hash_downloads = 0
         self.opensubtitles_rss_downloads = 0
         self.subscene_downloads = 0
@@ -106,7 +107,7 @@ class Steps(BaseInitializer):
         if self.pro_opensubtitles_rss:
             log.output("\n[Searching on opensubtitles - rss]")
             self.opensubtitles_rss_results = _opensubtitles.parse_site_results()
-        self.opensubtitles_sorted_list = _opensubtitles.sorted_list()
+        self.opensubtitles_sorted_list = _opensubtitles._sorted_list()
 
     def _provider_subscene(self) -> None:
         if self.file_exist is False:
@@ -116,7 +117,7 @@ class Steps(BaseInitializer):
         log.output("\n[Searching on subscene - title]")
         _subscene = subscene.Subscene(self.parameters, self.user_parameters)
         self.subscene_results = _subscene.parse_site_results()
-        self.subscene_sorted_list = _subscene.sorted_list()
+        self.subscene_sorted_list = _subscene._sorted_list()
 
     def _provider_yifysubtitles(self) -> None:
         if self.file_exist is False:
@@ -131,7 +132,7 @@ class Steps(BaseInitializer):
             log.output("\n[Searching on yifysubtitles - subtitle]")
             _yifysubtitles = yifysubtitles.YifiSubtitles(self.parameters, self.user_parameters)
             self.yifysubtitles_results = _yifysubtitles.parse_site_results()
-            self.subscene_sorted_list = _yifysubtitles.sorted_list()
+            self.subscene_sorted_list = _yifysubtitles._sorted_list()
 
     def _download_files(self) -> None:
         if self.file_exist is False:
@@ -168,13 +169,12 @@ class Steps(BaseInitializer):
             + self.yifysubtitles_downloads
         )
         if self.show_download_window and total_dls == 0:
-            self.combined_sorted_list = list(
-                set(self.opensubtitles_sorted_list + self.subscene_sorted_list + self.yifysubtitles_sorted_list)
+            self.combined_list: list[FormattedData] = (
+                self.opensubtitles_sorted_list + self.subscene_sorted_list + self.yifysubtitles_sorted_list
             )
-            self.combined_sorted_list.sort(key=lambda x: x[0], reverse=True)
-        if len(self.combined_sorted_list) > 0:
-            file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_sorted_list)
-            widget_menu.open_tab("download")
+        if len(self.combined_list) > 0:
+            # file_manager.write_not_downloaded_tmp(__video__.tmp_directory, self.combined_list)
+            widget_menu.open_tab("download", formatted_data=self.combined_list)
             self.ran_download_tab = True
 
     def _extract_zip_files(self) -> None:

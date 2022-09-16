@@ -5,7 +5,7 @@ import zipfile
 
 import cloudscraper
 
-from subsearch.providers.generic import DownloadData
+from subsearch.providers.generic import DownloadData, FormattedData
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
@@ -67,13 +67,12 @@ def del_directory(directory: str) -> None:
     shutil.rmtree(directory)
 
 
-def write_not_downloaded_tmp(dst: str, not_downloaded: list) -> str:
+def write_not_downloaded_tmp(dst: str, _list: list[FormattedData]) -> str:
     file_dst = f"{dst}\\download_data.tmp"
     with open(file_dst, "w", encoding="utf8") as f:
-        for i in range(len(not_downloaded)):
-            name, _link = not_downloaded[i][1], not_downloaded[i][2]
-            link = _link.replace(" ", "")
-            f.writelines(f"{name} {link}")
+        for item in _list:
+            url = item.url.replace(" ", "")
+            f.writelines(f"{item.provider}|{item.pct_release}|{url}")
             f.write("\n")
     return file_dst
 
