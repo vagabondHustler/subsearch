@@ -42,21 +42,19 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-NA = tuple[Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal["N/A"], Literal[False]]
 
 
-def find_ordinal(string: str) -> Union[tuple[str, str, str, str, bool], NA]:
+
+def find_ordinal(string: str) -> tuple[str, str, str, str, bool]:
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
-
-        return season, season_ordinal, episode, episode_ordinal, show_bool
     else:
         season, episode = string.replace("s", "").replace("e", " ").split(" ")
         season_ordinal = num2words(int(season), lang="en", to="ordinal")
         episode_ordinal = num2words(int(episode), lang="en", to="ordinal")
         show_bool = True
-        return season, season_ordinal, episode, episode_ordinal, show_bool
+    return season, season_ordinal, episode, episode_ordinal, show_bool
 
 
 def find_group(string: str) -> str:
@@ -70,16 +68,15 @@ def find_imdb_tt_id(base_yts: str, title: str, year: int) -> str:
     url_yifysubtitles = base_yts
     for movie in movies:
         movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
-        if movie_no_colon.lower() == title.lower() and movie.data["year"] == (year or year - 1):
-            _movie_id: str = movie.movieID
-            tt_id = f"tt{_movie_id}"
-            url_yifysubtitles = f"{base_yts}/{tt_id}"
-            break
+        if movie_no_colon.lower() != title.lower():
+            continue
+        if movie.data["year"] != year or movie.data["year"] != year - 1:
+            continue
+        _movie_id: str = movie.movieID
+        tt_id = f"tt{_movie_id}"
+        url_yifysubtitles = f"{base_yts}/{tt_id}"
+        break
     return url_yifysubtitles
-
-
-def rpl_sp_pct20(x: str) -> str:
-    return x.replace(" ", "%20")
 
 
 @dataclass(frozen=True, order=True)
@@ -143,7 +140,7 @@ def get_parameters(filename: str, file_hash: str, user_parameters: UserParameter
     if series:
         url_subscene = f"{base_ss}{title} - {season_ordinal} season"
         url_opensubtitles = f"{base_os}/searchonlytvseries-on/season-{season}/episode-{episode}/moviename-{title}/rss_2_00"
-        url_yifysubtitles = base_yts
+        url_yifysubtitles = "N/A"
     else:
         url_subscene = f"{base_ss}{title} ({year})"
         url_opensubtitles = f"{base_os}/searchonlymovies-on/moviename-{title} ({year})/rss_2_00"

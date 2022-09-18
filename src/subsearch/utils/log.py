@@ -9,16 +9,16 @@ from subsearch.utils import raw_config
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
 
-CWD = os.getcwd()
-if __video__.directory is not None:
-    CWD = __video__.directory
+cwd = os.getcwd()
+if __video__.directory != "N/A":
+    cwd = __video__.directory
 
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
 logging.basicConfig(
-    filename=f"{CWD}\\subsearch.log",
+    filename=f"{cwd}\\subsearch.log",
     filemode="w",
     level=logging.DEBUG,
     format="%(asctime)s - %(message)s",

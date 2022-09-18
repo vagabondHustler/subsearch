@@ -32,7 +32,7 @@ class BaseInitializer:
         self.pro_opensubtitles_rss = self.providers["opensubtitles_rss"]
         self.pro_opensubtitles_hash = self.providers["opensubtitles_hash"]
         self.pro_yifysubtitles = self.providers["yifysubtitles_site"]
-        self.file_exist = True if __video__.name is not None else False
+        self.file_exist = True if __video__.name != "N/A" else False
         self.file_hash = file_manager.get_hash(__video__.path)
         self.user_parameters = raw_config.UserParameters(
             current_language=self.current_language,
@@ -80,7 +80,7 @@ class Steps(BaseInitializer):
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
-        if __video__.tmp_directory is not None:
+        if __video__.tmp_directory != "N/A":
             if not os.path.exists(__video__.tmp_directory):
                 os.mkdir(__video__.tmp_directory)
             if not os.path.exists(__video__.subs_directory):
@@ -122,7 +122,7 @@ class Steps(BaseInitializer):
     def _provider_yifysubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.parameters.series:
+        if self.parameters.series or self.parameters.url_yifysubtitles == "N/A":
             log.output("\n[Searching on yifysubtitles - subtitle]]")
             log.output("yifysubtitles only have subtitles for movies")
             log.output("Done with tasks")
