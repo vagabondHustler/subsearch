@@ -25,7 +25,7 @@ class FormattedData(NamedTuple):
     provider: str
     release: str
     url: str
-    pct_result: str
+    pct_result: int
     formatted_release: str
     formatted_url: str
 
