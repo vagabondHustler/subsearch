@@ -190,14 +190,13 @@ class TabSettings(tk.Frame):
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, content_posx, content_posy):
+    def __init__(self, parent, content_posx, content_posy, formatted_data ):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
 
 
 def open_tab(active_tab: str, **kwargs):
-    global formatted_data
     try:
         formatted_data = kwargs["formatted_data"]
     except KeyError:
@@ -214,7 +213,7 @@ def open_tab(active_tab: str, **kwargs):
         TabLanguage(content, content_posx, content_posy),
         TabSearch(content, content_posx, content_posy),
         TabSettings(content, content_posx, content_posy),
-        TabDownload(content, content_posx, content_posy),
+        TabDownload(content, content_posx, content_posy, formatted_data),
     )
     footer.place(x=2, y=TKWINDOW.height - 82)
     root.mainloop()
