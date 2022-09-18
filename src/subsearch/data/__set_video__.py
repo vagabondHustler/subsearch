@@ -2,17 +2,16 @@ import os
 import sys
 from dataclasses import dataclass
 from itertools import product
-from typing import Any
 
 
 @dataclass(order=True)
 class VideoFileData:
-    name: str | Any
-    ext: str | Any
-    path: str | Any
-    directory: str | Any
-    subs_directory: str | Any
-    tmp_directory: str | Any
+    name: str
+    ext: str
+    path: str
+    directory: str
+    subs_directory: str
+    tmp_directory: str
 
 
 def get_video_file_data() -> VideoFileData:
@@ -54,4 +53,4 @@ def get_video_file_data() -> VideoFileData:
     if file_exist:
         return VideoFileData(name, ext, path, directory, subs_directory, tmp_directory)
     else:
-        return VideoFileData(name=None, ext=None, path=None, directory=None, subs_directory=None, tmp_directory=None)
+        return VideoFileData(name="N/A", ext="N/A", path="N/A", directory="N/A", subs_directory="N/A", tmp_directory="N/A")
