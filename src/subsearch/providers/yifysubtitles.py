@@ -49,9 +49,8 @@ class YifySubtitlesScrape(YifiSubtitles):
         doc = generic.get_lxml_doc(url)
         tag_tbody = doc.find("tbody")
         subtitles: dict[str, str] = {}
-        while tag_tbody is None:
-            self.to_many_requests()
-            tag_tbody = doc.find("tbody")
+        if tag_tbody is None:
+            return subtitles
         tbody_content = tag_tbody.contents[1::2]
         for class_a1 in tbody_content:
             subtitle_language = class_a1.contents[3].text
