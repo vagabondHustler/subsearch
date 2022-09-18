@@ -45,7 +45,7 @@ class DownloadList(tk.Frame):
             border=0,
             borderwidth=0,
             highlightthickness=0,
-            activestyle=None,
+            activestyle='none',
             yscrollcommand=self.scrollbar.set,
         )
         hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
