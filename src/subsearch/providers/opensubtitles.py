@@ -81,7 +81,7 @@ class OpenSubtitlesScrape(OpenSubtitles):
         doc_results = doc.find("a", download="download", id="bt-dwl-bt")
         if doc_results is None:
             return None
-        sub_id = doc_results.attrs['data-product-id']
+        sub_id = doc_results.attrs["data-product-id"]
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
         subtitles[release] = download_url
         return subtitles
