@@ -30,9 +30,10 @@ class Subscene(BaseProvider):
         # exit if no titles found
         if len(to_be_scraped) == 0:
             if self.series:
-                log.output(f"\nNo TV-series found matching {self.title}")
+                log.output(f"No TV-series found matching {self.title}")
             else:
-                log.output(f"\nNo movies found matching {self.title}")
+                log.output(f"No movies found matching {self.title}")
+            log.output("Done with task\n")
             return None
 
         # search title for subtitles
