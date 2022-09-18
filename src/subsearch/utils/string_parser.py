@@ -42,9 +42,6 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-
-
-
 def find_ordinal(string: str) -> tuple[str, str, str, str, bool]:
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"

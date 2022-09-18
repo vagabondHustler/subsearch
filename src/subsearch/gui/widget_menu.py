@@ -190,7 +190,7 @@ class TabSettings(tk.Frame):
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, content_posx, content_posy, formatted_data ):
+    def __init__(self, parent, content_posx, content_posy, formatted_data):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TKCOLOR.dark_grey)
         tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
