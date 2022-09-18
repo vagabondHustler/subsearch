@@ -12,15 +12,6 @@ from subsearch.utils import file_manager, log
 TKWINDOW = tk_data.Window()
 TKCOLOR = tk_data.Color()
 TKFONT = tk_data.Font()
-# file with subtitles and corresponding dl links
-def read_tmp_file():
-    if __video__.tmp_directory == None:
-        return None
-
-    file = os.path.join(__video__.tmp_directory, "download_data.tmp")
-    with open(file, "r") as f:
-        return [line.strip() for line in f]
-
 
 # download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
@@ -45,7 +36,7 @@ class DownloadList(tk.Frame):
             border=0,
             borderwidth=0,
             highlightthickness=0,
-            activestyle='none',
+            activestyle="none",
             yscrollcommand=self.scrollbar.set,
         )
         hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
