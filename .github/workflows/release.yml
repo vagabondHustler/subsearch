@@ -211,7 +211,7 @@ jobs:
 
       - name: Write to latest_release
         run: |
-          echo "v${{needs.versioning.outputs.version_output}}" > .github/configs/latest_release.yml
+          echo "${{ github.ref_name }}" > .github/configs/latest_release.yml
           
       - name: Push origin HEAD:main
         run: |
