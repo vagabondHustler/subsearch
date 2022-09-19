@@ -28,7 +28,7 @@ class YifiSubtitles(BaseProvider):
             to_be_downloaded[key] = value
         self.logged_and_sorted = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.pct_threashold)
 
-        if len(to_be_downloaded) == 0:
+        if not to_be_downloaded:
             log.output(f"No subtitles to download for {self.release}")
             log.output("Done with tasks\n")
             return None
