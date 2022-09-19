@@ -67,7 +67,7 @@ def find_imdb_tt_id(base_yts: str, title: str, year: int) -> str:
         movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
         if movie_no_colon.lower() != title.lower():
             continue
-        if movie.data["year"] != year or movie.data["year"] != year - 1:
+        if movie.data["year"] != year and movie.data["year"] != year - 1:
             continue
         _movie_id: str = movie.movieID
         tt_id = f"tt{_movie_id}"
