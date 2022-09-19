@@ -32,8 +32,12 @@ class BaseInitializer:
         self.pro_opensubtitles_rss = self.providers["opensubtitles_rss"]
         self.pro_opensubtitles_hash = self.providers["opensubtitles_hash"]
         self.pro_yifysubtitles = self.providers["yifysubtitles_site"]
-        self.file_exist = True if __video__.name != "N/A" else False
-        self.file_hash = file_manager.get_hash(__video__.path)
+        if __video__ is not None:
+            self.file_exist = True
+            self.file_hash = file_manager.get_hash(__video__.path)
+        else:
+            self.file_exist = False
+            self.file_hash = "000000000000000000"
         self.user_parameters = raw_config.UserParameters(
             current_language=self.current_language,
             languages=self.languages,
@@ -80,7 +84,7 @@ class Steps(BaseInitializer):
         if current_user.got_key() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
-        if __video__.tmp_directory != "N/A":
+        if __video__ is not None:
             if not os.path.exists(__video__.tmp_directory):
                 os.mkdir(__video__.tmp_directory)
             if not os.path.exists(__video__.subs_directory):
@@ -172,7 +176,7 @@ class Steps(BaseInitializer):
             self.combined_list: list[FormattedData] = (
                 self.opensubtitles_sorted_list + self.subscene_sorted_list + self.yifysubtitles_sorted_list
             )
-        if len(self.combined_list) > 0:
+        if self.combined_list:
             widget_menu.open_tab("download", formatted_data=self.combined_list)
             self.ran_download_tab = True
 
