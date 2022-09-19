@@ -28,7 +28,7 @@ class Subscene(BaseProvider):
         log.output("Done with task\n") if len(to_be_scraped) > 0 else None
 
         # exit if no titles found
-        if len(to_be_scraped) == 0:
+        if not to_be_scraped:
             if self.series:
                 log.output(f"No TV-series found matching {self.title}")
             else:
@@ -54,10 +54,9 @@ class Subscene(BaseProvider):
             if release in _to_be_downloaded.keys():
                 continue
             _to_be_downloaded[release] = subtitle_url
-        to_be_scraped.pop(0) if len(to_be_scraped) > 0 else None
         self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
         # exit if no subtitles found
-        if len(_to_be_downloaded) == 0:
+        if not _to_be_downloaded:
             log.output(f"No subtitles to download for {self.release}")
             log.output("Done with tasks\n")
             return None
