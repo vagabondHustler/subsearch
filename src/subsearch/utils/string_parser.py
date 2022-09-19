@@ -10,7 +10,7 @@ from subsearch.utils.raw_config import UserParameters
 
 def find_year(string: str) -> int:
     re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)  # https://regex101.com/r/r5TwxJ/1
-    if len(re_year) > 0:
+    if re_year:
         year = re_year[0]
         return int(year)
     return 0000
@@ -18,7 +18,7 @@ def find_year(string: str) -> int:
 
 def find_title_by_year(string: str) -> str:
     re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)  # https://regex101.com/r/FKUpY0/1
-    if len(re_title) > 0:
+    if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
         return title
@@ -27,7 +27,7 @@ def find_title_by_year(string: str) -> str:
 
 def find_title_by_show(string: str) -> str:
     re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)  # https://regex101.com/r/41OZE5/1
-    if len(re_title) > 0:
+    if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
         return title
@@ -36,7 +36,7 @@ def find_title_by_show(string: str) -> str:
 
 def find_season_episode(string: str) -> str:
     re_se = re.findall("\.([s]\d*[e]\d*)\.", string)  # https://regex101.com/r/8Nwlr6/1
-    if len(re_se) > 0:
+    if re_se:
         se: str = re_se[0]
         return se
     return "N/A"
