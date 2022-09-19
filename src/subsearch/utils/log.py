@@ -2,37 +2,42 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Literal
 
 from subsearch.data import __version__, __video__
 from subsearch.utils import raw_config
 from subsearch.utils.raw_config import UserParameters
 from subsearch.utils.string_parser import FileSearchParameters
 
-cwd = os.getcwd()
-if __video__.directory != "N/A":
-    cwd = __video__.directory
-
-
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
-logging.basicConfig(
-    filename=f"{cwd}\\subsearch.log",
-    filemode="w",
-    level=logging.DEBUG,
-    format="%(asctime)s - %(message)s",
-    datefmt="%d-%b-%y %H:%M:%S",
-)
+if __video__ is None:
+    cwd = os.getcwd()
+    create_log_file = False
+else:
+    create_log_file = True
+    cwd = __video__.directory
+
+if create_log_file:
+    logging.basicConfig(
+        filename=f"{cwd}\\subsearch.log",
+        filemode="w",
+        level=logging.DEBUG,
+        format="%(asctime)s - %(message)s",
+        datefmt="%d-%b-%y %H:%M:%S",
+    )
 
 
-def output(msg: str, to_terminal: bool = True) -> Literal[False] | None:
-    # log and print message
-    logging.info(msg)
-    return print(msg) if to_terminal else False
+def output(msg: str, to_terminal: bool = True) -> None:
+    if create_log_file:
+        logging.info(msg)
+    if to_terminal:
+        print(msg)
 
 
 def tprint(msg: str) -> None:
+    if create_log_file is False:
+        return None
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
