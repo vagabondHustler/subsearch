@@ -52,5 +52,3 @@ def get_video_file_data() -> VideoFileData:
 
     if file_exist:
         return VideoFileData(name, ext, path, directory, subs_directory, tmp_directory)
-    else:
-        return VideoFileData(name="N/A", ext="N/A", path="N/A", directory="N/A", subs_directory="N/A", tmp_directory="N/A")
