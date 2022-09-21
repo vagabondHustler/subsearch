@@ -8,6 +8,7 @@ from subsearch.data import __home__, __icon__
 from subsearch.utils import current_user
 
 COMPUTER_NAME = socket.gethostname()
+CLASSES_PATH = "Software\\Classes"
 ASTERISK_PATH = "Software\\Classes\\*"
 SHELL_PATH = "Software\\Classes\\*\\shell"
 SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\0.subsearch"
@@ -16,7 +17,8 @@ COMMAND_PATH = "Software\\Classes\\*\\shell\\0.subsearch\\command"
 
 def write_keys() -> None:
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
-        # open key, with write permission
+        with winreg.OpenKey(hkey, CLASSES_PATH, 0, winreg.KEY_WRITE) as sk:
+            winreg.CreateKey(sk, "*")
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "shell")
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
