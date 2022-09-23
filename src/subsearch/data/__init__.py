@@ -1,4 +1,4 @@
-from .__set_paths__ import (
+from .set_paths import (
     __data__,
     __gui__,
     __home__,
@@ -8,7 +8,5 @@ from .__set_paths__ import (
     __titlebar__,
     __utils__,
 )
-from .__set_video__ import get_video_file_data
-from .__version__ import __version__
-
-__video__ = get_video_file_data()
+from .version import __version__
+from .video_data import __video__
