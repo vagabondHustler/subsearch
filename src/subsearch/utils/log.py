@@ -84,3 +84,9 @@ class SubsearchOutputs:
         output(f"No subtitles to download for {release}")
         self.done_with_tasks(end_new_line=True)
 
+    def skip_provider(self, provider: str, reason: str):
+        output("\n")
+        output(f"[Skipping {provider}]")
+        output(f"{reason}")
+        output("Done with tasks")
+        output("\n")
