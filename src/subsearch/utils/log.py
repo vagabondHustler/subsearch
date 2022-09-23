@@ -74,3 +74,9 @@ class SubsearchOutputs:
 
     def match(self, pct_result: int, key: str):
         output(f"{pct_result:>3}% match: {key}")
+
+    def done_with_tasks(self, end_new_line: bool = False):
+        output("Done with tasks")
+        if end_new_line:
+            output("\n")
+
