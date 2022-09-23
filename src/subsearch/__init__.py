@@ -1,38 +1,38 @@
-import os
 import sys
+from pathlib import Path
 
-from subsearch import __subsearch__
+from subsearch import core
 from subsearch.gui import widget_menu
 from subsearch.utils import raw_registry
 
-PACKAGEPATH = os.path.abspath(os.path.dirname(__file__))
-HOMEPATH = os.path.dirname(PACKAGEPATH)
+PACKAGEPATH = Path(__file__).resolve().parent
+HOMEPATH = Path(PACKAGEPATH).parent
 sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 
 
-class Subsearch(__subsearch__.Steps):
+class Subsearch(core.Steps):
     def __init__(self) -> None:
         """
         Setup and gather all available parameters
         """
-        __subsearch__.Steps.__init__(self)
+        core.Steps.__init__(self)
 
     def provider_opensubtitles(self) -> None:
         """
-        Scrape on opensubtitles by filehash
+        Search for subtitles on opensubtitles
         """
         self._provider_opensubtitles()
 
     def provider_subscene(self) -> None:
         """
-        Scrape subscene from parsing filename of the video
+        Search for subtitles on subscene
         """
         self._provider_subscene()
 
     def provider_yifysubtitles(self) -> None:
         """
-        Scrape subscene from parsing filename of the video
+        Search for subtitles on yifysubtitles
         """
         self._provider_yifysubtitles()
 
@@ -57,18 +57,18 @@ def console() -> None:
     Usages: subsearch [OPTIONS]
 
     Options:
-        --settings [lang, search, app, dl]        Open the GUI settings menu
-                                                            lang: opens tab with available languages
-                                                            search: opens tab with settings such as available providers
-                                                            app: opens tab with app settings
-                                                            dl: opens tab for subtitles not downloaded
+        --settings [lang, search, app, dl]      Open the GUI settings menu
+                                                    ang: opens tab with available languages
+                                                    search: opens tab with settings such as available providers
+                                                    app: opens tab with app settings
+                                                    dl: opens tab for subtitles not downloaded
 
-        --registry-key [add, del]                           Edit the registry
-                                                            add: adds the context menu  / replaces the context menu with default values
-                                                            del: deletes the context menu
-                                                            e.g: subsearch --registry-key add
+        --registry-key [add, del]               Edit the registry
+                                                    add: adds the context menu  / replaces the context menu with default values
+                                                    del: deletes the context menu
+                                                    e.g: subsearch --registry-key add
 
-        --help                                              Prints usage information
+        --help                                  Prints usage information
     """
 
     for num, arg in enumerate(sys.argv[1:], 1):
