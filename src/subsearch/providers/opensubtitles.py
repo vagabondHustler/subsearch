@@ -1,17 +1,20 @@
 import re
-from typing import Union
 
 from subsearch.data import __video__
+from subsearch.data.data_fields import (
+    FileSearchData,
+    FormattedData,
+    ProviderUrlData,
+    UserConfigData,
+)
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider, FormattedData
+from subsearch.providers.generic import BaseProvider
 from subsearch.utils import log, string_parser
-from subsearch.utils.raw_config import UserParameters
-from subsearch.utils.string_parser import FileSearchParameters
 
 
 class OpenSubtitles(BaseProvider):
-    def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
-        BaseProvider.__init__(self, parameters, user_parameters)
+    def __init__(self, parameters: FileSearchData, user_parameters: UserConfigData, provider_url: ProviderUrlData):
+        BaseProvider.__init__(self, parameters, user_parameters, provider_url)
         self.scrape = OpenSubtitlesScrape()
         self.logged_and_sorted: list[FormattedData] = []
 
@@ -19,15 +22,15 @@ class OpenSubtitles(BaseProvider):
         to_be_downloaded = self.scrape.with_hash(self.url_opensubtitles_hash, self.release)
         if to_be_downloaded is None and self.series:
             log.output(f"No TV-series found matching hash {self.file_hash}")
-            log.output(f"Done with tasks\n")
+            self.log.done_with_tasks(end_new_line=True)
             return None
         if to_be_downloaded is None:
             log.output(f"No movies found matching hash {self.file_hash}")
-            log.output(f"Done with tasks\n")
+            self.log.done_with_tasks(end_new_line=True)
             return None
-        log.output(f"[100%  match]: {self.release}")
-        download_info = generic.named_tuple_zip_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
-        log.output(f"Done with tasks\n")
+        self.log.match(100, self.release)
+        download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
+        self.log.done_with_tasks(end_new_line=True)
         return download_info
 
     def parse_site_results(self):
@@ -37,7 +40,7 @@ class OpenSubtitles(BaseProvider):
         to_be_sorted: list[FormattedData] = []
         for key, value in subtitle_data.items():
             pct_result = string_parser.get_pct_value(key, self.release)
-            log.output(f"[{pct_result:>3}%  match]: {key}")
+            self.log.match(pct_result, key)
             formatted_data = generic.format_key_value_pct("opensubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(key, pct_result) is False:
@@ -48,12 +51,11 @@ class OpenSubtitles(BaseProvider):
         self.logged_and_sorted = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.pct_threashold)
         # exit if no subtitles found
         if not to_be_downloaded:
-            log.output(f"No subtitles to download for {self.release}")
-            log.output("Done with tasks\n")
+            self.log.no_subtitles_found(self.release)
             return None
 
-        download_info = generic.named_tuple_zip_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
-        log.output("Done with tasks\n")
+        download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
+        self.log.done_with_tasks(end_new_line=True)
         return download_info
 
     def _sorted_list(self):

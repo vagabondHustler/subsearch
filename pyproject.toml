@@ -22,3 +22,4 @@ profile = "black"
 [tool.mypy]
 mypy_path = "src"
 ignore_missing_imports = true
+warn_no_return = false 

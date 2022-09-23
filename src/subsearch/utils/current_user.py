@@ -5,7 +5,7 @@ import winreg as reg
 COMPUTER_NAME = socket.gethostname()
 
 
-def got_key() -> bool:
+def registry_key_exists() -> bool:
     """
     Check if current user has the registry key subsearch for the context menu
 
@@ -21,7 +21,7 @@ def got_key() -> bool:
         return False
 
 
-def check_is_exe() -> bool:
+def running_from_exe() -> bool:
     if sys.argv[0].endswith(".exe"):
         return True
     return False

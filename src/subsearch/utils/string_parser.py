@@ -1,11 +1,9 @@
 import re
-from dataclasses import dataclass
-from typing import Any, Literal, Union
 
 import imdb
 from num2words import num2words
 
-from subsearch.utils.raw_config import UserParameters
+from subsearch.data.data_fields import FileSearchData, ProviderUrlData, UserConfigData
 
 
 def find_year(string: str) -> int:
@@ -59,10 +57,9 @@ def find_group(string: str) -> str:
     return group
 
 
-def find_imdb_tt_id(base_yts: str, title: str, year: int) -> str:
+def find_imdb_tt_id(title: str, year: int) -> str:
     ia = imdb.Cinemagoer()
     movies = ia.search_movie(title)
-    url_yifysubtitles = base_yts
     for movie in movies:
         movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
         if movie_no_colon.lower() != title.lower():
@@ -71,88 +68,101 @@ def find_imdb_tt_id(base_yts: str, title: str, year: int) -> str:
             continue
         _movie_id: str = movie.movieID
         tt_id = f"tt{_movie_id}"
-        url_yifysubtitles = f"{base_yts}/{tt_id}"
-        break
-    return url_yifysubtitles
+        return tt_id
 
 
-@dataclass(frozen=True, order=True)
-class FileSearchParameters:
-    url_subscene: str
-    url_opensubtitles: str
-    url_opensubtitles_hash: str
-    url_yifysubtitles: str
-    title: str
-    year: int
-    season: str
-    season_ordinal: str
-    episode: str
-    episode_ordinal: str
-    series: bool
-    release: str
-    group: str
-    file_hash: str
-    definitive_match: str
-
-
-def get_parameters(filename: str, file_hash: str, user_parameters: UserParameters) -> FileSearchParameters:
-    """
-    Parse filename and get parameters for searching on subscene and opensubtitles
-    Uses regex expressions to find the parameters
-
-    Args:
-        file_name (str): name of the file
-        file_hash (str): hash of the file
-        lang_abbr (str): language abbreviation for ordinal numbers
-
-    Returns:
-        SearchParameters: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release, group
-    """
-    filename = filename.lower()
-
-    lang_code3 = user_parameters.languages[user_parameters.current_language]
-    year = find_year(filename)
-    season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
-
+def find_title(filename: str, year: int, series: bool):
     if year != 0000:
         title = find_title_by_year(filename)
     elif series and year == 0000:
         title = find_title_by_show(filename)
     else:
         title = filename.rsplit("-", 1)[0]
+    return title
 
-    group = find_group(filename)
 
-    base_ss = "https://subscene.com/subtitles/searchbytitle?query="
-    base_yts = "https://yifysubtitles.org/movie-imdb"
+def get_provider_urls(file_hash: str, ucf: UserConfigData, frd: FileSearchData) -> ProviderUrlData:
+    """
+    Parse data to apply to the provider urls
 
-    if user_parameters.hearing_impaired and user_parameters.non_hearing_impaired is False:
-        base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}/hearingimpaired-on"
-    else:
-        base_os = f"https://www.opensubtitles.org/en/search/sublanguageid-{lang_code3}"
+    Args:
+        file_hash (str): hash of the video file
+        ufc (UserConfigData): user configured settings
+        frd (FileSearchData): parsed data from release name of a file
 
-    url_opensubtitles_hash = f"{base_os}/moviehash-{file_hash}"
+    Returns:
+        ProviderUrlData: urls to the different providers
+    """
 
-    if series:
-        url_subscene = f"{base_ss}{title} - {season_ordinal} season"
-        url_opensubtitles = f"{base_os}/searchonlytvseries-on/season-{season}/episode-{episode}/moviename-{title}/rss_2_00"
+    def _set_base_url():
+        base_ss = "https://subscene.com"
+        base_yts = "https://yifysubtitles.org"
+        base_os = "https://www.opensubtitles.org"
+        return base_ss, base_yts, base_os
+
+    def _set_subtitle_type():
+        if ucf.hearing_impaired and ucf.non_hearing_impaired is False:
+            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_code3}/hearingimpaired-on"
+        else:
+            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_code3}"
+        return subtitle_type_os
+
+    def _set_series_url():
+        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title} - {frd.season_ordinal} season"
+        url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlytvseries-on/season-{frd.season}/episode-{frd.episode}/moviename-{frd.title}/rss_2_00"
+
         url_yifysubtitles = "N/A"
-    else:
-        url_subscene = f"{base_ss}{title} ({year})"
-        url_opensubtitles = f"{base_os}/searchonlymovies-on/moviename-{title} ({year})/rss_2_00"
-        url_yifysubtitles = find_imdb_tt_id(base_yts, title, year)
+        return url_subscene, url_opensubtitles, url_yifysubtitles
 
-    definitive_match = url_subscene.rsplit("query=", 1)[-1]
+    def _set_movie_url():
+
+        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title} ({frd.year})"
+        url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlymovies-on/moviename-{frd.title} ({frd.year})/rss_2_00"
+        tt_id = find_imdb_tt_id(frd.title, frd.year)
+        if tt_id is None:
+            url_yifysubtitles = "N/A"
+        else:
+            url_yifysubtitles = f"{base_yts}/movie-imdb/{tt_id}"
+
+        return url_subscene, url_opensubtitles, url_yifysubtitles
+
+    base_ss, base_yts, base_os = _set_base_url()
+    sub_type_os = _set_subtitle_type()
+    if frd.series:
+        url_subscene, url_opensubtitles, url_yifysubtitles = _set_series_url()
+    else:
+        url_subscene, url_opensubtitles, url_yifysubtitles = _set_movie_url()
+
+    url_opensubtitles_hash = f"{base_os}/{sub_type_os}/moviehash-{file_hash}"
+    # definitive_match = url_subscene.rsplit("query=", 1)[-1]
 
     url_subscene = url_subscene.replace(" ", "%20")
     url_opensubtitles = url_opensubtitles.replace(" ", "%20")
+    parameters = ProviderUrlData(url_subscene, url_opensubtitles, url_opensubtitles_hash, url_yifysubtitles)
+    return parameters
 
-    parameters = FileSearchParameters(
-        url_subscene,
-        url_opensubtitles,
-        url_opensubtitles_hash,
-        url_yifysubtitles,
+
+def get_file_search_data(filename: str, file_hash: str) -> FileSearchData:
+    """
+    Parse filename and get parameters
+    Uses regex expressions to find the parameters
+
+    Args:
+        filename (str): release name from the filename
+        file_hash (str): hash of the file
+
+    Returns:
+        FileSearchData: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
+    """
+    filename = filename.lower()
+    year = find_year(filename)
+    season_episode = find_season_episode(filename)
+    season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
+
+    title = find_title(filename, year, series)
+    group = find_group(filename)
+
+    parameters = FileSearchData(
         title,
         year,
         season,
@@ -163,24 +173,24 @@ def get_parameters(filename: str, file_hash: str, user_parameters: UserParameter
         filename,
         group,
         file_hash,
-        definitive_match,
     )
     return parameters
 
 
-def get_pct_value(from_pc: Any, from_browser: Any) -> int:
+def get_pct_value(from_user: str, from_browser: str) -> int:
     """
-    Parse two lists and return match in %
+    Compare two strings and compare how closely they match against each other
 
     Args:
-        from_pc (str | int): list from pc
-        from_browser (str | int): list from browser
+        from_user (str): release from filename
+        from_browser (str): release from the provider
+
     Returns:
-        int: value in percentage of how many words match
+        int: _description_
     """
     max_percentage = 100
-    pc_list: list[Any] = mk_lst(from_pc)
-    browser_list: list[Any] = mk_lst(from_browser)
+    pc_list: list[str] = mk_lst(from_user)
+    browser_list: list[str] = mk_lst(from_browser)
     not_matching = list(set(pc_list) - set(browser_list))
     not_matching_value = len(not_matching)
     number_of_items = len(pc_list)
@@ -190,9 +200,17 @@ def get_pct_value(from_pc: Any, from_browser: Any) -> int:
     return pct
 
 
-def mk_lst(release: Any) -> list[Any]:
-    # create list from string
-    new: list[Any] = []
+def mk_lst(release: str) -> list[str]:
+    """
+    Create a list from a string
+
+    Args:
+        release (str)
+
+    Returns:
+        list[str]
+    """
+    new: list[str] = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
     temp = release.split(".")
 

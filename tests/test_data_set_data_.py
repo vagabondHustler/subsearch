@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from src.subsearch.data import (
     __data__,
@@ -13,11 +13,11 @@ from src.subsearch.data import (
 
 
 def test_paths() -> None:
-    assert __home__ == os.path.join(os.getcwd(), "src\\subsearch")
-    assert __data__ == os.path.join(os.getcwd(), "src\\subsearch\\data")
-    assert __gui__ == os.path.join(os.getcwd(), "src\\subsearch\\gui")
-    assert __providers__ == os.path.join(os.getcwd(), "src\\subsearch\\providers")
-    assert __utils__ == os.path.join(os.getcwd(), "src\\subsearch\\utils")
-    assert __icon__ == os.path.join(os.getcwd(), "src\\subsearch\\gui\\assets\\icon\\subsearch.ico")
-    assert __titlebar__ == os.path.join(os.getcwd(), "src\\subsearch\\gui\\assets\\titlebar")
-    assert __tabs__ == os.path.join(os.getcwd(), "src\\subsearch\\gui\\assets\\tabs")
+    assert __home__ == Path(Path.cwd()) / "src" / "subsearch"
+    assert __data__ == Path(Path.cwd()) / "src" / "subsearch" / "data"
+    assert __gui__ == Path(Path.cwd()) / "src" / "subsearch" / "gui"
+    assert __providers__ == Path(Path.cwd()) / "src" / "subsearch" / "providers"
+    assert __utils__ == Path(Path.cwd()) / "src" / "subsearch" / "utils"
+    assert __icon__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "icon" / "subsearch.ico"
+    assert __titlebar__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "titlebar"
+    assert __tabs__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "tabs"

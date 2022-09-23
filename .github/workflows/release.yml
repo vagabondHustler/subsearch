@@ -82,16 +82,16 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          output=$(python src/subsearch/data/__version__.py --get-version)
+          output=$(python src/subsearch/data/version.py --get-version)
           echo "::set-output name=prev_version_output::$output"
 
-      - name: Update __version__.py
+      - name: Update version.py
         run: python scripts/update_version.py ${{ github.ref_name }}
 
       - name: Push new version
         run: |
           git status
-          git add src/subsearch/data/__version__.py
+          git add src/subsearch/data/version.py
           git commit -S -m "Release v${{steps.current_version.outputs.prev_version_output}} -> ${{ github.ref_name }}"
           git fetch origin main
           git push origin HEAD:main

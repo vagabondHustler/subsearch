@@ -1,12 +1,13 @@
 import json
-import os
-from typing import Any, NamedTuple, Union
+from pathlib import Path
+from typing import Any, Union
 
 from subsearch.data import __data__
+from subsearch.data.data_fields import UserConfigData
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
-    config_file = f"{__data__}\\config.json"
+    config_file = Path(__data__) / "config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
@@ -16,7 +17,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
 
 
 def set_config(data):
-    config_file = os.path.join(__data__, "config.json")
+    config_file = Path(__data__) / "config.json"
     with open(config_file, "w") as f:
         f.seek(0)
         json.dump(data, f, indent=4)
@@ -24,7 +25,7 @@ def set_config(data):
 
 
 def get_config() -> Any:
-    config_file = f"{__data__}\\config.json"
+    config_file = Path(__data__) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
 
@@ -77,17 +78,21 @@ def set_default_json() -> None:
     data["show_terminal"] = False
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
-    config_file = f"{__data__}\\config.json"
+    config_file = Path(__data__) / "config.json"
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
         file.truncate()
 
 
-class UserParameters(NamedTuple):
-    current_language: str
-    languages: dict[str, str]
-    hearing_impaired: bool
-    non_hearing_impaired: bool
-    percentage: int
-    show_download_window: bool
+def get_user_data() -> UserConfigData:
+    config_file = Path(__data__) / "config.json"
+    with open(config_file, encoding="utf-8") as file:
+        data = json.load(file)
+    user_data = UserConfigData(
+        **data,
+        language_code3=data["languages"][data["current_language"]],
+        hearing_impaired=data["subtitle_type"]["hearing_impaired"],
+        non_hearing_impaired=data["subtitle_type"]["non_hearing_impaired"],
+    )
+    return user_data
