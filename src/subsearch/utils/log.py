@@ -51,8 +51,7 @@ class SubsearchOutputs:
         ...
 
     def app_parameters(self, fsd: FileSearchData, ucd: UserConfigData, pud: ProviderUrlData) -> None:
-    # log and print all the used parameters from video/directory-name
-    output(f"[PARAMETERS]                [VALUES]")
+        output(f"[PARAMETERS]                [VALUES]")
         output(f"Subsearch:                  v{__version__} ")
         output(f"Language:                   {ucd.current_language}, {ucd.language_code3}")
         output(f"Use HI subtitle:            {ucd.hearing_impaired}")
