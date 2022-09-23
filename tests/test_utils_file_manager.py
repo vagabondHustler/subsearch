@@ -1,4 +1,3 @@
-import os
 import shutil
 from pathlib import Path
 
@@ -12,15 +11,15 @@ def copy_and_rename(src: str, dst: str):
     shutil.copy2(src, new_dst)
 
 
-CWD = os.path.join(os.getcwd(), "tests\\test_files")
-SUBS = os.path.join(CWD, "subs")
-if not os.path.isdir(SUBS):
-    os.mkdir(SUBS)
+CWD = Path(Path.cwd()) / "tests" / "test_files"
+SUBS = Path(CWD) / "subs"
+if not Path(SUBS).exists():
+    SUBS.mkdir()
 
 
 def test_extract_zips() -> None:
-    src = f"{CWD}\\test.subtitles.zip"
-    dst = f"{CWD}\\test.subtitles.zip"
+    src = Path(CWD) / "test_subtitles.zip"
+    dst = Path(CWD) / "test_subtitles.zip"
     copy_and_rename(src, dst)
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
@@ -41,14 +40,14 @@ def test_clean_up() -> None:
     """
     file_manager.clean_up_files(SUBS, "srt")
     file_manager.clean_up_files(CWD, "srt")
-    file_manager.clean_up_files(CWD, "__subsearch__test.subtitles.zip")
+    file_manager.clean_up_files(CWD, "__subsearch__test_subtitles.zip")
 
 
 def test_get_hash() -> None:
     """
     test the get_hash function in src/subsearch/utils/file_manager.py
     """
-    hash0 = file_manager.get_hash(f"{CWD}\\test.movie.2022.1080p-group.mkv")
-    hash1 = file_manager.get_hash(f"{CWD}\\none.hash.movie.mkv")
+    hash0 = file_manager.get_hash(Path(CWD) / "test.movie.2022.1080p-group.mkv")
+    hash1 = file_manager.get_hash(Path(CWD) / "none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == "000000000000000000"
