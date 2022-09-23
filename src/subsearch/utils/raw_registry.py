@@ -1,8 +1,7 @@
-import os
 import socket
 import sys
 import winreg
-from typing import Literal
+from pathlib import Path
 
 from subsearch.data import __home__, __icon__
 from subsearch.utils import current_user
@@ -71,13 +70,13 @@ def get_command_value() -> str:
     # get latest json value from file
     from subsearch.utils import raw_config
 
-    if current_user.check_is_exe():
+    if current_user.running_from_exe():
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
-    elif current_user.check_is_exe() is False:
+    elif current_user.running_from_exe() is False:
         show_terminal = raw_config.get_config_key("show_terminal")
         # gets the location to the python executable
-        python_path = os.path.dirname(sys.executable)
+        python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
@@ -97,7 +96,7 @@ def get_icon_value() -> str:
 
     show_icon: str = raw_config.get_config_key("context_menu_icon")
     if show_icon:
-        return __icon__
+        return str(__icon__)
     else:
         return ""
 
