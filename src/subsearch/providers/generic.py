@@ -1,33 +1,20 @@
 import time
-from typing import NamedTuple
 
 import cloudscraper
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from subsearch.data.data_fields import (
+    DownloadData,
+    FileSearchData,
+    FormattedData,
+    ProviderUrlData,
+    UserConfigData,
+)
 from subsearch.utils import log
 from subsearch.utils.exceptions import CaptchaError
-from subsearch.utils.raw_config import UserParameters
-from subsearch.utils.string_parser import FileSearchParameters
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
-
-
-class DownloadData(NamedTuple):
-    name: str
-    file_path: str
-    url: str
-    idx_num: int
-    idx_lenght: int
-
-
-class FormattedData(NamedTuple):
-    provider: str
-    release: str
-    url: str
-    pct_result: int
-    formatted_release: str
-    formatted_url: str
 
 
 class BaseProvider:
@@ -35,31 +22,33 @@ class BaseProvider:
     Base class for providers
     """
 
-    def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
+    def __init__(self, fsd: FileSearchData, ucd: UserConfigData, pud: ProviderUrlData):
+        self.log = log.SubsearchOutputs()
+        self.file_search_data = fsd
+        self.user_config_data = ucd
+        self.provider_url_data = pud
         # file parameters
-        self.parameters = parameters
-        self.user_parameters = user_parameters
-        self.url_subscene = parameters.url_subscene
-        self.url_opensubtitles = parameters.url_opensubtitles
-        self.url_opensubtitles_hash = parameters.url_opensubtitles_hash
-        self.url_yifysubtitles = parameters.url_yifysubtitles
-        self.title = parameters.title
-        self.year = parameters.year
-        self.season = parameters.season
-        self.season_ordinal = parameters.season_ordinal
-        self.episode = parameters.episode
-        self.episode_ordinal = parameters.episode_ordinal
-        self.series = parameters.series
-        self.release = parameters.release
-        self.group = parameters.group
-        self.file_hash = parameters.file_hash
-        self.definitive_match = parameters.definitive_match
+        self.title = fsd.title
+        self.year = fsd.year
+        self.season = fsd.season
+        self.season_ordinal = fsd.season_ordinal
+        self.episode = fsd.episode
+        self.episode_ordinal = fsd.episode_ordinal
+        self.series = fsd.series
+        self.release = fsd.release
+        self.group = fsd.group
+        self.file_hash = fsd.file_hash
         # user parameters
-        self.current_language = user_parameters.current_language
-        self.hi_sub = user_parameters.hearing_impaired
-        self.non_hi_sub = user_parameters.non_hearing_impaired
-        self.pct_threashold = user_parameters.percentage
-        self.show_download_window = user_parameters.show_download_window
+        self.current_language = ucd.current_language
+        self.hi_sub = ucd.hearing_impaired
+        self.non_hi_sub = ucd.non_hearing_impaired
+        self.pct_threashold = ucd.percentage
+        self.show_download_window = ucd.show_download_window
+        # provider url data
+        self.url_subscene = pud.subscene
+        self.url_opensubtitles = pud.opensubtitles
+        self.url_opensubtitles_hash = pud.opensubtitles_hash
+        self.url_yifysubtitles = pud.yifysubtitles
 
     def is_movie(self, key: str) -> bool:
         if key.lower() == f"{self.title} ({self.year})":
@@ -117,7 +106,7 @@ def get_lxml_doc(url: str, features: str = "lxml") -> BeautifulSoup:
     return doc
 
 
-def named_tuple_zip_data(provider: str, video_tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
+def pack_download_data(provider: str, video_tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
     download_info = []
     tbd_lenght = len(to_be_downloaded)
     for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):
@@ -128,9 +117,9 @@ def named_tuple_zip_data(provider: str, video_tmp_directory: str, to_be_download
 
 
 def format_key_value_pct(_provider: str, key: str, value: str, _pct_result: int) -> FormattedData:
-    lenght_str = sum(1 for char in f"[{_pct_result:>3}%  match]:")
+    lenght_str = sum(1 for char in f"{_pct_result:>3}% match:")
     number_of_spaces = " " * lenght_str
-    _match_release = f"[{_pct_result:>3}%  match]: {key}"
+    _match_release = f"{_pct_result:>3}% match: {key}"
     _url = f"{number_of_spaces} {value}"
     data = FormattedData(
         provider=_provider,

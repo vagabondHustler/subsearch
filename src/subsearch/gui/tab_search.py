@@ -1,12 +1,9 @@
 import tkinter as tk
-from tkinter import BooleanVar, ttk
+from tkinter import ttk
 
-from subsearch.data import __set_video__
-from subsearch.gui import tk_data, tk_tools
+from subsearch.data.data_fields import TkColor, TkFont
+from subsearch.gui import tk_tools
 from subsearch.utils import raw_config
-
-TKCOLOR = tk_data.Color()
-TKFONT = tk_data.Font()
 
 SUBTILE_TYPE = raw_config.get_config_key("subtitle_type")
 PCT = raw_config.get_config_key("percentage")
@@ -17,10 +14,10 @@ PROVIDERS = raw_config.get_config_key("providers")
 class Providers(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.data = raw_config.get_config()
         label = tk.Label(self, text="Search providers")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.rownum = 0
         self.colnum = 2
@@ -37,7 +34,7 @@ class Providers(tk.Frame):
                 self.rownum += 1
                 self.colnum = 2
                 _lbl = tk.Label(self, text=lbl_txt)
-                _lbl.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+                _lbl.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
                 _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
             else:
                 self.rownum -= 1
@@ -87,24 +84,24 @@ class Providers(tk.Frame):
         key = btn["text"].replace(" ", "_").lower()
         if self.data["providers"][key] is True:
             self.data["providers"][key] = False
-            btn.configure(fg=TKCOLOR.red)
+            btn.configure(fg=TkColor().red)
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
-            btn.configure(fg=TKCOLOR.green)
+            btn.configure(fg=TkColor().green)
         raw_config.set_config(self.data)
 
 
 class SubtitleType(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.data = raw_config.get_config()
         label = tk.Label(self, text="Subtitle type")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.sub_type_txt()
         tk_tools.VarColorPicker(self.string_var, self.clabel)
@@ -163,16 +160,16 @@ class SubtitleType(tk.Frame):
 class SearchThreshold(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.current_value = tk.IntVar()
         self.current_value.set(PCT)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{PCT} %")
         label = tk.Label(self, text="Search threshold")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=0, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel, True)
         x, y = tk_tools.calculate_btn_size(self, 36)
@@ -228,14 +225,14 @@ class SearchThreshold(tk.Frame):
 class RenameBestMatch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{RENAME_BEST_MATCH}")
         label = tk.Label(self, text="Rename best match")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         btn_true = ttk.Button(
