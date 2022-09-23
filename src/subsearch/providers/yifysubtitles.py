@@ -6,15 +6,13 @@ from subsearch.data.data_fields import (
     UserConfigData,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider, FormattedData
+from subsearch.providers.generic import BaseProvider
 from subsearch.utils import log, string_parser
-from subsearch.utils.raw_config import UserParameters
-from subsearch.utils.string_parser import FileSearchParameters
 
 
 class YifiSubtitles(BaseProvider):
-    def __init__(self, parameters: FileSearchParameters, user_parameters: UserParameters):
-        BaseProvider.__init__(self, parameters, user_parameters)
+    def __init__(self, parameters: FileSearchData, user_parameters: UserConfigData, provider_url: ProviderUrlData):
+        BaseProvider.__init__(self, parameters, user_parameters, provider_url)
         self.scrape = YifySubtitlesScrape()
         self.logged_and_sorted: list[FormattedData] = []
 
@@ -24,7 +22,7 @@ class YifiSubtitles(BaseProvider):
         to_be_sorted: list[FormattedData] = []
         for key, value in subtitle_data.items():
             pct_result = string_parser.get_pct_value(key, self.release)
-            log.output(f"[{pct_result:>3}%  match]: {key}")
+            self.log.match(pct_result, key)
             formatted_data = generic.format_key_value_pct("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(key, pct_result) is False:
@@ -35,12 +33,11 @@ class YifiSubtitles(BaseProvider):
         self.logged_and_sorted = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.pct_threashold)
 
         if not to_be_downloaded:
-            log.output(f"No subtitles to download for {self.release}")
-            log.output("Done with tasks\n")
+            self.log.no_subtitles_found(self.release)
             return None
 
-        download_info = generic.named_tuple_zip_data("yifysubtitles", __video__.tmp_directory, to_be_downloaded)
-        log.output("Done with tasks\n")
+        download_info = generic.pack_download_data("yifysubtitles", __video__.tmp_directory, to_be_downloaded)
+        self.log.done_with_tasks(end_new_line=True)
         return download_info
 
     def _sorted_list(self):
