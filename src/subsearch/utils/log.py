@@ -46,7 +46,7 @@ def tprint(msg: str) -> None:
     return logging.info(msg)
 
 
-def parameters(param: FileSearchParameters, user_parameters: UserParameters) -> None:
+class SubsearchOutputs:
     # log and print all the used parameters from video/directory-name
     languages = raw_config.get_config_key("languages")
     lang_code3 = languages[user_parameters.current_language]
