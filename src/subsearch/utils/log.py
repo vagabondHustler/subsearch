@@ -1,7 +1,7 @@
 import logging
-import os
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from subsearch.data import __version__, __video__
 from subsearch.data.data_fields import FileSearchData, ProviderUrlData, UserConfigData
@@ -10,7 +10,7 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 
 if __video__ is None:
-    cwd = os.getcwd()
+    cwd = Path.cwd()
     create_log_file = False
 else:
     create_log_file = True
@@ -18,9 +18,9 @@ else:
 
 if create_log_file:
     logging.basicConfig(
-        filename=f"{cwd}\\subsearch.log",
+        filename=Path(cwd) / "subsearch.log",
         filemode="w",
-        level=logging.DEBUG,
+        level=logging.WARNING,
         format="%(asctime)s - %(message)s",
         datefmt="%d-%b-%y %H:%M:%S",
     )
