@@ -71,3 +71,6 @@ class SubsearchOutputs:
         output(f"URL openSubtitles - hash:   {pud.opensubtitles_hash}")
         output(f"URL yifysubtitles - site:   {pud.yifysubtitles}")
         output("\n")
+
+    def match(self, pct_result: int, key: str):
+        output(f"{pct_result:>3}% match: {key}")
