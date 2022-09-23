@@ -3,7 +3,7 @@ import webbrowser
 from tkinter import ttk
 
 from subsearch.data import __version__
-from subsearch.gui import tk_data, tk_tools
+from subsearch.data.data_fields import TkColor, TkFont
 from subsearch.utils import current_user, raw_config, raw_registry, updates
 
 TKCOLOR = tk_data.Color()

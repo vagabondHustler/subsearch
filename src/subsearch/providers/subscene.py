@@ -1,6 +1,12 @@
 from bs4 import BeautifulSoup
 
 from subsearch.data import __video__
+from subsearch.data.data_fields import (
+    FileSearchData,
+    FormattedData,
+    ProviderUrlData,
+    UserConfigData,
+)
 from subsearch.providers import generic
 from subsearch.providers.generic import SCRAPER, BaseProvider, FormattedData
 from subsearch.utils import log, string_parser

@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data import __video__
-from subsearch.gui import tk_data
+from subsearch.data.data_fields import DownloadData, FormattedData, TkColor, TkFont
 from subsearch.providers import subscene
 from subsearch.providers.generic import DownloadData, FormattedData
 from subsearch.utils import file_manager, log

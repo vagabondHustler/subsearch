@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import BooleanVar, ttk
 
-from subsearch.data import __set_video__
+from subsearch.data.data_fields import TkColor, TkFont
 from subsearch.gui import tk_data, tk_tools
 from subsearch.utils import raw_config
 

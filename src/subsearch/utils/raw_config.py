@@ -3,6 +3,7 @@ import os
 from typing import Any, NamedTuple, Union
 
 from subsearch.data import __data__
+from subsearch.data.data_fields import UserConfigData
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:

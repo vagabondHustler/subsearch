@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from subsearch.data import __icon__
-from subsearch.gui import tk_data, tk_tools
+from subsearch.data.data_fields import TkColor, TkWindowSize
 from subsearch.utils import current_user, raw_config, raw_registry
 
 TKWINDOW = tk_data.Window()
