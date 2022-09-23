@@ -158,3 +158,4 @@ tests/__subsearch__.log
 old*
 scripts/git_branch.py
 src/subsearch/subsearch.log
+src/subsearch/test.py
