@@ -85,6 +85,7 @@ def set_default_json() -> None:
         file.truncate()
 
 
+def get_user_data() -> UserConfigData:
     config_file = Path(__data__) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
