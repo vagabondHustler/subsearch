@@ -85,10 +85,13 @@ def set_default_json() -> None:
         file.truncate()
 
 
-class UserParameters(NamedTuple):
-    current_language: str
-    languages: dict[str, str]
-    hearing_impaired: bool
-    non_hearing_impaired: bool
-    percentage: int
-    show_download_window: bool
+    config_file = Path(__data__) / "config.json"
+    with open(config_file, encoding="utf-8") as file:
+        data = json.load(file)
+    user_data = UserConfigData(
+        **data,
+        language_code3=data["languages"][data["current_language"]],
+        hearing_impaired=data["subtitle_type"]["hearing_impaired"],
+        non_hearing_impaired=data["subtitle_type"]["non_hearing_impaired"],
+    )
+    return user_data
