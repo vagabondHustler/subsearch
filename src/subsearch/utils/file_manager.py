@@ -2,9 +2,11 @@ import os
 import shutil
 import struct
 import zipfile
+from pathlib import Path
 
 import cloudscraper
 
+from subsearch.data import __video__
 from subsearch.data.data_fields import DownloadData
 from subsearch.utils import log, string_parser
 
@@ -25,16 +27,17 @@ def extract_files(src: str, dst: str, extension: str) -> None:
     for file in os.listdir(src):
         if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
-            filename = os.path.join(src, file)
+            filename = Path(src) / file
             zip_ref = zipfile.ZipFile(filename)
             zip_ref.extractall(dst)
             zip_ref.close()
 
 
 def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
+    if __video__ is None:
+        return None
     higest_value = (0, "")
-    subs_folder = os.path.join(cwd, "subs")
-    for file in os.listdir(subs_folder):
+    for file in os.listdir(__video__.subs_directory):
         if file.endswith(extension):
             value = string_parser.get_pct_value(file, release_name)
             if value >= higest_value[0]:
@@ -42,12 +45,12 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
 
     file_to_rename = higest_value[1]
     if file_to_rename.endswith(extension):
-        old_name_src = os.path.join(subs_folder, file_to_rename)
-        new_name_dst = os.path.join(subs_folder, release_name)
+        old_name_src = Path(__video__.subs_directory) / file_to_rename
+        new_name_dst = Path(__video__.subs_directory) / release_name
         log.output(f"Renaming: {file_to_rename } -> {release_name}")
         os.rename(old_name_src, new_name_dst)
         move_src = new_name_dst
-        move_dst = os.path.join(cwd, release_name)
+        move_dst = Path(cwd) / release_name
         log.output(f"Moving: {release_name} -> {cwd}")
         shutil.move(move_src, move_dst)
 
@@ -56,8 +59,8 @@ def clean_up_files(cwd: str, extension: str) -> None:
     for file in os.listdir(cwd):
         if file.endswith(extension):
             log.output(f"Removing: {file}")
-            file_path = os.path.join(cwd, file)
-            os.remove(file_path)
+            file_path = Path(cwd) / file
+            file_path.unlink()
 
 
 def del_directory(directory: str) -> None:
@@ -65,6 +68,15 @@ def del_directory(directory: str) -> None:
         log.output(f"Removing: {file}")
     log.output(f"Removing: {directory}")
     shutil.rmtree(directory)
+
+
+def make_necessary_directories():
+    if __video__ is None:
+        return None
+    if not Path(__video__.tmp_directory).exists():
+        Path.mkdir(__video__.tmp_directory)
+    if not Path(__video__.subs_directory).exists():
+        Path.mkdir(__video__.subs_directory)
 
 
 def get_hash(file_path: str | None) -> str:
