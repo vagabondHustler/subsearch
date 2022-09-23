@@ -8,20 +8,15 @@ from subsearch.gui import (
     tab_language,
     tab_search,
     tab_subsearch,
-    tk_data,
     tk_tools,
 )
 from subsearch.utils import current_user
-
-TKWINDOW = tk_data.Window()
-TKCOLOR = tk_data.Color()
-TKFONT = tk_data.Font()
 
 
 class Footer(tk.Frame):
     def __init__(self, parent, active_tab: str, language_tab, search_tab, settings_tab, download_tab):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.mid_grey_black, width=TKWINDOW.width - 4, height=80)
+        self.configure(bg=TkColor().mid_grey_black, width=TkWindowSize().width - 4, height=80)
         self.language_tab = language_tab
         self.search_tab = search_tab
         self.settings_tab = settings_tab
@@ -30,28 +25,28 @@ class Footer(tk.Frame):
             self,
             width=54,
             height=54,
-            bg=TKCOLOR.mid_grey_black,
+            bg=TkColor().mid_grey_black,
             highlightthickness=0,
         )
         self.search = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TKCOLOR.mid_grey_black,
+            bg=TkColor().mid_grey_black,
             highlightthickness=0,
         )
         self.settings = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TKCOLOR.mid_grey_black,
+            bg=TkColor().mid_grey_black,
             highlightthickness=0,
         )
         self.download = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TKCOLOR.mid_grey_black,
+            bg=TkColor().mid_grey_black,
             highlightthickness=0,
         )
         self.language.place(relx=0.2, rely=0.5, anchor="center")
@@ -160,16 +155,16 @@ class Footer(tk.Frame):
 class TabLanguage(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         tab_language.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
 class TabSearch(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         tab_search.Providers(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
         tab_search.SubtitleType(self).pack(anchor="center")
         tab_search.SearchThreshold(self).pack(anchor="center")
         tab_search.RenameBestMatch(self).pack(anchor="center")
@@ -178,22 +173,22 @@ class TabSearch(tk.Frame):
 class TabSettings(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         tab_subsearch.FileExtensions(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
         tab_subsearch.ShowContextMenu(self).pack(anchor="center")
         tab_subsearch.ShowContextMenuIcon(self).pack(anchor="center")
         tab_subsearch.ShowDownloadWindow(self).pack(anchor="center")
-        if current_user.check_is_exe() is False:
+        if current_user.running_from_exe() is False:
             tab_subsearch.ShowTerminalOnSearch(self).pack(anchor="center")
-        tk.Frame(self, height=20, bg=TKCOLOR.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=20, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
         tab_subsearch.CheckForUpdates(self).pack(anchor="center")
 
 
 class TabDownload(tk.Frame):
     def __init__(self, parent, content_posx, content_posy, formatted_data):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
 
 
@@ -204,7 +199,7 @@ def open_tab(active_tab: str, **kwargs):
         formatted_data = None
     root = base_root.main()
     gui.set_theme("dark")
-    content = tk.Frame(root, bg=TKCOLOR.dark_grey, width=TKWINDOW.width - 4, height=TKWINDOW.height - 118)
+    content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width - 4, height=TkWindowSize().height - 118)
     content.place(x=2, y=37)
     content_posx, content_posy = content.winfo_reqwidth(), content.winfo_reqheight()
 
@@ -216,5 +211,5 @@ def open_tab(active_tab: str, **kwargs):
         TabSettings(content, content_posx, content_posy),
         TabDownload(content, content_posx, content_posy, formatted_data),
     )
-    footer.place(x=2, y=TKWINDOW.height - 82)
+    footer.place(x=2, y=TkWindowSize().height - 82)
     root.mainloop()

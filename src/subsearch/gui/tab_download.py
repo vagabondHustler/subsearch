@@ -1,4 +1,3 @@
-import os
 import re
 import tkinter as tk
 from tkinter import ttk
@@ -6,18 +5,14 @@ from tkinter import ttk
 from subsearch.data import __video__
 from subsearch.data.data_fields import DownloadData, FormattedData, TkColor, TkFont
 from subsearch.providers import subscene
-from subsearch.providers.generic import DownloadData, FormattedData
 from subsearch.utils import file_manager, log
 
-TKWINDOW = tk_data.Window()
-TKCOLOR = tk_data.Color()
-TKFONT = tk_data.Font()
 
 # download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
     def __init__(self, parent, con_x, con_y, formatted_data: list[FormattedData]):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey, width=con_x, height=con_y)
+        self.configure(bg=TkColor().dark_grey, width=con_x, height=con_y)
         # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
@@ -29,9 +24,9 @@ class DownloadList(tk.Frame):
         self.sub_listbox = tk.Listbox(
             self,
             height=con_y,
-            bg=TKCOLOR.dark_grey,
-            fg=TKCOLOR.light_grey,
-            font=TKFONT.cas8b,
+            bg=TkColor().dark_grey,
+            fg=TkColor().light_grey,
+            font=TkFont().cas8b,
             bd=0,
             border=0,
             borderwidth=0,
@@ -85,7 +80,7 @@ class DownloadList(tk.Frame):
         ):
             if enum != int(item_num):
                 continue
-            self.sub_listbox.itemconfig(int(enum), {"fg": TKCOLOR.blue})
+            self.sub_listbox.itemconfig(int(enum), {"fg": TkColor().blue})
             if _provider == "subscene":
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
@@ -98,4 +93,4 @@ class DownloadList(tk.Frame):
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")
-        self.sub_listbox.itemconfig(int(item_num), {"fg": TKCOLOR.green})
+        self.sub_listbox.itemconfig(int(item_num), {"fg": TkColor().green})
