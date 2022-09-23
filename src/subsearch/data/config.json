@@ -99,7 +99,7 @@
     },
     "providers": {
         "subscene_site": true,
-        "opensubtitles_rss": true,
+        "opensubtitles_site": true,
         "opensubtitles_hash": true,
         "yifysubtitles_site": true
     }
