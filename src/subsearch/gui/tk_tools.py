@@ -1,9 +1,11 @@
-import os
+
 import tkinter as tk
+from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
 from subsearch.data import __icon__, __tabs__, __titlebar__, __version__, __video__
 from subsearch.data.data_fields import TkColor, TkWindowSize
+from subsearch.utils import raw_config
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
@@ -11,39 +13,39 @@ WS_EX_TOOLWINDOW = 0x00000080
 
 
 def get_titlebar_png(btn: str):
-    return os.path.join(__titlebar__, btn)
+    return Path(__titlebar__) / btn
 
 
 def get_tab_png(tab: str):
-    return os.path.join(__tabs__, tab)
+    return Path(__tabs__) / tab
 
 
-def calculate_btn_size(_widget, _width=18, _height=2):
-    generic_btn = tk.Button(_widget, width=_width, height=_height)
+def calculate_btn_size(cls, _width=18, _height=2):
+    generic_btn = tk.Button(cls, width=_width, height=_height)
     x, y = generic_btn.winfo_reqwidth(), generic_btn.winfo_reqheight()
     return x, y
 
 
-def calculate_checkbtn_size(_widget, _width=16):
-    generic_checkbtn = ttk.Checkbutton(_widget, width=_width)
+def calculate_checkbtn_size(cls, _width=16):
+    generic_checkbtn = ttk.Checkbutton(cls, width=_width)
     return generic_checkbtn.winfo_reqwidth()
 
 
-def set_default_grid_size(_widget, _width=18):
-    btn_size = tk.Button(_widget, width=_width, height=2)
+def set_default_grid_size(cls, _width=18):
+    btn_size = tk.Button(cls, width=_width, height=2)
     x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
-    col_count, row_count = _widget.grid_size()
+    col_count, row_count = cls.grid_size()
     for col in range(col_count):
-        _widget.grid_columnconfigure(col, minsize=x)
+        cls.grid_columnconfigure(col, minsize=x)
 
     for row in range(row_count):
-        _widget.grid_rowconfigure(row, minsize=0)
+        cls.grid_rowconfigure(row, minsize=0)
 
 
-def asset_tab(_widget, img, type, x=27, y=27):
+def asset_tab(cls, img, type, x=27, y=27):
     path = get_tab_png(f"{img}_{type}.png")
     png = tk.PhotoImage(file=path)
-    update_asset(_widget, png, x, y)
+    update_asset(cls, png, x, y)
 
 
 def asset_titlebar(_widget, img, type, x=18, y=18):
@@ -52,22 +54,22 @@ def asset_titlebar(_widget, img, type, x=18, y=18):
     update_asset(_widget, png, x, y)
 
 
-def asset_icon(_widget, x=18, y=18):
-    path = __icon__.replace(".ico", ".png")
+def asset_icon(cls, x=18, y=18):
+    path = str(__icon__).replace(".ico", ".png")
     ico = tk.PhotoImage(file=path)
-    update_asset(_widget, ico, x, y)
+    update_asset(cls, ico, x, y)
 
 
-def update_asset(_widget, img, x, y):
-    _widget.delete("all")
-    _widget.create_image(x, y, image=img)
-    _widget.photoimage = img
+def update_asset(cls, img, x, y):
+    cls.delete("all")
+    cls.create_image(x, y, image=img)
+    cls.photoimage = img
 
 
 class TitleBar(tk.Frame):
     def __init__(self, parent, root):
         tk.Frame.__init__(self, parent)
-        self.configure(height=37, width=TKWINDOW.width, bg=TKCOLOR.light_black)
+        self.configure(height=37, width=TkWindowSize().width, bg=TkColor().light_black)
 
         self.root = root
         self.parent = parent
@@ -75,34 +77,34 @@ class TitleBar(tk.Frame):
             self,
             width=37,
             height=37,
-            bg=TKCOLOR.light_black,
+            bg=TkColor().light_black,
             highlightthickness=0,
         )
         self.tab = tk.Canvas(
             self,
             width=37,
             height=37,
-            bg=TKCOLOR.light_black,
+            bg=TkColor().light_black,
             highlightthickness=0,
         )
         self.maximize = tk.Canvas(
             self,
             width=37,
             height=37,
-            bg=TKCOLOR.light_black,
+            bg=TkColor().light_black,
             highlightthickness=0,
         )
         self.exit = tk.Canvas(
             self,
             width=37,
             height=37,
-            bg=TKCOLOR.light_black,
+            bg=TkColor().light_black,
             highlightthickness=0,
         )
 
-        self.maximize.place(x=TKWINDOW.width - 37, rely=0, anchor="ne")
+        self.maximize.place(x=TkWindowSize().width - 37, rely=0, anchor="ne")
         self.exit.place(relx=1, rely=0, anchor="ne")
-        self.tab.place(x=TKWINDOW.width - 74, rely=0, anchor="ne")
+        self.tab.place(x=TkWindowSize().width - 74, rely=0, anchor="ne")
         self.icon.place(x=0, y=0, anchor="nw")
 
         asset_icon(self.icon)
@@ -140,29 +142,29 @@ class TitleBar(tk.Frame):
 
     def press_event(self, event):
         if event.widget == self.tab:
-            self.tab.configure(bg=TKCOLOR.light_grey)
+            self.tab.configure(bg=TkColor().light_grey)
             self.tab.bind("<ButtonRelease-1>", self.release_event)
         if event.widget == self.exit:
-            self.exit.configure(bg=TKCOLOR.dark_red)
+            self.exit.configure(bg=TkColor().dark_red)
             self.exit.bind("<ButtonRelease-1>", self.release_event)
 
     def enter_event(self, event):
         if event.widget == self.tab:
-            self.tab.configure(bg=TKCOLOR.dark_grey)
+            self.tab.configure(bg=TkColor().dark_grey)
             asset_titlebar(self.tab, "tab", "hover")
             self.tab.bind("<ButtonPress-1>", self.press_event)
         if event.widget == self.exit:
-            self.exit.configure(bg=TKCOLOR.red)
+            self.exit.configure(bg=TkColor().red)
             asset_titlebar(self.exit, "exit", "hover")
             self.exit.bind("<ButtonPress-1>", self.press_event)
 
     def leave_event(self, event):
         if event.widget == self.tab:
-            self.tab.configure(bg=TKCOLOR.light_black)
+            self.tab.configure(bg=TkColor().light_black)
             asset_titlebar(self.tab, "tab", "rest")
             self.tab.unbind("<ButtonRelease-1>")
         if event.widget == self.exit:
-            self.exit.configure(bg=TKCOLOR.light_black)
+            self.exit.configure(bg=TkColor().light_black)
             asset_titlebar(self.exit, "exit", "rest")
             self.exit.unbind("<ButtonRelease-1>")
 
@@ -170,27 +172,29 @@ class TitleBar(tk.Frame):
 class CustomBorder(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        csx = TKWINDOW.width
-        csy = TKWINDOW.height
-        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=TKCOLOR.light_black, borderwidth=0)
+        csx = TkWindowSize().width
+        csy = TkWindowSize().height
+        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=TkColor().light_black, borderwidth=0)
         self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
         self.canvas_bg = tk.Canvas(
             parent,
             width=csx - 4,
             height=csy - 4,
-            bg=TKCOLOR.dark_grey,
+            bg=TkColor().dark_grey,
             highlightthickness=0,
         )
         self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.configure(bg=TKCOLOR.light_black)
+        self.configure(bg=TkColor().light_black)
 
 
 class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
 
-    def set(self, w=TKWINDOW.width, h=TKWINDOW.height, ws_value_offset=0, hs_value_offset=0, other: bool = False):
+    def set(
+        self, w=TkWindowSize().width, h=TkWindowSize().height, ws_value_offset=0, hs_value_offset=0, other: bool = False
+    ):
         ws = self.winfo_screenwidth() + ws_value_offset
         hs = self.winfo_screenheight() + hs_value_offset
         x = int((ws / 2) - (w / 2))
@@ -210,28 +214,28 @@ class VarColorPicker:
 
     def pick(self):  # string boolean
         if self.string_var.get() == "True":
-            self.clabel.configure(fg=TKCOLOR.green)
+            self.clabel.configure(fg=TkColor().green)
         elif self.string_var.get() == "False":
-            self.clabel.configure(fg=TKCOLOR.red)
+            self.clabel.configure(fg=TkColor().red)
         elif self.string_var.get() == "Both":
-            self.clabel.configure(fg=TKCOLOR.blue)
+            self.clabel.configure(fg=TkColor().blue)
         elif self.string_var.get().startswith("Only"):
-            self.clabel.configure(fg=TKCOLOR.green)
+            self.clabel.configure(fg=TkColor().green)
 
         if self.is_pct:
             _pct = raw_config.get_config_key("percentage")
             if _pct in range(75, 101):
-                self.clabel.configure(fg=TKCOLOR.green)
+                self.clabel.configure(fg=TkColor().green)
             elif _pct in range(50, 75):
-                self.clabel.configure(fg=TKCOLOR.green_brown)
+                self.clabel.configure(fg=TkColor().green_brown)
             elif _pct in range(25, 50):
-                self.clabel.configure(fg=TKCOLOR.red_brown)
+                self.clabel.configure(fg=TkColor().red_brown)
             elif _pct in range(0, 25):
-                self.clabel.configure(fg=TKCOLOR.red)
+                self.clabel.configure(fg=TkColor().red)
 
 
 class ToolTip(tk.Toplevel):
-    def __init__(self, parent, _widget, *_text, _background=TKCOLOR.light_black):
+    def __init__(self, parent, _widget, *_text, _background=TkColor().light_black):
         self.parent = parent
         self.widget = _widget
         self.text = _text
@@ -239,17 +243,17 @@ class ToolTip(tk.Toplevel):
 
     def show(self):
         tk.Toplevel.__init__(self, self.parent)
-        self.configure(background=TKCOLOR.light_black)
+        self.configure(background=TkColor().light_black)
         # remove the standard window titlebar from the tooltip
         self.overrideredirect(True)
         # unpack *args and put each /n on a new line
         lines = "\n".join(self.text)
-        frame = tk.Frame(self, background=TKCOLOR.light_black)
+        frame = tk.Frame(self, background=TkColor().light_black)
         label = tk.Label(
             frame,
             text=lines,
             background=self.background,
-            foreground=TKCOLOR.white_grey,
+            foreground=TkColor().white_grey,
             justify="left",
         )
         # get size of the label to use later for positioning and sizing of the tooltip

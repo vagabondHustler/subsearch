@@ -4,10 +4,8 @@ from tkinter import ttk
 
 from subsearch.data import __version__
 from subsearch.data.data_fields import TkColor, TkFont
+from subsearch.gui import tk_tools
 from subsearch.utils import current_user, raw_config, raw_registry, updates
-
-TKCOLOR = tk_data.Color()
-TKFONT = tk_data.Font()
 
 SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
@@ -18,11 +16,11 @@ AVAIL_EXT = raw_config.get_config_key("file_ext")
 class FileExtensions(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.data = raw_config.get_config()
         number_of_buttons = len(AVAIL_EXT.items())
         label = tk.Label(self, text="File extensions")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.rownum = 0
         self.colnum = 0
@@ -72,14 +70,14 @@ class FileExtensions(tk.Frame):
 class ShowContextMenu(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"True")
         label = tk.Label(self, text="Context menu")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         btn_true = ttk.Button(
@@ -130,14 +128,14 @@ class ShowContextMenu(tk.Frame):
 class ShowContextMenuIcon(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CONTEXT_MENU_ICON}")
         label = tk.Label(self, text="Context menu icon")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         btn_true = ttk.Button(
@@ -188,14 +186,14 @@ class ShowContextMenuIcon(tk.Frame):
 class ShowDownloadWindow(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DL_WINDOW}")
         label = tk.Label(self, text="Download window")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         btn_true = ttk.Button(
@@ -240,17 +238,17 @@ class ShowDownloadWindow(tk.Frame):
 class ShowTerminalOnSearch(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{SHOW_TERMINAL}")
         label = tk.Label(self, text="Terminal on search")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
-        if current_user.check_is_exe() is False:
+        if current_user.running_from_exe() is False:
             btn_true = ttk.Button(
                 self,
                 text="True",
@@ -295,14 +293,14 @@ class ShowTerminalOnSearch(tk.Frame):
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         label = tk.Label(self, text=f"Version {__version__}")
-        label.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.white_grey, font=TKFONT.cas8b)
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=TKCOLOR.dark_grey, fg=TKCOLOR.yellow, font=TKFONT.cas8b)
+        self.clabel.configure(bg=TkColor().dark_grey, fg=TkColor().yellow, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         btn_check = ttk.Button(
             self,

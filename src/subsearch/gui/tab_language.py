@@ -2,11 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data.data_fields import TkColor
+from subsearch.gui import tk_tools
 from subsearch.utils import raw_config
-
-TKCOLOR = tk_data.Color()
-TKFONT = tk_data.Font()
-
 
 LANGUAGES = raw_config.get_config_key("languages")
 CURRENT_LANGUAGE = raw_config.get_config_key("current_language")
@@ -15,7 +12,7 @@ CURRENT_LANGUAGE = raw_config.get_config_key("current_language")
 class SelectLanguage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TKCOLOR.dark_grey)
+        self.configure(bg=TkColor().dark_grey)
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1
