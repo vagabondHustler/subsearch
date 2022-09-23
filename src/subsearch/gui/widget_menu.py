@@ -1,6 +1,7 @@
 import tkinter as tk
 
 from subsearch import gui
+from subsearch.data.data_fields import TkColor, TkWindowSize
 from subsearch.gui import (
     base_root,
     tab_download,

@@ -5,6 +5,13 @@ import cloudscraper
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from subsearch.data.data_fields import (
+    DownloadData,
+    FileSearchData,
+    FormattedData,
+    ProviderUrlData,
+    UserConfigData,
+)
 from subsearch.utils import log
 from subsearch.utils.exceptions import CaptchaError
 from subsearch.utils.raw_config import UserParameters

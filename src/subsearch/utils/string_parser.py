@@ -5,7 +5,7 @@ from typing import Any, Literal, Union
 import imdb
 from num2words import num2words
 
-from subsearch.utils.raw_config import UserParameters
+from subsearch.data.data_fields import FileSearchData, ProviderUrlData, UserConfigData
 
 
 def find_year(string: str) -> int:

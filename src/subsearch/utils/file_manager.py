@@ -5,7 +5,7 @@ import zipfile
 
 import cloudscraper
 
-from subsearch.providers.generic import DownloadData, FormattedData
+from subsearch.data.data_fields import DownloadData
 from subsearch.utils import log, string_parser
 
 SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})

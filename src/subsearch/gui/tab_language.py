@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.gui import tk_data, tk_tools
+from subsearch.data.data_fields import TkColor
 from subsearch.utils import raw_config
 
 TKCOLOR = tk_data.Color()

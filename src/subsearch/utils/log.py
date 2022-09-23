@@ -4,9 +4,7 @@ import sys
 from datetime import datetime
 
 from subsearch.data import __version__, __video__
-from subsearch.utils import raw_config
-from subsearch.utils.raw_config import UserParameters
-from subsearch.utils.string_parser import FileSearchParameters
+from subsearch.data.data_fields import FileSearchData, ProviderUrlData, UserConfigData
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
