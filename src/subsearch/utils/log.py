@@ -80,3 +80,7 @@ class SubsearchOutputs:
         if end_new_line:
             output("\n")
 
+    def no_subtitles_found(self, release: str):
+        output(f"No subtitles to download for {release}")
+        self.done_with_tasks(end_new_line=True)
+
