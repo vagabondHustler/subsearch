@@ -21,7 +21,7 @@ def registry_key_exists() -> bool:
         return False
 
 
-def check_is_exe() -> bool:
+def running_from_exe() -> bool:
     if sys.argv[0].endswith(".exe"):
         return True
     return False
