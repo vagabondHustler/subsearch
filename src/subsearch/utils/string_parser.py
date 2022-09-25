@@ -177,7 +177,7 @@ def get_file_search_data(filename: str, file_hash: str) -> FileSearchData:
     return parameters
 
 
-def get_pct_value(from_user: str, from_browser: str) -> int:
+def get_pct_value(from_user: str, from_website: str) -> int:
     """
     Compare two strings and compare how closely they match against each other
 
@@ -189,11 +189,12 @@ def get_pct_value(from_user: str, from_browser: str) -> int:
         int: _description_
     """
     max_percentage = 100
-    pc_list: list[str] = mk_lst(from_user)
-    browser_list: list[str] = mk_lst(from_browser)
-    not_matching = list(set(pc_list) - set(browser_list))
+    _from_user: list[str] = mk_lst(from_user)
+    _from_website: list[str] = mk_lst(from_website)
+    lst1, lst2 = make_equal_size(_from_user, _from_website)
+    not_matching = list(set(lst1) - set(lst2))
     not_matching_value = len(not_matching)
-    number_of_items = len(pc_list)
+    number_of_items = len(lst1)
     percentage_to_remove = round(not_matching_value / number_of_items * max_percentage)
     pct = round(max_percentage - percentage_to_remove)
 
@@ -218,3 +219,24 @@ def mk_lst(release: str) -> list[str]:
         if item not in qualities:
             new.append(item.lower())
     return new
+
+
+def make_equal_size(lst1, lst2):
+    if len(lst1) == len(lst2):
+        return lst1, lst2
+    elif len(lst1) > len(lst2):
+        lst_big, lst_small = lst1, lst2
+    else:
+        lst_big, lst_small = lst2, lst1
+
+    num_big, num_small = sorted((len(lst1), len(lst2)), reverse=True)
+    difference = num_big - num_small
+    filled_list = fill_shorter_list(lst_big, lst_small, difference)
+    return lst_big, filled_list
+
+
+def fill_shorter_list(big_lst, small_lst, difference):
+    if big_lst > small_lst:
+        for _i in range(difference):
+            small_lst.append(None)
+    return small_lst
