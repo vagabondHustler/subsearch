@@ -53,7 +53,8 @@ class DownloadList(tk.Frame):
         self._providers = {}
         self._releases = {}
         self._urls = {}
-        log.output("\n[Proccessing downloads]")
+        log.output("")
+        log.output_header("[Processing files with GUI]")
         # fil list box with all available subtitles that were found and not downloaded
         for enu, data in enumerate(self.formatted_data):
             self.sub_listbox.insert(tk.END, f"{data.formatted_release}\n")
@@ -86,7 +87,7 @@ class DownloadList(tk.Frame):
             else:
                 download_url = _url
             path = f"{__video__.tmp_directory}\\__{_provider}__{item_num}.zip"
-            enum = DownloadData(name=_release, file_path=path, url=download_url, idx_num=1, idx_lenght=1)
+            enum = DownloadData(provider=f"Downloading from {_provider}", name=_release, file_path=path, url=download_url, idx_num=1, idx_lenght=1)
             file_manager.download_subtitle(enum)
             file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
             file_manager.clean_up_files(__video__.tmp_directory, "zip")
