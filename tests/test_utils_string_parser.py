@@ -72,7 +72,6 @@ def test_string_parser_show() -> None:
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    base = BaseInitializer()
     fsd = string_parser.get_file_search_data(filename, "000000000000000000")
 
     assert fsd.title == "the foo bar 1080p web h264"
@@ -90,7 +89,7 @@ def test_provider_urls_movie():
     base = BaseInitializer()
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     fsd = string_parser.get_file_search_data(filename, "000000000000000000")
-    pud = string_parser.get_provider_urls("000000000000000000", base.user_config_data, fsd)
+    pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
 
     assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20(2021)"
     assert pud.opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
@@ -101,7 +100,7 @@ def test_provider_urls_series():
     base = BaseInitializer()
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     fsd = string_parser.get_file_search_data(filename, "000000000000000000")
-    pud = string_parser.get_provider_urls("000000000000000000", base.user_config_data, fsd)
+    pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
 
     assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert pud.opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
