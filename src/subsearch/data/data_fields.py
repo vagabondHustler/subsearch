@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(order=True)
@@ -25,14 +26,14 @@ class VideoFileData:
 
     name: str
     ext: str
-    path: str
-    directory: str
-    subs_directory: str
-    tmp_directory: str
+    path: Path
+    directory: Path
+    subs_directory: Path
+    tmp_directory: Path
 
 
 @dataclass(order=True)
-class UserConfigData:
+class UserData:
     """
     Dataclass containing the users different app configurations
     """
@@ -53,7 +54,7 @@ class UserConfigData:
 
 
 @dataclass(frozen=True, order=True)
-class FileSearchData:
+class ReleaseData:
     """
     Dataclass containing parsed data from a video file
     """
@@ -80,6 +81,34 @@ class ProviderUrlData:
     opensubtitles: str
     opensubtitles_hash: str
     yifysubtitles: str
+
+
+@dataclass(frozen=True, order=True)
+class DownloadData:
+    """
+    Dataclass with all the necessary data for downloading a file
+    """
+
+    provider: str
+    name: str
+    file_path: str
+    url: str
+    idx_num: int
+    idx_lenght: int
+
+
+@dataclass(frozen=True, order=True)
+class FormattedData:
+    """
+    Dataclass containing information that can later be downloaded
+    """
+
+    provider: str
+    release: str
+    url: str
+    pct_result: int
+    formatted_release: str
+    formatted_url: str
 
 
 @dataclass(frozen=True, order=True)
@@ -133,30 +162,3 @@ class TkFont:
     cas10b: str = "Cascadia 10 bold"
     cas11: str = "Cascadia 11"
     cas20b: str = "Cascadia 20 bold"
-
-
-@dataclass(frozen=True, order=True)
-class DownloadData:
-    """
-    Dataclass with all the necessary data for downloading a file
-    """
-
-    name: str
-    file_path: str
-    url: str
-    idx_num: int
-    idx_lenght: int
-
-
-@dataclass(frozen=True, order=True)
-class FormattedData:
-    """
-    Dataclass containing information that can later be downloaded
-    """
-
-    provider: str
-    release: str
-    url: str
-    pct_result: int
-    formatted_release: str
-    formatted_url: str

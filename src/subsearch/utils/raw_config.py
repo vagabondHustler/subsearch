@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from subsearch.data import __data__
-from subsearch.data.data_fields import UserConfigData
+from subsearch.data.data_fields import UserData
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
@@ -85,11 +85,11 @@ def set_default_json() -> None:
         file.truncate()
 
 
-def get_user_data() -> UserConfigData:
+def get_user_data() -> UserData:
     config_file = Path(__data__) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
-    user_data = UserConfigData(
+    user_data = UserData(
         **data,
         language_code3=data["languages"][data["current_language"]],
         hearing_impaired=data["subtitle_type"]["hearing_impaired"],

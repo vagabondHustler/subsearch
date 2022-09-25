@@ -3,7 +3,7 @@ import re
 import imdb
 from num2words import num2words
 
-from subsearch.data.data_fields import FileSearchData, ProviderUrlData, UserConfigData
+from subsearch.data.data_fields import ProviderUrlData, ReleaseData, UserData
 
 
 def find_year(string: str) -> int:
@@ -81,7 +81,7 @@ def find_title(filename: str, year: int, series: bool):
     return title
 
 
-def get_provider_urls(file_hash: str, ucf: UserConfigData, frd: FileSearchData) -> ProviderUrlData:
+def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> ProviderUrlData:
     """
     Parse data to apply to the provider urls
 
@@ -142,7 +142,7 @@ def get_provider_urls(file_hash: str, ucf: UserConfigData, frd: FileSearchData) 
     return parameters
 
 
-def get_file_search_data(filename: str, file_hash: str) -> FileSearchData:
+def get_file_search_data(filename: str, file_hash: str) -> ReleaseData:
     """
     Parse filename and get parameters
     Uses regex expressions to find the parameters
@@ -162,7 +162,7 @@ def get_file_search_data(filename: str, file_hash: str) -> FileSearchData:
     title = find_title(filename, year, series)
     group = find_group(filename)
 
-    parameters = FileSearchData(
+    parameters = ReleaseData(
         title,
         year,
         season,
