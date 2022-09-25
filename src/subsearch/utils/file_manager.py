@@ -14,7 +14,7 @@ SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": 
 
 
 def download_subtitle(data: DownloadData) -> int:
-    log.output(f"Downloading: {data.idx_num}/{data.idx_lenght}: {data.name}")
+    log.output(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
     r = SCRAPER.get(data.url, stream=True)
     with open(data.file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
@@ -23,7 +23,7 @@ def download_subtitle(data: DownloadData) -> int:
     return data.idx_num
 
 
-def extract_files(src: str, dst: str, extension: str) -> None:
+def extract_files(src: Path, dst: Path, extension: str) -> None:
     for file in os.listdir(src):
         if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
@@ -33,7 +33,7 @@ def extract_files(src: str, dst: str, extension: str) -> None:
             zip_ref.close()
 
 
-def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
+def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     if __video__ is None:
         return None
     higest_value = (0, "")
@@ -55,7 +55,7 @@ def rename_best_match(release_name: str, cwd: str, extension: str) -> None:
         shutil.move(move_src, move_dst)
 
 
-def clean_up_files(cwd: str, extension: str) -> None:
+def clean_up_files(cwd: Path, extension: str) -> None:
     for file in os.listdir(cwd):
         if file.endswith(extension):
             log.output(f"Removing: {file}")
@@ -63,7 +63,7 @@ def clean_up_files(cwd: str, extension: str) -> None:
             file_path.unlink()
 
 
-def del_directory(directory: str) -> None:
+def del_directory(directory: Path) -> None:
     for file in os.listdir(directory):
         log.output(f"Removing: {file}")
     log.output(f"Removing: {directory}")
@@ -79,7 +79,7 @@ def make_necessary_directories():
         Path.mkdir(__video__.subs_directory)
 
 
-def get_hash(file_path: str | None) -> str:
+def get_hash(file_path: Path | None) -> str:
     if file_path is None:
         return "000000000000000000"
     try:
@@ -105,7 +105,7 @@ def get_hash(file_path: str | None) -> str:
                 hash += l_value
                 hash = hash & 0xFFFFFFFFFFFFFFFF
 
-        returnedhash = "%016x" % hash
+        returnedhash = ("%016x" % hash)
         return returnedhash
 
     except IOError:

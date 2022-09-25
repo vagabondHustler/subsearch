@@ -5,8 +5,8 @@ from subsearch import core
 from subsearch.gui import widget_menu
 from subsearch.utils import raw_registry
 
-PACKAGEPATH = Path(__file__).resolve().parent
-HOMEPATH = Path(PACKAGEPATH).parent
+PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
+HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
 sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 

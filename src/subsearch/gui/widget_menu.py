@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from subsearch import gui
-from subsearch.data.data_fields import TkColor, TkWindowSize
+from subsearch.data.data_fields import FormattedData, TkColor, TkWindowSize
 from subsearch.gui import (
     base_root,
     tab_download,
@@ -186,7 +186,7 @@ class TabSettings(tk.Frame):
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, content_posx, content_posy, formatted_data):
+    def __init__(self, parent, content_posx, content_posy, formatted_data: list[FormattedData]):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TkColor().dark_grey)
         tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
@@ -194,7 +194,7 @@ class TabDownload(tk.Frame):
 
 def open_tab(active_tab: str, **kwargs):
     try:
-        formatted_data = kwargs["formatted_data"]
+        formatted_data: list[FormattedData] = kwargs["formatted_data"]
     except KeyError:
         formatted_data = None
     root = base_root.main()
