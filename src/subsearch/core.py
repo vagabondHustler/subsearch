@@ -163,7 +163,7 @@ class Steps(BaseInitializer):
     def _clean_up(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_config_data.rename_best_match:
+        log.output_header("Cleaning up")
             log.output("[Renaming best match]")
             file_manager.rename_best_match(f"{self.file_search_data.release}.srt", __video__.directory, ".srt")
             self.log.done_with_tasks(end_new_line=True)
