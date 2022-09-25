@@ -84,9 +84,9 @@ class Steps(BaseInitializer):
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_config_data.language_code3 == "N/A":
-            self.log.skip_provider(
-                "opensubtitles", f"{self.user_config_data.current_language} not supported on opensubtitles"
+        if self.user_data.language_code3 == "N/A":
+            log.output_skipping_provider(
+                "opensubtitles", f"{self.user_data.current_language} not supported on opensubtitles"
             )
             return None
 
