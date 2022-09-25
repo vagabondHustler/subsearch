@@ -126,18 +126,7 @@ class Steps(BaseInitializer):
     def _download_files(self) -> None:
         if self.file_exist is False:
             return None
-
-        if self.user_config_data.providers["opensubtitles_hash"] and self.opensubtitles_hash_results is not None:
-            self.opensubtitles_hash_dls = self.download_results("opensubtitles - hash", self.opensubtitles_hash_results)
-
-        if self.user_config_data.providers["opensubtitles_site"] and self.opensubtitles_site_results is not None:
-            self.opensubtitles_site_dls = self.download_results("opensubtitles - site", self.opensubtitles_site_results)
-
-        if self.user_config_data.providers["subscene_site"] and self.subscene_results is not None:
-            self.subscene_dls = self.download_results("subscene", self.subscene_results)
-
-        if self.user_config_data.providers["yifysubtitles_site"] and self.yifysubtitles_results is not None:
-            self.yifysubtitles_dls = self.download_results("yifysubtitles", self.yifysubtitles_results)
+        log.output_done_with_tasks(end_new_line=True)
 
     def _not_downloaded(self) -> None:
         if self.file_exist is False:
