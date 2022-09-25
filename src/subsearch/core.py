@@ -17,51 +17,44 @@ from subsearch.utils import (
 
 class BaseInitializer:
     def __init__(self) -> None:
-        self.log = log.SubsearchOutputs()
-        self.user_config_data = raw_config.get_user_data()
+        self.user_data = raw_config.get_user_data()
         if __video__ is not None:
             self.file_exist = True
             self.file_hash = file_manager.get_hash(__video__.path)
         else:
             self.file_exist = False
             self.file_hash = "000000000000000000"
-        self.opensubtitles_hash_results = None
-        self.opensubtitles_site_results = None
-        self.subscene_results = None
-        self.yifysubtitles_results = None
-        self.opensubtitles_fd: list = []
-        self.subscene_fd: list = []
-        self.yifysubtitles_fd: list = []
-        self.combined_fd: list[FormattedData] = []
-        self.opensubtitles_hash_dls = 0
-        self.opensubtitles_site_dls = 0
-        self.subscene_dls = 0
-        self.yifysubtitles_dls = 0
+        self.results: dict[str, list[DownloadData]] = {}
+        self.skipped: dict[str, list[FormattedData]] = {}
+        self.skipped_combined: list[FormattedData] = []
+        self.downloads: dict[str, int] = {}
+
+        for k in self.user_data.providers.keys():
+            self.results[k] = []
+            self.skipped[k] = []
+            self.downloads[k] = 0
+
         self.ran_download_tab = False
         if self.file_exist:
-            self.file_hash = file_manager.get_hash(__video__.path)
-            self.file_search_data = string_parser.get_file_search_data(__video__.name, self.file_hash)
-            self.provider_url_data = string_parser.get_provider_urls(
-                self.file_hash, self.user_config_data, self.file_search_data
-            )
-            self.log.app_parameters(self.file_search_data, self.user_config_data, self.provider_url_data)
+            self.release_data = string_parser.get_file_search_data(__video__.name, self.file_hash)
+            self.provider_data = string_parser.get_provider_urls(self.file_hash, self.user_data, self.release_data)
+            log.set_logger_data(self.release_data, self.user_data, self.provider_data)
+            log.output_parameters()
 
     def all_providers_disabled(self) -> bool:
-        self.user_config_data = raw_config.get_user_data()
+        self.user_data = raw_config.get_user_data()
         if (
-            self.user_config_data.providers["subscene_site"] is False
-            and self.user_config_data.providers["opensubtitles_site"] is False
-            and self.user_config_data.providers["opensubtitles_hash"] is False
-            and self.user_config_data.providers["yifysubtitles_site"] is False
+            self.user_data.providers["subscene_site"] is False
+            and self.user_data.providers["opensubtitles_site"] is False
+            and self.user_data.providers["opensubtitles_hash"] is False
+            and self.user_data.providers["yifysubtitles_site"] is False
         ):
             return True
         return False
 
-    def download_results(self, provider: str, results: list[DownloadData]) -> int:
-        log.output(f"[Downloading from {provider}]")
+    def download_results(self, results: list[DownloadData]) -> int:
         for i in results:
             downloads = file_manager.download_subtitle(i)
-        self.log.done_with_tasks(end_new_line=True)
         return downloads
 
 
@@ -89,54 +82,75 @@ class Steps(BaseInitializer):
                 "opensubtitles", f"{self.user_data.current_language} not supported on opensubtitles"
             )
             return None
-
-        _opensubtitles = opensubtitles.OpenSubtitles(self.file_search_data, self.user_config_data, self.provider_url_data)
-        if self.user_config_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
-            log.output("[Searching on opensubtitles - hash]")
-            self.opensubtitles_hash_results = _opensubtitles.parse_hash_results()
-        if self.user_config_data.providers["opensubtitles_site"]:
-            log.output("[Searching on opensubtitles - site]")
-            self.opensubtitles_site_results = _opensubtitles.parse_site_results()
-        self.opensubtitles_fd = _opensubtitles._sorted_list()
+        if self.user_data.providers["opensubtitles_hash"] is False and self.user_data.providers["opensubtitles_site"] is False:
+            return None
+        log.output_header("Searching on opensubtitles")
+        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.user_data, self.provider_data)
+        if self.user_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
+            self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
+        if self.user_data.providers["opensubtitles_site"]:
+            self.results["opensubtitles_site"] = _opensubs.parse_site_results()
+        self.skipped["opensubtitles_site"] = _opensubs._sorted_list()
 
     def _provider_subscene(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_config_data.providers["subscene_site"] is False:
+        if self.user_data.providers["subscene_site"] is False:
             return None
-        log.output("[Searching on subscene - title]")
-        _subscene = subscene.Subscene(self.file_search_data, self.user_config_data, self.provider_url_data)
-        self.subscene_results = _subscene.parse_site_results()
-        self.subscene_fd = _subscene._sorted_list()
+        log.output_header("Searching on subscene")
+        _subscene = subscene.Subscene(self.release_data, self.user_data, self.provider_data)
+        self.results["subscene_site"] = _subscene.parse_site_results()
+        self.skipped["subscene_site"] = _subscene._sorted_list()
 
     def _provider_yifysubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.file_search_data.series or self.provider_url_data.yifysubtitles == "N/A":
-            self.log.skip_provider("yifysubtitles", "yifysubtitles only host subtitles for movies")
+        if self.release_data.series:
+            log.output_skipping_provider("yifysubtitles", "Yifysubtitles only host subtitles for movies")
             return None
-        if self.user_config_data.providers["yifysubtitles_site"]:
-            log.output("[Searching on yifysubtitles - subtitle]")
-            _yifysubtitles = yifysubtitles.YifiSubtitles(
-                self.file_search_data, self.user_config_data, self.provider_url_data
+        if self.provider_data.yifysubtitles == "N/A":
+            log.output_skipping_provider(
+                "yifysubtitles", f"{self.user_data.current_language} not supported on yifysubtitles"
             )
-            self.yifysubtitles_results = _yifysubtitles.parse_site_results()
-            self.subscene_fd = _yifysubtitles._sorted_list()
+            return None
+        if self.user_data.providers["yifysubtitles_site"]:
+            log.output_header("Searching on yifysubtitles")
+            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.user_data, self.provider_data)
+            self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
+            self.skipped["yifysubtitles_site"] = _yifysubs._sorted_list()
 
     def _download_files(self) -> None:
         if self.file_exist is False:
             return None
+        if not any(self.results.values()):
+            return None
+        log.output_header(f"Downloading subtitles")
+        for provider, data in self.results.items():
+            if self.user_data.providers[provider] is False:
+                continue
+            if not data:
+                continue
+            self.downloads[provider] = self.download_results(data)
         log.output_done_with_tasks(end_new_line=True)
 
     def _not_downloaded(self) -> None:
         if self.file_exist is False:
             return None
-        total_dls = self.opensubtitles_hash_dls + self.opensubtitles_site_dls + self.subscene_dls + self.yifysubtitles_dls
-        if self.user_config_data.show_download_window and total_dls == 0:
-            self.combined_fd: list[FormattedData] = self.opensubtitles_fd + self.subscene_fd + self.yifysubtitles_fd
-        if self.combined_fd:
-            widget_menu.open_tab("download", formatted_data=self.combined_fd)
+        
+        number_of_downloads = sum(v for v in self.downloads.values())
+        if self.user_data.show_download_window and number_of_downloads > 0:
+            return None
+        
+        for data_list in self.skipped.values():
+            if not data_list:
+                continue
+            for data in data_list:
+                self.skipped_combined.append(data)
+
+        if self.skipped_combined:
+            widget_menu.open_tab("download", formatted_data=self.skipped_combined)
             self.ran_download_tab = True
+        log.output_done_with_tasks(end_new_line=True)
 
     def _extract_zip_files(self) -> None:
         if self.file_exist is False:
@@ -145,27 +159,29 @@ class Steps(BaseInitializer):
             return None
         if self.all_providers_disabled():
             return None
-        log.output("[Extracting downloads]")
+
+        log.output_header("Extracting downloads")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
-        self.log.done_with_tasks(end_new_line=True)
+        log.output_done_with_tasks(end_new_line=True)
 
     def _clean_up(self) -> None:
         if self.file_exist is False:
             return None
+        if self.user_data.rename_best_match:
+            log.output_header("Renaming best match")
+            file_manager.rename_best_match(f"{self.release_data.release}.srt", __video__.directory, ".srt")
+            log.output_done_with_tasks(end_new_line=True)
+
         log.output_header("Cleaning up")
-            log.output("[Renaming best match]")
-            file_manager.rename_best_match(f"{self.file_search_data.release}.srt", __video__.directory, ".srt")
-            self.log.done_with_tasks(end_new_line=True)
-        log.output("[Cleaning up]")
         file_manager.clean_up_files(__video__.subs_directory, "nfo")
         file_manager.del_directory(__video__.tmp_directory)
-        self.log.done_with_tasks(end_new_line=True)
+        log.output_done_with_tasks(end_new_line=True)
 
     def _pre_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
         log.output(f"Finished in {elapsed} seconds")
 
-        if self.user_config_data.show_terminal and current_user.running_from_exe() is False:
+        if self.user_data.show_terminal and current_user.running_from_exe() is False:
             try:
                 input("Ctrl + c or Enter to exit")
             except KeyboardInterrupt:
