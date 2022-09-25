@@ -79,7 +79,7 @@ class Steps(BaseInitializer):
             return None
 
         if " " in __video__.name:
-            log.output("Warning: Filename contains spaces")
+            log.warning_spaces_in_filename()
 
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
