@@ -2,10 +2,10 @@ from bs4 import BeautifulSoup
 
 from subsearch.data import __video__
 from subsearch.data.data_fields import (
-    FileSearchData,
     FormattedData,
     ProviderUrlData,
-    UserConfigData,
+    ReleaseData,
+    UserData,
 )
 from subsearch.providers import generic
 from subsearch.providers.generic import SCRAPER, BaseProvider
@@ -13,12 +13,13 @@ from subsearch.utils import log, string_parser
 
 
 class Subscene(BaseProvider):
-    def __init__(self, parameters: FileSearchData, user_parameters: UserConfigData, provider_url: ProviderUrlData):
+    def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
         BaseProvider.__init__(self, parameters, user_parameters, provider_url)
         self.scrape = SubsceneScrape()
         self.logged_and_sorted: list[FormattedData] = []
 
     def parse_site_results(self):
+        # search for title
         to_be_scraped: list[str] = []
         definitive_match = self.url_subscene.rsplit("query=", 1)[-1].replace("%20", " ")
         title_keys = self.scrape.get_title(self.url_subscene, definitive_match)
@@ -29,28 +30,23 @@ class Subscene(BaseProvider):
                 to_be_scraped.append(subtitle_url) if subtitle_url not in (to_be_scraped) else None
             if self.is_series(release):
                 to_be_scraped.append(subtitle_url) if subtitle_url not in (to_be_scraped) else None
-        self.log.done_with_tasks(end_new_line=True) if len(to_be_scraped) > 0 else None
 
-        # exit if no titles found
-        if not to_be_scraped:
-            if self.series:
-                log.output(f"No TV-series found matching {self.title}")
-            else:
-                log.output(f"No movies found matching {self.title}")
-            self.log.done_with_tasks(end_new_line=True)
-            return None
-
-        # search title for subtitles
+        # log results
+        data_found = True if to_be_scraped else False
+        log.output_title_data_result(data_found)
+        if data_found is False:
+            return []
         to_be_sorted: list[FormattedData] = []
+
+        # search for subtitles
         for subtitle_url in to_be_scraped:
-            log.output(f"[Searching on subscene - subtitle]")
             subtitle_data = self.scrape.get_subtitle(self.current_language, self.hi_sub, self.non_hi_sub, subtitle_url)
             break
 
         _to_be_downloaded: dict[str, str] = {}
         for release, subtitle_url in subtitle_data.items():
             pct_result = string_parser.get_pct_value(release, self.release)
-            self.log.match(pct_result, release)
+            log.output_match(pct_result, release)
             formatted_data = generic.format_key_value_pct("subscene", release, subtitle_url, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(release, pct_result) is False:
@@ -58,19 +54,23 @@ class Subscene(BaseProvider):
             if release in _to_be_downloaded.keys():
                 continue
             _to_be_downloaded[release] = subtitle_url
-        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
-        # exit if no subtitles found
-        if not _to_be_downloaded:
-            self.log.no_subtitles_found(self.release)
-            return None
 
+        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
+        if not _to_be_downloaded:
+            return []
+
+        # gather subtitle download url
         to_be_downloaded: dict[str, str] = {}
         for release, subtitle_url in _to_be_downloaded.items():
             zip_url = self.scrape.get_download_url(subtitle_url)
             to_be_downloaded[release] = zip_url
 
+        log.output_subtitle_result(to_be_downloaded, to_be_sorted)
+        if not to_be_downloaded:
+            return []
+
+        # pack download data
         download_info = generic.pack_download_data("subscene", __video__.tmp_directory, to_be_downloaded)
-        self.log.done_with_tasks(end_new_line=True)
         return download_info
 
     def _sorted_list(self):
