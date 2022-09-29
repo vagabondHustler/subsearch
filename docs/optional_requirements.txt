@@ -3,5 +3,5 @@ isort==5.10.1
 twine==4.0.1
 build==0.8.0
 pyinstaller==5.4.1
-mypy==0.971
+mypy==0.981
 pipreqs==0.4.11
