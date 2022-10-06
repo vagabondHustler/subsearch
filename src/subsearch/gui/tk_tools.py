@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk

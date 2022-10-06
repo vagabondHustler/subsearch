@@ -184,7 +184,7 @@ class Steps(BaseInitializer):
             return None
         if current_user.running_from_exe():
             return None
-            
+
         try:
             input("Ctrl + c or Enter to exit")
         except KeyboardInterrupt:

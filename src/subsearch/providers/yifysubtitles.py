@@ -21,7 +21,7 @@ class YifiSubtitles(BaseProvider):
         subtitle_data = self.scrape.get_subtitle(self.url_yifysubtitles, self.current_language)
         to_be_downloaded: dict[str, str] = {}
         to_be_sorted: list[FormattedData] = []
-        
+
         data_found = True if subtitle_data else False
         log.output_title_data_result(data_found)
         if data_found is False:
@@ -37,7 +37,7 @@ class YifiSubtitles(BaseProvider):
             if value in to_be_downloaded.values():
                 continue
             to_be_downloaded[key] = value
-            
+
         self.logged_and_sorted = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.pct_threashold)
         log.output_subtitle_result(to_be_downloaded, to_be_sorted)
         if not to_be_downloaded:

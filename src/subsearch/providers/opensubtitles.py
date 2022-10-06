@@ -21,14 +21,14 @@ class OpenSubtitles(BaseProvider):
     def parse_hash_results(self):
         # search for hash
         to_be_downloaded = self.scrape.with_hash(self.url_opensubtitles_hash, self.release)
-        
+
         # log results
         data_found = True if to_be_downloaded else False
         log.output_title_data_result(data_found, from_hash=True)
         if data_found is False:
             return []
         log.output_match(100, self.release)
-        
+
         # pack download data
         download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
         return download_info
@@ -37,13 +37,13 @@ class OpenSubtitles(BaseProvider):
         # search for title
         to_be_sorted = []
         subtitle_data = self.scrape.get_subtitles(self.url_opensubtitles)
-        
+
         # log results
         data_found = True if subtitle_data else False
         log.output_title_data_result(data_found)
         if data_found is False:
             return []
-        
+
         # search for subtitle
         to_be_downloaded: dict[str, str] = {}
         to_be_sorted: list[FormattedData] = []

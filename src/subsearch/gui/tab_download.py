@@ -87,7 +87,14 @@ class DownloadList(tk.Frame):
             else:
                 download_url = _url
             path = f"{__video__.tmp_directory}\\__{_provider}__{item_num}.zip"
-            enum = DownloadData(provider=f"Downloading from {_provider}", name=_release, file_path=path, url=download_url, idx_num=1, idx_lenght=1)
+            enum = DownloadData(
+                provider=f"Downloading from {_provider}",
+                name=_release,
+                file_path=path,
+                url=download_url,
+                idx_num=1,
+                idx_lenght=1,
+            )
             file_manager.download_subtitle(enum)
             file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
             file_manager.clean_up_files(__video__.tmp_directory, "zip")
