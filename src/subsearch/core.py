@@ -78,11 +78,12 @@ class Steps(BaseInitializer):
         if self.file_exist is False:
             return None
         if self.user_data.language_code3 == "N/A":
-            log.output_skipping_provider(
-                "opensubtitles", f"{self.user_data.current_language} not supported on opensubtitles"
-            )
+            log.output_skip_provider("opensubtitles", f"{self.user_data.current_language} not supported on opensubtitles")
             return None
-        if self.user_data.providers["opensubtitles_hash"] is False and self.user_data.providers["opensubtitles_site"] is False:
+        if (
+            self.user_data.providers["opensubtitles_hash"] is False
+            and self.user_data.providers["opensubtitles_site"] is False
+        ):
             return None
         log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.user_data, self.provider_data)
@@ -106,12 +107,10 @@ class Steps(BaseInitializer):
         if self.file_exist is False:
             return None
         if self.release_data.series:
-            log.output_skipping_provider("yifysubtitles", "Yifysubtitles only host subtitles for movies")
+            log.output_skip_provider("yifysubtitles", "Yifysubtitles only host subtitles for movies")
             return None
         if self.provider_data.yifysubtitles == "N/A":
-            log.output_skipping_provider(
-                "yifysubtitles", f"{self.user_data.current_language} not supported on yifysubtitles"
-            )
+            log.output_skip_provider("yifysubtitles", f"{self.user_data.current_language} not supported on yifysubtitles")
             return None
         if self.user_data.providers["yifysubtitles_site"]:
             log.output_header("Searching on yifysubtitles")
@@ -136,11 +135,11 @@ class Steps(BaseInitializer):
     def _not_downloaded(self) -> None:
         if self.file_exist is False:
             return None
-        
+
         number_of_downloads = sum(v for v in self.downloads.values())
         if self.user_data.show_download_window and number_of_downloads > 0:
             return None
-        
+
         for data_list in self.skipped.values():
             if not data_list:
                 continue
@@ -181,8 +180,12 @@ class Steps(BaseInitializer):
         elapsed = time.perf_counter() - self.start
         log.output(f"Finished in {elapsed} seconds")
 
-        if self.user_data.show_terminal and current_user.running_from_exe() is False:
-            try:
-                input("Ctrl + c or Enter to exit")
-            except KeyboardInterrupt:
-                pass
+        if self.user_data.show_terminal is False:
+            return None
+        if current_user.running_from_exe():
+            return None
+            
+        try:
+            input("Ctrl + c or Enter to exit")
+        except KeyboardInterrupt:
+            pass

@@ -59,7 +59,7 @@ def output_header(msg: str):
     output(f"--- [{msg}] ---")
 
 
-def output_skipping_provider(provider: str, reason: str):
+def output_skip_provider(provider: str, reason: str):
     output("")
     output_header(f"Skipping {provider}")
     output(f"{reason}")
