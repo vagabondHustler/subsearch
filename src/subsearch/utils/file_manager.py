@@ -105,7 +105,7 @@ def get_hash(file_path: Path | None) -> str:
                 hash += l_value
                 hash = hash & 0xFFFFFFFFFFFFFFFF
 
-        returnedhash = ("%016x" % hash)
+        returnedhash = "%016x" % hash
         return returnedhash
 
     except IOError:

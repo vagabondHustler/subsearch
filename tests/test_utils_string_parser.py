@@ -85,6 +85,7 @@ def test_string_parser_bad_filename() -> None:
     assert fsd.group == "the foo bar 1080p web h264"
     assert fsd.file_hash == "000000000000000000"
 
+
 def test_provider_urls_movie():
     base = BaseInitializer()
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
@@ -92,9 +93,13 @@ def test_provider_urls_movie():
     pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
 
     assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20(2021)"
-    assert pud.opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    assert (
+        pud.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    )
     assert pud.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
     assert pud.yifysubtitles == "N/A"
+
 
 def test_provider_urls_series():
     base = BaseInitializer()
@@ -103,10 +108,14 @@ def test_provider_urls_series():
     pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
 
     assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
-    assert pud.opensubtitles == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    assert (
+        pud.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    )
     assert pud.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
     assert pud.yifysubtitles == "N/A"
 
+
 def test_imdb_tt_id():
-    tt_id =string_parser.find_imdb_tt_id("Arctic", 2019)
+    tt_id = string_parser.find_imdb_tt_id("Arctic", 2019)
     assert tt_id == "tt6820256"
