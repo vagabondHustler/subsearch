@@ -46,6 +46,7 @@ class UserData:
     context_menu_icon: bool
     show_download_window: bool
     show_terminal: bool
+    log_to_file: bool
     file_ext: dict[str, bool]
     providers: dict[str, bool]
     language_code3: str
