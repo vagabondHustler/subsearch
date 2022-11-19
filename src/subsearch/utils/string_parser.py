@@ -1,6 +1,6 @@
 import re
-
 import time
+
 import imdb
 from num2words import num2words
 
@@ -65,7 +65,7 @@ def find_imdb_tt_id(title: str, year: int) -> str:
     if not movies:
         time.sleep(0.5)
         movies = ia.search_movie(title)
-        
+
     for movie in movies:
         movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
         if movie_no_colon.lower() != title.lower():

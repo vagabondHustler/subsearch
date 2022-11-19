@@ -290,6 +290,7 @@ class ShowTerminalOnSearch(tk.Frame):
         raw_config.set_config_key_value("show_terminal", False)
         raw_registry.write_valuex("command")
 
+
 class LogToFile(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
