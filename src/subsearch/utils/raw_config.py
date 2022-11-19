@@ -60,6 +60,7 @@ def get_config_key(key: str) -> Any:
         "context_menu_icon": get_config()["context_menu_icon"],
         "show_download_window": get_config()["show_download_window"],
         "show_terminal": get_config()["show_terminal"],
+        "log_to_file": get_config()["log_to_file"],
         "file_ext": get_config()["file_ext"],
         "providers": get_config()["providers"],
     }
@@ -76,6 +77,7 @@ def set_default_json() -> None:
     data["context_menu_icon"] = True
     data["show_download_window"] = True
     data["show_terminal"] = False
+    data["log_to_file"] = True
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
     config_file = Path(__data__) / "config.json"
