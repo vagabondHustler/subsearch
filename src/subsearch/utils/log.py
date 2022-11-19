@@ -3,17 +3,17 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
-from subsearch.utils import raw_config
 from subsearch.data.data_fields import (
     FormattedData,
     ProviderUrlData,
     ReleaseData,
     UserData,
 )
+from subsearch.utils import raw_config
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
-LOG_TO_FILE = raw_config.get_config_key('log_to_file')
+LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
