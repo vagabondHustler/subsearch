@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
+from subsearch.utils import raw_config
 from subsearch.data.data_fields import (
     FormattedData,
     ProviderUrlData,
@@ -12,10 +13,12 @@ from subsearch.data.data_fields import (
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
+LOG_TO_FILE = raw_config.get_config_key('log_to_file')
 
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
-if __video__ is not None:
+
+if __video__ is not None and LOG_TO_FILE:
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
     file_handler = logging.FileHandler(Path(__video__.directory) / "subsearch.log", "w")
     file_handler.setLevel(logging.INFO)
@@ -25,7 +28,7 @@ if __video__ is not None:
 
 def output(msg: str, terminal: bool = True, level: str = "info"):
     def _to_log(msg: str, level: str) -> None:
-        if __video__ is None:
+        if __video__ is None or LOG_TO_FILE is False:
             return None
         if level == "info":
             logger.info(msg)
