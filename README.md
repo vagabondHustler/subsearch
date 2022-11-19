@@ -88,7 +88,7 @@ See [code block](#code) for imports
 
 ### Source <a name = "src"></a>
 
-Download [Python](https://www.python.org/downloads/) >= 3.10
+Download [Python](https://www.python.org/downloads/) 3.10
 
 Download subsearch
 
