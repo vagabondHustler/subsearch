@@ -5,7 +5,7 @@ class Error(Exception):
 
 
 class ProviderError(Error):
-    """Base class for exceptions by providers"""
+    """Base class for errors by providers"""
 
     pass
 
