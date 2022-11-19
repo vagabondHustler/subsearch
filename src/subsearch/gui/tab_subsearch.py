@@ -304,19 +304,18 @@ class LogToFile(tk.Frame):
         self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
-        if current_user.running_from_exe() is False:
-            btn_true = ttk.Button(
-                self,
-                text="True",
-                width=18,
-            )
-            btn_true.grid(row=0, column=3, pady=2)
-            btn_false = ttk.Button(
-                self,
-                text="False",
-                width=18,
-            )
-            btn_false.grid(row=0, column=2, pady=2)
+        btn_true = ttk.Button(
+            self,
+            text="True",
+            width=18,
+        )
+        btn_true.grid(row=0, column=3, pady=2)
+        btn_false = ttk.Button(
+            self,
+            text="False",
+            width=18,
+        )
+        btn_false.grid(row=0, column=2, pady=2)
         btn_true.bind("<Enter>", self.enter_button)
         btn_true.bind("<Leave>", self.leave_button)
         btn_false.bind("<Enter>", self.enter_button)
