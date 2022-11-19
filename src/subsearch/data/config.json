@@ -81,6 +81,7 @@
     "context_menu_icon": true,
     "show_download_window": true,
     "show_terminal": false,
+    "log_to_file": false,
     "file_ext": {
         ".avi": true,
         ".mp4": true,
