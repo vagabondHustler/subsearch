@@ -1,10 +1,9 @@
 import re
-import time
 
-import imdb
 from num2words import num2words
 
 from subsearch.data.data_fields import ProviderUrlData, ReleaseData, UserData
+from subsearch.utils import imdb
 
 
 def find_year(string: str) -> int:
@@ -58,25 +57,6 @@ def find_group(string: str) -> str:
     return group
 
 
-def find_imdb_tt_id(title: str, year: int) -> str:
-    ia = imdb.Cinemagoer()
-    movies = ia.search_movie(title)
-    prev_year = year - 1
-    if not movies:
-        time.sleep(0.5)
-        movies = ia.search_movie(title)
-
-    for movie in movies:
-        movie_no_colon = movie.data["title"].replace(":", "").split("(")[0]
-        if movie_no_colon.lower() != title.lower():
-            continue
-        if movie.data["year"] != year and movie.data["year"] != prev_year:
-            continue
-        _movie_id: str = movie.movieID
-        tt_id = f"tt{_movie_id}"
-        return tt_id
-
-
 def find_title(filename: str, year: int, series: bool):
     if year != 0000:
         title = find_title_by_year(filename)
@@ -124,7 +104,7 @@ def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> Provid
 
         url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title} ({frd.year})"
         url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlymovies-on/moviename-{frd.title} ({frd.year})/rss_2_00"
-        tt_id = find_imdb_tt_id(frd.title, frd.year)
+        tt_id = imdb.FindImdbID(frd.title, frd.year).id
         if tt_id is None:
             url_yifysubtitles = "N/A"
         else:
