@@ -70,7 +70,7 @@ Source is probably faster than the executable version, but the executable can be
 
 ### PyPi <a name = "pypi"></a>
 
-Download [Python](https://www.python.org/downloads/) >= 3.10
+Download [Python](https://www.python.org/downloads/) 3.10
 
 Install subsearch
 
