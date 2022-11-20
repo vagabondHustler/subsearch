@@ -120,7 +120,7 @@ class SubsceneScrape(Subscene):
 
     def get_download_url(self, url: str) -> str:
         source = SCRAPER.get(url).text
-        doc = BeautifulSoup(source, "lxml")
+        doc = BeautifulSoup(source, features="html.parser")
         button_url = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
         download_url = f"https://subscene.com/{button_url[0]}"
         return download_url
