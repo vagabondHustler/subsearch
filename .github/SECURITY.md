@@ -6,6 +6,6 @@
 
 ### Reporting a Vulnerability
 
-Either via a new [Issue](https://github.com/vagabondHustler/SubSearch/pulls), or via twitter [vagabondHustl3r](https://twitter.com/vagabondHustl3r)
+Create a new [Issue](https://github.com/vagabondHustler/SubSearch/pulls)
 
 -- [vagabondHustler](https://github.com/vagabondHustler)
