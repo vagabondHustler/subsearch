@@ -15,6 +15,10 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
+release_data: ReleaseData
+user_data: UserData
+url_data: ProviderUrlData
+
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
