@@ -54,7 +54,7 @@ class DownloadList(tk.Frame):
         self._releases = {}
         self._urls = {}
         log.output("")
-        log.output_header("[Processing files with GUI]")
+        log.output_header("Processing files with GUI")
         # fil list box with all available subtitles that were found and not downloaded
         for enu, data in enumerate(self.formatted_data):
             self.sub_listbox.insert(tk.END, f"{data.formatted_release}\n")
