@@ -151,7 +151,7 @@ def output_subtitle_result(to_be_downloaded: dict[str, str], to_be_sorted: list[
     output("")
 
 
-def output_title_data_result(found: bool, from_hash: str = False):
+def output_title_data_result(found: bool, from_hash: bool = False):
     def _not_found(media_type: str, from_hash: bool):
         if from_hash:
             output(f"Did not find a {media_type} matching hash: {release_data.file_hash}")
