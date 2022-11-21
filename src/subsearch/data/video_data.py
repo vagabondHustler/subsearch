@@ -1,10 +1,11 @@
 import sys
 from itertools import product
 from pathlib import Path
+from typing import Optional, no_type_check
 
 from subsearch.data.data_fields import VideoFileData
 
-
+@no_type_check
 def get_video_file_data() -> VideoFileData:
 
     """
