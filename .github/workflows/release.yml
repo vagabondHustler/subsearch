@@ -92,7 +92,7 @@ jobs:
         run: |
           git status
           git add src/subsearch/data/version.py
-          git commit -S -m "Release v${{steps.current_version.outputs.prev_version_output}} -> ${{ github.ref_name }}"
+          git commit -S -m "Bump version v${{steps.current_version.outputs.prev_version_output}} → ${{ github.ref_name }}"
           git fetch origin main
           git push origin HEAD:main
 
