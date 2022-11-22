@@ -77,7 +77,7 @@ class OpenSubtitlesScrape(OpenSubtitles):
 
     def get_subtitles(self, url: str):
         subtitles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url, "xml")
+        doc = generic.get_lxml_doc(url)
         items = doc.find_all("item")
         for item in items:
             dl_url = item.enclosure["url"]
@@ -88,7 +88,7 @@ class OpenSubtitlesScrape(OpenSubtitles):
 
     def with_hash(self, url: str, release: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url, "lxml")
+        doc = generic.get_lxml_doc(url)
         doc_results = doc.find("a", download="download", id="bt-dwl-bt")
         if doc_results is None:
             return subtitles
