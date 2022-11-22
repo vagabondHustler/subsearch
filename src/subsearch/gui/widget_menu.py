@@ -197,7 +197,7 @@ def open_tab(active_tab: str, **kwargs):
     try:
         formatted_data: list[FormattedData] = kwargs["formatted_data"]
     except KeyError:
-        formatted_data = None
+        formatted_data = None # type: ignore
     root = base_root.main()
     gui.set_theme("dark")
     content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width - 4, height=TkWindowSize().height - 118)

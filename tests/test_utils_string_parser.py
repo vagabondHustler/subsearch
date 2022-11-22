@@ -1,5 +1,6 @@
 from src.subsearch.core import BaseInitializer
-from src.subsearch.utils import log, raw_config, string_parser
+from src.subsearch.utils import raw_config, string_parser
+from src.subsearch.utils import imdb
 
 LANGUAGES = raw_config.get_config_key("languages")
 
@@ -117,5 +118,5 @@ def test_provider_urls_series():
 
 
 def test_imdb_tt_id():
-    tt_id = string_parser.find_imdb_tt_id("Arctic", 2019)
+    tt_id = imdb.FindImdbID("Arctic", 2019).id
     assert tt_id == "tt6820256"

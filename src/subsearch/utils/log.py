@@ -15,6 +15,10 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
+release_data: ReleaseData
+user_data: UserData
+url_data: ProviderUrlData
+
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
@@ -147,7 +151,7 @@ def output_subtitle_result(to_be_downloaded: dict[str, str], to_be_sorted: list[
     output("")
 
 
-def output_title_data_result(found: bool, from_hash: str = False):
+def output_title_data_result(found: bool, from_hash: bool = False):
     def _not_found(media_type: str, from_hash: bool):
         if from_hash:
             output(f"Did not find a {media_type} matching hash: {release_data.file_hash}")

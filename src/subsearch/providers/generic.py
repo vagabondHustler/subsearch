@@ -96,7 +96,7 @@ class BaseProvider:
             raise CaptchaError("Captcha protection detected. Please try again later.")
 
 
-def get_lxml_doc(url: str, features: str = "lxml") -> BeautifulSoup:
+def get_lxml_doc(url: str, features: str = "html.parser") -> BeautifulSoup:
     source = SCRAPER.get(url)
     scontent = source.content
     doc = BeautifulSoup(scontent, features)
