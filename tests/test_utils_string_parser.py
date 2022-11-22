@@ -1,6 +1,5 @@
 from src.subsearch.core import BaseInitializer
-from src.subsearch.utils import raw_config, string_parser
-from src.subsearch.utils import imdb
+from src.subsearch.utils import imdb, raw_config, string_parser
 
 LANGUAGES = raw_config.get_config_key("languages")
 
