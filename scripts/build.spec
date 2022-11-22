@@ -3,12 +3,12 @@
 
 block_cipher = None
 added_files = [
-         ( '..\\src\\subsearch\\data\\*.json', 'subsearch\\data\\' )
+         ( '..\\src\\subsearch\\data\\*.json', 'subsearch\\data\\' ),
+         ('..\\src\\subsearch\\gui\\assets\\icon\\*.ico', 'subsearch\\gui\\assets\\icon\\')
          ]
 added_binaries = [
         ('..\\src\\subsearch\\gui\\assets\\btn\\*.png', 'subsearch\\gui\\assets\\btn\\'),
         ('..\\src\\subsearch\\gui\\assets\\checkbox\\*.png', 'subsearch\\gui\\assets\\checkbox\\'),
-        ('..\\src\\subsearch\\gui\\assets\\icon\\*.ico', 'subsearch\\gui\\assets\\icon\\'),
         ('..\\src\\subsearch\\gui\\assets\\icon\\*.png', 'subsearch\\gui\\assets\\icon\\'),
         ('..\\src\\subsearch\\gui\\assets\\scale\\*.png', 'subsearch\\gui\\assets\\scale\\'),
         ('..\\src\\subsearch\\gui\\assets\\scrollbar\\*.png', 'subsearch\\gui\\assets\\scrollbar\\'),
