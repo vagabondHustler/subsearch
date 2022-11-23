@@ -19,6 +19,7 @@
 - [PyPi](#pypi)
 - [Source](#src)
 - [Executable](#exe)
+- [VirusTotal analysis / false positives](#virus)
 - [Supported Languages](#lsupport)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md)
@@ -52,7 +53,8 @@ While searching for subs if show terminal is disabled
 
 ![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example.gif)
 
-Available options in the widget
+<details>
+<summary>Available options in the widget -  click to expand</summary>
 
 ![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language.png)
 
@@ -62,13 +64,18 @@ Available options in the widget
 
 ![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/gui_download.png)
 
+</details>
+
 </div>
 
 ## Getting Started <a name = "getting_started_src"></a>
 
 Source is probably faster than the executable version, but the executable can be run without installing a Python interpreter or any modules.
 
-### PyPi <a name = "pypi"></a>
+<details open>
+<summary>PyPi<a name = "pypi"></a></summary>
+
+---
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
@@ -84,21 +91,10 @@ More options
 
 `subsearch --help`
 
-See [code block](#code) for imports
+<details>
+<summary>Code block example<a name = "code"></a></summary>
 
-### Source <a name = "src"></a>
-
-Download [Python](https://www.python.org/downloads/) >= 3.10
-
-Download subsearch
-
-`git clone https://github.com/vagabondHustler/subsearch.git`
-
-Install package locally
-
-`pip install -e .`
-
-Code <a name = "code"></a>
+---
 
 ```
 from subsearch import __subsearch__
@@ -122,7 +118,66 @@ if __name__ == "__main__":
 
 `python -m main c:\users\vagabondhustler\desktop\foo.bar.the.movie.2022.1080p-foobar.mkv`
 
-### Executable <a name = "exe"></a>
+</details>
+
+---
+
+</details>
+
+</div>
+
+<details>
+<summary>Source <a name = "src"></a></summary>
+
+---
+
+Download [Python](https://www.python.org/downloads/) >= 3.10
+
+Download subsearch
+
+`git clone https://github.com/vagabondHustler/subsearch.git`
+
+Install package locally
+
+`pip install -e .`
+
+<details>
+<summary>Code block example<a name = "code"></a></summary>
+
+---
+
+```
+from subsearch import __subsearch__
+from subsearch.utils.raw_config import get_config, set_config
+
+
+def main() -> None:
+    config = get_config()
+    config["providers"]["opensubtitles_hash"] = False
+    set_config(config)
+    app = __subsearch__.Subsearch()
+    app.provider_opensubtitles()
+    app.provider_subscene()
+    app.process_files()
+    app.on_exit()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+`python -m main c:\users\vagabondhustler\desktop\foo.bar.the.movie.2022.1080p-foobar.mkv`
+
+</details>
+
+---
+
+</details>
+
+<details>
+<summary> Executable <a name = "exe"></a></summary>
+
+---
 
 Download SubSearch-vx.x.x-win-x64.zip from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
 
@@ -130,11 +185,31 @@ Unzip file and run SubSearch.exe
 
 If you get a PUA message, click `More info`
 
+<details>
+<summary>Print screens<a name = "code"></a></summary>
+
 ![prtsc_moreinfo](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
 
 ![prtsc_runanyway](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
 
-If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
+</details>
+
+---
+
+</details>
+
+If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log (logging is disabled by default and can be enabled in the gui) for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
+
+## VirusTotal analysis / false positives <a name = "virus"></a>
+
+Every release has a attached virustotal analysis of the compiled code for transparency reasons.
+
+There are a few false positives, like `Trojan.PSW.Python.iv`, `Trojan.Stealer.Win32.29558`, `Trojan.Win32.Save.a`, `Trojan.Generic.hhkmb` etc.
+
+I have done my best to remove them, but there will probably always be false positives for as long as I don't have a code signature (which would cost money I'm not willing to spend at the moment)
+
+If you are unsure if they really are false positives (which you should be), the source code is always available here on github to be read.
+If you want to compile the code yourself, all the information you need to pass into pyinstaller can be found in the [build.spec](https://github.com/vagabondHustler/subsearch/blob/main/scripts/build.spec) file and the workflow file [release.yml](https://github.com/vagabondHustler/subsearch/blob/main/.github/workflows/release.yml) under job `build-and-publish` name `Build executable`.
 
 ## Supported languages <a name = "lsupport"></a>
 
