@@ -40,8 +40,6 @@ where = ["src"]
 include = ["subsearch*"]
 exclude = ["examples*", "tools*", "subsearch.test*"]
 
-
-
 [tool.setuptools.dynamic]
 version = {attr = "subsearch.data.__version__"}
 
