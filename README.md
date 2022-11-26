@@ -137,9 +137,17 @@ Download subsearch
 
 `git clone https://github.com/vagabondHustler/subsearch.git`
 
-Install package locally
+Install syntax
+
+`pip install -e <local project path>[package-index-options]`
+
+Example 1: only required dependencies
 
 `pip install -e .`
+
+Example 2: with dev/optional dependencies
+
+`pip install -e .[dev, optional]`
 
 <details>
 <summary>Code block example<a name = "code"></a></summary>

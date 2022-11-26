@@ -2,6 +2,53 @@
 requires = ["setuptools>=65.5", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "subsearch"
+description = "Download subtitles for movies and shows, automatically with one easy mouse click."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT license"}
+keywords = ["subsearch", "subscene", "opensubtitles", "yifysubtitles", "download", "subtitles", "movies", "shows", "automatically", "scrape"]
+authors = [
+  {email = "vagabondHustler.github@gmail.com"},
+  {name = "vagabondHustler"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop"
+]
+dependencies = ["beautifulsoup4==4.11.1", "cloudscraper==1.2.66","num2words==0.5.12","packaging==21.3","requests==2.28.1",]
+dynamic = ["version"]
+
+[project.urls]
+repository = "https://github.com/vagabondHustler/subsearch"
+
+[project.scripts]
+subsearch = "subsearch:main"
+
+[tool.setuptools]
+platforms = ["win32"]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["subsearch*"]
+exclude = ["examples*", "tools*", "subsearch.test*"]
+
+
+
+[tool.setuptools.dynamic]
+version = {attr = "subsearch.data.__version__"}
+
+[project.optional-dependencies]
+optional = ["black==22.10.0", "isort==5.10.1", "twine==4.0.1", "build==0.9.0", "pyinstaller==5.6.2", "mypy==0.991", "pipreqs==0.4.11"]
+dev = ["pytest==7.2.0", "pytest-cov==4.0.0", "tox==3.27.1"]
+
 [tool.pytest.ini_options]
 filterwarnings =[
     'ignore::DeprecationWarning'
