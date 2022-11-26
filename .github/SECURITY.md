@@ -2,10 +2,9 @@
 
 ### Supported Versions
 
-[Latest](https://github.com/vagabondHustler/SubSearch/releases/latest) release.
+[Latest](https://github.com/vagabondHustler/SubSearch/releases/latest) release and pre-releases greater than latest.
 
 ### Reporting a Vulnerability
 
-Create a new [Issue](https://github.com/vagabondHustler/SubSearch/pulls)
-
--- [vagabondHustler](https://github.com/vagabondHustler)
+Send a e-mail to [vagabondHustler](mailto:vagabondHustler.github@gmail.com)
+Privately reporting a security vulnerability, [see](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability)
