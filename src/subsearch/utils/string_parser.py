@@ -102,7 +102,7 @@ def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> Provid
 
     def _set_movie_url():
 
-        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title} ({frd.year})"
+        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title}"
         url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlymovies-on/moviename-{frd.title} ({frd.year})/rss_2_00"
         tt_id = imdb.FindImdbID(frd.title, frd.year).id
         if tt_id is None:
