@@ -52,11 +52,6 @@ class Providers(tk.Frame):
 
     def enter_button(self, event):
         btn = event.widget
-        key = self.checkbox_value[btn][0]
-        if key == "yifysubtitles_site":
-            tip_text = "No filter for subtitle type on yifysubtitles"
-            self.tip = tk_tools.ToolTip(btn, btn, tip_text)
-            self.tip.show()
         btn.bind("<ButtonPress-1>", self.press_button)
 
     def leave_button(self, event):
