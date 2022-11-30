@@ -16,7 +16,8 @@ from subsearch.utils import current_user
 class Footer(tk.Frame):
     def __init__(self, parent, active_tab: str, language_tab, search_tab, settings_tab, download_tab):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().mid_grey_black, width=TkWindowSize().width - 4, height=80)
+        self.configure(bg=TkColor().mid_grey_black, width=TkWindowSize().width, height=82)
+        self.parent = parent
         self.language_tab = language_tab
         self.search_tab = search_tab
         self.settings_tab = settings_tab
@@ -75,15 +76,19 @@ class Footer(tk.Frame):
         if self.active_tab == "language":
             self.language_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.language, "language", "press")
+            self.parent.title("subsearch - languages")
         elif self.active_tab == "search":
             self.search_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.search, "search", "press")
+            self.parent.title("subsearch - search options")
         elif self.active_tab == "settings":
             self.settings_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.settings, "settings", "press")
+            self.parent.title("subsearch - application settings")
         elif self.active_tab == "download":
             self.download_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.download, "download", "press")
+            self.parent.title("subsearch - manual download")
 
     def release_tab(self, event):
         if event.widget == self.language:
@@ -201,8 +206,8 @@ def open_tab(active_tab: str, **kwargs):
         formatted_data = None  # type: ignore
     root = base_root.main()
     gui.set_theme("dark")
-    content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width - 4, height=TkWindowSize().height - 118)
-    content.place(x=2, y=37)
+    content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width, height=TkWindowSize().height - 82)
+    content.place(x=0, y=0)
     content_posx, content_posy = content.winfo_reqwidth(), content.winfo_reqheight()
 
     footer = Footer(
@@ -213,5 +218,5 @@ def open_tab(active_tab: str, **kwargs):
         TabSettings(content, content_posx, content_posy),
         TabDownload(content, content_posx, content_posy, formatted_data),
     )
-    footer.place(x=2, y=TkWindowSize().height - 82)
+    footer.place(y=TkWindowSize().height - 82)
     root.mainloop()
