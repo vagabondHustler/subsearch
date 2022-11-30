@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from selectolax.parser import Node
 
 from subsearch.data import __video__
 from subsearch.data.data_fields import (
@@ -8,64 +8,101 @@ from subsearch.data.data_fields import (
     UserData,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import SCRAPER, BaseProvider
+from subsearch.providers.generic import BaseProvider
 from subsearch.utils import log, string_parser
 
 
-class Subscene(BaseProvider):
+class SubsceneScraper:
+    def __init__(self):
+        ...
+
+    def find_title(self, url: str, current_language: str, definitive_match: list[str]):
+        tree = generic.get_html(url)
+        products = tree.css("div.title")
+        for item in products:
+            node = item.css_first("a")
+            result_href = node.attributes["href"]
+            result_title = str(node.child.html).lower()
+            if result_title not in definitive_match:
+                continue
+            current_language = current_language.lower()
+            return f"https://subscene.com{result_href}/{current_language}"
+
+    def skip_item(self, item: Node, hi_sub: bool, regular_sub: bool) -> bool:
+        if item.css_matches("td.banner-inlist"):
+            return True
+        if (hi_sub and regular_sub) or (hi_sub is False and regular_sub is False):
+            pass
+        elif hi_sub is False and item.css_matches("td.a40"):
+            return True
+        elif regular_sub is False and item.css_matches("td.a41"):
+            return True
+        return False
+
+    def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool) -> dict[str, str]:
+        subtitles: dict[str, str] = {}
+        tree = generic.get_html(url)
+        products = tree.css("tr")
+        for item in products[1:]:
+            if self.skip_item(item, hi_sub, regular_sub):
+                continue
+            node = item.css_first("a")
+            subtitle_href = node.attributes["href"]
+            filename = item.css_first("span:nth-child(2)").child.text_content.strip()
+            subtitles[filename] = f"https://subscene.com{subtitle_href}"
+        return subtitles
+
+    def get_download_url(self, url: str) -> str:
+        tree = generic.get_html(url)
+        href = tree.css_first("#downloadButton").attributes["href"]
+        download_url = f"https://subscene.com/{href}"
+        return download_url
+
+
+class Subscene(BaseProvider, SubsceneScraper):
     def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
         BaseProvider.__init__(self, parameters, user_parameters, provider_url)
-        self.scrape = SubsceneScrape()
+        SubsceneScraper.__init__(self)
         self.logged_and_sorted: list[FormattedData] = []
 
-    def parse_site_results(self):
-        # search for title
-        to_be_scraped: list[str] = []
-        definitive_match = self.url_subscene.rsplit("query=", 1)[-1].replace("%20", " ")
-        title_keys = self.scrape.get_title(self.url_subscene, definitive_match)
-        for release, subtitle_url in title_keys.items():
-            if self.is_movie(release):
-                to_be_scraped.append(subtitle_url) if subtitle_url not in (to_be_scraped) else None
-            if self.try_the_year_before(release):
-                to_be_scraped.append(subtitle_url) if subtitle_url not in (to_be_scraped) else None
-            if self.is_series(release):
-                to_be_scraped.append(subtitle_url) if subtitle_url not in (to_be_scraped) else None
+    def _definitive_match(self) -> list[str]:
+        if self.series:
+            return [f"{self.title} - {self.season_ordinal} season"]
+        return [f"{self.title} ({self.year})", f"{self.title} ({(self.year-1)})"]
 
-        # log results
-        data_found = True if to_be_scraped else False
-        log.output_title_data_result(data_found)
-        if data_found is False:
-            return []
+    def parse_site_results(self):
         to_be_sorted: list[FormattedData] = []
+        _to_be_downloaded: dict[str, str] = {}
+        to_be_downloaded: dict[str, str] = {}
+
+        # find title
+        definitive_match = self._definitive_match()
+        found_title_url = self.find_title(self.url_subscene, self.current_language, definitive_match)
+        if not found_title_url:
+            return []
 
         # search for subtitles
-        for subtitle_url in to_be_scraped:
-            subtitle_data = self.scrape.get_subtitle(self.current_language, self.hi_sub, self.non_hi_sub, subtitle_url)
-            break
-
-        _to_be_downloaded: dict[str, str] = {}
-        for release, subtitle_url in subtitle_data.items():
-            pct_result = string_parser.get_pct_value(release, self.release)
-            log.output_match(pct_result, release)
-            formatted_data = generic.format_key_value_pct("subscene", release, subtitle_url, pct_result)
+        subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub)
+        for key, value in subtitle_data.items():
+            pct_result = string_parser.get_pct_value(key, self.release)
+            log.output_match("subscene", pct_result, key)
+            formatted_data = generic.format_key_value_pct("subscene", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(release, pct_result) is False:
+            if self.is_threshold_met(key, pct_result) is False:
                 continue
-            if release in _to_be_downloaded.keys():
+            if key in _to_be_downloaded.keys():
                 continue
-            _to_be_downloaded[release] = subtitle_url
+            _to_be_downloaded[key] = value
 
         self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
         if not _to_be_downloaded:
             return []
 
         # gather subtitle download url
-        to_be_downloaded: dict[str, str] = {}
         for release, subtitle_url in _to_be_downloaded.items():
-            zip_url = self.scrape.get_download_url(subtitle_url)
+            zip_url = self.get_download_url(subtitle_url)
             to_be_downloaded[release] = zip_url
 
-        log.output_subtitle_result(to_be_downloaded, to_be_sorted)
         if not to_be_downloaded:
             return []
 
@@ -75,52 +112,3 @@ class Subscene(BaseProvider):
 
     def _sorted_list(self):
         return self.logged_and_sorted
-
-
-class SubsceneScrape(Subscene):
-    def __init__(self):
-        ...
-
-    def get_title(self, url: str, definitive_match: str) -> dict[str, str]:
-        titles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url)
-        tag_div = doc.find("div", class_="search-result")
-        self.is_captcha(tag_div)
-        tag_div = tag_div.find_all("div", class_="title")
-        for class_title in tag_div:
-            title_name = class_title.contents[1].contents[0].strip().replace(":", "")
-            title_url = class_title.contents[1].attrs["href"]
-            titles[title_name] = f"https://subscene.com{title_url}"
-            if title_name.lower() == definitive_match:
-                break
-        return titles
-
-    def get_subtitle(self, current_language: str, hi_sub: bool, regular_sub: bool, url: str) -> dict[str, str]:
-        subtitles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url)
-        tag_tbody = doc.find("tbody")
-        while tag_tbody is None:
-            self.to_many_requests()
-            tag_tbody = doc.find("tbody")
-        tag_td = tag_tbody.find_all("td", class_="a1")
-        for class_a1 in tag_td:
-            is_sub_hi = self.is_subtitle_hearing_impaired(class_a1)
-            subtitle_language = class_a1.contents[1].contents[1].contents[0].strip()
-            if hi_sub and regular_sub is False and is_sub_hi is False:
-                continue
-            if hi_sub is False and regular_sub and is_sub_hi:
-                continue
-            if current_language.lower() != subtitle_language.lower():
-                continue
-            release_name = class_a1.contents[1].contents[3].string.strip()
-            release_name = release_name.replace(" ", ".")
-            subtitle_url = class_a1.contents[1].attrs["href"]
-            subtitles[release_name] = f"https://subscene.com{subtitle_url}"
-        return subtitles
-
-    def get_download_url(self, url: str) -> str:
-        source = SCRAPER.get(url).text
-        doc = BeautifulSoup(source, features="html.parser")
-        button_url = [dl["href"] for dl in doc.find_all("a", href=True, id="downloadButton")]
-        download_url = f"https://subscene.com/{button_url[0]}"
-        return download_url

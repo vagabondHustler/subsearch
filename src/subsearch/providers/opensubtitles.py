@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 from subsearch.data import __video__
 from subsearch.data.data_fields import (
@@ -12,22 +13,61 @@ from subsearch.providers.generic import BaseProvider
 from subsearch.utils import log, string_parser
 
 
-class OpenSubtitles(BaseProvider):
+class OpenSubtitlesScraper:
+    def __init__(self):
+        ...
+
+    def opensubtitles_down(self, tree: Any):
+        is_offline = tree.css_matches("pre")
+        if is_offline is False:
+            return False
+        offline_text = tree.css_first("pre").text()
+        if offline_text.startswith("Site will be online soon"):
+            log.output(f"opensubtitles is down: {offline_text}", level="warning")
+            return True
+        return False
+
+    def get_subtitles(self, url: str):
+        subtitles: dict[str, str] = {}
+        tree = generic.get_html(url)
+        items = tree.css("item")
+        if self.opensubtitles_down(tree):
+            return subtitles
+        for item in items:
+            dl_url = item.css_first("enclosure").attributes["url"]
+            released_as = item.css_first("description").child.text_content.strip()
+            release_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
+            subtitles[release_name] = dl_url
+        return subtitles
+
+    def with_hash(self, url: str, release: str) -> dict[str, str]:
+        subtitles: dict[str, str] = {}
+        tree = generic.get_html(url)
+        if self.opensubtitles_down(tree):
+            return subtitles
+        try:
+            sub_id = tree.css_first("#bt-dwl-bt").attributes["data-product-id"]
+        except AttributeError:
+            return subtitles
+        subtitles[release] = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
+        return subtitles
+
+
+class OpenSubtitles(BaseProvider, OpenSubtitlesScraper):
     def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
         BaseProvider.__init__(self, parameters, user_parameters, provider_url)
-        self.scrape = OpenSubtitlesScrape()
+        OpenSubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedData] = []
 
     def parse_hash_results(self):
         # search for hash
-        to_be_downloaded = self.scrape.with_hash(self.url_opensubtitles_hash, self.release)
+        to_be_downloaded = self.with_hash(self.url_opensubtitles_hash, self.release)
 
         # log results
         data_found = True if to_be_downloaded else False
-        log.output_title_data_result(data_found, from_hash=True)
         if data_found is False:
             return []
-        log.output_match(100, self.release)
+        log.output_match("opensubtitles", 100, self.release)
 
         # pack download data
         download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
@@ -36,11 +76,10 @@ class OpenSubtitles(BaseProvider):
     def parse_site_results(self):
         # search for title
         to_be_sorted = []
-        subtitle_data = self.scrape.get_subtitles(self.url_opensubtitles)
+        subtitle_data = self.get_subtitles(self.url_opensubtitles)
 
         # log results
         data_found = True if subtitle_data else False
-        log.output_title_data_result(data_found)
         if data_found is False:
             return []
 
@@ -49,7 +88,7 @@ class OpenSubtitles(BaseProvider):
         to_be_sorted: list[FormattedData] = []
         for key, value in subtitle_data.items():
             pct_result = string_parser.get_pct_value(key, self.release)
-            log.output_match(pct_result, key)
+            log.output_match("opensubtitles", pct_result, key)
             formatted_data = generic.format_key_value_pct("opensubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(key, pct_result) is False:
@@ -59,7 +98,7 @@ class OpenSubtitles(BaseProvider):
             to_be_downloaded[key] = value
 
         self.logged_and_sorted = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.pct_threashold)
-        log.output_subtitle_result(to_be_downloaded, to_be_sorted)
+
         if not to_be_downloaded:
             return []
 
@@ -69,30 +108,3 @@ class OpenSubtitles(BaseProvider):
 
     def _sorted_list(self):
         return self.logged_and_sorted
-
-
-class OpenSubtitlesScrape(OpenSubtitles):
-    def __init__(self):
-        ...
-
-    def get_subtitles(self, url: str):
-        subtitles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url)
-        items = doc.find_all("item")
-        for item in items:
-            dl_url = item.enclosure["url"]
-            released_as = item.description.text.strip()
-            release_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
-            subtitles[release_name] = dl_url
-        return subtitles
-
-    def with_hash(self, url: str, release: str) -> dict[str, str]:
-        subtitles: dict[str, str] = {}
-        doc = generic.get_lxml_doc(url)
-        doc_results = doc.find("a", download="download", id="bt-dwl-bt")
-        if doc_results is None:
-            return subtitles
-        sub_id = doc_results.attrs["data-product-id"]
-        download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
-        subtitles[release] = download_url
-        return subtitles
