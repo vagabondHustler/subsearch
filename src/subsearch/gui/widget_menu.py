@@ -179,6 +179,7 @@ class TabSettings(tk.Frame):
         tab_subsearch.ShowContextMenu(self).pack(anchor="center")
         tab_subsearch.ShowContextMenuIcon(self).pack(anchor="center")
         tab_subsearch.ShowDownloadWindow(self).pack(anchor="center")
+        tab_subsearch.UseThreading(self).pack(anchor="center")
         tab_subsearch.LogToFile(self).pack(anchor="center")
         if current_user.running_from_exe() is False:
             tab_subsearch.ShowTerminalOnSearch(self).pack(anchor="center")
