@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from threading import Thread
 
 from subsearch import core
 from subsearch.gui import widget_menu
@@ -17,6 +18,20 @@ class Subsearch(core.Steps):
         Setup and gather all available parameters
         """
         core.Steps.__init__(self)
+
+    def thread_executor(self, *args):
+        """
+        Search for subtitles simultaneously with provided providers
+        """
+        provider_threads = {}
+        for provider in args:
+            provider_threads[provider] = Thread(target=provider)
+
+        for thread in provider_threads.values():
+            thread.start()
+
+        for thread in provider_threads.values():
+            thread.join()
 
     def provider_opensubtitles(self) -> None:
         """
@@ -112,9 +127,11 @@ def main() -> None:
             return None
 
     app = Subsearch()
-    app.provider_opensubtitles()
-    app.provider_subscene()
-    app.provider_yifysubtitles()
+    app.thread_executor(
+        app.provider_opensubtitles,
+        app.provider_subscene,
+        app.provider_yifysubtitles,
+    )
     app.process_files()
     app.pre_exit()
 
