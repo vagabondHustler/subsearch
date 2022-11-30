@@ -80,6 +80,7 @@
     "rename_best_match": true,
     "context_menu_icon": true,
     "show_download_window": true,
+    "threading": false,
     "show_terminal": false,
     "log_to_file": false,
     "file_ext": {

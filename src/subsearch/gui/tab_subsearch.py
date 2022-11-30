@@ -12,6 +12,7 @@ LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
 DL_WINDOW = raw_config.get_config_key("show_download_window")
 AVAIL_EXT = raw_config.get_config_key("file_ext")
+ENABLE_THREADING = raw_config.get_config_key('threading')
 
 
 class FileExtensions(tk.Frame):
@@ -341,6 +342,57 @@ class LogToFile(tk.Frame):
         self.string_var.set(f"False")
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         raw_config.set_config_key_value("log_to_file", False)
+
+class UseThreading(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=TkColor().dark_grey)
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{ENABLE_THREADING}")
+        label = tk.Label(self, text="Enable threading")
+        label.configure(bg=TkColor().dark_grey, fg=TkColor().white_grey, font=TkFont().cas8b)
+        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        self.clabel = tk.Label(self, textvariable=self.string_var)
+        self.clabel.configure(bg=TkColor().dark_grey, font=TkFont().cas8b)
+        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn_true = ttk.Button(
+            self,
+            text="True",
+            width=18,
+        )
+        btn_true.grid(row=0, column=3, pady=2)
+        btn_false = ttk.Button(
+            self,
+            text="False",
+            width=18,
+        )
+        btn_false.grid(row=0, column=2, pady=2)
+        btn_true.bind("<Enter>", self.enter_button)
+        btn_true.bind("<Leave>", self.leave_button)
+        btn_false.bind("<Enter>", self.enter_button)
+        btn_false.bind("<Leave>", self.leave_button)
+        tk_tools.set_default_grid_size(self)
+
+    def enter_button(self, event):
+        btn = event.widget
+        if btn["text"] == "True":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_false)
+
+    def leave_button(self, event):
+        btn = event.widget
+
+    def button_set_true(self, event):
+        self.string_var.set(f"True")
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        raw_config.set_config_key_value("threading", True)
+
+    def button_set_false(self, event):
+        self.string_var.set(f"False")
+        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        raw_config.set_config_key_value("threading", False)
 
 
 class CheckForUpdates(tk.Frame):

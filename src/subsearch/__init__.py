@@ -4,7 +4,7 @@ from threading import Thread
 
 from subsearch import core
 from subsearch.gui import widget_menu
-from subsearch.utils import raw_registry
+from subsearch.utils import raw_config, raw_registry
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
@@ -21,7 +21,7 @@ class Subsearch(core.Steps):
 
     def thread_executor(self, *args):
         """
-        Search for subtitles simultaneously with provided providers
+        Search for subtitles with active providers concurrently.
         """
         provider_threads = {}
         for provider in args:
@@ -32,6 +32,21 @@ class Subsearch(core.Steps):
 
         for thread in provider_threads.values():
             thread.join()
+
+    def search_for_subtitles(self) -> None:
+        """
+        Runs a search with all active providers, either concurrently or separately.
+        """
+        if raw_config.get_config_key("threading"):
+            self.thread_executor(
+                self._provider_subscene,
+                self._provider_opensubtitles,
+                self._provider_yifysubtitles,
+            )
+        else:
+            self._provider_subscene()
+            self._provider_opensubtitles()
+            self._provider_yifysubtitles()
 
     def provider_opensubtitles(self) -> None:
         """
@@ -127,11 +142,7 @@ def main() -> None:
             return None
 
     app = Subsearch()
-    app.thread_executor(
-        app.provider_opensubtitles,
-        app.provider_subscene,
-        app.provider_yifysubtitles,
-    )
+    app.search_for_subtitles()
     app.process_files()
     app.pre_exit()
 
