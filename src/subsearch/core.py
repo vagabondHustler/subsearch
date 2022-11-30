@@ -73,19 +73,20 @@ class Steps(BaseInitializer):
 
         if " " in __video__.name:
             log.warning_spaces_in_filename()
-
+        log.output_header("Search started")
+        
+        
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None
         if self.user_data.language_code3 == "N/A":
-            log.output_skip_provider("opensubtitles", f"{self.user_data.current_language} not supported on opensubtitles")
             return None
         if (
             self.user_data.providers["opensubtitles_hash"] is False
             and self.user_data.providers["opensubtitles_site"] is False
         ):
             return None
-        log.output_header("Searching on opensubtitles")
+        # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.user_data, self.provider_data)
         if self.user_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
@@ -98,7 +99,7 @@ class Steps(BaseInitializer):
             return None
         if self.user_data.providers["subscene_site"] is False:
             return None
-        log.output_header("Searching on subscene")
+        # log.output_header("Searching on subscene")
         _subscene = subscene.Subscene(self.release_data, self.user_data, self.provider_data)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped["subscene_site"] = _subscene._sorted_list()
@@ -107,13 +108,11 @@ class Steps(BaseInitializer):
         if self.file_exist is False:
             return None
         if self.release_data.series:
-            log.output_skip_provider("yifysubtitles", "Yifysubtitles only host subtitles for movies")
             return None
         if self.provider_data.yifysubtitles == "N/A":
-            log.output_skip_provider("yifysubtitles", f"{self.user_data.current_language} not supported on yifysubtitles")
             return None
         if self.user_data.providers["yifysubtitles_site"]:
-            log.output_header("Searching on yifysubtitles")
+            # log.output_header("Searching on yifysubtitles")
             _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.user_data, self.provider_data)
             self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
             self.skipped["yifysubtitles_site"] = _yifysubs._sorted_list()

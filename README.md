@@ -106,8 +106,11 @@ def main() -> None:
     config["providers"]["opensubtitles_hash"] = False
     set_config(config)
     app = __subsearch__.Subsearch()
-    app.provider_opensubtitles()
-    app.provider_subscene()
+    app.thread_executor(
+        app.provider_opensubtitles,
+        app.provider_subscene,
+        app.provider_yifysubtitles,
+    )
     app.process_files()
     app.on_exit()
 
@@ -164,10 +167,14 @@ def main() -> None:
     config["providers"]["opensubtitles_hash"] = False
     set_config(config)
     app = __subsearch__.Subsearch()
-    app.provider_opensubtitles()
-    app.provider_subscene()
+    app.thread_executor(
+        app.provider_opensubtitles,
+        app.provider_subscene,
+        app.provider_yifysubtitles,
+    )
     app.process_files()
     app.on_exit()
+    
 
 
 if __name__ == "__main__":

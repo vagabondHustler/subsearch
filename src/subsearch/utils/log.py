@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+import warnings
 
 from subsearch.data import __version__, __video__
 from subsearch.data.data_fields import (
@@ -23,6 +24,7 @@ logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
 if __video__ is not None and LOG_TO_FILE:
+    warnings.filterwarnings('ignore', lineno=545)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
     file_handler = logging.FileHandler(Path(__video__.directory) / "subsearch.log", "w")
     file_handler.setLevel(logging.INFO)
@@ -30,9 +32,11 @@ if __video__ is not None and LOG_TO_FILE:
     logger.addHandler(file_handler)
 
 
-def output(msg: str, terminal: bool = True, level: str = "info"):
+def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "info"):
     def _to_log(msg: str, level: str) -> None:
         if __video__ is None or LOG_TO_FILE is False:
+            return None
+        if to_log is False:
             return None
         if level == "info":
             logger.info(msg)
@@ -79,7 +83,6 @@ def output_done_with_tasks(end_new_line: bool = False):
     if end_new_line:
         output("")
 
-
 def output_parameters() -> None:
     output_header(f"User data")
     output(f"Language:                         {user_data.current_language}, {user_data.language_code3}")
@@ -113,65 +116,11 @@ def output_parameters() -> None:
     output("")
 
 
-def output_match(pct_result: int, key: str):
-    output(f"{pct_result:>3}% match: {key}")
-
-
-def output_subtitle_result(to_be_downloaded: dict[str, str], to_be_sorted: list[FormattedData]):
-    def _no_subtitle_found():
-        output(f"No subtitles found matching {release_data.release}")
-        output("Done with tasks")
-
-    def _can_be_downloaded(number: int):
-        output(f"{number} {_subtitle(number)} can be downloaded manually")
-
-    def _will_be_downloaded(number: int):
-        output(f"{number} {_subtitle(number)} will be downloaded")
-
-    def _no_subtitle_passed():
-        output(f"No subtitles passed the percentage threashold ({user_data.percentage}%)")
-
-    def _subtitle(number: int):
-        if number == 1:
-            return "subtitle"
-        return "subtitles"
-
-    tbd_size = len(to_be_downloaded)
-    tbs_size = len(to_be_sorted)
-    if not to_be_downloaded and not to_be_sorted:
-        _no_subtitle_found()
-        return None
-    if to_be_downloaded:
-        _will_be_downloaded(tbd_size)
-    elif not to_be_downloaded:
-        _no_subtitle_passed()
-    if to_be_sorted:
-        _can_be_downloaded(tbs_size)
-    output("Done with tasks")
-    output("")
-
-
-def output_title_data_result(found: bool, from_hash: bool = False):
-    def _not_found(media_type: str, from_hash: bool):
-        if from_hash:
-            output(f"Did not find a {media_type} matching hash: {release_data.file_hash}")
-        else:
-            output(f"Did not find a {media_type} matching title: {release_data.title}")
-        output("")
-
-    def _found(media_type: str, from_hash: bool):
-        if from_hash:
-            output(f"{media_type.capitalize()} found matching hash: {release_data.file_hash}")
-
-        else:
-            output(f"{media_type.capitalize()} found matching title: {release_data.title}")
-        output("")
-
-    media_type = "series" if release_data.series else "movie"
-    if found:
-        _found(media_type, from_hash)
-    elif found is False:
-        _not_found(media_type, from_hash)
+def output_match(provider:str, pct_result: int, key: str, _to_log:bool = False):
+    if pct_result >= user_data.percentage:
+        output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=_to_log)
+    else:
+        output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=_to_log)
 
 
 def set_logger_data(rd: ReleaseData, ud: UserData, pud: ProviderUrlData):
