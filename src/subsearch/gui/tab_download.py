@@ -17,7 +17,7 @@ class DownloadList(tk.Frame):
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
         self.formatted_data = formatted_data
-        self.subscene_scrape = subscene.SubsceneScrape()
+        self.subscene_scrape = subscene.SubsceneScraper()
         self.extent = 0
         # self.sublist = read_tmp_file()
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")

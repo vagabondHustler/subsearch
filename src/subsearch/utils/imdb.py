@@ -40,10 +40,12 @@ class FindImdbID(AdvTitleSearch):
         self.id = None
         adv_search = AdvTitleSearch(self.title, self.year)
         url = adv_search.get_url()
-        doc = generic.get_lxml_doc(url)
-        items = doc.find_all("div", class_="lister-item-content")
-        for item in items:
-            self.data = item.find("h3", class_="lister-item-header")
+        tree = generic.get_html(url)
+        product = tree.select("div.lister-item-content")
+        # items = doc.find_all("div", class_="lister-item-content")
+        for item in product.matches:
+            self.data = item.css_first("h3.lister-item-header")
+            # self.data = item.find("h3", class_="lister-item-header")
             if self.title != self.imdb_title:
                 continue
             if self.year != self.imdb_year and (self.year - 1) != self.imdb_year:
@@ -53,15 +55,15 @@ class FindImdbID(AdvTitleSearch):
 
     @property
     def imdb_title(self) -> str:
-        title = self.data.contents[3].string
+        title = self.data.css_first("a").text()
         return title.lower()
 
     @property
     def imdb_year(self) -> int:
-        year = self.data.contents[5].string
+        year = self.data.css_first("span.lister-item-year").child.text_content
         return int(re.findall("[0-9]+", year)[0])
 
     @property
     def imdb_id(self) -> str:
-        href = self.data.contents[3].attrs["href"]
-        return re.findall("tt[0-9]+", href)[0]
+        href = self.data.css_first("a")
+        return re.findall("tt[0-9]+", href.attributes['href'])[0]
