@@ -77,9 +77,9 @@ def set_default_json() -> None:
     data["rename_best_match"] = True
     data["context_menu_icon"] = True
     data["show_download_window"] = True
-    data["threading"] = True
+    data["threading"] = False
     data["show_terminal"] = False
-    data["log_to_file"] = True
+    data["log_to_file"] = False
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
     config_file = Path(__data__) / "config.json"
