@@ -59,6 +59,7 @@ def get_config_key(key: str) -> Any:
         "rename_best_match": get_config()["rename_best_match"],
         "context_menu_icon": get_config()["context_menu_icon"],
         "show_download_window": get_config()["show_download_window"],
+        "threading": get_config()["threading"],
         "show_terminal": get_config()["show_terminal"],
         "log_to_file": get_config()["log_to_file"],
         "file_ext": get_config()["file_ext"],
@@ -76,6 +77,7 @@ def set_default_json() -> None:
     data["rename_best_match"] = True
     data["context_menu_icon"] = True
     data["show_download_window"] = True
+    data["threading"] = True
     data["show_terminal"] = False
     data["log_to_file"] = True
     data["file_ext"] = dict.fromkeys(data["file_ext"], True)
