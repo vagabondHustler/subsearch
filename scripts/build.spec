@@ -13,7 +13,6 @@ added_binaries = [
         ('..\\src\\subsearch\\gui\\assets\\scale\\*.png', 'subsearch\\gui\\assets\\scale\\'),
         ('..\\src\\subsearch\\gui\\assets\\scrollbar\\*.png', 'subsearch\\gui\\assets\\scrollbar\\'),
         ('..\\src\\subsearch\\gui\\assets\\tabs\\*.png', 'subsearch\\gui\\assets\\tabs\\'),
-        ('..\\src\\subsearch\\gui\\assets\\titlebar\\*.png', 'subsearch\\gui\\assets\\titlebar\\'),
         ('..\\src\\subsearch\\gui\\assets\\*.tcl', 'subsearch\\gui\\assets\\')
 
         ]
