@@ -19,6 +19,7 @@
 - [PyPi](#pypi)
 - [Source](#src)
 - [Executable](#exe)
+- [GUI-settings explanation](#usage)
 - [VirusTotal analysis / false positives](#virus)
 - [Supported Languages](#lsupport)
 - [Authors](#authors)
@@ -214,6 +215,46 @@ If you get a PUA message, click `More info`
 </details>
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log (logging is disabled by default and can be enabled in the gui) for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
+
+## GUI-setting explanations  <a name = "usage"></a>
+
+<details>
+<summary>Languages</summary>
+
+Pick subtitle language.
+
+</details>
+
+<details>
+<summary>Search options</summary>
+
+- `Search providers`: What websites to search for subtitles on.
+- `Subtitle typ`: Only download hearing impaired subtitles/non hearing impaired or both if both are either checked/unchecked.
+- `Search threshold`: How closely the release name has to match with the found subtitle name, 100% would download everything.
+- `Rename best match`: Rename the .srt file that most closely matches the filename and keep it in the folder were the media file can be found (makes eg MPC-HC auto load the sub).
+
+</details>
+
+<details>
+<summary>Application settings</summary>
+
+- `File extensions`: Decide which files 'Subsearch' appears on in the context-menu.
+- `Context menu`: Remove/Add 'Subsearch' from the context-menu (and registry).
+- `Context menu icon`: Show a icon next to 'Subsearch' in the context-menu.
+- `Download window`: Open the manual download GUI tab if subtitles are found but not downloaded.
+- `Enable threading`: Search with all active providers concurrently, instead of separably, which can greatly improve the search times.
+- `Create subsearch.log`: Creates a .log file with different types of information the app does in the directory of the media file.
+- `Terminal on search`: Show the terminal when using `Subsearch`, what is output in the terminal is also output to the .log file (disabled when using the exe).
+- `Check for updates`: Check if there is a new release in the repository and provides a link to the latest release if there is a newer version available.
+
+</details>
+
+<details>
+<summary>Manual download</summary>
+
+For now, only has content if subtitles are found but not downloaded after a search.
+
+</details>
 
 ## VirusTotal analysis / false positives <a name = "virus"></a>
 
