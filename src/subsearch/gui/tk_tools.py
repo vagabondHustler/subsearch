@@ -43,12 +43,6 @@ def asset_tab(cls, img, type, x=27, y=27):
     update_asset(cls, png, x, y)
 
 
-def asset_titlebar(_widget, img, type, x=18, y=18):
-    path = get_titlebar_png(f"{img}_{type}.png")
-    png = tk.PhotoImage(file=path)
-    update_asset(_widget, png, x, y)
-
-
 def asset_icon(cls, x=18, y=18):
     path = str(__icon__).replace(".ico", ".png")
     ico = tk.PhotoImage(file=path)
