@@ -14,12 +14,12 @@ def test_str_parser_movie() -> None:
     show_720p = "the.foo.bar.s01e01.720p.web.h264-foobar"
     no_match = "then.fooing.baring.2022.720p.webby.h265-f00bar"
 
-    pct0 = string_parser.get_pct_value(movie_1080p, movie_720p)
-    pct1 = string_parser.get_pct_value(show_1080p, show_720p)
-    pct2 = string_parser.get_pct_value(movie_1080p, show_1080p)
-    pct3 = string_parser.get_pct_value(show_1080p, movie_1080p)
-    pct4 = string_parser.get_pct_value(movie_1080p, movie_1080p)
-    pct5 = string_parser.get_pct_value(movie_1080p, no_match)
+    pct0 = string_parser.calculate_match(movie_1080p, movie_720p)
+    pct1 = string_parser.calculate_match(show_1080p, show_720p)
+    pct2 = string_parser.calculate_match(movie_1080p, show_1080p)
+    pct3 = string_parser.calculate_match(show_1080p, movie_1080p)
+    pct4 = string_parser.calculate_match(movie_1080p, movie_1080p)
+    pct5 = string_parser.calculate_match(movie_1080p, no_match)
 
     assert pct0 == 100
     assert pct1 == 100
@@ -36,18 +36,18 @@ def test_string_parser_movie() -> None:
 
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     base = BaseInitializer()
-    fsd = string_parser.get_file_search_data(filename, "000000000000000000")
+    media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
 
-    assert fsd.title == "the foo bar"
-    assert fsd.year == 2021
-    assert fsd.season == "N/A"
-    assert fsd.season_ordinal == "N/A"
-    assert fsd.episode == "N/A"
-    assert fsd.episode_ordinal == "N/A"
-    assert fsd.series is False
-    assert fsd.release == "the.foo.bar.2021.1080p.web.h264-foobar"
-    assert fsd.group == "foobar"
-    assert fsd.file_hash == "000000000000000000"
+    assert media_metadata.title == "the foo bar"
+    assert media_metadata.year == 2021
+    assert media_metadata.season == "N/A"
+    assert media_metadata.season_ordinal == "N/A"
+    assert media_metadata.episode == "N/A"
+    assert media_metadata.episode_ordinal == "N/A"
+    assert media_metadata.tvseries is False
+    assert media_metadata.release == "the.foo.bar.2021.1080p.web.h264-foobar"
+    assert media_metadata.group == "foobar"
+    assert media_metadata.file_hash == "000000000000000000"
 
 
 def test_string_parser_show() -> None:
@@ -56,64 +56,64 @@ def test_string_parser_show() -> None:
     """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     base = BaseInitializer()
-    fsd = string_parser.get_file_search_data(filename, "000000000000000000")
+    media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
 
-    assert fsd.title == "the foo bar"
-    assert fsd.year == 0
-    assert fsd.season == "01"
-    assert fsd.season_ordinal == "first"
-    assert fsd.episode == "01"
-    assert fsd.episode_ordinal == "first"
-    assert fsd.series is True
-    assert fsd.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    assert fsd.group == "foobar"
-    assert fsd.file_hash == "000000000000000000"
+    assert media_metadata.title == "the foo bar"
+    assert media_metadata.year == 0
+    assert media_metadata.season == "01"
+    assert media_metadata.season_ordinal == "first"
+    assert media_metadata.episode == "01"
+    assert media_metadata.episode_ordinal == "first"
+    assert media_metadata.tvseries is True
+    assert media_metadata.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    assert media_metadata.group == "foobar"
+    assert media_metadata.file_hash == "000000000000000000"
 
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    fsd = string_parser.get_file_search_data(filename, "000000000000000000")
+    media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
 
-    assert fsd.title == "the foo bar 1080p web h264"
-    assert fsd.year == 0
-    assert fsd.season == "N/A"
-    assert fsd.season_ordinal == "N/A"
-    assert fsd.episode == "N/A"
-    assert fsd.episode_ordinal == "N/A"
-    assert fsd.series is False
-    assert fsd.release == "the foo bar 1080p web h264"
-    assert fsd.group == "the foo bar 1080p web h264"
-    assert fsd.file_hash == "000000000000000000"
+    assert media_metadata.title == "the foo bar 1080p web h264"
+    assert media_metadata.year == 0
+    assert media_metadata.season == "N/A"
+    assert media_metadata.season_ordinal == "N/A"
+    assert media_metadata.episode == "N/A"
+    assert media_metadata.episode_ordinal == "N/A"
+    assert media_metadata.tvseries is False
+    assert media_metadata.release == "the foo bar 1080p web h264"
+    assert media_metadata.group == "the foo bar 1080p web h264"
+    assert media_metadata.file_hash == "000000000000000000"
 
 
 def test_provider_urls_movie():
     base = BaseInitializer()
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    fsd = string_parser.get_file_search_data(filename, "000000000000000000")
-    pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
+    media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
+    urls = string_parser.get_provider_urls("000000000000000000", base.user_data, media_metadata)
 
-    assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
+    assert urls.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
     assert (
-        pud.opensubtitles
+        urls.opensubtitles
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
     )
-    assert pud.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
-    assert pud.yifysubtitles == "N/A"
+    assert urls.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
+    assert urls.yifysubtitles == "N/A"
 
 
 def test_provider_urls_series():
     base = BaseInitializer()
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    fsd = string_parser.get_file_search_data(filename, "000000000000000000")
-    pud = string_parser.get_provider_urls("000000000000000000", base.user_data, fsd)
+    media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
+    urls = string_parser.get_provider_urls("000000000000000000", base.user_data, media_metadata)
 
-    assert pud.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
+    assert urls.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert (
-        pud.opensubtitles
+        urls.opensubtitles
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
     )
-    assert pud.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
-    assert pud.yifysubtitles == "N/A"
+    assert urls.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
+    assert urls.yifysubtitles == "N/A"
 
 
 def test_imdb_tt_id():
