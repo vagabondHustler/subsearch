@@ -25,7 +25,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. window 10]
- - Filename: [e.g foo.bar.the.movie.2022.1080p-foobar.mkv.]
+ - Python version [e.g python311]
+ - Ran from [e.g source, pypi]
+ - media filename: [e.g foo.bar.the.movie.2022.1080p-foobar.mkv.]
  - Version [e.g. 22]
 
 **Additional context**
