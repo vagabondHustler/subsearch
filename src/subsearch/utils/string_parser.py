@@ -2,7 +2,11 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.data_fields import ProviderUrlData, ReleaseData, UserData
+from subsearch.data.metadata_classes import (
+    ApplicationSettings,
+    MediaMetadata,
+    ProviderUrls,
+)
 from subsearch.utils import imdb
 
 
@@ -67,7 +71,7 @@ def find_title(filename: str, year: int, series: bool):
     return title
 
 
-def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> ProviderUrlData:
+def get_provider_urls(file_hash: str, ucf: ApplicationSettings, frd: MediaMetadata) -> ProviderUrls:
     """
     Parse data to apply to the provider urls
 
@@ -88,9 +92,9 @@ def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> Provid
 
     def _set_subtitle_type():
         if ucf.hearing_impaired and ucf.non_hearing_impaired is False:
-            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_code3}/hearingimpaired-on"
+            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_iso_639_3}/hearingimpaired-on"
         else:
-            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_code3}"
+            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_iso_639_3}"
         return subtitle_type_os
 
     def _set_series_url():
@@ -114,7 +118,7 @@ def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> Provid
 
     base_ss, base_yts, base_os = _set_base_url()
     sub_type_os = _set_subtitle_type()
-    if frd.series:
+    if frd.tvseries:
         url_subscene, url_opensubtitles, url_yifysubtitles = _set_series_url()
     else:
         url_subscene, url_opensubtitles, url_yifysubtitles = _set_movie_url()
@@ -124,11 +128,11 @@ def get_provider_urls(file_hash: str, ucf: UserData, frd: ReleaseData) -> Provid
 
     url_subscene = url_subscene.replace(" ", "%20")
     url_opensubtitles = url_opensubtitles.replace(" ", "%20")
-    parameters = ProviderUrlData(url_subscene, url_opensubtitles, url_opensubtitles_hash, url_yifysubtitles)
+    parameters = ProviderUrls(url_subscene, url_opensubtitles, url_opensubtitles_hash, url_yifysubtitles)
     return parameters
 
 
-def get_file_search_data(filename: str, file_hash: str) -> ReleaseData:
+def get_media_metadata(filename: str, file_hash: str) -> MediaMetadata:
     """
     Parse filename and get parameters
     Uses regex expressions to find the parameters
@@ -148,7 +152,7 @@ def get_file_search_data(filename: str, file_hash: str) -> ReleaseData:
     title = find_title(filename, year, series)
     group = find_group(filename)
 
-    parameters = ReleaseData(
+    parameters = MediaMetadata(
         title,
         year,
         season,
@@ -163,7 +167,7 @@ def get_file_search_data(filename: str, file_hash: str) -> ReleaseData:
     return parameters
 
 
-def get_pct_value(from_user: str, from_website: str) -> int:
+def calculate_match(from_user: str, from_website: str) -> int:
     """
     Compare two strings and compare how closely they match against each other
 

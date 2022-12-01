@@ -1,21 +1,28 @@
 import os
 import shutil
 import struct
+import sys
 import zipfile
 from pathlib import Path
 
 import cloudscraper
 
 from subsearch.data import __video__
-from subsearch.data.data_fields import DownloadData
+from subsearch.data.metadata_classes import DownloadMetaData
+from subsearch.providers.generic import get_cloudscraper
 from subsearch.utils import log, string_parser
 
-SCRAPER = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+
+def running_from_exe() -> bool:
+    if sys.argv[0].endswith(".exe"):
+        return True
+    return False
 
 
-def download_subtitle(data: DownloadData) -> int:
+def download_subtitle(data: DownloadMetaData) -> int:
     log.output(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
-    r = SCRAPER.get(data.url, stream=True)
+    scraper = get_cloudscraper()
+    r = scraper.get(data.url, stream=True)
     with open(data.file_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
@@ -39,7 +46,7 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     higest_value = (0, "")
     for file in os.listdir(__video__.subs_directory):
         if file.endswith(extension):
-            value = string_parser.get_pct_value(file, release_name)
+            value = string_parser.calculate_match(file, release_name)
             if value >= higest_value[0]:
                 higest_value = value, file
 

@@ -4,11 +4,10 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
-from subsearch.data.data_fields import (
-    FormattedData,
-    ProviderUrlData,
-    ReleaseData,
-    UserData,
+from subsearch.data.metadata_classes import (
+    ApplicationSettings,
+    MediaMetadata,
+    ProviderUrls,
 )
 from subsearch.utils import raw_config
 
@@ -16,9 +15,9 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
-release_data: ReleaseData
-user_data: UserData
-url_data: ProviderUrlData
+release_metadata: MediaMetadata
+application_settings: ApplicationSettings
+provider_urls: ProviderUrls
 
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
@@ -60,7 +59,7 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
 
 
 def warning_spaces_in_filename():
-    name_unresolved = f"{__video__.name}{__video__.ext}"
+    name_unresolved = f"{__video__.name}{__video__.file_extension}"
     output(f"File: '{name_unresolved}' contains spaces", level="warning")
     output(f"Results may vary, use punctuation marks for a more accurate result", level="info")
     output("")
@@ -86,46 +85,48 @@ def output_done_with_tasks(end_new_line: bool = False):
 
 def output_parameters() -> None:
     output_header(f"User data")
-    output(f"Language:                         {user_data.current_language}, {user_data.language_code3}")
-    output(f"Use HI subtitle:                  {user_data.hearing_impaired}")
-    output(f"Use non-HI subtitle:              {user_data.non_hearing_impaired}")
-    output(f"Match threshold:                  {user_data.percentage}%")
-    output(f"Use site subscene:                {user_data.providers['subscene_site']}")
-    output(f"Use site opensubtitles:           {user_data.providers['opensubtitles_site']}")
-    output(f"Use hash opensubtitles:           {user_data.providers['opensubtitles_hash']}")
-    output(f"Use site yifysubtitles:           {user_data.providers['subscene_site']}")
+    output(
+        f"Language:                         {application_settings.current_language}, {application_settings.language_iso_639_3}"
+    )
+    output(f"Use HI subtitle:                  {application_settings.hearing_impaired}")
+    output(f"Use non-HI subtitle:              {application_settings.non_hearing_impaired}")
+    output(f"Match threshold:                  {application_settings.percentage_threshold}%")
+    output(f"Use site subscene:                {application_settings.providers['subscene_site']}")
+    output(f"Use site opensubtitles:           {application_settings.providers['opensubtitles_site']}")
+    output(f"Use hash opensubtitles:           {application_settings.providers['opensubtitles_hash']}")
+    output(f"Use site yifysubtitles:           {application_settings.providers['subscene_site']}")
     output("")
     output_header(f"File data")
     output(f"Filename:                         {__video__.name}")
     output(f"Directory:                        {__video__.directory}")
     output("")
     output_header(f"Release data")
-    output(f"Title:                            {release_data.title}")
-    output(f"Year:                             {release_data.year}")
-    output(f"Season:                           {release_data.season}, {release_data.season_ordinal}")
-    output(f"Episode:                          {release_data.episode}, {release_data.episode_ordinal}")
-    output(f"Series:                           {release_data.series}")
-    output(f"Release:                          {release_data.release}")
-    output(f"Group:                            {release_data.group}")
-    output(f"File hash:                        {release_data.file_hash}")
+    output(f"Title:                            {release_metadata.title}")
+    output(f"Year:                             {release_metadata.year}")
+    output(f"Season:                           {release_metadata.season}, {release_metadata.season_ordinal}")
+    output(f"Episode:                          {release_metadata.episode}, {release_metadata.episode_ordinal}")
+    output(f"Series:                           {release_metadata.tvseries}")
+    output(f"Release:                          {release_metadata.release}")
+    output(f"Group:                            {release_metadata.group}")
+    output(f"File hash:                        {release_metadata.file_hash}")
     output("")
     output_header(f"Provider url data")
-    output(f"subscene_site:                    {url_data.subscene}")
-    output(f"opensubtitles_site:               {url_data.opensubtitles}")
-    output(f"openSubtitles_hash:               {url_data.opensubtitles_hash}")
-    output(f"yifysubtitles_site:               {url_data.yifysubtitles}")
+    output(f"subscene_site:                    {provider_urls.subscene}")
+    output(f"opensubtitles_site:               {provider_urls.opensubtitles}")
+    output(f"openSubtitles_hash:               {provider_urls.opensubtitles_hash}")
+    output(f"yifysubtitles_site:               {provider_urls.yifysubtitles}")
     output("")
 
 
-def output_match(provider: str, pct_result: int, key: str, _to_log: bool = False):
-    if pct_result >= user_data.percentage:
-        output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=_to_log)
+def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False):
+    if pct_result >= application_settings.percentage_threshold:
+        output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
     else:
-        output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=_to_log)
+        output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(rd: ReleaseData, ud: UserData, pud: ProviderUrlData):
-    global release_data, user_data, url_data
-    release_data = rd
-    user_data = ud
-    url_data = pud
+def set_logger_data(media: MediaMetadata, app: ApplicationSettings, urls: ProviderUrls):
+    global release_metadata, application_settings, provider_urls
+    release_metadata = media
+    application_settings = app
+    provider_urls = urls

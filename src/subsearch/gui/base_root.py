@@ -1,13 +1,13 @@
 import tkinter as tk
 
 from subsearch.data import __icon__
-from subsearch.data.data_fields import TkColor
+from subsearch.data.metadata_classes import TkColor
 from subsearch.gui import tk_tools
-from subsearch.utils import current_user, raw_config, raw_registry
+from subsearch.utils import raw_config, raw_registry
 
 
 def main():
-    if current_user.registry_key_exists() is False:
+    if raw_registry.registry_key_exists() is False:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
     root = tk.Tk(className=f"subsearch")

@@ -1,16 +1,16 @@
 import tkinter as tk
 
-from subsearch import gui
-from subsearch.data.data_fields import FormattedData, TkColor, TkWindowSize
+from subsearch.data.metadata_classes import FormattedMetadata, TkColor, TkWindowSize
 from subsearch.gui import (
     base_root,
-    tab_download,
-    tab_language,
-    tab_search,
-    tab_subsearch,
+    set_theme,
+    tab_application_settings,
+    tab_languages,
+    tab_manual_download,
+    tab_search_settings,
     tk_tools,
 )
-from subsearch.utils import current_user
+from subsearch.utils import file_manager
 
 
 class Footer(tk.Frame):
@@ -80,7 +80,7 @@ class Footer(tk.Frame):
         elif self.active_tab == "search":
             self.search_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.search, "search", "press")
-            self.parent.title("subsearch - search options")
+            self.parent.title("subsearch - search settings")
         elif self.active_tab == "settings":
             self.settings_tab.place(relx=0.5, rely=0.5, anchor="center")
             tk_tools.asset_tab(self.settings, "settings", "press")
@@ -161,51 +161,51 @@ class TabLanguage(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TkColor().dark_grey)
-        tab_language.SelectLanguage(self).pack(anchor="center", expand=True)
+        tab_languages.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
 class TabSearch(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TkColor().dark_grey)
-        tab_search.Providers(self).pack(anchor="center")
+        tab_search_settings.Providers(self).pack(anchor="center")
         tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
-        tab_search.SubtitleType(self).pack(anchor="center")
-        tab_search.SearchThreshold(self).pack(anchor="center")
-        tab_search.RenameBestMatch(self).pack(anchor="center")
+        tab_search_settings.SubtitleType(self).pack(anchor="center")
+        tab_search_settings.SearchThreshold(self).pack(anchor="center")
+        tab_search_settings.RenameBestMatch(self).pack(anchor="center")
 
 
 class TabSettings(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TkColor().dark_grey)
-        tab_subsearch.FileExtensions(self).pack(anchor="center")
+        tab_application_settings.FileExtensions(self).pack(anchor="center")
         tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
-        tab_subsearch.ShowContextMenu(self).pack(anchor="center")
-        tab_subsearch.ShowContextMenuIcon(self).pack(anchor="center")
-        tab_subsearch.ShowDownloadWindow(self).pack(anchor="center")
-        tab_subsearch.UseThreading(self).pack(anchor="center")
-        tab_subsearch.LogToFile(self).pack(anchor="center")
-        if current_user.running_from_exe() is False:
-            tab_subsearch.ShowTerminalOnSearch(self).pack(anchor="center")
+        tab_application_settings.ShowContextMenu(self).pack(anchor="center")
+        tab_application_settings.ShowContextMenuIcon(self).pack(anchor="center")
+        tab_application_settings.ShowDownloadWindow(self).pack(anchor="center")
+        tab_application_settings.UseThreading(self).pack(anchor="center")
+        tab_application_settings.LogToFile(self).pack(anchor="center")
+        if file_manager.running_from_exe() is False:
+            tab_application_settings.ShowTerminalOnSearch(self).pack(anchor="center")
         tk.Frame(self, height=20, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
-        tab_subsearch.CheckForUpdates(self).pack(anchor="center")
+        tab_application_settings.CheckForUpdates(self).pack(anchor="center")
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, content_posx, content_posy, formatted_data: list[FormattedData]):
+    def __init__(self, parent, content_posx, content_posy, formatted_data: list[FormattedMetadata]):
         tk.Frame.__init__(self, parent)
         self.configure(bg=TkColor().dark_grey)
-        tab_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
+        tab_manual_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
 
 
 def open_tab(active_tab: str, **kwargs):
     try:
-        formatted_data: list[FormattedData] = kwargs["formatted_data"]
+        formatted_data: list[FormattedMetadata] = kwargs["formatted_data"]
     except KeyError:
         formatted_data = None  # type: ignore
     root = base_root.main()
-    gui.set_theme("dark")
+    set_theme("dark")
     content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width, height=TkWindowSize().height - 82)
     content.place(x=0, y=0)
     content_posx, content_posy = content.winfo_reqwidth(), content.winfo_reqheight()

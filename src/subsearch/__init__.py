@@ -37,7 +37,7 @@ class Subsearch(core.Steps):
         """
         Runs a search with all active providers, either concurrently or separately.
         """
-        if raw_config.get_config_key("threading"):
+        if raw_config.get_config_key("use_threading"):
             self.thread_executor(
                 self._provider_subscene,
                 self._provider_opensubtitles,

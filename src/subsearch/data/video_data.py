@@ -3,11 +3,11 @@ from itertools import product
 from pathlib import Path
 from typing import Optional, no_type_check
 
-from subsearch.data.data_fields import VideoFileData
+from subsearch.data.metadata_classes import VideoFileMetadata
 
 
 @no_type_check
-def get_video_file_data() -> VideoFileData:
+def get_video_file_data() -> VideoFileMetadata:
 
     """
     Set path, name, directory and ext for the video file
@@ -44,7 +44,7 @@ def get_video_file_data() -> VideoFileData:
             break
 
     if file_exist:
-        return VideoFileData(name, ext, file_path, directory, subs_directory, tmp_directory)
+        return VideoFileMetadata(name, ext, file_path, directory, subs_directory, tmp_directory)
 
 
 __video__ = get_video_file_data()
