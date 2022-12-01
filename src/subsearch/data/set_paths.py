@@ -13,7 +13,6 @@ class SetPaths:
             "providers": Path(home) / "providers",
             "utils": Path(home) / "utils",
             "icon": Path(home) / "gui" / "assets" / "icon" / "subsearch.ico",
-            "titlebar": Path(home) / "gui" / "assets" / "titlebar",
             "tabs": Path(home) / "gui" / "assets" / "tabs",
         }
         for k, v in all_paths.items():
@@ -28,5 +27,4 @@ if __name__ != "__main__":
     __providers__: str = getattr(SubsearchPaths, "providers")
     __utils__: str = getattr(SubsearchPaths, "utils")
     __icon__: str = getattr(SubsearchPaths, "icon")
-    __titlebar__: str = getattr(SubsearchPaths, "titlebar")
     __tabs__: str = getattr(SubsearchPaths, "tabs")

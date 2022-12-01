@@ -2,17 +2,13 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import __icon__, __tabs__, __titlebar__, __version__, __video__
+from subsearch.data import __icon__, __tabs__, __version__, __video__
 from subsearch.data.data_fields import TkColor, TkWindowSize
 from subsearch.utils import raw_config
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
-
-
-def get_titlebar_png(btn: str):
-    return Path(__titlebar__) / btn
 
 
 def get_tab_png(tab: str):
@@ -63,128 +59,6 @@ def update_asset(cls, img, x, y):
     cls.delete("all")
     cls.create_image(x, y, image=img)
     cls.photoimage = img
-
-
-class TitleBar(tk.Frame):
-    def __init__(self, parent, root):
-        tk.Frame.__init__(self, parent)
-        self.configure(height=37, width=TkWindowSize().width, bg=TkColor().light_black)
-
-        self.root = root
-        self.parent = parent
-        self.icon = tk.Canvas(
-            self,
-            width=37,
-            height=37,
-            bg=TkColor().light_black,
-            highlightthickness=0,
-        )
-        self.tab = tk.Canvas(
-            self,
-            width=37,
-            height=37,
-            bg=TkColor().light_black,
-            highlightthickness=0,
-        )
-        self.maximize = tk.Canvas(
-            self,
-            width=37,
-            height=37,
-            bg=TkColor().light_black,
-            highlightthickness=0,
-        )
-        self.exit = tk.Canvas(
-            self,
-            width=37,
-            height=37,
-            bg=TkColor().light_black,
-            highlightthickness=0,
-        )
-
-        self.maximize.place(x=TkWindowSize().width - 37, rely=0, anchor="ne")
-        self.exit.place(relx=1, rely=0, anchor="ne")
-        self.tab.place(x=TkWindowSize().width - 74, rely=0, anchor="ne")
-        self.icon.place(x=0, y=0, anchor="nw")
-
-        asset_icon(self.icon)
-        asset_titlebar(self.tab, "tab", "rest")
-        asset_titlebar(self.maximize, "maximize", "disabled")
-        asset_titlebar(self.exit, "exit", "rest")
-
-        self.icon.bind("<Button-1>", self.press_titlebar)
-        self.icon.bind("<B1-Motion>", self.drag_titlebar)
-
-        self.bind("<Button-1>", self.press_titlebar)
-        self.bind("<B1-Motion>", self.drag_titlebar)
-
-        self.tab.bind("<Enter>", self.enter_event)
-        self.exit.bind("<Enter>", self.enter_event)
-
-        self.tab.bind("<Leave>", self.leave_event)
-        self.exit.bind("<Leave>", self.leave_event)
-
-    def press_titlebar(self, event):
-        self._offsetx = self.winfo_pointerx() - self.winfo_rootx()
-        self._offsety = self.winfo_pointery() - self.winfo_rooty()
-
-    def drag_titlebar(self, event):
-        x = self.winfo_pointerx() - self._offsetx
-        y = self.winfo_pointery() - self._offsety
-        self.parent.geometry(f"+{x}+{y}")
-
-    def release_event(self, event):
-        if event.widget == self.tab:
-            self.parent.wm_withdraw()
-            self.root.wm_state("iconic")
-        if event.widget == self.exit:
-            self.root.destroy()
-
-    def press_event(self, event):
-        if event.widget == self.tab:
-            self.tab.configure(bg=TkColor().light_grey)
-            self.tab.bind("<ButtonRelease-1>", self.release_event)
-        if event.widget == self.exit:
-            self.exit.configure(bg=TkColor().dark_red)
-            self.exit.bind("<ButtonRelease-1>", self.release_event)
-
-    def enter_event(self, event):
-        if event.widget == self.tab:
-            self.tab.configure(bg=TkColor().dark_grey)
-            asset_titlebar(self.tab, "tab", "hover")
-            self.tab.bind("<ButtonPress-1>", self.press_event)
-        if event.widget == self.exit:
-            self.exit.configure(bg=TkColor().red)
-            asset_titlebar(self.exit, "exit", "hover")
-            self.exit.bind("<ButtonPress-1>", self.press_event)
-
-    def leave_event(self, event):
-        if event.widget == self.tab:
-            self.tab.configure(bg=TkColor().light_black)
-            asset_titlebar(self.tab, "tab", "rest")
-            self.tab.unbind("<ButtonRelease-1>")
-        if event.widget == self.exit:
-            self.exit.configure(bg=TkColor().light_black)
-            asset_titlebar(self.exit, "exit", "rest")
-            self.exit.unbind("<ButtonRelease-1>")
-
-
-class CustomBorder(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        csx = TkWindowSize().width
-        csy = TkWindowSize().height
-        self.canvas_border = tk.Canvas(parent, width=csx, height=csy, bg=TkColor().light_black, borderwidth=0)
-        self.canvas_border.place(relx=0.5, rely=0.5, anchor="center")
-        self.canvas_bg = tk.Canvas(
-            parent,
-            width=csx - 4,
-            height=csy - 4,
-            bg=TkColor().dark_grey,
-            highlightthickness=0,
-        )
-        self.canvas_bg.place(relx=0.5, rely=0.5, anchor="center")
-
-        self.configure(bg=TkColor().light_black)
 
 
 class WindowPosition(tk.Frame):
