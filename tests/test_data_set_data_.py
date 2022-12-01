@@ -7,7 +7,6 @@ from src.subsearch.data import (
     __icon__,
     __providers__,
     __tabs__,
-    __titlebar__,
     __utils__,
 )
 
@@ -19,5 +18,4 @@ def test_paths() -> None:
     assert __providers__ == Path(Path.cwd()) / "src" / "subsearch" / "providers"
     assert __utils__ == Path(Path.cwd()) / "src" / "subsearch" / "utils"
     assert __icon__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "icon" / "subsearch.ico"
-    assert __titlebar__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "titlebar"
     assert __tabs__ == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "tabs"

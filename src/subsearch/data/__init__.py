@@ -5,7 +5,6 @@ from .set_paths import (
     __icon__,
     __providers__,
     __tabs__,
-    __titlebar__,
     __utils__,
 )
 from .version import __version__
