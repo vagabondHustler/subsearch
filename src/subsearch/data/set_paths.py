@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from subsearch.data.data_fields import SubsearchPaths
+from subsearch.data.metadata_classes import ApplicationPaths
 
 
 class SetPaths:
@@ -16,15 +16,15 @@ class SetPaths:
             "tabs": Path(home) / "gui" / "assets" / "tabs",
         }
         for k, v in all_paths.items():
-            setattr(SubsearchPaths, k, v)
+            setattr(ApplicationPaths, k, v)
 
 
 if __name__ != "__main__":
     __set_values__ = SetPaths()
-    __home__: str = getattr(SubsearchPaths, "home")
-    __data__: str = getattr(SubsearchPaths, "data")
-    __gui__: str = getattr(SubsearchPaths, "gui")
-    __providers__: str = getattr(SubsearchPaths, "providers")
-    __utils__: str = getattr(SubsearchPaths, "utils")
-    __icon__: str = getattr(SubsearchPaths, "icon")
-    __tabs__: str = getattr(SubsearchPaths, "tabs")
+    __home__: str = getattr(ApplicationPaths, "home")
+    __data__: str = getattr(ApplicationPaths, "data")
+    __gui__: str = getattr(ApplicationPaths, "gui")
+    __providers__: str = getattr(ApplicationPaths, "providers")
+    __utils__: str = getattr(ApplicationPaths, "utils")
+    __icon__: str = getattr(ApplicationPaths, "icon")
+    __tabs__: str = getattr(ApplicationPaths, "tabs")

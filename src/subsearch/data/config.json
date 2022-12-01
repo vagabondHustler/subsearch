@@ -76,14 +76,14 @@
         "hearing_impaired": true,
         "non_hearing_impaired": true
     },
-    "percentage": 90,
+    "percentage_threshold": 90,
     "rename_best_match": true,
     "context_menu_icon": true,
-    "show_download_window": true,
-    "threading": false,
+    "manual_download_tab": true,
+    "use_threading": false,
     "show_terminal": false,
     "log_to_file": false,
-    "file_ext": {
+    "file_extensions": {
         ".avi": true,
         ".mp4": true,
         ".mkv": true,

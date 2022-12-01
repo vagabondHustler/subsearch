@@ -1,14 +1,14 @@
 from selectolax.parser import Node
 
 from subsearch.data import __video__
-from subsearch.data.data_fields import (
-    FormattedData,
-    ProviderUrlData,
-    ReleaseData,
-    UserData,
+from subsearch.data.metadata_classes import (
+    ApplicationSettings,
+    FormattedMetadata,
+    MediaMetadata,
+    ProviderUrls,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider
+from subsearch.providers.generic import Provider
 from subsearch.utils import log, string_parser
 
 
@@ -17,7 +17,7 @@ class SubsceneScraper:
         ...
 
     def find_title(self, url: str, current_language: str, definitive_match: list[str]):
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         products = tree.css("div.title")
         for item in products:
             node = item.css_first("a")
@@ -41,7 +41,7 @@ class SubsceneScraper:
 
     def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         products = tree.css("tr")
         for item in products[1:]:
             if self.skip_item(item, hi_sub, regular_sub):
@@ -53,17 +53,17 @@ class SubsceneScraper:
         return subtitles
 
     def get_download_url(self, url: str) -> str:
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         href = tree.css_first("#downloadButton").attributes["href"]
         download_url = f"https://subscene.com/{href}"
         return download_url
 
 
-class Subscene(BaseProvider, SubsceneScraper):
-    def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
-        BaseProvider.__init__(self, parameters, user_parameters, provider_url)
+class Subscene(Provider, SubsceneScraper):
+    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
+        Provider.__init__(self, parameters, user_parameters, provider_url)
         SubsceneScraper.__init__(self)
-        self.logged_and_sorted: list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedMetadata] = []
 
     def _definitive_match(self) -> list[str]:
         if self.series:
@@ -71,7 +71,7 @@ class Subscene(BaseProvider, SubsceneScraper):
         return [f"{self.title} ({self.year})", f"{self.title} ({(self.year-1)})"]
 
     def parse_site_results(self):
-        to_be_sorted: list[FormattedData] = []
+        to_be_sorted: list[FormattedMetadata] = []
         _to_be_downloaded: dict[str, str] = {}
         to_be_downloaded: dict[str, str] = {}
 
@@ -84,7 +84,7 @@ class Subscene(BaseProvider, SubsceneScraper):
         # search for subtitles
         subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub)
         for key, value in subtitle_data.items():
-            pct_result = string_parser.get_pct_value(key, self.release)
+            pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("subscene", pct_result, key)
             formatted_data = generic.format_key_value_pct("subscene", key, value, pct_result)
             to_be_sorted.append(formatted_data)
@@ -94,7 +94,7 @@ class Subscene(BaseProvider, SubsceneScraper):
                 continue
             _to_be_downloaded[key] = value
 
-        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.pct_threashold)
+        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.percentage_threashold)
         if not _to_be_downloaded:
             return []
 

@@ -4,7 +4,7 @@ import winreg
 from pathlib import Path
 
 from subsearch.data import __home__, __icon__
-from subsearch.utils import current_user
+from subsearch.utils import file_manager
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = "Software\\Classes"
@@ -70,10 +70,10 @@ def get_command_value() -> str:
     # get latest json value from file
     from subsearch.utils import raw_config
 
-    if current_user.running_from_exe():
+    if file_manager.running_from_exe():
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
-    elif current_user.running_from_exe() is False:
+    elif file_manager.running_from_exe() is False:
         show_terminal = raw_config.get_config_key("show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
@@ -105,7 +105,7 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from subsearch.utils import raw_config
 
-    file_ext = raw_config.get_config_key("file_ext")
+    file_ext = raw_config.get_config_key("file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
     for k, v in zip(file_ext.keys(), file_ext.values()):
@@ -131,3 +131,19 @@ def remove_context_menu() -> None:
 def add_context_menu() -> None:
     write_keys()
     write_all_valuex()
+
+
+def registry_key_exists() -> bool:
+    """
+    Check if current user has the registry key subsearch for the context menu
+
+    Returns:
+        bool: True if key exists, False if key does not exist
+    """
+    sub_key = r"Software\Classes\*\shell\0.subsearch\command"
+    try:
+        with winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as hkey:
+            winreg.OpenKey(hkey, sub_key)
+            return True
+    except Exception:
+        return False

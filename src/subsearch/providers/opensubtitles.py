@@ -2,14 +2,14 @@ import re
 from typing import Any
 
 from subsearch.data import __video__
-from subsearch.data.data_fields import (
-    FormattedData,
-    ProviderUrlData,
-    ReleaseData,
-    UserData,
+from subsearch.data.metadata_classes import (
+    ApplicationSettings,
+    FormattedMetadata,
+    MediaMetadata,
+    ProviderUrls,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider
+from subsearch.providers.generic import Provider
 from subsearch.utils import log, string_parser
 
 
@@ -29,7 +29,7 @@ class OpenSubtitlesScraper:
 
     def get_subtitles(self, url: str):
         subtitles: dict[str, str] = {}
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         items = tree.css("item")
         if self.opensubtitles_down(tree):
             return subtitles
@@ -42,7 +42,7 @@ class OpenSubtitlesScraper:
 
     def with_hash(self, url: str, release: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         if self.opensubtitles_down(tree):
             return subtitles
         try:
@@ -53,11 +53,11 @@ class OpenSubtitlesScraper:
         return subtitles
 
 
-class OpenSubtitles(BaseProvider, OpenSubtitlesScraper):
-    def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
-        BaseProvider.__init__(self, parameters, user_parameters, provider_url)
+class OpenSubtitles(Provider, OpenSubtitlesScraper):
+    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
+        Provider.__init__(self, parameters, user_parameters, provider_url)
         OpenSubtitlesScraper.__init__(self)
-        self.logged_and_sorted: list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedMetadata] = []
 
     def parse_hash_results(self):
         # search for hash
@@ -85,9 +85,9 @@ class OpenSubtitles(BaseProvider, OpenSubtitlesScraper):
 
         # search for subtitle
         to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[FormattedData] = []
+        to_be_sorted: list[FormattedMetadata] = []
         for key, value in subtitle_data.items():
-            pct_result = string_parser.get_pct_value(key, self.release)
+            pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("opensubtitles", pct_result, key)
             formatted_data = generic.format_key_value_pct("opensubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
@@ -97,7 +97,7 @@ class OpenSubtitles(BaseProvider, OpenSubtitlesScraper):
                 continue
             to_be_downloaded[key] = value
 
-        self.logged_and_sorted = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.pct_threashold)
+        self.logged_and_sorted = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.percentage_threashold)
 
         if not to_be_downloaded:
             return []

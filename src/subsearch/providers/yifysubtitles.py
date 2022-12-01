@@ -1,14 +1,14 @@
 from selectolax.parser import Node
 
 from subsearch.data import __video__
-from subsearch.data.data_fields import (
-    FormattedData,
-    ProviderUrlData,
-    ReleaseData,
-    UserData,
+from subsearch.data.metadata_classes import (
+    ApplicationSettings,
+    FormattedMetadata,
+    MediaMetadata,
+    ProviderUrls,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import BaseProvider
+from subsearch.providers.generic import Provider
 from subsearch.utils import log, string_parser
 
 
@@ -31,7 +31,7 @@ class YifySubtitlesScraper:
 
     def get_subtitle(self, url: str, current_language: str, hi_sub: bool, non_hi_sub: bool) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html(url)
+        tree = generic.get_html_parser(url)
         product = tree.select("tr")
         for item in product.matches[1:]:
             if self.skip_item(item, hi_sub, non_hi_sub, current_language):
@@ -44,24 +44,24 @@ class YifySubtitlesScraper:
         return subtitles
 
 
-class YifiSubtitles(BaseProvider, YifySubtitlesScraper):
-    def __init__(self, parameters: ReleaseData, user_parameters: UserData, provider_url: ProviderUrlData):
-        BaseProvider.__init__(self, parameters, user_parameters, provider_url)
+class YifiSubtitles(Provider, YifySubtitlesScraper):
+    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
+        Provider.__init__(self, parameters, user_parameters, provider_url)
         YifySubtitlesScraper.__init__(self)
-        self.logged_and_sorted: list[FormattedData] = []
+        self.logged_and_sorted: list[FormattedMetadata] = []
 
     def parse_site_results(self):
         # search for title
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
         to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[FormattedData] = []
+        to_be_sorted: list[FormattedMetadata] = []
 
         data_found = True if subtitle_data else False
         if data_found is False:
             return []
         # search for subtitle
         for key, value in subtitle_data.items():
-            pct_result = string_parser.get_pct_value(key, self.release)
+            pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("yifysubtitles", pct_result, key)
             formatted_data = generic.format_key_value_pct("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
@@ -71,7 +71,7 @@ class YifiSubtitles(BaseProvider, YifySubtitlesScraper):
                 continue
             to_be_downloaded[key] = value
 
-        self.logged_and_sorted = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.pct_threashold)
+        self.logged_and_sorted = generic.log_and_sort_list("yifysubtitles", to_be_sorted, self.percentage_threashold)
         if not to_be_downloaded:
             return []
 

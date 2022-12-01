@@ -3,7 +3,7 @@ from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
 from subsearch.data import __icon__, __tabs__, __version__, __video__
-from subsearch.data.data_fields import TkColor, TkWindowSize
+from subsearch.data.metadata_classes import TkColor, TkWindowSize
 from subsearch.utils import raw_config
 
 GWL_EXSTYLE = -20
@@ -90,7 +90,7 @@ class VarColorPicker:
             self.clabel.configure(fg=TkColor().green)
 
         if self.is_pct:
-            _pct = raw_config.get_config_key("percentage")
+            _pct = raw_config.get_config_key("percentage_threshold")
             if _pct in range(75, 101):
                 self.clabel.configure(fg=TkColor().green)
             elif _pct in range(50, 75):

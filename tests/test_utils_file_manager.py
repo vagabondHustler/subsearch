@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from src.subsearch.utils import file_manager
+from src.subsearch.utils import file_manager, raw_registry
 
 
 def copy_and_rename(src: str, dst: str):
@@ -51,3 +51,17 @@ def test_get_hash() -> None:
     hash1 = file_manager.get_hash(Path(CWD) / "none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == "000000000000000000"
+
+
+def test_is_exe() -> None:
+    """
+    test to ensure that the src/subsearch/utils/current_user.is_exe function returns boolean
+    """
+    assert file_manager.running_from_exe() or file_manager.running_from_exe() is False
+
+
+def test_got_key() -> None:
+    """
+    test to ensure that the src/subsearch/utils/raw_registry.get_key function returns boolean
+    """
+    assert raw_registry.registry_key_exists() or raw_registry.registry_key_exists() is False

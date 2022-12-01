@@ -2,17 +2,10 @@ import ctypes
 import time
 
 from subsearch.data import __version__, __video__
-from subsearch.data.data_fields import DownloadData, FormattedData
+from subsearch.data.metadata_classes import DownloadMetaData, FormattedMetadata
 from subsearch.gui import widget_menu
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    current_user,
-    file_manager,
-    log,
-    raw_config,
-    raw_registry,
-    string_parser,
-)
+from subsearch.utils import file_manager, log, raw_config, raw_registry, string_parser
 
 
 class BaseInitializer:
@@ -24,9 +17,9 @@ class BaseInitializer:
         else:
             self.file_exist = False
             self.file_hash = "000000000000000000"
-        self.results: dict[str, list[DownloadData]] = {}
-        self.skipped: dict[str, list[FormattedData]] = {}
-        self.skipped_combined: list[FormattedData] = []
+        self.results: dict[str, list[DownloadMetaData]] = {}
+        self.skipped: dict[str, list[FormattedMetadata]] = {}
+        self.skipped_combined: list[FormattedMetadata] = []
         self.downloads: dict[str, int] = {}
 
         for k in self.user_data.providers.keys():
@@ -36,7 +29,7 @@ class BaseInitializer:
 
         self.ran_download_tab = False
         if self.file_exist:
-            self.release_data = string_parser.get_file_search_data(__video__.name, self.file_hash)
+            self.release_data = string_parser.get_media_metadata(__video__.name, self.file_hash)
             self.provider_data = string_parser.get_provider_urls(self.file_hash, self.user_data, self.release_data)
             log.set_logger_data(self.release_data, self.user_data, self.provider_data)
             log.output_parameters()
@@ -52,9 +45,9 @@ class BaseInitializer:
             return True
         return False
 
-    def download_results(self, results: list[DownloadData]) -> int:
-        for i in results:
-            downloads = file_manager.download_subtitle(i)
+    def download_results(self, results: list[DownloadMetaData]) -> int:
+        for result in results:
+            downloads = file_manager.download_subtitle(result)
         return downloads
 
 
@@ -63,7 +56,7 @@ class Steps(BaseInitializer):
         self.start = time.perf_counter()
         BaseInitializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if current_user.registry_key_exists() is False:
+        if raw_registry.registry_key_exists() is False:
             raw_config.set_default_json()
             raw_registry.add_context_menu()
         file_manager.make_necessary_directories()
@@ -78,7 +71,7 @@ class Steps(BaseInitializer):
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_data.language_code3 == "N/A":
+        if self.user_data.language_iso_639_3 == "N/A":
             return None
         if (
             self.user_data.providers["opensubtitles_hash"] is False
@@ -106,7 +99,7 @@ class Steps(BaseInitializer):
     def _provider_yifysubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.release_data.series:
+        if self.release_data.tvseries:
             return None
         if self.provider_data.yifysubtitles == "N/A":
             return None
@@ -135,7 +128,7 @@ class Steps(BaseInitializer):
             return None
 
         number_of_downloads = sum(v for v in self.downloads.values())
-        if self.user_data.show_download_window and number_of_downloads > 0:
+        if self.user_data.manual_download_tab and number_of_downloads > 0:
             return None
 
         for data_list in self.skipped.values():
@@ -180,7 +173,7 @@ class Steps(BaseInitializer):
 
         if self.user_data.show_terminal is False:
             return None
-        if current_user.running_from_exe():
+        if file_manager.running_from_exe():
             return None
 
         try:
