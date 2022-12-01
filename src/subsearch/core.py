@@ -74,8 +74,7 @@ class Steps(BaseInitializer):
         if " " in __video__.name:
             log.warning_spaces_in_filename()
         log.output_header("Search started")
-        
-        
+
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None

@@ -12,7 +12,7 @@ LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
 DL_WINDOW = raw_config.get_config_key("show_download_window")
 AVAIL_EXT = raw_config.get_config_key("file_ext")
-ENABLE_THREADING = raw_config.get_config_key('threading')
+ENABLE_THREADING = raw_config.get_config_key("threading")
 
 
 class FileExtensions(tk.Frame):
@@ -342,6 +342,7 @@ class LogToFile(tk.Frame):
         self.string_var.set(f"False")
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         raw_config.set_config_key_value("log_to_file", False)
+
 
 class UseThreading(tk.Frame):
     def __init__(self, parent):

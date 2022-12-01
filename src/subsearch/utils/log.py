@@ -1,7 +1,7 @@
 import logging
+import warnings
 from datetime import datetime
 from pathlib import Path
-import warnings
 
 from subsearch.data import __version__, __video__
 from subsearch.data.data_fields import (
@@ -24,7 +24,7 @@ logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
 if __video__ is not None and LOG_TO_FILE:
-    warnings.filterwarnings('ignore', lineno=545)
+    warnings.filterwarnings("ignore", lineno=545)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
     file_handler = logging.FileHandler(Path(__video__.directory) / "subsearch.log", "w")
     file_handler.setLevel(logging.INFO)
@@ -83,6 +83,7 @@ def output_done_with_tasks(end_new_line: bool = False):
     if end_new_line:
         output("")
 
+
 def output_parameters() -> None:
     output_header(f"User data")
     output(f"Language:                         {user_data.current_language}, {user_data.language_code3}")
@@ -116,7 +117,7 @@ def output_parameters() -> None:
     output("")
 
 
-def output_match(provider:str, pct_result: int, key: str, _to_log:bool = False):
+def output_match(provider: str, pct_result: int, key: str, _to_log: bool = False):
     if pct_result >= user_data.percentage:
         output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=_to_log)
     else:

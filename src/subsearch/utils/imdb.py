@@ -66,4 +66,4 @@ class FindImdbID(AdvTitleSearch):
     @property
     def imdb_id(self) -> str:
         href = self.data.css_first("a")
-        return re.findall("tt[0-9]+", href.attributes['href'])[0]
+        return re.findall("tt[0-9]+", href.attributes["href"])[0]
