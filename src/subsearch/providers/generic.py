@@ -10,6 +10,7 @@ from subsearch.data.data_fields import (
 )
 from subsearch.utils import log
 
+
 class BaseProvider:
     """
     Base class for providers
@@ -44,9 +45,10 @@ class BaseProvider:
         self.url_yifysubtitles = pud.yifysubtitles
 
     def is_threshold_met(self, key: str, pct_result: int) -> bool:
-            if pct_result >= self.pct_threashold or self.title and f"{self.season}{self.episode}" in key.lower() and self.series:
-                return True
-            return False
+        if pct_result >= self.pct_threashold or self.title and f"{self.season}{self.episode}" in key.lower() and self.series:
+            return True
+        return False
+
 
 def get_html(url: str):
     scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
