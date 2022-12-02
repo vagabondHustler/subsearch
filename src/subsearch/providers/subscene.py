@@ -17,7 +17,7 @@ class SubsceneScraper:
         ...
 
     def find_title(self, url: str, current_language: str, definitive_match: list[str]):
-        tree = generic.send_request(url)
+        tree = generic.get_html_parser(url)
         products = tree.css("div.title")
         for item in products:
             node = item.css_first("a")
