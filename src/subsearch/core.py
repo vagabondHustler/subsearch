@@ -10,7 +10,7 @@ from subsearch.utils import file_manager, log, raw_config, raw_registry, string_
 
 class BaseInitializer:
     def __init__(self) -> None:
-        self.user_data = raw_config.get_user_data()
+        self.app_data = raw_config.get_application_settings()
         if __video__ is not None:
             self.file_exist = True
             self.file_hash = file_manager.get_hash(__video__.path)
@@ -22,7 +22,7 @@ class BaseInitializer:
         self.skipped_combined: list[FormattedMetadata] = []
         self.downloads: dict[str, int] = {}
 
-        for k in self.user_data.providers.keys():
+        for k in self.app_data.providers.keys():
             self.results[k] = []
             self.skipped[k] = []
             self.downloads[k] = 0
@@ -30,17 +30,17 @@ class BaseInitializer:
         self.ran_download_tab = False
         if self.file_exist:
             self.release_data = string_parser.get_media_metadata(__video__.name, self.file_hash)
-            self.provider_data = string_parser.get_provider_urls(self.file_hash, self.user_data, self.release_data)
-            log.set_logger_data(self.release_data, self.user_data, self.provider_data)
+            self.provider_data = string_parser.get_provider_urls(self.file_hash, self.app_data, self.release_data)
+            log.set_logger_data(self.release_data, self.app_data, self.provider_data)
             log.output_parameters()
 
     def all_providers_disabled(self) -> bool:
-        self.user_data = raw_config.get_user_data()
+        self.app_data = raw_config.get_application_settings()
         if (
-            self.user_data.providers["subscene_site"] is False
-            and self.user_data.providers["opensubtitles_site"] is False
-            and self.user_data.providers["opensubtitles_hash"] is False
-            and self.user_data.providers["yifysubtitles_site"] is False
+            self.app_data.providers["subscene_site"] is False
+            and self.app_data.providers["opensubtitles_site"] is False
+            and self.app_data.providers["opensubtitles_hash"] is False
+            and self.app_data.providers["yifysubtitles_site"] is False
         ):
             return True
         return False
@@ -71,28 +71,28 @@ class Steps(BaseInitializer):
     def _provider_opensubtitles(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_data.language_iso_639_3 == "N/A":
+        if self.app_data.language_iso_639_3 == "N/A":
             return None
         if (
-            self.user_data.providers["opensubtitles_hash"] is False
-            and self.user_data.providers["opensubtitles_site"] is False
+            self.app_data.providers["opensubtitles_hash"] is False
+            and self.app_data.providers["opensubtitles_site"] is False
         ):
             return None
         # log.output_header("Searching on opensubtitles")
-        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.user_data, self.provider_data)
-        if self.user_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
+        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_data, self.provider_data)
+        if self.app_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
-        if self.user_data.providers["opensubtitles_site"]:
+        if self.app_data.providers["opensubtitles_site"]:
             self.results["opensubtitles_site"] = _opensubs.parse_site_results()
         self.skipped["opensubtitles_site"] = _opensubs._sorted_list()
 
     def _provider_subscene(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_data.providers["subscene_site"] is False:
+        if self.app_data.providers["subscene_site"] is False:
             return None
         # log.output_header("Searching on subscene")
-        _subscene = subscene.Subscene(self.release_data, self.user_data, self.provider_data)
+        _subscene = subscene.Subscene(self.release_data, self.app_data, self.provider_data)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped["subscene_site"] = _subscene._sorted_list()
 
@@ -103,9 +103,9 @@ class Steps(BaseInitializer):
             return None
         if self.provider_data.yifysubtitles == "N/A":
             return None
-        if self.user_data.providers["yifysubtitles_site"]:
+        if self.app_data.providers["yifysubtitles_site"]:
             # log.output_header("Searching on yifysubtitles")
-            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.user_data, self.provider_data)
+            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_data, self.provider_data)
             self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
             self.skipped["yifysubtitles_site"] = _yifysubs._sorted_list()
 
@@ -116,7 +116,7 @@ class Steps(BaseInitializer):
             return None
         log.output_header(f"Downloading subtitles")
         for provider, data in self.results.items():
-            if self.user_data.providers[provider] is False:
+            if self.app_data.providers[provider] is False:
                 continue
             if not data:
                 continue
@@ -128,7 +128,7 @@ class Steps(BaseInitializer):
             return None
 
         number_of_downloads = sum(v for v in self.downloads.values())
-        if self.user_data.manual_download_tab and number_of_downloads > 0:
+        if self.app_data.manual_download_tab and number_of_downloads > 0:
             return None
 
         for data_list in self.skipped.values():
@@ -157,7 +157,7 @@ class Steps(BaseInitializer):
     def _clean_up(self) -> None:
         if self.file_exist is False:
             return None
-        if self.user_data.rename_best_match:
+        if self.app_data.rename_best_match:
             log.output_header("Renaming best match")
             file_manager.rename_best_match(f"{self.release_data.release}.srt", __video__.directory, ".srt")
             log.output_done_with_tasks(end_new_line=True)
@@ -171,7 +171,7 @@ class Steps(BaseInitializer):
         elapsed = time.perf_counter() - self.start
         log.output(f"Finished in {elapsed} seconds")
 
-        if self.user_data.show_terminal is False:
+        if self.app_data.show_terminal is False:
             return None
         if file_manager.running_from_exe():
             return None

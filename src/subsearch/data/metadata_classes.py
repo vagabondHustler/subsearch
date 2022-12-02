@@ -55,6 +55,7 @@ class ApplicationSettings:
     non_hearing_impaired: bool
 
 
+
 @dataclass(frozen=True, order=True)
 class MediaMetadata:
     """

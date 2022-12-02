@@ -9,7 +9,7 @@ class AdvTitleSearch:
         self.year = year
 
     def get_url(self):
-        imdb_domain = "https://www.imdb.com"
+        imdb_domain = "https://www.imdb.com"        
         return f"{imdb_domain}/search/title/?{self.title_search}&{self.release_date_search}"
 
     @property
@@ -42,10 +42,8 @@ class FindImdbID(AdvTitleSearch):
         url = adv_search.get_url()
         tree = generic.get_html_parser(url)
         product = tree.select("div.lister-item-content")
-        # items = doc.find_all("div", class_="lister-item-content")
         for item in product.matches:
             self.data = item.css_first("h3.lister-item-header")
-            # self.data = item.find("h3", class_="lister-item-header")
             if self.title != self.find_imdb_title():
                 continue
             if self.year != self.find_imdb_year() and (self.year - 1) != self.find_imdb_year():
