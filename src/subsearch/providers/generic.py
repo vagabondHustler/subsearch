@@ -11,9 +11,9 @@ from subsearch.data.metadata_classes import (
 from subsearch.utils import log
 
 
-class Provider:
+class ProviderParameters:
     """
-    Base class for providers
+    Parameters for provider
     """
 
     def __init__(self, media: MediaMetadata, app: ApplicationSettings, urls: ProviderUrls):

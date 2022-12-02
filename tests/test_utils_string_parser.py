@@ -90,7 +90,7 @@ def test_provider_urls_movie():
     base = BaseInitializer()
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
-    urls = string_parser.get_provider_urls("000000000000000000", base.user_data, media_metadata)
+    urls = string_parser.get_provider_urls("000000000000000000", base.app_data, media_metadata)
 
     assert urls.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
     assert (
@@ -107,7 +107,7 @@ def test_provider_urls_series():
     base = BaseInitializer()
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     media_metadata = string_parser.get_media_metadata(filename, "000000000000000000")
-    urls = string_parser.get_provider_urls("000000000000000000", base.user_data, media_metadata)
+    urls = string_parser.get_provider_urls("000000000000000000", base.app_data, media_metadata)
 
     assert urls.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
     assert (

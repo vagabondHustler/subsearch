@@ -5,8 +5,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-import cloudscraper
-
 from subsearch.data import __video__
 from subsearch.data.metadata_classes import DownloadMetaData
 from subsearch.providers.generic import get_cloudscraper

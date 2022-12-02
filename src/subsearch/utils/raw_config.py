@@ -38,34 +38,14 @@ def get_config_key(key: str) -> Any:
 
     Args:
         key (str):
-
-        - User settings
-
-        "hearing_impaired: bool | str", "percentage: int"
-
-        - GUI stuff
-
-        "cm_icon: bool", "manual_download_tab: bool",
-        "show_terminal: bool", "file_ext: dict"
+        current_language, languages, subtitle_type, percentage_threshold,
+        rename_best_match, context_menu_icon, manual_download_tab, use_threading,
+        show_terminal, log_to_file, file_extensions, providers
 
     Returns:
         Any: value
     """
-    config_json_dict = {
-        "current_language": get_config()["current_language"],
-        "languages": get_config()["languages"],
-        "subtitle_type": get_config()["subtitle_type"],
-        "percentage_threshold": get_config()["percentage_threshold"],
-        "rename_best_match": get_config()["rename_best_match"],
-        "context_menu_icon": get_config()["context_menu_icon"],
-        "manual_download_tab": get_config()["manual_download_tab"],
-        "use_threading": get_config()["use_threading"],
-        "show_terminal": get_config()["show_terminal"],
-        "log_to_file": get_config()["log_to_file"],
-        "file_extensions": get_config()["file_extensions"],
-        "providers": get_config()["providers"],
-    }
-    return config_json_dict[f"{key}"]
+    return get_config()[f"{key}"]
 
 
 def set_default_json() -> None:
@@ -89,7 +69,7 @@ def set_default_json() -> None:
         file.truncate()
 
 
-def get_user_data() -> ApplicationSettings:
+def get_application_settings() -> ApplicationSettings:
     config_file = Path(__data__) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)

@@ -47,6 +47,7 @@ class Subsearch(core.Steps):
             self._provider_subscene()
             self._provider_opensubtitles()
             self._provider_yifysubtitles()
+    
 
     def provider_opensubtitles(self) -> None:
         """

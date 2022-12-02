@@ -8,7 +8,7 @@ from subsearch.data.metadata_classes import (
     ProviderUrls,
 )
 from subsearch.providers import generic
-from subsearch.providers.generic import Provider
+from subsearch.providers.generic import ProviderParameters
 from subsearch.utils import log, string_parser
 
 
@@ -17,7 +17,7 @@ class SubsceneScraper:
         ...
 
     def find_title(self, url: str, current_language: str, definitive_match: list[str]):
-        tree = generic.get_html_parser(url)
+        tree = generic.send_request(url)
         products = tree.css("div.title")
         for item in products:
             node = item.css_first("a")
@@ -59,9 +59,9 @@ class SubsceneScraper:
         return download_url
 
 
-class Subscene(Provider, SubsceneScraper):
+class Subscene(ProviderParameters, SubsceneScraper):
     def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
-        Provider.__init__(self, parameters, user_parameters, provider_url)
+        ProviderParameters.__init__(self, parameters, user_parameters, provider_url)
         SubsceneScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
