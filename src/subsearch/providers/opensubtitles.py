@@ -3,7 +3,7 @@ from typing import Any
 
 from subsearch.data import __video__
 from subsearch.data.data_objects import (
-    ApplicationSettings,
+    AppConfig,
     FormattedMetadata,
     MediaMetadata,
     ProviderUrls,
@@ -54,7 +54,7 @@ class OpenSubtitlesScraper:
 
 
 class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
-    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
+    def __init__(self, parameters: MediaMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
         ProviderParameters.__init__(self, parameters, user_parameters, provider_url)
         OpenSubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []

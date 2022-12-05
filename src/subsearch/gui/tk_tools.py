@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import GUI_DATA, __icon__, __tabs__, __version__, __video__
+from subsearch.data import GUI_DATA, __paths__, __version__, __video__
 from subsearch.utils import raw_config
 
 GWL_EXSTYLE = -20
@@ -11,7 +11,7 @@ WS_EX_TOOLWINDOW = 0x00000080
 
 
 def get_tab_png(tab: str):
-    return Path(__tabs__) / tab
+    return Path(__paths__.tabs) / tab
 
 
 def calculate_btn_size(cls, _width=18, _height=2):
@@ -43,7 +43,7 @@ def asset_tab(cls, img, type, x=27, y=27):
 
 
 def asset_icon(cls, x=18, y=18):
-    path = str(__icon__).replace(".ico", ".png")
+    path = str(__paths__.icon).replace(".ico", ".png")
     ico = tk.PhotoImage(file=path)
     update_asset(cls, ico, x, y)
 

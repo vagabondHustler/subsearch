@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 @dataclass(order=True)
-class ApplicationPaths:
+class AppPaths:
     """
     Dataclass containing paths to modules and assets
     """
@@ -14,7 +14,6 @@ class ApplicationPaths:
     providers: str
     utils: str
     icon: str
-    titlebar: str
     tabs: str
 
 
@@ -33,7 +32,7 @@ class VideoFileMetadata:
 
 
 @dataclass(order=True)
-class ApplicationSettings:
+class AppConfig:
     """
     Dataclass containing the users different app configurations
     """
@@ -127,7 +126,7 @@ class GUISize:
 class GUIColors:
     """
     Sub dataclass containing colors for the GUI
-    
+
     Colors:
         purple: #b294bb
         red: #bc473b

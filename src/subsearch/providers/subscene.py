@@ -2,7 +2,7 @@ from selectolax.parser import Node
 
 from subsearch.data import __video__
 from subsearch.data.data_objects import (
-    ApplicationSettings,
+    AppConfig,
     FormattedMetadata,
     MediaMetadata,
     ProviderUrls,
@@ -60,7 +60,7 @@ class SubsceneScraper:
 
 
 class Subscene(ProviderParameters, SubsceneScraper):
-    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
+    def __init__(self, parameters: MediaMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
         ProviderParameters.__init__(self, parameters, user_parameters, provider_url)
         SubsceneScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []

@@ -2,7 +2,7 @@ import cloudscraper
 from selectolax.parser import HTMLParser
 
 from subsearch.data.data_objects import (
-    ApplicationSettings,
+    AppConfig,
     DownloadMetaData,
     FormattedMetadata,
     MediaMetadata,
@@ -16,7 +16,7 @@ class ProviderParameters:
     Parameters for provider
     """
 
-    def __init__(self, media: MediaMetadata, app: ApplicationSettings, urls: ProviderUrls):
+    def __init__(self, media: MediaMetadata, app: AppConfig, urls: ProviderUrls):
         self.release_data = media
         self.user_data = app
         self.provider_data = urls

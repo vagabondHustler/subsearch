@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
-from subsearch.data.data_objects import ApplicationSettings, MediaMetadata, ProviderUrls
+from subsearch.data.data_objects import AppConfig, MediaMetadata, ProviderUrls
 from subsearch.utils import raw_config
 
 NOW = datetime.now()
@@ -12,7 +12,7 @@ DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
 release_metadata: MediaMetadata
-application_settings: ApplicationSettings
+application_settings: AppConfig
 provider_urls: ProviderUrls
 
 logger = logging.getLogger("subsearch")
@@ -121,7 +121,7 @@ def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(media: MediaMetadata, app: ApplicationSettings, urls: ProviderUrls):
+def set_logger_data(media: MediaMetadata, app: AppConfig, urls: ProviderUrls):
     global release_metadata, application_settings, provider_urls
     release_metadata = media
     application_settings = app

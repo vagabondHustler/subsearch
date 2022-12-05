@@ -2,7 +2,7 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.data_objects import ApplicationSettings, MediaMetadata, ProviderUrls
+from subsearch.data.data_objects import AppConfig, MediaMetadata, ProviderUrls
 from subsearch.utils import imdb
 
 
@@ -67,7 +67,7 @@ def find_title(filename: str, year: int, series: bool):
     return title
 
 
-def get_provider_urls(file_hash: str, ucf: ApplicationSettings, frd: MediaMetadata) -> ProviderUrls:
+def get_provider_urls(file_hash: str, ucf: AppConfig, frd: MediaMetadata) -> ProviderUrls:
     """
     Parse data to apply to the provider urls
 
