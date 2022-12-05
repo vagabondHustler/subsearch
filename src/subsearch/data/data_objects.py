@@ -113,13 +113,24 @@ class FormattedMetadata:
 
 
 @dataclass(frozen=True, order=True)
-class GUISize:
+class GUISizes:
     """
     Sub dataclass containing sizes for the GUI
     """
 
     root_width: int = 738
     root_height: int = 720
+
+
+@dataclass(frozen=True, order=True)
+class GUIPositions:
+    """
+    Sub dataclass containing sizes for the GUI
+    """
+
+    content_x: int = GUISizes().root_width / 2
+    content_y: int = GUISizes().root_height / 2 - 41
+    content_hidden_x = GUISizes().root_width * 2
 
 
 @dataclass(frozen=True, order=True)
@@ -202,7 +213,8 @@ class GUIData:
     Dataclass containing GUI data
     """
 
-    size = GUISize
+    size = GUISizes
+    pos = GUIPositions
     fonts = GUIFonts
     colors = GUIColors
 
