@@ -97,8 +97,9 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
                 continue
             to_be_downloaded[key] = value
 
-        self.logged_and_sorted = generic.log_and_sort_list("opensubtitles", to_be_sorted, self.percentage_threashold)
-
+        self.sorted_metadata = generic.sort_download_metadata(to_be_sorted)
+        log.downlod_metadata("opensubtitles" , self.sorted_metadata, self.percentage_threashold)
+        
         if not to_be_downloaded:
             return []
 

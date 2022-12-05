@@ -93,19 +93,10 @@ def format_key_value_pct(provider_: str, key: str, value: str, precentage_result
     return data
 
 
-def log_and_sort_list(provider_: str, list_: list[FormattedMetadata], precentage: int) -> list[FormattedMetadata]:
-    list_.sort(key=lambda x: x.pct_result, reverse=True)
-    log.output("")
-    log.output(f"--- [Sorted List from {provider_}] ---", False)
-    downloaded_printed = False
-    not_downloaded_printed = False
-    for data in list_:
-        if data.pct_result >= precentage and not downloaded_printed:
-            log.output(f"--- Has been downloaded ---\n", False)
-            downloaded_printed = True
-        if data.pct_result <= precentage and not not_downloaded_printed:
-            log.output(f"--- Has not been downloaded ---\n", False)
-            not_downloaded_printed = True
-        log.output(f"{data.formatted_release}", False)
-        log.output(f"{data.formatted_url}\n", False)
-    return list_
+def sort_download_metadata(list_: list[FormattedMetadata]) -> list[FormattedMetadata]:
+   list_.sort(key=lambda x: x.pct_result, reverse=True)
+   return list_
+
+
+
+

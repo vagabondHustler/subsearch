@@ -4,7 +4,12 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
-from subsearch.data.data_objects import AppConfig, MediaMetadata, ProviderUrls
+from subsearch.data.data_objects import (
+    AppConfig,
+    FormattedMetadata,
+    MediaMetadata,
+    ProviderUrls,
+)
 from subsearch.utils import raw_config
 
 NOW = datetime.now()
@@ -126,3 +131,19 @@ def set_logger_data(media: MediaMetadata, app: AppConfig, urls: ProviderUrls):
     release_metadata = media
     application_settings = app
     provider_urls = urls
+
+
+def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int):
+    output("")
+    output(f"--- [Sorted List from {provider_}] ---", False)
+    downloaded_printed = False
+    not_downloaded_printed = False
+    for data in formatted_metadata_:
+        if data.pct_result >= search_threashold and not downloaded_printed:
+            output(f"--- Has been downloaded ---\n", False)
+            downloaded_printed = True
+        if data.pct_result <= search_threashold and not not_downloaded_printed:
+            output(f"--- Has not been downloaded ---\n", False)
+            not_downloaded_printed = True
+        output(f"{data.formatted_release}", False)
+        output(f"{data.formatted_url}\n", False)
