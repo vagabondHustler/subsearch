@@ -1,7 +1,7 @@
 import cloudscraper
 from selectolax.parser import HTMLParser
 
-from subsearch.data.metadata_classes import (
+from subsearch.data.data_objects import (
     ApplicationSettings,
     DownloadMetaData,
     FormattedMetadata,

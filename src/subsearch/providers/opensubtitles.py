@@ -2,7 +2,7 @@ import re
 from typing import Any
 
 from subsearch.data import __video__
-from subsearch.data.metadata_classes import (
+from subsearch.data.data_objects import (
     ApplicationSettings,
     FormattedMetadata,
     MediaMetadata,
