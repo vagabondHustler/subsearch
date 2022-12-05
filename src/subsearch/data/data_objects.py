@@ -55,7 +55,6 @@ class ApplicationSettings:
     non_hearing_impaired: bool
 
 
-
 @dataclass(frozen=True, order=True)
 class MediaMetadata:
     """
@@ -115,19 +114,41 @@ class FormattedMetadata:
 
 
 @dataclass(frozen=True, order=True)
-class TkWindowSize:
+class GUISize:
     """
-    Dataclass containing different window sizes for the GUI
+    Sub dataclass containing sizes for the GUI
     """
 
-    width: int = 738
-    height: int = 720
+    root_width: int = 738
+    root_height: int = 720
 
 
 @dataclass(frozen=True, order=True)
-class TkColor:
+class GUIColors:
     """
-    Dataclass containing different colors for the GUI
+    Sub dataclass containing colors for the GUI
+    
+    Colors:
+        purple: #b294bb
+        red: #bc473b
+        dark_red: #89332a
+        red_brown: #b26947,
+        orange: #ab7149
+        light_orange: #de935f
+        yellow: #f0c674
+        blue: #81a2be
+        cyan: #82b3ac
+        green: #9fa65d
+        green_brown: #a59256
+        grey: #4c4c4c
+        light_grey: #727272
+        silver_grey: #8a8a8a
+        white_grey: #bdbdbd
+        dark_grey: #1a1b1b
+        mid_grey_black: #111111
+        light_black: #0e0e0e
+        black: #151515
+        dark_black: #000000
     """
 
     purple: str = "#b294bb"
@@ -153,9 +174,18 @@ class TkColor:
 
 
 @dataclass(frozen=True, order=True)
-class TkFont:
+class GUIFonts:
     """
-    Dataclass containing different fonts and their styles and or size
+    Sub dataclass containing fonts and their styles and or size
+
+    Fonts:
+        cas6b: Cascadia 6 bold
+        cas8: Cascadia 8
+        cas8i: Cascadia 8 italic
+        cas8b: Cascadia 8 bold
+        cas10b: Cascadia 10 bold
+        cas11: Cascadia 11
+        cas20b: Cascadia 20 bold
     """
 
     cas6b: str = "Cascadia 6 bold"
@@ -165,3 +195,17 @@ class TkFont:
     cas10b: str = "Cascadia 10 bold"
     cas11: str = "Cascadia 11"
     cas20b: str = "Cascadia 20 bold"
+
+
+@dataclass(frozen=True, order=True)
+class GUIData:
+    """
+    Dataclass containing GUI data
+    """
+
+    size = GUISize
+    fonts = GUIFonts
+    colors = GUIColors
+
+
+GUI_DATA = GUIData()

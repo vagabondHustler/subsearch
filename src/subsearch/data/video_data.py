@@ -3,7 +3,7 @@ from itertools import product
 from pathlib import Path
 from typing import Optional, no_type_check
 
-from subsearch.data.metadata_classes import VideoFileMetadata
+from subsearch.data.data_objects import VideoFileMetadata
 
 
 @no_type_check

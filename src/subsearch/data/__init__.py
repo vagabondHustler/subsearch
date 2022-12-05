@@ -9,3 +9,4 @@ from .set_paths import (
 )
 from .version import __version__
 from .video_data import __video__
+from .data_objects import GUI_DATA

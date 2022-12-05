@@ -2,8 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import __icon__, __tabs__, __version__, __video__
-from subsearch.data.metadata_classes import TkColor, TkWindowSize
+from subsearch.data import GUI_DATA, __icon__, __tabs__, __version__, __video__
 from subsearch.utils import raw_config
 
 GWL_EXSTYLE = -20
@@ -60,7 +59,12 @@ class WindowPosition(tk.Frame):
         tk.Frame.__init__(self, parent)
 
     def set(
-        self, w=TkWindowSize().width, h=TkWindowSize().height, ws_value_offset=0, hs_value_offset=0, other: bool = False
+        self,
+        w=GUI_DATA.size.root_width,
+        h=GUI_DATA.size.root_height,
+        ws_value_offset=0,
+        hs_value_offset=0,
+        other: bool = False,
     ):
         ws = self.winfo_screenwidth() + ws_value_offset
         hs = self.winfo_screenheight() + hs_value_offset
@@ -81,28 +85,28 @@ class VarColorPicker:
 
     def pick(self):  # string boolean
         if self.string_var.get() == "True":
-            self.clabel.configure(fg=TkColor().green)
+            self.clabel.configure(fg=GUI_DATA.colors.green)
         elif self.string_var.get() == "False":
-            self.clabel.configure(fg=TkColor().red)
+            self.clabel.configure(fg=GUI_DATA.colors.red)
         elif self.string_var.get() == "Both":
-            self.clabel.configure(fg=TkColor().blue)
+            self.clabel.configure(fg=GUI_DATA.colors.blue)
         elif self.string_var.get().startswith("Only"):
-            self.clabel.configure(fg=TkColor().green)
+            self.clabel.configure(fg=GUI_DATA.colors.green)
 
         if self.is_pct:
             _pct = raw_config.get_config_key("percentage_threshold")
             if _pct in range(75, 101):
-                self.clabel.configure(fg=TkColor().green)
+                self.clabel.configure(fg=GUI_DATA.colors.green)
             elif _pct in range(50, 75):
-                self.clabel.configure(fg=TkColor().green_brown)
+                self.clabel.configure(fg=GUI_DATA.colors.green_brown)
             elif _pct in range(25, 50):
-                self.clabel.configure(fg=TkColor().red_brown)
+                self.clabel.configure(fg=GUI_DATA.colors.red_brown)
             elif _pct in range(0, 25):
-                self.clabel.configure(fg=TkColor().red)
+                self.clabel.configure(fg=GUI_DATA.colors.red)
 
 
 class ToolTip(tk.Toplevel):
-    def __init__(self, parent, _widget, *_text, _background=TkColor().light_black):
+    def __init__(self, parent, _widget, *_text, _background=GUI_DATA.colors.light_black):
         self.parent = parent
         self.widget = _widget
         self.text = _text
@@ -110,17 +114,17 @@ class ToolTip(tk.Toplevel):
 
     def show(self):
         tk.Toplevel.__init__(self, self.parent)
-        self.configure(background=TkColor().light_black)
+        self.configure(background=GUI_DATA.colors.light_black)
         # remove the standard window titlebar from the tooltip
         self.overrideredirect(True)
         # unpack *args and put each /n on a new line
         lines = "\n".join(self.text)
-        frame = tk.Frame(self, background=TkColor().light_black)
+        frame = tk.Frame(self, background=GUI_DATA.colors.light_black)
         label = tk.Label(
             frame,
             text=lines,
             background=self.background,
-            foreground=TkColor().white_grey,
+            foreground=GUI_DATA.colors.white_grey,
             justify="left",
         )
         # get size of the label to use later for positioning and sizing of the tooltip

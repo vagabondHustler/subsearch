@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from subsearch.data.metadata_classes import ApplicationPaths
+from subsearch.data.data_objects import ApplicationPaths
 
 
 class SetPaths:

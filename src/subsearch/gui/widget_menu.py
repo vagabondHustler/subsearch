@@ -1,6 +1,7 @@
 import tkinter as tk
 
-from subsearch.data.metadata_classes import FormattedMetadata, TkColor, TkWindowSize
+from subsearch.data import GUI_DATA
+from subsearch.data.data_objects import FormattedMetadata
 from subsearch.gui import (
     base_root,
     set_theme,
@@ -16,7 +17,7 @@ from subsearch.utils import file_manager
 class Footer(tk.Frame):
     def __init__(self, parent, active_tab: str, language_tab, search_tab, settings_tab, download_tab):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().mid_grey_black, width=TkWindowSize().width, height=82)
+        self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
         self.parent = parent
         self.language_tab = language_tab
         self.search_tab = search_tab
@@ -26,28 +27,28 @@ class Footer(tk.Frame):
             self,
             width=54,
             height=54,
-            bg=TkColor().mid_grey_black,
+            bg=GUI_DATA.colors.mid_grey_black,
             highlightthickness=0,
         )
         self.search = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TkColor().mid_grey_black,
+            bg=GUI_DATA.colors.mid_grey_black,
             highlightthickness=0,
         )
         self.settings = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TkColor().mid_grey_black,
+            bg=GUI_DATA.colors.mid_grey_black,
             highlightthickness=0,
         )
         self.download = tk.Canvas(
             self,
             width=54,
             height=54,
-            bg=TkColor().mid_grey_black,
+            bg=GUI_DATA.colors.mid_grey_black,
             highlightthickness=0,
         )
         self.language.place(relx=0.2, rely=0.5, anchor="center")
@@ -160,16 +161,16 @@ class Footer(tk.Frame):
 class TabLanguage(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().dark_grey)
+        self.configure(bg=GUI_DATA.colors.dark_grey)
         tab_languages.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
 class TabSearch(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().dark_grey)
+        self.configure(bg=GUI_DATA.colors.dark_grey)
         tab_search_settings.Providers(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
         tab_search_settings.SubtitleType(self).pack(anchor="center")
         tab_search_settings.SearchThreshold(self).pack(anchor="center")
         tab_search_settings.RenameBestMatch(self).pack(anchor="center")
@@ -178,9 +179,9 @@ class TabSearch(tk.Frame):
 class TabSettings(tk.Frame):
     def __init__(self, parent, content_posx, content_posy):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().dark_grey)
+        self.configure(bg=GUI_DATA.colors.dark_grey)
         tab_application_settings.FileExtensions(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
         tab_application_settings.ShowContextMenu(self).pack(anchor="center")
         tab_application_settings.ShowContextMenuIcon(self).pack(anchor="center")
         tab_application_settings.ShowDownloadWindow(self).pack(anchor="center")
@@ -188,14 +189,14 @@ class TabSettings(tk.Frame):
         tab_application_settings.LogToFile(self).pack(anchor="center")
         if file_manager.running_from_exe() is False:
             tab_application_settings.ShowTerminalOnSearch(self).pack(anchor="center")
-        tk.Frame(self, height=20, bg=TkColor().dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=20, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
         tab_application_settings.CheckForUpdates(self).pack(anchor="center")
 
 
 class TabDownload(tk.Frame):
     def __init__(self, parent, content_posx, content_posy, formatted_data: list[FormattedMetadata]):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().dark_grey)
+        self.configure(bg=GUI_DATA.colors.dark_grey)
         tab_manual_download.DownloadList(self, content_posx, content_posy, formatted_data).pack(anchor="center")
 
 
@@ -206,7 +207,9 @@ def open_tab(active_tab: str, **kwargs):
         formatted_data = None  # type: ignore
     root = base_root.main()
     set_theme("dark")
-    content = tk.Frame(root, bg=TkColor().dark_grey, width=TkWindowSize().width, height=TkWindowSize().height - 82)
+    content = tk.Frame(
+        root, bg=GUI_DATA.colors.dark_grey, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height - 82
+    )
     content.place(x=0, y=0)
     content_posx, content_posy = content.winfo_reqwidth(), content.winfo_reqheight()
 
@@ -218,5 +221,5 @@ def open_tab(active_tab: str, **kwargs):
         TabSettings(content, content_posx, content_posy),
         TabDownload(content, content_posx, content_posy, formatted_data),
     )
-    footer.place(y=TkWindowSize().height - 82)
+    footer.place(y=GUI_DATA.size.root_height - 82)
     root.mainloop()
