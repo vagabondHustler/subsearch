@@ -10,9 +10,10 @@ from subsearch.utils import file_manager, log
 
 # download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
-    def __init__(self, parent, con_x, con_y, formatted_data: list[FormattedMetadata]):
+    def __init__(self, parent, formatted_data: list[FormattedMetadata]):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey, width=con_x, height=con_y)
+        root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
+        self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy-82)
         # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
@@ -23,7 +24,7 @@ class DownloadList(tk.Frame):
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
             self,
-            height=con_y,
+            height=root_posy,
             bg=GUI_DATA.colors.dark_grey,
             fg=GUI_DATA.colors.light_grey,
             font=GUI_DATA.fonts.cas8b,
@@ -36,8 +37,8 @@ class DownloadList(tk.Frame):
         )
         hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
         self.sub_listbox.place(
-            height=con_y - 36,
-            width=con_x - hsx - 20,
+            height=root_posy - 82,
+            width=root_posx - hsx - 20,
             x=18,
             rely=0.5,
             bordermode="inside",
@@ -45,7 +46,7 @@ class DownloadList(tk.Frame):
         )
         if self.formatted_data is not None:
             self.fill_listbox()
-        self.scrollbar.place(x=con_x - 17, y=0, bordermode="inside", height=con_y)
+        self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy-82)
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 
