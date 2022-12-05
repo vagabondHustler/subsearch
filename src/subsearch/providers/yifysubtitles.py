@@ -82,4 +82,4 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         return download_info
 
     def _sorted_list(self):
-        return self.logged_and_sorted
+        return self.sorted_metadata
