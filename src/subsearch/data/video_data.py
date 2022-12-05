@@ -1,7 +1,7 @@
 import sys
 from itertools import product
 from pathlib import Path
-from typing import Optional, no_type_check
+from typing import no_type_check
 
 from subsearch.data.data_objects import VideoFileMetadata
 
