@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from subsearch.data import __data__
-from subsearch.data.metadata_classes import ApplicationSettings
+from subsearch.data.data_objects import ApplicationSettings
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:

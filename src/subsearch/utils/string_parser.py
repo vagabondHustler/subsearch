@@ -2,11 +2,7 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.metadata_classes import (
-    ApplicationSettings,
-    MediaMetadata,
-    ProviderUrls,
-)
+from subsearch.data.data_objects import ApplicationSettings, MediaMetadata, ProviderUrls
 from subsearch.utils import imdb
 
 

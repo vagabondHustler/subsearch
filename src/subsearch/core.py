@@ -2,7 +2,7 @@ import ctypes
 import time
 
 from subsearch.data import __version__, __video__
-from subsearch.data.metadata_classes import DownloadMetaData, FormattedMetadata
+from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
 from subsearch.gui import widget_menu
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import file_manager, log, raw_config, raw_registry, string_parser
@@ -73,10 +73,7 @@ class Steps(BaseInitializer):
             return None
         if self.app_data.language_iso_639_3 == "N/A":
             return None
-        if (
-            self.app_data.providers["opensubtitles_hash"] is False
-            and self.app_data.providers["opensubtitles_site"] is False
-        ):
+        if self.app_data.providers["opensubtitles_hash"] is False and self.app_data.providers["opensubtitles_site"] is False:
             return None
         # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_data, self.provider_data)

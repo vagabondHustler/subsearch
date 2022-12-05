@@ -4,11 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from subsearch.data import __version__, __video__
-from subsearch.data.metadata_classes import (
-    ApplicationSettings,
-    MediaMetadata,
-    ProviderUrls,
-)
+from subsearch.data.data_objects import ApplicationSettings, MediaMetadata, ProviderUrls
 from subsearch.utils import raw_config
 
 NOW = datetime.now()
