@@ -13,7 +13,7 @@ class Initializer:
         self.app_data = raw_config.get_app_config()
         if __video__ is not None:
             self.file_exist = True
-            self.file_hash = file_manager.get_hash(__video__.path)
+            self.file_hash = file_manager.get_hash(__video__.file_path)
         else:
             self.file_exist = False
             self.file_hash = "000000000000000000"
@@ -29,7 +29,7 @@ class Initializer:
 
         self.ran_download_tab = False
         if self.file_exist:
-            self.release_data = string_parser.get_release_metadata(__video__.name, self.file_hash)
+            self.release_data = string_parser.get_release_metadata(__video__.filename, self.file_hash)
             create_provider_urls = string_parser.CreateProviderUrls(self.file_hash, self.app_data, self.release_data)
             self.provider_urls = create_provider_urls.retrieve_urls()
             log.set_logger_data(self.release_data, self.app_data, self.provider_urls)
@@ -65,7 +65,7 @@ class AppSteps(Initializer):
             widget_menu.open_tab("search")
             return None
 
-        if " " in __video__.name:
+        if " " in __video__.filename:
             log.warning_spaces_in_filename()
         log.output_header("Search started")
 
@@ -157,7 +157,7 @@ class AppSteps(Initializer):
             return None
         if self.app_data.rename_best_match:
             log.output_header("Renaming best match")
-            file_manager.rename_best_match(f"{self.release_data.release}.srt", __video__.directory, ".srt")
+            file_manager.rename_best_match(f"{self.release_data.release}.srt", __video__.directory_path, ".srt")
             log.output_done_with_tasks(end_new_line=True)
 
         log.output_header("Cleaning up")

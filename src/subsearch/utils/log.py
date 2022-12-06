@@ -26,7 +26,7 @@ logger.setLevel(logging.DEBUG)
 if __video__ is not None and LOG_TO_FILE:
     warnings.filterwarnings("ignore", lineno=545)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
-    file_handler = logging.FileHandler(Path(__video__.directory) / "subsearch.log", "w")
+    file_handler = logging.FileHandler(Path(__video__.directory_path) / "subsearch.log", "w")
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -60,7 +60,7 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
 
 
 def warning_spaces_in_filename():
-    name_unresolved = f"{__video__.name}{__video__.file_extension}"
+    name_unresolved = f"{__video__.filename}{__video__.file_extension}"
     output(f"File: '{name_unresolved}' contains spaces", level="warning")
     output(f"Results may vary, use punctuation marks for a more accurate result", level="info")
     output("")
@@ -96,8 +96,8 @@ def output_parameters() -> None:
     output(f"Use site yifysubtitles:           {app_config.providers['subscene_site']}")
     output("")
     output_header(f"File data")
-    output(f"Filename:                         {__video__.name}")
-    output(f"Directory:                        {__video__.directory}")
+    output(f"Filename:                         {__video__.filename}")
+    output(f"Directory:                        {__video__.directory_path}")
     output("")
     output_header(f"Release data")
     output(f"Title:                            {release_metadata.title}")
