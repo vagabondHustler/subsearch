@@ -8,13 +8,13 @@ class AppPaths:
     Dataclass containing paths to modules and assets
     """
 
-    home: str
-    data: str
-    gui: str
-    providers: str
-    utils: str
-    icon: str
-    tabs: str
+    home: Path
+    data: Path
+    gui: Path
+    providers: Path
+    utils: Path
+    icon: Path
+    tabs: Path
 
 
 @dataclass(order=True)
@@ -128,9 +128,9 @@ class GUIPositions:
     Sub dataclass containing sizes for the GUI
     """
 
-    content_x: int = GUISizes().root_width / 2
-    content_y: int = GUISizes().root_height / 2 - 41
-    content_hidden_x = GUISizes().root_width * 2
+    content_x: int = int(GUISizes().root_width / 2)
+    content_y: int = int(GUISizes().root_height / 2 - 41)
+    content_hidden_x: int = int(GUISizes().root_width * 2)
 
 
 @dataclass(frozen=True, order=True)

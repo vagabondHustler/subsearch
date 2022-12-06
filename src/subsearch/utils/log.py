@@ -16,7 +16,7 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
-ReleaseMetadata: ReleaseMetadata
+release_metadata: ReleaseMetadata
 app_config: AppConfig
 provider_urls: ProviderUrls
 
@@ -100,14 +100,14 @@ def output_parameters() -> None:
     output(f"Directory:                        {__video__.directory}")
     output("")
     output_header(f"Release data")
-    output(f"Title:                            {ReleaseMetadata.title}")
-    output(f"Year:                             {ReleaseMetadata.year}")
-    output(f"Season:                           {ReleaseMetadata.season}, {ReleaseMetadata.season_ordinal}")
-    output(f"Episode:                          {ReleaseMetadata.episode}, {ReleaseMetadata.episode_ordinal}")
-    output(f"Series:                           {ReleaseMetadata.tvseries}")
-    output(f"Release:                          {ReleaseMetadata.release}")
-    output(f"Group:                            {ReleaseMetadata.group}")
-    output(f"File hash:                        {ReleaseMetadata.file_hash}")
+    output(f"Title:                            {release_metadata.title}")
+    output(f"Year:                             {release_metadata.year}")
+    output(f"Season:                           {release_metadata.season}, {release_metadata.season_ordinal}")
+    output(f"Episode:                          {release_metadata.episode}, {release_metadata.episode_ordinal}")
+    output(f"Series:                           {release_metadata.tvseries}")
+    output(f"Release:                          {release_metadata.release}")
+    output(f"Group:                            {release_metadata.group}")
+    output(f"File hash:                        {release_metadata.file_hash}")
     output("")
     output_header(f"Provider url data")
     output(f"subscene_site:                    {provider_urls.subscene}")
@@ -125,8 +125,8 @@ def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False
 
 
 def set_logger_data(media: ReleaseMetadata, app: AppConfig, urls: ProviderUrls):
-    global ReleaseMetadata, app_config, provider_urls
-    ReleaseMetadata = media
+    global release_metadata, app_config, provider_urls
+    release_metadata = media
     app_config = app
     provider_urls = urls
 
