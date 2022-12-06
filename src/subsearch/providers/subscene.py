@@ -1,11 +1,11 @@
 from selectolax.parser import Node
 
 from subsearch.data import __video__
-from subsearch.data.metadata_classes import (
-    ApplicationSettings,
+from subsearch.data.data_objects import (
+    AppConfig,
     FormattedMetadata,
-    MediaMetadata,
     ProviderUrls,
+    ReleaseMetadata,
 )
 from subsearch.providers import generic
 from subsearch.providers.generic import ProviderParameters
@@ -60,8 +60,8 @@ class SubsceneScraper:
 
 
 class Subscene(ProviderParameters, SubsceneScraper):
-    def __init__(self, parameters: MediaMetadata, user_parameters: ApplicationSettings, provider_url: ProviderUrls):
-        ProviderParameters.__init__(self, parameters, user_parameters, provider_url)
+    def __init__(self, release_metadata: ReleaseMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
+        ProviderParameters.__init__(self, release_metadata, user_parameters, provider_url)
         SubsceneScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
@@ -94,7 +94,8 @@ class Subscene(ProviderParameters, SubsceneScraper):
                 continue
             _to_be_downloaded[key] = value
 
-        self.logged_and_sorted = generic.log_and_sort_list("subscene", to_be_sorted, self.percentage_threashold)
+        self.sorted_metadata = generic.sort_download_metadata(to_be_sorted)
+        log.downlod_metadata("subscene", self.sorted_metadata, self.percentage_threashold)
         if not _to_be_downloaded:
             return []
 
@@ -111,4 +112,4 @@ class Subscene(ProviderParameters, SubsceneScraper):
         return download_info
 
     def _sorted_list(self):
-        return self.logged_and_sorted
+        return self.sorted_metadata

@@ -3,37 +3,36 @@ from pathlib import Path
 
 
 @dataclass(order=True)
-class ApplicationPaths:
+class AppPaths:
     """
     Dataclass containing paths to modules and assets
     """
 
-    home: str
-    data: str
-    gui: str
-    providers: str
-    utils: str
-    icon: str
-    titlebar: str
-    tabs: str
+    home: Path
+    data: Path
+    gui: Path
+    providers: Path
+    utils: Path
+    icon: Path
+    tabs: Path
 
 
 @dataclass(order=True)
-class VideoFileMetadata:
+class FileData:
     """
     Dataclass containing the video file base information
     """
 
-    name: str
+    filename: str
     file_extension: str
-    path: Path
-    directory: Path
+    file_path: Path
+    directory_path: Path
     subs_directory: Path
     tmp_directory: Path
 
 
 @dataclass(order=True)
-class ApplicationSettings:
+class AppConfig:
     """
     Dataclass containing the users different app configurations
     """
@@ -55,9 +54,8 @@ class ApplicationSettings:
     non_hearing_impaired: bool
 
 
-
 @dataclass(frozen=True, order=True)
-class MediaMetadata:
+class ReleaseMetadata:
     """
     Dataclass containing parsed data from a video file
     """
@@ -115,19 +113,52 @@ class FormattedMetadata:
 
 
 @dataclass(frozen=True, order=True)
-class TkWindowSize:
+class GUISizes:
     """
-    Dataclass containing different window sizes for the GUI
+    Sub dataclass containing sizes for the GUI
     """
 
-    width: int = 738
-    height: int = 720
+    root_width: int = 738
+    root_height: int = 720
 
 
 @dataclass(frozen=True, order=True)
-class TkColor:
+class GUIPositions:
     """
-    Dataclass containing different colors for the GUI
+    Sub dataclass containing sizes for the GUI
+    """
+
+    content_x: int = int(GUISizes().root_width / 2)
+    content_y: int = int(GUISizes().root_height / 2 - 41)
+    content_hidden_x: int = int(GUISizes().root_width * 2)
+
+
+@dataclass(frozen=True, order=True)
+class GUIColors:
+    """
+    Sub dataclass containing colors for the GUI
+
+    Colors:
+        purple: #b294bb
+        red: #bc473b
+        dark_red: #89332a
+        red_brown: #b26947,
+        orange: #ab7149
+        light_orange: #de935f
+        yellow: #f0c674
+        blue: #81a2be
+        cyan: #82b3ac
+        green: #9fa65d
+        green_brown: #a59256
+        grey: #4c4c4c
+        light_grey: #727272
+        silver_grey: #8a8a8a
+        white_grey: #bdbdbd
+        dark_grey: #1a1b1b
+        mid_grey_black: #111111
+        light_black: #0e0e0e
+        black: #151515
+        dark_black: #000000
     """
 
     purple: str = "#b294bb"
@@ -153,9 +184,18 @@ class TkColor:
 
 
 @dataclass(frozen=True, order=True)
-class TkFont:
+class GUIFonts:
     """
-    Dataclass containing different fonts and their styles and or size
+    Sub dataclass containing fonts and their styles and or size
+
+    Fonts:
+        cas6b: Cascadia 6 bold
+        cas8: Cascadia 8
+        cas8i: Cascadia 8 italic
+        cas8b: Cascadia 8 bold
+        cas10b: Cascadia 10 bold
+        cas11: Cascadia 11
+        cas20b: Cascadia 20 bold
     """
 
     cas6b: str = "Cascadia 6 bold"
@@ -165,3 +205,18 @@ class TkFont:
     cas10b: str = "Cascadia 10 bold"
     cas11: str = "Cascadia 11"
     cas20b: str = "Cascadia 20 bold"
+
+
+@dataclass(frozen=True, order=True)
+class GUIData:
+    """
+    Dataclass containing GUI data
+    """
+
+    size = GUISizes
+    pos = GUIPositions
+    fonts = GUIFonts
+    colors = GUIColors
+
+
+GUI_DATA = GUIData()

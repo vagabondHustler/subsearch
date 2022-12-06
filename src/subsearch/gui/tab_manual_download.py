@@ -2,22 +2,18 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import __video__
-from subsearch.data.metadata_classes import (
-    DownloadMetaData,
-    FormattedMetadata,
-    TkColor,
-    TkFont,
-)
+from subsearch.data import GUI_DATA, __video__
+from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
 
 
 # download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
-    def __init__(self, parent, con_x, con_y, formatted_data: list[FormattedMetadata]):
+    def __init__(self, parent, formatted_data: list[FormattedMetadata]):
         tk.Frame.__init__(self, parent)
-        self.configure(bg=TkColor().dark_grey, width=con_x, height=con_y)
+        root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
+        self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy-82)
         # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
@@ -28,10 +24,10 @@ class DownloadList(tk.Frame):
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
             self,
-            height=con_y,
-            bg=TkColor().dark_grey,
-            fg=TkColor().light_grey,
-            font=TkFont().cas8b,
+            height=root_posy,
+            bg=GUI_DATA.colors.dark_grey,
+            fg=GUI_DATA.colors.light_grey,
+            font=GUI_DATA.fonts.cas8b,
             bd=0,
             border=0,
             borderwidth=0,
@@ -41,8 +37,8 @@ class DownloadList(tk.Frame):
         )
         hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
         self.sub_listbox.place(
-            height=con_y - 36,
-            width=con_x - hsx - 20,
+            height=root_posy - 82,
+            width=root_posx - hsx - 20,
             x=18,
             rely=0.5,
             bordermode="inside",
@@ -50,7 +46,7 @@ class DownloadList(tk.Frame):
         )
         if self.formatted_data is not None:
             self.fill_listbox()
-        self.scrollbar.place(x=con_x - 17, y=0, bordermode="inside", height=con_y)
+        self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy-82)
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 
@@ -86,7 +82,7 @@ class DownloadList(tk.Frame):
         ):
             if enum != int(item_num):
                 continue
-            self.sub_listbox.itemconfig(int(enum), {"fg": TkColor().blue})
+            self.sub_listbox.itemconfig(int(enum), {"fg": GUI_DATA.colors.blue})
             if _provider == "subscene":
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
@@ -106,4 +102,4 @@ class DownloadList(tk.Frame):
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")
-        self.sub_listbox.itemconfig(int(item_num), {"fg": TkColor().green})
+        self.sub_listbox.itemconfig(int(item_num), {"fg": GUI_DATA.colors.green})

@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 from typing import Any, Union
 
-from subsearch.data import __data__
-from subsearch.data.metadata_classes import ApplicationSettings
+from subsearch.data import __paths__
+from subsearch.data.data_objects import AppConfig
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
-    config_file = Path(__data__) / "config.json"
+    config_file = Path(__paths__.data) / "config.json"
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
@@ -17,7 +17,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
 
 
 def set_config(data):
-    config_file = Path(__data__) / "config.json"
+    config_file = Path(__paths__.data) / "config.json"
     with open(config_file, "w") as f:
         f.seek(0)
         json.dump(data, f, indent=4)
@@ -25,7 +25,7 @@ def set_config(data):
 
 
 def get_config() -> Any:
-    config_file = Path(__data__) / "config.json"
+    config_file = Path(__paths__.data) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
 
@@ -62,18 +62,18 @@ def set_default_json() -> None:
     data["log_to_file"] = False
     data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
-    config_file = Path(__data__) / "config.json"
+    config_file = Path(__paths__.data) / "config.json"
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
         file.truncate()
 
 
-def get_application_settings() -> ApplicationSettings:
-    config_file = Path(__data__) / "config.json"
+def get_app_config() -> AppConfig:
+    config_file = Path(__paths__.data) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
-    user_data = ApplicationSettings(
+    user_data = AppConfig(
         **data,
         language_iso_639_3=data["languages"][data["current_language"]],
         hearing_impaired=data["subtitle_type"]["hearing_impaired"],

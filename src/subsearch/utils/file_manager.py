@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 from subsearch.data import __video__
-from subsearch.data.metadata_classes import DownloadMetaData
+from subsearch.data.data_objects import DownloadMetaData
 from subsearch.providers.generic import get_cloudscraper
 from subsearch.utils import log, string_parser
 

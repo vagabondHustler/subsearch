@@ -2,11 +2,7 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.metadata_classes import (
-    ApplicationSettings,
-    MediaMetadata,
-    ProviderUrls,
-)
+from subsearch.data.data_objects import AppConfig, ProviderUrls, ReleaseMetadata
 from subsearch.utils import imdb
 
 
@@ -44,7 +40,7 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-def find_ordinal(string: str) -> tuple[str, str, str, str, bool]:
+def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
@@ -71,70 +67,102 @@ def find_title(filename: str, year: int, series: bool):
     return title
 
 
-def get_provider_urls(file_hash: str, ucf: ApplicationSettings, frd: MediaMetadata) -> ProviderUrls:
+class CreateProviderUrls:
     """
-    Parse data to apply to the provider urls
-
-    Args:
-        file_hash (str): hash of the video file
-        ufc (UserConfigData): user configured settings
-        frd (FileSearchData): parsed data from release name of a file
-
-    Returns:
-        ProviderUrlData: urls to the different providers
+    Class for retrieving initial URL to search with for a provider
     """
 
-    def _set_base_url():
-        base_ss = "https://subscene.com"
-        base_yts = "https://yifysubtitles.org"
-        base_os = "https://www.opensubtitles.org"
-        return base_ss, base_yts, base_os
+    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
+        """
+        Get initial URL to search with for a provider
 
-    def _set_subtitle_type():
-        if ucf.hearing_impaired and ucf.non_hearing_impaired is False:
-            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_iso_639_3}/hearingimpaired-on"
-        else:
-            subtitle_type_os = f"en/search/sublanguageid-{ucf.language_iso_639_3}"
-        return subtitle_type_os
+        Args:
+            file_hash (str): _description_
+            app_config (AppConfig): _description_
+            release_metadata (ReleaseMetadata): _description_
+        """
+        self.file_hash = file_hash
+        self.app_config = app_config
+        self.release_metadata = release_metadata
 
-    def _set_series_url():
-        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title} - {frd.season_ordinal} season"
-        url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlytvseries-on/season-{frd.season}/episode-{frd.episode}/moviename-{frd.title}/rss_2_00"
+    def retrieve_urls(self) -> ProviderUrls:
+        """
+        Retrieve all available URLs
 
-        url_yifysubtitles = "N/A"
-        return url_subscene, url_opensubtitles, url_yifysubtitles
+        Returns:
+            ProviderUrls: URLs for all providers
+        """
+        return ProviderUrls(self.subscene(), self.opensubtitles(), self.opensubtitles_hash(), self.yifysubtitles())
 
-    def _set_movie_url():
+    def subscene(self) -> str:
+        """
+        subscene URL
 
-        url_subscene = f"{base_ss}/subtitles/searchbytitle?query={frd.title}"
-        url_opensubtitles = f"{base_os}/{sub_type_os}/searchonlymovies-on/moviename-{frd.title} ({frd.year})/rss_2_00"
-        tt_id = imdb.FindImdbID(frd.title, frd.year).id
-        if tt_id is None:
-            url_yifysubtitles = "N/A"
-        else:
-            url_yifysubtitles = f"{base_yts}/movie-imdb/{tt_id}"
+        Returns:
+            str: f"{domain}/{query}={search_parameters}"
+        """
+        domain = "https://subscene.com"
+        query = "subtitles/searchbytitle?query"
+        search_parameters = self._subscene_search_parameters()
+        url_subscene = f"{domain}/{query}={search_parameters}"
+        return url_subscene.replace(" ", "%20")
 
-        return url_subscene, url_opensubtitles, url_yifysubtitles
+    def opensubtitles(self) -> str:
+        """
+        opensubtitles URL
 
-    base_ss, base_yts, base_os = _set_base_url()
-    sub_type_os = _set_subtitle_type()
-    if frd.tvseries:
-        url_subscene, url_opensubtitles, url_yifysubtitles = _set_series_url()
-    else:
-        url_subscene, url_opensubtitles, url_yifysubtitles = _set_movie_url()
+        Returns:
+            str: f"{domain}/{subtitle_type}/{search_parameters}/rss_2_00"
+        """
+        domain = "https://www.opensubtitles.org"
+        subtitle_type = self._opensubtitles_subtitle_type()
+        search_parameters = self._opensubtitles_search_parameters()
+        return f"{domain}/{subtitle_type}/{search_parameters}/rss_2_00".replace(" ", "%20")
 
-    url_opensubtitles_hash = f"{base_os}/{sub_type_os}/moviehash-{file_hash}"
-    # definitive_match = url_subscene.rsplit("query=", 1)[-1]
+    def opensubtitles_hash(self) -> str:
+        """
+        opensubtitles URL
 
-    url_subscene = url_subscene.replace(" ", "%20")
-    url_opensubtitles = url_opensubtitles.replace(" ", "%20")
-    parameters = ProviderUrls(url_subscene, url_opensubtitles, url_opensubtitles_hash, url_yifysubtitles)
-    return parameters
+        Returns:
+            str: f"{domain}/{subtitle_type}/moviehash-{self.file_hash}"
+        """
+        domain = "https://www.opensubtitles.org"
+        subtitle_type = self._opensubtitles_subtitle_type()
+        return f"{domain}/{subtitle_type}/moviehash-{self.file_hash}"
+
+    def yifysubtitles(self) -> str:
+        """
+        yifysubtitles URL
+
+        Returns:
+            str: f"{domain}/movie-imdb/{tt_id}"
+        """
+        if self.release_metadata.tvseries:
+            return "N/A"
+        domain = "https://yifysubtitles.org"
+        tt_id = imdb.FindImdbID(self.release_metadata.title, self.release_metadata.year).id
+        return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else "N/A"
+
+    def _subscene_search_parameters(self) -> str:
+        if self.release_metadata.tvseries:
+            return f"{self.release_metadata.title} - {self.release_metadata.season_ordinal} season"
+        return f"{self.release_metadata.title}"
+
+    def _opensubtitles_subtitle_type(self) -> str:
+        if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
+            return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}/hearingimpaired-on"
+        return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}"
+
+    def _opensubtitles_search_parameters(self) -> str:
+        if self.release_metadata.tvseries:
+            return f"searchonlytvseries-on/season-{self.release_metadata.season}/episode-{self.release_metadata.episode}/moviename-{self.release_metadata.title}"
+        return f"searchonlymovies-on/moviename-{self.release_metadata.title} ({self.release_metadata.year})"
 
 
-def get_media_metadata(filename: str, file_hash: str) -> MediaMetadata:
+
+def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     """
-    Parse filename and get parameters
+    Get release metadata from a filename
     Uses regex expressions to find the parameters
 
     Args:
@@ -142,17 +170,17 @@ def get_media_metadata(filename: str, file_hash: str) -> MediaMetadata:
         file_hash (str): hash of the file
 
     Returns:
-        FileSearchData: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
+        ReleaseMetadata: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
     """
     filename = filename.lower()
     year = find_year(filename)
     season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
+    season, season_ordinal, episode, episode_ordinal, series = convert_to_ordinal_string(season_episode)
 
     title = find_title(filename, year, series)
     group = find_group(filename)
 
-    parameters = MediaMetadata(
+    parameters = ReleaseMetadata(
         title,
         year,
         season,
