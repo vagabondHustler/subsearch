@@ -8,9 +8,9 @@ from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import file_manager, log, raw_config, raw_registry, string_parser
 
 
-class BaseInitializer:
+class Initializer:
     def __init__(self) -> None:
-        self.app_data = raw_config.get_application_settings()
+        self.app_data = raw_config.get_app_config()
         if __video__ is not None:
             self.file_exist = True
             self.file_hash = file_manager.get_hash(__video__.path)
@@ -22,20 +22,21 @@ class BaseInitializer:
         self.skipped_combined: list[FormattedMetadata] = []
         self.downloads: dict[str, int] = {}
 
-        for k in self.app_data.providers.keys():
-            self.results[k] = []
-            self.skipped[k] = []
-            self.downloads[k] = 0
+        for provider in self.app_data.providers.keys():
+            self.results[provider] = []
+            self.skipped[provider] = []
+            self.downloads[provider] = 0
 
         self.ran_download_tab = False
         if self.file_exist:
-            self.release_data = string_parser.get_media_metadata(__video__.name, self.file_hash)
-            self.provider_data = string_parser.get_provider_urls(self.file_hash, self.app_data, self.release_data)
-            log.set_logger_data(self.release_data, self.app_data, self.provider_data)
+            self.release_data = string_parser.get_release_metadata(__video__.name, self.file_hash)
+            create_provider_urls = string_parser.CreateProviderUrls(self.file_hash, self.app_data, self.release_data)
+            self.provider_urls = create_provider_urls.retrieve_urls()
+            log.set_logger_data(self.release_data, self.app_data, self.provider_urls)
             log.output_parameters()
 
     def all_providers_disabled(self) -> bool:
-        self.app_data = raw_config.get_application_settings()
+        self.app_data = raw_config.get_app_config()
         if (
             self.app_data.providers["subscene_site"] is False
             and self.app_data.providers["opensubtitles_site"] is False
@@ -51,10 +52,10 @@ class BaseInitializer:
         return downloads
 
 
-class Steps(BaseInitializer):
+class AppSteps(Initializer):
     def __init__(self) -> None:
         self.start = time.perf_counter()
-        BaseInitializer.__init__(self)
+        Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if raw_registry.registry_key_exists() is False:
             raw_config.set_default_json()
@@ -76,7 +77,7 @@ class Steps(BaseInitializer):
         if self.app_data.providers["opensubtitles_hash"] is False and self.app_data.providers["opensubtitles_site"] is False:
             return None
         # log.output_header("Searching on opensubtitles")
-        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_data, self.provider_data)
+        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_data, self.provider_urls)
         if self.app_data.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
         if self.app_data.providers["opensubtitles_site"]:
@@ -89,7 +90,7 @@ class Steps(BaseInitializer):
         if self.app_data.providers["subscene_site"] is False:
             return None
         # log.output_header("Searching on subscene")
-        _subscene = subscene.Subscene(self.release_data, self.app_data, self.provider_data)
+        _subscene = subscene.Subscene(self.release_data, self.app_data, self.provider_urls)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped["subscene_site"] = _subscene._sorted_list()
 
@@ -98,11 +99,11 @@ class Steps(BaseInitializer):
             return None
         if self.release_data.tvseries:
             return None
-        if self.provider_data.yifysubtitles == "N/A":
+        if self.provider_urls.yifysubtitles == "N/A":
             return None
         if self.app_data.providers["yifysubtitles_site"]:
             # log.output_header("Searching on yifysubtitles")
-            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_data, self.provider_data)
+            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_data, self.provider_urls)
             self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
             self.skipped["yifysubtitles_site"] = _yifysubs._sorted_list()
 

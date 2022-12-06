@@ -18,15 +18,15 @@ class AppPaths:
 
 
 @dataclass(order=True)
-class VideoFileMetadata:
+class FileData:
     """
     Dataclass containing the video file base information
     """
 
-    name: str
+    filename: str
     file_extension: str
-    path: Path
-    directory: Path
+    file_path: Path
+    directory_path: Path
     subs_directory: Path
     tmp_directory: Path
 
@@ -55,7 +55,7 @@ class AppConfig:
 
 
 @dataclass(frozen=True, order=True)
-class MediaMetadata:
+class ReleaseMetadata:
     """
     Dataclass containing parsed data from a video file
     """

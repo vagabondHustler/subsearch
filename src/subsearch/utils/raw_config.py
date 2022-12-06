@@ -69,7 +69,7 @@ def set_default_json() -> None:
         file.truncate()
 
 
-def get_application_settings() -> AppConfig:
+def get_app_config() -> AppConfig:
     config_file = Path(__paths__.data) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)

@@ -5,8 +5,8 @@ from subsearch.data.data_objects import (
     AppConfig,
     DownloadMetaData,
     FormattedMetadata,
-    MediaMetadata,
     ProviderUrls,
+    ReleaseMetadata,
 )
 from subsearch.utils import log
 
@@ -16,28 +16,28 @@ class ProviderParameters:
     Parameters for provider
     """
 
-    def __init__(self, media: MediaMetadata, app: AppConfig, urls: ProviderUrls):
-        self.release_data = media
-        self.user_data = app
+    def __init__(self, release_metadata: ReleaseMetadata, app_config: AppConfig, urls: ProviderUrls):
+        self.release_data = release_metadata
+        self.user_data = app_config
         self.provider_data = urls
 
         # file parameters
-        self.title = media.title
-        self.year = media.year
-        self.season = media.season
-        self.season_ordinal = media.season_ordinal
-        self.episode = media.episode
-        self.episode_ordinal = media.episode_ordinal
-        self.series = media.tvseries
-        self.release = media.release
-        self.group = media.group
-        self.file_hash = media.file_hash
+        self.title = release_metadata.title
+        self.year = release_metadata.year
+        self.season = release_metadata.season
+        self.season_ordinal = release_metadata.season_ordinal
+        self.episode = release_metadata.episode
+        self.episode_ordinal = release_metadata.episode_ordinal
+        self.series = release_metadata.tvseries
+        self.release = release_metadata.release
+        self.group = release_metadata.group
+        self.file_hash = release_metadata.file_hash
         # user parameters
-        self.current_language = app.current_language
-        self.hi_sub = app.hearing_impaired
-        self.non_hi_sub = app.non_hearing_impaired
-        self.percentage_threashold = app.percentage_threshold
-        self.manual_download_tab = app.manual_download_tab
+        self.current_language = app_config.current_language
+        self.hi_sub = app_config.hearing_impaired
+        self.non_hi_sub = app_config.non_hearing_impaired
+        self.percentage_threashold = app_config.percentage_threshold
+        self.manual_download_tab = app_config.manual_download_tab
         # provider url data
         self.url_subscene = urls.subscene
         self.url_opensubtitles = urls.opensubtitles
@@ -94,9 +94,5 @@ def format_key_value_pct(provider_: str, key: str, value: str, precentage_result
 
 
 def sort_download_metadata(list_: list[FormattedMetadata]) -> list[FormattedMetadata]:
-   list_.sort(key=lambda x: x.pct_result, reverse=True)
-   return list_
-
-
-
-
+    list_.sort(key=lambda x: x.pct_result, reverse=True)
+    return list_

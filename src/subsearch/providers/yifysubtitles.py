@@ -4,8 +4,8 @@ from subsearch.data import __video__
 from subsearch.data.data_objects import (
     AppConfig,
     FormattedMetadata,
-    MediaMetadata,
     ProviderUrls,
+    ReleaseMetadata,
 )
 from subsearch.providers import generic
 from subsearch.providers.generic import ProviderParameters
@@ -45,8 +45,8 @@ class YifySubtitlesScraper:
 
 
 class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
-    def __init__(self, parameters: MediaMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
-        ProviderParameters.__init__(self, parameters, user_parameters, provider_url)
+    def __init__(self, release_metadata: ReleaseMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
+        ProviderParameters.__init__(self, release_metadata, user_parameters, provider_url)
         YifySubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
@@ -72,8 +72,8 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
             to_be_downloaded[key] = value
 
         self.sorted_metadata = generic.sort_download_metadata(to_be_sorted)
-        log.downlod_metadata("yifysubtitles" , self.sorted_metadata, self.percentage_threashold)
-        
+        log.downlod_metadata("yifysubtitles", self.sorted_metadata, self.percentage_threashold)
+
         if not to_be_downloaded:
             return []
 

@@ -2,7 +2,7 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.data_objects import AppConfig, MediaMetadata, ProviderUrls
+from subsearch.data.data_objects import AppConfig, ProviderUrls, ReleaseMetadata
 from subsearch.utils import imdb
 
 
@@ -40,7 +40,7 @@ def find_season_episode(string: str) -> str:
     return "N/A"
 
 
-def find_ordinal(string: str) -> tuple[str, str, str, str, bool]:
+def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
@@ -160,9 +160,9 @@ class CreateProviderUrls:
 
 
 
-def get_media_metadata(filename: str, file_hash: str) -> MediaMetadata:
+def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     """
-    Parse filename and get parameters
+    Get release metadata from a filename
     Uses regex expressions to find the parameters
 
     Args:
@@ -170,17 +170,17 @@ def get_media_metadata(filename: str, file_hash: str) -> MediaMetadata:
         file_hash (str): hash of the file
 
     Returns:
-        FileSearchData: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
+        ReleaseMetadata: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
     """
     filename = filename.lower()
     year = find_year(filename)
     season_episode = find_season_episode(filename)
-    season, season_ordinal, episode, episode_ordinal, series = find_ordinal(season_episode)
+    season, season_ordinal, episode, episode_ordinal, series = convert_to_ordinal_string(season_episode)
 
     title = find_title(filename, year, series)
     group = find_group(filename)
 
-    parameters = MediaMetadata(
+    parameters = ReleaseMetadata(
         title,
         year,
         season,

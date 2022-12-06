@@ -12,12 +12,12 @@ sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 
 
-class Subsearch(core.Steps):
+class Subsearch(core.AppSteps):
     def __init__(self) -> None:
         """
         Setup and gather all available parameters
         """
-        core.Steps.__init__(self)
+        core.AppSteps.__init__(self)
 
     def thread_executor(self, *args):
         """
@@ -47,7 +47,6 @@ class Subsearch(core.Steps):
             self._provider_subscene()
             self._provider_opensubtitles()
             self._provider_yifysubtitles()
-    
 
     def provider_opensubtitles(self) -> None:
         """

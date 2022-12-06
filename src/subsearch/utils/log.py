@@ -7,8 +7,8 @@ from subsearch.data import __version__, __video__
 from subsearch.data.data_objects import (
     AppConfig,
     FormattedMetadata,
-    MediaMetadata,
     ProviderUrls,
+    ReleaseMetadata,
 )
 from subsearch.utils import raw_config
 
@@ -16,8 +16,8 @@ NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 
-release_metadata: MediaMetadata
-application_settings: AppConfig
+ReleaseMetadata: ReleaseMetadata
+app_config: AppConfig
 provider_urls: ProviderUrls
 
 logger = logging.getLogger("subsearch")
@@ -86,30 +86,28 @@ def output_done_with_tasks(end_new_line: bool = False):
 
 def output_parameters() -> None:
     output_header(f"User data")
-    output(
-        f"Language:                         {application_settings.current_language}, {application_settings.language_iso_639_3}"
-    )
-    output(f"Use HI subtitle:                  {application_settings.hearing_impaired}")
-    output(f"Use non-HI subtitle:              {application_settings.non_hearing_impaired}")
-    output(f"Match threshold:                  {application_settings.percentage_threshold}%")
-    output(f"Use site subscene:                {application_settings.providers['subscene_site']}")
-    output(f"Use site opensubtitles:           {application_settings.providers['opensubtitles_site']}")
-    output(f"Use hash opensubtitles:           {application_settings.providers['opensubtitles_hash']}")
-    output(f"Use site yifysubtitles:           {application_settings.providers['subscene_site']}")
+    output(f"Language:                         {app_config.current_language}, {app_config.language_iso_639_3}")
+    output(f"Use HI subtitle:                  {app_config.hearing_impaired}")
+    output(f"Use non-HI subtitle:              {app_config.non_hearing_impaired}")
+    output(f"Match threshold:                  {app_config.percentage_threshold}%")
+    output(f"Use site subscene:                {app_config.providers['subscene_site']}")
+    output(f"Use site opensubtitles:           {app_config.providers['opensubtitles_site']}")
+    output(f"Use hash opensubtitles:           {app_config.providers['opensubtitles_hash']}")
+    output(f"Use site yifysubtitles:           {app_config.providers['subscene_site']}")
     output("")
     output_header(f"File data")
     output(f"Filename:                         {__video__.name}")
     output(f"Directory:                        {__video__.directory}")
     output("")
     output_header(f"Release data")
-    output(f"Title:                            {release_metadata.title}")
-    output(f"Year:                             {release_metadata.year}")
-    output(f"Season:                           {release_metadata.season}, {release_metadata.season_ordinal}")
-    output(f"Episode:                          {release_metadata.episode}, {release_metadata.episode_ordinal}")
-    output(f"Series:                           {release_metadata.tvseries}")
-    output(f"Release:                          {release_metadata.release}")
-    output(f"Group:                            {release_metadata.group}")
-    output(f"File hash:                        {release_metadata.file_hash}")
+    output(f"Title:                            {ReleaseMetadata.title}")
+    output(f"Year:                             {ReleaseMetadata.year}")
+    output(f"Season:                           {ReleaseMetadata.season}, {ReleaseMetadata.season_ordinal}")
+    output(f"Episode:                          {ReleaseMetadata.episode}, {ReleaseMetadata.episode_ordinal}")
+    output(f"Series:                           {ReleaseMetadata.tvseries}")
+    output(f"Release:                          {ReleaseMetadata.release}")
+    output(f"Group:                            {ReleaseMetadata.group}")
+    output(f"File hash:                        {ReleaseMetadata.file_hash}")
     output("")
     output_header(f"Provider url data")
     output(f"subscene_site:                    {provider_urls.subscene}")
@@ -120,16 +118,16 @@ def output_parameters() -> None:
 
 
 def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False):
-    if pct_result >= application_settings.percentage_threshold:
+    if pct_result >= app_config.percentage_threshold:
         output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
     else:
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(media: MediaMetadata, app: AppConfig, urls: ProviderUrls):
-    global release_metadata, application_settings, provider_urls
-    release_metadata = media
-    application_settings = app
+def set_logger_data(media: ReleaseMetadata, app: AppConfig, urls: ProviderUrls):
+    global ReleaseMetadata, app_config, provider_urls
+    ReleaseMetadata = media
+    app_config = app
     provider_urls = urls
 
 
