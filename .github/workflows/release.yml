@@ -140,7 +140,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           configuration: .github/configs/changelog_builder.json
-          ignorePreReleases: ${{ !contains(github.ref, '-') }}
+          ignorePreReleases: ${{ !contains(github.ref_name, 'rc') || !contains(github.ref_name, 'b') || !contains(github.ref_name, 'a') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -167,12 +167,12 @@ jobs:
           name: ${{ needs.versioning.outputs.new_version }}
           body_path: tmp_changelog.md
           token: ${{ secrets.ACTIONS_TOKEN }}
-          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'b') || contains(github.ref, 'a') }}
+          prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
             subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip
 
   pypi-upload:
-    if: ${{ !contains(github.ref, 'b') || !contains(github.ref, 'a') }}
+    if: ${{ !contains(github.ref_name, 'b') || !contains(github.ref_name, 'a') }}
     name: Upload to PyPi
     needs: ["versioning", "build-and-publish"]
     runs-on: ubuntu-latest
@@ -201,7 +201,7 @@ jobs:
           twine upload --verbose -u '__token__' dist/*
 
   latest-release-yml:
-    if: ${{ !contains(github.ref, 'rc') || !contains(github.ref, 'b') || !contains(github.ref, 'a') }}
+    if: ${{ !contains(github.ref_name, 'rc') || !contains(github.ref_name, 'b') || !contains(github.ref_name, 'a') }}
     name: Update latest_release.yml
     needs: [versioning, pypi-upload, build-and-publish]
     runs-on: windows-latest
