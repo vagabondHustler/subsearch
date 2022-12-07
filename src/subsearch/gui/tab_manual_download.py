@@ -13,7 +13,7 @@ class DownloadList(tk.Frame):
     def __init__(self, parent, formatted_data: list[FormattedMetadata]):
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
-        self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy-82)
+        self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy - 82)
         # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
@@ -46,7 +46,7 @@ class DownloadList(tk.Frame):
         )
         if self.formatted_data is not None:
             self.fill_listbox()
-        self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy-82)
+        self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy - 82)
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 

@@ -159,7 +159,6 @@ class CreateProviderUrls:
         return f"searchonlymovies-on/moviename-{self.release_metadata.title} ({self.release_metadata.year})"
 
 
-
 def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     """
     Get release metadata from a filename

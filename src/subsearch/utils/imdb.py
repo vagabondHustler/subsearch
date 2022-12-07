@@ -9,7 +9,7 @@ class AdvTitleSearch:
         self.year = year
 
     def get_url(self):
-        imdb_domain = "https://www.imdb.com"        
+        imdb_domain = "https://www.imdb.com"
         return f"{imdb_domain}/search/title/?{self.title_search}&{self.release_date_search}"
 
     @property

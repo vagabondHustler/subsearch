@@ -99,7 +99,8 @@ def test_provider_urls_movie():
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
     )
     assert (
-        provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
+        provider_url.opensubtitles_hash
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
     )
     assert provider_url.yifysubtitles == "N/A"
 
@@ -117,7 +118,8 @@ def test_provider_urls_series():
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
     )
     assert (
-        provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
+        provider_url.opensubtitles_hash
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-000000000000000000"
     )
     assert provider_url.yifysubtitles == "N/A"
 
