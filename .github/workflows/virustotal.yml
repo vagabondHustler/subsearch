@@ -8,6 +8,12 @@ jobs:
   virustotal:
     runs-on: ubuntu-latest
     steps:
+      - name: Remove v from ${{ github.ref_name }}
+        id: remove_v
+        run: |
+          v_version=${{ github.ref_name }}
+          echo "current_version=${v_version:1}" >> $GITHUB_ENV
+
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v3
         with:
@@ -15,4 +21,4 @@ jobs:
           github_token: ${{ secrets.ACTIONS_TOKEN }}
           update_release_body: false
           files: |
-            subsearch-${{ github.ref_name }}-win-x64.zip
+            subsearch-${{ env.current_version }}-win-x64.zip
