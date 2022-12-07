@@ -61,8 +61,6 @@ jobs:
     name: Versioning
     needs: ["test", "black-isort"]
     runs-on: ubuntu-latest
-    outputs:
-      version_output: ${{ steps.current_version.outputs.prev_version_output }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -80,21 +78,30 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Get current version
-        id: current_version
+        id: get_current_version
         run: |
-          output=$(python src/subsearch/data/version.py --get-version)
-          echo "::set-output name=prev_version_output::$output"
+          echo "current_version=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
+
+      - name: Remove v from ${{ github.ref_name }}
+        id: remove_v
+        run: |
+          v_version=${{ github.ref_name }}
+          echo "new_version=${v_version:1}" >> $GITHUB_ENV
 
       - name: Update version.py
-        run: python scripts/update_version.py ${{ github.ref_name }}
+        run: python scripts/update_version.py ${{env.new_version}}
 
       - name: Push new version
         run: |
           git status
           git add src/subsearch/data/version.py
-          git commit -S -m "Bump version v${{steps.current_version.outputs.prev_version_output}} → ${{ github.ref_name }}"
+          git commit -S -m "Bump version ${{env.current_version}} → ${{env.new_version}}"
           git fetch origin main
           git push origin HEAD:main
+
+    outputs:
+      current_version: "${{env.current_version}}"
+      new_version: "${{env.new_version}}"
 
   build-and-publish:
     name: Build and Publish
@@ -125,7 +132,7 @@ jobs:
         if: steps.build_executable.outcome
         run: |
           python scripts/make_archive.py
-          mv ./subsearch-x64.zip ./subsearch-${{ github.ref_name }}-win-x64.zip
+          mv ./subsearch-x64.zip ./subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip
 
       - name: Build changelog
         id: github_release
@@ -142,14 +149,14 @@ jobs:
         run: |
           echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
 
-          $sha256_hash = Get-FileHash -Path "subsearch-${{ github.ref_name }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $sha256_hash = Get-FileHash -Path "subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
 
           $ver = cat .github/configs/latest_release.yml
 
           $line1 = "###### Full changelog: "
           $http_subsearch = "https://github.com/vagabondHustler/subsearch"
           $line2 = "[${{ github.ref_name }}]($http_subsearch/compare/$ver...${{ github.ref_name }})"
-          $line3 = "<p>VirusTotal analysis: [subsearch-${{ github.ref_name }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
+          $line3 = "<p>VirusTotal analysis: [subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
 
           echo "$line1$line2$line3" >> tmp_changelog.md
 
@@ -157,14 +164,15 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          name: ${{ needs.versioning.outputs.new_version }}
           body_path: tmp_changelog.md
           token: ${{ secrets.ACTIONS_TOKEN }}
-          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
+          prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'b') || contains(github.ref, 'a') }}
           files: |
-            subsearch-${{ github.ref_name }}-win-x64.zip
+            subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip
 
   pypi-upload:
-    if: ${{ !contains(github.ref, '-') }}
+    if: ${{ !contains(github.ref, 'b') || !contains(github.ref, 'a') }}
     name: Upload to PyPi
     needs: ["versioning", "build-and-publish"]
     runs-on: ubuntu-latest
@@ -193,7 +201,7 @@ jobs:
           twine upload --verbose -u '__token__' dist/*
 
   latest-release-yml:
-    if: ${{ !contains(github.ref, '-') }}
+    if: ${{ !contains(github.ref, 'rc') || !contains(github.ref, 'b') || !contains(github.ref, 'a') }}
     name: Update latest_release.yml
     needs: [versioning, pypi-upload, build-and-publish]
     runs-on: windows-latest
