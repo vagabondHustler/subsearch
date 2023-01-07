@@ -69,7 +69,6 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
             return []
         log.output_match("opensubtitles", 100, self.release)
 
-
         # pack download data
         download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
         return download_info

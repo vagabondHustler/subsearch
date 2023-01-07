@@ -74,7 +74,10 @@ class AppSteps(Initializer):
             return None
         if self.app_config.language_iso_639_3 == "N/A":
             return None
-        if self.app_config.providers["opensubtitles_hash"] is False and self.app_config.providers["opensubtitles_site"] is False:
+        if (
+            self.app_config.providers["opensubtitles_hash"] is False
+            and self.app_config.providers["opensubtitles_site"] is False
+        ):
             return None
         # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_config, self.provider_urls)
