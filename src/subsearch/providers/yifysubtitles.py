@@ -65,7 +65,7 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
             log.output_match("yifysubtitles", pct_result, key)
             formatted_data = generic.format_key_value_pct("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False:
+            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
                 continue
             if value in to_be_downloaded.values():
                 continue

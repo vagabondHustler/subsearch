@@ -66,7 +66,7 @@ class Subscene(ProviderParameters, SubsceneScraper):
         self.logged_and_sorted: list[FormattedMetadata] = []
 
     def _definitive_match(self) -> list[str]:
-        if self.series:
+        if self.tvseries:
             return [f"{self.title} - {self.season_ordinal} season"]
         return [f"{self.title} ({self.year})", f"{self.title} ({(self.year-1)})"]
 
@@ -88,7 +88,7 @@ class Subscene(ProviderParameters, SubsceneScraper):
             log.output_match("subscene", pct_result, key)
             formatted_data = generic.format_key_value_pct("subscene", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False:
+            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
                 continue
             if key in _to_be_downloaded.keys():
                 continue
