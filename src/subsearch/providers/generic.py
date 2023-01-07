@@ -28,7 +28,7 @@ class ProviderParameters:
         self.season_ordinal = release_metadata.season_ordinal
         self.episode = release_metadata.episode
         self.episode_ordinal = release_metadata.episode_ordinal
-        self.series = release_metadata.tvseries
+        self.tvseries = release_metadata.tvseries
         self.release = release_metadata.release
         self.group = release_metadata.group
         self.file_hash = release_metadata.file_hash
@@ -37,7 +37,8 @@ class ProviderParameters:
         self.hi_sub = app_config.hearing_impaired
         self.non_hi_sub = app_config.non_hearing_impaired
         self.percentage_threashold = app_config.percentage_threshold
-        self.manual_download_tab = app_config.manual_download_tab
+        self.manual_download_fail = app_config.manual_download_fail
+        self.manual_download_mode = app_config.manual_download_mode
         # provider url data
         self.url_subscene = urls.subscene
         self.url_opensubtitles = urls.opensubtitles
@@ -45,11 +46,8 @@ class ProviderParameters:
         self.url_yifysubtitles = urls.yifysubtitles
 
     def is_threshold_met(self, key: str, pct_result: int) -> bool:
-        if (
-            pct_result >= self.percentage_threashold
-            or self.title
-            and f"{self.season}{self.episode}" in key.lower()
-            and self.series
+        if pct_result >= self.percentage_threashold or (
+            self.title and f"{self.season}{self.episode}" in key.lower() and self.tvseries
         ):
             return True
         return False

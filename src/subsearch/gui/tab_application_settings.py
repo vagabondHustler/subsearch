@@ -9,7 +9,8 @@ from subsearch.utils import file_manager, raw_config, raw_registry, updates
 SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
-DL_WINDOW = raw_config.get_config_key("manual_download_tab")
+DLW_ON_FAIL = raw_config.get_config_key("manual_download_fail")
+MANUAL_MODE = raw_config.get_config_key("manual_download_mode")
 FILE_EXTENSIONS = raw_config.get_config_key("file_extensions")
 USE_THREADING = raw_config.get_config_key("use_threading")
 
@@ -189,7 +190,7 @@ class ShowDownloadWindow(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{DL_WINDOW}")
+        self.string_var.set(f"{DLW_ON_FAIL}")
         label = tk.Label(self, text="Download window")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
@@ -228,12 +229,12 @@ class ShowDownloadWindow(tk.Frame):
     def button_set_true(self, event):
         self.string_var.set(f"True")
         tk_tools.VarColorPicker(self.string_var, self.clabel)
-        raw_config.set_config_key_value("manual_download_tab", True)
+        raw_config.set_config_key_value("manual_download_fail", True)
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
         tk_tools.VarColorPicker(self.string_var, self.clabel)
-        raw_config.set_config_key_value("manual_download_tab", False)
+        raw_config.set_config_key_value("manual_download_fail", False)
 
 
 class ShowTerminalOnSearch(tk.Frame):

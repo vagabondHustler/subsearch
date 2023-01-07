@@ -69,6 +69,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
             return []
         log.output_match("opensubtitles", 100, self.release)
 
+
         # pack download data
         download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
         return download_info
@@ -91,7 +92,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
             log.output_match("opensubtitles", pct_result, key)
             formatted_data = generic.format_key_value_pct("opensubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False:
+            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
                 continue
             if value in to_be_downloaded.values():
                 continue

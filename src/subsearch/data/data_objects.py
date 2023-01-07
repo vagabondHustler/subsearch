@@ -43,7 +43,8 @@ class AppConfig:
     percentage_threshold: int
     rename_best_match: bool
     context_menu_icon: bool
-    manual_download_tab: bool
+    manual_download_fail: bool
+    manual_download_mode: bool
     show_terminal: bool
     use_threading: bool
     log_to_file: bool
