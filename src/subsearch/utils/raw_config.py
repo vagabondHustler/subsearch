@@ -58,7 +58,7 @@ def set_default_json() -> None:
     data["context_menu_icon"] = True
     data["manual_download_fail"] = True
     data["manual_download_mode"] = False
-    data["use_threading"] = False
+    data["use_threading"] = True
     data["show_terminal"] = False
     data["log_to_file"] = False
     data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)
