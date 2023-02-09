@@ -21,7 +21,6 @@ def paths() -> AppPaths:
 
 @no_type_check
 def video_file() -> FileData:
-
     """
     Set path, name, directory and ext for the video file
 

@@ -105,7 +105,6 @@ class ShowContextMenu(tk.Frame):
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
         if btn["text"] == "False":
-
             btn.bind("<ButtonRelease-1>", self.button_set_false)
 
     def leave_button(self, event):
