@@ -38,9 +38,10 @@ class YifySubtitlesScraper:
                 continue
             node = item.css_first("a")
             titles = node.text().strip().split("subtitle ")[-1].split("\n")
-            href = node.attributes["href"].replace("subtitles", "subtitle")
+            _href = node.attributes["href"].split("/")
+            href = _href[-1]
             for title in titles:
-                subtitles[title] = f"https://yifysubtitles.org{href}.zip"
+                subtitles[title] = f"https://yifysubtitles.org/subtitle/{href}.zip"
         return subtitles
 
 
