@@ -15,6 +15,10 @@
 		{
 			"title": "#### 💤 Chores:",
 			"labels": ["chore", "other"]
+		},
+		{
+			"title": "#### 📦 Dependencies:",
+			"labels": ["dependencies"]
 		}
 	],
 	"template": "${{CHANGELOG}}\n\n",
