@@ -2,9 +2,8 @@ import shutil
 from pathlib import Path
 
 """
-Used by release.yml in .github/workflows to create a zip files of the repository contents
+Used in workflow release.yml during job 'build-and-publish' under name 'Make archives'. 
 """
-
 
 path_x64_dir_src = Path(Path.cwd()) / "subsearch-x64" / "subsearch"
 path_x64_zip_dst = Path(Path.cwd()) / "subsearch-x64.zip"
