@@ -150,15 +150,21 @@ jobs:
           echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
 
           $sha256_hash = Get-FileHash -Path "subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          
+          $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
+          $version_yml = cat .github/configs/latest_release.yml
+          $pre_releases = @('rc', 'a', 'b')
+          $virustotal_no_file = "<p>VirusTotal analysis: No file uploaded"
+          $virustotal_url = "<p>VirusTotal analysis: [subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
 
-          $ver = cat .github/configs/latest_release.yml
 
           $line1 = "###### Full changelog: "
-          $http_subsearch = "https://github.com/vagabondHustler/subsearch"
-          $line2 = "[${{ github.ref_name }}]($http_subsearch/compare/$ver...${{ github.ref_name }})"
-          $line3 = "<p>VirusTotal analysis: [subsearch-${{ needs.versioning.outputs.new_version }}-win-x64.zip](https://www.virustotal.com/gui/file/$sha256_hash)"
+          $line2 = "[${{ github.ref_name }}]($subsearch_repo/compare/$version_yml...${{ github.ref_name }})"
+          $is_pre_release = $null -ne ($pre_releases | ? { ${{ github.ref_name }} -match $_ })
+          if ($is_pre_release){$line3 = $virustotal_no_file} else {$line3 = $virustotal_url}
+          $line4 = "<p>SHA256: **$sha256_hash**""
 
-          echo "$line1$line2$line3" >> tmp_changelog.md
+          echo "$line1$line2$line3$line4" >> tmp_changelog.md
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
