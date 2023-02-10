@@ -2,3 +2,4 @@ feature: ["feature/*", "feat/*"]
 fix: "fix/*"
 test: "test/*"
 chore: "chore/*"
+dependencies: "dependabot/*"
