@@ -160,7 +160,7 @@ jobs:
 
           $line1 = "###### Full changelog: "
           $line2 = "[${{ github.ref_name }}]($subsearch_repo/compare/$version_yml...${{ github.ref_name }})"
-          $is_pre_release = $null -ne ($pre_releases | ? { ${{ github.ref_name }} -match $_ })
+          $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
           if ($is_pre_release){$line3 = $virustotal_no_file} else {$line3 = $virustotal_url}
           $line4 = "<p>SHA256: **$sha256_hash**"
 
