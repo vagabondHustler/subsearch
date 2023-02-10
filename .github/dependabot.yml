@@ -6,7 +6,6 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
     labels:
-      - "chore"
       - "dependencies"
 
   - package-ecosystem: "github-actions"
