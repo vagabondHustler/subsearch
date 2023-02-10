@@ -140,7 +140,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           configuration: .github/configs/changelog_builder.json
-          ignorePreReleases: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+          ignorePreReleases: ${{ !contains(github.ref_name, 'rc') || !contains(github.ref_name, 'b') || !contains(github.ref_name, 'a') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
