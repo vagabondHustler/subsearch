@@ -132,11 +132,11 @@ if __name__ == "__main__":
 <details>
 <summary>Source <a name = "src"></a></summary>
 
----
+#### Install python
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
-Download subsearch
+#### Clone repository
 
 `git clone https://github.com/vagabondHustler/subsearch.git`
 
@@ -151,6 +151,10 @@ Example 1: only required dependencies
 Example 2: with dev/optional dependencies
 
 `pip install -e .[dev, optional]`
+
+#### Build executable and msi installer
+
+`python setup.py bdist_msi`
 
 <details>
 <summary>Code block example<a name = "code"></a></summary>
@@ -194,7 +198,7 @@ if __name__ == "__main__":
 
 ---
 
-Download SubSearch-vx.x.x-subsearch-${{ needs.versioning.outputs.new_version }}--win64.msi from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
+Download SubSearch-x.x.x-win64.msi from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
 
 Advantage of using the .msi installer is that when updating from a previous version you just need to download and run the new installer, as long as it's installed into the same directory. Else you might have to delete the old registry key, see the [Wiki](https://github.com/vagabondHustler/subsearch/wiki/Remove-context-menu) for details.
 
