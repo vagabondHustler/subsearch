@@ -3,7 +3,7 @@ requires = ["setuptools>=65.5", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "subsearch"
+name = "Subsearch"
 description = "Download subtitles for movies and shows, automatically with one easy mouse click."
 readme = "README.md"
 requires-python = ">=3.10"

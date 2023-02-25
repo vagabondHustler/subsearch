@@ -10,8 +10,8 @@ COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = "Software\\Classes"
 ASTERISK_PATH = "Software\\Classes\\*"
 SHELL_PATH = "Software\\Classes\\*\\shell"
-SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\0.subsearch"
-COMMAND_PATH = "Software\\Classes\\*\\shell\\0.subsearch\\command"
+SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\Subsearch"
+COMMAND_PATH = "Software\\Classes\\*\\shell\\Subsearch\\command"
 
 
 def write_keys() -> None:
@@ -21,7 +21,7 @@ def write_keys() -> None:
         with winreg.OpenKey(hkey, ASTERISK_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "shell")
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
-            winreg.CreateKey(sk, "0.subsearch")
+            winreg.CreateKey(sk, "Subsearch")
         with winreg.OpenKey(hkey, SUBSEARCH_PATH, 0, winreg.KEY_WRITE) as sk:
             winreg.CreateKey(sk, "command")
 
@@ -124,7 +124,7 @@ def remove_context_menu() -> None:
 
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, SHELL_PATH, 0, winreg.KEY_WRITE) as sk:
-            winreg.DeleteKey(sk, "0.subsearch")
+            winreg.DeleteKey(sk, "Subsearch")
 
 
 # write keys to registry then write values
@@ -140,7 +140,7 @@ def registry_key_exists() -> bool:
     Returns:
         bool: True if key exists, False if key does not exist
     """
-    sub_key = r"Software\Classes\*\shell\0.subsearch\command"
+    sub_key = r"Software\Classes\*\shell\Subsearch\command"
     try:
         with winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as hkey:
             winreg.OpenKey(hkey, sub_key)

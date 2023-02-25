@@ -18,9 +18,8 @@
 - [Preview](#preview)
 - [PyPi](#pypi)
 - [Source](#src)
-- [Executable](#exe)
-- [GUI-settings explanation](#usage)
-- [VirusTotal analysis / false positives](#virus)
+- [Executable / MSI](#exe)
+- [Wiki](https://github.com/vagabondHustler/subsearch/wiki)
 - [Supported Languages](#lsupport)
 - [Authors](#authors)
 - [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md)
@@ -133,11 +132,11 @@ if __name__ == "__main__":
 <details>
 <summary>Source <a name = "src"></a></summary>
 
----
+#### Install python
 
 Download [Python](https://www.python.org/downloads/) >= 3.10
 
-Download subsearch
+#### Clone repository
 
 `git clone https://github.com/vagabondHustler/subsearch.git`
 
@@ -152,6 +151,10 @@ Example 1: only required dependencies
 Example 2: with dev/optional dependencies
 
 `pip install -e .[dev, optional]`
+
+#### Build executable and msi installer
+
+`python setup.py bdist_msi`
 
 <details>
 <summary>Code block example<a name = "code"></a></summary>
@@ -175,7 +178,7 @@ def main() -> None:
     )
     app.process_files()
     app.on_exit()
-    
+
 
 
 if __name__ == "__main__":
@@ -191,13 +194,13 @@ if __name__ == "__main__":
 </details>
 
 <details>
-<summary> Executable <a name = "exe"></a></summary>
+<summary> Executable / MSI <a name = "exe"></a></summary>
 
 ---
 
-Download SubSearch-vx.x.x-win-x64.zip from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
+Download SubSearch-x.x.x-win64.msi from releases - [Download URL](https://github.com/vagabondHustler/SubSearch/releases)
 
-Unzip file and run SubSearch.exe
+Advantage of using the .msi installer is that when updating from a previous version you just need to download and run the new installer, as long as it's installed into the same directory. Else you might have to delete the old registry key, see the [Wiki](https://github.com/vagabondHustler/subsearch/wiki/Remove-context-menu) for details.
 
 If you get a PUA message, click `More info`
 
@@ -216,57 +219,6 @@ If you get a PUA message, click `More info`
 
 If no subtitles are found or no subtitles (including the folder subs with extra .srt files) are synced with the movie check the **subsearch**.log (logging is disabled by default and can be enabled in the gui) for a list with download links to all the different subtitles that didn't pass the search threshold percentage or decrease the value in the settings GUI, accessed from SubSearch.exe
 
-## GUI-setting explanations  <a name = "usage"></a>
-
-<details>
-<summary>Languages</summary>
-
-Pick subtitle language.
-
-</details>
-
-<details>
-<summary>Search options</summary>
-
-- `Search providers`: What websites to search for subtitles on.
-- `Subtitle typ`: Only download hearing impaired subtitles/non hearing impaired or both if both are either checked/unchecked.
-- `Search threshold`: How closely the release name has to match with the found subtitle name, 100% would download everything.
-- `Rename best match`: Rename the .srt file that most closely matches the filename and keep it in the folder were the media file can be found (makes eg MPC-HC auto load the sub).
-
-</details>
-
-<details>
-<summary>Application settings</summary>
-
-- `File extensions`: Decide which files 'Subsearch' appears on in the context-menu.
-- `Context menu`: Remove/Add 'Subsearch' from the context-menu (and registry).
-- `Context menu icon`: Show a icon next to 'Subsearch' in the context-menu.
-- `Download window`: Open the manual download GUI tab if subtitles are found but not downloaded.
-- `Enable threading`: Search with all active providers concurrently, instead of separably, which can greatly improve the search times.
-- `Create subsearch.log`: Creates a .log file with different types of information the app does in the directory of the media file.
-- `Terminal on search`: Show the terminal when using `Subsearch`, what is output in the terminal is also output to the .log file (disabled when using the exe).
-- `Check for updates`: Check if there is a new release in the repository and provides a link to the latest release if there is a newer version available.
-
-</details>
-
-<details>
-<summary>Manual download</summary>
-
-For now, only has content if subtitles are found but not downloaded after a search.
-
-</details>
-
-## VirusTotal analysis / false positives <a name = "virus"></a>
-
-Every release has a attached virustotal analysis of the compiled code for transparency reasons.
-
-There are a few false positives, like `Trojan.PSW.Python.iv`, `Trojan.Stealer.Win32.29558`, `Trojan.Win32.Save.a`, `Trojan.Generic.hhkmb` etc.
-
-I have done my best to remove them, but there will probably always be false positives for as long as I don't have a code signature (which would cost money I'm not willing to spend at the moment)
-
-If you are unsure if they really are false positives (which you should be), the source code is always available here on github to be read.
-If you want to compile the code yourself, all the information you need to pass into pyinstaller can be found in the [build.spec](https://github.com/vagabondHustler/subsearch/blob/main/scripts/build.spec) file and the workflow file [release.yml](https://github.com/vagabondHustler/subsearch/blob/main/.github/workflows/release.yml) under job `build-and-publish` name `Build executable`.
-
 ## Supported languages <a name = "lsupport"></a>
 
 `N/A` = not supported on opensubtitles
@@ -277,11 +229,13 @@ If you want to compile the code yourself, all the information you need to pass i
 
 - [@vagabondHustler](https://github.com/vagabondHustler)
 
-## Special Thanks<a name = "thanks"></a>
+## Credits<a name = "thanks"></a>
 
-- To the people at [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template) for `README` template
-- To the people at [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md) for `CONTRIBUTING` template
-- To the people at [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader) for inspiration, ways of solving similar problems
-- To the people at [psf/black](https://github.com/psf/black) for ways of doing workflow related tasks
-- To the people at [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) for amazing icons
-- To the people at [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) for an amazing ttk theme
+People/repositories that has helped with templates, inspiration, themes and ways of solving similar problems.
+
+- [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+- [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md)
+- [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader)
+- [psf/black](https://github.com/psf/black)
+- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font)
+- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme)

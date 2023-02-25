@@ -22,4 +22,4 @@ jobs:
           github_token: ${{ secrets.ACTIONS_TOKEN }}
           update_release_body: false
           files: |
-            subsearch-${{ env.current_version }}-win-x64.zip
+            Subsearch-${{ env.current_version }}-win64.msi
