@@ -74,19 +74,19 @@ class Footer(tk.Frame):
         if self.active_tab == "language":
             self.tabs["language"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
             tk_tools.asset_tab(self.button_language, "language", "press")
-            self.parent.title("subsearch - languages")
+            self.parent.title("Subsearch - languages")
         elif self.active_tab == "search":
             self.tabs["search"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
             tk_tools.asset_tab(self.button_search, "search", "press")
-            self.parent.title("subsearch - search settings")
+            self.parent.title("Subsearch - search settings")
         elif self.active_tab == "settings":
             self.tabs["settings"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
             tk_tools.asset_tab(self.button_settings, "settings", "press")
-            self.parent.title("subsearch - application settings")
+            self.parent.title("Subsearch - application settings")
         elif self.active_tab == "download":
             self.tabs["download"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
             tk_tools.asset_tab(self.button_download, "download", "press")
-            self.parent.title("subsearch - manual download")
+            self.parent.title("Subsearch - manual download")
 
     def release_tab(self, event) -> None:
         if event.widget == self.button_language:
@@ -220,7 +220,7 @@ def main():
     if raw_registry.registry_key_exists() is False:
         raw_config.set_default_json()
         raw_registry.add_context_menu()
-    root = tk.Tk(className=f"subsearch")
+    root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)
     root.iconbitmap(__paths__.icon)
     root.geometry(tk_tools.WindowPosition.set(root))
