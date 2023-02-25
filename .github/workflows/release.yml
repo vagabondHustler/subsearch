@@ -127,6 +127,7 @@ jobs:
         id: build_msi
         run: |
           python setup.py bdist_msi -d .
+          
 
       - name: Build changelog
         id: github_release
@@ -143,13 +144,13 @@ jobs:
         run: |
           echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
 
-          $sha256_hash = Get-FileHash -Path "subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
 
           $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
           $version_yml = cat .github/configs/latest_release.yml
           $pre_releases = @('rc', 'a', 'b')
           $virustotal_no_file = "<p>VirusTotal analysis: No file uploaded"
-          $virustotal_url = "<p>VirusTotal analysis: [subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
+          $virustotal_url = "<p>VirusTotal analysis: [Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
 
 
           $line1 = "###### Full changelog: "
@@ -169,7 +170,7 @@ jobs:
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
-            subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi
+            Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi
 
   pypi-upload:
     if: ${{ !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
