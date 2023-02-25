@@ -3,7 +3,7 @@ requires = ["setuptools>=65.5", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "subsearch"
+name = "Subsearch"
 description = "Download subtitles for movies and shows, automatically with one easy mouse click."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,7 +44,7 @@ exclude = ["examples*", "tools*", "subsearch.test*"]
 version = {attr = "subsearch.data.__version__"}
 
 [project.optional-dependencies]
-optional = ["black==23.1.0", "isort==5.12.0", "twine==4.0.2", "build==0.10.0", "pyinstaller==5.8.0", "mypy==1.0.1", "pipreqs==0.4.11"]
+optional = ["black==23.1.0", "isort==5.12.0", "twine==4.0.2", "build==0.10.0", "cx_freeze==6.14.4", "mypy==1.0.1", "pipreqs==0.4.11"]
 dev = ["pytest==7.2.1", "pytest-cov==4.0.0", "tox==4.4.6"]
 
 
