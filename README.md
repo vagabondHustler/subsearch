@@ -23,10 +23,10 @@
 #### Wiki Table of Contents
 
 - [Home](https://github.com/vagabondHustler/subsearch/wiki)
-- [Code-Analysis-and-Verification-Process](https://github.com/vagabondHustler/subsearch/wiki/Code-Analysis-and-Verification-Process)
-- [Fixing-Context-Menu-Issue-in-Subsearch](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch)
-- [Subsearch-Settings](https://github.com/vagabondHustler/subsearch/wiki/Subsearch-Settings)
-- [Troubleshooting-Subtitle-Search-Issues](https://github.com/vagabondHustler/subsearch/wiki/Troubleshooting-Subtitle-Search-Issues)
+- [Code Analysis and Verification Process](https://github.com/vagabondHustler/subsearch/wiki/Code-Analysis-and-Verification-Process)
+- [Fixing Context Menu Issue in Subsearch](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch)
+- [Subsearch Settings](https://github.com/vagabondHustler/subsearch/wiki/Subsearch-Settings)
+- [Troubleshooting Subtitle Search Issues](https://github.com/vagabondHustler/subsearch/wiki/Troubleshooting-Subtitle-Search-Issues)
 
 #### Misc Table of Contents
 
@@ -87,7 +87,7 @@ If the terminal is disabled during the subtitle search process.
 
 - Download `SubSearch-x.x.x-win64.msi` from the Subsearch releases [page](https://github.com/vagabondHustler/SubSearch/releases)
 - Install the .msi file.
-- To update from a previous version, download and run the new installer in the same directory. If installed in a different directory, delete the old registry key (see Wiki for details).the same directory. Else you might have to delete the old registry key, (see [Wiki](https://github.com/vagabondHustler/subsearch/wiki/) for details).Remove-context-menu) for details.
+- To update from a previous version, download and run the new installer in the same directory. If installed in a different directory, delete the old registry key (see Wiki for details).the same directory. Else you might have to delete the old registry key, (see [Wiki](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch) for details).
 - If you receive a PUA message, click `More info`.
 
 <details>
