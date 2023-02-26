@@ -3,3 +3,4 @@ fix: "fix/*"
 test: "test/*"
 chore: "chore/*"
 dependency: ["dependabot/*", "dependency/*"]
+workflow: ["workflow/*"]
