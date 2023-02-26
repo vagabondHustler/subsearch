@@ -15,144 +15,69 @@ from subsearch.utils import file_manager, raw_config, raw_registry
 
 
 class Footer(tk.Frame):
+    
     def __init__(self, parent, tabs: dict[str, Any], active_tab: str) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
+        relx_value = 0
+        btn_kwargs = dict(master=self, width=54, height=54, bg=GUI_DATA.colors.mid_grey_black, highlightthickness=0)
         self.parent = parent
         self.tabs = tabs
-        self.button_language = tk.Canvas(
-            self,
-            width=54,
-            height=54,
-            bg=GUI_DATA.colors.mid_grey_black,
-            highlightthickness=0,
-        )
-        self.button_search = tk.Canvas(
-            self,
-            width=54,
-            height=54,
-            bg=GUI_DATA.colors.mid_grey_black,
-            highlightthickness=0,
-        )
-        self.button_settings = tk.Canvas(
-            self,
-            width=54,
-            height=54,
-            bg=GUI_DATA.colors.mid_grey_black,
-            highlightthickness=0,
-        )
-        self.button_download = tk.Canvas(
-            self,
-            width=54,
-            height=54,
-            bg=GUI_DATA.colors.mid_grey_black,
-            highlightthickness=0,
-        )
-        self.button_language.place(relx=0.2, rely=0.5, anchor="center")
-        self.button_search.place(relx=0.4, rely=0.5, anchor="center")
-        self.button_settings.place(relx=0.6, rely=0.5, anchor="center")
-        self.button_download.place(relx=0.8, rely=0.5, anchor="center")
+        self.buttons = {}
 
-        self.button_language.bind("<Enter>", self.enter_tab)
-        self.button_search.bind("<Enter>", self.enter_tab)
-        self.button_settings.bind("<Enter>", self.enter_tab)
-        self.button_download.bind("<Enter>", self.enter_tab)
+        for tab_key in tabs.keys():
+            self.buttons[tab_key] = tk.Canvas(**btn_kwargs)
 
-        self.button_language.bind("<Leave>", self.leave_tab)
-        self.button_search.bind("<Leave>", self.leave_tab)
-        self.button_settings.bind("<Leave>", self.leave_tab)
-        self.button_download.bind("<Leave>", self.leave_tab)
-        tk_tools.asset_tab(self.button_language, "language", "rest")
-        tk_tools.asset_tab(self.button_search, "search", "rest")
-        tk_tools.asset_tab(self.button_settings, "settings", "rest")
-        tk_tools.asset_tab(self.button_download, "download", "rest")
+        for btn_key, btn_widget in self.buttons.items():
+            relx_value += 0.2
+            btn_widget.place(relx=relx_value, rely=0.5, anchor="center")
+            btn_widget.bind("<Enter>", self.enter_tab)
+            btn_widget.bind("<Leave>", self.leave_tab)
+            tk_tools.asset_tab(btn_widget, btn_key, "rest")
+
         tk_tools.set_default_grid_size(self)
         self.active_tab = active_tab
         self.activate_tabs()
 
     def activate_tabs(self) -> None:
-        if self.active_tab == "language":
-            self.tabs["language"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
-            tk_tools.asset_tab(self.button_language, "language", "press")
-            self.parent.title("Subsearch - languages")
-        elif self.active_tab == "search":
-            self.tabs["search"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
-            tk_tools.asset_tab(self.button_search, "search", "press")
-            self.parent.title("Subsearch - search settings")
-        elif self.active_tab == "settings":
-            self.tabs["settings"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
-            tk_tools.asset_tab(self.button_settings, "settings", "press")
-            self.parent.title("Subsearch - application settings")
-        elif self.active_tab == "download":
-            self.tabs["download"].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
-            tk_tools.asset_tab(self.button_download, "download", "press")
-            self.parent.title("Subsearch - manual download")
+        self.tabs[self.active_tab].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
+        tk_tools.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
+        self.parent.title(f"Subsearch - {self.active_tab} tab")
 
     def release_tab(self, event) -> None:
-        if event.widget == self.button_language:
-            self.active_tab = "language"
-        if event.widget == self.button_search:
-            self.active_tab = "search"
-        if event.widget == self.button_settings:
-            self.active_tab = "settings"
-        if event.widget == self.button_download:
-            self.active_tab = "download"
+        btn_key, _btn_widget = self.get_btn(self.buttons, event)
+        self.active_tab = btn_key
         self.activate_tabs()
         self.deactivate_tabs()
 
     def press_tab(self, event) -> None:
-        if event.widget == self.button_language:
-            self.button_language.bind("<ButtonRelease>", self.release_tab)
-            tk_tools.asset_tab(self.button_language, "language", "press", y=20)
-        if event.widget == self.button_search:
-            self.button_search.bind("<ButtonRelease>", self.release_tab)
-            tk_tools.asset_tab(self.button_search, "search", "press", y=20)
-        if event.widget == self.button_settings:
-            self.button_settings.bind("<ButtonRelease>", self.release_tab)
-            tk_tools.asset_tab(self.button_settings, "settings", "press", y=20)
-        if event.widget == self.button_download:
-            self.button_download.bind("<ButtonRelease>", self.release_tab)
-            tk_tools.asset_tab(self.button_download, "download", "press", y=20)
+        btn_key, btn_widget = self.get_btn(self.buttons, event, False)
+        btn_widget.bind("<ButtonRelease>", self.release_tab)
+        tk_tools.asset_tab(btn_widget, btn_key, "press", y=20)
 
     def deactivate_tabs(self) -> None:
-        if self.active_tab != "language":
-            self.tabs["language"].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
-            tk_tools.asset_tab(self.button_language, "language", "rest")
-        if self.active_tab != "search":
-            self.tabs["search"].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
-            tk_tools.asset_tab(self.button_search, "search", "rest")
-        if self.active_tab != "settings":
-            self.tabs["settings"].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
-            tk_tools.asset_tab(self.button_settings, "settings", "rest")
-        if self.active_tab != "download":
-            self.tabs["download"].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
-            tk_tools.asset_tab(self.button_download, "download", "rest")
+        for btn_key, btn_widget in self.buttons.items():
+            if self.active_tab == btn_key:
+                continue
+            self.tabs[btn_key].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
+            tk_tools.asset_tab(btn_widget, btn_key, "rest")
 
     def enter_tab(self, event) -> None:
-        if event.widget == self.button_language:
-            self.button_language.bind("<ButtonPress>", self.press_tab)
-            tk_tools.asset_tab(self.button_language, "language", "hover", y=25)
-        if event.widget == self.button_search:
-            self.button_search.bind("<ButtonPress>", self.press_tab)
-            tk_tools.asset_tab(self.button_search, "search", "hover", y=25)
-        if event.widget == self.button_settings:
-            self.button_settings.bind("<ButtonPress>", self.press_tab)
-            tk_tools.asset_tab(self.button_settings, "settings", "hover", y=25)
-        if event.widget == self.button_download:
-            self.button_download.bind("<ButtonPress>", self.press_tab)
-            tk_tools.asset_tab(self.button_download, "download", "hover", y=25)
+        _btn_key, btn_widget = self.get_btn(self.buttons, event)
+        btn_widget.bind("<ButtonPress>", self.press_tab)
 
     def leave_tab(self, event) -> None:
-        if event.widget == self.button_language:
-            self.button_language.unbind("<ButtonPress>")
-        if event.widget == self.button_search:
-            self.button_search.unbind("<ButtonPress>")
-        if event.widget == self.button_settings:
-            self.button_settings.unbind("<ButtonPress>")
-        if event.widget == self.button_download:
-            self.button_download.unbind("<ButtonPress>")
+        _btn_key, btn_value = self.get_btn(self.buttons, event)
+        btn_value.unbind("<ButtonPress>")
         self.activate_tabs()
         self.deactivate_tabs()
+
+    def get_btn(self, dict_, event_, equals=True):
+        for btn_key, btn_widget in dict_.items():
+            if event_.widget == btn_widget and equals:
+                return btn_key, btn_widget
+            if event_.widget == btn_widget and not equals:
+                return btn_key, btn_widget
 
 
 class TabLanguage(tk.Frame):
@@ -210,7 +135,6 @@ def open_tab(active_tab: str, **kwargs) -> None:
         "settings": TabSettings(root),
         "download": TabDownload(root, formatted_data),
     }
-    # edit_tabs(tabs, "language").place(x=32)
     footer = Footer(root, tabs, active_tab.lower())
     footer.place(y=GUI_DATA.size.root_height - 82)
     root.mainloop()
