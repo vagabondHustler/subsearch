@@ -17,8 +17,8 @@
 			"labels": ["chore", "other"]
 		},
 		{
-			"title": "#### 📦 Dependencies:",
-			"labels": ["dependency"]
+			"title": "#### 📦 Dependencies & workflows:",
+			"labels": ["dependency", "dependabot", "workflow", "github-actions"]
 		}
 	],
 	"template": "${{CHANGELOG}}\n\n",
