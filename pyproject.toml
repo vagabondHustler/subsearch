@@ -22,7 +22,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop"
 ]
-dependencies = ["selectolax==0.3.12", "cloudscraper==1.2.68","num2words==0.5.12","packaging==23.0","requests==2.28.2",]
+dependencies = ["selectolax==0.3.12", "cloudscraper==1.2.69","num2words==0.5.12","packaging==23.0","requests==2.28.2",]
 dynamic = ["version"]
 
 [project.urls]
