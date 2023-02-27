@@ -35,6 +35,16 @@
 
 ## About <a name = "about"></a>
 
+#### Key Features
+  
+  - Initiate a search for subtitles by simply right-clicking on a media file.
+  - Search for subtitles in 70 different languages
+  - User-friendly GUI for easy customization and configuration
+  - Available in three options, including a compiled executable and source code on GitHub and PyPI
+  - The setup process is straightforward and has minimal reliance on external modules.
+
+#### Details 
+
 Subsearch is an automated subtitle downloader and extractor that allows users to search and download subtitles for movies and TV shows with a single click from the context menu. The application features a graphical user interface for configuring settings, including options for searching subtitles in 70 different languages from various subtitle sites, filtering hearing-impaired subtitles, and adjusting filename matching criteria.
 
 The application has a user-friendly GUI for all custom settings that can be easily configured. It supports 70 different languages, most of which work on all available subtitle sites. Users can configure it to include hearing impaired subtitles only, non-hearing impaired subtitles only, or both. They can also adjust how strictly the file name matches the search results.
@@ -48,12 +58,10 @@ Initially created as a personal project to learn Python programming and git vers
 
 <div align="center">
 
-If the terminal is disabled during the subtitle search process.
-
 ![prtsc_example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example.gif)
 
 <details>
-<summary>Available options in the GUI - click to expand</summary>
+<summary>Screenshots of the interface</summary>
 
 ![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/gui_language.png)
 
@@ -91,13 +99,11 @@ If the terminal is disabled during the subtitle search process.
 - If you receive a PUA message, click `More info`.
 
 <details>
-<summary>Screenshots<a name = "code"></a></summary>
+<summary>Screenshots of PUA message<a name = "code"></a></summary>
 
 ![prtsc_moreinfo](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
 
 ![prtsc_runanyway](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
-
-</details>
 
 ---
 
