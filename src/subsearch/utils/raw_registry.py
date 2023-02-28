@@ -140,10 +140,20 @@ def registry_key_exists() -> bool:
     Returns:
         bool: True if key exists, False if key does not exist
     """
-    sub_key = r"Software\Classes\*\shell\Subsearch\command"
+    sub_key = rf"Software\Classes\*\shell\Subsearch\command"
     try:
         with winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as hkey:
             winreg.OpenKey(hkey, sub_key)
             return True
     except Exception:
         return False
+
+
+def key_no_value() -> bool:
+    sub_key = rf"Software\Classes\*\shell\Subsearch\command"
+    with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
+        with winreg.OpenKey(hkey, sub_key) as subkey:
+            default = winreg.QueryValueEx(subkey, None)
+            if default[0] == "":
+                return True
+    return False
