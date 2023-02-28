@@ -1,5 +1,8 @@
 from importlib import util
 
+# TODO: Modify the MSI installer to add the correct registry key values without relying on the application to run once to generate them.
+# Currently, the installer only adds registry key placeholders, which are updated only after the app runs and generates the correct values
+# . 
 
 def _cx_freeze():
     """
@@ -7,7 +10,6 @@ def _cx_freeze():
 
     """
     from cx_Freeze import Executable, setup
-
     icon = "src/subsearch/gui/assets/icon/subsearch.ico"
     # Define registry keys and entries for context menu integration in Windows Explorer
     #
