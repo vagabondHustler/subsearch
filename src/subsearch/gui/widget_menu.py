@@ -141,7 +141,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
 
 
 def main():
-    if raw_registry.registry_key_exists() is False:
+    if raw_registry.registry_key_exists() is False and raw_config.get_config_key("context_menu"):
         raw_config.set_default_json()
         raw_registry.add_context_menu()
     root = tk.Tk(className=f"Subsearch")

@@ -39,7 +39,7 @@ def get_config_key(key: str) -> Any:
     Args:
         key (str):
         current_language, languages, subtitle_type, percentage_threshold,
-        rename_best_match, context_menu_icon, manual_download_fail, use_threading,
+        rename_best_match, context_menu, context_menu_icon, manual_download_fail, use_threading,
         show_terminal, log_to_file, file_extensions, providers
 
     Returns:
@@ -55,6 +55,7 @@ def set_default_json() -> None:
     data["subtitle_type"] = dict.fromkeys(data["subtitle_type"], True)
     data["percentage_threshold"] = 90
     data["rename_best_match"] = True
+    data["context_menu"] = True
     data["context_menu_icon"] = True
     data["manual_download_fail"] = True
     data["manual_download_mode"] = False

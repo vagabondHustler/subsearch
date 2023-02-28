@@ -57,8 +57,10 @@ class AppSteps(Initializer):
         self.start = time.perf_counter()
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if raw_registry.registry_key_exists() is False:
+        if raw_registry.registry_key_exists() is False and raw_config.get_config_key("context_menu"):
             raw_config.set_default_json()
+            raw_registry.add_context_menu()
+        if raw_registry.registry_key_exists() and raw_registry.key_no_value() and raw_config.get_config_key("context_menu"):
             raw_registry.add_context_menu()
         file_manager.make_necessary_directories()
         if self.file_exist is False:

@@ -74,7 +74,11 @@ class ShowContextMenu(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"True")
+        context_menu_value = raw_config.get_config_key("context_menu")
+        if context_menu_value == 1:
+            self.string_var.set("True")
+        else:
+            self.string_var.set("False")
         label = tk.Label(self, text="Context menu")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
@@ -112,6 +116,7 @@ class ShowContextMenu(tk.Frame):
 
     def button_set_true(self, event):
         self.string_var.set(f"True")
+        raw_config.set_config_key_value("context_menu", True)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         from subsearch.utils import raw_registry
 
@@ -120,6 +125,7 @@ class ShowContextMenu(tk.Frame):
 
     def button_set_false(self, event):
         self.string_var.set(f"False")
+        raw_config.set_config_key_value("context_menu", False)
         tk_tools.VarColorPicker(self.string_var, self.clabel)
         from subsearch.utils import raw_registry
 
