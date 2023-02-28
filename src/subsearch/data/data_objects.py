@@ -42,6 +42,7 @@ class AppConfig:
     subtitle_type: dict[str, bool]
     percentage_threshold: int
     rename_best_match: bool
+    context_menu: bool
     context_menu_icon: bool
     manual_download_fail: bool
     manual_download_mode: bool
