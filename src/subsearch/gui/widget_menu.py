@@ -15,7 +15,6 @@ from subsearch.utils import file_manager, raw_config, raw_registry
 
 
 class Footer(tk.Frame):
-    
     def __init__(self, parent, tabs: dict[str, Any], active_tab: str) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
