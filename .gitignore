@@ -147,19 +147,20 @@ desktop.ini
 # README.md settings
 .markdownlint.json
 
-# Subsearch
+# snakeviz
+profiling.prof
+
+#Offline testing
+tests/__subsearch__.log
+src/subsearch/subsearch.log
+scripts/git_branch.py
+scripts/get_msi_component_table.py
 src/*test*
 src/*language
 src/*.zip
 src/*.srt
 src/*subs/
 /*.log
-tests/__subsearch__.log
 old*
-scripts/git_branch.py
-src/subsearch/subsearch.log
 src/subsearch/test*
 test_media/*
-
-# snakeviz
-profiling.prof
