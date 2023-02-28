@@ -6,7 +6,7 @@ on:
 
 jobs:
   virustotal:
-    if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+    if: ${{ !endsWithIgnoreCase(github.ref_name, '(rc|a|b)\\d+$') }}
     runs-on: ubuntu-latest
     steps:
       - name: Remove v from ${{ github.ref_name }}
