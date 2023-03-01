@@ -82,54 +82,43 @@ class ShowContextMenu(tk.Frame):
         label = tk.Label(self, text="Context menu")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        self.btn_toggle = ttk.Button(
             self,
-            text="True",
+            textvariable=self.string_var,
             width=18,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        self.btn_toggle.grid(row=0, column=3, pady=2)
+        self.btn_toggle.bind("<Enter>", self.enter_button)
+        self.btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
+        btn = event.widget
         self.string_var.set(f"True")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu", True)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        from subsearch.utils import raw_registry
-
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu", False)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        from subsearch.utils import raw_registry
-
         raw_registry.remove_context_menu()
+        self.enter_button(event)
 
 
 class ShowContextMenuIcon(tk.Frame):
