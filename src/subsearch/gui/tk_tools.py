@@ -27,7 +27,7 @@ def calculate_checkbtn_size(cls, _width=16):
 
 def set_default_grid_size(cls, _width=18):
     btn_size = tk.Button(cls, width=_width, height=2)
-    x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
+    x, _y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
     col_count, row_count = cls.grid_size()
     for col in range(col_count):
         cls.grid_columnconfigure(col, minsize=x)
@@ -52,6 +52,13 @@ def update_asset(cls, img, x, y):
     cls.delete("all")
     cls.create_image(x, y, image=img)
     cls.photoimage = img
+
+
+def set_custom_btn_styles():
+    custom_style = ttk.Style()
+    # configure the style option for a specific widget (in this case, a ttk.Button)
+    custom_style.configure("True.TButton", foreground=GUI_DATA.colors.green)
+    custom_style.configure("False.TButton", foreground=GUI_DATA.colors.red)
 
 
 class WindowPosition(tk.Frame):

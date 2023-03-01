@@ -8,11 +8,15 @@ from subsearch.utils import file_manager, raw_config, raw_registry, updates
 
 SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
+CONTEXT_MENU = raw_config.get_config_key("context_menu")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
 DLW_ON_FAIL = raw_config.get_config_key("manual_download_fail")
 MANUAL_MODE = raw_config.get_config_key("manual_download_mode")
 FILE_EXTENSIONS = raw_config.get_config_key("file_extensions")
 USE_THREADING = raw_config.get_config_key("use_threading")
+DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
+DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
 class FileExtensions(tk.Frame):
@@ -22,8 +26,8 @@ class FileExtensions(tk.Frame):
         self.data = raw_config.get_config()
         number_of_buttons = len(FILE_EXTENSIONS.items())
         label = tk.Label(self, text="File extensions")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
         self.rownum = 0
         self.colnum = 0
         self.checkbox_value = {}
@@ -74,62 +78,47 @@ class ShowContextMenu(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        context_menu_value = raw_config.get_config_key("context_menu")
-        if context_menu_value == 1:
-            self.string_var.set("True")
-        else:
-            self.string_var.set("False")
+        self.string_var.set(f"{CONTEXT_MENU}")
         label = tk.Label(self, text="Context menu")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
             self,
-            text="True",
-            width=18,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
+        btn = event.widget
         self.string_var.set(f"True")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu", True)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        from subsearch.utils import raw_registry
-
         raw_registry.add_context_menu()
         raw_registry.write_all_valuex()
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu", False)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        from subsearch.utils import raw_registry
-
         raw_registry.remove_context_menu()
+        self.enter_button(event)
 
 
 class ShowContextMenuIcon(tk.Frame):
@@ -139,55 +128,44 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CONTEXT_MENU_ICON}")
         label = tk.Label(self, text="Context menu icon")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
             self,
-            text="True",
-            width=18,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
+        btn = event.widget
         self.string_var.set(f"True")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu_icon", True)
-        from subsearch.utils import raw_registry
-
         raw_registry.write_valuex("icon")
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu_icon", False)
-        from subsearch.utils import raw_registry
-
         raw_registry.write_valuex("icon")
+        self.enter_button(event)
 
 
 class ShowDownloadWindow(tk.Frame):
@@ -197,49 +175,42 @@ class ShowDownloadWindow(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DLW_ON_FAIL}")
         label = tk.Label(self, text="Download window")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
             self,
-            text="True",
-            width=18,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
+        btn = event.widget
         self.string_var.set(f"True")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("manual_download_fail", True)
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("manual_download_fail", False)
+        self.enter_button(event)
 
 
 class ShowTerminalOnSearch(tk.Frame):
@@ -249,52 +220,45 @@ class ShowTerminalOnSearch(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"{SHOW_TERMINAL}")
         label = tk.Label(self, text="Terminal on search")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
         if file_manager.running_from_exe() is False:
-            btn_true = ttk.Button(
+            btn_toggle = ttk.Button(
                 self,
-                text="True",
-                width=18,
+                textvariable=self.string_var,
+                width=40,
+                style=f"{self.string_var.get()}.TButton",
             )
-            btn_true.grid(row=0, column=3, pady=2)
-            btn_false = ttk.Button(
-                self,
-                text="False",
-                width=18,
-            )
-            btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+            btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+            btn_toggle.bind("<Enter>", self.enter_button)
+            btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
+        btn = event.widget
         self.string_var.set(f"True")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("show_terminal", True)
         raw_registry.write_valuex("command")
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("show_terminal", False)
         raw_registry.write_valuex("command")
+        self.enter_button(event)
 
 
 class LogToFile(tk.Frame):
@@ -303,50 +267,43 @@ class LogToFile(tk.Frame):
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{LOG_TO_FILE}")
-        label = tk.Label(self, text="Create subsearch.log")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        label = tk.Label(self, text="Download window")
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
             self,
-            text="True",
-            width=18,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
-        self.string_var.set(f"True")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn = event.widget
+        self.string_var.set(f"False")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("log_to_file", True)
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("log_to_file", False)
+        self.enter_button(event)
 
 
 class UseThreading(tk.Frame):
@@ -355,50 +312,43 @@ class UseThreading(tk.Frame):
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{USE_THREADING}")
-        label = tk.Label(self, text="Use threading")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
-        btn_true = ttk.Button(
+        label = tk.Label(self, text="Download window")
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
             self,
-            text="True",
-            width=18,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
         )
-        btn_true.grid(row=0, column=3, pady=2)
-        btn_false = ttk.Button(
-            self,
-            text="False",
-            width=18,
-        )
-        btn_false.grid(row=0, column=2, pady=2)
-        btn_true.bind("<Enter>", self.enter_button)
-        btn_true.bind("<Leave>", self.leave_button)
-        btn_false.bind("<Enter>", self.enter_button)
-        btn_false.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
         if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-        if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
 
     def leave_button(self, event):
         btn = event.widget
 
     def button_set_true(self, event):
-        self.string_var.set(f"True")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn = event.widget
+        self.string_var.set(f"False")
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("use_threading", True)
+        self.enter_button(event)
 
     def button_set_false(self, event):
+        btn = event.widget
         self.string_var.set(f"False")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("use_threading", False)
+        self.enter_button(event)
 
 
 class CheckForUpdates(tk.Frame):
@@ -408,8 +358,8 @@ class CheckForUpdates(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         label = tk.Label(self, text=f"Version {__version__}")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.yellow, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)

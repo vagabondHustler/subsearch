@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from typing import Any
 
 from subsearch.data import GUI_DATA, __paths__
@@ -128,6 +129,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
         formatted_data = None  # type: ignore
     root = main()
     set_theme("dark")
+    tk_tools.set_custom_btn_styles()
     tabs = {
         "language": TabLanguage(root),
         "search": TabSearch(root),
