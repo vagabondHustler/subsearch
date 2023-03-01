@@ -88,7 +88,7 @@ class ShowContextMenu(tk.Frame):
             width=18,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(row=0, column=3, pady=2)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -358,7 +358,7 @@ class CheckForUpdates(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         label = tk.Label(self, text=f"Version {__version__}")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(DEFAULT_LABEL_CONFIG)
         label.grid(DEFAULT_LABEL_GRID)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.yellow, font=GUI_DATA.fonts.cas8b)
