@@ -15,6 +15,8 @@ MANUAL_MODE = raw_config.get_config_key("manual_download_mode")
 FILE_EXTENSIONS = raw_config.get_config_key("file_extensions")
 USE_THREADING = raw_config.get_config_key("use_threading")
 DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
+
 
 class FileExtensions(tk.Frame):
     def __init__(self, parent):
@@ -23,8 +25,8 @@ class FileExtensions(tk.Frame):
         self.data = raw_config.get_config()
         number_of_buttons = len(FILE_EXTENSIONS.items())
         label = tk.Label(self, text="File extensions")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
         self.rownum = 0
         self.colnum = 0
         self.checkbox_value = {}
@@ -78,7 +80,7 @@ class ShowContextMenu(tk.Frame):
         self.string_var.set(f"{CONTEXT_MENU}")
         label = tk.Label(self, text="Context menu")
         label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.grid(DEFAULT_LABEL_GRID)
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
@@ -126,7 +128,7 @@ class ShowContextMenuIcon(tk.Frame):
         self.string_var.set(f"{CONTEXT_MENU_ICON}")
         label = tk.Label(self, text="Context menu icon")
         label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.grid(DEFAULT_LABEL_GRID)
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
@@ -171,9 +173,9 @@ class ShowDownloadWindow(tk.Frame):
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{DLW_ON_FAIL}")
-        label = tk.Label(self, text="Show download window")
+        label = tk.Label(self, text="Download window")
         label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.grid(DEFAULT_LABEL_GRID)
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
@@ -184,7 +186,6 @@ class ShowDownloadWindow(tk.Frame):
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
-        
 
     def enter_button(self, event):
         btn = event.widget
@@ -216,10 +217,10 @@ class ShowTerminalOnSearch(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{DLW_ON_FAIL}")
-        label = tk.Label(self, text="Show download window")
+        self.string_var.set(f"{SHOW_TERMINAL}")
+        label = tk.Label(self, text="Terminal on search")
         label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.grid(DEFAULT_LABEL_GRID)
         if file_manager.running_from_exe() is False:
             btn_toggle = ttk.Button(
                 self,
@@ -230,6 +231,7 @@ class ShowTerminalOnSearch(tk.Frame):
             btn_toggle.grid(row=0, column=3, pady=2)
             btn_toggle.bind("<Enter>", self.enter_button)
             btn_toggle.bind("<Leave>", self.leave_button)
+        tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
         btn = event.widget
@@ -356,7 +358,7 @@ class CheckForUpdates(tk.Frame):
         self.string_var.set(f"")
         label = tk.Label(self, text=f"Version {__version__}")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label.grid(DEFAULT_LABEL_GRID)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.yellow, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
