@@ -85,10 +85,10 @@ class ShowContextMenu(tk.Frame):
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
-            width=18,
+            width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -133,10 +133,10 @@ class ShowContextMenuIcon(tk.Frame):
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
-            width=18,
+            width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -180,10 +180,10 @@ class ShowDownloadWindow(tk.Frame):
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
-            width=18,
+            width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -226,10 +226,10 @@ class ShowTerminalOnSearch(tk.Frame):
             btn_toggle = ttk.Button(
                 self,
                 textvariable=self.string_var,
-                width=18,
+                width=40,
                 style=f"{self.string_var.get()}.TButton",
             )
-            btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+            btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
             btn_toggle.bind("<Enter>", self.enter_button)
             btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -273,10 +273,10 @@ class LogToFile(tk.Frame):
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
-            width=18,
+            width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
@@ -318,10 +318,10 @@ class UseThreading(tk.Frame):
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
-            width=18,
+            width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID)
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
