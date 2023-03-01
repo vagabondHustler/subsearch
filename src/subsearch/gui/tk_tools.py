@@ -27,7 +27,7 @@ def calculate_checkbtn_size(cls, _width=16):
 
 def set_default_grid_size(cls, _width=18):
     btn_size = tk.Button(cls, width=_width, height=2)
-    x, y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
+    x, _y = btn_size.winfo_reqwidth(), btn_size.winfo_reqheight()
     col_count, row_count = cls.grid_size()
     for col in range(col_count):
         cls.grid_columnconfigure(col, minsize=x)
