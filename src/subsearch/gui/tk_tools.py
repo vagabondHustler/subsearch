@@ -54,6 +54,13 @@ def update_asset(cls, img, x, y):
     cls.photoimage = img
 
 
+def set_custom_btn_styles():
+    custom_style = ttk.Style()
+    # configure the style option for a specific widget (in this case, a ttk.Button)
+    custom_style.configure("True.TButton", foreground=GUI_DATA.colors.green)
+    custom_style.configure("False.TButton", foreground=GUI_DATA.colors.red)
+
+
 class WindowPosition(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
