@@ -8,12 +8,13 @@ from subsearch.utils import file_manager, raw_config, raw_registry, updates
 
 SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
 LOG_TO_FILE = raw_config.get_config_key("log_to_file")
+CONTEXT_MENU = raw_config.get_config_key("context_menu")
 CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
 DLW_ON_FAIL = raw_config.get_config_key("manual_download_fail")
 MANUAL_MODE = raw_config.get_config_key("manual_download_mode")
 FILE_EXTENSIONS = raw_config.get_config_key("file_extensions")
 USE_THREADING = raw_config.get_config_key("use_threading")
-
+DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
 
 class FileExtensions(tk.Frame):
     def __init__(self, parent):
@@ -74,23 +75,19 @@ class ShowContextMenu(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        context_menu_value = raw_config.get_config_key("context_menu")
-        if context_menu_value == 1:
-            self.string_var.set("True")
-        else:
-            self.string_var.set("False")
+        self.string_var.set(f"{CONTEXT_MENU}")
         label = tk.Label(self, text="Context menu")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(DEFAULT_LABEL_CONFIG)
         label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        self.btn_toggle = ttk.Button(
+        btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
             width=18,
             style=f"{self.string_var.get()}.TButton",
         )
-        self.btn_toggle.grid(row=0, column=3, pady=2)
-        self.btn_toggle.bind("<Enter>", self.enter_button)
-        self.btn_toggle.bind("<Leave>", self.leave_button)
+        btn_toggle.grid(row=0, column=3, pady=2)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
     def enter_button(self, event):
@@ -127,9 +124,11 @@ class ShowContextMenuIcon(tk.Frame):
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{CONTEXT_MENU_ICON}")
-        label = tk.Label(self, text="Context menu icon")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
+        label_context_menu_icon = tk.Label(self, text="Context menu icon")
+        label_context_menu_icon.configure(
+            bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b
+        )
+        label_context_menu_icon.grid(row=0, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
