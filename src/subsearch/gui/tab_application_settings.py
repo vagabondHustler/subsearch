@@ -154,6 +154,7 @@ class ShowContextMenuIcon(tk.Frame):
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu_icon", True)
         raw_registry.write_valuex("icon")
+        self.enter_button(event)
 
     def button_set_false(self, event):
         btn = event.widget
@@ -161,6 +162,7 @@ class ShowContextMenuIcon(tk.Frame):
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("context_menu_icon", False)
         raw_registry.write_valuex("icon")
+        self.enter_button(event)
 
 
 class ShowDownloadWindow(tk.Frame):
