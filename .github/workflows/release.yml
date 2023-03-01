@@ -127,7 +127,6 @@ jobs:
         id: build_msi
         run: |
           python setup.py bdist_msi -d .
-          
 
       - name: Build changelog
         id: github_release
@@ -135,7 +134,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           configuration: .github/configs/changelog_builder.json
-          ignorePreReleases: ${{ !endsWithIgnoreCase(github.ref_name, '(rc|a|b)\\d+$') }}
+          ignorePreReleases: ${{ !endsWith(github.ref_name, '(rc|a|b)\\d+$') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -173,7 +172,7 @@ jobs:
             Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi
 
   pypi-upload:
-    if: ${{ !endsWithIgnoreCase(github.ref_name, '(a|b)\\d+$') }}
+    if: ${{ !endsWith(github.ref_name, '(a|b)\\d+$') }}
     name: Upload to PyPi
     needs: ["versioning", "build-and-publish"]
     runs-on: ubuntu-latest
@@ -202,7 +201,7 @@ jobs:
           twine upload --verbose -u '__token__' dist/*
 
   latest-release-yml:
-    if: ${{ !endsWithIgnoreCase(github.ref_name, '(rc|a|b)\\d+$') }}
+    if: ${{ !endsWith(github.ref_name, '(rc|a|b)\\d+$') }}
     name: Update latest_release.yml
     needs: [versioning, pypi-upload, build-and-publish]
     runs-on: windows-latest
