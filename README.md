@@ -6,7 +6,8 @@
 ![Tests](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/tests.yml?branch=main&label=tests&style=flat-square)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square)
 ![Version](https://img.shields.io/github/v/release/vagabondHustler/SubSearch?&display_name=tag&include_prereleases&style=flat-square)
-![Downloads](https://img.shields.io/github/downloads/vagabondHustler/SubSearch/total?&style=flat-square)
+![Dls_total](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?label=downloads%40total&style=flat-square)
+![Dls_latest](https://img.shields.io/github/downloads/vagabondhustler/subsearch/latest/total?style=flat-square)
 ![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square)
 
 </div>
