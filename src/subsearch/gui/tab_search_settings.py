@@ -12,7 +12,7 @@ PROVIDERS = raw_config.get_config_key("providers")
 
 
 class Providers(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.data = raw_config.get_config()
@@ -50,19 +50,19 @@ class Providers(tk.Frame):
             btn.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonPress-1>", self.press_button)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
         self.checkbox_value[btn][0]
 
-    def press_button(self, event):
+    def press_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_types)
 
-    def toggle_types(self, event):
+    def toggle_types(self, event) -> None:
         btn = event.widget
         key = self.checkbox_value[btn][0]
         value = self.checkbox_value[btn][1]
@@ -72,7 +72,7 @@ class Providers(tk.Frame):
             self.data["providers"][key] = True
         raw_config.set_config(self.data)
 
-    def toggle_providers(self, event):
+    def toggle_providers(self, event) -> None:
         btn = event.widget
         key = btn["text"].replace(" ", "_").lower()
         if self.data["providers"][key] is True:
@@ -85,7 +85,7 @@ class Providers(tk.Frame):
 
 
 class SubtitleType(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -119,15 +119,15 @@ class SubtitleType(tk.Frame):
             btn.bind("<Enter>", self.enter_button)
             tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonPress-1>", self.press_button)
 
-    def press_button(self, event):
+    def press_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_types)
 
-    def toggle_types(self, event):
+    def toggle_types(self, event) -> None:
         btn = event.widget
         key = self.checkbox_values[btn][0]
         value = self.checkbox_values[btn][1]
@@ -151,7 +151,7 @@ class SubtitleType(tk.Frame):
 
 
 class SearchThreshold(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.current_value = tk.IntVar()
@@ -175,21 +175,21 @@ class SearchThreshold(tk.Frame):
     def get_value(self):
         return self.current_value.get()
 
-    def set_value(self, event):
+    def set_value(self, event) -> None:
         self.string_var.set(f"{self.get_value()} %")
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn == self.slider:
             self.slider.bind("<ButtonPress>", self.press_slider)
             self.slider.bind("<Double-ButtonRelease-1>", self.dubble_press)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
         if btn == self.slider:
             self.slider.configure(command=self.set_value)
 
-    def dubble_press(self, event):
+    def dubble_press(self, event) -> None:
         btn = event.widget
         if btn == self.slider:
             self.current_value.set(90)
@@ -197,13 +197,13 @@ class SearchThreshold(tk.Frame):
             self.slider.update()
             self.update_config()
 
-    def press_slider(self, event):
+    def press_slider(self, event) -> None:
         btn = event.widget
         if btn == self.slider:
             self.slider.configure(command=self.set_value)
             self.slider.bind("<ButtonRelease>", self.release_slider)
 
-    def release_slider(self, event):
+    def release_slider(self, event) -> None:
         btn = event.widget
         if btn == self.slider:
             self.slider.configure(command=self.set_value)
@@ -216,7 +216,7 @@ class SearchThreshold(tk.Frame):
 
 
 class RenameBestMatch(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -235,24 +235,24 @@ class RenameBestMatch(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("rename_best_match", True)
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"

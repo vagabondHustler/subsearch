@@ -3,6 +3,7 @@ from selectolax.parser import Node
 from subsearch.data import __video__
 from subsearch.data.data_objects import (
     AppConfig,
+    DownloadMetaData,
     FormattedMetadata,
     ProviderUrls,
     ReleaseMetadata,
@@ -70,7 +71,7 @@ class Subscene(ProviderParameters, SubsceneScraper):
             return [f"{self.title} - {self.season_ordinal} season"]
         return [f"{self.title} ({self.year})", f"{self.title} ({(self.year-1)})"]
 
-    def parse_site_results(self):
+    def parse_site_results(self) -> (list | list[DownloadMetaData]):
         to_be_sorted: list[FormattedMetadata] = []
         _to_be_downloaded: dict[str, str] = {}
         to_be_downloaded: dict[str, str] = {}
@@ -111,5 +112,5 @@ class Subscene(ProviderParameters, SubsceneScraper):
         download_info = generic.pack_download_data("subscene", __video__.tmp_directory, to_be_downloaded)
         return download_info
 
-    def _sorted_list(self):
+    def _sorted_list(self) -> list[FormattedMetadata]:
         return self.sorted_metadata

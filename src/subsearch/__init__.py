@@ -19,7 +19,7 @@ class Subsearch(core.AppSteps):
         """
         core.AppSteps.__init__(self)
 
-    def thread_executor(self, *args):
+    def thread_executor(self, *args) -> None:
         """
         Search for subtitles with active providers concurrently.
         """
