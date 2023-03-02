@@ -4,19 +4,7 @@ from tkinter import ttk
 
 from subsearch.data import GUI_DATA, __version__
 from subsearch.gui import tk_tools
-from subsearch.utils import file_manager, raw_config, raw_registry, updates
-
-SHOW_TERMINAL = raw_config.get_config_key("show_terminal")
-LOG_TO_FILE = raw_config.get_config_key("log_to_file")
-CONTEXT_MENU = raw_config.get_config_key("context_menu")
-CONTEXT_MENU_ICON = raw_config.get_config_key("context_menu_icon")
-DLW_ON_FAIL = raw_config.get_config_key("manual_download_fail")
-MANUAL_MODE = raw_config.get_config_key("manual_download_mode")
-FILE_EXTENSIONS = raw_config.get_config_key("file_extensions")
-USE_THREADING = raw_config.get_config_key("use_threading")
-DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
-DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
+from subsearch.utils import raw_config, updates
 
 
 class FileExtensions(tk.Frame):
@@ -24,16 +12,17 @@ class FileExtensions(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.data = raw_config.get_config()
-        number_of_buttons = len(FILE_EXTENSIONS.items())
+        self.file_extensions = raw_config.get_config_key("file_extensions")
+        number_of_buttons = len(self.file_extensions.items())
         label = tk.Label(self, text="File extensions")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
+        label.configure(tk_tools.DEFAULT_LABEL_CONFIG)
+        label.grid(tk_tools.DEFAULT_LABEL_GRID)
         self.rownum = 0
         self.colnum = 0
         self.checkbox_value = {}
         number_of_rows = 4
 
-        for i, (key, value) in zip(range(number_of_buttons), FILE_EXTENSIONS.items()):
+        for i, (key, value) in zip(range(number_of_buttons), self.file_extensions.items()):
             self.rownum += 1
             if self.rownum > number_of_rows:
                 self.rownum = 1
@@ -73,282 +62,70 @@ class FileExtensions(tk.Frame):
         raw_registry.write_all_valuex()
 
 
-class ShowContextMenu(tk.Frame):
+class ShowContextMenu(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{CONTEXT_MENU}")
-        label = tk.Label(self, text="Context menu")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"True")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("context_menu", True)
-        raw_registry.add_context_menu()
-        raw_registry.write_all_valuex()
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("context_menu", False)
-        raw_registry.remove_context_menu()
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Context menu", "context_menu", write_to_reg=True)
 
 
-class ShowContextMenuIcon(tk.Frame):
+class ShowContextMenuIcon(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{CONTEXT_MENU_ICON}")
-        label = tk.Label(self, text="Context menu icon")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"True")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("context_menu_icon", True)
-        raw_registry.write_valuex("icon")
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("context_menu_icon", False)
-        raw_registry.write_valuex("icon")
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Context menu icon", "context_menu_icon")
 
 
-class ShowDownloadWindow(tk.Frame):
+class ShowDownloadWindow(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{DLW_ON_FAIL}")
-        label = tk.Label(self, text="Download window")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"True")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("manual_download_fail", True)
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("manual_download_fail", False)
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Download window", "manual_download_fail")
 
 
-class ShowTerminalOnSearch(tk.Frame):
+class ShowTerminalOnSearch(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{SHOW_TERMINAL}")
-        label = tk.Label(self, text="Terminal on search")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        if file_manager.running_from_exe() is False:
-            btn_toggle = ttk.Button(
-                self,
-                textvariable=self.string_var,
-                width=40,
-                style=f"{self.string_var.get()}.TButton",
-            )
-            btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-            btn_toggle.bind("<Enter>", self.enter_button)
-            btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"True")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("show_terminal", True)
-        raw_registry.write_valuex("command")
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("show_terminal", False)
-        raw_registry.write_valuex("command")
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Terminal on search", "show_terminal", show_if_exe=False)
 
 
-class LogToFile(tk.Frame):
+class LogToFile(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{LOG_TO_FILE}")
-        label = tk.Label(self, text="Download window")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("log_to_file", True)
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("log_to_file", False)
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Log to file", "log_to_file")
 
 
-class UseThreading(tk.Frame):
+class UseThreading(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{USE_THREADING}")
-        label = tk.Label(self, text="Download window")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("use_threading", True)
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("use_threading", False)
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Use threading", "use_threading")
 
 
 class CheckForUpdates(tk.Frame):
@@ -358,8 +135,8 @@ class CheckForUpdates(tk.Frame):
         self.string_var = tk.StringVar()
         self.string_var.set(f"")
         label = tk.Label(self, text=f"Version {__version__}")
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
+        label.configure(tk_tools.DEFAULT_LABEL_CONFIG)
+        label.grid(tk_tools.DEFAULT_LABEL_GRID)
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.yellow, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
