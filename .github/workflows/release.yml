@@ -134,7 +134,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           configuration: .github/configs/changelog_builder.json
-          ignorePreReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
