@@ -20,7 +20,9 @@ class Footer(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
         relx_value = 0.0
-        btn_kwargs: dict[str, Any] = dict(master=self, width=54, height=54, bg=GUI_DATA.colors.mid_grey_black, highlightthickness=0)
+        btn_kwargs: dict[str, Any] = dict(
+            master=self, width=54, height=54, bg=GUI_DATA.colors.mid_grey_black, highlightthickness=0
+        )
         self.parent = parent
         self.tabs = tabs
         self.buttons = {}

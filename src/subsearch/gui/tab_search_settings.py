@@ -6,8 +6,7 @@ from subsearch.gui import tk_tools
 from subsearch.utils import raw_config
 
 SUBTILE_TYPE = raw_config.get_config_key("subtitle_type")
-PCT = raw_config.get_config_key("percentage_threshold")
-RENAME_BEST_MATCH = raw_config.get_config_key("rename_best_match")
+PERCENTAGE_THRESHOLD = raw_config.get_config_key("percentage_threshold")
 PROVIDERS = raw_config.get_config_key("providers")
 
 
@@ -155,9 +154,9 @@ class SearchThreshold(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.current_value = tk.IntVar()
-        self.current_value.set(PCT)
+        self.current_value.set(PERCENTAGE_THRESHOLD)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{PCT} %")
+        self.string_var.set(f"{PERCENTAGE_THRESHOLD} %")
         label = tk.Label(self, text="Search threshold")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=0, pady=2)
@@ -215,46 +214,12 @@ class SearchThreshold(tk.Frame):
         tk_tools.VarColorPicker(self.string_var, self.clabel, True)
 
 
-class RenameBestMatch(tk.Frame):
+class RenameBestMatch(tk_tools.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{RENAME_BEST_MATCH}")
-        label = tk.Label(self, text="Rename best match")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=2, pady=2)
-        btn_toggle = ttk.Button(
-            self,
-            textvariable=self.string_var,
-            width=40,
-            style=f"{self.string_var.get()}.TButton",
-        )
-        btn_toggle.grid(row=0, column=2, pady=4, padx=8)
-        btn_toggle.bind("<Enter>", self.enter_button)
-        btn_toggle.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        if btn["text"] == "True":
-            btn.bind("<ButtonRelease-1>", self.button_set_false)
-        if btn["text"] == "False":
-            btn.bind("<ButtonRelease-1>", self.button_set_true)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-
-    def button_set_true(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("rename_best_match", True)
-        self.enter_button(event)
-
-    def button_set_false(self, event) -> None:
-        btn = event.widget
-        self.string_var.set(f"False")
-        btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value("rename_best_match", False)
-        self.enter_button(event)
+        tk_tools.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")

@@ -3,11 +3,15 @@ from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
 from subsearch.data import GUI_DATA, __paths__, __version__, __video__
-from subsearch.utils import raw_config
+from subsearch.utils import file_manager, raw_config, raw_registry
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
+
+DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
+DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
 def get_tab_png(tab: str):
@@ -156,3 +160,91 @@ class ToolTip(tk.Toplevel):
 
     def hide(self):
         self.destroy()
+
+
+class ToggleableFrameButton(tk.Frame):
+    """Creates a toggleable button widget.
+
+    The ToggleableFrameButton class inherits from the tk.Frame class and creates a button widget that can be toggled between True and False values.
+
+    The button widget can be customized with a label, a configuration key, and a Boolean value to indicate whether to write the value to the registry.
+
+    Attributes:
+    parent (tkinter.Tk): The parent widget of the button.
+    setting_label (str): The label text to be displayed next to the button.
+    config_key (str): The key in the configuration file that the button corresponds to.
+    write_to_reg (bool): Whether to write the button value to the registry.
+    show_if_exe (bool): Whether to show the button if the program is running from an executable.
+
+    Methods:
+    init(self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True) -> None:
+    Initializes the ToggleableFrameButton class and sets its attributes.
+
+
+    enter_button(self, event) -> None:
+        Changes the text and style of the button widget when the user hovers over it.
+
+    leave_button(self, event) -> None:
+        Does nothing when the user stops hovering over the button widget.
+
+    button_set_true(self, event) -> None:
+        Sets the button value to True and updates the configuration file and registry if necessary.
+
+    button_set_false(self, event) -> None:
+        Sets the button value to False and updates the configuration file and registry if necessary.
+
+    """
+
+    def __init__(self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True) -> None:
+        tk.Frame.__init__(self, parent)
+        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.string_var = tk.StringVar()
+        self.string_var.set(f"{raw_config.get_config_key(config_key)}")
+        self.setting_name = setting_label
+        self.config_key = config_key
+        self.write_to_reg = write_to_reg
+        self.show_if_exe = show_if_exe
+        if show_if_exe is False and file_manager.running_from_exe() is False:
+            return None
+        label = tk.Label(self, text=self.setting_name)
+        label.configure(DEFAULT_LABEL_CONFIG)
+        label.grid(DEFAULT_LABEL_GRID)
+        btn_toggle = ttk.Button(
+            self,
+            textvariable=self.string_var,
+            width=40,
+            style=f"{self.string_var.get()}.TButton",
+        )
+        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.bind("<Enter>", self.enter_button)
+        btn_toggle.bind("<Leave>", self.leave_button)
+        set_default_grid_size(self)
+
+    def enter_button(self, event) -> None:
+        btn = event.widget
+        if btn["text"] == "True":
+            btn.bind("<ButtonRelease-1>", self.button_set_false)
+        if btn["text"] == "False":
+            btn.bind("<ButtonRelease-1>", self.button_set_true)
+
+    def leave_button(self, event) -> None:
+        btn = event.widget
+
+    def button_set_true(self, event) -> None:
+        btn = event.widget
+        self.string_var.set(f"True")
+        btn["style"] = f"{self.string_var.get()}.TButton"
+        raw_config.set_config_key_value(self.config_key, True)
+        if self.write_to_reg:
+            raw_registry.add_context_menu()
+            raw_registry.write_all_valuex()
+        self.enter_button(event)
+
+    def button_set_false(self, event) -> None:
+        btn = event.widget
+        self.string_var.set(f"False")
+        btn["style"] = f"{self.string_var.get()}.TButton"
+        raw_config.set_config_key_value(self.config_key, False)
+        if self.write_to_reg:
+            raw_registry.remove_context_menu()
+        self.enter_button(event)
