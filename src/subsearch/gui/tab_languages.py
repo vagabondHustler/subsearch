@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import Type
 
 from subsearch.data import GUI_DATA
 from subsearch.gui import tk_tools
@@ -10,7 +11,7 @@ CURRENT_LANGUAGE = raw_config.get_config_key("current_language")
 
 
 class SelectLanguage(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.active_btn = None
@@ -38,7 +39,7 @@ class SelectLanguage(tk.Frame):
             self.rownum += 1
         tk_tools.set_default_grid_size(self, _width=6)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if LANGUAGES[btn["text"]] == "N/A":
             tip_text = "N/A with opensubtitles, provider will be skipped on search"
@@ -46,19 +47,19 @@ class SelectLanguage(tk.Frame):
             self.tip.show()
         btn.bind("<ButtonPress-1>", self.press_button)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
         if LANGUAGES[btn["text"]] == "N/A":
             self.tip.hide()
 
-    def press_button(self, event):
+    def press_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.set_current_language)
 
-    def set_current_language(self, event):
+    def set_current_language(self, event) -> None:
         btn = event.widget
-        self.checkbox_values[self.active_btn].set(0)
-        self.active_btn.state(["!alternate"])
-        self.active_btn = btn
+        self.checkbox_values[self.active_btn].set(0)    # type: ignore
+        self.active_btn.state(["!alternate"])           # type: ignore
+        self.active_btn = btn 
 
         raw_config.set_config_key_value("current_language", btn["text"])

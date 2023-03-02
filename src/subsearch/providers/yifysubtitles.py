@@ -3,6 +3,7 @@ from selectolax.parser import Node
 from subsearch.data import __video__
 from subsearch.data.data_objects import (
     AppConfig,
+    DownloadMetaData,
     FormattedMetadata,
     ProviderUrls,
     ReleaseMetadata,
@@ -51,7 +52,7 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         YifySubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
-    def parse_site_results(self):
+    def parse_site_results(self) -> (list | list[DownloadMetaData]):
         # search for title
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
         to_be_downloaded: dict[str, str] = {}
@@ -82,5 +83,5 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         download_info = generic.pack_download_data("yifysubtitles", __video__.tmp_directory, to_be_downloaded)
         return download_info
 
-    def _sorted_list(self):
+    def _sorted_list(self) -> list[FormattedMetadata]:
         return self.sorted_metadata

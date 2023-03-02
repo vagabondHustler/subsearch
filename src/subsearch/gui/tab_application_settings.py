@@ -20,7 +20,7 @@ DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
 class FileExtensions(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.data = raw_config.get_config()
@@ -47,15 +47,15 @@ class FileExtensions(tk.Frame):
             btn.bind("<Enter>", self.enter_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonPress-1>", self.press_button)
 
-    def press_button(self, event):
+    def press_button(self, event) -> None:
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_ext)
 
-    def toggle_ext(self, event):
+    def toggle_ext(self, event) -> None:
         btn = event.widget
         key = self.checkbox_value[btn][0]
         value = self.checkbox_value[btn][1]
@@ -74,7 +74,7 @@ class FileExtensions(tk.Frame):
 
 
 class ShowContextMenu(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -93,17 +93,17 @@ class ShowContextMenu(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -112,7 +112,7 @@ class ShowContextMenu(tk.Frame):
         raw_registry.write_all_valuex()
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -122,7 +122,7 @@ class ShowContextMenu(tk.Frame):
 
 
 class ShowContextMenuIcon(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -141,17 +141,17 @@ class ShowContextMenuIcon(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -159,7 +159,7 @@ class ShowContextMenuIcon(tk.Frame):
         raw_registry.write_valuex("icon")
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -169,7 +169,7 @@ class ShowContextMenuIcon(tk.Frame):
 
 
 class ShowDownloadWindow(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -188,24 +188,24 @@ class ShowDownloadWindow(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("manual_download_fail", True)
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -214,7 +214,7 @@ class ShowDownloadWindow(tk.Frame):
 
 
 class ShowTerminalOnSearch(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -234,17 +234,17 @@ class ShowTerminalOnSearch(tk.Frame):
             btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -252,7 +252,7 @@ class ShowTerminalOnSearch(tk.Frame):
         raw_registry.write_valuex("command")
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -262,7 +262,7 @@ class ShowTerminalOnSearch(tk.Frame):
 
 
 class LogToFile(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -281,24 +281,24 @@ class LogToFile(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("log_to_file", True)
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -307,7 +307,7 @@ class LogToFile(tk.Frame):
 
 
 class UseThreading(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -326,24 +326,24 @@ class UseThreading(tk.Frame):
         btn_toggle.bind("<Leave>", self.leave_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "True":
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
 
-    def leave_button(self, event):
+    def leave_button(self, event) -> None:
         btn = event.widget
 
-    def button_set_true(self, event):
+    def button_set_true(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
         raw_config.set_config_key_value("use_threading", True)
         self.enter_button(event)
 
-    def button_set_false(self, event):
+    def button_set_false(self, event) -> None:
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
@@ -352,7 +352,7 @@ class UseThreading(tk.Frame):
 
 
 class CheckForUpdates(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -379,14 +379,14 @@ class CheckForUpdates(tk.Frame):
         self.btn_download.bind("<Enter>", self.enter_button)
         tk_tools.set_default_grid_size(self)
 
-    def enter_button(self, event):
+    def enter_button(self, event) -> None:
         btn = event.widget
         if btn["text"] == "Check for updates":
             btn.bind("<ButtonRelease-1>", self.button_check)
         if btn["text"].startswith("Get"):
             btn.bind("<ButtonRelease-1>", self.button_download)
 
-    def button_check(self, event):
+    def button_check(self, event) -> None:
         self.string_var.set(f"Looking...")
         new_repo_avail, repo_is_prerelease = updates.is_new_version_avail()
         latest_version = updates.get_latest_version()
@@ -405,5 +405,5 @@ class CheckForUpdates(tk.Frame):
         if new_repo_avail:
             self.btn_download.configure(text=f"Get v{latest_version}")
 
-    def button_download(self, event):
+    def button_download(self, event) -> None:
         webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")

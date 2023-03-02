@@ -10,7 +10,7 @@ from subsearch.utils import file_manager, log
 
 # download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
-    def __init__(self, parent, formatted_data: list[FormattedMetadata]):
+    def __init__(self, parent, formatted_data: list[FormattedMetadata]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
         self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy - 82)
@@ -35,7 +35,7 @@ class DownloadList(tk.Frame):
             activestyle="none",
             yscrollcommand=self.scrollbar.set,
         )
-        hsx, hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
+        hsx, _hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
         self.sub_listbox.place(
             height=root_posy - 82,
             width=root_posx - hsx - 20,
@@ -50,7 +50,7 @@ class DownloadList(tk.Frame):
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 
-    def fill_listbox(self):
+    def fill_listbox(self) -> None:
         self._providers = {}
         self._releases = {}
         self._urls = {}
@@ -64,13 +64,13 @@ class DownloadList(tk.Frame):
             self._releases[enu] = data.release
             self._urls[enu] = data.url
 
-    def mouse_b1_press(self, event):
+    def mouse_b1_press(self, event) -> None:
         self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
 
-    def mouse_b1_release(self, event):
+    def mouse_b1_release(self, event) -> None:
         self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
 
-    def download_button(self, event):
+    def download_button(self, event) -> None:
         self.sub_listbox.unbind("<<ListboxSelect>>")
         self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
         selection = str(self.sub_listbox.curselection())
@@ -95,8 +95,8 @@ class DownloadList(tk.Frame):
                 url=download_url,
                 idx_num=1,
                 idx_lenght=1,
-            )
-            file_manager.download_subtitle(enum)
+            ) # type: ignore
+            file_manager.download_subtitle(enum) # type: ignore
             file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
             file_manager.clean_up_files(__video__.tmp_directory, "zip")
             break

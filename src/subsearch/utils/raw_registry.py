@@ -153,7 +153,7 @@ def key_no_value() -> bool:
     sub_key = rf"Software\Classes\*\shell\Subsearch\command"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, sub_key) as subkey:
-            default = winreg.QueryValueEx(subkey, None)
+            default = winreg.QueryValueEx(subkey, None) # type: ignore
             if default[0] == "":
                 return True
     return False
