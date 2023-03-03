@@ -94,8 +94,8 @@ class DownloadList(tk.Frame):
                 url=download_url,
                 idx_num=1,
                 idx_lenght=1,
-            ) # type: ignore
-            file_manager.download_subtitle(enum) # type: ignore
+            )  # type: ignore
+            file_manager.download_subtitle(enum)  # type: ignore
             file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
             file_manager.clean_up_files(__video__.tmp_directory, "zip")
             break

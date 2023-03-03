@@ -18,14 +18,13 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         None
     """
     config_file = Path(__paths__.data) / "config.json"
-    
+
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
-
 
 
 def set_config(data: dict[str, Union[str, int, bool]]) -> None:
@@ -35,7 +34,7 @@ def set_config(data: dict[str, Union[str, int, bool]]) -> None:
     Args:
         data: A dictionary containing configuration data with keys as strings and values as an instance
                  of either a string, int or boolean type.
-              
+
     Returns:
         None
     """
@@ -44,7 +43,6 @@ def set_config(data: dict[str, Union[str, int, bool]]) -> None:
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
-
 
 
 def get_config() -> Any:
@@ -82,11 +80,11 @@ def get_config_key(key: str) -> Any:
 def set_default_json() -> None:
     """
     Sets default values to keys that are present inside config.json file and modifies the same file.
-    
+
     Returns:
         None.
     """
-    
+
     # set default config.json values
     data = get_config()
     data["current_language"] = "English"
@@ -109,7 +107,6 @@ def set_default_json() -> None:
         file.truncate()
 
 
-
 def get_app_config() -> AppConfig:
     """
     Returns an instance of AppConfig that contains the current configuration settings.
@@ -127,4 +124,3 @@ def get_app_config() -> AppConfig:
         non_hearing_impaired=data["subtitle_type"]["non_hearing_impaired"],
     )
     return user_data
-

@@ -52,7 +52,7 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         YifySubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
-    def parse_site_results(self) -> (list | list[DownloadMetaData]):
+    def parse_site_results(self) -> list | list[DownloadMetaData]:
         # search for title
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
         to_be_downloaded: dict[str, str] = {}

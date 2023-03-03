@@ -16,7 +16,7 @@ class AppPaths:
         icon (Path): The Path object representing the icon for the application.
         tabs (Path): The directory containing tab icon assets for the GUI.
     """
-    
+
     home: Path
     data: Path
     gui: Path
@@ -72,6 +72,7 @@ class AppConfig:
         hearing_impaired (bool): Boolean flag indicating if the subtitle is for hearing-impaired people.
         non_hearing_impaired (bool): Boolean flag indicating if the subtitle is not for hearing-impaired people.
     """
+
     current_language: str
     languages: dict[str, str]
     subtitle_type: dict[str, bool]
@@ -108,6 +109,7 @@ class ReleaseMetadata:
         group (str): Name of the release group.
         file_hash (str): Hash value of the media file.
     """
+
     title: str
     year: int
     season: str
@@ -131,6 +133,7 @@ class ProviderUrls:
         opensubtitles_hash(str): Hash URL of the opensubtitle provider.
         yifysubtitles(str): URL of the yifysubtitles provider.
     """
+
     subscene: str
     opensubtitles: str
     opensubtitles_hash: str
@@ -150,6 +153,7 @@ class DownloadMetaData:
         idx_num (int): Index in which order the file is downloaded.
         idx_length (int): The total length of index.
     """
+
     provider: str
     name: str
     file_path: str
@@ -172,6 +176,7 @@ class FormattedMetadata:
         formatted_release (str): The formatted name of the release.
         formatted_url (str): The formatted URL of the metadata.
     """
+
     provider: str
     release: str
     url: str

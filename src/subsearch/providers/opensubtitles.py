@@ -60,7 +60,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
         OpenSubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
-    def parse_hash_results(self) -> (list | list[DownloadMetaData]):
+    def parse_hash_results(self) -> list | list[DownloadMetaData]:
         # search for hash
         to_be_downloaded = self.with_hash(self.url_opensubtitles_hash, self.release)
 
@@ -74,7 +74,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
         download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
         return download_info
 
-    def parse_site_results(self) -> (list | list[DownloadMetaData]):
+    def parse_site_results(self) -> list | list[DownloadMetaData]:
         # search for title
         subtitle_data = self.get_subtitles(self.url_opensubtitles)
 

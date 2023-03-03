@@ -4,8 +4,8 @@ from typing import Any
 from subsearch.data import GUI_DATA, __paths__
 from subsearch.data.data_objects import FormattedMetadata
 from subsearch.gui import set_theme, tkinter_utils
+from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
 from subsearch.utils import file_manager, raw_config, raw_registry
-from subsearch.gui.tabs import language_tab, dowload_tab, search_tab, settings_tab 
 
 
 class TabManager(tk.Frame):
@@ -28,10 +28,11 @@ class TabManager(tk.Frame):
         release_tab(event): Called when a tab button is released. Set the active tab and call 'activate_tabs()' method.
         press_tab(event): Called when a tab button is pressed. Bind '<ButtonRelease>' event to the button widget.
         deactivate_tabs(): Hide the content of all tabs except the active one.
-        enter_tab(event): Called when mouse enters a tab button. Bind '<ButtonPress>' event to the button widget. 
+        enter_tab(event): Called when mouse enters a tab button. Bind '<ButtonPress>' event to the button widget.
         leave_tab(event):  Called when mouse leaves a tab button. Unbind '<ButtonPress>' event from the button widget, and call 'activate_tabs()' and 'deactivate_tabs()' methods.
         get_btn(dict_, event_, equals=True): Helper method to retrieve the button widget and its key.
     """
+
     def __init__(self, parent, tabs: dict[str, Any], active_tab: str) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
@@ -146,8 +147,8 @@ def open_tab(active_tab: str, **kwargs) -> None:
 
     Args:
         active_tab (str): A string representing which tab to activate.
-        **kwargs: Arbitrary keyword arguments that should contain "formatted_data", 
-                  a list of FormattedMetadata. 
+        **kwargs: Arbitrary keyword arguments that should contain "formatted_data",
+                  a list of FormattedMetadata.
 
     Returns:
         None: This function does not return anything, it manipulates the GUI instead.
@@ -174,9 +175,9 @@ def initalize_root():
     """
     Initializes the Tkinter root window with the name `"Subsearch"`, sets its background color to `GUI_DATA.colors.dark_grey`,
     adds an icon bitmap from `__paths__.icon`, configures the window geometry using `tkinter_utils.WindowPosition.set` and makes the window non-resizable.
-    If `raw_registry.registry_key_exists()` is `False` and `raw_config.get_config_key("context_menu")` is `True`, 
+    If `raw_registry.registry_key_exists()` is `False` and `raw_config.get_config_key("context_menu")` is `True`,
     the default JSON configuration is set using `raw_config.set_default_json()` and a context menu is added to the registry using `raw_registry.add_context_menu()`.
-    
+
     Returns:
       An instance of Tk() class representing the main window of Subsearch application.
     """

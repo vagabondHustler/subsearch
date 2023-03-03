@@ -48,12 +48,12 @@ def download_subtitle(data: DownloadMetaData) -> int:
 def extract_files(src: Path, dst: Path, extension: str) -> None:
     """
     Extract files from a directory to a specified Destination.
-    
+
     Args:
         src (Path): Source path to extract files
         dst (Path): Destination path to extract files
         extension (str): Extension of files to be extracted
-    
+
     Returns:
         None.
     """
@@ -102,15 +102,15 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
 def clean_up_files(cwd: Path, extension: str) -> None:
     """
     Removes files with specific extensions in a given directory
-    
+
     Args:
         cwd (pathlib.Path): The directory path where the files to be deleted reside.
         extension (str): The file extension of the files to be deleted.
-    
+
     Returns:
         None
     """
-    
+
     for file in os.listdir(cwd):
         if file.endswith(extension):
             log.output(f"Removing: {file}")
@@ -138,7 +138,7 @@ def make_necessary_directories():
     """
     Make necessary directories using video object info.
     """
-    
+
     if __video__ is None:
         return None
     if not Path(__video__.tmp_directory).exists():

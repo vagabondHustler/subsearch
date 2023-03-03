@@ -13,7 +13,7 @@ class AdvTitleSearch:
 
     Methods:
         get_url(): Returns the URL for searching the given title and year on IMDb.
- 
+
     Properties:
         prior_year: Returns a string with the start date of the previous year in ISO format.
         release_year: Returns a string with the end date of the current year in ISO format.
@@ -58,7 +58,6 @@ class AdvTitleSearch:
         return f"release_date={self.prior_year},{self.release_year}"
 
 
-
 class FindImdbID(AdvTitleSearch):
     """
     This class is used to find the IMDb ID of a movie or TV show based on its title and year.
@@ -81,26 +80,26 @@ class FindImdbID(AdvTitleSearch):
 
     def __init__(self, title: str, year: int):
         """Initializes FindImdbID with a title and year."""
-        
+
         self.title = title.lower()
         self.year = year
         self.id = None
 
         adv_search = AdvTitleSearch(self.title, self.year)
-        
+
         url = adv_search.get_url()
         tree = generic.get_html_parser(url)
         product = tree.select("div.lister-item-content")
 
         for item in product.matches:
             self.data = item.css_first("h3.lister-item-header")
-            
+
             if self.title != self.find_imdb_title():
                 continue
-                
+
             if self.year != self.find_imdb_year() and (self.year - 1) != self.find_imdb_year():
                 continue
-                
+
             self.id = self.get_imdb_id()
             break
 
@@ -111,7 +110,7 @@ class FindImdbID(AdvTitleSearch):
         Returns:
             str: The title of the movie or TV show.
         """
-        
+
         title = self.data.css_first("a").text()
         return title.lower()
 
@@ -122,7 +121,7 @@ class FindImdbID(AdvTitleSearch):
         Returns:
             int: The year the movie or TV show was released.
         """
-        
+
         year = self.data.css_first("span.lister-item-year").child.text_content
         return int(re.findall("[0-9]+", year)[0])
 
@@ -133,7 +132,6 @@ class FindImdbID(AdvTitleSearch):
         Returns:
             str: The IMDb ID of the movie or TV show.
         """
-        
+
         href = self.data.css_first("a")
         return re.findall("tt[0-9]+", href.attributes["href"])[0]
-

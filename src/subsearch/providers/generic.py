@@ -9,6 +9,7 @@ from subsearch.data.data_objects import (
     ReleaseMetadata,
 )
 
+
 class ProviderParameters:
     """
     Parameters for provider
@@ -45,13 +46,13 @@ class ProviderParameters:
 
     def is_threshold_met(self, key: str, pct_result: int) -> bool:
         """Checks if the percentage threshold is met or if the given 'key' contains a title for a TV series.
-        
+
         Args:
             key (str): Containing the data to be checked for matching with tvseries name
             pct_result (int): Percentage value to compare with "percentage_threshold"
-        
+
         Returns:
-            bool : True or False depending on whether the percentage threshold is met or not 
+            bool : True or False depending on whether the percentage threshold is met or not
                    and tvseries title is matching or not.
         """
         if pct_result >= self.percentage_threashold or (
@@ -59,7 +60,6 @@ class ProviderParameters:
         ):
             return True
         return False
-    
 
 
 def get_cloudscraper():
@@ -69,15 +69,15 @@ def get_cloudscraper():
 def get_html_parser(url: str):
     """
     Returns a parsed HTML from a given URL using cloudscraper package.
-    
+
     Args:
         url (str): The URL from where HTML is to be fetched, parsed and returned.
-    
+
     Returns:
         A `HTMLParser` object which has the parsed HTML content of the given URL text as its attributes.
-    
+
     """
-    
+
     scraper = get_cloudscraper()
     response = scraper.get(url)
     return HTMLParser(response.text)
@@ -106,22 +106,21 @@ def pack_download_data(provider_: str, video_tmp_directory: str, to_be_downloade
     return download_info
 
 
-
 def format_key_value_pct(provider_: str, key: str, value: str, percentage_result_: int) -> FormattedMetadata:
     """
-    Formats the provided key, value pair with percentage match result and returns as 
+    Formats the provided key, value pair with percentage match result and returns as
     FormattedMetadata object.
-    
+
     Args:
         provider_ (str): The metadata provider.
         key (str): Key of the meta-data.
         value (str): Value of the key respective to input key.
-        percentage_result_ (int): Percentage value indicating the match between the found metadata 
+        percentage_result_ (int): Percentage value indicating the match between the found metadata
                                 and input query.
-    
+
     Returns:
         FormattedMetadata: An instance of FormattedMetadata class populated with formatted metadata.
-    
+
     """
     lenght_str = sum(1 for char in f"{percentage_result_:>3}% match:")
     number_of_spaces = " " * lenght_str
@@ -136,7 +135,6 @@ def format_key_value_pct(provider_: str, key: str, value: str, percentage_result
         formatted_url=_url,
     )
     return data
-
 
 
 def sort_download_metadata(list_: list[FormattedMetadata]) -> list[FormattedMetadata]:

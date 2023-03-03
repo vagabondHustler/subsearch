@@ -90,7 +90,7 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 def get_command_value() -> str:
     """
     Returns the command to execute when the context menu is used on a file for SubSearch.
-    
+
     Returns:
         A string containing the command to execute for the corresponding value.
     """
@@ -138,7 +138,7 @@ def get_icon_value() -> str:
 def get_appliesto_value() -> str:
     """
     Retrieve the latest json value from file `raw_config`.
-    
+
     Returns:
         str: A string of file types to show the SubSearch context entry on
             The file types are concatenated with `" OR "` in between.
@@ -200,7 +200,7 @@ def key_no_value() -> bool:
     sub_key = rf"Software\Classes\*\shell\Subsearch\command"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, sub_key) as subkey:
-            default = winreg.QueryValueEx(subkey, None) # type: ignore
+            default = winreg.QueryValueEx(subkey, None)  # type: ignore
             if default[0] == "":
                 return True
     return False

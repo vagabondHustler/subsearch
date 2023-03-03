@@ -104,17 +104,17 @@ def asset_tab(cls, img, type, x=27, y=27) -> None:
 def update_asset(cls, img, x, y) -> None:
     """
     Updates an asset in a tkinter canvas with the provided image.
-    
+
     Args:
         cls: The canvas instance that houses the current asset.
         img: The image asset to replace the current asset within the canvas.
         x: The X coordinate for positioning of the new asset.
         y: The Y coordinate for positioning of the new asset.
-        
+
     Returns:
-        None 
+        None
     """
-    
+
     cls.delete("all")
     cls.create_image(x, y, image=img)
     cls.photoimage = img
@@ -123,14 +123,14 @@ def update_asset(cls, img, x, y) -> None:
 def set_custom_btn_styles() -> None:
     """
     Sets custom button styles
-    
+
     Args:
         None
-    
+
     Returns:
         None
     """
-    
+
     custom_style = ttk.Style()
     custom_style.configure("True.TButton", foreground=GUI_DATA.colors.green)
     custom_style.configure("False.TButton", foreground=GUI_DATA.colors.red)
@@ -148,13 +148,14 @@ class WindowPosition(tk.Frame):
 
     Methods:
         set(w=int, h=int, ws_value_offset=int, hs_value_offset=int, other=bool): Sets the window dimension
-            in width and height. It also sets offsets by which to move the window horizontally (ws_value_offset) 
-            and vertically (hs_value_offset). If other=True, it allows changing other dimensions not typically 
+            in width and height. It also sets offsets by which to move the window horizontally (ws_value_offset)
+            and vertically (hs_value_offset). If other=True, it allows changing other dimensions not typically
             touched (eg. height of frame/window title bar)
 
     Returns:
        None
     """
+
     def __init__(self, parent):
         """
         Constructor Method for WindowPosition Class
@@ -180,7 +181,7 @@ class WindowPosition(tk.Frame):
              h: An optional integer for setting the height of the window/frame
              ws_value_offset: An optional integer for setting the horizontal offset of the window/frame
              hs_value_offset: An optional integer for setting the vertical offset of the window/frame
-             other: An optional bool variable to allow changing other dimensions not typically touched 
+             other: An optional bool variable to allow changing other dimensions not typically touched
                     eg. height of frame/window title bar
 
         Returns:
@@ -213,6 +214,7 @@ class VarColorPicker:
     Methods:
         pick(): Method to determine and update the color of clabel based on the string_var value.
     """
+
     def __init__(self, string_var: StringVar, clabel: Label, is_pct: bool = False):
         self.string_var = string_var
         self.clabel = clabel
@@ -311,6 +313,7 @@ class ToggleableFrameButton(tk.Frame):
         write_to_reg (bool, optional): Whether to also write the state to registry. Defaults to False.
         show_if_exe (bool, optional): Only show the button if the program is not running from an executable. Defaults to True.
     """
+
     def __init__(self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)

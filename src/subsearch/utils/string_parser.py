@@ -147,6 +147,7 @@ class CreateProviderUrls:
         app_config (AppConfig): an instance of AppConfig that contains configuration settings
         release_metadata (ReleaseMetadata): the metadata of the release
     """
+
     def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
         self.file_hash = file_hash
         self.app_config = app_config
@@ -270,7 +271,7 @@ def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     Returns:
       ReleaseMetadata: A ReleaseMetadata object containing the relevant metadata for the inputted file.
 
-    """   
+    """
     filename = filename.lower()
     year = find_year(filename)
     season_episode = find_season_episode(filename)

@@ -26,12 +26,12 @@ def find_semantic_version(version: str) -> str:
 def scrape_github() -> str:
     """
     Scrape the latest version of the subsearch application from the subsearch GitHub repository.
-    
-    Args: 
+
+    Args:
         None.
 
-    Returns: 
-        str: Returns the file content which contains the latest version of the 
+    Returns:
+        str: Returns the file content which contains the latest version of the
              subsearch tool from the subsearch GitHub repository.
     """
     scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})

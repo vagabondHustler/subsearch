@@ -10,10 +10,8 @@ def test_get_version():
 
     capturedOutput = StringIO()
     sys.stdout = capturedOutput  # Redirect stdout to capture version
-    exec(open(path_module_version ).read())
+    exec(open(path_module_version).read())
     sys.stdout = sys.__stdout__  # Reset redirect.
     version_ = capturedOutput.getvalue().strip()
 
     assert version_ == __version__
-
-
