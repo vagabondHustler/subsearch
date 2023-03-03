@@ -7,7 +7,18 @@ from subsearch.data.data_objects import AppConfig
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
+    """
+    Set the value of a key in the config.json file to a specified value.
+
+    Args:
+        key (str): A string that represents the key name to modify.
+        value (Union[str, int, bool]): A value of String/Integer/Boolean to assign to the specified key.
+
+    Returns:
+        None
+    """
     config_file = Path(__paths__.data) / "config.json"
+    
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
@@ -16,7 +27,18 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         f.truncate()
 
 
-def set_config(data):
+
+def set_config(data: dict[str, Union[str, int, bool]]) -> None:
+    """
+    Writes the provided configuration data to the config.json file.
+
+    Args:
+        data: A dictionary containing configuration data with keys as strings and values as an instance
+                 of either a string, int or boolean type.
+              
+    Returns:
+        None
+    """
     config_file = Path(__paths__.data) / "config.json"
     with open(config_file, "w") as f:
         f.seek(0)
@@ -24,11 +46,20 @@ def set_config(data):
         f.truncate()
 
 
+
 def get_config() -> Any:
+    """
+    Returns the contents of the config.json file as a Python object.
+
+    Args:
+        None
+
+    Returns:
+        Any: The contents of config.json file.
+    """
     config_file = Path(__paths__.data) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
-
     return data
 
 
@@ -49,6 +80,13 @@ def get_config_key(key: str) -> Any:
 
 
 def set_default_json() -> None:
+    """
+    Sets default values to keys that are present inside config.json file and modifies the same file.
+    
+    Returns:
+        None.
+    """
+    
     # set default config.json values
     data = get_config()
     data["current_language"] = "English"
@@ -71,7 +109,14 @@ def set_default_json() -> None:
         file.truncate()
 
 
+
 def get_app_config() -> AppConfig:
+    """
+    Returns an instance of AppConfig that contains the current configuration settings.
+
+    Returns:
+        AppConfig: instance containing the current application configuration settings.
+    """
     config_file = Path(__paths__.data) / "config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
@@ -82,3 +127,4 @@ def get_app_config() -> AppConfig:
         non_hearing_impaired=data["subtitle_type"]["non_hearing_impaired"],
     )
     return user_data
+

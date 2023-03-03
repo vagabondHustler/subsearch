@@ -5,9 +5,18 @@ from pathlib import Path
 @dataclass(order=True)
 class AppPaths:
     """
-    Dataclass containing paths to modules and assets
-    """
+    A dataclass representing the paths used in the application.
 
+    Attributes:
+        home (Path): The root directory of the application.
+        data (Path): The directory where data related to the application is stored.
+        gui (Path): The directory containing GUI modules and files.
+        providers (Path): The directory containing subtitle provider modules.
+        utils (Path): The directory containing utility modules.
+        icon (Path): The Path object representing the icon for the application.
+        tabs (Path): The directory containing tab icon assets for the GUI.
+    """
+    
     home: Path
     data: Path
     gui: Path
@@ -20,7 +29,15 @@ class AppPaths:
 @dataclass(order=True)
 class FileData:
     """
-    Dataclass containing the video file base information
+     Class representing file information.
+
+    Attributes:
+        filename (str): Name of the file.
+        file_extension (str): Extension of the file.
+        file_path (pathlib.Path): Path of the file.
+        directory_path (pathlib.Path): Directory path of the file.
+        subs_directory (pathlib.Path): Subtitles directory path.
+        tmp_directory (pathlib.Path): Temporary directory path.
     """
 
     filename: str
@@ -34,9 +51,27 @@ class FileData:
 @dataclass(order=True)
 class AppConfig:
     """
-    Dataclass containing the users different app configurations
-    """
+    Data class for storing user preferences and settings.
 
+    Attributes:
+        current_language (str): The currently selected language.
+        languages (dict[str, str]): A mapping of languages.
+        subtitle_type (dict[str, bool]): A dictionary used to store user's preference regarding subtitle types.
+        percentage_threshold (int): Percentage threshold value for preferred match results.
+        rename_best_match (bool): Boolean flag to rename the closest matching srt file with the media file used in search.
+        context_menu (bool): Boolean flag representing whether or not to display SubSearch in the context menu on Windows platform.
+        context_menu_icon (bool): Boolean flag representing whether or not to display the SubSearch icon in the context menu on Windows platform.
+        manual_download_fail (bool): Boolean flag indicating if the GUI download tab should be opened.
+        manual_download_mode (bool): Boolean flag to toggle manual download mode.
+        show_terminal (bool): Boolean flag indicating if terminal output is displayed.
+        use_threading (bool): Boolean flag indicating if threads are enabled when downloading subtitles.
+        log_to_file (bool): Boolean flag that indicates if logging is enabled.
+        file_extensions (dict[str, bool]): A dictionary storing user's preferences regarding file extensions.
+        providers (dict[str, bool]): A dictionary storing user's preferences regarding subtitle providers.
+        language_iso_639_3 (str): ISO 639-3 code for the selected language.
+        hearing_impaired (bool): Boolean flag indicating if the subtitle is for hearing-impaired people.
+        non_hearing_impaired (bool): Boolean flag indicating if the subtitle is not for hearing-impaired people.
+    """
     current_language: str
     languages: dict[str, str]
     subtitle_type: dict[str, bool]
@@ -59,9 +94,20 @@ class AppConfig:
 @dataclass(frozen=True, order=True)
 class ReleaseMetadata:
     """
-    Dataclass containing parsed data from a video file
-    """
+    Data class representing metadata associated with a media release.
 
+    Attributes:
+        title (str): Title of the media.
+        year (int): Year of the media release.
+        season (str): Season of the media.
+        season_ordinal (str): Ordinal of the season.
+        episode (str): Episode of the media.
+        episode_ordinal (str): Ordinal of the episode.
+        tvseries (bool): Boolean flag indicating if the media is a TV series.
+        release (str): Name of the media release.
+        group (str): Name of the release group.
+        file_hash (str): Hash value of the media file.
+    """
     title: str
     year: int
     season: str
@@ -77,9 +123,14 @@ class ReleaseMetadata:
 @dataclass(frozen=True, order=True)
 class ProviderUrls:
     """
-    Dataclass containing urls for providers
-    """
+    A dataclass to represent URLs for different subtitle providers.
 
+    Attributes:
+        subscene(str): URL of the subscene provider.
+        opensubtitles(str): URL of the opensubtitle provider.
+        opensubtitles_hash(str): Hash URL of the opensubtitle provider.
+        yifysubtitles(str): URL of the yifysubtitles provider.
+    """
     subscene: str
     opensubtitles: str
     opensubtitles_hash: str
@@ -89,9 +140,16 @@ class ProviderUrls:
 @dataclass(frozen=True, order=True)
 class DownloadMetaData:
     """
-    Dataclass with all the necessary data for downloading a file
-    """
+    A data class representing metadata for the to be downloaded subtitle file.
 
+    Attributes:
+        provider (str): The subtitle provider used to obtain the subtitle file.
+        name (str): The name of the media file associated with the subtitle file.
+        file_path (str): The path to the subtitle file on the local filesystem.
+        url (str): The URL from which the subtitle file can be downloaded from.
+        idx_num (int): Index in which order the file is downloaded.
+        idx_length (int): The total length of index.
+    """
     provider: str
     name: str
     file_path: str
@@ -103,9 +161,17 @@ class DownloadMetaData:
 @dataclass(frozen=True, order=True)
 class FormattedMetadata:
     """
-    Dataclass containing information that can later be downloaded
-    """
+    Represents formatted metadata for a movie or TV show release.
 
+    Attributes:
+        provider (str): The name of the metadata provider.
+        release (str): The name of the movie or TV show release.
+        url (str): The URL from which the subtitle file can be downloaded from.
+        pct_result (int): The percentage match between the search query and
+            the metadata.
+        formatted_release (str): The formatted name of the release.
+        formatted_url (str): The formatted URL of the metadata.
+    """
     provider: str
     release: str
     url: str

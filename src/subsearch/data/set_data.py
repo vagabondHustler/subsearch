@@ -7,6 +7,12 @@ from subsearch.data.data_objects import AppPaths, FileData
 
 
 def paths() -> AppPaths:
+    """
+    Returns an instance of the AppPaths class representing the path configuration for Subsearch application.
+
+    Returns:
+        AppPaths: An instance of AppPaths representing the path configuration for Subsearch application.
+    """
     home = Path(__file__).resolve().parent.parent
     return AppPaths(
         home=home,
@@ -22,10 +28,20 @@ def paths() -> AppPaths:
 @no_type_check
 def video_file() -> FileData:
     """
-    Set path, name, directory and ext for the video file
+    Returns an instance of the FileData class based on the file path provided in the command line arguments.
+
+    The function receives no inputs.
 
     Returns:
-        VideoFilePaths: name, ext, path, directory
+      An instance of the FileData class containing the video file data. None if the file path is not valid or not one of the supported extensions (.avi, .mp4, .mkv, .mpg, .mpeg, .mov, .rm, .vob, .wmv, .flv, .3gp, .3g2, .swf, .mswmm)
+
+    FileData class:
+      name (str): the name of the video file without the extension
+      extension (str): the extension of the video file (e.g. ".avi")
+      file_path (Path): the absolute path to the video file
+      directory (Path): the parent directory of the video file
+      subs_directory (Path): the absolute path to a directory to save the subtitles (same as the parent directory for the video file)
+      tmp_directory (Path): the absolute path to the local temporary files directory (".subsearch" folder within the parent directory of the video file)
     """
     exts = [
         ".avi",
