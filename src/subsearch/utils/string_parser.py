@@ -7,7 +7,16 @@ from subsearch.utils import imdb
 
 
 def find_year(string: str) -> int:
-    re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)  # https://regex101.com/r/r5TwxJ/1
+    """
+    Find and return the year from a string.
+
+    Args:
+        string (str): The string where the year has to be looked for.
+
+    Returns:
+        int: The first 4 digit number that matches the regex pattern or 0000 if no match is found.
+    """
+    re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)
     if re_year:
         year = re_year[0]
         return int(year)
@@ -15,7 +24,16 @@ def find_year(string: str) -> int:
 
 
 def find_title_by_year(string: str) -> str:
-    re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)  # https://regex101.com/r/FKUpY0/1
+    """
+    Find and return the title of a media file by year.
+
+    Args:
+        string (str): The file name.
+
+    Returns:
+        str: The part of the file name before the year, with '.' replaced by ' ', or "N/A" if no match is found.
+    """
+    re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
@@ -24,7 +42,16 @@ def find_title_by_year(string: str) -> str:
 
 
 def find_title_by_show(string: str) -> str:
-    re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)  # https://regex101.com/r/41OZE5/1
+    """
+    Find and return the title of a media file by show.
+
+    Args:
+        string (str): The file name.
+
+    Returns:
+        str: The part of the filename before the season and episode values, with '.' replaced by ' ', or "N/A" if no match is found.
+    """
+    re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
@@ -33,7 +60,16 @@ def find_title_by_show(string: str) -> str:
 
 
 def find_season_episode(string: str) -> str:
-    re_se = re.findall("\.([s]\d*[e]\d*)\.", string)  # https://regex101.com/r/8Nwlr6/1
+    """
+    Find and return the season and episode values of a media file.
+
+    Args:
+        string (str): The file name.
+
+    Returns:
+        str: A string consisting of the season and episode values formatted like "s01e01", or "N/A" if no match is found.
+    """
+    re_se = re.findall("\.([s]\d*[e]\d*)\.", string)
     if re_se:
         se: str = re_se[0]
         return se
@@ -41,6 +77,16 @@ def find_season_episode(string: str) -> str:
 
 
 def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
+    """
+    Converts the numeric TV series values (season and episode numbers) in a filename to their ordinal versions(if any).
+
+    Args:
+        string (str): The TV series values as pulled out from the filename as a single string, e.g., `s01e01`.
+
+    Returns:
+        tuple(str, str, str, str, bool): A tuple containing separated season and episode strings, corresponding ordinal
+            strings, and a Boolean flag indicating whether the input string was matched successfully.
+    """
     if string == "N/A":
         season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
         show_bool = False
@@ -53,11 +99,31 @@ def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
 
 
 def find_group(string: str) -> str:
+    """
+    Find and return the group from a string.
+
+    Args:
+        string (str): The string where the group has to be looked for.
+
+    Returns:
+        str: The group identifier as taken from the end of the string.
+    """
     group = string.rsplit("-", 1)[-1]
     return group
 
 
 def find_title(filename: str, year: int, series: bool):
+    """
+    Find and return the media file's title, taking its year and/or TV series values into consideration.
+
+    Args:
+        filename (str): The name of the media file.
+        year (int): The relevant year, extracted from the name, passed on from another method.
+        series (bool): Whether the video file is a TV series or not.
+
+    Returns:
+        str: The name of the given media file.
+    """
     if year != 0000:
         title = find_title_by_year(filename)
     elif series and year == 0000:
@@ -69,17 +135,33 @@ def find_title(filename: str, year: int, series: bool):
 
 class CreateProviderUrls:
     """
-    Class for retrieving initial URL to search with for a provider
-    """
+    A class used to represent a provider URL
 
+    Args:
+        file_hash (str): the hash of the file
+        app_config (AppConfig): an instance of AppConfig that contains configuration settings
+        release_metadata (ReleaseMetadata): the metadata of the release
+
+    Attributes:
+        file_hash (str): the hash of the file
+        app_config (AppConfig): an instance of AppConfig that contains configuration settings
+        release_metadata (ReleaseMetadata): the metadata of the release
+    """
+    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
+        self.file_hash = file_hash
+        self.app_config = app_config
+        self.release_metadata = release_metadata
+
+
+class CreateProviderUrls:
     def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
         """
-        Get initial URL to search with for a provider
+        Initializes a new instance of the CreateProviderUrls class.
 
         Args:
-            file_hash (str): _description_
-            app_config (AppConfig): _description_
-            release_metadata (ReleaseMetadata): _description_
+            file_hash (str): The file hash.
+            app_config (AppConfig): The application configuration
+            release_metadata (ReleaseMetadata): The release metadata
         """
         self.file_hash = file_hash
         self.app_config = app_config
@@ -87,19 +169,19 @@ class CreateProviderUrls:
 
     def retrieve_urls(self) -> ProviderUrls:
         """
-        Retrieve all available URLs
+        Get the provider urls to search for subtitles.
 
         Returns:
-            ProviderUrls: URLs for all providers
+            ProviderUrls: A collection of strings that contains urls to search for subtitles from different subtitle providers.
         """
         return ProviderUrls(self.subscene(), self.opensubtitles(), self.opensubtitles_hash(), self.yifysubtitles())
 
     def subscene(self) -> str:
         """
-        subscene URL
+        Gets the Url for the Subscene website to search for subtitles.
 
         Returns:
-            str: f"{domain}/{query}={search_parameters}"
+            str: The url to search for subtitles on subscene.com
         """
         domain = "https://subscene.com"
         query = "subtitles/searchbytitle?query"
@@ -109,10 +191,10 @@ class CreateProviderUrls:
 
     def opensubtitles(self) -> str:
         """
-        opensubtitles URL
+        Gets the Url for the Opensubtitles website to search for subtitles.
 
         Returns:
-            str: f"{domain}/{subtitle_type}/{search_parameters}/rss_2_00"
+            str: The url to search for subtitles on opensubtitles.org
         """
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
@@ -121,10 +203,10 @@ class CreateProviderUrls:
 
     def opensubtitles_hash(self) -> str:
         """
-        opensubtitles URL
+        Gets the Url to set a moviehash for the Opensubtitles website to find subtitles.
 
         Returns:
-            str: f"{domain}/{subtitle_type}/moviehash-{self.file_hash}"
+            str: the url to set moviehash for opensubtitles.org
         """
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
@@ -132,10 +214,10 @@ class CreateProviderUrls:
 
     def yifysubtitles(self) -> str:
         """
-        yifysubtitles URL
+        Gets the Url for the YifySubtitles website to search for subtitles for movies.
 
         Returns:
-            str: f"{domain}/movie-imdb/{tt_id}"
+            str: The url to search for subtitles on yifysubtitles.org
         """
         if self.release_metadata.tvseries:
             return "N/A"
@@ -144,16 +226,34 @@ class CreateProviderUrls:
         return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else "N/A"
 
     def _subscene_search_parameters(self) -> str:
+        """
+        Gets the search parameters for Subscene to search for the appropriate subtitles based on File name and season ordinal.
+
+        Returns:
+            str: The search parameter value for Subscene to search for the applicable subtitles.
+        """
         if self.release_metadata.tvseries:
             return f"{self.release_metadata.title} - {self.release_metadata.season_ordinal} season"
         return f"{self.release_metadata.title}"
 
     def _opensubtitles_subtitle_type(self) -> str:
+        """
+        Gets the subtitle type and language settings for Opensubtitles based on Application configuration.
+
+        Returns:
+            str: The subtitle types and language configurations to search for subtitles in Opensubtitles.
+        """
         if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
             return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}/hearingimpaired-on"
         return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}"
 
     def _opensubtitles_search_parameters(self) -> str:
+        """
+        Gets the search parameters for Opensubtitles to search for the appropriate subtitles based on Movie title, year, season and episode number.
+
+        Returns:
+            str: The search parameter value for Opensubtitles to search for the applicable subtitles.
+        """
         if self.release_metadata.tvseries:
             return f"searchonlytvseries-on/season-{self.release_metadata.season}/episode-{self.release_metadata.episode}/moviename-{self.release_metadata.title}"
         return f"searchonlymovies-on/moviename-{self.release_metadata.title} ({self.release_metadata.year})"
@@ -161,16 +261,16 @@ class CreateProviderUrls:
 
 def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     """
-    Get release metadata from a filename
-    Uses regex expressions to find the parameters
+    Collects the necessary metadata from a filename.
 
     Args:
-        filename (str): release name from the filename
-        file_hash (str): hash of the file
+      filename (str): The name of the file to obtain release metadata from.
+      file_hash (str): The hash value of the file.
 
     Returns:
-        ReleaseMetadata: title, year, season, season_ordinal, episode, episode_ordinal, tv_series, release name, group, file_hash
-    """
+      ReleaseMetadata: A ReleaseMetadata object containing the relevant metadata for the inputted file.
+
+    """   
     filename = filename.lower()
     year = find_year(filename)
     season_episode = find_season_episode(filename)
@@ -196,14 +296,14 @@ def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
 
 def calculate_match(from_user: str, from_website: str) -> int:
     """
-    Compare two strings and compare how closely they match against each other
+    Calculates the match between user input and website information
 
     Args:
-        from_user (str): release from filename
-        from_browser (str): release from the provider
+        from_user (str): User input string
+        from_website (str): Website information string
 
     Returns:
-        int: _description_
+        int: The percentage of matching between two strings.
     """
     max_percentage = 100
     _from_user: list[str] = mk_lst(from_user)
@@ -219,15 +319,6 @@ def calculate_match(from_user: str, from_website: str) -> int:
 
 
 def mk_lst(release: str) -> list[str]:
-    """
-    Create a list from a string
-
-    Args:
-        release (str)
-
-    Returns:
-        list[str]
-    """
     new: list[str] = []
     qualities = ["720p", "1080p", "1440p", "2160p"]
     temp = release.split(".")

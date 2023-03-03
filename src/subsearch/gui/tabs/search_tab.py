@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data import GUI_DATA
-from subsearch.gui import tk_tools
+from subsearch.gui import tkinter_utils
 from subsearch.utils import raw_config
 
 SUBTILE_TYPE = raw_config.get_config_key("subtitle_type")
@@ -47,7 +47,7 @@ class Providers(tk.Frame):
 
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
+        tkinter_utils.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -96,7 +96,7 @@ class SubtitleType(tk.Frame):
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.sub_type_txt()
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        tkinter_utils.VarColorPicker(self.string_var, self.clabel)
         self.rownum = 0
         self.colnum = 2
         self.checkbox_values = {}
@@ -116,7 +116,7 @@ class SubtitleType(tk.Frame):
             self.checkbox_values[btn] = key, valuevar
 
             btn.bind("<Enter>", self.enter_button)
-            tk_tools.set_default_grid_size(self)
+            tkinter_utils.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -146,7 +146,7 @@ class SubtitleType(tk.Frame):
             self.string_var.set(f"Only HI")
         if hi_sub is False and nonhi_sub:
             self.string_var.set(f"Only non-HI")
-        tk_tools.VarColorPicker(self.string_var, self.clabel)
+        tkinter_utils.VarColorPicker(self.string_var, self.clabel)
 
 
 class SearchThreshold(tk.Frame):
@@ -163,13 +163,13 @@ class SearchThreshold(tk.Frame):
         self.clabel = tk.Label(self, textvariable=self.string_var)
         self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tk_tools.VarColorPicker(self.string_var, self.clabel, True)
-        x, y = tk_tools.calculate_btn_size(self, 36)
+        tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
+        x, y = tkinter_utils.calculate_btn_size(self, 36)
         self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x - 2)
         self.slider.grid(column=2, row=0, sticky="we", padx=4)
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
-        tk_tools.set_default_grid_size(self)
+        tkinter_utils.set_default_grid_size(self)
 
     def get_value(self):
         return self.current_value.get()
@@ -211,10 +211,10 @@ class SearchThreshold(tk.Frame):
     def update_config(self):
         update_svar = self.current_value.get()
         raw_config.set_config_key_value("percentage_threshold", update_svar)
-        tk_tools.VarColorPicker(self.string_var, self.clabel, True)
+        tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
 
 
-class RenameBestMatch(tk_tools.ToggleableFrameButton):
+class RenameBestMatch(tkinter_utils.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -222,4 +222,4 @@ class RenameBestMatch(tk_tools.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tk_tools.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")
+        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")

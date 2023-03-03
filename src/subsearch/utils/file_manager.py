@@ -12,12 +12,29 @@ from subsearch.utils import log, string_parser
 
 
 def running_from_exe() -> bool:
+    """
+    Checks if the module is running from an executable file.
+
+    Returns:
+        bool: True if the module is running from an executable file, False otherwise.
+    """
     if sys.argv[0].endswith(".exe"):
         return True
     return False
 
 
 def download_subtitle(data: DownloadMetaData) -> int:
+    """Download the subtitle from the given url.
+
+    Args:
+      data: A DownloadMetaData object that has information about the subtitle file to be downloaded.
+
+    Returns:
+      An integer value that represents the index number of the subtitle that was downloaded.
+
+    Raises:
+      Any exception raised by the get_cloudscraper or IOError during writing of the subtitle file.
+    """
     log.output(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
     scraper = get_cloudscraper()
     r = scraper.get(data.url, stream=True)
@@ -29,6 +46,17 @@ def download_subtitle(data: DownloadMetaData) -> int:
 
 
 def extract_files(src: Path, dst: Path, extension: str) -> None:
+    """
+    Extract files from a directory to a specified Destination.
+    
+    Args:
+        src (Path): Source path to extract files
+        dst (Path): Destination path to extract files
+        extension (str): Extension of files to be extracted
+    
+    Returns:
+        None.
+    """
     for file in os.listdir(src):
         if file.endswith(extension):
             log.output(f"Extracting: {file} -> ..\\subs\\{file}")
@@ -39,6 +67,17 @@ def extract_files(src: Path, dst: Path, extension: str) -> None:
 
 
 def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
+    """
+    Function renames and moves the best matching subtitle file, based on the release name, to the specified path. If no match is found nothing happens.
+
+    Args:
+        release_name (str): The name of the video release whose subtitle is being renamed.
+        cwd (Path): The path to the working directory.
+        extension (str): The file type of the subtitles i.e ".srt".
+
+    Returns:
+        None.
+    """
     if __video__ is None:
         return None
     higest_value = (0, "")
@@ -61,6 +100,17 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
 
 
 def clean_up_files(cwd: Path, extension: str) -> None:
+    """
+    Removes files with specific extensions in a given directory
+    
+    Args:
+        cwd (pathlib.Path): The directory path where the files to be deleted reside.
+        extension (str): The file extension of the files to be deleted.
+    
+    Returns:
+        None
+    """
+    
     for file in os.listdir(cwd):
         if file.endswith(extension):
             log.output(f"Removing: {file}")
@@ -69,6 +119,15 @@ def clean_up_files(cwd: Path, extension: str) -> None:
 
 
 def del_directory(directory: Path) -> None:
+    """
+    Remove a directory and its contents.
+
+    Args:
+        directory: A Path object representing the directory to be removed.
+
+    Returns:
+        None
+    """
     for file in os.listdir(directory):
         log.output(f"Removing: {file}")
     log.output(f"Removing: {directory}")
@@ -76,6 +135,10 @@ def del_directory(directory: Path) -> None:
 
 
 def make_necessary_directories():
+    """
+    Make necessary directories using video object info.
+    """
+    
     if __video__ is None:
         return None
     if not Path(__video__.tmp_directory).exists():
@@ -85,6 +148,19 @@ def make_necessary_directories():
 
 
 def get_hash(file_path: Path | None) -> str:
+    """
+    Calculates and returns the hash value of given file path.
+
+    Args:
+        file_path: A Path object indicating the location of the input file. If None, returns an all-zero string.
+
+    Returns:
+        A hexadecimal String indicating the unique hash value of the file. If the file cannot be read or its size is less than 131072 bytes, returns an all-zero string '000000000000000000'.
+
+    Examples:
+        get_hash(Path("my_folder/my_file.jpg")) returns "d020f52c464caedd"
+        get_hash(None) returns "000000000000000000"
+    """
     if file_path is None:
         return "000000000000000000"
     try:

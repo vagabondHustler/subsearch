@@ -3,7 +3,7 @@ from pathlib import Path
 from threading import Thread
 
 from subsearch import core
-from subsearch.gui import widget_menu
+from subsearch.gui import tab_manager
 from subsearch.utils import raw_config, raw_registry
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -105,16 +105,16 @@ def console() -> None:
         if arg.startswith("--settings"):
             if sys.argv[num + 1] == "lang":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                widget_menu.open_tab("language")
+                tab_manager.open_tab("language")
             elif sys.argv[num + 1] == "search":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                widget_menu.open_tab("search")
+                tab_manager.open_tab("search")
             elif sys.argv[num + 1] == "app":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                widget_menu.open_tab("settings")
+                tab_manager.open_tab("settings")
             elif sys.argv[num + 1] == "dl":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                widget_menu.open_tab("download")
+                tab_manager.open_tab("download")
 
             break
         elif arg.startswith("--registry-key") or arg.startswith("--add-key"):

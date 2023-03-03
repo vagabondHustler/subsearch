@@ -8,7 +8,6 @@ from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
 
 
-# download said subtitle to the folder with the video file in it
 class DownloadList(tk.Frame):
     def __init__(self, parent, formatted_data: list[FormattedMetadata]) -> None:
         tk.Frame.__init__(self, parent)
