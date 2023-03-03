@@ -3,7 +3,7 @@ import time
 
 from subsearch.data import __version__, __video__
 from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
-from subsearch.gui import widget_menu
+from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import file_manager, log, raw_config, raw_registry, string_parser
 
@@ -64,7 +64,7 @@ class AppSteps(Initializer):
             raw_registry.add_context_menu()
         file_manager.make_necessary_directories()
         if self.file_exist is False:
-            widget_menu.open_tab("search")
+            tab_manager.open_tab("search")
             return None
 
         if " " in __video__.filename:
@@ -144,7 +144,7 @@ class AppSteps(Initializer):
                 self.skipped_combined.append(data)
 
         if self.skipped_combined:
-            widget_menu.open_tab("download", formatted_data=self.skipped_combined)
+            tab_manager.open_tab("download", formatted_data=self.skipped_combined)
             self.ran_download_tab = True
         log.output_done_with_tasks(end_new_line=True)
 
