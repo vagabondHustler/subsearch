@@ -15,7 +15,8 @@ DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
 def get_tab_png(tab: str) -> Path:
-    """Get the path of the PNG file for a given tab.
+    """
+    Get the path of the PNG file for a given tab.
 
     Args:
         tab (str): The name of the tab.
@@ -30,7 +31,8 @@ def get_tab_png(tab: str) -> Path:
 
 
 def calculate_btn_size(cls, width_=18, height_=2) -> tuple[int, int]:
-    """Calculate the required size of a button based on its content.
+    """
+    Calculate the required size of a button based on its content.
 
     Args:
         cls: The class from which the method is being called.
