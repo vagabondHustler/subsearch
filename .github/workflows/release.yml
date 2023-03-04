@@ -128,36 +128,54 @@ jobs:
         run: |
           python setup.py bdist_msi -d .
 
-      - name: Build changelog
-        id: github_release
+      - name: Build pre-release changelog
+        id: github_release_pre
         uses: mikepenz/release-changelog-builder-action@v3
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ contains(github.ref_name, 'rc') && contains(github.ref_name, 'b') && contains(github.ref_name, 'a') }}
         with:
           configuration: .github/configs/changelog_builder.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build changelog fromtags
+        id: github_release_full
+        uses: mikepenz/release-changelog-builder-action@v3
+        if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+        with:
+          fromTag: $version_yml
+          toTag: ${{ github.ref_name }}
+          configuration: .github/configs/changelog_builder.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
       - name: Update changelog
         id: update_changelog
         run: |
-          echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
-
+          $pre_releases = @('rc', 'a', 'b')
+          $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
+          
+          
           $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
 
           $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
           $version_yml = cat .github/configs/latest_release.yml
-          $pre_releases = @('rc', 'a', 'b')
-          $virustotal_no_file = "<p>VirusTotal analysis: No file uploaded"
-          $virustotal_url = "<p>VirusTotal analysis: [Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
+          $virustotal_no_file = "VirusTotal analysis: No file uploaded"
+          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
+          if ($is_pre_release){$virustotal_analysis = $virustotal_no_file} else {$virustotal_analysis = $virustotal_url}
 
 
-          $line1 = "###### Full changelog: "
-          $line2 = "[${{ github.ref_name }}]($subsearch_repo/compare/$version_yml...${{ github.ref_name }})"
-          $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
-          if ($is_pre_release){$line3 = $virustotal_no_file} else {$line3 = $virustotal_url}
-          $line4 = "<p>SHA256: **$sha256_hash**"
+          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/$version_yml...${{ github.ref_name }})"
+          $full_changelog = "Full changelog: $comparison_link"
+          $hash_info = "<p>SHA256: $sha256_hash"
 
-          echo "$line1$line2$line3$line4" >> tmp_changelog.md
+          if ($is_pre_release) {
+            $changelog = "${{ steps.github_release_pre.outputs.changelog }}"
+          } else {
+            $changelog = "${{ steps.github_release_full.outputs.changelog }}"
+          }
+
+          echo "$changelog" > tmp_changelog.md
+          echo "###### $virustotal_analysis<p>$hash_info<p><p>$full_changelog" >> tmp_changelog.md
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
