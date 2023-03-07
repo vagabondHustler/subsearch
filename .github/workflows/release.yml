@@ -6,13 +6,39 @@ on:
       - "v*.*.*"
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
+  variables:
+    name: Set enviroment variables
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "*"
+      - name: Set variables
+        run: |
+          _past_full_release=$(cat .github/configs/latest_release.yml)
+          _ref_name=${{ github.ref_name }}
+
+          echo "past_ref_name=$_past_full_release" >> $GITHUB_ENV
+          echo "valid_semver=${_ref_name:1}" >> $GITHUB_ENV
+          echo "past_valid_semver=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
+          echo "local_appdata=${LOCALAPPDATA}" >> $GITHUB_ENV
+        shell: bash
+
+    outputs:
+      past_valid_semver: "${{ env.past_valid_semver }}"
+      valid_semver: "${{ env.valid_semver }}"
+      past_ref_name: "${{ env.past_ref_name }}"
+      local_appdata: "${{ env.local_appdata }}"
+
+  test_tox:
+    name: Test with tox
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest]
         python-version: ["3.10.*", "3.11.*"]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -27,7 +53,8 @@ jobs:
       - name: Test with tox
         run: tox
 
-  black-isort:
+  black_isort:
+    name: Reformat codebase with black & isort
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,6 +66,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+          git_config_global: true
 
       - name: Install black & isort
         run: |
@@ -57,9 +85,9 @@ jobs:
           git fetch origin main
           git push origin HEAD:main
 
-  versioning:
-    name: Versioning
-    needs: ["test", "black-isort"]
+  bump_version:
+    name: Bump version
+    needs: [variables, test_tox, black_isort]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -76,36 +104,22 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+          git_config_global: true
 
-      - name: Get current version
-        id: get_current_version
-        run: |
-          echo "current_version=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
-
-      - name: Remove v from ${{ github.ref_name }}
-        id: remove_v
-        run: |
-          v_version=${{ github.ref_name }}
-          echo "new_version=${v_version:1}" >> $GITHUB_ENV
-
-      - name: Update version.py
-        run: python scripts/update_version.py ${{env.new_version}}
+      - name: Bump version.py
+        run: python scripts/update_version.py ${{ needs.variables.outputs.valid_semver }}
 
       - name: Push new version
         run: |
           git status
           git add src/subsearch/data/version.py
-          git commit -S -m "Bump version ${{env.current_version}} → ${{env.new_version}}"
+          git commit -S -m "Bump version ${{ needs.variables.outputs.past_valid_semver }} → ${{ needs.variables.outputs.valid_semver }}"
           git fetch origin main
           git push origin HEAD:main
 
-    outputs:
-      current_version: "${{env.current_version}}"
-      new_version: "${{env.new_version}}"
-
-  build-and-publish:
-    name: Build and Publish
-    needs: versioning
+  build_msi:
+    name: Build MSI
+    needs: [variables, bump_version]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -128,11 +142,82 @@ jobs:
         run: |
           python setup.py bdist_msi -d .
 
-      - name: Build changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v3
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
+          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          path: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+
+  msi_verification:
+    name: MSI verification
+    needs: [variables, bump_version, build_msi]
+    runs-on: windows-latest
+    steps:
+      - name: Download MSI artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          path: .
+
+      - name: Install Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi & verify install
+        id: install_msi
+        run: |
+          Start-Process -FilePath msiexec.exe -ArgumentList @("/i Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi", "/norestart", "/quiet") -Wait
+          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
+          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
+          if ($files.Count -eq 1 -and $registry.Count -eq 1) {
+            Write-Output "MSI package installed successfully"
+          } else {
+            Write-Output "MSI package failed to install"
+            Exit 1
+          }
+        shell: pwsh
+
+      - name: Uninstall Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi & verify uninstall
+        id: uninstall_msi
+        run: |
+          Start-Process -FilePath msiexec.exe -ArgumentList @("/x Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi", "/norestart", "/quiet") -Wait
+          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
+          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
+          if ($files.Count -gt 0 -or $registry.Count -gt 0) {
+            Write-Output "MSI package failed to uninstall"
+            Exit 1
+          } else {
+            Write-Output "MSI package uninstalled successfully."
+          }
+        shell: pwsh
+
+  generate_changelog:
+    name: Generate changelog
+    needs: [variables, bump_version, msi_verification]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Download MSI artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          path: .
+
+      - name: Build changlog for pre-release
+        id: changelog_pre_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        if: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
+        with:
+          configuration: .github/configs/changelog_builder.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build changelog for full-release
+        id: changelog_full_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+        with:
+          fromTag: ${{ needs.variables.outputs.past_ref_name }}
+          toTag: ${{ github.ref_name }}
           configuration: .github/configs/changelog_builder.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,40 +225,73 @@ jobs:
       - name: Update changelog
         id: update_changelog
         run: |
-          echo "${{steps.github_release.outputs.changelog}}" > tmp_changelog.md
-
-          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
-
-          $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
-          $version_yml = cat .github/configs/latest_release.yml
           $pre_releases = @('rc', 'a', 'b')
-          $virustotal_no_file = "<p>VirusTotal analysis: No file uploaded"
-          $virustotal_url = "<p>VirusTotal analysis: [Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
-
-
-          $line1 = "###### Full changelog: "
-          $line2 = "[${{ github.ref_name }}]($subsearch_repo/compare/$version_yml...${{ github.ref_name }})"
           $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
-          if ($is_pre_release){$line3 = $virustotal_no_file} else {$line3 = $virustotal_url}
-          $line4 = "<p>SHA256: **$sha256_hash**"
+          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
+          $virustotal_no_file = "VirusTotal analysis: No file uploaded"
+          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
+          if ($is_pre_release){$virustotal_analysis = $virustotal_no_file} else {$virustotal_analysis = $virustotal_url}
+          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/${{  needs.variables.outputs.past_ref_name }}...${{ github.ref_name }})"
+          $full_changelog = "Full changelog: $comparison_link"
+          $hash_info = "<p>SHA256: $sha256_hash"
+          if ($is_pre_release) {
+            echo "${{ steps.changelog_pre_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.valid_semver }}.md
+          } else {
+            echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.valid_semver }}.md
+          }
+          echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.valid_semver }}.md
+      - name: Upload changlog artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: changelog-${{ needs.variables.outputs.valid_semver }}.md
+          path: changelog-${{ needs.variables.outputs.valid_semver }}.md
 
-          echo "$line1$line2$line3$line4" >> tmp_changelog.md
+  publish_github:
+    name: Publish to GitHub
+    needs: [variables, bump_version, build_msi, msi_verification, generate_changelog]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+
+      - name: Download changelog artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: changelog-${{ needs.variables.outputs.valid_semver }}.md
+          path: .
+
+      - name: Download MSI artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          path: .
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: ${{ needs.versioning.outputs.new_version }}
-          body_path: tmp_changelog.md
+          name: ${{ needs.variables.outputs.valid_semver }}
+          body_path: changelog-${{ needs.variables.outputs.valid_semver }}.md
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
-            Subsearch-${{ needs.versioning.outputs.new_version }}-win64.msi
+            Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
 
-  pypi-upload:
+  publish_pypi:
     if: ${{ !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
-    name: Upload to PyPi
-    needs: ["versioning", "build-and-publish"]
+    name: Publish to PyPi
+    needs: [bump_version, generate_changelog]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -182,7 +300,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "*"
-
       - name: Install requirements
         run: |
           git fetch origin main
@@ -199,10 +316,10 @@ jobs:
         run: |
           twine upload --verbose -u '__token__' dist/*
 
-  latest-release-yml:
+  update_latest_release:
     if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
     name: Update latest_release.yml
-    needs: [versioning, pypi-upload, build-and-publish]
+    needs: [generate_changelog]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -216,6 +333,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+          git_config_global: true
 
       - name: Write to latest_release
         run: |
@@ -228,3 +346,4 @@ jobs:
           git commit -S -m "Chore update latest_release.yml"
           git fetch origin main
           git push origin HEAD:main
+
