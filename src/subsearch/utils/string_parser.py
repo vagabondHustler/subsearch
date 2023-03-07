@@ -132,28 +132,6 @@ def find_title(filename: str, year: int, series: bool):
         title = filename.rsplit("-", 1)[0]
     return title
 
-
-class CreateProviderUrls:
-    """
-    A class used to represent a provider URL
-
-    Args:
-        file_hash (str): the hash of the file
-        app_config (AppConfig): an instance of AppConfig that contains configuration settings
-        release_metadata (ReleaseMetadata): the metadata of the release
-
-    Attributes:
-        file_hash (str): the hash of the file
-        app_config (AppConfig): an instance of AppConfig that contains configuration settings
-        release_metadata (ReleaseMetadata): the metadata of the release
-    """
-
-    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
-        self.file_hash = file_hash
-        self.app_config = app_config
-        self.release_metadata = release_metadata
-
-
 class CreateProviderUrls:
     def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
         """
