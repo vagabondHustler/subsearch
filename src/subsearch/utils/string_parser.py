@@ -132,6 +132,7 @@ def find_title(filename: str, year: int, series: bool):
         title = filename.rsplit("-", 1)[0]
     return title
 
+
 class CreateProviderUrls:
     def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
         """
