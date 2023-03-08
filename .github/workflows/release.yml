@@ -202,7 +202,7 @@ jobs:
           name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
           path: .
 
-      - name: Build changlog for pre-release
+      - name: Build changelog for pre-release
         id: changelog_pre_release
         uses: mikepenz/release-changelog-builder-action@v3
         if: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
@@ -241,7 +241,7 @@ jobs:
             echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.valid_semver }}.md
           }
           echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.valid_semver }}.md
-      - name: Upload changlog artifact
+      - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
           name: changelog-${{ needs.variables.outputs.valid_semver }}.md
