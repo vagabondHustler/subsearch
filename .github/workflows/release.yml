@@ -107,7 +107,7 @@ jobs:
           git_config_global: true
 
       - name: Bump version.py
-        run: python scripts/update_version.py ${{ needs.variables.outputs.valid_semver }}
+        run: python scripts/bump_version.py ${{ needs.variables.outputs.valid_semver }}
 
       - name: Push new version
         run: |
