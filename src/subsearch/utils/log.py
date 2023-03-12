@@ -2,23 +2,26 @@ import logging
 import warnings
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 
 from subsearch.data import __version__, __video__
 from subsearch.data.data_objects import (
     AppConfig,
     FormattedMetadata,
+    LanguageData,
     ProviderUrls,
     ReleaseMetadata,
 )
-from subsearch.utils import raw_config
+from subsearch.utils import io_json
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
-LOG_TO_FILE = raw_config.get_config_key("log_to_file")
+LOG_TO_FILE = io_json.get_config_key("log_to_file")
 
 release_metadata: ReleaseMetadata
 app_config: AppConfig
 provider_urls: ProviderUrls
+language_data: LanguageData
 
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
@@ -51,7 +54,10 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
         if to_terminal is False:
             return None
         if level == "info":
+            lock = Lock()
+            lock.acquire()
             print(msg)
+            lock.release()
         else:
             print(f"{level.upper()} - {msg}")
 
@@ -86,7 +92,7 @@ def output_done_with_tasks(end_new_line: bool = False):
 
 def output_parameters() -> None:
     output_header(f"User data")
-    output(f"Language:                         {app_config.current_language}, {app_config.language_iso_639_3}")
+    output(f"Language:                         {language.name}, {language.alpha_1}, {language.alpha_2b}")
     output(f"Use HI subtitle:                  {app_config.hearing_impaired}")
     output(f"Use non-HI subtitle:              {app_config.non_hearing_impaired}")
     output(f"Match threshold:                  {app_config.percentage_threshold}%")
@@ -124,11 +130,12 @@ def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(media: ReleaseMetadata, app: AppConfig, urls: ProviderUrls):
-    global release_metadata, app_config, provider_urls
+def set_logger_data(media: ReleaseMetadata, app: AppConfig, urls: ProviderUrls, language_data: LanguageData):
+    global release_metadata, app_config, provider_urls, language
     release_metadata = media
     app_config = app
     provider_urls = urls
+    language = language_data
 
 
 def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int):

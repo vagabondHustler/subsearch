@@ -2,8 +2,13 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.data_objects import AppConfig, ProviderUrls, ReleaseMetadata
-from subsearch.utils import imdb
+from subsearch.data.data_objects import (
+    AppConfig,
+    LanguageData,
+    ProviderUrls,
+    ReleaseMetadata,
+)
+from subsearch.utils import imdb_lookup
 
 
 def find_year(string: str) -> int:
@@ -134,7 +139,9 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata):
+    def __init__(
+        self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata, language_data: LanguageData
+    ):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
@@ -146,6 +153,7 @@ class CreateProviderUrls:
         self.file_hash = file_hash
         self.app_config = app_config
         self.release_metadata = release_metadata
+        self.language_data = language_data
 
     def retrieve_urls(self) -> ProviderUrls:
         """
@@ -202,7 +210,7 @@ class CreateProviderUrls:
         if self.release_metadata.tvseries:
             return "N/A"
         domain = "https://yifysubtitles.org"
-        tt_id = imdb.FindImdbID(self.release_metadata.title, self.release_metadata.year).id
+        tt_id = imdb_lookup.FindImdbID(self.release_metadata.title, self.release_metadata.year).id
         return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else "N/A"
 
     def _subscene_search_parameters(self) -> str:
@@ -224,8 +232,8 @@ class CreateProviderUrls:
             str: The subtitle types and language configurations to search for subtitles in Opensubtitles.
         """
         if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
-            return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}/hearingimpaired-on"
-        return f"en/search/sublanguageid-{self.app_config.language_iso_639_3}"
+            return f"en/search/sublanguageid-{self.language_data.alpha_2b}/hearingimpaired-on"
+        return f"en/search/sublanguageid-{self.language_data.alpha_2b}"
 
     def _opensubtitles_search_parameters(self) -> str:
         """
