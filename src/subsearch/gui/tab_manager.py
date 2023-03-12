@@ -175,8 +175,8 @@ def initalize_root():
     """
     Initializes the Tkinter root window with the name `"Subsearch"`, sets its background color to `GUI_DATA.colors.dark_grey`,
     adds an icon bitmap from `__paths__.icon`, configures the window geometry using `tkinter_utils.WindowPosition.set` and makes the window non-resizable.
-    If `raw_registry.registry_key_exists()` is `False` and `raw_json.get_config_key("context_menu")` is `True`,
-    the default JSON configuration is set using `raw_json.set_default_json()` and a context menu is added to the registry using `raw_registry.add_context_menu()`.
+    If `io_winreg.registry_key_exists()` is `False` and `raw_json.get_config_key("context_menu")` is `True`,
+    the default JSON configuration is set using `raw_json.set_default_json()` and a context menu is added to the registry using `io_winreg.add_context_menu()`.
 
     Returns:
       An instance of Tk() class representing the main window of Subsearch application.
