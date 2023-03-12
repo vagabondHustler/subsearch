@@ -5,12 +5,12 @@ from subsearch.data import __version__, __video__
 from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import file_manager, log, raw_config, raw_registry, string_parser
+from subsearch.utils import file_manager, io_json, io_winreg, log, string_parser
 
 
 class Initializer:
     def __init__(self) -> None:
-        self.app_config = raw_config.get_app_config()
+        self.app_config = io_json.get_app_config()
         if __video__ is not None:
             self.file_exist = True
             self.file_hash = file_manager.get_hash(__video__.file_path)
@@ -18,25 +18,29 @@ class Initializer:
             self.file_exist = False
             self.file_hash = "000000000000000000"
         self.results: dict[str, list[DownloadMetaData]] = {}
-        self.skipped: dict[str, list[FormattedMetadata]] = {}
+        self.skipped_downloads: dict[str, list[FormattedMetadata]] = {}
         self.skipped_combined: list[FormattedMetadata] = []
         self.downloads: dict[str, int] = {}
+        self.language_data = io_json.get_language_data()
 
         for provider in self.app_config.providers.keys():
             self.results[provider] = []
-            self.skipped[provider] = []
+            self.skipped_downloads[provider] = []
             self.downloads[provider] = 0
 
         self.ran_download_tab = False
+        self.skip_step = SkipStep(self)
         if self.file_exist:
             self.release_data = string_parser.get_release_metadata(__video__.filename, self.file_hash)
-            create_provider_urls = string_parser.CreateProviderUrls(self.file_hash, self.app_config, self.release_data)
+            create_provider_urls = string_parser.CreateProviderUrls(
+                self.file_hash, self.app_config, self.release_data, self.language_data
+            )
             self.provider_urls = create_provider_urls.retrieve_urls()
-            log.set_logger_data(self.release_data, self.app_config, self.provider_urls)
+            log.set_logger_data(self.release_data, self.app_config, self.provider_urls, self.language_data)
             log.output_parameters()
 
     def all_providers_disabled(self) -> bool:
-        self.app_config = raw_config.get_app_config()
+        self.app_config = io_json.get_app_config()
         if (
             self.app_config.providers["subscene_site"] is False
             and self.app_config.providers["opensubtitles_site"] is False
@@ -57,11 +61,11 @@ class AppSteps(Initializer):
         self.start = time.perf_counter()
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if raw_registry.registry_key_exists() is False and raw_config.get_config_key("context_menu"):
-            raw_config.set_default_json()
-            raw_registry.add_context_menu()
-        if raw_registry.registry_key_exists() and raw_registry.key_no_value() and raw_config.get_config_key("context_menu"):
-            raw_registry.add_context_menu()
+        if io_winreg.registry_key_exists() is False and io_json.get_config_key("context_menu"):
+            io_json.set_default_json()
+            io_winreg.add_context_menu()
+        if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_config_key("context_menu"):
+            io_winreg.add_context_menu()
         file_manager.make_necessary_directories()
         if self.file_exist is False:
             tab_manager.open_tab("search")
@@ -72,14 +76,7 @@ class AppSteps(Initializer):
         log.output_header("Search started")
 
     def _provider_opensubtitles(self) -> None:
-        if self.file_exist is False:
-            return None
-        if self.app_config.language_iso_639_3 == "N/A":
-            return None
-        if (
-            self.app_config.providers["opensubtitles_hash"] is False
-            and self.app_config.providers["opensubtitles_site"] is False
-        ):
+        if self.skip_step.opensubtitles():
             return None
         # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_config, self.provider_urls)
@@ -87,35 +84,24 @@ class AppSteps(Initializer):
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
         if self.app_config.providers["opensubtitles_site"]:
             self.results["opensubtitles_site"] = _opensubs.parse_site_results()
-        self.skipped["opensubtitles_site"] = _opensubs._sorted_list()
+        self.skipped_downloads["opensubtitles_site"] = _opensubs._sorted_list()
 
     def _provider_subscene(self) -> None:
-        if self.file_exist is False:
+        if self.skip_step.subscene():
             return None
-        if self.app_config.providers["subscene_site"] is False:
-            return None
-        # log.output_header("Searching on subscene")
         _subscene = subscene.Subscene(self.release_data, self.app_config, self.provider_urls)
         self.results["subscene_site"] = _subscene.parse_site_results()
-        self.skipped["subscene_site"] = _subscene._sorted_list()
+        self.skipped_downloads["subscene_site"] = _subscene._sorted_list()
 
     def _provider_yifysubtitles(self) -> None:
-        if self.file_exist is False:
+        if self.skip_step.yifysubtitles():
             return None
-        if self.release_data.tvseries:
-            return None
-        if self.provider_urls.yifysubtitles == "N/A":
-            return None
-        if self.app_config.providers["yifysubtitles_site"]:
-            # log.output_header("Searching on yifysubtitles")
-            _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_config, self.provider_urls)
-            self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
-            self.skipped["yifysubtitles_site"] = _yifysubs._sorted_list()
+        _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_config, self.provider_urls)
+        self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
+        self.skipped_downloads["yifysubtitles_site"] = _yifysubs._sorted_list()
 
     def _download_files(self) -> None:
-        if self.file_exist is False:
-            return None
-        if not any(self.results.values()):
+        if self.skip_step.download_files():
             return None
         log.output_header(f"Downloading subtitles")
         for provider, data in self.results.items():
@@ -127,17 +113,9 @@ class AppSteps(Initializer):
         log.output_done_with_tasks(end_new_line=True)
 
     def _not_downloaded(self) -> None:
-        if self.file_exist is False:
+        if self.skip_step.not_downloaded():
             return None
-
-        number_of_downloads = sum(v for v in self.downloads.values())
-        if self.app_config.manual_download_fail and number_of_downloads > 0:
-            return None
-
-        if self.app_config.manual_download_mode and number_of_downloads < 1:
-            return None
-
-        for data_list in self.skipped.values():
+        for data_list in self.skipped_downloads.values():
             if not data_list:
                 continue
             for data in data_list:
@@ -149,13 +127,8 @@ class AppSteps(Initializer):
         log.output_done_with_tasks(end_new_line=True)
 
     def _extract_zip_files(self) -> None:
-        if self.file_exist is False:
+        if self.skip_step.extract_zip():
             return None
-        if self.ran_download_tab:
-            return None
-        if self.all_providers_disabled():
-            return None
-
         log.output_header("Extracting downloads")
         file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
         log.output_done_with_tasks(end_new_line=True)
@@ -186,3 +159,69 @@ class AppSteps(Initializer):
             input("Ctrl + c or Enter to exit")
         except KeyboardInterrupt:
             pass
+
+
+class SkipStep:
+    def __init__(self, cls):
+        self.cls = cls
+
+    def opensubtitles(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        if io_json.check_compatibility("opensubtitles") is False:
+            return True
+        if (
+            self.cls.app_config.providers["opensubtitles_hash"] is False
+            and self.cls.app_config.providers["opensubtitles_site"] is False
+        ):
+            return True
+        return False
+
+    def subscene(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        if io_json.check_compatibility("subscene") is False:
+            return True
+        if self.cls.app_config.providers["subscene_site"] is False:
+            return True
+        return False
+
+    def yifysubtitles(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        if io_json.check_compatibility("yifysubtitles") is False:
+            return True
+        if self.cls.release_data.tvseries:
+            return True
+        if self.cls.provider_urls.yifysubtitles == "N/A":
+            return True
+        if self.cls.app_config.providers["yifysubtitles_site"] is False:
+            return True
+        return False
+
+    def download_files(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        if not any(self.cls.results.values()):
+            return True
+        return False
+
+    def not_downloaded(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        number_of_downloads = sum(v for v in self.cls.downloads.values())
+        if self.cls.app_config.manual_download_fail and number_of_downloads > 0:
+            return True
+
+        if self.cls.app_config.manual_download_mode and number_of_downloads < 1:
+            return True
+        return False
+
+    def extract_zip(self) -> bool:
+        if self.cls.file_exist is False:
+            return True
+        if self.cls.ran_download_tab:
+            return True
+        if self.cls.all_providers_disabled():
+            return True
+        return False
