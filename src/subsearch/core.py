@@ -1,7 +1,7 @@
 import ctypes
 import time
 
-from subsearch.data import __version__, __video__
+from subsearch.data import __version__, video_data
 from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
@@ -11,9 +11,9 @@ from subsearch.utils import file_manager, io_json, io_winreg, log, string_parser
 class Initializer:
     def __init__(self) -> None:
         self.app_config = io_json.get_app_config()
-        if __video__ is not None:
+        if video_data is not None:
             self.file_exist = True
-            self.file_hash = file_manager.get_hash(__video__.file_path)
+            self.file_hash = file_manager.get_hash(video_data.file_path)
         else:
             self.file_exist = False
             self.file_hash = "000000000000000000"
@@ -31,7 +31,7 @@ class Initializer:
         self.ran_download_tab = False
         self.skip_step = SkipStep(self)
         if self.file_exist:
-            self.release_data = string_parser.get_release_metadata(__video__.filename, self.file_hash)
+            self.release_data = string_parser.get_release_metadata(video_data.filename, self.file_hash)
             create_provider_urls = string_parser.CreateProviderUrls(
                 self.file_hash, self.app_config, self.release_data, self.language_data
             )
@@ -71,7 +71,7 @@ class AppSteps(Initializer):
             tab_manager.open_tab("search")
             return None
 
-        if " " in __video__.filename:
+        if " " in video_data.filename:
             log.warning_spaces_in_filename()
         log.output_header("Search started")
 
@@ -130,7 +130,7 @@ class AppSteps(Initializer):
         if self.skip_step.extract_zip():
             return None
         log.output_header("Extracting downloads")
-        file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
+        file_manager.extract_files(video_data.tmp_directory, video_data.subs_directory, ".zip")
         log.output_done_with_tasks(end_new_line=True)
 
     def _clean_up(self) -> None:
@@ -138,12 +138,12 @@ class AppSteps(Initializer):
             return None
         if self.app_config.rename_best_match:
             log.output_header("Renaming best match")
-            file_manager.rename_best_match(f"{self.release_data.release}.srt", __video__.directory_path, ".srt")
+            file_manager.rename_best_match(f"{self.release_data.release}.srt", video_data.directory_path, ".srt")
             log.output_done_with_tasks(end_new_line=True)
 
         log.output_header("Cleaning up")
-        file_manager.clean_up_files(__video__.subs_directory, "nfo")
-        file_manager.del_directory(__video__.tmp_directory)
+        file_manager.clean_up_files(video_data.subs_directory, "nfo")
+        file_manager.del_directory(video_data.tmp_directory)
         log.output_done_with_tasks(end_new_line=True)
 
     def _pre_exit(self) -> None:

@@ -1,6 +1,6 @@
 from selectolax.parser import Node
 
-from subsearch.data import __video__
+from subsearch.data import video_data
 from subsearch.data.data_objects import (
     AppConfig,
     DownloadMetaData,
@@ -80,7 +80,7 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
             return []
 
         # pack download data
-        download_info = generic.pack_download_data("yifysubtitles", __video__.tmp_directory, to_be_downloaded)
+        download_info = generic.pack_download_data("yifysubtitles", video_data.tmp_directory, to_be_downloaded)
         return download_info
 
     def _sorted_list(self) -> list[FormattedMetadata]:

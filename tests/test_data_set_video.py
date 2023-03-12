@@ -1,5 +1,5 @@
-from src.subsearch.data import __video__
+from src.subsearch.data import video_data
 
 
 def test_paths() -> None:
-    assert __video__ is None
+    assert video_data is None

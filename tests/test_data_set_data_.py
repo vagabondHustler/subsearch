@@ -1,13 +1,17 @@
 from pathlib import Path
 
-from src.subsearch.data import __paths__
+from src.subsearch.data import app_paths
 
 
 def test_paths() -> None:
-    assert __paths__.home == Path(Path.cwd()) / "src" / "subsearch"
-    assert __paths__.data == Path(Path.cwd()) / "src" / "subsearch" / "data"
-    assert __paths__.gui == Path(Path.cwd()) / "src" / "subsearch" / "gui"
-    assert __paths__.providers == Path(Path.cwd()) / "src" / "subsearch" / "providers"
-    assert __paths__.utils == Path(Path.cwd()) / "src" / "subsearch" / "utils"
-    assert __paths__.icon == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "icon" / "subsearch.ico"
-    assert __paths__.tabs == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "tabs"
+    """Test function for app_paths module.
+
+    This function tests whether various path constants defined in app_paths module are correctly defined.
+    """
+    assert app_paths.home == Path(Path.cwd()) / "src" / "subsearch"
+    assert app_paths.data == Path(Path.cwd()) / "src" / "subsearch" / "data"
+    assert app_paths.gui == Path(Path.cwd()) / "src" / "subsearch" / "gui"
+    assert app_paths.providers == Path(Path.cwd()) / "src" / "subsearch" / "providers"
+    assert app_paths.utils == Path(Path.cwd()) / "src" / "subsearch" / "utils"
+    assert app_paths.icon == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "icon" / "subsearch.ico"
+    assert app_paths.tabs == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "tabs"

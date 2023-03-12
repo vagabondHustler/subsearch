@@ -5,7 +5,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-from subsearch.data import __video__
+from subsearch.data import video_data
 from subsearch.data.data_objects import DownloadMetaData
 from subsearch.providers.generic import get_cloudscraper
 from subsearch.utils import log, string_parser
@@ -78,10 +78,10 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     Returns:
         None.
     """
-    if __video__ is None:
+    if video_data is None:
         return None
     higest_value = (0, "")
-    for file in os.listdir(__video__.subs_directory):
+    for file in os.listdir(video_data.subs_directory):
         if file.endswith(extension):
             value = string_parser.calculate_match(file, release_name)
             if value >= higest_value[0]:
@@ -89,8 +89,8 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
 
     file_to_rename = higest_value[1]
     if file_to_rename.endswith(extension):
-        old_name_src = Path(__video__.subs_directory) / file_to_rename
-        new_name_dst = Path(__video__.subs_directory) / release_name
+        old_name_src = Path(video_data.subs_directory) / file_to_rename
+        new_name_dst = Path(video_data.subs_directory) / release_name
         log.output(f"Renaming: {file_to_rename } -> {release_name}")
         os.rename(old_name_src, new_name_dst)
         move_src = new_name_dst
@@ -139,12 +139,12 @@ def make_necessary_directories():
     Make necessary directories using video object info.
     """
 
-    if __video__ is None:
+    if video_data is None:
         return None
-    if not Path(__video__.tmp_directory).exists():
-        Path.mkdir(__video__.tmp_directory)
-    if not Path(__video__.subs_directory).exists():
-        Path.mkdir(__video__.subs_directory)
+    if not Path(video_data.tmp_directory).exists():
+        Path.mkdir(video_data.tmp_directory)
+    if not Path(video_data.subs_directory).exists():
+        Path.mkdir(video_data.subs_directory)
 
 
 def get_hash(file_path: Path | None) -> str:

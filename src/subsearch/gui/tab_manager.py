@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import GUI_DATA, __paths__
+from subsearch.data import GUI_DATA, app_paths
 from subsearch.data.data_objects import FormattedMetadata
 from subsearch.gui import set_theme, tkinter_utils
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
@@ -186,7 +186,7 @@ def initalize_root():
         io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)
-    root.iconbitmap(__paths__.icon)
+    root.iconbitmap(app_paths.icon)
     root.geometry(tkinter_utils.WindowPosition.set(root))
     root.resizable(False, False)
     return root

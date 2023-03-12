@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from subsearch.data import __video__
+from subsearch.data import video_data
 from subsearch.data.data_objects import (
     AppConfig,
     DownloadMetaData,
@@ -71,7 +71,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
         log.output_match("opensubtitles", 100, self.release)
 
         # pack download data
-        download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
+        download_info = generic.pack_download_data("opensubtitles", video_data.tmp_directory, to_be_downloaded)
         return download_info
 
     def parse_site_results(self) -> list | list[DownloadMetaData]:
@@ -104,7 +104,7 @@ class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
             return []
 
         # pack download data
-        download_info = generic.pack_download_data("opensubtitles", __video__.tmp_directory, to_be_downloaded)
+        download_info = generic.pack_download_data("opensubtitles", video_data.tmp_directory, to_be_downloaded)
         return download_info
 
     def _sorted_list(self) -> list[FormattedMetadata]:
