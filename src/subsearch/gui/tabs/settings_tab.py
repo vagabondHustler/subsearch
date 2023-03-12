@@ -4,15 +4,15 @@ from tkinter import ttk
 
 from subsearch.data import GUI_DATA, __version__
 from subsearch.gui import tkinter_utils
-from subsearch.utils import raw_config, updates
+from subsearch.utils import io_json, updates
 
 
 class FileExtensions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.data = raw_config.get_config()
-        self.file_extensions = raw_config.get_config_key("file_extensions")
+        self.data = io_json.get_config()
+        self.file_extensions = io_json.get_config_key("file_extensions")
         number_of_buttons = len(self.file_extensions.items())
         label = tk.Label(self, text="File extensions")
         label.configure(tkinter_utils.DEFAULT_LABEL_CONFIG)
@@ -52,14 +52,14 @@ class FileExtensions(tk.Frame):
             self.data["file_extensions"][key] = False
         elif value.get() is False:
             self.data["file_extensions"][key] = True
-        raw_config.set_config(self.data)
+        io_json.set_config(self.data)
 
         self.update_registry()
 
     def update_registry(self):
-        from subsearch.utils import raw_registry
+        from subsearch.utils import io_winreg
 
-        raw_registry.write_all_valuex()
+        io_winreg.write_all_valuex()
 
 
 class ShowContextMenu(tkinter_utils.ToggleableFrameButton):
