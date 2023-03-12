@@ -75,5 +75,5 @@ def video_file() -> FileData:
         return FileData(name, ext, file_path, directory, subs_directory, tmp_directory)
 
 
-__video__ = video_file()
-__paths__ = paths()
+video_data = video_file()
+app_paths = paths()

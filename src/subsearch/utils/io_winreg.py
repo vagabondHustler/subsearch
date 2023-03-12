@@ -3,7 +3,7 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.data import __paths__
+from subsearch.data import app_paths
 from subsearch.utils import file_manager
 
 COMPUTER_NAME = socket.gethostname()
@@ -108,7 +108,7 @@ def get_command_value() -> str:
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; os.chdir(r'{__paths__.home}');"
+        set_wd = f"import os; os.chdir(r'{app_paths.home}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" "%1"'
@@ -130,7 +130,7 @@ def get_icon_value() -> str:
 
     show_icon: str = io_json.get_config_key("context_menu_icon")
     if show_icon:
-        return str(__paths__.icon)
+        return str(app_paths.icon)
     else:
         return ""
 

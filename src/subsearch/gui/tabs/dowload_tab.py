@@ -2,7 +2,7 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA, __video__
+from subsearch.data import GUI_DATA, video_data
 from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
@@ -86,7 +86,7 @@ class DownloadList(tk.Frame):
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
                 download_url = _url
-            path = f"{__video__.tmp_directory}\\__{_provider}__{item_num}.zip"
+            path = f"{video_data.tmp_directory}\\__{_provider}__{item_num}.zip"
             enum = DownloadMetaData(
                 provider=f"Downloading from {_provider}",
                 name=_release,
@@ -96,8 +96,8 @@ class DownloadList(tk.Frame):
                 idx_lenght=1,
             )  # type: ignore
             file_manager.download_subtitle(enum)  # type: ignore
-            file_manager.extract_files(__video__.tmp_directory, __video__.subs_directory, ".zip")
-            file_manager.clean_up_files(__video__.tmp_directory, "zip")
+            file_manager.extract_files(video_data.tmp_directory, video_data.subs_directory, ".zip")
+            file_manager.clean_up_files(video_data.tmp_directory, "zip")
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")

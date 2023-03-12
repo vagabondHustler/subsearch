@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import GUI_DATA, __paths__, __version__, __video__
+from subsearch.data import GUI_DATA, __version__, app_paths, video_data
 from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
@@ -27,7 +27,7 @@ def get_tab_png(tab: str) -> Path:
     Raises:
         None.
     """
-    return Path(__paths__.tabs) / tab
+    return Path(app_paths.tabs) / tab
 
 
 def calculate_btn_size(cls, width_=18, height_=2) -> tuple[int, int]:

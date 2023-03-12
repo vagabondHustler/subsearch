@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any, Union
 
-from subsearch.data import __paths__
+from subsearch.data import app_paths
 from subsearch.data.data_objects import AppConfig, LanguageData
 
 
@@ -17,7 +17,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
     Returns:
         None
     """
-    config_file = Path(__paths__.data) / "application_config.json"
+    config_file = Path(app_paths.data) / "application_config.json"
 
     with open(config_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
@@ -38,7 +38,7 @@ def set_config(data: dict[str, Union[str, int, bool]]) -> None:
     Returns:
         None
     """
-    config_file = Path(__paths__.data) / "application_config.json"
+    config_file = Path(app_paths.data) / "application_config.json"
     with open(config_file, "w") as f:
         f.seek(0)
         json.dump(data, f, indent=4)
@@ -55,7 +55,7 @@ def get_config() -> Any:
     Returns:
         Any: The contents of config.json file.
     """
-    config_file = Path(__paths__.data) / "application_config.json"
+    config_file = Path(app_paths.data) / "application_config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
     return data
@@ -100,7 +100,7 @@ def set_default_json() -> None:
     data["log_to_file"] = False
     data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
-    config_file = Path(__paths__.data) / "application_config.json"
+    config_file = Path(app_paths.data) / "application_config.json"
     with open(config_file, "r+", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
@@ -114,7 +114,7 @@ def get_app_config() -> AppConfig:
     Returns:
         AppConfig: instance containing the current application configuration settings.
     """
-    config_file = Path(__paths__.data) / "application_config.json"
+    config_file = Path(app_paths.data) / "application_config.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
     user_data = AppConfig(
@@ -136,7 +136,7 @@ def get_language_data(language: str = get_config_key("current_language")) -> Lan
     Returns:
         A LanguageData object containing the data associated with the specified language.
     """
-    config_file = Path(__paths__.data) / "languages.json"
+    config_file = Path(app_paths.data) / "languages.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
     language_data = LanguageData(**data[language])
@@ -144,7 +144,7 @@ def get_language_data(language: str = get_config_key("current_language")) -> Lan
 
 
 def get_available_languages() -> dict:
-    config_file = Path(__paths__.data) / "languages.json"
+    config_file = Path(app_paths.data) / "languages.json"
     with open(config_file, encoding="utf-8") as file:
         data = json.load(file)
         return data

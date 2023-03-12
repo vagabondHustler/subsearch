@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from threading import Lock
 
-from subsearch.data import __version__, __video__
+from subsearch.data import __version__, video_data
 from subsearch.data.data_objects import (
     AppConfig,
     FormattedMetadata,
@@ -26,10 +26,10 @@ language_data: LanguageData
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
-if __video__ is not None and LOG_TO_FILE:
+if video_data is not None and LOG_TO_FILE:
     warnings.filterwarnings("ignore", lineno=545)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
-    file_handler = logging.FileHandler(Path(__video__.directory_path) / "subsearch.log", "w")
+    file_handler = logging.FileHandler(Path(video_data.directory_path) / "subsearch.log", "w")
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -37,7 +37,7 @@ if __video__ is not None and LOG_TO_FILE:
 
 def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "info"):
     def _to_log(msg: str, level: str) -> None:
-        if __video__ is None or LOG_TO_FILE is False:
+        if video_data is None or LOG_TO_FILE is False:
             return None
         if to_log is False:
             return None
@@ -66,7 +66,7 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
 
 
 def warning_spaces_in_filename():
-    name_unresolved = f"{__video__.filename}{__video__.file_extension}"
+    name_unresolved = f"{video_data.filename}{video_data.file_extension}"
     output(f"File: '{name_unresolved}' contains spaces", level="warning")
     output(f"Results may vary, use punctuation marks for a more accurate result", level="info")
     output("")
@@ -102,8 +102,8 @@ def output_parameters() -> None:
     output(f"Use site yifysubtitles:           {app_config.providers['subscene_site']}")
     output("")
     output_header(f"File data")
-    output(f"Filename:                         {__video__.filename}")
-    output(f"Directory:                        {__video__.directory_path}")
+    output(f"Filename:                         {video_data.filename}")
+    output(f"Directory:                        {video_data.directory_path}")
     output("")
     output_header(f"Release data")
     output(f"Title:                            {release_metadata.title}")
