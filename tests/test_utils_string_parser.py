@@ -1,8 +1,5 @@
 from src.subsearch.core import Initializer
-from src.subsearch.utils import imdb, raw_config, string_parser
-
-LANGUAGES = raw_config.get_config_key("languages")
-
+from src.subsearch.utils import imdb_lookup, io_json, string_parser
 
 def test_str_parser_movie() -> None:
     """
@@ -55,7 +52,7 @@ def test_string_parser_show() -> None:
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
     """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    initializer = Initializer()
+    _initializer = Initializer()
     release_metadata = string_parser.get_release_metadata(filename, "000000000000000000")
 
     assert release_metadata.title == "the foo bar"
@@ -90,7 +87,13 @@ def test_provider_urls_movie():
     initializer = Initializer()
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     release_metadata = string_parser.get_release_metadata(filename, "000000000000000000")
-    create_provider_urls = string_parser.CreateProviderUrls("000000000000000000", initializer.app_config, release_metadata)
+    language_data = io_json.get_language_data()
+    create_provider_urls = string_parser.CreateProviderUrls(
+        "000000000000000000",
+        initializer.app_config,
+        release_metadata,
+        language_data,
+    )
     provider_url = create_provider_urls.retrieve_urls()
 
     assert provider_url.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
@@ -109,7 +112,13 @@ def test_provider_urls_series():
     initializer = Initializer()
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     release_metadata = string_parser.get_release_metadata(filename, "000000000000000000")
-    create_provider_urls = string_parser.CreateProviderUrls("000000000000000000", initializer.app_config, release_metadata)
+    language_data = io_json.get_language_data()
+    create_provider_urls = string_parser.CreateProviderUrls(
+        "000000000000000000",
+        initializer.app_config,
+        release_metadata,
+        language_data,
+    )
     provider_url = create_provider_urls.retrieve_urls()
 
     assert provider_url.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
@@ -125,5 +134,5 @@ def test_provider_urls_series():
 
 
 def test_imdb_tt_id():
-    tt_id = imdb.FindImdbID("Arctic", 2019).id
+    tt_id = imdb_lookup.FindImdbID("Arctic", 2019).id
     assert tt_id == "tt6820256"

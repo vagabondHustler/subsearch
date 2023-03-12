@@ -3,18 +3,18 @@ from tkinter import ttk
 
 from subsearch.data import GUI_DATA
 from subsearch.gui import tkinter_utils
-from subsearch.utils import raw_config
+from subsearch.utils import io_json
 
-SUBTILE_TYPE = raw_config.get_config_key("subtitle_type")
-PERCENTAGE_THRESHOLD = raw_config.get_config_key("percentage_threshold")
-PROVIDERS = raw_config.get_config_key("providers")
+SUBTILE_TYPE = io_json.get_config_key("subtitle_type")
+PERCENTAGE_THRESHOLD = io_json.get_config_key("percentage_threshold")
+PROVIDERS = io_json.get_config_key("providers")
 
 
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.data = raw_config.get_config()
+        self.data = io_json.get_config()
         label = tk.Label(self, text="Search providers")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
@@ -69,7 +69,7 @@ class Providers(tk.Frame):
             self.data["providers"][key] = False
         elif value.get() is False:
             self.data["providers"][key] = True
-        raw_config.set_config(self.data)
+        io_json.set_config(self.data)
 
     def toggle_providers(self, event) -> None:
         btn = event.widget
@@ -80,7 +80,7 @@ class Providers(tk.Frame):
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
             btn.configure(fg=GUI_DATA.colors.green)
-        raw_config.set_config(self.data)
+        io_json.set_config(self.data)
 
 
 class SubtitleType(tk.Frame):
@@ -88,7 +88,7 @@ class SubtitleType(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.data = raw_config.get_config()
+        self.data = io_json.get_config()
         label = tk.Label(self, text="Subtitle type")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
@@ -134,7 +134,7 @@ class SubtitleType(tk.Frame):
             self.data["subtitle_type"][key] = False
         elif value.get() is False:
             self.data["subtitle_type"][key] = True
-        raw_config.set_config(self.data)
+        io_json.set_config(self.data)
         self.sub_type_txt()
 
     def sub_type_txt(self):
@@ -210,7 +210,7 @@ class SearchThreshold(tk.Frame):
 
     def update_config(self):
         update_svar = self.current_value.get()
-        raw_config.set_config_key_value("percentage_threshold", update_svar)
+        io_json.set_config_key_value("percentage_threshold", update_svar)
         tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
 
 

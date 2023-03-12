@@ -5,7 +5,7 @@ from subsearch.data import GUI_DATA, __paths__
 from subsearch.data.data_objects import FormattedMetadata
 from subsearch.gui import set_theme, tkinter_utils
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
-from subsearch.utils import file_manager, raw_config, raw_registry
+from subsearch.utils import file_manager, io_json, io_winreg
 
 
 class TabManager(tk.Frame):
@@ -175,15 +175,15 @@ def initalize_root():
     """
     Initializes the Tkinter root window with the name `"Subsearch"`, sets its background color to `GUI_DATA.colors.dark_grey`,
     adds an icon bitmap from `__paths__.icon`, configures the window geometry using `tkinter_utils.WindowPosition.set` and makes the window non-resizable.
-    If `raw_registry.registry_key_exists()` is `False` and `raw_config.get_config_key("context_menu")` is `True`,
-    the default JSON configuration is set using `raw_config.set_default_json()` and a context menu is added to the registry using `raw_registry.add_context_menu()`.
+    If `io_winreg.registry_key_exists()` is `False` and `raw_json.get_config_key("context_menu")` is `True`,
+    the default JSON configuration is set using `raw_json.set_default_json()` and a context menu is added to the registry using `io_winreg.add_context_menu()`.
 
     Returns:
       An instance of Tk() class representing the main window of Subsearch application.
     """
-    if raw_registry.registry_key_exists() is False and raw_config.get_config_key("context_menu"):
-        raw_config.set_default_json()
-        raw_registry.add_context_menu()
+    if io_winreg.registry_key_exists() is False and io_json.get_config_key("context_menu"):
+        io_json.set_default_json()
+        io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)
     root.iconbitmap(__paths__.icon)

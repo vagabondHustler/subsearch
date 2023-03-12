@@ -3,7 +3,7 @@ from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
 from subsearch.data import GUI_DATA, __paths__, __version__, __video__
-from subsearch.utils import file_manager, raw_config, raw_registry
+from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
@@ -232,7 +232,7 @@ class VarColorPicker:
             self.clabel.configure(fg=GUI_DATA.colors.green)
 
         if self.is_pct:
-            _pct = raw_config.get_config_key("percentage_threshold")
+            _pct = io_json.get_config_key("percentage_threshold")
             if _pct in range(75, 101):
                 self.clabel.configure(fg=GUI_DATA.colors.green)
             elif _pct in range(50, 75):
@@ -318,7 +318,7 @@ class ToggleableFrameButton(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{raw_config.get_config_key(config_key)}")
+        self.string_var.set(f"{io_json.get_config_key(config_key)}")
         self.setting_name = setting_label
         self.config_key = config_key
         self.write_to_reg = write_to_reg
@@ -371,10 +371,10 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value(self.config_key, True)
+        io_json.set_config_key_value(self.config_key, True)
         if self.write_to_reg:
-            raw_registry.add_context_menu()
-            raw_registry.write_all_valuex()
+            io_winreg.add_context_menu()
+            io_winreg.write_all_valuex()
         self.enter_button(event)
 
     def button_set_false(self, event) -> None:
@@ -387,7 +387,7 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        raw_config.set_config_key_value(self.config_key, False)
+        io_json.set_config_key_value(self.config_key, False)
         if self.write_to_reg:
-            raw_registry.remove_context_menu()
+            io_winreg.remove_context_menu()
         self.enter_button(event)

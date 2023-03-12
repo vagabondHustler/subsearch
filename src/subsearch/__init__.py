@@ -4,7 +4,7 @@ from threading import Thread
 
 from subsearch import core
 from subsearch.gui import tab_manager
-from subsearch.utils import raw_config, raw_registry
+from subsearch.utils import io_json, io_winreg
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
@@ -37,7 +37,7 @@ class Subsearch(core.AppSteps):
         """
         Runs a search with all active providers, either concurrently or separately.
         """
-        if raw_config.get_config_key("use_threading"):
+        if io_json.get_config_key("use_threading"):
             self.thread_executor(
                 self._provider_subscene,
                 self._provider_opensubtitles,
@@ -120,11 +120,11 @@ def console() -> None:
         elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
             if sys.argv[num + 1] == "add":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                raw_registry.add_context_menu()
+                io_winreg.add_context_menu()
                 break
             elif sys.argv[num + 1] == "del":
                 sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
-                raw_registry.remove_context_menu()
+                io_winreg.remove_context_menu()
                 break
         elif arg.startswith("--help"):
             sys.argv.pop(num)  # pop argument

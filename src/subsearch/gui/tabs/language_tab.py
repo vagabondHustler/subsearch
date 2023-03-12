@@ -3,10 +3,9 @@ from tkinter import ttk
 
 from subsearch.data import GUI_DATA
 from subsearch.gui import tkinter_utils
-from subsearch.utils import raw_config
+from subsearch.utils import io_json
 
-LANGUAGES = raw_config.get_config_key("languages")
-CURRENT_LANGUAGE = raw_config.get_config_key("current_language")
+
 
 
 class SelectLanguage(tk.Frame):
@@ -17,13 +16,17 @@ class SelectLanguage(tk.Frame):
         self.rownum = 0
         self.colnum = 1
         self.checkbox_values = {}
-        for key in LANGUAGES.keys():
+        self.name_find_key = {}
+        self.tip_present = False
+        self.languages = io_json.get_available_languages()
+        self.current_language = io_json.get_config_key("current_language")
+        for language, language_data in self.languages.items():
             if self.rownum == 14:
                 self.rownum = 0
                 self.colnum += 1
             valuevar = tk.IntVar()
-            btn = ttk.Checkbutton(self, text=key, onvalue=1, offvalue=9, variable=valuevar, width=20)
-            if CURRENT_LANGUAGE == key:
+            btn = ttk.Checkbutton(self, text=language_data["name"], onvalue=1, offvalue=9, variable=valuevar, width=20)
+            if self.current_language == language:
                 valuevar.set(1)
                 self.checkbox_values[btn] = valuevar
             else:
@@ -36,20 +39,25 @@ class SelectLanguage(tk.Frame):
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
             self.rownum += 1
+            self.name_find_key[language_data["name"]] = language
         tkinter_utils.set_default_grid_size(self, width_=6)
 
     def enter_button(self, event) -> None:
         btn = event.widget
-        if LANGUAGES[btn["text"]] == "N/A":
-            tip_text = "N/A with opensubtitles, provider will be skipped on search"
+        json_key = self.name_find_key[btn["text"]]
+        providers = ", ".join(([_i.title() for _i in self.languages[json_key]["incompatibility"]]))
+        if providers:
+            tip_text = f"If enabled, '{providers}' will be automatically skipped."
             self.tip = tkinter_utils.ToolTip(btn, btn, tip_text)
             self.tip.show()
+            self.tip_present = True
         btn.bind("<ButtonPress-1>", self.press_button)
 
     def leave_button(self, event) -> None:
         btn = event.widget
-        if LANGUAGES[btn["text"]] == "N/A":
+        if self.tip_present:
             self.tip.hide()
+            self.tip_present = False
 
     def press_button(self, event) -> None:
         btn = event.widget
@@ -61,4 +69,4 @@ class SelectLanguage(tk.Frame):
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
 
-        raw_config.set_config_key_value("current_language", btn["text"])
+        io_json.set_config_key_value("current_language", btn["text"])

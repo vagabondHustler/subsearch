@@ -1,0 +1,422 @@
+{
+	"albanian": {
+		"name": "Albanian",
+		"alpha_1": "sq",
+		"alpha_2b": "alb",
+		"incompatibility": []
+	},
+	"arabic": {
+		"name": "Arabic",
+		"alpha_1": "ar",
+		"alpha_2b": "ara",
+		"incompatibility": []
+	},
+	"armenian": {
+		"name": "Armenian",
+		"alpha_1": "hy",
+		"alpha_2b": "arm",
+		"incompatibility": []
+	},
+	"azerbaijani": {
+		"name": "Azerbaijani",
+		"alpha_1": "az",
+		"alpha_2b": "aze",
+		"incompatibility": []
+	},
+	"basque": {
+		"name": "Basque",
+		"alpha_1": "eu",
+		"alpha_2b": "baq",
+		"incompatibility": []
+	},
+	"belarusian": {
+		"name": "Belarusian",
+		"alpha_1": "be",
+		"alpha_2b": "bel",
+		"incompatibility": []
+	},
+	"bosnian": {
+		"name": "Bosnian",
+		"alpha_1": "bs",
+		"alpha_2b": "bos",
+		"incompatibility": []
+	},
+	"brazillian_portuguese": {
+		"name": "Brazillian-Portuguese",
+		"alpha_1": "pt",
+		"alpha_2b": "pob",
+		"incompatibility": []
+	},
+	"bulgarian": {
+		"name": "Bulgarian",
+		"alpha_1": "bg",
+		"alpha_2b": "bul",
+		"incompatibility": []
+	},
+	"bulgarian_english": {
+		"name": "Bulgarian-English",
+		"alpha_1": null,
+		"alpha_2b": null,
+		"incompatibility": ["opensubtitles"]
+	},
+	"burmese": {
+		"name": "Burmese",
+		"alpha_1": "my",
+		"alpha_2b": "bur",
+		"incompatibility": []
+	},
+	"cambodian_khmer": {
+		"name": "Cambodian-Khmer",
+		"alpha_1": "km",
+		"alpha_2b": "khm",
+		"incompatibility": []
+	},
+	"catalan": {
+		"name": "Catalan",
+		"alpha_1": "ca",
+		"alpha_2b": "cat",
+		"incompatibility": []
+	},
+	"chinese_bg_code": {
+		"name": "Chinese-BG-Code",
+		"alpha_1": null,
+		"alpha_2b": "zht",
+		"incompatibility": []
+	},
+	"croatian": {
+		"name": "Croatian",
+		"alpha_1": "hr",
+		"alpha_2b": "hrv",
+		"incompatibility": []
+	},
+	"czech": {
+		"name": "Czech",
+		"alpha_1": "cs",
+		"alpha_2b": "cze",
+		"incompatibility": []
+	},
+	"danish": {
+		"name": "Danish",
+		"alpha_1": "da",
+		"alpha_2b": "dan",
+		"incompatibility": []
+	},
+	"dutch": {
+		"name": "Dutch",
+		"alpha_1": "nl",
+		"alpha_2b": "dut",
+		"incompatibility": []
+	},
+	"dutch_english": {
+		"name": "Dutch-English",
+		"alpha_1": null,
+		"alpha_2b": null,
+		"incompatibility": ["opensubtitles"]
+	},
+	"english": {
+		"name": "English",
+		"alpha_1": "en",
+		"alpha_2b": "eng",
+		"incompatibility": []
+	},
+	"english_german": {
+		"name": "English-German",
+		"alpha_1": null,
+		"alpha_2b": null,
+		"incompatibility": ["opensubtitles"]
+	},
+	"esperanto": {
+		"name": "Esperanto",
+		"alpha_1": "eo",
+		"alpha_2b": "epo",
+		"incompatibility": []
+	},
+	"estonian": {
+		"name": "Estonian",
+		"alpha_1": "et",
+		"alpha_2b": "est",
+		"incompatibility": []
+	},
+	"finnish": {
+		"name": "Finnish",
+		"alpha_1": "fi",
+		"alpha_2b": "fin",
+		"incompatibility": []
+	},
+	"french": {
+		"name": "French",
+		"alpha_1": "fr",
+		"alpha_2b": "fre",
+		"incompatibility": []
+	},
+	"georgian": {
+		"name": "Georgian",
+		"alpha_1": "ka",
+		"alpha_2b": "geo",
+		"incompatibility": []
+	},
+	"german": {
+		"name": "German",
+		"alpha_1": "de",
+		"alpha_2b": "ger",
+		"incompatibility": []
+	},
+	"greenlandic": {
+		"name": "Greenlandic",
+		"alpha_1": "kl",
+		"alpha_2b": "kal",
+		"incompatibility": ["opensubtitles"]
+	},
+	"hebrew": {
+		"name": "Hebrew",
+		"alpha_1": "he",
+		"alpha_2b": "heb",
+		"incompatibility": []
+	},
+	"hindi": {
+		"name": "Hindi",
+		"alpha_1": "hi",
+		"alpha_2b": "hin",
+		"incompatibility": []
+	},
+	"hungarian": {
+		"name": "Hungarian",
+		"alpha_1": "hu",
+		"alpha_2b": "hun",
+		"incompatibility": []
+	},
+	"hungarian_english": {
+		"name": "Hungarian-English",
+		"alpha_1": null,
+		"alpha_2b": null,
+		"incompatibility": ["opensubtitles", "yifisubtitles"]
+	},
+	"icelandic": {
+		"name": "Icelandic",
+		"alpha_1": "is",
+		"alpha_2b": "ice",
+		"incompatibility": []
+	},
+	"indonesian": {
+		"name": "Indonesian",
+		"alpha_1": "name",
+		"alpha_2b": "ind",
+		"incompatibility": []
+	},
+	"italian": {
+		"name": "Italian",
+		"alpha_1": "it",
+		"alpha_2b": "ita",
+		"incompatibility": []
+	},
+	"japanese": {
+		"name": "Japanese",
+		"alpha_1": "ja",
+		"alpha_2b": "jpn",
+		"incompatibility": []
+	},
+	"kannada": {
+		"name": "Kannada",
+		"alpha_1": "kn",
+		"alpha_2b": "kan",
+		"incompatibility": []
+	},
+	"kinyarwanda": {
+		"name": "Kinyarwanda",
+		"alpha_1": "rw",
+		"alpha_2b": "kin",
+		"incompatibility": ["opensubtitles", "yifisubtitles"]
+	},
+	"korean": {
+		"name": "Korean",
+		"alpha_1": "ko",
+		"alpha_2b": "kor",
+		"incompatibility": []
+	},
+	"kurdish": {
+		"name": "Kurdish",
+		"alpha_1": "ku",
+		"alpha_2b": "kur",
+		"incompatibility": []
+	},
+	"latvian": {
+		"name": "Latvian",
+		"alpha_1": "lv",
+		"alpha_2b": "lav",
+		"incompatibility": []
+	},
+	"lithuanian": {
+		"name": "Lithuanian",
+		"alpha_1": "lt",
+		"alpha_2b": "lit",
+		"incompatibility": []
+	},
+	"macedonian": {
+		"name": "Macedonian",
+		"alpha_1": "mk",
+		"alpha_2b": "mac",
+		"incompatibility": []
+	},
+	"malayalam": {
+		"name": "Malayalam",
+		"alpha_1": "ml",
+		"alpha_2b": "mal",
+		"incompatibility": []
+	},
+	"manipuri": {
+		"name": "Manipuri",
+		"alpha_1": "mni",
+		"alpha_2b": "mni",
+		"incompatibility": []
+	},
+	"mongolian": {
+		"name": "Mongolian",
+		"alpha_1": "mn",
+		"alpha_2b": "mon",
+		"incompatibility": []
+	},
+	"nepali": {
+		"name": "Nepali",
+		"alpha_1": "ne",
+		"alpha_2b": "nep",
+		"incompatibility": []
+	},
+	"norwegian": {
+		"name": "Norwegian",
+		"alpha_1": "no",
+		"alpha_2b": "nor",
+		"incompatibility": []
+	},
+	"pashto": {
+		"name": "Pashto",
+		"alpha_1": "ps",
+		"alpha_2b": "pus",
+		"incompatibility": ["opensubtitles"]
+	},
+	"punjabi": {
+		"name": "Punjabi",
+		"alpha_1": "pa",
+		"alpha_2b": "pan",
+		"incompatibility": ["opensubtitles", "yifisubtitles"]
+	},
+	"romanian": {
+		"name": "Romanian",
+		"alpha_1": "ro",
+		"alpha_2b": "rum",
+		"incompatibility": []
+	},
+	"russian": {
+		"name": "Russian",
+		"alpha_1": "ru",
+		"alpha_2b": "rus",
+		"incompatibility": []
+	},
+	"serbian": {
+		"name": "Serbian",
+		"alpha_1": "sr",
+		"alpha_2b": "scc",
+		"incompatibility": []
+	},
+	"sinhala": {
+		"name": "Sinhala",
+		"alpha_1": "si",
+		"alpha_2b": "sin",
+		"incompatibility": []
+	},
+	"slovak": {
+		"name": "Slovak",
+		"alpha_1": "sk",
+		"alpha_2b": "slo",
+		"incompatibility": []
+	},
+	"slovenian": {
+		"name": "Slovenian",
+		"alpha_1": "sl",
+		"alpha_2b": "slv",
+		"incompatibility": []
+	},
+	"somali": {
+		"name": "Somali",
+		"alpha_1": "so",
+		"alpha_2b": "som",
+		"incompatibility": []
+	},
+	"spanish": {
+		"name": "Spanish",
+		"alpha_1": "es",
+		"alpha_2b": "spa",
+		"incompatibility": []
+	},
+	"sundanese": {
+		"name": "Sundanese",
+		"alpha_1": "su",
+		"alpha_2b": "sun",
+		"incompatibility": []
+	},
+	"swahili": {
+		"name": "Swahili",
+		"alpha_1": "sw",
+		"alpha_2b": "swa",
+		"incompatibility": []
+	},
+	"swedish": {
+		"name": "Swedish",
+		"alpha_1": "sv",
+		"alpha_2b": "swe",
+		"incompatibility": []
+	},
+	"tagalog": {
+		"name": "Tagalog",
+		"alpha_1": "tl",
+		"alpha_2b": "tgl",
+		"incompatibility": []
+	},
+	"tamil": {
+		"name": "Tamil",
+		"alpha_1": "ta",
+		"alpha_2b": "tam",
+		"incompatibility": []
+	},
+	"telugu": {
+		"name": "Telugu",
+		"alpha_1": "te",
+		"alpha_2b": "tel",
+		"incompatibility": []
+	},
+	"thai": {
+		"name": "Thai",
+		"alpha_1": "th",
+		"alpha_2b": "tha",
+		"incompatibility": []
+	},
+	"turkish": {
+		"name": "Turkish",
+		"alpha_1": "tr",
+		"alpha_2b": "tur",
+		"incompatibility": []
+	},
+	"ukrainian": {
+		"name": "Ukrainian",
+		"alpha_1": "uk",
+		"alpha_2b": "ukr",
+		"incompatibility": []
+	},
+	"urdu": {
+		"name": "Urdu",
+		"alpha_1": "ur",
+		"alpha_2b": "urd",
+		"incompatibility": []
+	},
+	"vietnamese": {
+		"name": "Vietnamese",
+		"alpha_1": "vi",
+		"alpha_2b": "vie",
+		"incompatibility": []
+	},
+	"yoruba": {
+		"name": "Yoruba",
+		"alpha_1": "yo",
+		"alpha_2b": "yor",
+		"incompatibility": ["opensubtitles", "yifisubtitles"]
+	}
+}

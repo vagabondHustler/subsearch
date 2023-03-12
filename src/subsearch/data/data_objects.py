@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
+
+@dataclass(order=True)
+class LanguageData:
+    name: str
+    alpha_1: str
+    alpha_2b: str
+    incompatibility: list[str]
 
 @dataclass(order=True)
 class AppPaths:
@@ -55,7 +63,6 @@ class AppConfig:
 
     Attributes:
         current_language (str): The currently selected language.
-        languages (dict[str, str]): A mapping of languages.
         subtitle_type (dict[str, bool]): A dictionary used to store user's preference regarding subtitle types.
         percentage_threshold (int): Percentage threshold value for preferred match results.
         rename_best_match (bool): Boolean flag to rename the closest matching srt file with the media file used in search.
@@ -68,13 +75,11 @@ class AppConfig:
         log_to_file (bool): Boolean flag that indicates if logging is enabled.
         file_extensions (dict[str, bool]): A dictionary storing user's preferences regarding file extensions.
         providers (dict[str, bool]): A dictionary storing user's preferences regarding subtitle providers.
-        language_iso_639_3 (str): ISO 639-3 code for the selected language.
         hearing_impaired (bool): Boolean flag indicating if the subtitle is for hearing-impaired people.
         non_hearing_impaired (bool): Boolean flag indicating if the subtitle is not for hearing-impaired people.
     """
 
     current_language: str
-    languages: dict[str, str]
     subtitle_type: dict[str, bool]
     percentage_threshold: int
     rename_best_match: bool
@@ -87,7 +92,6 @@ class AppConfig:
     log_to_file: bool
     file_extensions: dict[str, bool]
     providers: dict[str, bool]
-    language_iso_639_3: str
     hearing_impaired: bool
     non_hearing_impaired: bool
 
@@ -237,6 +241,7 @@ class GUIColors:
     purple: str = "#b294bb"
     red: str = "#bc473b"
     dark_red: str = "#89332a"
+    black_red: str = "#4b1713"
     red_brown: str = "#b26947"
     orange: str = "#ab7149"
     light_orange: str = "#de935f"
