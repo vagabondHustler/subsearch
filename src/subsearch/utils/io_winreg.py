@@ -95,13 +95,13 @@ def get_command_value() -> str:
         A string containing the command to execute for the corresponding value.
     """
     # get latest json value from file
-    from subsearch.utils import raw_config
+    from subsearch.utils import io_json
 
     if file_manager.running_from_exe():
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif file_manager.running_from_exe() is False:
-        show_terminal = raw_config.get_config_key("show_terminal")
+        show_terminal = io_json.get_config_key("show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -126,9 +126,9 @@ def get_icon_value() -> str:
         str: Path of the icon file to be used in the context menu, or an empty string if the configuration specifies
              that it should not be shown.
     """
-    from subsearch.utils import raw_config
+    from subsearch.utils import io_json
 
-    show_icon: str = raw_config.get_config_key("context_menu_icon")
+    show_icon: str = io_json.get_config_key("context_menu_icon")
     if show_icon:
         return str(__paths__.icon)
     else:
@@ -137,16 +137,16 @@ def get_icon_value() -> str:
 
 def get_appliesto_value() -> str:
     """
-    Retrieve the latest json value from file `raw_config`.
+    Retrieve the latest json value from file `raw_json`.
 
     Returns:
         str: A string of file types to show the SubSearch context entry on
             The file types are concatenated with `" OR "` in between.
     """
     # get latest json value from file
-    from subsearch.utils import raw_config
+    from subsearch.utils import io_json
 
-    file_ext = raw_config.get_config_key("file_extensions")
+    file_ext = io_json.get_config_key("file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
     for k, v in zip(file_ext.keys(), file_ext.values()):
