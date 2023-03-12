@@ -133,8 +133,8 @@ class ProviderUrls:
 
     Attributes:
         subscene(str): URL of the subscene provider.
-        opensubtitles(str): URL of the opensubtitle provider.
-        opensubtitles_hash(str): Hash URL of the opensubtitle provider.
+        opensubtitles(str): URL of the opensubtitles provider.
+        opensubtitles_hash(str): Hash URL of the opensubtitles provider.
         yifysubtitles(str): URL of the yifysubtitles provider.
     """
 
