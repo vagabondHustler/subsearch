@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 
 @dataclass(order=True)
@@ -9,6 +8,13 @@ class LanguageData:
     alpha_1: str
     alpha_2b: str
     incompatibility: list[str]
+
+
+@dataclass(order=True)
+class ProviderAlphaCodeType:
+    provider: str
+    alpha_code: str
+
 
 @dataclass(order=True)
 class AppPaths:
@@ -97,9 +103,9 @@ class AppConfig:
 
 
 @dataclass(frozen=True, order=True)
-class ReleaseMetadata:
+class ReleaseData:
     """
-    Data class representing metadata associated with a media release.
+    Data class representing data associated with a media release.
 
     Attributes:
         title (str): Title of the media.
