@@ -181,7 +181,7 @@ def initalize_root():
     Returns:
       An instance of Tk() class representing the main window of Subsearch application.
     """
-    if io_winreg.registry_key_exists() is False and io_json.get_config_key("context_menu"):
+    if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
         io_json.set_default_json()
         io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
