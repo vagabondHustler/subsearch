@@ -101,7 +101,7 @@ def get_command_value() -> str:
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif file_manager.running_from_exe() is False:
-        show_terminal = io_json.get_config_key("show_terminal")
+        show_terminal = io_json.get_json_key("show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -128,7 +128,7 @@ def get_icon_value() -> str:
     """
     from subsearch.utils import io_json
 
-    show_icon: str = io_json.get_config_key("context_menu_icon")
+    show_icon: str = io_json.get_json_key("context_menu_icon")
     if show_icon:
         return str(app_paths.icon)
     else:
@@ -146,7 +146,7 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from subsearch.utils import io_json
 
-    file_ext = io_json.get_config_key("file_extensions")
+    file_ext = io_json.get_json_key("file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
     for k, v in zip(file_ext.keys(), file_ext.values()):
