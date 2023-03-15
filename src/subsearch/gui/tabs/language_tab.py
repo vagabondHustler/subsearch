@@ -6,8 +6,6 @@ from subsearch.gui import tkinter_utils
 from subsearch.utils import io_json
 
 
-
-
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
@@ -19,7 +17,7 @@ class SelectLanguage(tk.Frame):
         self.name_find_key = {}
         self.tip_present = False
         self.languages = io_json.get_available_languages()
-        self.current_language = io_json.get_config_key("current_language")
+        self.current_language = io_json.get_json_key("current_language")
         for language, language_data in self.languages.items():
             if self.rownum == 14:
                 self.rownum = 0

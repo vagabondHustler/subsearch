@@ -5,16 +5,16 @@ from subsearch.data import GUI_DATA
 from subsearch.gui import tkinter_utils
 from subsearch.utils import io_json
 
-SUBTILE_TYPE = io_json.get_config_key("subtitle_type")
-PERCENTAGE_THRESHOLD = io_json.get_config_key("percentage_threshold")
-PROVIDERS = io_json.get_config_key("providers")
+SUBTILE_TYPE = io_json.get_json_key("subtitle_type")
+PERCENTAGE_THRESHOLD = io_json.get_json_key("percentage_threshold")
+PROVIDERS = io_json.get_json_key("providers")
 
 
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.data = io_json.get_config()
+        self.data = io_json.get_json_data()
         label = tk.Label(self, text="Search providers")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
@@ -88,7 +88,7 @@ class SubtitleType(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.data = io_json.get_config()
+        self.data = io_json.get_json_data()
         label = tk.Label(self, text="Subtitle type")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)

@@ -3,7 +3,49 @@ from pathlib import Path
 from typing import Any, Union
 
 from subsearch.data import app_paths
-from subsearch.data.data_objects import AppConfig, LanguageData
+from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeType
+from subsearch.utils.exceptions import ProviderNotImplemented
+
+APPLICATION_CONFIG_JSON = Path(app_paths.data) / "application_config.json"
+LANGUAGES_JSON = Path(app_paths.data) / "languages.json"
+
+
+def get_json_data(json_file: Path = APPLICATION_CONFIG_JSON) -> Any:
+    """
+    Returns the contents of the json file as a Python object.
+
+    Args:
+        None
+
+    Returns:
+        Any: The contents of config.json file.
+    """
+    with open(json_file, encoding="utf-8") as file:
+        data = json.load(file)
+    return data
+
+
+def get_json_key(key: str) -> Any:
+    """
+    Get values of keys in config.json
+
+    Args:
+        key (str):
+        current_language, languages, subtitle_type, percentage_threshold,
+        rename_best_match, context_menu, context_menu_icon, manual_download_fail, use_threading,
+        show_terminal, log_to_file, file_extensions, providers
+
+    Returns:
+        Any: value
+    """
+    return get_json_data()[f"{key}"]
+
+
+_current_language: str = get_json_key("current_language")
+
+#
+#       subsearch/data/application_config.json
+#
 
 
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
@@ -17,9 +59,8 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
     Returns:
         None
     """
-    config_file = Path(app_paths.data) / "application_config.json"
 
-    with open(config_file, "r+", encoding="utf-8") as f:
+    with open(APPLICATION_CONFIG_JSON, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -33,48 +74,15 @@ def set_config(data: dict[str, Union[str, int, bool]]) -> None:
 
     Args:
         data: A dictionary containing configuration data with keys as strings and values as an instance
-                 of either a string, int or boolean type.
+                of either a string, int or boolean type.
 
     Returns:
         None
     """
-    config_file = Path(app_paths.data) / "application_config.json"
-    with open(config_file, "w") as f:
+    with open(APPLICATION_CONFIG_JSON, "w") as f:
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
-
-
-def get_config() -> Any:
-    """
-    Returns the contents of the config.json file as a Python object.
-
-    Args:
-        None
-
-    Returns:
-        Any: The contents of config.json file.
-    """
-    config_file = Path(app_paths.data) / "application_config.json"
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
-    return data
-
-
-def get_config_key(key: str) -> Any:
-    """
-    Get values of keys in config.json
-
-    Args:
-        key (str):
-        current_language, languages, subtitle_type, percentage_threshold,
-        rename_best_match, context_menu, context_menu_icon, manual_download_fail, use_threading,
-        show_terminal, log_to_file, file_extensions, providers
-
-    Returns:
-        Any: value
-    """
-    return get_config()[f"{key}"]
 
 
 def set_default_json() -> None:
@@ -85,8 +93,7 @@ def set_default_json() -> None:
         None.
     """
 
-    # set default config.json values
-    data = get_config()
+    data = get_json_data()
     data["current_language"] = "english"
     data["subtitle_type"] = dict.fromkeys(data["subtitle_type"], True)
     data["percentage_threshold"] = 90
@@ -100,8 +107,7 @@ def set_default_json() -> None:
     data["log_to_file"] = False
     data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)
     data["providers"] = dict.fromkeys(data["providers"], True)
-    config_file = Path(app_paths.data) / "application_config.json"
-    with open(config_file, "r+", encoding="utf-8") as file:
+    with open(APPLICATION_CONFIG_JSON, "r+", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
         file.truncate()
@@ -114,9 +120,7 @@ def get_app_config() -> AppConfig:
     Returns:
         AppConfig: instance containing the current application configuration settings.
     """
-    config_file = Path(app_paths.data) / "application_config.json"
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
+    data = get_json_data()
     user_data = AppConfig(
         **data,
         hearing_impaired=data["subtitle_type"]["hearing_impaired"],
@@ -124,33 +128,54 @@ def get_app_config() -> AppConfig:
     )
     return user_data
 
-
-def get_language_data(language: str = get_config_key("current_language")) -> LanguageData:
+def get_language_data(language: str = _current_language) -> LanguageData:
     """
     Get the language data object for the provided language from the languages.json configuration file.
 
     Args:
         language: The language for which to retrieve the data. Defaults to the current language stored in the application
-                  configuration if not specified.
+                configuration if not specified.
 
     Returns:
         A LanguageData object containing the data associated with the specified language.
     """
-    config_file = Path(app_paths.data) / "languages.json"
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
+
+    data = get_json_data(LANGUAGES_JSON)
     language_data = LanguageData(**data[language])
     return language_data
 
 
 def get_available_languages() -> dict:
-    config_file = Path(app_paths.data) / "languages.json"
-    with open(config_file, encoding="utf-8") as file:
-        data = json.load(file)
-        return data
+    return get_json_data(LANGUAGES_JSON)
 
 
-def check_compatibility(provider: str, language: str = get_config_key("current_language")) -> bool:
+def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeType:
+    """
+    Generates ProviderAlphaCodeType object containing provider and its associated alpha code.
+
+    Args:
+        provider (str): a string specifying the name of the provider
+
+    Returns:
+        ProviderAlphaCodeType: an instance of ProviderAlphaCodeType with the given provider and its associated alpha code_
+    """
+    providers = {"subscene": "name", "opensubtitles": "alpha_2b", "yifisubtitles": "name"}
+    if provider not in providers:
+        raise ProviderNotImplemented
+    return ProviderAlphaCodeType(provider, providers[provider])
+
+
+def get_alpha_code(alpha_code_type: str) -> str:
+    language_data = get_language_data()
+    return getattr(language_data, alpha_code_type)
+
+
+def get_provider_alpha_code(provider: str) -> str:
+    code_type = get_provider_alpha_code_type(provider)
+    return get_alpha_code(code_type)
+
+
+def check_language_compatibility(provider: str, language: str = _current_language) -> bool:
     data = get_language_data(language)
     if not data.incompatibility:
         return True

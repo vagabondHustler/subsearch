@@ -11,8 +11,8 @@ class FileExtensions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.data = io_json.get_config()
-        self.file_extensions = io_json.get_config_key("file_extensions")
+        self.data = io_json.get_json_data()
+        self.file_extensions = io_json.get_json_key("file_extensions")
         number_of_buttons = len(self.file_extensions.items())
         label = tk.Label(self, text="File extensions")
         label.configure(tkinter_utils.DEFAULT_LABEL_CONFIG)

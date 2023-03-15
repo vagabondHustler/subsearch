@@ -36,7 +36,13 @@ class Initializer:
                 self.file_hash, self.app_config, self.release_data, self.language_data
             )
             self.provider_urls = create_provider_urls.retrieve_urls()
-            log.set_logger_data(self.release_data, self.app_config, self.provider_urls, self.language_data)
+            self.search_kwargs = dict(
+                release_data=self.release_data,
+                app_config=self.app_config,
+                provider_urls=self.provider_urls,
+                language_data=self.language_data,
+            )
+            log.set_logger_data(**self.search_kwargs)
             log.output_parameters()
 
     def all_providers_disabled(self) -> bool:
@@ -61,10 +67,10 @@ class AppSteps(Initializer):
         self.start = time.perf_counter()
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if io_winreg.registry_key_exists() is False and io_json.get_config_key("context_menu"):
+        if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
             io_json.set_default_json()
             io_winreg.add_context_menu()
-        if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_config_key("context_menu"):
+        if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_json_key("context_menu"):
             io_winreg.add_context_menu()
         file_manager.make_necessary_directories()
         if self.file_exist is False:
@@ -79,7 +85,7 @@ class AppSteps(Initializer):
         if self.skip_step.opensubtitles():
             return None
         # log.output_header("Searching on opensubtitles")
-        _opensubs = opensubtitles.OpenSubtitles(self.release_data, self.app_config, self.provider_urls)
+        _opensubs = opensubtitles.OpenSubtitles(**self.search_kwargs)
         if self.app_config.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
         if self.app_config.providers["opensubtitles_site"]:
@@ -89,17 +95,18 @@ class AppSteps(Initializer):
     def _provider_subscene(self) -> None:
         if self.skip_step.subscene():
             return None
-        _subscene = subscene.Subscene(self.release_data, self.app_config, self.provider_urls)
+        _subscene = subscene.Subscene(**self.search_kwargs)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped_downloads["subscene_site"] = _subscene._sorted_list()
 
     def _provider_yifysubtitles(self) -> None:
         if self.skip_step.yifysubtitles():
             return None
-        _yifysubs = yifysubtitles.YifiSubtitles(self.release_data, self.app_config, self.provider_urls)
+        _yifysubs = yifysubtitles.YifiSubtitles(**self.search_kwargs)
         self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
         self.skipped_downloads["yifysubtitles_site"] = _yifysubs._sorted_list()
 
+    
     def _download_files(self) -> None:
         if self.skip_step.download_files():
             return None
@@ -168,7 +175,7 @@ class SkipStep:
     def opensubtitles(self) -> bool:
         if self.cls.file_exist is False:
             return True
-        if io_json.check_compatibility("opensubtitles") is False:
+        if io_json.check_language_compatibility("opensubtitles") is False:
             return True
         if (
             self.cls.app_config.providers["opensubtitles_hash"] is False
@@ -180,7 +187,7 @@ class SkipStep:
     def subscene(self) -> bool:
         if self.cls.file_exist is False:
             return True
-        if io_json.check_compatibility("subscene") is False:
+        if io_json.check_language_compatibility("subscene") is False:
             return True
         if self.cls.app_config.providers["subscene_site"] is False:
             return True
@@ -189,7 +196,7 @@ class SkipStep:
     def yifysubtitles(self) -> bool:
         if self.cls.file_exist is False:
             return True
-        if io_json.check_compatibility("yifysubtitles") is False:
+        if io_json.check_language_compatibility("yifysubtitles") is False:
             return True
         if self.cls.release_data.tvseries:
             return True
@@ -198,6 +205,8 @@ class SkipStep:
         if self.cls.app_config.providers["yifysubtitles_site"] is False:
             return True
         return False
+
+  
 
     def download_files(self) -> bool:
         if self.cls.file_exist is False:
@@ -214,7 +223,7 @@ class SkipStep:
             return True
 
         if self.cls.app_config.manual_download_mode and number_of_downloads < 1:
-            return True
+            return False
         return False
 
     def extract_zip(self) -> bool:

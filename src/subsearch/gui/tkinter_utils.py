@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import GUI_DATA, __version__, app_paths, video_data
+from subsearch.data import GUI_DATA, __version__, app_paths
 from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
@@ -232,7 +232,7 @@ class VarColorPicker:
             self.clabel.configure(fg=GUI_DATA.colors.green)
 
         if self.is_pct:
-            _pct = io_json.get_config_key("percentage_threshold")
+            _pct = io_json.get_json_key("percentage_threshold")
             if _pct in range(75, 101):
                 self.clabel.configure(fg=GUI_DATA.colors.green)
             elif _pct in range(50, 75):
@@ -318,7 +318,7 @@ class ToggleableFrameButton(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{io_json.get_config_key(config_key)}")
+        self.string_var.set(f"{io_json.get_json_key(config_key)}")
         self.setting_name = setting_label
         self.config_key = config_key
         self.write_to_reg = write_to_reg
