@@ -6,7 +6,7 @@ from subsearch.data.data_objects import (
     AppConfig,
     LanguageData,
     ProviderUrls,
-    ReleaseMetadata,
+    ReleaseData,
 )
 from subsearch.utils import imdb_lookup
 
@@ -139,9 +139,7 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(
-        self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseMetadata, language_data: LanguageData
-    ):
+    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseData, language_data: LanguageData):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
@@ -247,7 +245,7 @@ class CreateProviderUrls:
         return f"searchonlymovies-on/moviename-{self.release_metadata.title} ({self.release_metadata.year})"
 
 
-def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
+def get_release_metadata(filename: str, file_hash: str) -> ReleaseData:
     """
     Collects the necessary metadata from a filename.
 
@@ -267,7 +265,7 @@ def get_release_metadata(filename: str, file_hash: str) -> ReleaseMetadata:
     title = find_title(filename, year, series)
     group = find_group(filename)
 
-    parameters = ReleaseMetadata(
+    parameters = ReleaseData(
         title,
         year,
         season,
