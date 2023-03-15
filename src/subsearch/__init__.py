@@ -37,7 +37,7 @@ class Subsearch(core.AppSteps):
         """
         Runs a search with all active providers, either concurrently or separately.
         """
-        if io_json.get_config_key("use_threading"):
+        if io_json.get_json_key("use_threading"):
             self.thread_executor(
                 self._provider_subscene,
                 self._provider_opensubtitles,
@@ -59,6 +59,12 @@ class Subsearch(core.AppSteps):
         Search for subtitles on subscene
         """
         self._provider_subscene()
+
+    def provider_yifysubtitles(self) -> None:
+        """
+        Search for subtitles on yifysubtitles
+        """
+        self._provider_yifysubtitles()
 
     def provider_yifysubtitles(self) -> None:
         """
