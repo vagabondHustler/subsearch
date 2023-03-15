@@ -30,9 +30,9 @@
         ".mswmm": true
     },
     "providers": {
-        "subscene_site": false,
-        "opensubtitles_site": false,
-        "opensubtitles_hash": false,
+        "subscene_site": true,
+        "opensubtitles_site": true,
+        "opensubtitles_hash": true,
         "yifysubtitles_site": true
     }
 }
