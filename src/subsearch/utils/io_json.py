@@ -128,6 +128,7 @@ def get_app_config() -> AppConfig:
     )
     return user_data
 
+
 def get_language_data(language: str = _current_language) -> LanguageData:
     """
     Get the language data object for the provided language from the languages.json configuration file.

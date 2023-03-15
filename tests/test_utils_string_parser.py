@@ -1,6 +1,7 @@
 from src.subsearch.core import Initializer
 from src.subsearch.utils import imdb_lookup, io_json, string_parser
 
+
 def test_str_parser_movie() -> None:
     """
     test so to ensure that the src/subsearch/utils/string_parser.pct_value function returns a with the correct percentage

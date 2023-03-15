@@ -106,7 +106,6 @@ class AppSteps(Initializer):
         self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
         self.skipped_downloads["yifysubtitles_site"] = _yifysubs._sorted_list()
 
-    
     def _download_files(self) -> None:
         if self.skip_step.download_files():
             return None
@@ -205,8 +204,6 @@ class SkipStep:
         if self.cls.app_config.providers["yifysubtitles_site"] is False:
             return True
         return False
-
-  
 
     def download_files(self) -> bool:
         if self.cls.file_exist is False:
