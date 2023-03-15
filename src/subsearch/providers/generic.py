@@ -5,8 +5,9 @@ from subsearch.data.data_objects import (
     AppConfig,
     DownloadMetaData,
     FormattedMetadata,
+    LanguageData,
     ProviderUrls,
-    ReleaseMetadata,
+    ReleaseData,
 )
 
 
@@ -15,22 +16,23 @@ class ProviderParameters:
     Parameters for provider
     """
 
-    def __init__(self, release_metadata: ReleaseMetadata, app_config: AppConfig, urls: ProviderUrls):
-        self.release_data = release_metadata
-        self.user_data = app_config
-        self.provider_data = urls
+    def __init__(self, **kwargs):
+        release_data: ReleaseData = kwargs["release_data"]
+        app_config: AppConfig = kwargs["app_config"]
+        provider_urls: ProviderUrls = kwargs["provider_urls"]
+        language_data: LanguageData = kwargs["language_data"]
 
         # file parameters
-        self.title = release_metadata.title
-        self.year = release_metadata.year
-        self.season = release_metadata.season
-        self.season_ordinal = release_metadata.season_ordinal
-        self.episode = release_metadata.episode
-        self.episode_ordinal = release_metadata.episode_ordinal
-        self.tvseries = release_metadata.tvseries
-        self.release = release_metadata.release
-        self.group = release_metadata.group
-        self.file_hash = release_metadata.file_hash
+        self.title = release_data.title
+        self.year = release_data.year
+        self.season = release_data.season
+        self.season_ordinal = release_data.season_ordinal
+        self.episode = release_data.episode
+        self.episode_ordinal = release_data.episode_ordinal
+        self.tvseries = release_data.tvseries
+        self.release = release_data.release
+        self.group = release_data.group
+        self.file_hash = release_data.file_hash
         # user parameters
         self.current_language = app_config.current_language
         self.hi_sub = app_config.hearing_impaired
@@ -39,10 +41,12 @@ class ProviderParameters:
         self.manual_download_fail = app_config.manual_download_fail
         self.manual_download_mode = app_config.manual_download_mode
         # provider url data
-        self.url_subscene = urls.subscene
-        self.url_opensubtitles = urls.opensubtitles
-        self.url_opensubtitles_hash = urls.opensubtitles_hash
-        self.url_yifysubtitles = urls.yifysubtitles
+        self.url_subscene = provider_urls.subscene
+        self.url_opensubtitles = provider_urls.opensubtitles
+        self.url_opensubtitles_hash = provider_urls.opensubtitles_hash
+        self.url_yifysubtitles = provider_urls.yifysubtitles
+
+        self.language_data = language_data
 
     def is_threshold_met(self, key: str, pct_result: int) -> bool:
         """Checks if the percentage threshold is met or if the given 'key' contains a title for a TV series.
