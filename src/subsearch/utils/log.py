@@ -10,21 +10,22 @@ from subsearch.data.data_objects import (
     FormattedMetadata,
     LanguageData,
     ProviderUrls,
-    ReleaseMetadata,
+    ReleaseData,
 )
 from subsearch.utils import io_json
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
-LOG_TO_FILE = io_json.get_config_key("log_to_file")
+LOG_TO_FILE = io_json.get_json_key("log_to_file")
 
-release_metadata: ReleaseMetadata
-app_config: AppConfig
-provider_urls: ProviderUrls
-language_data: LanguageData
 
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
+
+release_data: ReleaseData
+app_config: AppConfig
+provider_urls: ProviderUrls
+language_data: LanguageData
 
 if video_data is not None and LOG_TO_FILE:
     warnings.filterwarnings("ignore", lineno=545)
@@ -92,34 +93,35 @@ def output_done_with_tasks(end_new_line: bool = False):
 
 def output_parameters() -> None:
     output_header(f"User data")
-    output(f"Language:                         {language.name}, {language.alpha_1}, {language.alpha_2b}")
+    output(f"Language:                         {language_data.name}, {language_data.alpha_1}, {language_data.alpha_2b}")
     output(f"Use HI subtitle:                  {app_config.hearing_impaired}")
     output(f"Use non-HI subtitle:              {app_config.non_hearing_impaired}")
     output(f"Match threshold:                  {app_config.percentage_threshold}%")
     output(f"Use site subscene:                {app_config.providers['subscene_site']}")
     output(f"Use site opensubtitles:           {app_config.providers['opensubtitles_site']}")
     output(f"Use hash opensubtitles:           {app_config.providers['opensubtitles_hash']}")
-    output(f"Use site yifysubtitles:           {app_config.providers['subscene_site']}")
+    output(f"Use site yifysubtitles:           {app_config.providers['yifysubtitles_site']}")
     output("")
     output_header(f"File data")
     output(f"Filename:                         {video_data.filename}")
     output(f"Directory:                        {video_data.directory_path}")
     output("")
     output_header(f"Release data")
-    output(f"Title:                            {release_metadata.title}")
-    output(f"Year:                             {release_metadata.year}")
-    output(f"Season:                           {release_metadata.season}, {release_metadata.season_ordinal}")
-    output(f"Episode:                          {release_metadata.episode}, {release_metadata.episode_ordinal}")
-    output(f"Series:                           {release_metadata.tvseries}")
-    output(f"Release:                          {release_metadata.release}")
-    output(f"Group:                            {release_metadata.group}")
-    output(f"File hash:                        {release_metadata.file_hash}")
+    output(f"Title:                            {release_data.title}")
+    output(f"Year:                             {release_data.year}")
+    output(f"Season:                           {release_data.season}, {release_data.season_ordinal}")
+    output(f"Episode:                          {release_data.episode}, {release_data.episode_ordinal}")
+    output(f"Series:                           {release_data.tvseries}")
+    output(f"Release:                          {release_data.release}")
+    output(f"Group:                            {release_data.group}")
+    output(f"File hash:                        {release_data.file_hash}")
     output("")
     output_header(f"Provider url data")
     output(f"subscene_site:                    {provider_urls.subscene}")
     output(f"opensubtitles_site:               {provider_urls.opensubtitles}")
-    output(f"openSubtitles_hash:               {provider_urls.opensubtitles_hash}")
+    output(f"opensubtitles_hash:               {provider_urls.opensubtitles_hash}")
     output(f"yifysubtitles_site:               {provider_urls.yifysubtitles}")
+
     output("")
 
 
@@ -130,12 +132,12 @@ def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(media: ReleaseMetadata, app: AppConfig, urls: ProviderUrls, language_data: LanguageData):
-    global release_metadata, app_config, provider_urls, language
-    release_metadata = media
-    app_config = app
-    provider_urls = urls
-    language = language_data
+def set_logger_data(**kwargs):
+    global release_data, app_config, provider_urls, language_data
+    release_data = kwargs["release_data"]
+    app_config = kwargs["app_config"]
+    provider_urls = kwargs["provider_urls"]
+    language_data = kwargs["language_data"]
 
 
 def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int):
