@@ -6,7 +6,7 @@ from subsearch.data.data_objects import (
     DownloadMetaData,
     FormattedMetadata,
     ProviderUrls,
-    ReleaseMetadata,
+    ReleaseData,
 )
 from subsearch.providers import generic
 from subsearch.providers.generic import ProviderParameters
@@ -47,8 +47,8 @@ class YifySubtitlesScraper:
 
 
 class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
-    def __init__(self, release_metadata: ReleaseMetadata, user_parameters: AppConfig, provider_url: ProviderUrls):
-        ProviderParameters.__init__(self, release_metadata, user_parameters, provider_url)
+    def __init__(self, **kwargs):
+        ProviderParameters.__init__(self, **kwargs)
         YifySubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[FormattedMetadata] = []
 
