@@ -139,7 +139,7 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, file_hash: str, app_config: AppConfig, release_metadata: ReleaseData, language_data: LanguageData):
+    def __init__(self, file_hash: str, **kwargs):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
@@ -149,9 +149,9 @@ class CreateProviderUrls:
             release_metadata (ReleaseMetadata): The release metadata
         """
         self.file_hash = file_hash
-        self.app_config = app_config
-        self.release_metadata = release_metadata
-        self.language_data = language_data
+        self.app_config: AppConfig = kwargs["app_config"]
+        self.release_data: ReleaseData = kwargs["release_data"]
+        self.language_data: LanguageData = kwargs["language_data"]
 
     def retrieve_urls(self) -> ProviderUrls:
         """
@@ -205,10 +205,10 @@ class CreateProviderUrls:
         Returns:
             str: The url to search for subtitles on yifysubtitles.org
         """
-        if self.release_metadata.tvseries:
+        if self.release_data.tvseries:
             return "N/A"
         domain = "https://yifysubtitles.org"
-        tt_id = imdb_lookup.FindImdbID(self.release_metadata.title, self.release_metadata.year).id
+        tt_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
         return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else "N/A"
 
     def _subscene_search_parameters(self) -> str:
@@ -218,9 +218,9 @@ class CreateProviderUrls:
         Returns:
             str: The search parameter value for Subscene to search for the applicable subtitles.
         """
-        if self.release_metadata.tvseries:
-            return f"{self.release_metadata.title} - {self.release_metadata.season_ordinal} season"
-        return f"{self.release_metadata.title}"
+        if self.release_data.tvseries:
+            return f"{self.release_data.title} - {self.release_data.season_ordinal} season"
+        return f"{self.release_data.title}"
 
     def _opensubtitles_subtitle_type(self) -> str:
         """
@@ -240,9 +240,9 @@ class CreateProviderUrls:
         Returns:
             str: The search parameter value for Opensubtitles to search for the applicable subtitles.
         """
-        if self.release_metadata.tvseries:
-            return f"searchonlytvseries-on/season-{self.release_metadata.season}/episode-{self.release_metadata.episode}/moviename-{self.release_metadata.title}"
-        return f"searchonlymovies-on/moviename-{self.release_metadata.title} ({self.release_metadata.year})"
+        if self.release_data.tvseries:
+            return f"searchonlytvseries-on/season-{self.release_data.season}/episode-{self.release_data.episode}/moviename-{self.release_data.title}"
+        return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
 
 
 def get_release_metadata(filename: str, file_hash: str) -> ReleaseData:

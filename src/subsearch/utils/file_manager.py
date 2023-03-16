@@ -134,7 +134,7 @@ def del_directory(directory: Path) -> None:
     shutil.rmtree(directory)
 
 
-def make_necessary_directories():
+def make_necessary_directories() -> None:
     """
     Make necessary directories using video object info.
     """

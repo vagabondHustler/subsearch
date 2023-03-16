@@ -66,18 +66,18 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
     _to_terminal(msg, terminal, level)
 
 
-def warning_spaces_in_filename():
+def warning_spaces_in_filename() -> None:
     name_unresolved = f"{video_data.filename}{video_data.file_extension}"
     output(f"File: '{name_unresolved}' contains spaces", level="warning")
     output(f"Results may vary, use punctuation marks for a more accurate result", level="info")
     output("")
 
 
-def output_header(msg: str):
+def output_header(msg: str) -> None:
     output(f"--- [{msg}] ---")
 
 
-def output_skip_provider(provider: str, reason: str):
+def output_skip_provider(provider: str, reason: str) -> None:
     output("")
     output_header(f"Skipping {provider}")
     output(f"{reason}")
@@ -85,7 +85,7 @@ def output_skip_provider(provider: str, reason: str):
     output("")
 
 
-def output_done_with_tasks(end_new_line: bool = False):
+def output_done_with_tasks(end_new_line: bool = False) -> None:
     output("Done with tasks")
     if end_new_line:
         output("")
@@ -125,14 +125,14 @@ def output_parameters() -> None:
     output("")
 
 
-def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False):
+def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False) -> None:
     if pct_result >= app_config.percentage_threshold:
         output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
     else:
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
 
 
-def set_logger_data(**kwargs):
+def set_logger_data(**kwargs) -> None:
     global release_data, app_config, provider_urls, language_data
     release_data = kwargs["release_data"]
     app_config = kwargs["app_config"]
@@ -140,7 +140,7 @@ def set_logger_data(**kwargs):
     language_data = kwargs["language_data"]
 
 
-def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int):
+def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int) -> None:
     output("")
     output(f"--- [Sorted List from {provider_}] ---", False)
     downloaded_printed = False
