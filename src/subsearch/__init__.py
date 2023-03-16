@@ -66,11 +66,6 @@ class Subsearch(core.AppSteps):
         """
         self._provider_yifysubtitles()
 
-    def provider_yifysubtitles(self) -> None:
-        """
-        Search for subtitles on yifysubtitles
-        """
-        self._provider_yifysubtitles()
 
     def process_files(self) -> None:
         """
