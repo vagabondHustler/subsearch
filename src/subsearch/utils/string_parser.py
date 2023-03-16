@@ -139,7 +139,7 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, file_hash: str, **kwargs):
+    def __init__(self, file_hash: str, app_config: AppConfig, release_data: ReleaseData, language_data: LanguageData):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
@@ -149,9 +149,9 @@ class CreateProviderUrls:
             release_metadata (ReleaseMetadata): The release metadata
         """
         self.file_hash = file_hash
-        self.app_config: AppConfig = kwargs["app_config"]
-        self.release_data: ReleaseData = kwargs["release_data"]
-        self.language_data: LanguageData = kwargs["language_data"]
+        self.app_config = app_config
+        self.release_data = release_data
+        self.language_data = language_data
 
     def retrieve_urls(self) -> ProviderUrls:
         """
