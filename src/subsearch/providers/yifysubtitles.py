@@ -14,7 +14,7 @@ from subsearch.utils import log, string_parser
 
 
 class YifySubtitlesScraper:
-    def __init__(self):
+    def __init__(self) -> None:
         ...
 
     def skip_item(self, item: Node, hi_sub: bool, regular_sub: bool, current_language: str) -> bool:

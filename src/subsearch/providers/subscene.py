@@ -8,10 +8,10 @@ from subsearch.utils import log, string_parser
 
 
 class SubsceneScraper:
-    def __init__(self):
+    def __init__(self) -> None:
         ...
 
-    def find_title(self, url: str, current_language: str, definitive_match: list[str]):
+    def find_title(self, url: str, current_language: str, definitive_match: list[str]) -> str | None:
         tree = generic.get_html_parser(url)
         products = tree.css("div.title")
         for item in products:
