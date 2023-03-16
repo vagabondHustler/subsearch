@@ -11,7 +11,7 @@ class LanguageData:
 
 
 @dataclass(order=True)
-class ProviderAlphaCodeType:
+class ProviderAlphaCodeData:
     provider: str
     alpha_code: str
 
