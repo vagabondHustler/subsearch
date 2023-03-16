@@ -10,7 +10,7 @@ def init(func):
         global root
 
         if not inited:
-            from tkinter import _default_root
+            from tkinter import _default_root # type: ignore
 
             path = (Path(__file__).parent / "assets" / "ttk_style.tcl").resolve()
 
@@ -35,12 +35,12 @@ def set_theme(theme):
     if theme not in {"dark"}:
         raise RuntimeError(f"not a valid theme name: {theme}")
 
-    root.tk.call("set_theme", theme)
+    root.tk.call("set_theme", theme) # type: ignore
 
 
 @init
 def get_theme():
-    theme = root.tk.call("ttk::style", "theme", "use")
+    theme = root.tk.call("ttk::style", "theme", "use") # type: ignore
 
     try:
         return {"ttk_style": "dark"}[theme]
@@ -49,7 +49,7 @@ def get_theme():
 
 
 @init
-def toggle_theme():
+def toggle_theme()  -> None:
     if get_theme() == "dark":
         use_dark_theme()
     else:

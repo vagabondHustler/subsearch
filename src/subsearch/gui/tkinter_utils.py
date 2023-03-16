@@ -156,7 +156,7 @@ class WindowPosition(tk.Frame):
        None
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         """
         Constructor Method for WindowPosition Class
 
@@ -172,7 +172,7 @@ class WindowPosition(tk.Frame):
         ws_value_offset=0,
         hs_value_offset=0,
         other: bool = False,
-    ):
+    ): 
         """
         Set the size of the current window/Frame
 
@@ -221,7 +221,7 @@ class VarColorPicker:
         self.is_pct = is_pct
         self.pick()
 
-    def pick(self):  # string boolean
+    def pick(self) -> None:
         if self.string_var.get() == "True":
             self.clabel.configure(fg=GUI_DATA.colors.green)
         elif self.string_var.get() == "False":
@@ -263,7 +263,7 @@ class ToolTip(tk.Toplevel):
         self.text = _text
         self.background = _background
 
-    def show(self):
+    def show(self) -> None:
         tk.Toplevel.__init__(self, self.parent)
         self.configure(background=GUI_DATA.colors.light_black)
         # remove the standard window titlebar from the tooltip
@@ -298,7 +298,7 @@ class ToolTip(tk.Toplevel):
         # set position of the tooltip, size and add 2px around the tooltip for a 1px border
         self.geometry(f"{x+2}x{y+2}+{root_x}+{root_y}")
 
-    def hide(self):
+    def hide(self) -> None:
         self.destroy()
 
 

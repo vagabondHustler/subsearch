@@ -137,7 +137,7 @@ class SubtitleType(tk.Frame):
         io_json.set_config(self.data)
         self.sub_type_txt()
 
-    def sub_type_txt(self):
+    def sub_type_txt(self) -> None:
         hi_sub = self.data["subtitle_type"]["hearing_impaired"]
         nonhi_sub = self.data["subtitle_type"]["non_hearing_impaired"]
         if (hi_sub and nonhi_sub) or (hi_sub is False and nonhi_sub is False):
@@ -208,7 +208,7 @@ class SearchThreshold(tk.Frame):
             self.slider.configure(command=self.set_value)
             self.update_config()
 
-    def update_config(self):
+    def update_config(self) -> None:
         update_svar = self.current_value.get()
         io_json.set_config_key_value("percentage_threshold", update_svar)
         tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
