@@ -9,7 +9,7 @@ from subsearch.utils import log, string_parser
 
 
 class OpenSubtitlesScraper:
-    def __init__(self):
+    def __init__(self) -> None:
         ...
 
     def opensubtitles_down(self, tree: Any):

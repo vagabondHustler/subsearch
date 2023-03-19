@@ -13,12 +13,12 @@ class ProviderError(Error):
 class CaptchaError(ProviderError):
     """Error raised when a captcha challenge is encountered."""
 
-    def __init__(self, message="Captcha challenge encountered"):
+    def __init__(self, message: str = "Captcha challenge encountered"):
         super().__init__(message)
 
 
 class ProviderNotImplemented(ProviderError):
     """Error raised when using an unsupported subtitle provider."""
 
-    def __init__(self, message="This provider is not implemented"):
+    def __init__(self, message: str = "This provider is not implemented"):
         super().__init__(message)

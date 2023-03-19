@@ -56,7 +56,7 @@ class FileExtensions(tk.Frame):
 
         self.update_registry()
 
-    def update_registry(self):
+    def update_registry(self) -> None:
         from subsearch.utils import io_winreg
 
         io_winreg.write_all_valuex()

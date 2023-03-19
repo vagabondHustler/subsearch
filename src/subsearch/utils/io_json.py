@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from subsearch.data import app_paths
-from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeType
+from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeData
 from subsearch.utils.exceptions import ProviderNotImplemented
 
 APPLICATION_CONFIG_JSON = Path(app_paths.data) / "application_config.json"
@@ -150,7 +150,7 @@ def get_available_languages() -> dict:
     return get_json_data(LANGUAGES_JSON)
 
 
-def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeType:
+def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeData:
     """
     Generates ProviderAlphaCodeType object containing provider and its associated alpha code.
 
@@ -163,7 +163,7 @@ def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeType:
     providers = {"subscene": "name", "opensubtitles": "alpha_2b", "yifisubtitles": "name"}
     if provider not in providers:
         raise ProviderNotImplemented
-    return ProviderAlphaCodeType(provider, providers[provider])
+    return ProviderAlphaCodeData(provider, providers[provider])
 
 
 def get_alpha_code(alpha_code_type: str) -> str:
@@ -172,8 +172,8 @@ def get_alpha_code(alpha_code_type: str) -> str:
 
 
 def get_provider_alpha_code(provider: str) -> str:
-    code_type = get_provider_alpha_code_type(provider)
-    return get_alpha_code(code_type)
+    data = get_provider_alpha_code_type(provider)
+    return get_alpha_code(data.alpha_code)
 
 
 def check_language_compatibility(provider: str, language: str = _current_language) -> bool:
@@ -183,3 +183,4 @@ def check_language_compatibility(provider: str, language: str = _current_languag
 
     elif provider in data.incompatibility:
         return False
+    return False
