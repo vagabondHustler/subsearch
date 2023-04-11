@@ -150,6 +150,8 @@ class AppSteps(Initializer):
         log.output_header("Cleaning up")
         file_manager.clean_up_files(video_data.subs_directory, "nfo")
         file_manager.del_directory(video_data.tmp_directory)
+        if file_manager.directory_is_empty(video_data.subs_directory):
+            file_manager.del_directory(video_data.subs_directory)
         log.output_done_with_tasks(end_new_line=True)
 
     def _pre_exit(self) -> None:
