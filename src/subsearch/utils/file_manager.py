@@ -134,6 +134,12 @@ def del_directory(directory: Path) -> None:
     shutil.rmtree(directory)
 
 
+def directory_is_empty(directory: Path) -> bool:
+    if len(os.listdir(directory)) == 0:
+        return True
+    return False
+
+
 def make_necessary_directories() -> None:
     """
     Make necessary directories using video object info.
