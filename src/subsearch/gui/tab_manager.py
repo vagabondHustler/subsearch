@@ -187,6 +187,6 @@ def initalize_root():
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)
     root.iconbitmap(app_paths.icon)
-    root.geometry(tkinter_utils.WindowPosition.set(root)) # type: ignore
+    root.geometry(tkinter_utils.WindowPosition.set(root))  # type: ignore
     root.resizable(False, False)
     return root

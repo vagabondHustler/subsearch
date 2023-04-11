@@ -66,7 +66,6 @@ class Subsearch(core.AppSteps):
         """
         self._provider_yifysubtitles()
 
-
     def process_files(self) -> None:
         """
         Download zip files containing the .srt files, extract, rename and clean up tmp files

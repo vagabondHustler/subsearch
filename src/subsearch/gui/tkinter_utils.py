@@ -172,7 +172,7 @@ class WindowPosition(tk.Frame):
         ws_value_offset=0,
         hs_value_offset=0,
         other: bool = False,
-    ): 
+    ):
         """
         Set the size of the current window/Frame
 
