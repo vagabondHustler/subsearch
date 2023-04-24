@@ -66,5 +66,5 @@ class SelectLanguage(tk.Frame):
         self.checkbox_values[self.active_btn].set(0)  # type: ignore
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
-
-        io_json.set_config_key_value("current_language", btn["text"])
+        json_key = self.name_find_key[btn["text"]]
+        io_json.set_config_key_value("current_language", json_key)
