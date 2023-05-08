@@ -128,6 +128,17 @@ class UseThreading(tkinter_utils.ToggleableFrameButton):
         tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Use threading", "use_threading")
 
 
+class MultipleAppInstances(tkinter_utils.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
+    def __init__(self, parent) -> None:
+        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Multiple app instances", "multiple_app_instances")
+
+
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
