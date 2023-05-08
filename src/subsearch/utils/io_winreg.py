@@ -7,11 +7,11 @@ from subsearch.data import app_paths
 from subsearch.utils import file_manager
 
 COMPUTER_NAME = socket.gethostname()
-CLASSES_PATH = "Software\\Classes"
-ASTERISK_PATH = "Software\\Classes\\*"
-SHELL_PATH = "Software\\Classes\\*\\shell"
-SUBSEARCH_PATH = "Software\\Classes\\*\\shell\\Subsearch"
-COMMAND_PATH = "Software\\Classes\\*\\shell\\Subsearch\\command"
+CLASSES_PATH = r"Software\Classes"
+ASTERISK_PATH = r"Software\Classes\*"
+SHELL_PATH = r"Software\Classes\*\shell"
+SUBSEARCH_PATH = r"Software\Classes\*\shell\Subsearch"
+COMMAND_PATH = r"Software\Classes\*\shell\Subsearch\command"
 
 
 def write_keys() -> None:
@@ -29,10 +29,9 @@ def write_all_valuex() -> None:
     """
     Write values to the registry for `subsearch`, `icon`, `appliesto` and `command`.
     """
-    write_valuex("subsearch")
-    write_valuex("icon")
-    write_valuex("appliesto")
-    write_valuex("command")
+    items = ["subsearch", "icon", "appliesto", "command"]
+    for i in items:
+        write_valuex(i)
 
 
 def write_valuex(key: str) -> None:
@@ -45,23 +44,19 @@ def write_valuex(key: str) -> None:
     Returns:
         None.
     """
-    if key == "subsearch":
-        key_type = SUBSEARCH_PATH
-        value_name = ""
-        value = "Subsearch"
-    if key.lower() == "icon":
-        key_type = SUBSEARCH_PATH
-        value_name = "Icon"
-        value = get_icon_value()
-    elif key.lower() == "appliesto":
-        key_type = SUBSEARCH_PATH
-        value_name = "AppliesTo"
-        value = get_appliesto_value()
-    elif key.lower() == "command":
-        key_type = COMMAND_PATH
-        value_name = ""
-        value = get_command_value()
-    open_write_valuex(key_type, value_name, value)
+    key_map = {
+        "subsearch": {"key_type": SUBSEARCH_PATH, "value_name": "", "value": "Subsearch"},
+        "icon": {"key_type": SUBSEARCH_PATH, "value_name": "Icon", "value": get_icon_value()},
+        "appliesto": {"key_type": SUBSEARCH_PATH, "value_name": "AppliesTo", "value": get_appliesto_value()},
+        "command": {"key_type": COMMAND_PATH, "value_name": "", "value": get_command_value()},
+    }
+
+    key = key.lower()
+    if key in key_map:
+        key_type = key_map[key]["key_type"]
+        value_name = key_map[key]["value_name"]
+        value = key_map[key]["value"]
+        open_write_valuex(key_type, value_name, value)
 
 
 def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
