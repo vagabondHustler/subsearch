@@ -22,3 +22,11 @@ class ProviderNotImplemented(ProviderError):
 
     def __init__(self, message: str = "This provider is not implemented"):
         super().__init__(message)
+
+
+class MultipleInstancesError(Error):
+    """Error raised when multiple instances of the application are running"""
+
+    def __init__(self, mutex_name: str):
+        message = f"Multiple instances of the application are running. Mutex '{mutex_name}' is already acquired."
+        super().__init__(message)
