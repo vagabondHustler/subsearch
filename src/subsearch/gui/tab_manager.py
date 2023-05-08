@@ -127,6 +127,7 @@ class TabSettings(tk.Frame):
         settings_tab.ShowContextMenuIcon(self).pack(anchor="center")
         settings_tab.ShowDownloadWindow(self).pack(anchor="center")
         settings_tab.UseThreading(self).pack(anchor="center")
+        settings_tab.MultipleAppInstances(self).pack(anchor="center")
         settings_tab.LogToFile(self).pack(anchor="center")
         if file_manager.running_from_exe() is False:
             settings_tab.ShowTerminalOnSearch(self).pack(anchor="center")

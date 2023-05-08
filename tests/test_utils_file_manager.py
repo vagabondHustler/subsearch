@@ -18,12 +18,12 @@ if not Path(SUBS).exists():
 
 
 def test_extract_zips() -> None:
-    src = Path(CWD) / "test_subtitles.zip"
-    dst = Path(CWD) / "test_subtitles.zip"
-    copy_and_rename(src, dst)
     """
     test the extract_zips function in src/subsearch/utils/file_manager.py
     """
+    src = Path(CWD) / "test_subtitles.zip"
+    dst = Path(CWD) / "test_subtitles.zip"
+    copy_and_rename(src, dst)
     file_manager.extract_files(CWD, CWD, ".zip")
 
 
@@ -50,7 +50,7 @@ def test_get_hash() -> None:
     hash0 = file_manager.get_hash(Path(CWD) / "test.movie.2022.1080p-group.mkv")
     hash1 = file_manager.get_hash(Path(CWD) / "none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
-    assert hash1 == "000000000000000000"
+    assert hash1 == ""
 
 
 def test_is_exe() -> None:

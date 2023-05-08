@@ -103,6 +103,7 @@ def set_default_json() -> None:
     data["manual_download_fail"] = True
     data["manual_download_mode"] = False
     data["use_threading"] = True
+    data["multiple_app_instances"] = False
     data["show_terminal"] = False
     data["log_to_file"] = False
     data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)

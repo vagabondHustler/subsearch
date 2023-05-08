@@ -39,21 +39,20 @@ if video_data is not None and LOG_TO_FILE:
 def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "info"):
     def _to_log(msg: str, level: str) -> None:
         if video_data is None or LOG_TO_FILE is False:
-            return None
+            return
         if to_log is False:
-            return None
-        if level == "info":
-            logger.info(msg)
-        elif level == "warning":
-            logger.warning(msg)
-        elif level == "error":
-            logger.error(msg)
-        elif level == "critical":
-            logger.critical(msg)
+            return
+        log_methods = {
+            "info": logger.info,
+            "warning": logger.warning,
+            "error": logger.error,
+            "critical": logger.critical,
+        }
+        log_methods[level](msg)
 
     def _to_terminal(msg: str, to_terminal, level: str) -> None:
         if to_terminal is False:
-            return None
+            return
         if level == "info":
             lock = Lock()
             lock.acquire()
@@ -92,37 +91,51 @@ def output_done_with_tasks(end_new_line: bool = False) -> None:
 
 
 def output_parameters() -> None:
-    output_header(f"User data")
-    output(f"Language:                         {language_data.name}, {language_data.alpha_1}, {language_data.alpha_2b}")
-    output(f"Use HI subtitle:                  {app_config.hearing_impaired}")
-    output(f"Use non-HI subtitle:              {app_config.non_hearing_impaired}")
-    output(f"Match threshold:                  {app_config.percentage_threshold}%")
-    output(f"Use site subscene:                {app_config.providers['subscene_site']}")
-    output(f"Use site opensubtitles:           {app_config.providers['opensubtitles_site']}")
-    output(f"Use hash opensubtitles:           {app_config.providers['opensubtitles_hash']}")
-    output(f"Use site yifysubtitles:           {app_config.providers['yifysubtitles_site']}")
-    output("")
-    output_header(f"File data")
-    output(f"Filename:                         {video_data.filename}")
-    output(f"Directory:                        {video_data.directory_path}")
-    output("")
-    output_header(f"Release data")
-    output(f"Title:                            {release_data.title}")
-    output(f"Year:                             {release_data.year}")
-    output(f"Season:                           {release_data.season}, {release_data.season_ordinal}")
-    output(f"Episode:                          {release_data.episode}, {release_data.episode_ordinal}")
-    output(f"Series:                           {release_data.tvseries}")
-    output(f"Release:                          {release_data.release}")
-    output(f"Group:                            {release_data.group}")
-    output(f"File hash:                        {release_data.file_hash}")
-    output("")
-    output_header(f"Provider url data")
-    output(f"subscene_site:                    {provider_urls.subscene}")
-    output(f"opensubtitles_site:               {provider_urls.opensubtitles}")
-    output(f"opensubtitles_hash:               {provider_urls.opensubtitles_hash}")
-    output(f"yifysubtitles_site:               {provider_urls.yifysubtitles}")
+    """
+    Logs the parameters used by the application.
 
-    output("")
+    Args:
+        data: A dictionary containing the header and the data.
+
+    Returns:
+        None
+    """
+    data = {
+        "User data": [
+            {"Language": f"{language_data.name}, {language_data.alpha_1}, {language_data.alpha_2b}"},
+            {"Use HI subtitle": app_config.hearing_impaired},
+            {"Use non-HI subtitle": app_config.non_hearing_impaired},
+            {"Match threshold": f"{app_config.percentage_threshold}%"},
+            {"Use site subscene": app_config.providers["subscene_site"]},
+            {"Use site opensubtitles": app_config.providers["opensubtitles_site"]},
+            {"Use hash opensubtitles": app_config.providers["opensubtitles_hash"]},
+            {"Use site yifysubtitles": app_config.providers["yifysubtitles_site"]},
+        ],
+        "File data": [{"Filename": video_data.filename}, {"Directory": video_data.directory_path}],
+        "Release data": [
+            {"Title": release_data.title},
+            {"Year": release_data.year},
+            {"Season": f"{release_data.season}, {release_data.season_ordinal}"},
+            {"Episode": f"{release_data.episode}, {release_data.episode_ordinal}"},
+            {"Series": release_data.tvseries},
+            {"Release": release_data.release},
+            {"Group": release_data.group},
+            {"File hash": release_data.file_hash},
+        ],
+        "Provider url data": [
+            {"subscene_site": provider_urls.subscene},
+            {"opensubtitles_site": provider_urls.opensubtitles},
+            {"opensubtitles_hash": provider_urls.opensubtitles_hash},
+            {"yifysubtitles_site": provider_urls.yifysubtitles},
+        ],
+    }
+    for header, header_data in data.items():
+        output_header(header)
+        for item in header_data:
+            key, value = list(item.items())[0]
+            padding = " " * (30 - len(key))
+            output(f"{key}:{padding}{value}")
+        output("")
 
 
 def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False) -> None:
@@ -130,6 +143,41 @@ def output_match(provider: str, pct_result: int, key: str, to_log_: bool = False
         output(f"> {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
     else:
         output(f"  {provider:<14}{pct_result:>3}% {key}", to_log=to_log_)
+
+
+def path_action(action_type: str, src_: Path, dst_: Path | None = None) -> None:
+    """
+    Logs a message indicating the removal, renaming, moving, or extraction of a file or directory.
+
+    Args:
+        action_type (str): A string representing the type of action being performed (e.g. "remove", "rename", "move", "extract").
+        src_ (Path): A Path object representing the file or directory being acted upon.
+        dst_ (Path, optional): An optional Path object representing the new location or name of the file or directory (used for renaming, moving and extracting actions). Defaults to None.
+
+    Returns:
+        None
+    """
+    if src_.is_file():
+        type = "file"
+    elif src_.is_dir():
+        type = "directory"
+
+    src = src_.relative_to(src_.parent.parent) if src_ else None
+    dst = dst_.relative_to(dst_.parent.parent) if dst_ else None
+
+    action_messages: dict[str, str] = {
+        "remove": rf"Removing {type}: ...\{src}",
+        "rename": rf"Renaming {type}: ...\{src} -> ...\{dst}",
+        "move": rf"Moving {type}: ...\{src} -> ...\{dst}",
+        "extract": rf"Extracting archive: ...\{src} -> ...\{dst}",
+    }
+
+    message = action_messages.get(action_type)
+
+    if not message:
+        raise ValueError("Invalid action type")
+
+    output(message)
 
 
 def set_logger_data(**kwargs) -> None:

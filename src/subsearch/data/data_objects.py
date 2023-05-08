@@ -95,6 +95,7 @@ class AppConfig:
     manual_download_mode: bool
     show_terminal: bool
     use_threading: bool
+    multiple_app_instances: bool
     log_to_file: bool
     file_extensions: dict[str, bool]
     providers: dict[str, bool]

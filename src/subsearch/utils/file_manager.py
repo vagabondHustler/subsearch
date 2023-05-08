@@ -1,4 +1,3 @@
-import os
 import shutil
 import struct
 import sys
@@ -57,13 +56,12 @@ def extract_files(src: Path, dst: Path, extension: str) -> None:
     Returns:
         None.
     """
-    for file in os.listdir(src):
-        if file.endswith(extension):
-            log.output(f"Extracting: {file} -> ..\\subs\\{file}")
-            filename = Path(src) / file
-            zip_ref = zipfile.ZipFile(filename)
-            zip_ref.extractall(dst)
-            zip_ref.close()
+    for file in Path(src).glob(f"*{extension}"):
+        filename = Path(src) / file
+        log.path_action("extract", file, dst)
+        zip_ref = zipfile.ZipFile(filename)
+        zip_ref.extractall(dst)
+        zip_ref.close()
 
 
 def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
@@ -80,23 +78,24 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     """
     if video_data is None:
         return None
-    higest_value = (0, "")
-    for file in os.listdir(video_data.subs_directory):
-        if file.endswith(extension):
-            value = string_parser.calculate_match(file, release_name)
-            if value >= higest_value[0]:
-                higest_value = value, file
-
-    file_to_rename = higest_value[1]
-    if file_to_rename.endswith(extension):
-        old_name_src = Path(video_data.subs_directory) / file_to_rename
-        new_name_dst = Path(video_data.subs_directory) / release_name
-        log.output(f"Renaming: {file_to_rename } -> {release_name}")
-        os.rename(old_name_src, new_name_dst)
-        move_src = new_name_dst
-        move_dst = Path(cwd) / release_name
-        log.output(f"Moving: {release_name} -> {cwd}")
-        shutil.move(move_src, move_dst)
+    best_match = (0, "")
+    for file in Path(video_data.subs_directory).glob(f"*{extension}"):
+        value = string_parser.calculate_match(file.name, release_name)
+        if value >= best_match[0]:
+            best_match = value, file
+    if not best_match[1]:
+        return None
+    file_to_rename = best_match[1]
+    old_name_src = Path(video_data.subs_directory) / file_to_rename
+    new_name_dst = Path(video_data.subs_directory) / release_name
+    log.path_action("rename", file_to_rename, new_name_dst)
+    old_name_src.rename(new_name_dst)
+    move_src = new_name_dst
+    move_dst = Path(cwd) / release_name
+    log.path_action("move", move_src, cwd)
+    if move_dst.exists():
+        move_dst.unlink()
+    shutil.move(move_src, move_dst)
 
 
 def clean_up_files(cwd: Path, extension: str) -> None:
@@ -111,11 +110,10 @@ def clean_up_files(cwd: Path, extension: str) -> None:
         None
     """
 
-    for file in os.listdir(cwd):
-        if file.endswith(extension):
-            log.output(f"Removing: {file}")
-            file_path = Path(cwd) / file
-            file_path.unlink()
+    for file in Path(cwd).glob(f"*{extension}"):
+        log.path_action("remove", file)
+        file_path = Path(cwd) / file
+        file_path.unlink()
 
 
 def del_directory(directory: Path) -> None:
@@ -128,14 +126,12 @@ def del_directory(directory: Path) -> None:
     Returns:
         None
     """
-    for file in os.listdir(directory):
-        log.output(f"Removing: {file}")
-    log.output(f"Removing: {directory}")
+    log.path_action("remove", directory)
     shutil.rmtree(directory)
 
 
 def directory_is_empty(directory: Path) -> bool:
-    if len(os.listdir(directory)) == 0:
+    if not any(directory.iterdir()):
         return True
     return False
 
@@ -165,19 +161,20 @@ def get_hash(file_path: Path | None) -> str:
 
     Examples:
         get_hash(Path("my_folder/my_file.jpg")) returns "d020f52c464caedd"
-        get_hash(None) returns "000000000000000000"
+        get_hash(None) returns ""
     """
     if file_path is None:
-        return "000000000000000000"
+        return ""
     try:
         longlongformat = "<q"  # little-endian long long
         bytesize = struct.calcsize(longlongformat)
         with open(file_path, "rb") as f:
-            filesize = os.path.getsize(file_path)
+            # filesize = os.path.getsize(file_path)
+            filesize = file_path.stat().st_size
             hash = filesize
             if filesize < 65536 * 2:
                 log.output(f"SizeError: filesize is {filesize} bytes", False)
-                return "000000000000000000"
+                return ""
             n1 = 65536 // bytesize
             for _x in range(n1):
                 buffer = f.read(bytesize)
@@ -196,4 +193,4 @@ def get_hash(file_path: Path | None) -> str:
         return returnedhash
 
     except IOError:
-        return "000000000000000000"
+        return ""

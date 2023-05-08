@@ -11,6 +11,7 @@
     "manual_download_fail": true,
     "manual_download_mode": false,
     "use_threading": true,
+    "multiple_app_instances": false,
     "show_terminal": false,
     "log_to_file": false,
     "file_extensions": {
