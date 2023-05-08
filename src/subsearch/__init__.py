@@ -3,9 +3,9 @@ from pathlib import Path
 from threading import Thread
 
 from subsearch import core
+from subsearch.data import __guid__
 from subsearch.gui import tab_manager
 from subsearch.utils import io_json, io_winreg, mutex_synchronizer
-from subsearch.data import __guid__
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
@@ -134,6 +134,7 @@ def console() -> None:
         elif len(sys.argv[1:]) == num:
             print("Invalid argument")
             print(console.__doc__)
+
 
 @mutex_synchronizer.synchronized(__guid__)
 def main() -> None:
