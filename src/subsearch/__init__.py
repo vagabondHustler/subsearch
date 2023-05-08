@@ -4,7 +4,8 @@ from threading import Thread
 
 from subsearch import core
 from subsearch.gui import tab_manager
-from subsearch.utils import io_json, io_winreg
+from subsearch.utils import io_json, io_winreg, mutex_synchronizer
+from subsearch.data import __guid__
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
@@ -104,26 +105,26 @@ def console() -> None:
     for num, arg in enumerate(sys.argv[1:], 1):
         if arg.startswith("--settings"):
             if sys.argv[num + 1] == "lang":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 tab_manager.open_tab("language")
             elif sys.argv[num + 1] == "search":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 tab_manager.open_tab("search")
             elif sys.argv[num + 1] == "app":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 tab_manager.open_tab("settings")
             elif sys.argv[num + 1] == "dl":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 tab_manager.open_tab("download")
 
             break
         elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
             if sys.argv[num + 1] == "add":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 io_winreg.add_context_menu()
                 break
             elif sys.argv[num + 1] == "del":
-                sys.argv.pop(num), sys.argv.pop(num)  # pop arguments
+                sys.argv.pop(num), sys.argv.pop(num)
                 io_winreg.remove_context_menu()
                 break
         elif arg.startswith("--help"):
@@ -134,7 +135,7 @@ def console() -> None:
             print("Invalid argument")
             print(console.__doc__)
 
-
+@mutex_synchronizer.synchronized(__guid__)
 def main() -> None:
     for i in sys.argv:
         if i.startswith("--"):
