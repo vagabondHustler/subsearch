@@ -23,7 +23,7 @@ def synchronized(mutex_name: str) -> Callable:
     def wrapper(func: Callable) -> Callable:
         def inner(*args, **kwargs):
             if io_json.get_json_key("multiple_app_instances"):
-                return None 
+                return func()
             kernel32 = ctypes.WinDLL("kernel32")
             mutex = kernel32.CreateMutexW(None, False, mutex_name)
             last_error = kernel32.GetLastError()
