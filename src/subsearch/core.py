@@ -16,7 +16,7 @@ class Initializer:
             self.file_hash = file_manager.get_hash(video_data.file_path)
         else:
             self.file_exist = False
-            self.file_hash = "000000000000000000"
+            self.file_hash = ""
         self.results: dict[str, list[DownloadMetaData]] = {}
         self.skipped_downloads: dict[str, list[FormattedMetadata]] = {}
         self.skipped_combined: list[FormattedMetadata] = []
@@ -86,7 +86,7 @@ class AppSteps(Initializer):
             return None
         # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(**self.search_kwargs)
-        if self.app_config.providers["opensubtitles_hash"] and self.file_hash != "000000000000000000":
+        if self.app_config.providers["opensubtitles_hash"] and self.file_hash != "":
             self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
         if self.app_config.providers["opensubtitles_site"]:
             self.results["opensubtitles_site"] = _opensubs.parse_site_results()
