@@ -74,7 +74,8 @@ def is_new_version_avail() -> tuple[bool, bool]:
 
     return new_repo_avail, repo_is_prerelease
 
-# Work in progress 
+
+# Work in progress
 # def find_sha256(url):
 #     response = requests.get(url)
 #     html_content = response.text
