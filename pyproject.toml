@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Subsearch"
-description = "Download subtitles for movies and shows, automatically with one easy mouse click."
+description = "Subsearch - Download subtitles for movies and shows, automatically with one easy mouse click."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT license"}

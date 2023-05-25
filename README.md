@@ -96,6 +96,7 @@ Initially created as a personal project to learn Python programming and git vers
 
 - Download `SubSearch-x.x.x-win64.msi` from the Subsearch releases [page](https://github.com/vagabondHustler/SubSearch/releases)
 - Install the .msi file.
+- Run Subsearch.exe at least once
 - To update from a previous version, download and run the new installer in the same directory. If installed in a different directory, delete the old registry key (see Wiki for details).the same directory. Else you might have to delete the old registry key, (see [Wiki](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch) for details).
 - If you receive a PUA message, click `More info`.
 
