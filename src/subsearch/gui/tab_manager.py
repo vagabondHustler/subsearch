@@ -174,16 +174,14 @@ def open_tab(active_tab: str, **kwargs) -> None:
 
 def initalize_root():
     """
-    Initializes the Tkinter root window with the name `"Subsearch"`, sets its background color to `GUI_DATA.colors.dark_grey`,
-    adds an icon bitmap from `__paths__.icon`, configures the window geometry using `tkinter_utils.WindowPosition.set` and makes the window non-resizable.
-    If `io_winreg.registry_key_exists()` is `False` and `raw_json.get_config_key("context_menu")` is `True`,
-    the default JSON configuration is set using `raw_json.set_default_json()` and a context menu is added to the registry using `io_winreg.add_context_menu()`.
+    Initialize the root Tkinter window for the Subsearch application.
 
     Returns:
-      An instance of Tk() class representing the main window of Subsearch application.
+        tk.Tk: The initialized Tkinter root window.
     """
-    if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
+    if io_json.APPCON_JSON.exists() is False:
         io_json.create_application_config()
+    if io_json.get_json_key("context_menu"):
         io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)
