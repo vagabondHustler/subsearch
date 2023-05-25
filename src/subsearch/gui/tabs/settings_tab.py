@@ -167,7 +167,6 @@ class CheckForUpdates(tk.Frame):
         new_repo_avail, repo_is_prerelease = update.is_new_version_avail()
         self.latest_version = update.get_latest_version()
         if new_repo_avail:
-            self.sha256_hex = update.find_sha256("https://github.com/vagabondHustler/subsearch/releases")
             self.btn_search.destroy()
             self.btn_visit_release_page.grid(row=0, column=2, pady=2)
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
