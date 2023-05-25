@@ -29,6 +29,8 @@ class AppPaths:
         utils (Path): The directory containing utility modules.
         icon (Path): The Path object representing the icon for the application.
         tabs (Path): The directory containing tab icon assets for the GUI.
+        tmpdir(Path): The directory containing temporary files & folders.
+        appdata_local(Path): The directory containing the persistent application files.
     """
 
     home: Path
@@ -38,6 +40,8 @@ class AppPaths:
     utils: Path
     icon: Path
     tabs: Path
+    tmpdir: Path
+    appdata_local: Path
 
 
 @dataclass(order=True)
@@ -152,7 +156,7 @@ class ProviderUrls:
 
 
 @dataclass(frozen=True, order=True)
-class DownloadMetaData:
+class DownloadData:
     """
     A data class representing metadata for the to be downloaded subtitle file.
 
@@ -174,9 +178,9 @@ class DownloadMetaData:
 
 
 @dataclass(frozen=True, order=True)
-class FormattedMetadata:
+class PrettifiedDownloadData:
     """
-    Represents formatted metadata for a movie or TV show release.
+    Represents prettified version of DownloadData.
 
     Attributes:
         provider (str): The name of the metadata provider.
@@ -305,3 +309,21 @@ class GUIData:
 
 
 GUI_DATA = GUIData()
+
+SUPPORTED_FILE_EXTENSIONS = [
+    ".avi",
+    ".mp4",
+    ".mkv",
+    ".mpg",
+    ".mpeg",
+    ".mov",
+    ".rm",
+    ".vob",
+    ".wmv",
+    ".flv",
+    ".3gp",
+    ".3g2",
+    ".swf",
+    ".mswmm",
+]
+SUPPORTED_PROVIDERS = ["subscene_site", "opensubtitles_site", "opensubtitles_hash", "yifysubtitles_site"]
