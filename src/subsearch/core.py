@@ -1,8 +1,8 @@
 import ctypes
 import time
 
-from subsearch.data import __version__, video_data
-from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
+from subsearch.data import __version__, app_paths, video_data
+from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import file_manager, io_json, io_winreg, log, string_parser
@@ -10,16 +10,20 @@ from subsearch.utils import file_manager, io_json, io_winreg, log, string_parser
 
 class Initializer:
     def __init__(self) -> None:
+        file_manager.create_directory(app_paths.appdata_local)
+        file_manager.create_directory(app_paths.tmpdir)
+        io_json.create_application_config()
         self.app_config = io_json.get_app_config()
         if video_data is not None:
+            file_manager.create_directory(video_data.subs_directory)
             self.file_exist = True
             self.file_hash = file_manager.get_hash(video_data.file_path)
         else:
             self.file_exist = False
             self.file_hash = ""
-        self.results: dict[str, list[DownloadMetaData]] = {}
-        self.skipped_downloads: dict[str, list[FormattedMetadata]] = {}
-        self.skipped_combined: list[FormattedMetadata] = []
+        self.results: dict[str, list[DownloadData]] = {}
+        self.skipped_downloads: dict[str, list[PrettifiedDownloadData]] = {}
+        self.skipped_combined: list[PrettifiedDownloadData] = []
         self.downloads: dict[str, int] = {}
         self.language_data = io_json.get_language_data()
 
@@ -56,7 +60,7 @@ class Initializer:
             return True
         return False
 
-    def download_results(self, results: list[DownloadMetaData]) -> int:
+    def download_results(self, results: list[DownloadData]) -> int:
         for result in results:
             downloads = file_manager.download_subtitle(result)
         return downloads
@@ -68,11 +72,10 @@ class AppSteps(Initializer):
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
-            io_json.set_default_json()
+            io_json.create_application_config()
             io_winreg.add_context_menu()
         if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_json_key("context_menu"):
             io_winreg.add_context_menu()
-        file_manager.make_necessary_directories()
         if self.file_exist is False:
             tab_manager.open_tab("search")
             return None
@@ -136,7 +139,7 @@ class AppSteps(Initializer):
         if self.skip_step.extract_zip():
             return None
         log.output_header("Extracting downloads")
-        file_manager.extract_files(video_data.tmp_directory, video_data.subs_directory, ".zip")
+        file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
         log.output_done_with_tasks(end_new_line=True)
 
     def _clean_up(self) -> None:
@@ -149,7 +152,7 @@ class AppSteps(Initializer):
 
         log.output_header("Cleaning up")
         file_manager.clean_up_files(video_data.subs_directory, "nfo")
-        file_manager.del_directory(video_data.tmp_directory)
+        file_manager.delete_temp_files(app_paths.tmpdir)
         if file_manager.directory_is_empty(video_data.subs_directory):
             file_manager.del_directory(video_data.subs_directory)
         log.output_done_with_tasks(end_new_line=True)
