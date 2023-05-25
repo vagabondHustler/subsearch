@@ -19,7 +19,7 @@ def find_semantic_version(version: str) -> str:
     Returns:
         str: The extracted semantic version string.
     """
-    # semantic expression https://regex101.com/r/M4qItH/2
+    # semantic expression https://regex101.com/r/M4qItH/
     pattern = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'
     version_semantic = "".join(re.findall(pattern, version)[0])
     return version_semantic
