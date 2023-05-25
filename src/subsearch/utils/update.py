@@ -20,7 +20,7 @@ def find_semantic_version(version: str) -> str:
         str: The extracted semantic version string.
     """
     # semantic expression https://regex101.com/r/M4qItH/2
-    pattern = '"(\d*\.\d*\.\d*-\w*\d*)"|"(\d*\.\d*\.\d*-\w*\.\d*)"|"(\d*\.\d*\.\d*)"'
+    pattern = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'
     version_semantic = "".join(re.findall(pattern, version)[0])
     return version_semantic
 
@@ -76,26 +76,26 @@ def is_new_version_avail() -> tuple[bool, bool]:
 
 
 # Work in progress
-# def find_sha256(url):
-#     response = requests.get(url)
-#     html_content = response.text
+def find_sha256(url):
+    response = requests.get(url)
+    html_content = response.text
 
-#     parser = selectolax.parser.HTMLParser(html_content)
-#     selector_lst = [
-#         ".clearfix",
-#         "div:nth-child(3)",
-#         "section:nth-child(1)",
-#         "div:nth-child(2)",
-#         "div:nth-child(2)",
-#         "div:nth-child(1)",
-#         "div:nth-child(1)",
-#         "div:nth-child(2)",
-#         "h6:nth-child(5)",
-#         "p:nth-child(2)",
-#     ]
+    parser = selectolax.parser.HTMLParser(html_content)
+    selector_lst = [
+        ".clearfix",
+        "div:nth-child(3)",
+        "section:nth-child(1)",
+        "div:nth-child(2)",
+        "div:nth-child(2)",
+        "div:nth-child(1)",
+        "div:nth-child(1)",
+        "div:nth-child(2)",
+        "h6:nth-child(5)",
+        "p:nth-child(2)",
+    ]
 
-#     css_selector = " > ".join(selector_lst)
+    css_selector = " > ".join(selector_lst)
 
-#     element = parser.css(css_selector)
-#     match = re.search(r"([A-Fa-f0-9]{64})", element[0].html)
-#     return match[0]
+    element = parser.css(css_selector)
+    match = re.search(r"([A-Fa-f0-9]{64})", element[0].html)
+    return match[0]
