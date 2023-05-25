@@ -5,15 +5,12 @@ from subsearch.data import GUI_DATA
 from subsearch.gui import tkinter_utils
 from subsearch.utils import io_json
 
-SUBTILE_TYPE = io_json.get_json_key("subtitle_type")
-PERCENTAGE_THRESHOLD = io_json.get_json_key("percentage_threshold")
-PROVIDERS = io_json.get_json_key("providers")
-
 
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Search providers")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
@@ -22,7 +19,7 @@ class Providers(tk.Frame):
         self.colnum = 2
         self.checkbox_value = {}
         self.last_key = ""
-        for key, value in PROVIDERS.items():
+        for key, value in self.providers.items():
             btn_txt = key.split("_")[-1].capitalize()
             lbl_txt = f"{key.split('_')[0]}".capitalize()
             valuevar = tk.BooleanVar()
@@ -69,7 +66,7 @@ class Providers(tk.Frame):
             self.data["providers"][key] = False
         elif value.get() is False:
             self.data["providers"][key] = True
-        io_json.set_config(self.data)
+        io_json.set_json_data(self.data)
 
     def toggle_providers(self, event) -> None:
         btn = event.widget
@@ -80,13 +77,14 @@ class Providers(tk.Frame):
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
             btn.configure(fg=GUI_DATA.colors.green)
-        io_json.set_config(self.data)
+        io_json.set_json_data(self.data)
 
 
 class SubtitleType(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.subtitle_type = io_json.get_json_key("subtitle_type")
         self.string_var = tk.StringVar()
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Subtitle type")
@@ -100,7 +98,7 @@ class SubtitleType(tk.Frame):
         self.rownum = 0
         self.colnum = 2
         self.checkbox_values = {}
-        for key, value in SUBTILE_TYPE.items():
+        for key, value in self.subtitle_type.items():
             if key.startswith("non"):
                 _text = "Regular"
             else:
@@ -134,7 +132,7 @@ class SubtitleType(tk.Frame):
             self.data["subtitle_type"][key] = False
         elif value.get() is False:
             self.data["subtitle_type"][key] = True
-        io_json.set_config(self.data)
+        io_json.set_json_data(self.data)
         self.sub_type_txt()
 
     def sub_type_txt(self) -> None:
@@ -153,10 +151,11 @@ class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.pct_threashold = io_json.get_json_key("percentage_threshold")
         self.current_value = tk.IntVar()
-        self.current_value.set(PERCENTAGE_THRESHOLD)
+        self.current_value.set(self.pct_threashold)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{PERCENTAGE_THRESHOLD} %")
+        self.string_var.set(f"{self.pct_threashold} %")
         label = tk.Label(self, text="Search threshold")
         label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=0, pady=2)

@@ -2,15 +2,15 @@ import json
 from pathlib import Path
 from typing import Any, Union
 
-from subsearch.data import app_paths
+from subsearch.data import SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS, app_paths
 from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeData
 from subsearch.utils.exceptions import ProviderNotImplemented
 
-APPLICATION_CONFIG_JSON = Path(app_paths.data) / "application_config.json"
-LANGUAGES_JSON = Path(app_paths.data) / "languages.json"
+APPCON_JSON = Path(app_paths.appdata_local) / "application_config.json"
+LANGS_JSON = Path(app_paths.data) / "languages.json"
 
 
-def get_json_data(json_file: Path = APPLICATION_CONFIG_JSON) -> Any:
+def get_json_data(json_file: Path = APPCON_JSON) -> Any:
     """
     Returns the contents of the json file as a Python object.
 
@@ -41,13 +41,6 @@ def get_json_key(key: str) -> Any:
     return get_json_data()[f"{key}"]
 
 
-_current_language: str = get_json_key("current_language")
-
-#
-#       subsearch/data/application_config.json
-#
-
-
 def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
     """
     Set the value of a key in the config.json file to a specified value.
@@ -60,7 +53,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         None
     """
 
-    with open(APPLICATION_CONFIG_JSON, "r+", encoding="utf-8") as f:
+    with open(APPCON_JSON, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -68,7 +61,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         f.truncate()
 
 
-def set_config(data: dict[str, Union[str, int, bool]]) -> None:
+def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APPCON_JSON) -> None:
     """
     Writes the provided configuration data to the config.json file.
 
@@ -79,23 +72,25 @@ def set_config(data: dict[str, Union[str, int, bool]]) -> None:
     Returns:
         None
     """
-    with open(APPLICATION_CONFIG_JSON, "w") as f:
+    with open(json_file, "w") as f:
         f.seek(0)
         json.dump(data, f, indent=4)
         f.truncate()
 
 
-def set_default_json() -> None:
+def create_application_config() -> None:
     """
-    Sets default values to keys that are present inside config.json file and modifies the same file.
+    Creates application_config.json file and set the default values.
 
     Returns:
         None.
     """
-
-    data = get_json_data()
+    if APPCON_JSON.exists():
+        return None
+    subtitle_types = ["hearing_impaired", "non_hearing_impaired"]
+    data = {}
     data["current_language"] = "english"
-    data["subtitle_type"] = dict.fromkeys(data["subtitle_type"], True)
+    data["subtitle_type"] = dict.fromkeys(subtitle_types, True)
     data["percentage_threshold"] = 90
     data["rename_best_match"] = True
     data["context_menu"] = True
@@ -106,9 +101,9 @@ def set_default_json() -> None:
     data["multiple_app_instances"] = False
     data["show_terminal"] = False
     data["log_to_file"] = False
-    data["file_extensions"] = dict.fromkeys(data["file_extensions"], True)
-    data["providers"] = dict.fromkeys(data["providers"], True)
-    with open(APPLICATION_CONFIG_JSON, "r+", encoding="utf-8") as file:
+    data["file_extensions"] = dict.fromkeys(SUPPORTED_FILE_EXTENSIONS, True)
+    data["providers"] = dict.fromkeys(SUPPORTED_PROVIDERS, True)
+    with open(APPCON_JSON, "w", encoding="utf-8") as file:
         file.seek(0)
         json.dump(data, file, indent=4)
         file.truncate()
@@ -130,7 +125,7 @@ def get_app_config() -> AppConfig:
     return user_data
 
 
-def get_language_data(language: str = _current_language) -> LanguageData:
+def get_language_data(language: str = "default") -> LanguageData:
     """
     Get the language data object for the provided language from the languages.json configuration file.
 
@@ -141,14 +136,16 @@ def get_language_data(language: str = _current_language) -> LanguageData:
     Returns:
         A LanguageData object containing the data associated with the specified language.
     """
+    if language == "default":
+        language = get_json_key("current_language")
 
-    data = get_json_data(LANGUAGES_JSON)
+    data = get_json_data(LANGS_JSON)
     language_data = LanguageData(**data[language])
     return language_data
 
 
 def get_available_languages() -> dict:
-    return get_json_data(LANGUAGES_JSON)
+    return get_json_data(LANGS_JSON)
 
 
 def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeData:
@@ -177,7 +174,9 @@ def get_provider_alpha_code(provider: str) -> str:
     return get_alpha_code(data.alpha_code)
 
 
-def check_language_compatibility(provider: str, language: str = _current_language) -> bool:
+def check_language_compatibility(provider: str, language: str = "default") -> bool:
+    if language == "default":
+        language = get_json_key("current_language")
     data = get_language_data(language)
     if not data.incompatibility:
         return True

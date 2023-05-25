@@ -1,9 +1,11 @@
 import re
 
 import cloudscraper
+import requests
+import selectolax
 from packaging.version import Version
 
-from subsearch.data import __version__
+from subsearch.data import __guid__, __version__
 
 
 def find_semantic_version(version: str) -> str:
@@ -71,3 +73,28 @@ def is_new_version_avail() -> tuple[bool, bool]:
         new_repo_avail = True
 
     return new_repo_avail, repo_is_prerelease
+
+# Work in progress 
+# def find_sha256(url):
+#     response = requests.get(url)
+#     html_content = response.text
+
+#     parser = selectolax.parser.HTMLParser(html_content)
+#     selector_lst = [
+#         ".clearfix",
+#         "div:nth-child(3)",
+#         "section:nth-child(1)",
+#         "div:nth-child(2)",
+#         "div:nth-child(2)",
+#         "div:nth-child(1)",
+#         "div:nth-child(1)",
+#         "div:nth-child(2)",
+#         "h6:nth-child(5)",
+#         "p:nth-child(2)",
+#     ]
+
+#     css_selector = " > ".join(selector_lst)
+
+#     element = parser.css(css_selector)
+#     match = re.search(r"([A-Fa-f0-9]{64})", element[0].html)
+#     return match[0]

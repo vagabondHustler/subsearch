@@ -3,9 +3,9 @@ from selectolax.parser import HTMLParser
 
 from subsearch.data.data_objects import (
     AppConfig,
-    DownloadMetaData,
-    FormattedMetadata,
+    DownloadData,
     LanguageData,
+    PrettifiedDownloadData,
     ProviderUrls,
     ReleaseData,
 )
@@ -87,69 +87,59 @@ def get_html_parser(url: str):
     return HTMLParser(response.text)
 
 
-def pack_download_data(provider_: str, video_tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadMetaData]:
+def create_download_data(provider: str, tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
     """
-    Creates a list of metadata for each downloaded file.
+    Creates a list of data for each downloaded file.
 
     Args:
-        provider_ (str): The name of the file provider.
-        video_tmp_directory (str): The directory where the temporary downloaded files will be saved.
+        provider (str): The name of the file provider.
+        tmp_directory (str): The directory where the temporary downloaded files will be saved.
         to_be_downloaded (dict[str,str]): A dictionary with the name and url of each file to be downloaded.
 
     Returns:
-        List[DownloadMetaData]: A list containing metadata for each downloaded file.
+        List[DownloadData]: A list containing metadata for each downloaded file.
     """
     download_info = []
-    tbd_lenght = len(to_be_downloaded)
-    for zip_idx, (zip_name, zip_url) in enumerate(to_be_downloaded.items(), start=1):
-        zip_fp = f"{video_tmp_directory}\\{provider_}_{zip_idx}.zip"
-        data = DownloadMetaData(
-            provider=provider_, name=zip_name, file_path=zip_fp, url=zip_url, idx_num=zip_idx, idx_lenght=tbd_lenght
-        )
+    idx_lenght = len(to_be_downloaded)
+    for idx_num, (name, url) in enumerate(to_be_downloaded.items(), start=1):
+        file_path = f"{tmp_directory}\\{provider}_{idx_num}.zip"
+        data = DownloadData(provider, name, file_path, url, idx_num, idx_lenght)
         download_info.append(data)
     return download_info
 
 
-def format_key_value_pct(provider_: str, key: str, value: str, percentage_result_: int) -> FormattedMetadata:
+def prettify_download_data(provider: str, key: str, value: str, percentage_result: int) -> PrettifiedDownloadData:
     """
-    Formats the provided key, value pair with percentage match result and returns as
-    FormattedMetadata object.
+    Prettify the provided download data and return as UpdatedDownloadData object.
 
     Args:
-        provider_ (str): The metadata provider.
+        provider (str): The metadata provider.
         key (str): Key of the meta-data.
         value (str): Value of the key respective to input key.
-        percentage_result_ (int): Percentage value indicating the match between the found metadata
+        percentage_result (int): Percentage value indicating the match between the found metadata
                                 and input query.
 
     Returns:
-        FormattedMetadata: An instance of FormattedMetadata class populated with formatted metadata.
+        PrettifiedDownloadData: An instance of PrettifiedDownloadData class populated with download data.
 
     """
-    lenght_str = sum(1 for char in f"{percentage_result_:>3}% match:")
+    lenght_str = sum(1 for _char in f"{percentage_result:>3}% match:")
     number_of_spaces = " " * lenght_str
-    _match_release = f"{percentage_result_:>3}% match: {key}"
-    _url = f"{number_of_spaces} {value}"
-    data = FormattedMetadata(
-        provider=provider_,
-        release=key,
-        url=value,
-        pct_result=percentage_result_,
-        formatted_release=_match_release,
-        formatted_url=_url,
-    )
+    pct_result_string = f"{percentage_result:>3}% match: {key}"
+    url = f"{number_of_spaces} {value}"
+    data = PrettifiedDownloadData(provider, key, value, percentage_result, pct_result_string, url)
     return data
 
 
-def sort_download_metadata(list_: list[FormattedMetadata]) -> list[FormattedMetadata]:
+def sort_prettified_data(list_: list[PrettifiedDownloadData]) -> list[PrettifiedDownloadData]:
     """
-    Sorts the list of FormattedMetadata objects based on percentage result from Highest to Lowest.
+    Sorts the list of PrettifiedDownloadData objects based on percentage result from Highest to Lowest.
 
     Args:
-        list_ (list): a list of FormattedMetadata objects
+        list_ (list): a list of PrettifiedDownloadData objects
 
     Returns:
-        list: A sorted list of FormattedMetadata objects in descending order by Percentage result.
+        list: A sorted list of PrettifiedDownloadData objects in descending order by Percentage result.
     """
     list_.sort(key=lambda x: x.pct_result, reverse=True)
     return list_

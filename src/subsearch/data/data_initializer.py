@@ -1,9 +1,10 @@
 import sys
+import tempfile
 from itertools import product
 from pathlib import Path
 from typing import no_type_check
 
-from subsearch.data.data_objects import AppPaths, FileData
+from subsearch.data.data_objects import SUPPORTED_FILE_EXTENSIONS, AppPaths, FileData
 
 
 def paths() -> AppPaths:
@@ -22,6 +23,8 @@ def paths() -> AppPaths:
         utils=Path(home) / "utils",
         icon=Path(home) / "gui" / "assets" / "icon" / "subsearch.ico",
         tabs=Path(home) / "gui" / "assets" / "tabs",
+        tmpdir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
+        appdata_local=Path.home() / "AppData" / "Local" / "Subsearch",
     )
 
 
@@ -43,24 +46,8 @@ def video_file() -> FileData:
       subs_directory (Path): the absolute path to a directory to save the subtitles (same as the parent directory for the video file)
       tmp_directory (Path): the absolute path to the local temporary files directory (".subsearch" folder within the parent directory of the video file)
     """
-    exts = [
-        ".avi",
-        ".mp4",
-        ".mkv",
-        ".mpg",
-        ".mpeg",
-        ".mov",
-        ".rm",
-        ".vob",
-        ".wmv",
-        ".flv",
-        ".3gp",
-        ".3g2",
-        ".swf",
-        ".mswmm",
-    ]
     file_exist = False
-    for i in product(exts, sys.argv):
+    for i in product(SUPPORTED_FILE_EXTENSIONS, sys.argv):
         if i[1].endswith(i[0]) and str(i[1])[i[1].rfind("\\") :].startswith("\\"):
             file_path = Path(i[1])
             directory = file_path.parent

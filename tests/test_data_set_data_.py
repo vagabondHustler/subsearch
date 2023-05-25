@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 
 from src.subsearch.data import app_paths
@@ -15,3 +16,5 @@ def test_paths() -> None:
     assert app_paths.utils == Path(Path.cwd()) / "src" / "subsearch" / "utils"
     assert app_paths.icon == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "icon" / "subsearch.ico"
     assert app_paths.tabs == Path(Path.cwd()) / "src" / "subsearch" / "gui" / "assets" / "tabs"
+    assert app_paths.tmpdir == Path(tempfile.gettempdir()) / f"tmp_subsearch"
+    assert app_paths.appdata_local == Path.home() / "AppData" / "Local" / "Subsearch"

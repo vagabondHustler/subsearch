@@ -7,8 +7,8 @@ from threading import Lock
 from subsearch.data import __version__, video_data
 from subsearch.data.data_objects import (
     AppConfig,
-    FormattedMetadata,
     LanguageData,
+    PrettifiedDownloadData,
     ProviderUrls,
     ReleaseData,
 )
@@ -16,9 +16,12 @@ from subsearch.utils import io_json
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
-LOG_TO_FILE = io_json.get_json_key("log_to_file")
+try:
+    LOG_TO_FILE = io_json.get_json_key("log_to_file")
+except FileNotFoundError:
+    pass
 
-
+lock = Lock()
 logger = logging.getLogger("subsearch")
 logger.setLevel(logging.DEBUG)
 
@@ -54,15 +57,14 @@ def output(msg: str, terminal: bool = True, to_log: bool = True, level: str = "i
         if to_terminal is False:
             return
         if level == "info":
-            lock = Lock()
-            lock.acquire()
             print(msg)
-            lock.release()
         else:
             print(f"{level.upper()} - {msg}")
 
     _to_log(msg, level)
+    lock.acquire()
     _to_terminal(msg, terminal, level)
+    lock.release()
 
 
 def warning_spaces_in_filename() -> None:
@@ -188,7 +190,7 @@ def set_logger_data(**kwargs) -> None:
     language_data = kwargs["language_data"]
 
 
-def downlod_metadata(provider_: str, formatted_metadata_: list[FormattedMetadata], search_threashold: int) -> None:
+def downlod_metadata(provider_: str, formatted_metadata_: list[PrettifiedDownloadData], search_threashold: int) -> None:
     output("")
     output(f"--- [Sorted List from {provider_}] ---", False)
     downloaded_printed = False

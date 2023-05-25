@@ -1,8 +1,8 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import GUI_DATA, app_paths
-from subsearch.data.data_objects import FormattedMetadata
+from subsearch.data import GUI_DATA, __version__, app_paths
+from subsearch.data.data_objects import PrettifiedDownloadData
 from subsearch.gui import set_theme, tkinter_utils
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
 from subsearch.utils import file_manager, io_json, io_winreg
@@ -61,7 +61,7 @@ class TabManager(tk.Frame):
     def activate_tabs(self) -> None:
         self.tabs[self.active_tab].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
         tkinter_utils.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
-        self.parent.title(f"Subsearch - {self.active_tab} tab")
+        self.parent.title(f"Subsearch {__version__} - {self.active_tab} tab")
 
     def release_tab(self, event) -> None:
         btn_key, _btn_widget = self.get_btn(self.buttons, event)
@@ -136,7 +136,7 @@ class TabSettings(tk.Frame):
 
 
 class TabDownload(tk.Frame):
-    def __init__(self, parent, formatted_data: list[FormattedMetadata]) -> None:
+    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
         tk.Frame.__init__(self, parent, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         dowload_tab.DownloadList(self, formatted_data).pack(anchor="center")
@@ -155,7 +155,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
         None: This function does not return anything, it manipulates the GUI instead.
     """
     try:
-        formatted_data: list[FormattedMetadata] = kwargs["formatted_data"]
+        formatted_data: list[PrettifiedDownloadData] = kwargs["formatted_data"]
     except KeyError:
         formatted_data = None  # type: ignore
     root = initalize_root()
@@ -183,7 +183,7 @@ def initalize_root():
       An instance of Tk() class representing the main window of Subsearch application.
     """
     if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
-        io_json.set_default_json()
+        io_json.create_application_config()
         io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
     root.configure(background=GUI_DATA.colors.dark_grey)

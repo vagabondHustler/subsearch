@@ -2,24 +2,22 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA, video_data
-from subsearch.data.data_objects import DownloadMetaData, FormattedMetadata
+from subsearch.data import GUI_DATA, app_paths, video_data
+from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
 
 
 class DownloadList(tk.Frame):
-    def __init__(self, parent, formatted_data: list[FormattedMetadata]) -> None:
+    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
         self.configure(bg=GUI_DATA.colors.dark_grey, width=root_posx, height=root_posy - 82)
-        # listbox for the subtitles
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
         self.formatted_data = formatted_data
         self.subscene_scrape = subscene.SubsceneScraper()
         self.extent = 0
-        # self.sublist = read_tmp_file()
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
             self,
@@ -86,8 +84,8 @@ class DownloadList(tk.Frame):
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
                 download_url = _url
-            path = f"{video_data.tmp_directory}\\__{_provider}__{item_num}.zip"
-            enum = DownloadMetaData(
+            path = f"{ app_paths.tmpdir}\\__{_provider}__{item_num}.zip"
+            enum = DownloadData(
                 provider=f"Downloading from {_provider}",
                 name=_release,
                 file_path=path,
@@ -96,8 +94,8 @@ class DownloadList(tk.Frame):
                 idx_lenght=1,
             )  # type: ignore
             file_manager.download_subtitle(enum)  # type: ignore
-            file_manager.extract_files(video_data.tmp_directory, video_data.subs_directory, ".zip")
-            file_manager.clean_up_files(video_data.tmp_directory, "zip")
+            file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
+            file_manager.delete_temp_files(app_paths.tmpdir)
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")

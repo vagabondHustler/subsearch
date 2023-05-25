@@ -4,8 +4,8 @@ import sys
 import zipfile
 from pathlib import Path
 
-from subsearch.data import video_data
-from subsearch.data.data_objects import DownloadMetaData
+from subsearch.data import __guid__, app_paths, video_data
+from subsearch.data.data_objects import DownloadData
 from subsearch.providers.generic import get_cloudscraper
 from subsearch.utils import log, string_parser
 
@@ -22,8 +22,9 @@ def running_from_exe() -> bool:
     return False
 
 
-def download_subtitle(data: DownloadMetaData) -> int:
-    """Download the subtitle from the given url.
+def download_subtitle(data: DownloadData) -> int:
+    """
+    Download the subtitle from the given url.
 
     Args:
       data: A DownloadMetaData object that has information about the subtitle file to be downloaded.
@@ -109,7 +110,6 @@ def clean_up_files(cwd: Path, extension: str) -> None:
     Returns:
         None
     """
-
     for file in Path(cwd).glob(f"*{extension}"):
         log.path_action("remove", file)
         file_path = Path(cwd) / file
@@ -136,19 +136,6 @@ def directory_is_empty(directory: Path) -> bool:
     return False
 
 
-def make_necessary_directories() -> None:
-    """
-    Make necessary directories using video object info.
-    """
-
-    if video_data is None:
-        return None
-    if not Path(video_data.tmp_directory).exists():
-        Path.mkdir(video_data.tmp_directory)
-    if not Path(video_data.subs_directory).exists():
-        Path.mkdir(video_data.subs_directory)
-
-
 def get_hash(file_path: Path | None) -> str:
     """
     Calculates and returns the hash value of given file path.
@@ -166,10 +153,9 @@ def get_hash(file_path: Path | None) -> str:
     if file_path is None:
         return ""
     try:
-        longlongformat = "<q"  # little-endian long long
+        longlongformat = "<q"
         bytesize = struct.calcsize(longlongformat)
         with open(file_path, "rb") as f:
-            # filesize = os.path.getsize(file_path)
             filesize = file_path.stat().st_size
             hash = filesize
             if filesize < 65536 * 2:
@@ -180,7 +166,7 @@ def get_hash(file_path: Path | None) -> str:
                 buffer = f.read(bytesize)
                 (l_value,) = struct.unpack(longlongformat, buffer)
                 hash += l_value
-                hash = hash & 0xFFFFFFFFFFFFFFFF  # to remain as 64bit number
+                hash = hash & 0xFFFFFFFFFFFFFFFF
             f.seek(max(0, filesize - 65536), 0)
             n2 = 65536 // bytesize
             for _x in range(n2):
@@ -194,3 +180,16 @@ def get_hash(file_path: Path | None) -> str:
 
     except IOError:
         return ""
+
+
+def delete_temp_files(temp_path: Path):
+    for item in temp_path.iterdir():
+        log.path_action("remove", item)
+        if item.is_file():
+            item.unlink()
+        if item.is_dir():
+            shutil.rmtree(item)
+
+
+def create_directory(path: Path):
+    path.mkdir(exist_ok=True)
