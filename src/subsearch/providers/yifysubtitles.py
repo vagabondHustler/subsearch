@@ -1,13 +1,7 @@
 from selectolax.parser import Node
 
-from subsearch.data import video_data
-from subsearch.data.data_objects import (
-    AppConfig,
-    DownloadMetaData,
-    FormattedMetadata,
-    ProviderUrls,
-    ReleaseData,
-)
+from subsearch.data import app_paths
+from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.providers import generic
 from subsearch.providers.generic import ProviderParameters
 from subsearch.utils import log, string_parser
@@ -50,13 +44,13 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
     def __init__(self, **kwargs):
         ProviderParameters.__init__(self, **kwargs)
         YifySubtitlesScraper.__init__(self)
-        self.logged_and_sorted: list[FormattedMetadata] = []
+        self.logged_and_sorted: list[PrettifiedDownloadData] = []
 
-    def parse_site_results(self) -> list | list[DownloadMetaData]:
+    def parse_site_results(self) -> list | list[DownloadData]:
         # search for title
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
         to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[FormattedMetadata] = []
+        to_be_sorted: list[PrettifiedDownloadData] = []
 
         data_found = True if subtitle_data else False
         if data_found is False:
@@ -65,7 +59,7 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         for key, value in subtitle_data.items():
             pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("yifysubtitles", pct_result, key)
-            formatted_data = generic.format_key_value_pct("yifysubtitles", key, value, pct_result)
+            formatted_data = generic.prettify_download_data("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
             if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
                 continue
@@ -73,15 +67,15 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
                 continue
             to_be_downloaded[key] = value
 
-        self.sorted_metadata = generic.sort_download_metadata(to_be_sorted)
+        self.sorted_metadata = generic.sort_prettified_data(to_be_sorted)
         log.downlod_metadata("yifysubtitles", self.sorted_metadata, self.percentage_threashold)
 
         if not to_be_downloaded:
             return []
 
         # pack download data
-        download_info = generic.pack_download_data("yifysubtitles", video_data.tmp_directory, to_be_downloaded)
+        download_info = generic.create_download_data("yifysubtitles", app_paths.tmpdir, to_be_downloaded)
         return download_info
 
-    def _sorted_list(self) -> list[FormattedMetadata]:
+    def _sorted_list(self) -> list[PrettifiedDownloadData]:
         return self.sorted_metadata
