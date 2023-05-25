@@ -22,7 +22,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop"
 ]
-dependencies = ["selectolax==0.3.13", "cloudscraper==1.2.71", "num2words==0.5.12", "packaging==23.1", "requests==2.30.0"]
+dependencies = ["selectolax==0.3.13", "cloudscraper==1.2.71", "num2words==0.5.12", "packaging==23.1", "requests==2.31.0"]
 dynamic = ["version"]
 
 [project.urls]
@@ -44,8 +44,8 @@ exclude = ["examples*", "tools*", "subsearch.test*"]
 version = {attr = "subsearch.data.__version__"}
 
 [project.optional-dependencies]
-optional = ["black==23.3.0", "isort==5.12.0", "twine==4.0.2", "build==0.10.0", "cx_Freeze==6.14.9", "mypy==1.2.0", "pipreqs==0.4.13"]
-dev = ["pytest==7.3.1", "pytest-cov==4.0.0", "tox==4.5.1"]
+optional = ["black==23.3.0", "isort==5.12.0", "twine==4.0.2", "build==0.10.0", "cx_Freeze==6.15.0", "mypy==1.3.0", "pipreqs==0.4.13"]
+dev = ["pytest==7.3.1", "pytest-cov==4.1.0", "tox==4.5.1"]
 
 
 [tool.pytest.ini_options]
