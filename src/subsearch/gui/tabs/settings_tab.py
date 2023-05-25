@@ -4,7 +4,7 @@ from tkinter import ttk
 
 from subsearch.data import GUI_DATA, __version__
 from subsearch.gui import tkinter_utils
-from subsearch.utils import io_json, updates
+from subsearch.utils import io_json, update
 
 
 class FileExtensions(tk.Frame):
@@ -52,7 +52,7 @@ class FileExtensions(tk.Frame):
             self.data["file_extensions"][key] = False
         elif value.get() is False:
             self.data["file_extensions"][key] = True
-        io_json.set_config(self.data)
+        io_json.set_json_data(self.data)
 
         self.update_registry()
 
@@ -143,55 +143,36 @@ class CheckForUpdates(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"")
-        label = tk.Label(self, text=f"Version {__version__}")
-        label.configure(tkinter_utils.DEFAULT_LABEL_CONFIG)
-        label.grid(tkinter_utils.DEFAULT_LABEL_GRID)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.yellow, font=GUI_DATA.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        btn_check = ttk.Button(
+        self.latest_version = None
+        self.btn_search = ttk.Button(
             self,
-            text="Check for updates",
-            width=18,
+            text="Search for updates",
+            width=40,
         )
-        btn_check.grid(row=0, column=3, pady=2)
-        self.btn_download = ttk.Button(
+        self.btn_visit_release_page = ttk.Button(
             self,
-            text="",
-            width=18,
+            text="Open in webbrowser",
+            width=40,
         )
-        self.btn_download.grid(row=0, column=2, pady=2)
-        btn_check.bind("<Enter>", self.enter_button)
-        self.btn_download.bind("<Enter>", self.enter_button)
+        self.btn_search.grid(row=0, column=2, pady=2)
+        self.btn_search.bind("<Enter>", self.enter_button)
         tkinter_utils.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
-        if btn["text"] == "Check for updates":
-            btn.bind("<ButtonRelease-1>", self.button_check)
-        if btn["text"].startswith("Get"):
-            btn.bind("<ButtonRelease-1>", self.button_download)
+        if btn == self.btn_search:
+            btn.bind("<ButtonRelease-1>", self.search_button)
 
-    def button_check(self, event) -> None:
-        self.string_var.set(f"Looking...")
-        new_repo_avail, repo_is_prerelease = updates.is_new_version_avail()
-        latest_version = updates.get_latest_version()
-        if new_repo_avail and repo_is_prerelease:
-            if "-rc" in latest_version:
-                self.string_var.set(f"Release candidate")
-            elif "-alpha" in latest_version:
-                self.string_var.set(f"Alpha release")
-            elif "-beta" in latest_version:
-                self.string_var.set(f"Beta release")
-        elif new_repo_avail and repo_is_prerelease is False:
-            self.string_var.set(f"Stable release")
-        else:
-            self.string_var.set(f"Up to date")
-
+    def search_button(self, event) -> None:
+        new_repo_avail, repo_is_prerelease = update.is_new_version_avail()
+        self.latest_version = update.get_latest_version()
         if new_repo_avail:
-            self.btn_download.configure(text=f"Get v{latest_version}")
+            self.sha256_hex = update.find_sha256("https://github.com/vagabondHustler/subsearch/releases")
+            self.btn_search.destroy()
+            self.btn_visit_release_page.grid(row=0, column=2, pady=2)
+            self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
+        if not new_repo_avail:
+            self.btn_search["text"] = f"Latest version already installed"
 
-    def button_download(self, event) -> None:
-        webbrowser.open("https://github.com/vagabondHustler/SubSearch/releases")
+    def visit_repository_button(self, event) -> None:
+        webbrowser.open(f"https://github.com/vagabondHustler/subsearch/releases")
