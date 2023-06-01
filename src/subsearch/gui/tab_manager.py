@@ -114,6 +114,7 @@ class TabSearch(tk.Frame):
         tk.Frame(self, height=80, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
         search_tab.SubtitleType(self).pack(anchor="center")
         search_tab.SearchThreshold(self).pack(anchor="center")
+        search_tab.ForeignOnly(self).pack(anchor="center")
         search_tab.RenameBestMatch(self).pack(anchor="center")
 
 

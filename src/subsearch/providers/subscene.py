@@ -34,9 +34,9 @@ class SubsceneScraper:
             return True
         return False
 
-    def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool) -> dict[str, str]:
+    def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool, subscene_header) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url)
+        tree = generic.get_html_parser(url, subscene_header)
         products = tree.css("tr")
         for item in products[1:]:
             if self.skip_item(item, hi_sub, regular_sub):
@@ -77,7 +77,9 @@ class Subscene(ProviderParameters, SubsceneScraper):
             return []
 
         # search for subtitles
-        subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub)
+        custom_subscene_header = generic.CustomSubsceneHeader(self.app_config)
+        header = custom_subscene_header.create_header()
+        subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub, header)
         for key, value in subtitle_data.items():
             pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("subscene", pct_result, key)

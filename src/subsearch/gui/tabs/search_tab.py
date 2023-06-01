@@ -213,6 +213,17 @@ class SearchThreshold(tk.Frame):
         tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
 
 
+class ForeignOnly(tkinter_utils.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
+    def __init__(self, parent) -> None:
+        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only")
+
+
 class RenameBestMatch(tkinter_utils.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
