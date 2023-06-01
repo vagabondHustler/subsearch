@@ -1,3 +1,5 @@
+from typing import Literal
+
 import cloudscraper
 from selectolax.parser import HTMLParser
 
@@ -8,7 +10,46 @@ from subsearch.data.data_objects import (
     PrettifiedDownloadData,
     ProviderUrls,
     ReleaseData,
+    SubsceneCookie,
 )
+from subsearch.utils import io_json
+
+
+class CustomSubsceneHeader:
+    def __init__(self, app_config: AppConfig) -> None:
+        self.app_config = app_config
+
+    def _get_hearing_impaired_int(self) -> Literal[2, 1, 0]:
+        if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired:
+            value = 0
+        if self.app_config.hearing_impaired and not self.app_config.non_hearing_impaired:
+            value = 1
+        if self.app_config.non_hearing_impaired and not self.app_config.hearing_impaired:
+            value = 2
+        return value
+
+    def _get_cookie(self) -> SubsceneCookie:
+        subscene_cookie = SubsceneCookie(
+            dark_theme=False,
+            sort_subtitle_by_date="false",
+            language_filter=io_json.get_language_data().subscene_id,
+            hearing_impaired=self._get_hearing_impaired_int(),
+            foreigen_only=self.app_config.foreign_only,
+        )
+        return subscene_cookie
+
+    def set_cookie_values(self) -> str:
+        data = self._get_cookie()
+        dark_theme = f"DarkTheme={data.dark_theme}"
+        sort_subtitle_by_date = f"SortSubtitlesByDate={data.sort_subtitle_by_date}"
+        language_filter = f"LanguageFilter={data.language_filter}"
+        hearing_impaired = f"HearingImpaired={data.hearing_impaired}"
+        foreign_only = f"ForeignOnly={data.foreigen_only}"
+        return f"{dark_theme}; {sort_subtitle_by_date}; {language_filter}; {hearing_impaired}; {foreign_only}"
+
+    def create_header(self) -> dict[str, str]:
+        cookie_values = self.set_cookie_values()
+        return {"Cookie": cookie_values}
 
 
 class ProviderParameters:
@@ -21,6 +62,8 @@ class ProviderParameters:
         app_config: AppConfig = kwargs["app_config"]
         provider_urls: ProviderUrls = kwargs["provider_urls"]
         language_data: LanguageData = kwargs["language_data"]
+
+        self.app_config = app_config
 
         # file parameters
         self.title = release_data.title
@@ -70,7 +113,7 @@ def get_cloudscraper():
     return cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def get_html_parser(url: str):
+def get_html_parser(url: str, header_=None):
     """
     Returns a parsed HTML from a given URL using cloudscraper package.
 
@@ -83,7 +126,10 @@ def get_html_parser(url: str):
     """
 
     scraper = get_cloudscraper()
-    response = scraper.get(url)
+    if header_ is None:
+        response = scraper.get(url)
+    else:
+        response = scraper.get(url, headers=header_)
     return HTMLParser(response.text)
 
 

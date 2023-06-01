@@ -8,6 +8,7 @@ class LanguageData:
     alpha_1: str
     alpha_2b: str
     incompatibility: list[str]
+    subscene_id: int
 
 
 @dataclass(order=True)
@@ -91,6 +92,7 @@ class AppConfig:
 
     current_language: str
     subtitle_type: dict[str, bool]
+    foreign_only: bool
     percentage_threshold: int
     rename_best_match: bool
     context_menu: bool
@@ -105,6 +107,15 @@ class AppConfig:
     providers: dict[str, bool]
     hearing_impaired: bool
     non_hearing_impaired: bool
+
+
+@dataclass(order=True)
+class SubsceneCookie:
+    dark_theme: bool
+    sort_subtitle_by_date: str
+    language_filter: int
+    hearing_impaired: bool
+    foreigen_only: bool
 
 
 @dataclass(frozen=True, order=True)
