@@ -87,6 +87,7 @@ class AppSteps(Initializer):
         if self.file_exist is False:
             tab_manager.open_tab("search")
             return None
+        self.foreign_only = io_json.get_json_key("foreign_only")
 
         if " " in video_data.filename:
             log.warning_spaces_in_filename()
@@ -187,6 +188,8 @@ class SkipStep:
     def opensubtitles(self) -> bool:
         if self.cls.file_exist is False:
             return True
+        if self.cls.foreign_only:
+            return True
         if io_json.check_language_compatibility("opensubtitles") is False:
             return True
         if (
@@ -207,6 +210,8 @@ class SkipStep:
 
     def yifysubtitles(self) -> bool:
         if self.cls.file_exist is False:
+            return True
+        if self.cls.foreign_only:
             return True
         if io_json.check_language_compatibility("yifysubtitles") is False:
             return True

@@ -221,7 +221,7 @@ class ForeignOnly(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only")
+        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only", tip_text="If True, only 'Subscene.com' will be used.")
 
 
 class RenameBestMatch(tkinter_utils.ToggleableFrameButton):

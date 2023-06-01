@@ -314,7 +314,9 @@ class ToggleableFrameButton(tk.Frame):
         show_if_exe (bool, optional): Only show the button if the program is not running from an executable. Defaults to True.
     """
 
-    def __init__(self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True) -> None:
+    def __init__(
+        self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True, tip_text=None
+    ) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=GUI_DATA.colors.dark_grey)
         self.string_var = tk.StringVar()
@@ -323,6 +325,8 @@ class ToggleableFrameButton(tk.Frame):
         self.config_key = config_key
         self.write_to_reg = write_to_reg
         self.show_if_exe = show_if_exe
+        self.tip_text = tip_text
+        self.tip_present = False
         if show_if_exe is False and file_manager.running_from_exe():
             return None
         label = tk.Label(self, text=self.setting_name)
@@ -351,6 +355,10 @@ class ToggleableFrameButton(tk.Frame):
             btn.bind("<ButtonRelease-1>", self.button_set_false)
         if btn["text"] == "False":
             btn.bind("<ButtonRelease-1>", self.button_set_true)
+        if self.tip_text is not None and self.tip_present is False:
+            self.tip = ToolTip(btn, btn, self.tip_text)
+            self.tip.show()
+            self.tip_present = True
 
     def leave_button(self, event) -> None:
         """
@@ -360,6 +368,9 @@ class ToggleableFrameButton(tk.Frame):
             event: The tkinter event object.
         """
         btn = event.widget
+        if self.tip_present:
+            self.tip.hide()
+            self.tip_present = False
 
     def button_set_true(self, event) -> None:
         """
