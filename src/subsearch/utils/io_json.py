@@ -84,7 +84,6 @@ def retrieve_application_config() -> dict[str, Any]:
     data = {
         "current_language": "english",
         "subtitle_type": dict.fromkeys(subtitle_types, True),
-        "foreign_only": False,
         "percentage_threshold": 90,
         "rename_best_match": True,
         "context_menu": True,
