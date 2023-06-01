@@ -5,14 +5,20 @@ from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import file_manager, io_json, io_winreg, log, string_parser
+from subsearch.utils import (
+    config_integrity,
+    file_manager,
+    io_json,
+    io_winreg,
+    log,
+    string_parser,
+)
 
 
 class Initializer:
     def __init__(self) -> None:
-        file_manager.create_directory(app_paths.appdata_local)
+        config_integrity.cleanup_on_integrity_failure()
         file_manager.create_directory(app_paths.tmpdir)
-        io_json.create_application_config()
         self.app_config = io_json.get_app_config()
         if video_data is not None:
             file_manager.create_directory(video_data.subs_directory)
@@ -72,7 +78,7 @@ class AppSteps(Initializer):
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
-            io_json.create_application_config()
+            io_json.create_application_config_json()
             io_winreg.add_context_menu()
         if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_json_key("context_menu"):
             io_winreg.add_context_menu()
