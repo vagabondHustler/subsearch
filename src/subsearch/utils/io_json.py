@@ -4,6 +4,7 @@ from typing import Any, Union
 
 from subsearch.data import SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS, app_paths
 from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeData
+from subsearch.utils import file_manager
 from subsearch.utils.exceptions import ProviderNotImplemented
 
 APPCON_JSON = Path(app_paths.appdata_local) / "application_config.json"
@@ -78,7 +79,28 @@ def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APPC
         f.truncate()
 
 
-def create_application_config() -> None:
+def retrieve_application_config() -> dict[str, Any]:
+    subtitle_types = ["hearing_impaired", "non_hearing_impaired"]
+    data = {
+        "current_language": "english",
+        "subtitle_type": dict.fromkeys(subtitle_types, True),
+        "percentage_threshold": 90,
+        "rename_best_match": True,
+        "context_menu": True,
+        "context_menu_icon": True,
+        "manual_download_fail": True,
+        "manual_download_mode": False,
+        "use_threading": True,
+        "multiple_app_instances": False,
+        "show_terminal": False,
+        "log_to_file": False,
+        "file_extensions": dict.fromkeys(SUPPORTED_FILE_EXTENSIONS, True),
+        "providers": dict.fromkeys(SUPPORTED_PROVIDERS, True),
+    }
+    return data
+
+
+def create_config_file() -> None:
     """
     Creates application_config.json file and set the default values.
 
@@ -87,25 +109,10 @@ def create_application_config() -> None:
     """
     if APPCON_JSON.exists():
         return None
-    subtitle_types = ["hearing_impaired", "non_hearing_impaired"]
-    data = {}
-    data["current_language"] = "english"
-    data["subtitle_type"] = dict.fromkeys(subtitle_types, True)
-    data["percentage_threshold"] = 90
-    data["rename_best_match"] = True
-    data["context_menu"] = True
-    data["context_menu_icon"] = True
-    data["manual_download_fail"] = True
-    data["manual_download_mode"] = False
-    data["use_threading"] = True
-    data["multiple_app_instances"] = False
-    data["show_terminal"] = False
-    data["log_to_file"] = False
-    data["file_extensions"] = dict.fromkeys(SUPPORTED_FILE_EXTENSIONS, True)
-    data["providers"] = dict.fromkeys(SUPPORTED_PROVIDERS, True)
+    application_config = retrieve_application_config()
     with open(APPCON_JSON, "w", encoding="utf-8") as file:
         file.seek(0)
-        json.dump(data, file, indent=4)
+        json.dump(application_config, file, indent=4)
         file.truncate()
 
 

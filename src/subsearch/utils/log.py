@@ -163,6 +163,8 @@ def path_action(action_type: str, src_: Path, dst_: Path | None = None) -> None:
         type = "file"
     elif src_.is_dir():
         type = "directory"
+    else:
+        return None
 
     src = src_.relative_to(src_.parent.parent) if src_ else None
     dst = dst_.relative_to(dst_.parent.parent) if dst_ else None
