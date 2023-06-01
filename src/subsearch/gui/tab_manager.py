@@ -158,7 +158,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
         formatted_data: list[PrettifiedDownloadData] = kwargs["formatted_data"]
     except KeyError:
         formatted_data = None  # type: ignore
-    root = initalize_root()
+    root = initialize_root()
     set_theme("dark")
     tkinter_utils.set_custom_btn_styles()
     tabs = {
@@ -172,7 +172,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
     root.mainloop()
 
 
-def initalize_root():
+def initialize_root():
     """
     Initialize the root Tkinter window for the Subsearch application.
 
@@ -180,7 +180,7 @@ def initalize_root():
         tk.Tk: The initialized Tkinter root window.
     """
     if io_json.APPCON_JSON.exists() is False:
-        io_json.create_application_config()
+        io_json.create_application_config_json()
     if io_json.get_json_key("context_menu"):
         io_winreg.add_context_menu()
     root = tk.Tk(className=f"Subsearch")
