@@ -19,6 +19,8 @@ class Initializer:
     def __init__(self) -> None:
         config_integrity.cleanup_on_integrity_failure()
         file_manager.create_directory(app_paths.tmpdir)
+        file_manager.create_directory(app_paths.appdata_local)
+        io_json.create_config_file()
         self.app_config = io_json.get_app_config()
         if video_data is not None:
             file_manager.create_directory(video_data.subs_directory)

@@ -48,7 +48,6 @@ def cleanup_on_integrity_failure():
     Returns:
         None.
     """
-    if not check_config_integrity():
+    if not check_config_integrity() and app_paths.appdata_local.exists():
         file_manager.del_directory(app_paths.appdata_local)
-        file_manager.create_directory(app_paths.appdata_local)
-        io_json.create_config_file()
+
