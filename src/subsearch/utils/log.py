@@ -16,9 +16,12 @@ from subsearch.utils import io_json
 
 NOW = datetime.now()
 DATE = NOW.strftime("%y%m%d")
+
 try:
     LOG_TO_FILE = io_json.get_json_key("log_to_file")
 except FileNotFoundError:
+    pass
+except KeyError:
     pass
 
 lock = Lock()
