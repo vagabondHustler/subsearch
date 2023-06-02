@@ -27,6 +27,8 @@ def synchronized(mutex_name: str) -> Callable:
                     return func()
             except FileNotFoundError:
                 pass
+            except KeyError:
+                pass
             kernel32 = ctypes.WinDLL("kernel32")
             mutex = kernel32.CreateMutexW(None, False, mutex_name)
             last_error = kernel32.GetLastError()
