@@ -84,6 +84,7 @@ def retrieve_application_config() -> dict[str, Any]:
     data = {
         "current_language": "english",
         "subtitle_type": dict.fromkeys(subtitle_types, True),
+        "foreign_only": False,
         "percentage_threshold": 90,
         "rename_best_match": True,
         "context_menu": True,
@@ -149,6 +150,11 @@ def get_language_data(language: str = "default") -> LanguageData:
     data = get_json_data(LANGS_JSON)
     language_data = LanguageData(**data[language])
     return language_data
+
+
+def get_language_data_value(key: str):
+    data = get_language_data()
+    return data[key]
 
 
 def get_available_languages() -> dict:

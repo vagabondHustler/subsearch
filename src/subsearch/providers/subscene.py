@@ -34,14 +34,16 @@ class SubsceneScraper:
             return True
         return False
 
-    def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool) -> dict[str, str]:
+    def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool, subscene_header) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url)
+        tree = generic.get_html_parser(url, subscene_header)
         products = tree.css("tr")
         for item in products[1:]:
             if self.skip_item(item, hi_sub, regular_sub):
                 continue
             node = item.css_first("a")
+            if node.child.text_content == "upload":
+                continue
             subtitle_href = node.attributes["href"]
             filename = item.css_first("span:nth-child(2)").child.text_content.strip()
             subtitles[filename] = f"https://subscene.com{subtitle_href}"
@@ -69,7 +71,8 @@ class Subscene(ProviderParameters, SubsceneScraper):
         to_be_sorted: list[PrettifiedDownloadData] = []
         _to_be_downloaded: dict[str, str] = {}
         to_be_downloaded: dict[str, str] = {}
-
+        custom_subscene_header = generic.CustomSubsceneHeader(self.app_config)
+        header = custom_subscene_header.create_header()
         # find title
         definitive_match = self._definitive_match()
         found_title_url = self.find_title(self.url_subscene, self.current_language, definitive_match)
@@ -77,7 +80,7 @@ class Subscene(ProviderParameters, SubsceneScraper):
             return []
 
         # search for subtitles
-        subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub)
+        subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub, header)
         for key, value in subtitle_data.items():
             pct_result = string_parser.calculate_match(key, self.release)
             log.output_match("subscene", pct_result, key)
