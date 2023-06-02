@@ -78,7 +78,6 @@ def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APPC
         json.dump(data, f, indent=4)
         f.truncate()
 
-
 def retrieve_application_config() -> dict[str, Any]:
     subtitle_types = ["hearing_impaired", "non_hearing_impaired"]
     data = {
@@ -103,7 +102,7 @@ def retrieve_application_config() -> dict[str, Any]:
 
 def create_config_file() -> None:
     """
-    Creates application_config.json file and set the default values.
+    Creates application_config.json file and set the default values if it doesn't exist and.
 
     Returns:
         None.

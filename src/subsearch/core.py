@@ -6,7 +6,7 @@ from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
-    config_integrity,
+    app_integrity,
     file_manager,
     io_json,
     io_winreg,
@@ -17,10 +17,7 @@ from subsearch.utils import (
 
 class Initializer:
     def __init__(self) -> None:
-        config_integrity.cleanup_on_integrity_failure()
-        file_manager.create_directory(app_paths.tmpdir)
-        file_manager.create_directory(app_paths.appdata_local)
-        io_json.create_config_file()
+        app_integrity.initialize_application()
         self.app_config = io_json.get_app_config()
         if video_data is not None:
             file_manager.create_directory(video_data.subs_directory)
