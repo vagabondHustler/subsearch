@@ -204,7 +204,7 @@ jobs:
 
       - name: Build changelog for pre-release
         id: changelog_pre_release
-        uses: mikepenz/release-changelog-builder-action@v3
+        uses: mikepenz/release-changelog-builder-action@v4
         if: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
         with:
           configuration: .github/configs/changelog_builder.json
@@ -213,7 +213,7 @@ jobs:
 
       - name: Build changelog for full-release
         id: changelog_full_release
-        uses: mikepenz/release-changelog-builder-action@v3
+        uses: mikepenz/release-changelog-builder-action@v4
         if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
         with:
           fromTag: ${{ needs.variables.outputs.past_ref_name }}
