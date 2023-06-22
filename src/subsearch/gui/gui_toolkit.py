@@ -83,22 +83,6 @@ def set_default_grid_size(cls, width_=18) -> None:
         cls.grid_rowconfigure(row, minsize=0)
 
 
-def get_tab_png(tab: str) -> Path:
-    """
-    Get the path of the PNG file for a given tab.
-
-    Args:
-        tab (str): The name of the tab.
-
-    Returns:
-        Path: The path of the PNG file for the specified tab.
-
-    Raises:
-        None.
-    """
-    return Path(app_paths.tabs) / tab
-
-
 def asset_tab(cls, img, type, x=27, y=27) -> None:
     """
     Attach an image displayed as a tab onto the application window.

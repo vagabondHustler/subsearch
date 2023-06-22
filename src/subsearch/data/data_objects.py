@@ -41,7 +41,6 @@ class AppPaths:
     gui_app_theme: Path
     providers: Path
     utils: Path
-    tabs: Path
     tmpdir: Path
     appdata_local: Path
 
