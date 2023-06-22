@@ -1,59 +1,24 @@
-from pathlib import Path
+import re
+from tkinter import Tk
 
-inited = False
-root = None
-
-
-def init(func):
-    def wrapper(*args, **kwargs):
-        global inited
-        global root
-
-        if not inited:
-            from tkinter import _default_root  # type: ignore
-
-            path = (Path(__file__).parent / "assets" / "ttk_style.tcl").resolve()
-
-            try:
-                _default_root.tk.call("source", str(path))
-            except AttributeError:
-                raise RuntimeError(
-                    "can't set theme. Tk is not initialized. "
-                    + "Please first create a tkinter.Tk instance, then set the theme."
-                ) from None
-            else:
-                inited = True
-                root = _default_root
-
-        return func(*args, **kwargs)
-
-    return wrapper
+from subsearch.data import app_paths
 
 
-@init
-def set_theme(theme):
-    if theme not in {"dark"}:
-        raise RuntimeError(f"not a valid theme name: {theme}")
+def get_spritesheet_data() -> dict[str, tuple[int, int, int, int]]:
+    pattern = r"\b(\w+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\b"
+    data = {}
+    file_path = app_paths.gui_app_theme / "spritesheet_data.tcl"
+    with file_path.open() as file:
+        content = file.read()
+        matches = re.findall(pattern, content)
 
-    root.tk.call("set_theme", theme)  # type: ignore
+        for match in matches:
+            key = match[0]
+            values = tuple(map(int, match[1:]))
+            data[key] = values
 
-
-@init
-def get_theme():
-    theme = root.tk.call("ttk::style", "theme", "use")  # type: ignore
-
-    try:
-        return {"ttk_style": "dark"}[theme]
-    except KeyError:
-        return theme
+    return data
 
 
-@init
-def toggle_theme() -> None:
-    if get_theme() == "dark":
-        use_dark_theme()
-    else:
-        use_dark_theme()
-
-
-use_dark_theme = lambda: set_theme("dark")
+root = Tk(className="Subsearch")
+spritesheet_data = get_spritesheet_data()

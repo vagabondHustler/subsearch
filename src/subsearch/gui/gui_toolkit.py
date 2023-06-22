@@ -2,7 +2,10 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
+from PIL import Image, ImageTk
+
 from subsearch.data import GUI_DATA, __version__, app_paths
+from subsearch.gui import spritesheet_data
 from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
@@ -14,20 +17,15 @@ DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
 DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
-def get_tab_png(tab: str) -> Path:
-    """
-    Get the path of the PNG file for a given tab.
-
-    Args:
-        tab (str): The name of the tab.
-
-    Returns:
-        Path: The path of the PNG file for the specified tab.
-
-    Raises:
-        None.
-    """
-    return Path(app_paths.tabs) / tab
+def get_sprite(sprite_name):
+    spritesheet_path = app_paths.gui_assets / "spritesheet.png"
+    spritesheet_image = Image.open(spritesheet_path)
+    sprite_x = spritesheet_data[sprite_name][0]
+    sprite_y = spritesheet_data[sprite_name][1]
+    sprite_width = spritesheet_data[sprite_name][2]
+    sprite_height = spritesheet_data[sprite_name][3]
+    sprite = spritesheet_image.crop((sprite_x, sprite_y, sprite_x + sprite_width, sprite_y + sprite_height))
+    return sprite
 
 
 def calculate_btn_size(cls, width_=18, height_=2) -> tuple[int, int]:
@@ -85,6 +83,22 @@ def set_default_grid_size(cls, width_=18) -> None:
         cls.grid_rowconfigure(row, minsize=0)
 
 
+def get_tab_png(tab: str) -> Path:
+    """
+    Get the path of the PNG file for a given tab.
+
+    Args:
+        tab (str): The name of the tab.
+
+    Returns:
+        Path: The path of the PNG file for the specified tab.
+
+    Raises:
+        None.
+    """
+    return Path(app_paths.tabs) / tab
+
+
 def asset_tab(cls, img, type, x=27, y=27) -> None:
     """
     Attach an image displayed as a tab onto the application window.
@@ -96,8 +110,8 @@ def asset_tab(cls, img, type, x=27, y=27) -> None:
         x (int, optional): The width of the image in pixels. Defaults to 27.
         y (int, optional): The height of the image in pixels. Defaults to 27.
     """
-    path = get_tab_png(f"{img}_{type}.png")
-    png = tk.PhotoImage(file=path)
+    path = get_sprite(f"{img}_{type}")
+    png = ImageTk.PhotoImage(path)
     update_asset(cls, png, x, y)
 
 
@@ -402,3 +416,26 @@ class ToggleableFrameButton(tk.Frame):
         if self.write_to_reg:
             io_winreg.remove_context_menu()
         self.enter_button(event)
+
+
+def set_ttk_theme(root):
+    initializer_tcl = app_paths.gui_app_theme / "ttk_theme_initializer.tcl"
+    root.tk.call("source", str(initializer_tcl))
+    root.tk.call("set_theme")
+
+
+def configure_root(root):
+    """
+    Initialize the root Tkinter window for the Subsearch application.
+
+    Returns:
+        tk.Tk: The initialized Tkinter root window.
+    """
+    if io_json.APPCON_JSON.exists() is False:
+        io_json.create_application_config_json()
+    if io_json.get_json_key("context_menu"):
+        io_winreg.add_context_menu()
+    root.configure(background=GUI_DATA.colors.dark_grey)
+    root.iconbitmap(app_paths.gui_assets / "subsearch.ico")
+    root.geometry(WindowPosition.set(root))  # type: ignore
+    root.resizable(False, False)
