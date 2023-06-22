@@ -137,7 +137,7 @@ class AppSteps(Initializer):
                 self.skipped_combined.append(data)
 
         if self.skipped_combined:
-            tab_manager.open_tab("download", formatted_data=self.skipped_combined)
+            tab_manager.open_tab("download", data=self.skipped_combined)
             self.ran_download_tab = True
         log.output_done_with_tasks(end_new_line=True)
 
