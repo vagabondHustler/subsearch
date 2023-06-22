@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data import GUI_DATA
-from subsearch.gui import tkinter_utils
+from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
 
@@ -38,7 +38,7 @@ class SelectLanguage(tk.Frame):
             btn.bind("<Leave>", self.leave_button)
             self.rownum += 1
             self.name_find_key[language_data["name"]] = language
-        tkinter_utils.set_default_grid_size(self, width_=6)
+        gui_toolkit.set_default_grid_size(self, width_=6)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -46,7 +46,7 @@ class SelectLanguage(tk.Frame):
         providers = ", ".join(([_i.title() for _i in self.languages[json_key]["incompatibility"]]))
         if providers:
             tip_text = f"If enabled, '{providers}' will be automatically skipped."
-            self.tip = tkinter_utils.ToolTip(btn, btn, tip_text)
+            self.tip = gui_toolkit.ToolTip(btn, btn, tip_text)
             self.tip.show()
             self.tip_present = True
         btn.bind("<ButtonPress-1>", self.press_button)
