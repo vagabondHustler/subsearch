@@ -37,9 +37,10 @@ class AppPaths:
     home: Path
     data: Path
     gui: Path
+    gui_assets: Path
+    gui_app_theme: Path
     providers: Path
     utils: Path
-    icon: Path
     tabs: Path
     tmpdir: Path
     appdata_local: Path
