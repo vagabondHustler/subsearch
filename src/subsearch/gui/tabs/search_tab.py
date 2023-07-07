@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA
+from subsearch.data import gui
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
@@ -9,11 +9,11 @@ from subsearch.utils import io_json
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Search providers")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.rownum = 0
         self.colnum = 2
@@ -30,7 +30,7 @@ class Providers(tk.Frame):
                 self.rownum += 1
                 self.colnum = 2
                 _lbl = tk.Label(self, text=lbl_txt)
-                _lbl.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+                _lbl.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
                 _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
             else:
                 self.rownum -= 1
@@ -73,25 +73,25 @@ class Providers(tk.Frame):
         key = btn["text"].replace(" ", "_").lower()
         if self.data["providers"][key] is True:
             self.data["providers"][key] = False
-            btn.configure(fg=GUI_DATA.colors.red)
+            btn.configure(fg=gui.colors.red)
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
-            btn.configure(fg=GUI_DATA.colors.green)
+            btn.configure(fg=gui.colors.green)
         io_json.set_json_data(self.data)
 
 
 class SubtitleType(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.subtitle_type = io_json.get_json_key("subtitle_type")
         self.string_var = tk.StringVar()
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Subtitle type")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
+        self.clabel.configure(bg=gui.colors.dark_grey, font=gui.fonts.cas8b)
         self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.sub_type_txt()
         gui_toolkit.VarColorPicker(self.string_var, self.clabel)
@@ -150,17 +150,17 @@ class SubtitleType(tk.Frame):
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.pct_threashold = io_json.get_json_key("percentage_threshold")
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{self.pct_threashold} %")
         label = tk.Label(self, text="Search threshold")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=0, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
+        self.clabel.configure(bg=gui.colors.dark_grey, font=gui.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
         gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
         x, y = gui_toolkit.calculate_btn_size(self, 36)
