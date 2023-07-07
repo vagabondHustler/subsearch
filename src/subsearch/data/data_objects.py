@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
+$from typing import Literal
 
 
-@dataclass(order=True, slots=True)
+@dataclass(order=True)
 class LanguageData:
     name: str
     alpha_1: str
@@ -114,7 +115,7 @@ class SubsceneCookie:
     dark_theme: bool
     sort_subtitle_by_date: str
     language_filter: int
-    hearing_impaired: bool
+    hearing_impaired: int
     foreigen_only: bool
 
 
@@ -211,7 +212,7 @@ class PrettifiedDownloadData:
     formatted_url: str
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, frozen=True)
 class GUISizes:
     """
     Sub dataclass containing sizes for the GUI
@@ -221,7 +222,7 @@ class GUISizes:
     root_height: int = 720
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, frozen=True)
 class GUIPositions:
     """
     Sub dataclass containing sizes for the GUI
@@ -232,7 +233,7 @@ class GUIPositions:
     content_hidden_x: int = int(GUISizes().root_width * 2)
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, frozen=True)
 class GUIColors:
     """
     Sub dataclass containing colors for the GUI
@@ -283,7 +284,7 @@ class GUIColors:
     dark_black: str = "#000000"
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, frozen=True)
 class GUIFonts:
     """
     Sub dataclass containing fonts and their styles and or size
@@ -307,7 +308,7 @@ class GUIFonts:
     cas20b: str = "Cascadia 20 bold"
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, frozen=True)
 class GUIData:
     """
     Dataclass containing GUI data
@@ -319,7 +320,7 @@ class GUIData:
     colors = GUIColors
 
 
-GUI_DATA = GUIData()
+gui = GUIData()
 
 SUPPORTED_FILE_EXTENSIONS = [
     ".avi",
