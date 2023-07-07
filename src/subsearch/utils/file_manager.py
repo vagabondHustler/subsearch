@@ -4,7 +4,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-from subsearch.data import __guid__, app_paths, video_data
+from subsearch.data import __guid__, video_data
 from subsearch.data.data_objects import DownloadData
 from subsearch.providers.generic import get_cloudscraper
 from subsearch.utils import log, string_parser
@@ -79,7 +79,7 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     """
     if video_data is None:
         return None
-    best_match = (0, "")
+    best_match = (0, Path())
     for file in Path(video_data.subs_directory).glob(f"*{extension}"):
         value = string_parser.calculate_match(file.name, release_name)
         if value >= best_match[0]:

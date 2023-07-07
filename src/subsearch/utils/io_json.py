@@ -154,7 +154,7 @@ def get_language_data(language: str = "default") -> LanguageData:
 
 def get_language_data_value(key: str):
     data = get_language_data()
-    return data[key]
+    return data.__dict__[key]
 
 
 def get_available_languages() -> dict:

@@ -105,7 +105,7 @@ def output_parameters() -> None:
     Returns:
         None
     """
-    data = {
+    data: dict = {
         "User data": [
             {"Language": f"{language_data.name}, {language_data.alpha_1}, {language_data.alpha_2b}"},
             {"Use HI subtitle": app_config.hearing_impaired},
