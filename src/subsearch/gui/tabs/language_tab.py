@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA
+from subsearch.data import gui
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
@@ -9,7 +9,7 @@ from subsearch.utils import io_json
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1
