@@ -4,7 +4,7 @@ from tkinter import Tk
 from subsearch.data import app_paths
 
 
-def get_spritesheet_data() -> dict[str, tuple[int, int, int, int]]:
+def get_spritesheet_data() -> dict:
     pattern = r"\b(\w+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\b"
     data = {}
     file_path = app_paths.gui_app_theme / "spritesheet_data.tcl"
