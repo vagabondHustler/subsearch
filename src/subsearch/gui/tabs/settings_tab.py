@@ -2,7 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA, __version__
+from subsearch.data import gui, __version__
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json, update
 
@@ -10,7 +10,7 @@ from subsearch.utils import io_json, update
 class FileExtensions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.data = io_json.get_json_data()
         self.file_extensions = io_json.get_json_key("file_extensions")
         number_of_buttons = len(self.file_extensions.items())
@@ -142,8 +142,8 @@ class MultipleAppInstances(gui_toolkit.ToggleableFrameButton):
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.latest_version = None
+        self.configure(bg=gui.colors.dark_grey)
+        self.latest_version = ""
         self.btn_search = ttk.Button(
             self,
             text="Search for updates",
