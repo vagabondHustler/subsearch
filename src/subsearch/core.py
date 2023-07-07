@@ -31,6 +31,7 @@ class Initializer:
             self.downloads[provider] = 0
 
         self.ran_download_tab = False
+        self.skip_step = SkipStep(self)
         if self.file_exist:
             self.release_data = string_parser.get_release_metadata(video_data.filename, self.file_hash)
             create_provider_urls = string_parser.CreateProviderUrls(
@@ -75,7 +76,6 @@ class AppSteps(Initializer):
 
         if " " in video_data.filename:
             log.warning_spaces_in_filename()
-        self.skip_step = SkipStep(self)
         log.output_header("Search started")
 
     def _provider_opensubtitles(self) -> None:
