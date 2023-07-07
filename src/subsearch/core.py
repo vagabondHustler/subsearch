@@ -1,6 +1,7 @@
 import ctypes
 import time
 
+
 from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
@@ -38,7 +39,6 @@ class Initializer:
             self.downloads[provider] = 0
 
         self.ran_download_tab = False
-        self.skip_step = SkipStep(self)
         if self.file_exist:
             self.release_data = string_parser.get_release_metadata(video_data.filename, self.file_hash)
             create_provider_urls = string_parser.CreateProviderUrls(
@@ -76,11 +76,6 @@ class AppSteps(Initializer):
         self.start = time.perf_counter()
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
-            io_json.create_application_config_json()
-            io_winreg.add_context_menu()
-        if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_json_key("context_menu"):
-            io_winreg.add_context_menu()
         if self.file_exist is False:
             tab_manager.open_tab("search")
             return None
@@ -88,6 +83,7 @@ class AppSteps(Initializer):
 
         if " " in video_data.filename:
             log.warning_spaces_in_filename()
+        self.skip_step = SkipStep(self)
         log.output_header("Search started")
 
     def _provider_opensubtitles(self) -> None:
@@ -179,7 +175,7 @@ class AppSteps(Initializer):
 
 
 class SkipStep:
-    def __init__(self, cls: "AppSteps"):
+    def __init__(self, cls: AppSteps):
         self.cls = cls
 
     def opensubtitles(self) -> bool:
