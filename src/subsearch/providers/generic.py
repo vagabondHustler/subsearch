@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal
 
 import cloudscraper
@@ -19,7 +20,7 @@ class CustomSubsceneHeader:
     def __init__(self, app_config: AppConfig) -> None:
         self.app_config = app_config
 
-    def _get_hearing_impaired_int(self) -> Literal[2, 1, 0]:
+    def _get_hearing_impaired_int(self) -> int:
         if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired:
             value = 0
         if self.app_config.hearing_impaired and not self.app_config.non_hearing_impaired:
@@ -133,7 +134,7 @@ def get_html_parser(url: str, header_=None):
     return HTMLParser(response.text)
 
 
-def create_download_data(provider: str, tmp_directory: str, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
+def create_download_data(provider: str, tmp_directory: Path, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
     """
     Creates a list of data for each downloaded file.
 
