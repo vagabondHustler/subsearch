@@ -179,7 +179,7 @@ class AppSteps(Initializer):
 
 
 class SkipStep:
-    def __init__(self, cls):
+    def __init__(self, cls: "AppSteps"):
         self.cls = cls
 
     def opensubtitles(self) -> bool:
