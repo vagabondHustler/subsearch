@@ -1,19 +1,11 @@
 import ctypes
 import time
 
-
 from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    app_integrity,
-    file_manager,
-    io_json,
-    io_winreg,
-    log,
-    string_parser,
-)
+from subsearch.utils import app_integrity, file_manager, io_json, log, string_parser
 
 
 class Initializer:
