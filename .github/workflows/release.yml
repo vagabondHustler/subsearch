@@ -279,12 +279,10 @@ jobs:
         id: hashes
         run: |
           $filenames = @(
-            "tox.ini"
-            "tox.ini"
           )
 
           $hashAlgorithm = "SHA256"
-          $targetFilePath = "hashes.256"
+          $targetFilePath = "hashes.sha256"
 
           foreach ($filename in $filenames) {
             $filePath = $filename
@@ -294,11 +292,11 @@ jobs:
             $line | Out-File -FilePath $targetFilePath -Append
           }
 
-      - name: Upload hashes256 artifact
+      - name: Upload hashes artifact
         uses: actions/upload-artifact@v3
         with:
-          name: hashes.256
-          path: hashes.256
+          name: hashes.sha256
+          path: hashes.sha256
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
@@ -309,7 +307,7 @@ jobs:
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
-            hashes.256
+            hashes.sha256
             Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
 
   publish_pypi:
