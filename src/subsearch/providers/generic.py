@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Literal
 
 import cloudscraper
 from selectolax.parser import HTMLParser

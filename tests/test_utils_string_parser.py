@@ -38,10 +38,10 @@ def test_string_parser_movie() -> None:
 
     assert release_metadata.title == "the foo bar"
     assert release_metadata.year == 2021
-    assert release_metadata.season == "N/A"
-    assert release_metadata.season_ordinal == "N/A"
-    assert release_metadata.episode == "N/A"
-    assert release_metadata.episode_ordinal == "N/A"
+    assert release_metadata.season == ""
+    assert release_metadata.season_ordinal == ""
+    assert release_metadata.episode == ""
+    assert release_metadata.episode_ordinal == ""
     assert release_metadata.tvseries is False
     assert release_metadata.release == "the.foo.bar.2021.1080p.web.h264-foobar"
     assert release_metadata.group == "foobar"
@@ -74,10 +74,10 @@ def test_string_parser_bad_filename() -> None:
 
     assert release_metadata.title == "the foo bar 1080p web h264"
     assert release_metadata.year == 0
-    assert release_metadata.season == "N/A"
-    assert release_metadata.season_ordinal == "N/A"
-    assert release_metadata.episode == "N/A"
-    assert release_metadata.episode_ordinal == "N/A"
+    assert release_metadata.season == ""
+    assert release_metadata.season_ordinal == ""
+    assert release_metadata.episode == ""
+    assert release_metadata.episode_ordinal == ""
     assert release_metadata.tvseries is False
     assert release_metadata.release == "the foo bar 1080p web h264"
     assert release_metadata.group == "the foo bar 1080p web h264"
@@ -103,7 +103,7 @@ def test_provider_urls_movie():
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
     )
     assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
-    assert provider_url.yifysubtitles == "N/A"
+    assert provider_url.yifysubtitles == ""
 
 
 def test_provider_urls_series():
@@ -125,7 +125,7 @@ def test_provider_urls_series():
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
     )
     assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
-    assert provider_url.yifysubtitles == "N/A"
+    assert provider_url.yifysubtitles == ""
 
 
 def test_imdb_tt_id():

@@ -1,11 +1,11 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import gui, __version__, app_paths
+from subsearch.data import gui, __version__
 from subsearch.data.data_objects import PrettifiedDownloadData
 from subsearch.gui import gui_toolkit, root
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
-from subsearch.utils import debug, file_manager, io_json, io_winreg
+from subsearch.utils import file_manager
 
 
 class TabManager(tk.Frame):
@@ -61,7 +61,7 @@ class TabManager(tk.Frame):
     def activate_tabs(self) -> None:
         self.tabs[self.active_tab].place(x=gui.pos.content_x, y=gui.pos.content_y, anchor="center")
         gui_toolkit.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
-        self.parent.title(f"Subsearch {__version__} - {self.active_tab} tab")
+        self.parent.title(f"Subsearch {__version__} - {self.active_tab.capitalize()} tab")
 
     def release_tab(self, event) -> None:
         btn_key, _btn_widget = self.get_btn(self.buttons, event)
@@ -157,6 +157,7 @@ def open_tab(active_tab: str, **kwargs) -> None:
         data: list[PrettifiedDownloadData] = kwargs["data"]
     except KeyError:
         data = []
+    root
     gui_toolkit.configure_root(root)
     gui_toolkit.set_ttk_theme(root)
     gui_toolkit.set_custom_btn_styles()
