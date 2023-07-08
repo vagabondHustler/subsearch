@@ -2,25 +2,21 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 
-class _Subsearch(Enum):
-    UNKNOWN = auto()
-    INITIALIZING = auto()
-    INITIALIZED = auto()
-    INITIALIZING_SEARCH = auto()
-    SUBSCENE_STARTED = auto()
-    OPENSUBS_STARTED = auto()
-    YIFYSUBS_STARTED = auto()
-    SUBSCENE_ENDED = auto()
-    OPENSUBS_ENDED = auto()
-    YIFYSUBS_ENDED = auto()
-    DOWNLOADING_FILES = auto()
-    EXTRACTING_FILES = auto()
-    CLEANING_UP = auto()
-    EXITING = auto()
-    NO_FILE_FOUND = auto()
+class CoreEnum(Enum):
+    UNKNOWN = "unknown"
+    INITIALIZING = "initializing"
+    INITIALIZED = "initialized"
+    SCRAPING_SUBSCENE = "scraping_subscene"
+    SCRAPING_OPENSUBTITLES = "scraping_opensubtitles"
+    SCRAPING_YIFYSUBTITLES = "scraping_yifysubtitles"
+    DOWNLOADING_FILES = "downloading_files"
+    EXTRACTING_FILES = "extracting_files"
+    CLEANING_UP = "cleaning_up"
+    EXITING = "exiting"
+    NO_FILE_FOUND = "no_file_found"
 
 
-class StateHelper:
+class State:
     previous_states: list[Enum] = []
 
     @classmethod
@@ -36,33 +32,25 @@ class StateHelper:
         return self.__state
 
     @property
-    def search_ran(self) -> bool:
-        providers_ended = [_Subsearch.SUBSCENE_ENDED, _Subsearch.OPENSUBS_ENDED, _Subsearch.YIFYSUBS_ENDED]
-        if _Subsearch.INITIALIZING not in self.previous_states:
-            return False
-        elif any(provider in self.previous_states for provider in providers_ended):
-            return _Subsearch.SEARCHING in self.previous_states
-        return False
+    def ran_scrape(self) -> bool:
+        scraped = [CoreEnum.SCRAPING_SUBSCENE, CoreEnum.SCRAPING_OPENSUBTITLES, CoreEnum.SCRAPING_YIFYSUBTITLES]
+        return any(provider in self.previous_states for provider in scraped)
 
     @property
     def file_exist(self) -> bool:
-        return _Subsearch.NO_FILE_FOUND not in self.previous_states
+        return CoreEnum.NO_FILE_FOUND not in self.previous_states
 
 
 @dataclass(frozen=True, order=True)
-class Subsearch(StateHelper):
-    UNKNOWN: _Subsearch = _Subsearch.UNKNOWN
-    INITIALIZING: _Subsearch = _Subsearch.INITIALIZING
-    INITIALIZED: _Subsearch = _Subsearch.INITIALIZED
-    INITIALIZING_SEARCH: _Subsearch = _Subsearch.INITIALIZING_SEARCH
-    SUBSCENE_STARTED: _Subsearch = _Subsearch.SUBSCENE_STARTED
-    OPENSUBS_STARTED: _Subsearch = _Subsearch.OPENSUBS_STARTED
-    YIFYSUBS_STARTED: _Subsearch = _Subsearch.YIFYSUBS_STARTED
-    SUBSCENE_ENDED: _Subsearch = _Subsearch.SUBSCENE_ENDED
-    OPENSUBS_ENDED: _Subsearch = _Subsearch.OPENSUBS_ENDED
-    YIFYSUBS_ENDED: _Subsearch = _Subsearch.YIFYSUBS_ENDED
-    DOWNLOADING_FILES: _Subsearch = _Subsearch.DOWNLOADING_FILES
-    EXTRACTING_FILES: _Subsearch = _Subsearch.EXTRACTING_FILES
-    CLEANING_UP: _Subsearch = _Subsearch.CLEANING_UP
-    EXITING: _Subsearch = _Subsearch.EXITING
-    NO_FILE_FOUND: _Subsearch = _Subsearch.NO_FILE_FOUND
+class CoreState(State):
+    unknown: CoreEnum = CoreEnum.UNKNOWN
+    initializing: CoreEnum = CoreEnum.INITIALIZING
+    initialized: CoreEnum = CoreEnum.INITIALIZED
+    scraping_subscene: CoreEnum = CoreEnum.SCRAPING_SUBSCENE
+    scraping_opensubtitles: CoreEnum = CoreEnum.SCRAPING_OPENSUBTITLES
+    scraping_yifysubtitles: CoreEnum = CoreEnum.SCRAPING_YIFYSUBTITLES
+    downloading_files: CoreEnum = CoreEnum.DOWNLOADING_FILES
+    extracting_files: CoreEnum = CoreEnum.EXTRACTING_FILES
+    cleaning_up: CoreEnum = CoreEnum.CLEANING_UP
+    exiting: CoreEnum = CoreEnum.EXITING
+    no_file_found: CoreEnum = CoreEnum.NO_FILE_FOUND
