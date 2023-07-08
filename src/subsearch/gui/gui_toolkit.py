@@ -3,7 +3,7 @@ from tkinter import Label, StringVar, ttk
 
 from PIL import Image, ImageTk
 
-from subsearch.data import gui, __version__, app_paths
+from subsearch.data import __version__, app_paths, gui
 from subsearch.gui import spritesheet_data
 from subsearch.utils import file_manager, io_json, io_winreg
 
@@ -305,26 +305,24 @@ class ToggleableFrameButton(tk.Frame):
 
     Args:
         parent (tk.Widget): The parent widget.
-        setting_label (str): Name of the setting to be displayeed.
+        setting_label (str): Name of the setting to be displayed.
         config_key (str): Key in the configuration file where the state is stored.
         write_to_reg (bool, optional): Whether to also write the state to registry. Defaults to False.
         show_if_exe (bool, optional): Only show the button if the program is not running from an executable. Defaults to True.
     """
 
-    def __init__(
-        self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True, tip_text=None
-    ) -> None:
+    def __init__(self, parent, setting_label: str, config_key: str, **kwargs) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=gui.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{io_json.get_json_key(config_key)}")
         self.setting_name = setting_label
         self.config_key = config_key
-        self.write_to_reg = write_to_reg
-        self.show_if_exe = show_if_exe
-        self.tip_text = tip_text
+        self.write_to_reg = kwargs.get("write_to_reg", False)
+        self.show_if_exe = kwargs.get("write_to_reg", True)
+        self.tip_text = kwargs.get("tip_text", None)
         self.tip_present = False
-        if show_if_exe is False and file_manager.running_from_exe():
+        if self.show_if_exe is False and file_manager.running_from_exe():
             return None
         label = tk.Label(self, text=self.setting_name)
         label.configure(DEFAULT_LABEL_CONFIG)
