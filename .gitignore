@@ -164,3 +164,7 @@ src/*subs/
 old*
 src/subsearch/test*
 test_media/*
+scripts/spritesheet_generator
+scripts/gpt_commit
+scripts/commit_generator/
+out/

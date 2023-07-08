@@ -1,33 +1,30 @@
 import tkinter as tk
-from pathlib import Path
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import GUI_DATA, __version__, app_paths
+from PIL import Image, ImageTk
+
+from subsearch.data import gui, __version__, app_paths
+from subsearch.gui import spritesheet_data
 from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOOLWINDOW = 0x00000080
 
-DEFAULT_LABEL_CONFIG = dict(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+DEFAULT_LABEL_CONFIG = dict(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
 DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
 DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 
 
-def get_tab_png(tab: str) -> Path:
-    """
-    Get the path of the PNG file for a given tab.
-
-    Args:
-        tab (str): The name of the tab.
-
-    Returns:
-        Path: The path of the PNG file for the specified tab.
-
-    Raises:
-        None.
-    """
-    return Path(app_paths.tabs) / tab
+def get_sprite(sprite_name):
+    spritesheet_path = app_paths.gui_assets / "spritesheet.png"
+    spritesheet_image = Image.open(spritesheet_path)
+    sprite_x = spritesheet_data[sprite_name][0]
+    sprite_y = spritesheet_data[sprite_name][1]
+    sprite_width = spritesheet_data[sprite_name][2]
+    sprite_height = spritesheet_data[sprite_name][3]
+    sprite = spritesheet_image.crop((sprite_x, sprite_y, sprite_x + sprite_width, sprite_y + sprite_height))
+    return sprite
 
 
 def calculate_btn_size(cls, width_=18, height_=2) -> tuple[int, int]:
@@ -96,8 +93,8 @@ def asset_tab(cls, img, type, x=27, y=27) -> None:
         x (int, optional): The width of the image in pixels. Defaults to 27.
         y (int, optional): The height of the image in pixels. Defaults to 27.
     """
-    path = get_tab_png(f"{img}_{type}.png")
-    png = tk.PhotoImage(file=path)
+    path = get_sprite(f"{img}_{type}")
+    png = ImageTk.PhotoImage(path)
     update_asset(cls, png, x, y)
 
 
@@ -132,8 +129,8 @@ def set_custom_btn_styles() -> None:
     """
 
     custom_style = ttk.Style()
-    custom_style.configure("True.TButton", foreground=GUI_DATA.colors.green)
-    custom_style.configure("False.TButton", foreground=GUI_DATA.colors.red)
+    custom_style.configure("True.TButton", foreground=gui.colors.green)
+    custom_style.configure("False.TButton", foreground=gui.colors.red)
 
 
 class WindowPosition(tk.Frame):
@@ -167,8 +164,8 @@ class WindowPosition(tk.Frame):
 
     def set(
         self,
-        w=GUI_DATA.size.root_width,
-        h=GUI_DATA.size.root_height,
+        w=gui.size.root_width,
+        h=gui.size.root_height,
         ws_value_offset=0,
         hs_value_offset=0,
         other: bool = False,
@@ -223,24 +220,24 @@ class VarColorPicker:
 
     def pick(self) -> None:
         if self.string_var.get() == "True":
-            self.clabel.configure(fg=GUI_DATA.colors.green)
+            self.clabel.configure(fg=gui.colors.green)
         elif self.string_var.get() == "False":
-            self.clabel.configure(fg=GUI_DATA.colors.red)
+            self.clabel.configure(fg=gui.colors.red)
         elif self.string_var.get() == "Both":
-            self.clabel.configure(fg=GUI_DATA.colors.blue)
+            self.clabel.configure(fg=gui.colors.blue)
         elif self.string_var.get().startswith("Only"):
-            self.clabel.configure(fg=GUI_DATA.colors.green)
+            self.clabel.configure(fg=gui.colors.green)
 
         if self.is_pct:
             _pct = io_json.get_json_key("percentage_threshold")
             if _pct in range(75, 101):
-                self.clabel.configure(fg=GUI_DATA.colors.green)
+                self.clabel.configure(fg=gui.colors.green)
             elif _pct in range(50, 75):
-                self.clabel.configure(fg=GUI_DATA.colors.green_brown)
+                self.clabel.configure(fg=gui.colors.green_brown)
             elif _pct in range(25, 50):
-                self.clabel.configure(fg=GUI_DATA.colors.red_brown)
+                self.clabel.configure(fg=gui.colors.red_brown)
             elif _pct in range(0, 25):
-                self.clabel.configure(fg=GUI_DATA.colors.red)
+                self.clabel.configure(fg=gui.colors.red)
 
 
 class ToolTip(tk.Toplevel):
@@ -257,7 +254,7 @@ class ToolTip(tk.Toplevel):
         show(): Creates and displays a toplevel widget containing the text to be displayed in the tooltip
     """
 
-    def __init__(self, parent, _widget, *_text, _background=GUI_DATA.colors.light_black):
+    def __init__(self, parent, _widget, *_text, _background=gui.colors.light_black):
         self.parent = parent
         self.widget = _widget
         self.text = _text
@@ -265,17 +262,17 @@ class ToolTip(tk.Toplevel):
 
     def show(self) -> None:
         tk.Toplevel.__init__(self, self.parent)
-        self.configure(background=GUI_DATA.colors.light_black)
+        self.configure(background=gui.colors.light_black)
         # remove the standard window titlebar from the tooltip
         self.overrideredirect(True)
         # unpack *args and put each /n on a new line
         lines = "\n".join(self.text)
-        frame = tk.Frame(self, background=GUI_DATA.colors.light_black)
+        frame = tk.Frame(self, background=gui.colors.light_black)
         label = tk.Label(
             frame,
             text=lines,
             background=self.background,
-            foreground=GUI_DATA.colors.white_grey,
+            foreground=gui.colors.white_grey,
             justify="left",
         )
         # get size of the label to use later for positioning and sizing of the tooltip
@@ -318,7 +315,7 @@ class ToggleableFrameButton(tk.Frame):
         self, parent, setting_label: str, config_key: str, write_to_reg: bool = False, show_if_exe=True, tip_text=None
     ) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{io_json.get_json_key(config_key)}")
         self.setting_name = setting_label
@@ -402,3 +399,24 @@ class ToggleableFrameButton(tk.Frame):
         if self.write_to_reg:
             io_winreg.remove_context_menu()
         self.enter_button(event)
+
+
+def set_ttk_theme(root):
+    initializer_tcl = app_paths.gui_app_theme / "ttk_theme_initializer.tcl"
+    root.tk.call("source", str(initializer_tcl))
+    root.tk.call("set_theme")
+
+
+def configure_root(root):
+    """
+    Initialize the root Tkinter window for the Subsearch application.
+
+    Returns:
+        tk.Tk: The initialized Tkinter root window.
+    """
+    if io_json.get_json_key("context_menu"):
+        io_winreg.add_context_menu()
+    root.configure(background=gui.colors.dark_grey)
+    root.iconbitmap(app_paths.gui_assets / "subsearch.ico")
+    root.geometry(WindowPosition.set(root))  # type: ignore
+    root.resizable(False, False)

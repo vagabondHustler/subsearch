@@ -1,19 +1,19 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA
-from subsearch.gui import tkinter_utils
+from subsearch.data import gui
+from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
 
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Search providers")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.rownum = 0
         self.colnum = 2
@@ -30,7 +30,7 @@ class Providers(tk.Frame):
                 self.rownum += 1
                 self.colnum = 2
                 _lbl = tk.Label(self, text=lbl_txt)
-                _lbl.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+                _lbl.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
                 _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
             else:
                 self.rownum -= 1
@@ -44,7 +44,7 @@ class Providers(tk.Frame):
 
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
-        tkinter_utils.set_default_grid_size(self)
+        gui_toolkit.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -73,28 +73,28 @@ class Providers(tk.Frame):
         key = btn["text"].replace(" ", "_").lower()
         if self.data["providers"][key] is True:
             self.data["providers"][key] = False
-            btn.configure(fg=GUI_DATA.colors.red)
+            btn.configure(fg=gui.colors.red)
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
-            btn.configure(fg=GUI_DATA.colors.green)
+            btn.configure(fg=gui.colors.green)
         io_json.set_json_data(self.data)
 
 
 class SubtitleType(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.subtitle_type = io_json.get_json_key("subtitle_type")
         self.string_var = tk.StringVar()
         self.data = io_json.get_json_data()
         label = tk.Label(self, text="Subtitle type")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
+        self.clabel.configure(bg=gui.colors.dark_grey, font=gui.fonts.cas8b)
         self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.sub_type_txt()
-        tkinter_utils.VarColorPicker(self.string_var, self.clabel)
+        gui_toolkit.VarColorPicker(self.string_var, self.clabel)
         self.rownum = 0
         self.colnum = 2
         self.checkbox_values = {}
@@ -114,7 +114,7 @@ class SubtitleType(tk.Frame):
             self.checkbox_values[btn] = key, valuevar
 
             btn.bind("<Enter>", self.enter_button)
-            tkinter_utils.set_default_grid_size(self)
+            gui_toolkit.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -144,31 +144,31 @@ class SubtitleType(tk.Frame):
             self.string_var.set(f"Only HI")
         if hi_sub is False and nonhi_sub:
             self.string_var.set(f"Only non-HI")
-        tkinter_utils.VarColorPicker(self.string_var, self.clabel)
+        gui_toolkit.VarColorPicker(self.string_var, self.clabel)
 
 
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.pct_threashold = io_json.get_json_key("percentage_threshold")
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{self.pct_threashold} %")
         label = tk.Label(self, text="Search threshold")
-        label.configure(bg=GUI_DATA.colors.dark_grey, fg=GUI_DATA.colors.white_grey, font=GUI_DATA.fonts.cas8b)
+        label.configure(bg=gui.colors.dark_grey, fg=gui.colors.white_grey, font=gui.fonts.cas8b)
         label.grid(row=0, column=0, sticky="w", padx=0, pady=2)
         self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=GUI_DATA.colors.dark_grey, font=GUI_DATA.fonts.cas8b)
+        self.clabel.configure(bg=gui.colors.dark_grey, font=gui.fonts.cas8b)
         self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
-        x, y = tkinter_utils.calculate_btn_size(self, 36)
+        gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
+        x, y = gui_toolkit.calculate_btn_size(self, 36)
         self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x - 2)
         self.slider.grid(column=2, row=0, sticky="we", padx=4)
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
-        tkinter_utils.set_default_grid_size(self)
+        gui_toolkit.set_default_grid_size(self)
 
     def get_value(self):
         return self.current_value.get()
@@ -210,10 +210,10 @@ class SearchThreshold(tk.Frame):
     def update_config(self) -> None:
         update_svar = self.current_value.get()
         io_json.set_config_key_value("percentage_threshold", update_svar)
-        tkinter_utils.VarColorPicker(self.string_var, self.clabel, True)
+        gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
 
 
-class ForeignOnly(tkinter_utils.ToggleableFrameButton):
+class ForeignOnly(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -222,10 +222,10 @@ class ForeignOnly(tkinter_utils.ToggleableFrameButton):
 
     def __init__(self, parent) -> None:
         text = f"If 'True', 'OpenSubtitles, Yifysubtitles' will be automatically skipped."
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only", tip_text=text)
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only", tip_text=text)
 
 
-class RenameBestMatch(tkinter_utils.ToggleableFrameButton):
+class RenameBestMatch(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -233,4 +233,4 @@ class RenameBestMatch(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")

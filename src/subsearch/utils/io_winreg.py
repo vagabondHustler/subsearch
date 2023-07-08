@@ -125,7 +125,7 @@ def get_icon_value() -> str:
 
     show_icon: str = io_json.get_json_key("context_menu_icon")
     if show_icon:
-        return str(app_paths.icon)
+        return str(app_paths.gui_assets / "subsearch.ico")
     else:
         return ""
 

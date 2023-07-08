@@ -5,14 +5,7 @@ from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui import tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    app_integrity,
-    file_manager,
-    io_json,
-    io_winreg,
-    log,
-    string_parser,
-)
+from subsearch.utils import app_integrity, file_manager, io_json, log, string_parser
 
 
 class Initializer:
@@ -76,11 +69,6 @@ class AppSteps(Initializer):
         self.start = time.perf_counter()
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
-        if io_winreg.registry_key_exists() is False and io_json.get_json_key("context_menu"):
-            io_json.create_application_config_json()
-            io_winreg.add_context_menu()
-        if io_winreg.registry_key_exists() and io_winreg.key_no_value() and io_json.get_json_key("context_menu"):
-            io_winreg.add_context_menu()
         if self.file_exist is False:
             tab_manager.open_tab("search")
             return None
@@ -137,7 +125,7 @@ class AppSteps(Initializer):
                 self.skipped_combined.append(data)
 
         if self.skipped_combined:
-            tab_manager.open_tab("download", formatted_data=self.skipped_combined)
+            tab_manager.open_tab("download", data=self.skipped_combined)
             self.ran_download_tab = True
         log.output_done_with_tasks(end_new_line=True)
 
@@ -179,7 +167,7 @@ class AppSteps(Initializer):
 
 
 class SkipStep:
-    def __init__(self, cls):
+    def __init__(self, cls: AppSteps):
         self.cls = cls
 
     def opensubtitles(self) -> bool:

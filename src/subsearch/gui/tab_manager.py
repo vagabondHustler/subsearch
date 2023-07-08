@@ -1,11 +1,11 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import GUI_DATA, __version__, app_paths
+from subsearch.data import gui, __version__, app_paths
 from subsearch.data.data_objects import PrettifiedDownloadData
-from subsearch.gui import set_theme, tkinter_utils
+from subsearch.gui import gui_toolkit, root
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab
-from subsearch.utils import file_manager, io_json, io_winreg
+from subsearch.utils import debug, file_manager, io_json, io_winreg
 
 
 class TabManager(tk.Frame):
@@ -35,10 +35,10 @@ class TabManager(tk.Frame):
 
     def __init__(self, parent, tabs: dict[str, Any], active_tab: str) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.mid_grey_black, width=GUI_DATA.size.root_width, height=82)
+        self.configure(bg=gui.colors.mid_grey_black, width=gui.size.root_width, height=82)
         relx_value = 0.0
         btn_kwargs: dict[str, Any] = dict(
-            master=self, width=54, height=54, bg=GUI_DATA.colors.mid_grey_black, highlightthickness=0
+            master=self, width=54, height=54, bg=gui.colors.mid_grey_black, highlightthickness=0
         )
         self.parent = parent
         self.tabs = tabs
@@ -52,15 +52,15 @@ class TabManager(tk.Frame):
             btn_widget.place(relx=relx_value, rely=0.5, anchor="center")
             btn_widget.bind("<Enter>", self.enter_tab)
             btn_widget.bind("<Leave>", self.leave_tab)
-            tkinter_utils.asset_tab(btn_widget, btn_key, "rest")
+            gui_toolkit.asset_tab(btn_widget, btn_key, "rest")
 
-        tkinter_utils.set_default_grid_size(self)
+        gui_toolkit.set_default_grid_size(self)
         self.active_tab = active_tab
         self.activate_tabs()
 
     def activate_tabs(self) -> None:
-        self.tabs[self.active_tab].place(x=GUI_DATA.pos.content_x, y=GUI_DATA.pos.content_y, anchor="center")
-        tkinter_utils.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
+        self.tabs[self.active_tab].place(x=gui.pos.content_x, y=gui.pos.content_y, anchor="center")
+        gui_toolkit.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
         self.parent.title(f"Subsearch {__version__} - {self.active_tab} tab")
 
     def release_tab(self, event) -> None:
@@ -72,24 +72,24 @@ class TabManager(tk.Frame):
     def press_tab(self, event) -> None:
         btn_key, btn_widget = self.get_btn(self.buttons, event, False)
         btn_widget.bind("<ButtonRelease>", self.release_tab)
-        tkinter_utils.asset_tab(btn_widget, btn_key, "press", y=20)
+        gui_toolkit.asset_tab(btn_widget, btn_key, "press", y=20)
 
     def deactivate_tabs(self) -> None:
         for btn_key, btn_widget in self.buttons.items():
             if self.active_tab == btn_key:
                 continue
-            self.tabs[btn_key].place(x=GUI_DATA.pos.content_hidden_x, y=GUI_DATA.pos.content_y, anchor="nw")
-            tkinter_utils.asset_tab(btn_widget, btn_key, "rest")
+            self.tabs[btn_key].place(x=gui.pos.content_hidden_x, y=gui.pos.content_y, anchor="nw")
+            gui_toolkit.asset_tab(btn_widget, btn_key, "rest")
 
     def enter_tab(self, event) -> None:
         _btn_key, btn_widget = self.get_btn(self.buttons, event)
         btn_widget.bind("<ButtonPress>", self.press_tab)
+        gui_toolkit.asset_tab(self.buttons[_btn_key], _btn_key, "hover")
 
     def leave_tab(self, event) -> None:
         _btn_key, btn_value = self.get_btn(self.buttons, event)
         btn_value.unbind("<ButtonPress>")
-        self.activate_tabs()
-        self.deactivate_tabs()
+        gui_toolkit.asset_tab(self.buttons[_btn_key], _btn_key, "rest" if _btn_key != self.active_tab else "press")
 
     def get_btn(self, dict_, event_, equals=True):
         for btn_key, btn_widget in dict_.items():
@@ -101,17 +101,17 @@ class TabManager(tk.Frame):
 
 class TabLanguage(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        tk.Frame.__init__(self, parent, width=gui.size.root_width, height=gui.size.root_height)
+        self.configure(bg=gui.colors.dark_grey)
         language_tab.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
 class TabSearch(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        tk.Frame.__init__(self, parent, width=gui.size.root_width, height=gui.size.root_height)
+        self.configure(bg=gui.colors.dark_grey)
         search_tab.Providers(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=gui.colors.dark_grey).pack(anchor="center", expand=True)
         search_tab.SubtitleType(self).pack(anchor="center")
         search_tab.SearchThreshold(self).pack(anchor="center")
         search_tab.ForeignOnly(self).pack(anchor="center")
@@ -120,10 +120,10 @@ class TabSearch(tk.Frame):
 
 class TabSettings(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        tk.Frame.__init__(self, parent, width=gui.size.root_width, height=gui.size.root_height)
+        self.configure(bg=gui.colors.dark_grey)
         settings_tab.FileExtensions(self).pack(anchor="center")
-        tk.Frame(self, height=80, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=gui.colors.dark_grey).pack(anchor="center", expand=True)
         settings_tab.ShowContextMenu(self).pack(anchor="center")
         settings_tab.ShowContextMenuIcon(self).pack(anchor="center")
         settings_tab.ShowDownloadWindow(self).pack(anchor="center")
@@ -132,14 +132,14 @@ class TabSettings(tk.Frame):
         settings_tab.LogToFile(self).pack(anchor="center")
         if file_manager.running_from_exe() is False:
             settings_tab.ShowTerminalOnSearch(self).pack(anchor="center")
-        tk.Frame(self, height=20, bg=GUI_DATA.colors.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=20, bg=gui.colors.dark_grey).pack(anchor="center", expand=True)
         settings_tab.CheckForUpdates(self).pack(anchor="center")
 
 
 class TabDownload(tk.Frame):
     def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
-        tk.Frame.__init__(self, parent, width=GUI_DATA.size.root_width, height=GUI_DATA.size.root_height)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        tk.Frame.__init__(self, parent, width=gui.size.root_width, height=gui.size.root_height)
+        self.configure(bg=gui.colors.dark_grey)
         dowload_tab.DownloadList(self, formatted_data).pack(anchor="center")
 
 
@@ -149,44 +149,23 @@ def open_tab(active_tab: str, **kwargs) -> None:
 
     Args:
         active_tab (str): A string representing which tab to activate.
-        **kwargs: Arbitrary keyword arguments that should contain "formatted_data",
-                  a list of FormattedMetadata.
 
     Returns:
         None: This function does not return anything, it manipulates the GUI instead.
     """
     try:
-        formatted_data: list[PrettifiedDownloadData] = kwargs["formatted_data"]
+        data: list[PrettifiedDownloadData] = kwargs["data"]
     except KeyError:
-        formatted_data = None  # type: ignore
-    root = initialize_root()
-    set_theme("dark")
-    tkinter_utils.set_custom_btn_styles()
+        data = []
+    gui_toolkit.configure_root(root)
+    gui_toolkit.set_ttk_theme(root)
+    gui_toolkit.set_custom_btn_styles()
     tabs = {
         "language": TabLanguage(root),
         "search": TabSearch(root),
         "settings": TabSettings(root),
-        "download": TabDownload(root, formatted_data),
+        "download": TabDownload(root, data),
     }
     footer = TabManager(root, tabs, active_tab.lower())
-    footer.place(y=GUI_DATA.size.root_height - 82)
+    footer.place(y=gui.size.root_height - 82)
     root.mainloop()
-
-
-def initialize_root():
-    """
-    Initialize the root Tkinter window for the Subsearch application.
-
-    Returns:
-        tk.Tk: The initialized Tkinter root window.
-    """
-    if io_json.APPCON_JSON.exists() is False:
-        io_json.create_application_config_json()
-    if io_json.get_json_key("context_menu"):
-        io_winreg.add_context_menu()
-    root = tk.Tk(className=f"Subsearch")
-    root.configure(background=GUI_DATA.colors.dark_grey)
-    root.iconbitmap(app_paths.icon)
-    root.geometry(tkinter_utils.WindowPosition.set(root))  # type: ignore
-    root.resizable(False, False)
-    return root

@@ -2,21 +2,21 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from subsearch.data import GUI_DATA, __version__
-from subsearch.gui import tkinter_utils
+from subsearch.data import gui, __version__
+from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json, update
 
 
 class FileExtensions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
+        self.configure(bg=gui.colors.dark_grey)
         self.data = io_json.get_json_data()
         self.file_extensions = io_json.get_json_key("file_extensions")
         number_of_buttons = len(self.file_extensions.items())
         label = tk.Label(self, text="File extensions")
-        label.configure(tkinter_utils.DEFAULT_LABEL_CONFIG)
-        label.grid(tkinter_utils.DEFAULT_LABEL_GRID)
+        label.configure(gui_toolkit.DEFAULT_LABEL_CONFIG)
+        label.grid(gui_toolkit.DEFAULT_LABEL_GRID)
         self.rownum = 0
         self.colnum = 0
         self.checkbox_value = {}
@@ -34,7 +34,7 @@ class FileExtensions(tk.Frame):
             btn.grid(row=self.rownum, column=self.colnum, pady=2)
             self.checkbox_value[btn] = key, valuevar
             btn.bind("<Enter>", self.enter_button)
-        tkinter_utils.set_default_grid_size(self)
+        gui_toolkit.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -62,7 +62,7 @@ class FileExtensions(tk.Frame):
         io_winreg.write_all_valuex()
 
 
-class ShowContextMenu(tkinter_utils.ToggleableFrameButton):
+class ShowContextMenu(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -70,10 +70,10 @@ class ShowContextMenu(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Context menu", "context_menu", write_to_reg=True)
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Context menu", "context_menu", write_to_reg=True)
 
 
-class ShowContextMenuIcon(tkinter_utils.ToggleableFrameButton):
+class ShowContextMenuIcon(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -81,10 +81,10 @@ class ShowContextMenuIcon(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Context menu icon", "context_menu_icon")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Context menu icon", "context_menu_icon")
 
 
-class ShowDownloadWindow(tkinter_utils.ToggleableFrameButton):
+class ShowDownloadWindow(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -92,10 +92,10 @@ class ShowDownloadWindow(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Download window", "manual_download_fail")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Download window", "manual_download_fail")
 
 
-class ShowTerminalOnSearch(tkinter_utils.ToggleableFrameButton):
+class ShowTerminalOnSearch(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -103,10 +103,10 @@ class ShowTerminalOnSearch(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Terminal on search", "show_terminal", show_if_exe=False)
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Terminal on search", "show_terminal", show_if_exe=False)
 
 
-class LogToFile(tkinter_utils.ToggleableFrameButton):
+class LogToFile(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -114,10 +114,10 @@ class LogToFile(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Log to file", "log_to_file")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Log to file", "log_to_file")
 
 
-class UseThreading(tkinter_utils.ToggleableFrameButton):
+class UseThreading(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -125,10 +125,10 @@ class UseThreading(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Use threading", "use_threading")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Use threading", "use_threading")
 
 
-class MultipleAppInstances(tkinter_utils.ToggleableFrameButton):
+class MultipleAppInstances(gui_toolkit.ToggleableFrameButton):
     """
     Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
 
@@ -136,14 +136,14 @@ class MultipleAppInstances(tkinter_utils.ToggleableFrameButton):
     """
 
     def __init__(self, parent) -> None:
-        tkinter_utils.ToggleableFrameButton.__init__(self, parent, "Multiple app instances", "multiple_app_instances")
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Multiple app instances", "multiple_app_instances")
 
 
 class CheckForUpdates(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=GUI_DATA.colors.dark_grey)
-        self.latest_version = None
+        self.configure(bg=gui.colors.dark_grey)
+        self.latest_version = ""
         self.btn_search = ttk.Button(
             self,
             text="Search for updates",
@@ -156,7 +156,7 @@ class CheckForUpdates(tk.Frame):
         )
         self.btn_search.grid(row=0, column=2, pady=2)
         self.btn_search.bind("<Enter>", self.enter_button)
-        tkinter_utils.set_default_grid_size(self)
+        gui_toolkit.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget

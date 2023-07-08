@@ -15,7 +15,7 @@ def _cx_freeze():
 
     sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-    icon = "src/subsearch/gui/assets/icon/subsearch.ico"
+    icon = "src/subsearch/gui/assets/subsearch.ico"
     app_name = "Subsearch"
     registry_path = rf"Software\Classes\*\shell\Subsearch"
     script_component = "_cx_executable0__Executable_script_src_subsearch___main__.py_"

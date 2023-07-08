@@ -11,13 +11,13 @@ class LanguageData:
     subscene_id: int
 
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class ProviderAlphaCodeData:
     provider: str
     alpha_code: str
 
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class AppPaths:
     """
     A dataclass representing the paths used in the application.
@@ -37,15 +37,15 @@ class AppPaths:
     home: Path
     data: Path
     gui: Path
+    gui_assets: Path
+    gui_app_theme: Path
     providers: Path
     utils: Path
-    icon: Path
-    tabs: Path
     tmpdir: Path
     appdata_local: Path
 
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class FileData:
     """
      Class representing file information.
@@ -67,7 +67,7 @@ class FileData:
     tmp_directory: Path
 
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class AppConfig:
     """
     Data class for storing user preferences and settings.
@@ -109,16 +109,16 @@ class AppConfig:
     non_hearing_impaired: bool
 
 
-@dataclass(order=True)
+@dataclass(order=True, slots=True)
 class SubsceneCookie:
     dark_theme: bool
     sort_subtitle_by_date: str
     language_filter: int
-    hearing_impaired: bool
+    hearing_impaired: int
     foreigen_only: bool
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True, slots=True)
 class ReleaseData:
     """
     Data class representing data associated with a media release.
@@ -148,7 +148,7 @@ class ReleaseData:
     file_hash: str
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True, slots=True)
 class ProviderUrls:
     """
     A dataclass to represent URLs for different subtitle providers.
@@ -166,7 +166,7 @@ class ProviderUrls:
     yifysubtitles: str
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True, slots=True)
 class DownloadData:
     """
     A data class representing metadata for the to be downloaded subtitle file.
@@ -188,7 +188,7 @@ class DownloadData:
     idx_lenght: int
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True, slots=True)
 class PrettifiedDownloadData:
     """
     Represents prettified version of DownloadData.
@@ -211,7 +211,7 @@ class PrettifiedDownloadData:
     formatted_url: str
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
 class GUISizes:
     """
     Sub dataclass containing sizes for the GUI
@@ -221,7 +221,7 @@ class GUISizes:
     root_height: int = 720
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
 class GUIPositions:
     """
     Sub dataclass containing sizes for the GUI
@@ -232,7 +232,7 @@ class GUIPositions:
     content_hidden_x: int = int(GUISizes().root_width * 2)
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
 class GUIColors:
     """
     Sub dataclass containing colors for the GUI
@@ -283,7 +283,7 @@ class GUIColors:
     dark_black: str = "#000000"
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
 class GUIFonts:
     """
     Sub dataclass containing fonts and their styles and or size
@@ -307,7 +307,7 @@ class GUIFonts:
     cas20b: str = "Cascadia 20 bold"
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
 class GUIData:
     """
     Dataclass containing GUI data
@@ -319,7 +319,7 @@ class GUIData:
     colors = GUIColors
 
 
-GUI_DATA = GUIData()
+gui = GUIData()
 
 SUPPORTED_FILE_EXTENSIONS = [
     ".avi",
