@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import gui, __version__
+from subsearch.data import __version__, gui
 from subsearch.data.data_objects import PrettifiedDownloadData
 from subsearch.gui import gui_toolkit, root
 from subsearch.gui.tabs import dowload_tab, language_tab, search_tab, settings_tab

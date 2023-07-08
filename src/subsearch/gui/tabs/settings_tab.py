@@ -2,7 +2,7 @@ import tkinter as tk
 import webbrowser
 from tkinter import ttk
 
-from subsearch.data import gui, __version__
+from subsearch.data import __version__, gui
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json, update
 

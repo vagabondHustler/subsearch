@@ -1,5 +1,5 @@
 from .data_initializer import app_paths, video_data
-from .data_objects import gui, SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS
+from .data_objects import SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS, gui
 from .guid import __guid__
 from .version import __version__
 

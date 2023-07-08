@@ -2,7 +2,7 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import gui, app_paths, video_data
+from subsearch.data import app_paths, gui, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
