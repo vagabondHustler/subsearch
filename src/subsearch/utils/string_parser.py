@@ -36,14 +36,14 @@ def find_title_by_year(string: str) -> str:
         string (str): The file name.
 
     Returns:
-        str: The part of the file name before the year, with '.' replaced by ' ', or "N/A" if no match is found.
+        str: The part of the file name before the year, with '.' replaced by ' ', or "" if no match is found.
     """
     re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
         return title
-    return "N/A"
+    return ""
 
 
 def find_title_by_show(string: str) -> str:
@@ -54,14 +54,14 @@ def find_title_by_show(string: str) -> str:
         string (str): The file name.
 
     Returns:
-        str: The part of the filename before the season and episode values, with '.' replaced by ' ', or "N/A" if no match is found.
+        str: The part of the filename before the season and episode values, with '.' replaced by ' ', or "" if no match is found.
     """
     re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
         return title
-    return "N/A"
+    return ""
 
 
 def find_season_episode(string: str) -> str:
@@ -72,13 +72,13 @@ def find_season_episode(string: str) -> str:
         string (str): The file name.
 
     Returns:
-        str: A string consisting of the season and episode values formatted like "s01e01", or "N/A" if no match is found.
+        str: A string consisting of the season and episode values formatted like "s01e01", or "" if no match is found.
     """
     re_se = re.findall("\.([s]\d*[e]\d*)\.", string)
     if re_se:
         se: str = re_se[0]
         return se
-    return "N/A"
+    return ""
 
 
 def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
@@ -92,8 +92,8 @@ def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
         tuple(str, str, str, str, bool): A tuple containing separated season and episode strings, corresponding ordinal
             strings, and a Boolean flag indicating whether the input string was matched successfully.
     """
-    if string == "N/A":
-        season, season_ordinal, episode, episode_ordinal = "N/A", "N/A", "N/A", "N/A"
+    if string == "":
+        season, season_ordinal, episode, episode_ordinal = "", "", "", ""
         show_bool = False
     else:
         season, episode = string.replace("s", "").replace("e", " ").split(" ")
@@ -206,10 +206,10 @@ class CreateProviderUrls:
             str: The url to search for subtitles on yifysubtitles.org
         """
         if self.release_data.tvseries:
-            return "N/A"
+            return ""
         domain = "https://yifysubtitles.org"
         tt_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
-        return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else "N/A"
+        return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else ""
 
     def _subscene_search_parameters(self) -> str:
         """
