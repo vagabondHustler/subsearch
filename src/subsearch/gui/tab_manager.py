@@ -61,7 +61,7 @@ class TabManager(tk.Frame):
     def activate_tabs(self) -> None:
         self.tabs[self.active_tab].place(x=gui.pos.content_x, y=gui.pos.content_y, anchor="center")
         gui_toolkit.asset_tab(self.buttons[self.active_tab], self.active_tab, "press")
-        self.parent.title(f"Subsearch {__version__} - {self.active_tab} tab")
+        self.parent.title(f"Subsearch {__version__} - {self.active_tab.capitalize()} tab")
 
     def release_tab(self, event) -> None:
         btn_key, _btn_widget = self.get_btn(self.buttons, event)
