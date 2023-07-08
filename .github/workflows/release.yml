@@ -279,7 +279,7 @@ jobs:
         id: hashes
         run: |
           $filenames = @(
-          Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi"
           )
 
           $hashAlgorithm = "SHA256"
