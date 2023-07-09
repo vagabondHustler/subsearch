@@ -227,6 +227,7 @@ jobs:
         run: |
           $pre_releases = @('rc', 'a', 'b')
           $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
+          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
           $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
           $virustotal_no_file = "VirusTotal analysis: No file uploaded"
           $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
@@ -275,29 +276,6 @@ jobs:
           name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
           path: .
 
-      - name: Create hashes256
-        id: hashes
-        run: |
-          $filenames = @(
-          "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi"
-          )
-
-          $hashAlgorithm = "SHA256"
-          $targetFilePath = "hashes.sha256"
-
-          foreach ($filename in $filenames) {
-            $filePath = $filename
-            $hash = Get-FileHash -Path $filePath -Algorithm $hashAlgorithm | Select-Object -ExpandProperty Hash
-            $line = "$hash *$filename"
-
-            $line | Out-File -FilePath $targetFilePath -Append
-          }
-
-      - name: Upload hashes artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: hashes.sha256
-          path: hashes.sha256
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
