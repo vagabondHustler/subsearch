@@ -58,6 +58,9 @@ class SystemTray(StateMachine):
         status = str(self.state).split(".")[-1].capitalize().replace("_", " ")
         return f" {status}\n{pct}"
 
+    def toast_message(self, msg: str, title: str | None = None):
+        self.tray.notify(msg, title)
+
     def start(self) -> None:
         self.thread_tray.start()
 
