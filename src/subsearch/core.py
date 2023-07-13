@@ -170,7 +170,7 @@ class AppSteps(Initializer):
         elapsed_summary = f"Finished in {elapsed} seconds"
         downloaded = len(self.results.items())
         skipped = len(self.skipped_combined)
-        download_summary = f"Downloaded {downloaded}/{skipped+downloaded}"
+        download_summary = f"Downloaded {downloaded}/{skipped+downloaded} subtitles"
         self.system_tray.update_progress_state()
         if downloaded > 0:
             self.system_tray.toast_message(f"Search Succeeded"f"{download_summary}\n{elapsed_summary}")
