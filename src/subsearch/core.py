@@ -11,10 +11,11 @@ from subsearch.utils import app_integrity, file_manager, io_json, log, string_pa
 class Initializer:
     def __init__(self) -> None:
         app_integrity.initialize_application()
+        self.app_config = io_json.get_app_config()
+        system_tray.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()
         self.system_tray.update_progress_state()
-        self.app_config = io_json.get_app_config()
         if video_data is not None:
             self.file_exist = True
             file_manager.create_directory(video_data.subs_directory)
@@ -165,15 +166,15 @@ class AppSteps(Initializer):
 
     def _summary_toast(self, elapsed) -> None:
         self.system_tray.update_progress_state()
-        if not self.file_exist or not self.ran_download_tab:
-            return
+        if not self.file_exist or not self.app_config.toast_summary:
+            return None
         elapsed_summary = f"Finished in {elapsed} seconds"
         downloaded = len(self.results.items())
         skipped = len(self.skipped_combined)
         download_summary = f"Downloaded {downloaded}/{skipped+downloaded} subtitles"
         self.system_tray.update_progress_state()
         if downloaded > 0:
-            self.system_tray.toast_message(f"Search Succeeded"f"{download_summary}\n{elapsed_summary}")
+            self.system_tray.toast_message(f"Search Succeeded", f"{download_summary}\n{elapsed_summary}")
         elif downloaded == 0:
             self.system_tray.toast_message(f"Search Failed", f"{download_summary}\n{elapsed_summary}")
 
