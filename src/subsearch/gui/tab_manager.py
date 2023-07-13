@@ -126,6 +126,8 @@ class TabSettings(tk.Frame):
         tk.Frame(self, height=80, bg=gui.colors.dark_grey).pack(anchor="center", expand=True)
         settings_tab.ShowContextMenu(self).pack(anchor="center")
         settings_tab.ShowContextMenuIcon(self).pack(anchor="center")
+        settings_tab.ShowSystemTrayIcon(self).pack(anchor="center")
+        settings_tab.ShowToastMessageSummary(self).pack(anchor="center")
         settings_tab.ShowDownloadWindow(self).pack(anchor="center")
         settings_tab.UseThreading(self).pack(anchor="center")
         settings_tab.MultipleAppInstances(self).pack(anchor="center")

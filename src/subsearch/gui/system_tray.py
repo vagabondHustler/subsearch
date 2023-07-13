@@ -7,6 +7,19 @@ from PIL import Image
 from subsearch.data import __version__, app_paths
 from subsearch.utils.state_machine import StateMachine, States
 
+enable_system_tray: bool
+
+
+def system_tray_conditions(func):
+    def wrapper(*args, **kwargs):
+        if enable_system_tray:
+            return func(*args, **kwargs)
+        else:
+            ...
+            # log.output(f"Skipping {func.__name__} execution because condition is False.", terminal=False)
+
+    return wrapper
+
 
 class SystemTray(StateMachine):
     """
@@ -28,6 +41,7 @@ class SystemTray(StateMachine):
         _create_progress_bar(progress, width=15): Creates a progress bar string based on the given progress value.
     """
 
+    @system_tray_conditions
     def __init__(self) -> None:
         StateMachine.__init__(self)
         self.state_machine = StateMachine()
@@ -36,11 +50,13 @@ class SystemTray(StateMachine):
         self.tray = pystray.Icon("Subsearch", icon=icon, title=title)
         self.thread_tray = threading.Thread(target=self._run_pystray)
 
+    @system_tray_conditions
     def update_progress_state(self) -> None:
         self._next_state()
         self.tray.title = self.prettified_tooltip()
         self.tray.update_menu()
 
+    @system_tray_conditions
     def lock_to_state(self, state: str) -> None:
         """
         Locks the system tray to a specific state, even if update_progress_state is called
@@ -53,14 +69,22 @@ class SystemTray(StateMachine):
         self.tray.title = self.prettified_tooltip()
         self.tray.update_menu()
 
+    @system_tray_conditions
     def prettified_tooltip(self) -> str:
         pct = self._state_to_progressbar()
         status = str(self.state).split(".")[-1].capitalize().replace("_", " ")
         return f" {status}\n{pct}"
 
+    @system_tray_conditions
+    def toast_message(self, title: str, msg: str):
+        self.tray.title
+        self.tray.notify(msg, title)
+
+    @system_tray_conditions
     def start(self) -> None:
         self.thread_tray.start()
 
+    @system_tray_conditions
     def stop(self) -> None:
         self.tray.stop()
         self.thread_tray.join()
