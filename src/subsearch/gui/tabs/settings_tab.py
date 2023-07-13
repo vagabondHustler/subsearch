@@ -83,6 +83,26 @@ class ShowContextMenuIcon(gui_toolkit.ToggleableFrameButton):
     def __init__(self, parent) -> None:
         gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Context menu icon", "context_menu_icon")
 
+class ShowSystemTrayIcon(gui_toolkit.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
+    def __init__(self, parent) -> None:
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "System tray icon", "system_tray")
+
+class ShowToastMessageSummary(gui_toolkit.ToggleableFrameButton):
+    """
+    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
+
+    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
+    """
+
+    def __init__(self, parent) -> None:
+        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Toast summary", "toast_summary")
+
 
 class ShowDownloadWindow(gui_toolkit.ToggleableFrameButton):
     """
