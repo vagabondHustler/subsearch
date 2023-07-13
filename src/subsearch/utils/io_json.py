@@ -4,7 +4,6 @@ from typing import Any, Union
 
 from subsearch.data import SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS, app_paths
 from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeData
-from subsearch.utils import file_manager
 from subsearch.utils.exceptions import ProviderNotImplemented
 
 APPCON_JSON = Path(app_paths.appdata_local) / "application_config.json"
@@ -89,6 +88,8 @@ def retrieve_application_config() -> dict[str, Any]:
         "rename_best_match": True,
         "context_menu": True,
         "context_menu_icon": True,
+        "system_tray": True,
+        "toast_summary": False,
         "manual_download_fail": True,
         "manual_download_mode": False,
         "use_threading": True,
