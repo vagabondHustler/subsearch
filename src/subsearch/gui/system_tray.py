@@ -1,5 +1,5 @@
 import threading
-from typing import LiteralString
+from typing import Literal
 
 import pystray
 from PIL import Image
@@ -48,7 +48,7 @@ class SystemTray(StateMachine):
         title = self.prettified_tooltip()
         icon = Image.open(app_paths.gui_assets / "subsearch.ico")
         self.tray = pystray.Icon("Subsearch", icon=icon, title=title)
-        self.thread_tray = threading.Thread(target=self._run_pystray)
+        self.thread_tray = threading.Thread(daemon=True, target=self._run_pystray)
 
     @system_tray_conditions
     def update_progress_state(self) -> None:
@@ -87,6 +87,7 @@ class SystemTray(StateMachine):
     @system_tray_conditions
     def stop(self) -> None:
         self.tray.stop()
+        self.thread_tray.exit()
         self.thread_tray.join()
 
     def _run_pystray(self) -> None:
@@ -105,7 +106,7 @@ class SystemTray(StateMachine):
 
         return self._create_progress_bar(pct)
 
-    def _create_progress_bar(self, progress, width=15) -> LiteralString:
+    def _create_progress_bar(self, progress, width=15) -> Literal:
         width_filled = int(progress / 100 * width)
         width_empty = width - width_filled
         bar_filled = "█" * width_filled
