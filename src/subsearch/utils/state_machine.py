@@ -12,8 +12,9 @@ class States(Enum):
     YIFYSUBTITLES: Enum = 5
     DOWNLOAD_FILES: Enum = 6
     EXTRACT_FILES: Enum = 7
-    CLEAN_UP: Enum = 8
-    EXIT: Enum = 9
+    SUMMARY: Enum = 8
+    CLEAN_UP: Enum = 9
+    EXIT: Enum = 10
 
     NO_FILE: Enum = -1
     GUI: Enum = -2
