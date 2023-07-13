@@ -87,7 +87,6 @@ class SystemTray(StateMachine):
     @system_tray_conditions
     def stop(self) -> None:
         self.tray.stop()
-        self.thread_tray.exit()
         self.thread_tray.join()
 
     def _run_pystray(self) -> None:
