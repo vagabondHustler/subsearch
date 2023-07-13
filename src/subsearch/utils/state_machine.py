@@ -1,56 +1,57 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum
 
 
-class CoreEnum(Enum):
-    UNKNOWN = "unknown"
-    INITIALIZING = "initializing"
-    INITIALIZED = "initialized"
-    SCRAPING_SUBSCENE = "scraping_subscene"
-    SCRAPING_OPENSUBTITLES = "scraping_opensubtitles"
-    SCRAPING_YIFYSUBTITLES = "scraping_yifysubtitles"
-    DOWNLOADING_FILES = "downloading_files"
-    EXTRACTING_FILES = "extracting_files"
-    CLEANING_UP = "cleaning_up"
-    EXITING = "exiting"
-    NO_FILE_FOUND = "no_file_found"
+@dataclass(order=True, frozen=True)
+class States(Enum):
+    UNKNOWN: Enum = 0
+    INITIALIZE: Enum = 1
+    INITIALIZED: Enum = 2
+    OPENSUBTITLES: Enum = 3
+    SUBSCENE: Enum = 4
+    YIFYSUBTITLES: Enum = 5
+    DOWNLOAD_FILES: Enum = 6
+    EXTRACT_FILES: Enum = 7
+    SUMMARY: Enum = 8
+    CLEAN_UP: Enum = 9
+    EXIT: Enum = 10
+
+    NO_FILE: Enum = -1
+    GUI: Enum = -2
 
 
-class State:
-    previous_states: list[Enum] = []
+class StateMachine:
+    """
+    A class representing a state machine.
 
-    @classmethod
-    def __create__(cls, state: Enum) -> None:
-        cls.__state = state
+    Attributes:
+        state (States): The current state of the state machine.
 
-    def set_state(self, state: Enum) -> None:
-        self.__state = state
-        self.previous_states.append(state)
+    Methods:
+        __init__(): Initializes the StateMachine class.
+        _yield_state(): Generator function to yield the next state.
+        set_state(state: int): Sets the state of the state machine.
+        get_state(): Returns the current state of the state machine.
+        _next_state(): Sets the next state of the state machine.
+    """
 
-    @property
-    def state(self) -> Enum:
-        return self.__state
+    state = States.UNKNOWN
 
-    @property
-    def ran_scrape(self) -> bool:
-        scraped = [CoreEnum.SCRAPING_SUBSCENE, CoreEnum.SCRAPING_OPENSUBTITLES, CoreEnum.SCRAPING_YIFYSUBTITLES]
-        return any(provider in self.previous_states for provider in scraped)
+    def __init__(self) -> None:
+        self.locked_states = [States.NO_FILE.name, States.GUI.name, States.EXIT.name]
 
-    @property
-    def file_exist(self) -> bool:
-        return CoreEnum.NO_FILE_FOUND not in self.previous_states
+    def _yeild_state(self):
+        current_index = self.state.value
+        next_index = current_index + 1
+        self.set_state(next_index)
+        yield self.state
 
+    def set_state(self, state: int):
+        setattr(StateMachine, "state", States(state))
 
-@dataclass(frozen=True, order=True)
-class CoreState(State):
-    unknown: CoreEnum = CoreEnum.UNKNOWN
-    initializing: CoreEnum = CoreEnum.INITIALIZING
-    initialized: CoreEnum = CoreEnum.INITIALIZED
-    scraping_subscene: CoreEnum = CoreEnum.SCRAPING_SUBSCENE
-    scraping_opensubtitles: CoreEnum = CoreEnum.SCRAPING_OPENSUBTITLES
-    scraping_yifysubtitles: CoreEnum = CoreEnum.SCRAPING_YIFYSUBTITLES
-    downloading_files: CoreEnum = CoreEnum.DOWNLOADING_FILES
-    extracting_files: CoreEnum = CoreEnum.EXTRACTING_FILES
-    cleaning_up: CoreEnum = CoreEnum.CLEANING_UP
-    exiting: CoreEnum = CoreEnum.EXITING
-    no_file_found: CoreEnum = CoreEnum.NO_FILE_FOUND
+    def get_state(self):
+        return getattr(StateMachine, "state")
+
+    def _next_state(self):
+        if self.state.name not in self.locked_states:
+            next(self._yeild_state())

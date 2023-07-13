@@ -3,29 +3,26 @@ import time
 
 from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
-from subsearch.gui import tab_manager
+from subsearch.gui import system_tray, tab_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    app_integrity,
-    file_manager,
-    io_json,
-    log,
-    state_machine,
-    string_parser,
-)
+from subsearch.utils import app_integrity, file_manager, io_json, log, string_parser
 
 
-class Initializer(state_machine.CoreState):
+class Initializer:
     def __init__(self) -> None:
-        state_machine.CoreState.__create__(self.unknown)
-        self.set_state(self.initializing)
         app_integrity.initialize_application()
         self.app_config = io_json.get_app_config()
+        system_tray.enable_system_tray = self.app_config.system_tray
+        self.system_tray = system_tray.SystemTray()
+        self.system_tray.start()
+        self.system_tray.update_progress_state()
         if video_data is not None:
+            self.file_exist = True
             file_manager.create_directory(video_data.subs_directory)
             self.file_hash = file_manager.get_hash(video_data.file_path)
         else:
-            self.set_state(self.no_file_found)
+            self.system_tray.lock_to_state("no_file")
+            self.file_exist = False
             self.file_hash = ""
         self.results: dict[str, list[DownloadData]] = {}
         self.skipped_downloads: dict[str, list[PrettifiedDownloadData]] = {}
@@ -55,7 +52,7 @@ class Initializer(state_machine.CoreState):
             )
             log.set_logger_data(**self.search_kwargs)
             log.output_parameters()
-            self.set_state(self.initialized)
+            self.system_tray.update_progress_state()
 
     def all_providers_disabled(self) -> bool:
         self.app_config = io_json.get_app_config()
@@ -80,6 +77,7 @@ class AppSteps(Initializer):
         Initializer.__init__(self)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if not self.file_exist:
+            self.system_tray.lock_to_state("gui")
             tab_manager.open_tab("search")
             return None
 
@@ -88,9 +86,9 @@ class AppSteps(Initializer):
         log.output_header("Search started")
 
     def _provider_opensubtitles(self) -> None:
+        self.system_tray.update_progress_state()
         if self.skip_step.opensubtitles():
             return None
-        self.set_state(self.scraping_opensubtitles)
         # log.output_header("Searching on opensubtitles")
         _opensubs = opensubtitles.OpenSubtitles(**self.search_kwargs)
         if self.app_config.providers["opensubtitles_hash"] and self.file_hash != "":
@@ -100,26 +98,26 @@ class AppSteps(Initializer):
         self.skipped_downloads["opensubtitles_site"] = _opensubs._sorted_list()
 
     def _provider_subscene(self) -> None:
+        self.system_tray.update_progress_state()
         if self.skip_step.subscene():
             return None
-        self.set_state(self.scraping_subscene)
         _subscene = subscene.Subscene(**self.search_kwargs)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped_downloads["subscene_site"] = _subscene._sorted_list()
 
     def _provider_yifysubtitles(self) -> None:
+        self.system_tray.update_progress_state()
         if self.skip_step.yifysubtitles():
             return None
-        self.set_state(self.scraping_yifysubtitles)
         _yifysubs = yifysubtitles.YifiSubtitles(**self.search_kwargs)
         self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
         self.skipped_downloads["yifysubtitles_site"] = _yifysubs._sorted_list()
 
     def _download_files(self) -> None:
+        self.system_tray.update_progress_state()
         if self.skip_step.download_files():
             return None
         log.output_header(f"Downloading subtitles")
-        self.set_state(self.downloading_files)
         for provider, data in self.results.items():
             if self.app_config.providers[provider] is False:
                 continue
@@ -143,17 +141,17 @@ class AppSteps(Initializer):
         log.output_done_with_tasks(end_new_line=True)
 
     def _extract_zip_files(self) -> None:
+        self.system_tray.update_progress_state()
         if self.skip_step.extract_zip():
             return None
-        self.set_state(self.extracting_files)
         log.output_header("Extracting downloads")
         file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
         log.output_done_with_tasks(end_new_line=True)
 
     def _clean_up(self) -> None:
+        self.system_tray.update_progress_state()
         if not self.file_exist:
             return None
-        self.set_state(self.cleaning_up)
         if self.app_config.rename_best_match:
             log.output_header("Renaming best match")
             file_manager.rename_best_match(f"{self.release_data.release}.srt", video_data.directory_path, ".srt")
@@ -166,11 +164,25 @@ class AppSteps(Initializer):
             file_manager.del_directory(video_data.subs_directory)
         log.output_done_with_tasks(end_new_line=True)
 
-    def _pre_exit(self) -> None:
-        elapsed = time.perf_counter() - self.start
-        self.set_state(self.exiting)
-        log.output(f"Finished in {elapsed} seconds")
+    def _summary_toast(self, elapsed) -> None:
+        self.system_tray.update_progress_state()
+        if not self.file_exist or not self.app_config.toast_summary:
+            return None
+        elapsed_summary = f"Finished in {elapsed} seconds"
+        downloaded = len(self.results.items())
+        skipped = len(self.skipped_combined)
+        download_summary = f"Downloaded {downloaded}/{skipped+downloaded} subtitles"
+        self.system_tray.update_progress_state()
+        if downloaded > 0:
+            self.system_tray.toast_message(f"Search Succeeded", f"{download_summary}\n{elapsed_summary}")
+        elif downloaded == 0:
+            self.system_tray.toast_message(f"Search Failed", f"{download_summary}\n{elapsed_summary}")
 
+    def _on_exit(self) -> None:
+        elapsed = time.perf_counter() - self.start
+        self._summary_toast(elapsed)
+        log.output(f"Finished in {elapsed} seconds")
+        self.system_tray.stop()
         if self.app_config.show_terminal is False:
             return None
         if file_manager.running_from_exe():

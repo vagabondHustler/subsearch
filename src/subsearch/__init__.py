@@ -80,7 +80,7 @@ class Subsearch(core.AppSteps):
         """
         Stop pref counter, log elapsed time and keep the terminal open if show_terminal is True
         """
-        self._pre_exit()
+        self._on_exit()
 
 
 def console() -> None:
