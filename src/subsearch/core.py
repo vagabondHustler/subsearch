@@ -163,12 +163,25 @@ class AppSteps(Initializer):
             file_manager.del_directory(video_data.subs_directory)
         log.output_done_with_tasks(end_new_line=True)
 
+    def _summary_toast(self, elapsed) -> None:
+        self.system_tray.update_progress_state()
+        if not self.file_exist or not self.ran_download_tab:
+            return
+        elapsed_summary = f"Finished in {elapsed} seconds"
+        downloaded = len(self.results.items())
+        skipped = len(self.skipped_combined)
+        download_summary = f"Downloaded {downloaded}/{skipped+downloaded}"
+        self.system_tray.update_progress_state()
+        if downloaded > 0:
+            self.system_tray.toast_message(f"Search Succeeded"f"{download_summary}\n{elapsed_summary}")
+        elif downloaded == 0:
+            self.system_tray.toast_message(f"Search Failed", f"{download_summary}\n{elapsed_summary}")
+
     def _on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
-        self.system_tray.update_progress_state()
-        self.system_tray.stop()
+        self._summary_toast(elapsed)
         log.output(f"Finished in {elapsed} seconds")
-
+        self.system_tray.stop()
         if self.app_config.show_terminal is False:
             return None
         if file_manager.running_from_exe():
