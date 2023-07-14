@@ -168,3 +168,5 @@ scripts/spritesheet_generator
 scripts/gpt_commit
 scripts/commit_generator/
 out/
+scripts/spritesheet_data.tcl
+scripts/spritesheet.png
