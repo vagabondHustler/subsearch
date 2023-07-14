@@ -12,7 +12,7 @@ class Providers(tk.Frame):
         self.configure(text="Search providers", padding=10)
         self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
-        self.checkbox_value = {}
+        self.chekboxes = {}
         self.last_key = ""
         frame = None
         for enum, (key, value) in enumerate(self.providers.items()):
@@ -25,7 +25,7 @@ class Providers(tk.Frame):
             boolean.set(value)
             btn = ttk.Checkbutton(frame, text=f"{provider} {provider_type}", onvalue=True, offvalue=False, variable=boolean)
             btn.pack(pady=2, ipadx=60)
-            self.checkbox_value[btn] = key, boolean
+            self.chekboxes[btn] = key, boolean
             if self.data["providers"][key] is True:
                 btn.configure(state="normal")
 
@@ -38,7 +38,7 @@ class Providers(tk.Frame):
 
     def leave_button(self, event) -> None:
         btn = event.widget
-        self.checkbox_value[btn][0]
+        self.chekboxes[btn][0]
 
     def press_button(self, event) -> None:
         btn = event.widget
@@ -46,8 +46,8 @@ class Providers(tk.Frame):
 
     def toggle_types(self, event) -> None:
         btn = event.widget
-        key = self.checkbox_value[btn][0]
-        value = self.checkbox_value[btn][1]
+        key = self.chekboxes[btn][0]
+        value = self.chekboxes[btn][1]
         if value.get() is True:
             self.data["providers"][key] = False
         elif value.get() is False:
@@ -66,41 +66,38 @@ class Providers(tk.Frame):
         io_json.set_json_data(self.data)
 
 
-class SubtitleType(tk.Frame):
+class SubtitleTypes(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=gui.color.dark_grey)
-        self.subtitle_type = io_json.get_json_key("subtitle_type")
-        self.string_var = tk.StringVar()
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Subtitle Options", padding=10)
         self.data = io_json.get_json_data()
-        label = tk.Label(self, text="Subtitle type")
-        label.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
-        label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=gui.color.dark_grey, font=gui.fonts.cas8b)
-        self.clabel.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
-        self.sub_type_txt()
-        gui_toolkit.VarColorPicker(self.string_var, self.clabel)
-        self.rownum = 0
-        self.colnum = 2
-        self.checkbox_values = {}
-        for key, value in self.subtitle_type.items():
-            if key.startswith("non"):
-                _text = "Regular"
+        self.subtitle_options = {
+            "hearing_impaired": "Include hearing impaird subtitles",
+            "non_hearing_impaired": "Include regular subtitles",
+            "foreign_only": "Only include subtitles for foreign parts",
+        }
+        for name, description in self.subtitle_options.items():
+            if name != "foreign_only":
+                subtitle_type = io_json.get_json_key("subtitle_type")
+                self.subtitle_options[name] = [subtitle_type[name], description]
             else:
-                _text = key.replace("_", " ").title()
-            valuevar = tk.BooleanVar()
-            valuevar.set(value)
-            self.rownum += 1
-            if self.rownum > 1:
-                self.rownum = 1
-                self.colnum += 1
-            btn = ttk.Checkbutton(self, text=_text, onvalue=True, offvalue=False, variable=valuevar)
-            btn.grid(row=self.rownum, column=self.colnum, pady=2)
-            self.checkbox_values[btn] = key, valuevar
+                self.subtitle_options[name] = [io_json.get_json_key(name), description]
 
-            btn.bind("<Enter>", self.enter_button)
-            gui_toolkit.set_default_grid_size(self)
+        frame = None
+        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
+        for enum, (key, value) in enumerate(self.subtitle_options.items()):
+            bool_value = value[0]
+            description = value[1]
+            if enum % 3 == 0:
+                frame = ttk.Frame(self)
+                frame.pack(side=tk.LEFT, anchor="n")
+
+            boolean = tk.BooleanVar()
+            boolean.set(bool_value)
+            check_btn = ttk.Checkbutton(frame, text=description, onvalue=True, offvalue=False, variable=boolean)
+            check_btn.pack(padx=4, pady=4, ipadx=60)
+            self.checkbuttons[check_btn] = key, boolean
+            check_btn.bind("<Enter>", self.enter_button)
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -112,25 +109,13 @@ class SubtitleType(tk.Frame):
 
     def toggle_types(self, event) -> None:
         btn = event.widget
-        key = self.checkbox_values[btn][0]
-        value = self.checkbox_values[btn][1]
+        key = self.checkbuttons[btn][0]
+        value = self.checkbuttons[btn][1]
         if value.get() is True:
             self.data["subtitle_type"][key] = False
         elif value.get() is False:
             self.data["subtitle_type"][key] = True
         io_json.set_json_data(self.data)
-        self.sub_type_txt()
-
-    def sub_type_txt(self) -> None:
-        hi_sub = self.data["subtitle_type"]["hearing_impaired"]
-        nonhi_sub = self.data["subtitle_type"]["non_hearing_impaired"]
-        if (hi_sub and nonhi_sub) or (hi_sub is False and nonhi_sub is False):
-            self.string_var.set(f"Both")
-        if hi_sub and nonhi_sub is False:
-            self.string_var.set(f"Only HI")
-        if hi_sub is False and nonhi_sub:
-            self.string_var.set(f"Only non-HI")
-        gui_toolkit.VarColorPicker(self.string_var, self.clabel)
 
 
 class SearchThreshold(tk.Frame):
@@ -197,18 +182,6 @@ class SearchThreshold(tk.Frame):
         update_svar = self.current_value.get()
         io_json.set_config_key_value("percentage_threshold", update_svar)
         gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
-
-
-class ForeignOnly(gui_toolkit.ToggleableFrameButton):
-    """
-    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
-
-    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
-    """
-
-    def __init__(self, parent) -> None:
-        text = f"If 'True', 'OpenSubtitles, Yifysubtitles' will be automatically skipped."
-        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Foreign language only", "foreign_only", tip_text=text)
 
 
 class RenameBestMatch(gui_toolkit.ToggleableFrameButton):

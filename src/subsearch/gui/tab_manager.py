@@ -110,11 +110,12 @@ class TabSearch(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=gui.size.width, height=gui.size.height)
         self.configure(bg=gui.color.dark_grey)
-        search_tab.Providers(self).pack(anchor="e")
+        group_a = tk.Frame(self, bg=gui.color.dark_grey)
+        group_a.pack(anchor="center", expand=True, fill="both")
+        search_tab.Providers(group_a).pack(side=tk.RIGHT, anchor="center", expand=True, fill="both",padx=2)
+        search_tab.SubtitleTypes(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
         tk.Frame(self, height=80, bg=gui.color.dark_grey).pack(anchor="center", expand=True)
-        search_tab.SubtitleType(self).pack(anchor="center")
         search_tab.SearchThreshold(self).pack(anchor="center")
-        search_tab.ForeignOnly(self).pack(anchor="center")
         search_tab.RenameBestMatch(self).pack(anchor="center")
 
 
