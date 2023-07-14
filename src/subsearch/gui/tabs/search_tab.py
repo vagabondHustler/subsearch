@@ -8,43 +8,29 @@ from subsearch.utils import io_json
 
 class Providers(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=gui.color.dark_grey)
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Search providers", padding=10)
         self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
-        label = tk.Label(self, text="Search providers")
-        label.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
-        label.grid(row=1, column=0, sticky="w", padx=2, pady=2)
-        self.rownum = 0
-        self.colnum = 2
         self.checkbox_value = {}
         self.last_key = ""
-        for key, value in self.providers.items():
-            btn_txt = key.split("_")[-1].capitalize()
-            lbl_txt = f"{key.split('_')[0]}".capitalize()
-            valuevar = tk.BooleanVar()
-            valuevar.set(value)
-            if self.last_key.startswith(lbl_txt):
-                self.colnum += 1
-            if self.last_key != lbl_txt:
-                self.rownum += 1
-                self.colnum = 2
-                _lbl = tk.Label(self, text=lbl_txt)
-                _lbl.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
-                _lbl.grid(row=self.rownum, column=2, sticky="w", padx=2, pady=2)
-            else:
-                self.rownum -= 1
-            self.rownum += 1
-            self.last_key = lbl_txt
-            btn = ttk.Checkbutton(self, text=btn_txt, onvalue=True, offvalue=False, variable=valuevar)
-            btn.grid(row=self.rownum, column=self.colnum, pady=2)
-            self.checkbox_value[btn] = key, valuevar
+        frame = None
+        for enum, (key, value) in enumerate(self.providers.items()):
+            if enum % 4 == 0:
+                frame = tk.Frame(self)
+                frame.pack(side=tk.LEFT, anchor="n", expand=True)
+            provider_type = key.split("_")[-1].lower()
+            provider = f"{key.split('_')[0]}".capitalize()
+            boolean = tk.BooleanVar()
+            boolean.set(value)
+            btn = ttk.Checkbutton(frame, text=f"{provider} {provider_type}", onvalue=True, offvalue=False, variable=boolean)
+            btn.pack(pady=2, ipadx=60)
+            self.checkbox_value[btn] = key, boolean
             if self.data["providers"][key] is True:
                 btn.configure(state="normal")
 
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
-        gui_toolkit.set_default_grid_size(self)
 
     def enter_button(self, event) -> None:
         btn = event.widget
