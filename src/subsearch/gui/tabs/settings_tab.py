@@ -176,15 +176,18 @@ class CheckForUpdates(ttk.Labelframe):
         self.configure(text="Update Subsearch", padding=10, style="TLabelframePlain")
         frame_left = tk.Frame(self, bg=gui.color.dark_grey)
         frame_right = tk.Frame(self, bg=gui.color.dark_grey)
+        
         self.var_current = tk.StringVar(self, f"Current version:\t\t{__version__}")
         self.var_latest = tk.StringVar(self, "Latest version: \t\t")
         self.var_misc = tk.StringVar()
+        
         frame_current = tk.Label(frame_left, textvariable=self.var_current, justify="left")
         frame_latest = tk.Label(frame_left, textvariable=self.var_latest, justify="left")
         frame_misc = tk.Label(frame_left, textvariable=self.var_misc, justify="left")
         frame_current.pack(anchor="w")
         frame_latest.pack(anchor="w")
         frame_misc.pack(anchor="w")
+        
         self.btn_search = ttk.Button(
             frame_right,
             text="Search",

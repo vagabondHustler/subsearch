@@ -110,7 +110,7 @@ class TabSearch(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=gui.size.width, height=gui.size.height)
         self.configure(bg=gui.color.dark_grey)
-        search_tab.Providers(self).pack(anchor="center")
+        search_tab.Providers(self).pack(anchor="e")
         tk.Frame(self, height=80, bg=gui.color.dark_grey).pack(anchor="center", expand=True)
         search_tab.SubtitleType(self).pack(anchor="center")
         search_tab.SearchThreshold(self).pack(anchor="center")
