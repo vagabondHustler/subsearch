@@ -219,8 +219,8 @@ class GUISizes:
     Sub dataclass containing sizes for the GUI
     """
 
-    root_width: int = 738
-    root_height: int = 720
+    width: int = 738
+    height: int = 720
 
 
 @dataclass(order=True, frozen=True)
@@ -229,9 +229,9 @@ class GUIPositions:
     Sub dataclass containing sizes for the GUI
     """
 
-    content_x: int = int(GUISizes().root_width / 2)
-    content_y: int = int(GUISizes().root_height / 2 - 41)
-    content_hidden_x: int = int(GUISizes().root_width * 2)
+    content_x: int = int(GUISizes().width / 2)
+    content_y: int = int(GUISizes().height / 2 - 41)
+    content_hidden_x: int = int(GUISizes().width * 2)
 
 
 @dataclass(order=True, frozen=True)
@@ -318,7 +318,7 @@ class GUIData:
     size = GUISizes
     pos = GUIPositions
     fonts = GUIFonts
-    colors = GUIColors
+    color = GUIColors
 
 
 gui = GUIData()
