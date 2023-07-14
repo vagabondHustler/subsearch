@@ -219,8 +219,8 @@ class GUISizes:
     Sub dataclass containing sizes for the GUI
     """
 
-    width: int = 738
-    height: int = 720
+    width: int = 800
+    height: int = 680
 
 
 @dataclass(order=True, frozen=True)
