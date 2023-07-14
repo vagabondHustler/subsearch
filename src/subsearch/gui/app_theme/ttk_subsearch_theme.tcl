@@ -69,7 +69,7 @@ namespace eval ttk_subsearch_theme {
         ttk::style configure TButton -padding {4 4} -anchor center -foreground $colors(-fg)
 
         ttk::style map TButton -foreground \
-            [list disabled #bdbdbd \
+            [list disabled #232323 \
                 pressed #4c4c4c]
 
         ttk::style element create Button.button image \
@@ -123,5 +123,43 @@ namespace eval ttk_subsearch_theme {
                 {pressed !selected} $sprites(check_unsel_pressed) \
                 active $sprites(check_unsel_hover) \
             ] -width 26 -sticky w
+
+        ttk::style map TCheckbutton -foreground \
+            [list disabled #565656 \
+            ]
+        
+        # Card
+        ttk::style layout Card.TFrame {
+        Card.field {
+            Card.padding -expand 1 
+            }
+        }
+
+        ttk::style element create Card.field image $sprites(card) -border 0 -padding 4 -sticky nsew
+
+        # Labelframe
+        ttk::style layout TLabelframe {
+        Labelframe.border {
+            Labelframe.padding -expand 1 -children {
+            Labelframe.label -side left
+                }
+            }
+        
+        }
+        # Labelframe
+        ttk::style layout TLabelframePlain {
+        Labelframe.plain {
+            Labelframe.padding -expand 1 -children {
+            Labelframe.label -side left
+                }
+            }
+        
+        }
+
+        ttk::style element create Labelframe.border image $sprites(card) -border 5 -padding 4 -sticky nsew
+        ttk::style configure TLabelframe.border.Label -font "Cascadia 8 bold" -foreground $colors(-fg) -background $colors(-bg)
+        ttk::style configure TLabelframe.plain.Label -font "Cascadia 8 bold" -foreground $colors(-fg) -background $colors(-bg)
+
+
     }
 }
