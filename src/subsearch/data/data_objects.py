@@ -339,4 +339,4 @@ SUPPORTED_FILE_EXTENSIONS = [
     ".swf",
     ".mswmm",
 ]
-SUPPORTED_PROVIDERS = ["subscene_site", "opensubtitles_site", "opensubtitles_hash", "yifysubtitles_site"]
+SUPPORTED_PROVIDERS = ["opensubtitles_site", "opensubtitles_hash", "subscene_site", "yifysubtitles_site"]
