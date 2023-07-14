@@ -9,7 +9,7 @@ from subsearch.utils import io_json
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=gui.colors.dark_grey)
+        self.configure(bg=gui.color.dark_grey)
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1
