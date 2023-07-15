@@ -24,7 +24,7 @@ class Providers(tk.Frame):
             boolean = tk.BooleanVar()
             boolean.set(value)
             btn = ttk.Checkbutton(frame, text=f"{provider} {provider_type}", onvalue=True, offvalue=False, variable=boolean)
-            btn.pack(pady=2, ipadx=60)
+            btn.pack(padx=4, pady=4, ipadx=60)
             self.chekboxes[btn] = key, boolean
             if self.data["providers"][key] is True:
                 btn.configure(state="normal")
@@ -66,7 +66,7 @@ class Providers(tk.Frame):
         io_json.set_json_data(self.data)
 
 
-class SubtitleTypes(tk.Frame):
+class SubtitleOptions(tk.Frame):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle Options", padding=10)
@@ -75,20 +75,20 @@ class SubtitleTypes(tk.Frame):
             "hearing_impaired": "Include hearing impaird subtitles",
             "non_hearing_impaired": "Include regular subtitles",
             "foreign_only": "Only include subtitles for foreign parts",
+            "rename_best_match": "Rename best match for 'Autoload'"
         }
         for name, description in self.subtitle_options.items():
-            if name != "foreign_only":
+            if "hearing_impaired" in name:
                 subtitle_type = io_json.get_json_key("subtitle_type")
                 self.subtitle_options[name] = [subtitle_type[name], description]
-            else:
-                self.subtitle_options[name] = [io_json.get_json_key(name), description]
-
+                continue
+            self.subtitle_options[name] = [io_json.get_json_key(name), description]
         frame = None
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
         for enum, (key, value) in enumerate(self.subtitle_options.items()):
             bool_value = value[0]
             description = value[1]
-            if enum % 3 == 0:
+            if enum % 4 == 0:
                 frame = ttk.Frame(self)
                 frame.pack(side=tk.LEFT, anchor="n")
 
@@ -116,27 +116,42 @@ class SubtitleTypes(tk.Frame):
         elif value.get() is False:
             self.data["subtitle_type"][key] = True
         io_json.set_json_data(self.data)
-
+        
+    def add_missig_json_key(self, name, description):
+        subtitle_type = io_json.get_json_key("subtitle_type")
+        self.subtitle_options[name] = [subtitle_type[name], description]
 
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=gui.color.dark_grey)
         self.pct_threashold = io_json.get_json_key("percentage_threshold")
+        
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{self.pct_threashold} %")
-        label = tk.Label(self, text="Search threshold")
-        label.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
-        label.grid(row=0, column=0, sticky="w", padx=0, pady=2)
-        self.clabel = tk.Label(self, textvariable=self.string_var)
-        self.clabel.configure(bg=gui.color.dark_grey, font=gui.fonts.cas8b)
-        self.clabel.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
-        gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
+
+        frame_text = tk.Frame(self, bg=gui.color.dark_grey)
+        frame_slider = tk.Frame(self, bg=gui.color.dark_grey)
+        
+        label_description = tk.Label(frame_text, text=f"Include subtitles matching video filename by")
+        label_description.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
+        label_description.pack(side=tk.LEFT, anchor="n")
+        
+        self.label_pct = tk.Label(frame_text, textvariable=self.string_var, width=4)
+        self.label_pct.configure(bg=gui.color.dark_grey, font=gui.fonts.cas8b)
+        self.label_pct.pack(side=tk.LEFT, anchor="n")
+
+        
+        gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
         x, y = gui_toolkit.calculate_btn_size(self, 36)
-        self.slider = ttk.Scale(self, from_=0, to=100, orient="horizontal", variable=self.current_value, length=x - 2)
-        self.slider.grid(column=2, row=0, sticky="we", padx=4)
+        
+        self.slider = ttk.Scale(frame_slider, from_=0, to=100, orient="horizontal", variable=self.current_value, length=500)
+        self.slider.pack(side=tk.LEFT, anchor="n")
+
+        frame_text.pack(side=tk.TOP, anchor="n")
+        frame_slider.pack(side=tk.TOP, anchor="n")
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
         gui_toolkit.set_default_grid_size(self)
@@ -181,15 +196,4 @@ class SearchThreshold(tk.Frame):
     def update_config(self) -> None:
         update_svar = self.current_value.get()
         io_json.set_config_key_value("percentage_threshold", update_svar)
-        gui_toolkit.VarColorPicker(self.string_var, self.clabel, True)
-
-
-class RenameBestMatch(gui_toolkit.ToggleableFrameButton):
-    """
-    Inherits from the tk_tools.ToggleableFrameButton class and create toggleable button widget with different settings.
-
-    Class corresponds to a specific setting in the configuration file and has a unique label, configuration key, and other optional attributes.
-    """
-
-    def __init__(self, parent) -> None:
-        gui_toolkit.ToggleableFrameButton.__init__(self, parent, "Rename best match", "rename_best_match")
+        gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
