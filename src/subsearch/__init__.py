@@ -76,7 +76,7 @@ class Subsearch(core.AppSteps):
         self._extract_zip_files()
         self._clean_up()
 
-    def pre_exit(self) -> None:
+    def on_exit(self) -> None:
         """
         Stop pref counter, log elapsed time and keep the terminal open if show_terminal is True
         """
@@ -146,7 +146,7 @@ def main() -> None:
     app = Subsearch()
     app.search_for_subtitles()
     app.process_files()
-    app.pre_exit()
+    app.on_exit()
 
 
 if __name__ == "__main__":

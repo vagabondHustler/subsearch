@@ -78,7 +78,7 @@ class AppSteps(Initializer):
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if not self.file_exist:
             self.system_tray.lock_to_state("gui")
-            tab_manager.open_tab("search")
+            tab_manager.open_tab("search_filters")
             return None
 
         if " " in video_data.filename:
@@ -136,7 +136,7 @@ class AppSteps(Initializer):
                 self.skipped_combined.append(data)
 
         if self.skipped_combined:
-            tab_manager.open_tab("download", data=self.skipped_combined)
+            tab_manager.open_tab("download_manager", data=self.skipped_combined)
             self.ran_download_tab = True
         log.output_done_with_tasks(end_new_line=True)
 
