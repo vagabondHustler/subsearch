@@ -184,10 +184,10 @@ class CheckForUpdates(ttk.Labelframe):
 
         frame_current = tk.Label(frame_left, textvariable=self.var_current, justify="left")
         frame_latest = tk.Label(frame_left, textvariable=self.var_latest, justify="left")
-        frame_misc = tk.Label(frame_left, textvariable=self.var_misc, justify="left")
+        self.frame_misc = tk.Label(frame_left, textvariable=self.var_misc, justify="left")
         frame_current.pack(anchor="w")
         frame_latest.pack(anchor="w")
-        frame_misc.pack(anchor="w")
+        self.frame_misc.pack(pady=16, anchor="w")
 
         self.btn_search = ttk.Button(
             frame_right,
@@ -225,8 +225,10 @@ class CheckForUpdates(ttk.Labelframe):
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
             if repo_is_prerelease:
                 self.var_misc.set(f"Pre-release")
+                self.frame_misc.configure(fg=cfg.color.orange)
             else:
                 self.var_misc.set(f"Latest")
+                self.frame_misc.configure(fg=cfg.color.green)
 
         if not new_repo_avail:
             self.var_latest.set(f"Latest version: \t\t{latest_version}")
