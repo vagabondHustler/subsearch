@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Label, StringVar, Tk, ttk
+from tkinter import Label, StringVar, ttk
 
 from PIL import Image, ImageTk
 
