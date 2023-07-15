@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import IntVar, ttk
 
-from subsearch.data import gui
+
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import gui
+from subsearch.gui.resources import config as cfg
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
@@ -59,10 +59,10 @@ class Providers(tk.Frame):
         key = btn["text"].replace(" ", "_").lower()
         if self.data["providers"][key] is True:
             self.data["providers"][key] = False
-            btn.configure(fg=gui.color.red)
+            btn.configure(fg=cfg.color.red)
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
-            btn.configure(fg=gui.color.green)
+            btn.configure(fg=cfg.color.green)
         io_json.set_json_data(self.data)
 
 
@@ -75,7 +75,7 @@ class SubtitleOptions(tk.Frame):
             "hearing_impaired": "Include hearing impaird subtitles",
             "non_hearing_impaired": "Include regular subtitles",
             "foreign_only": "Only include subtitles for foreign parts",
-            "rename_best_match": "Rename best match for 'Autoload'"
+            "rename_best_match": "Rename best match for 'Autoload'",
         }
         for name, description in self.subtitle_options.items():
             if "hearing_impaired" in name:
@@ -116,37 +116,37 @@ class SubtitleOptions(tk.Frame):
         elif value.get() is False:
             self.data["subtitle_type"][key] = True
         io_json.set_json_data(self.data)
-        
+
     def add_missig_json_key(self, name, description):
         subtitle_type = io_json.get_json_key("subtitle_type")
         self.subtitle_options[name] = [subtitle_type[name], description]
 
+
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=gui.color.dark_grey)
+        self.configure(bg=cfg.color.dark_grey)
         self.pct_threashold = io_json.get_json_key("percentage_threshold")
-        
+
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
         self.string_var = tk.StringVar()
         self.string_var.set(f"{self.pct_threashold} %")
 
-        frame_text = tk.Frame(self, bg=gui.color.dark_grey)
-        frame_slider = tk.Frame(self, bg=gui.color.dark_grey)
-        
+        frame_text = tk.Frame(self, bg=cfg.color.dark_grey)
+        frame_slider = tk.Frame(self, bg=cfg.color.dark_grey)
+
         label_description = tk.Label(frame_text, text=f"Include subtitles matching video filename by")
-        label_description.configure(bg=gui.color.dark_grey, fg=gui.color.white_grey, font=gui.fonts.cas8b)
+        label_description.configure(bg=cfg.color.dark_grey, fg=cfg.color.white_grey, font=cfg.font.cas8b)
         label_description.pack(side=tk.LEFT, anchor="n")
-        
+
         self.label_pct = tk.Label(frame_text, textvariable=self.string_var, width=4)
-        self.label_pct.configure(bg=gui.color.dark_grey, font=gui.fonts.cas8b)
+        self.label_pct.configure(bg=cfg.color.dark_grey, font=cfg.font.cas8b)
         self.label_pct.pack(side=tk.LEFT, anchor="n")
 
-        
         gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
         x, y = gui_toolkit.calculate_btn_size(self, 36)
-        
+
         self.slider = ttk.Scale(frame_slider, from_=0, to=100, orient="horizontal", variable=self.current_value, length=500)
         self.slider.pack(side=tk.LEFT, anchor="n")
 

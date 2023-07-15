@@ -2,7 +2,8 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import app_paths, gui, video_data
+from subsearch.data import app_paths, video_data
+from subsearch.gui.resources import config as cfg
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
@@ -12,7 +13,7 @@ class DownloadList(tk.Frame):
     def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
-        self.configure(bg=gui.color.dark_grey, width=root_posx, height=root_posy - 82)
+        self.configure(bg=cfg.color.dark_grey, width=root_posx, height=root_posy - 82)
         if formatted_data is not None:
             formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
         self.formatted_data = formatted_data
@@ -22,9 +23,9 @@ class DownloadList(tk.Frame):
         self.sub_listbox = tk.Listbox(
             self,
             height=root_posy,
-            bg=gui.color.dark_grey,
-            fg=gui.color.light_grey,
-            font=gui.fonts.cas8b,
+            bg=cfg.color.dark_grey,
+            fg=cfg.color.light_grey,
+            font=cfg.font.cas8b,
             bd=0,
             border=0,
             borderwidth=0,
@@ -79,7 +80,7 @@ class DownloadList(tk.Frame):
         ):
             if enum != int(item_num):
                 continue
-            self.sub_listbox.itemconfig(int(enum), {"fg": gui.color.blue})
+            self.sub_listbox.itemconfig(int(enum), {"fg": cfg.color.blue})
             if _provider == "subscene":
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
@@ -99,4 +100,4 @@ class DownloadList(tk.Frame):
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")
-        self.sub_listbox.itemconfig(int(item_num), {"fg": gui.color.green})
+        self.sub_listbox.itemconfig(int(item_num), {"fg": cfg.color.green})
