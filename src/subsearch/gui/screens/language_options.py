@@ -1,15 +1,15 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import IntVar, ttk
 
-from subsearch.data import gui
+
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
 
 class SelectLanguage(tk.Frame):
     def __init__(self, parent) -> None:
-        tk.Frame.__init__(self, parent)
-        self.configure(bg=gui.colors.dark_grey)
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Languages", padding=10)
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1
@@ -18,27 +18,28 @@ class SelectLanguage(tk.Frame):
         self.tip_present = False
         self.languages = io_json.get_available_languages()
         self.current_language = io_json.get_json_key("current_language")
-        for language, language_data in self.languages.items():
-            if self.rownum == 14:
-                self.rownum = 0
-                self.colnum += 1
+        self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
+        frame = None
+        for enum, (language, language_data ) in enumerate(self.languages.items()):
+            if enum % 14 == 0:
+                frame = ttk.Frame(self)
+                frame.pack(side=tk.LEFT, anchor="n")
+
             valuevar = tk.IntVar()
-            btn = ttk.Checkbutton(self, text=language_data["name"], onvalue=1, offvalue=9, variable=valuevar, width=20)
+            btn = ttk.Checkbutton(frame, text=language_data["name"], onvalue=1, offvalue=9, variable=valuevar, width=20)
             if self.current_language == language:
                 valuevar.set(1)
                 self.checkbox_values[btn] = valuevar
             else:
                 valuevar.set(0)
                 self.checkbox_values[btn] = valuevar
-            btn.grid(row=self.rownum, column=self.colnum, pady=8)
+            btn.pack(padx=2, pady=8)
             if valuevar.get() == 1:
                 self.active_btn = btn
 
             btn.bind("<Enter>", self.enter_button)
             btn.bind("<Leave>", self.leave_button)
-            self.rownum += 1
             self.name_find_key[language_data["name"]] = language
-        gui_toolkit.set_default_grid_size(self, width_=6)
 
     def enter_button(self, event) -> None:
         btn = event.widget
