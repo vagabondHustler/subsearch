@@ -20,7 +20,7 @@ def paths() -> AppPaths:
         data=Path(home) / "data",
         gui=Path(home) / "gui",
         gui_assets=Path(home) / "gui" / "assets",
-        gui_app_theme=Path(home) / "gui" / "app_theme",
+        gui_styles=Path(home) / "gui" / "styles",
         providers=Path(home) / "providers",
         utils=Path(home) / "utils",
         tmpdir=Path(tempfile.gettempdir()) / f"tmp_subsearch",

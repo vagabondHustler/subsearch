@@ -28,8 +28,6 @@ class AppPaths:
         gui (Path): The directory containing GUI modules and files.
         providers (Path): The directory containing subtitle provider modules.
         utils (Path): The directory containing utility modules.
-        icon (Path): The Path object representing the icon for the application.
-        tabs (Path): The directory containing tab icon assets for the GUI.
         tmpdir(Path): The directory containing temporary files & folders.
         appdata_local(Path): The directory containing the persistent application files.
     """
@@ -38,7 +36,7 @@ class AppPaths:
     data: Path
     gui: Path
     gui_assets: Path
-    gui_app_theme: Path
+    gui_styles: Path
     providers: Path
     utils: Path
     tmpdir: Path
