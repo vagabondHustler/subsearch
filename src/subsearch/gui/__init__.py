@@ -4,10 +4,10 @@ from tkinter import Tk
 from subsearch.data import app_paths
 
 
-def get_spritesheet_data() -> dict:
+def get_sprites() -> dict:
     pattern = r"\b(\w+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\b"
     data = {}
-    file_path = app_paths.gui_app_theme / "spritesheet_data.tcl"
+    file_path = app_paths.gui_styles / "sprites.tcl"
     with file_path.open() as file:
         content = file.read()
         matches = re.findall(pattern, content)
@@ -21,4 +21,4 @@ def get_spritesheet_data() -> dict:
 
 
 root = Tk(className="Subsearch")
-spritesheet_data = get_spritesheet_data()
+sprites = get_sprites()

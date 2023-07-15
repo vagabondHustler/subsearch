@@ -4,7 +4,7 @@ from tkinter import Label, StringVar, Tk, ttk
 from PIL import Image, ImageTk
 
 from subsearch.data import __version__, app_paths, gui
-from subsearch.gui import spritesheet_data
+from subsearch.gui import sprites
 from subsearch.utils import file_manager, io_json, io_winreg
 
 GWL_EXSTYLE = -20
@@ -19,10 +19,10 @@ DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
 def get_sprite(sprite_name):
     spritesheet_path = app_paths.gui_assets / "spritesheet.png"
     spritesheet_image = Image.open(spritesheet_path)
-    sprite_x = spritesheet_data[sprite_name][0]
-    sprite_y = spritesheet_data[sprite_name][1]
-    sprite_width = spritesheet_data[sprite_name][2]
-    sprite_height = spritesheet_data[sprite_name][3]
+    sprite_x = sprites[sprite_name][0]
+    sprite_y = sprites[sprite_name][1]
+    sprite_width = sprites[sprite_name][2]
+    sprite_height = sprites[sprite_name][3]
     sprite = spritesheet_image.crop((sprite_x, sprite_y, sprite_x + sprite_width, sprite_y + sprite_height))
     return sprite
 
@@ -400,7 +400,7 @@ class ToggleableFrameButton(tk.Frame):
 
 
 def set_ttk_theme(root):
-    initializer_tcl = app_paths.gui_app_theme / "ttk_theme_initializer.tcl"
+    initializer_tcl = app_paths.gui_styles / "style_options.tcl"
     root.tk.call("source", str(initializer_tcl))
     root.tk.call("set_theme")
 
