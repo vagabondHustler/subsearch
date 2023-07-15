@@ -169,13 +169,12 @@ class AppSteps(Initializer):
         if not self.file_exist or not self.app_config.toast_summary:
             return None
         elapsed_summary = f"Finished in {elapsed} seconds"
-        downloaded = len(self.results.items())
-        skipped = len(self.skipped_combined)
-        download_summary = f"Downloaded {downloaded}/{skipped+downloaded} subtitles"
+        matches = len(self.results.items())
+        download_summary = f"Matches found {matches}"
         self.system_tray.update_progress_state()
-        if downloaded > 0:
+        if matches > 0:
             self.system_tray.toast_message(f"Search Succeeded", f"{download_summary}\n{elapsed_summary}")
-        elif downloaded == 0:
+        elif matches == 0:
             self.system_tray.toast_message(f"Search Failed", f"{download_summary}\n{elapsed_summary}")
 
     def _on_exit(self) -> None:
