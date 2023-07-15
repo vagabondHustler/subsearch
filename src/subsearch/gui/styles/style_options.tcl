@@ -1,10 +1,10 @@
-source [file join [file dirname [info script]] ttk_subsearch_theme.tcl]
+source [file join [file dirname [info script]] style_subsearch.tcl]
 
 option add *tearOff 0
 
 proc set_theme {} {
     
-    ttk::style theme use "ttk_subsearch_theme"
+    ttk::style theme use "style_subsearch"
 
     array set colors {
         -fg             "#bdbdbd"

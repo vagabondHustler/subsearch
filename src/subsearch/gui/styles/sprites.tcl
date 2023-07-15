@@ -1,16 +1,16 @@
 set ::sprite_data [list \
-  download_hover 0 0 51 41 \
-  download_press 0 41 51 41 \
-  download_rest 51 0 51 41 \
-  language_hover 51 41 51 41 \
-  language_press 0 82 51 41 \
-  language_rest 51 82 51 41 \
-  search_hover 102 0 51 41 \
-  search_press 102 41 51 41 \
-  search_rest 102 82 51 41 \
-  settings_hover 0 123 51 41 \
-  settings_press 51 123 51 41 \
-  settings_rest 102 123 51 41 \
+  download_manager_hover 0 0 51 41 \
+  download_manager_press 0 41 51 41 \
+  download_manager_rest 51 0 51 41 \
+  language_options_hover 51 41 51 41 \
+  language_options_press 0 82 51 41 \
+  language_options_rest 51 82 51 41 \
+  search_filters_hover 102 0 51 41 \
+  search_filters_press 102 41 51 41 \
+  search_filters_rest 102 82 51 41 \
+  subsearch_options_hover 0 123 51 41 \
+  subsearch_options_press 51 123 51 41 \
+  subsearch_options_rest 102 123 51 41 \
   card 153 0 50 50 \
   btn_disabled 153 50 22 35 \
   btn_hover 175 50 22 35 \

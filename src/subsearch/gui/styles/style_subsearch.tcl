@@ -1,7 +1,7 @@
-source [file join [file dirname [info script]] spritesheet_data.tcl]
+source [file join [file dirname [info script]] sprites.tcl]
 
-namespace eval ttk_subsearch_theme {
-    package provide ttk::theme::ttk_subsearch_theme 0.1.0
+namespace eval style_subsearch {
+    package provide ttk::theme::style_subsearch 0.1.0
 
     # Load Images
     proc load_images {imgfile} {
@@ -17,7 +17,7 @@ namespace eval ttk_subsearch_theme {
 
 
     # Theme Creation
-    ttk::style theme create ttk_subsearch_theme -parent clam -settings {
+    ttk::style theme create style_subsearch -parent clam -settings {
 
         # Color Settings
         array set colors {
