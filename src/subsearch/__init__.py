@@ -4,7 +4,7 @@ from threading import Thread
 
 from subsearch import core
 from subsearch.data import __guid__
-from subsearch.gui import tab_manager
+from subsearch.gui import screen_manager
 from subsearch.utils import io_json, io_winreg, mutex_synchronizer
 
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -89,10 +89,10 @@ def console() -> None:
 
     Options:
         --settings [lang, search, app, dl]      Open the GUI settings menu
-                                                    ang: opens tab with available languages
-                                                    search: opens tab with settings such as available providers
-                                                    app: opens tab with app settings
-                                                    dl: opens tab for subtitles not downloaded
+                                                    ang: opens screen with available languages
+                                                    search: opens screen with settings such as available providers
+                                                    app: opens screen with app settings
+                                                    dl: opens screen for subtitles not downloaded
 
         --registry-key [add, del]               Edit the registry
                                                     add: adds the context menu  / replaces the context menu with default values
@@ -106,16 +106,16 @@ def console() -> None:
         if arg.startswith("--settings"):
             if sys.argv[num + 1] == "lang":
                 sys.argv.pop(num), sys.argv.pop(num)
-                tab_manager.open_tab("language")
+                screen_manager.open_screen("language")
             elif sys.argv[num + 1] == "search":
                 sys.argv.pop(num), sys.argv.pop(num)
-                tab_manager.open_tab("search")
+                screen_manager.open_screen("search")
             elif sys.argv[num + 1] == "app":
                 sys.argv.pop(num), sys.argv.pop(num)
-                tab_manager.open_tab("settings")
+                screen_manager.open_screen("settings")
             elif sys.argv[num + 1] == "dl":
                 sys.argv.pop(num), sys.argv.pop(num)
-                tab_manager.open_tab("download")
+                screen_manager.open_screen("download")
 
             break
         elif arg.startswith("--registry-key") or arg.startswith("--add-key"):

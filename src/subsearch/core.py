@@ -3,7 +3,7 @@ import time
 
 from subsearch.data import __version__, app_paths, video_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
-from subsearch.gui import system_tray, tab_manager
+from subsearch.gui import screen_manager, system_tray
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import app_integrity, file_manager, io_json, log, string_parser
 
@@ -78,7 +78,7 @@ class AppSteps(Initializer):
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
         if not self.file_exist:
             self.system_tray.lock_to_state("gui")
-            tab_manager.open_tab("search_filters")
+            screen_manager.open_screen("search_filters")
             return None
 
         if " " in video_data.filename:
@@ -136,7 +136,7 @@ class AppSteps(Initializer):
                 self.skipped_combined.append(data)
 
         if self.skipped_combined:
-            tab_manager.open_tab("download_manager", data=self.skipped_combined)
+            screen_manager.open_screen("download_manager", data=self.skipped_combined)
             self.ran_download_tab = True
         log.output_done_with_tasks(end_new_line=True)
 
