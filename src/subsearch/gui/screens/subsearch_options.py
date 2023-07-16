@@ -84,16 +84,16 @@ class SubsearchOption(ttk.Labelframe):
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
         self.data = io_json.get_json_data()
-        self.subsearch_options: dict[str, list] = {
-            "context_menu": ["Context menu"],
-            "context_menu_icon": ["Context menu icon"],
-            "system_tray": ["System tray icon"],
-            "toast_summary": ["Notification when done"],
-            "manual_download_fail": ["Manual download on fail"],
-            "show_terminal": ["Terminal while searching"],
-            "log_to_file": ["Create log file"],
-            "use_threading": ["Multithreading"],
-            "multiple_app_instances": ["Multiple instances"],
+        self.subsearch_options = {
+            "context_menu": "Context menu",
+            "context_menu_icon": "Context menu icon",
+            "system_tray": "System tray icon",
+            "toast_summary": "Notification when done",
+            "manual_download_fail": "Manual download on fail",
+            "show_terminal": "Terminal while searching",
+            "log_to_file": "Create log file",
+            "use_threading": "Multithreading",
+            "multiple_app_instances": "Multiple instances",
         }
         for name, description in self.subsearch_options.items():
             self.subsearch_options[name] = [io_json.get_json_key(name), description]
