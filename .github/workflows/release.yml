@@ -142,7 +142,7 @@ jobs:
         run: |
           python setup.py bdist_msi -d .
 
-      - name: Upload artifact
+      - name: Upload msi artifact
         uses: actions/upload-artifact@v3
         with:
           name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
@@ -276,6 +276,29 @@ jobs:
           name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
           path: .
 
+      - name: Create hashes file
+        id: hashes
+        run: |
+          $filenames = @(
+          "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi"
+          )
+
+          $hashAlgorithm = "SHA256"
+          $targetFilePath = "hashes.sha256"
+
+          foreach ($filename in $filenames) {
+            $filePath = $filename
+            $hash = Get-FileHash -Path $filePath -Algorithm $hashAlgorithm | Select-Object -ExpandProperty Hash
+            $line = "$hash *$filename"
+
+            $line | Out-File -FilePath $targetFilePath -Append
+          }
+
+      - name: Upload hashes artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hashes.sha256
+          path: hashes.sha256
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
