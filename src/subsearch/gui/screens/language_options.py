@@ -6,10 +6,10 @@ from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
 
-class SelectLanguage(tk.Frame):
+class SelectLanguage(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
-        self.configure(text="Languages", padding=10)
+        self.configure(text="Languages", padding=10) 
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1

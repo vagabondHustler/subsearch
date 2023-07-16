@@ -105,7 +105,7 @@ class SystemTray(StateMachine):
 
         return self._create_progress_bar(pct)
 
-    def _create_progress_bar(self, progress, width=15) -> Literal:
+    def _create_progress_bar(self, progress, width=15):
         width_filled = int(progress / 100 * width)
         width_empty = width - width_filled
         bar_filled = "█" * width_filled
