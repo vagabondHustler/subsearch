@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import Any, Iterable
 
-from subsearch.gui.resources import config as cfg
 from subsearch.gui import gui_toolkit
+from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_json
 
 
-class Providers(tk.Frame):
+class Providers(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Search providers", padding=10)
@@ -66,16 +67,16 @@ class Providers(tk.Frame):
         io_json.set_json_data(self.data)
 
 
-class SubtitleOptions(tk.Frame):
+class SubtitleOptions(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle Options", padding=10)
         self.data = io_json.get_json_data()
-        self.subtitle_options = {
-            "hearing_impaired": "Include hearing impaird subtitles",
-            "non_hearing_impaired": "Include regular subtitles",
-            "foreign_only": "Only include subtitles for foreign parts",
-            "rename_best_match": "Rename best match for 'Autoload'",
+        self.subtitle_options: dict = {
+            "hearing_impaired": ["Include hearing impaird subtitles"],
+            "non_hearing_impaired": ["Include regular subtitles"],
+            "foreign_only": ["Only include subtitles for foreign parts"],
+            "rename_best_match": ["Rename best match for 'Autoload'"],
         }
         for name, description in self.subtitle_options.items():
             if "hearing_impaired" in name:

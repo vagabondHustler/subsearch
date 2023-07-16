@@ -1,7 +1,7 @@
 import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
-from typing import Any
+from typing import Any, Iterable
 
 from subsearch.data import __version__
 from subsearch.gui.resources import config as cfg
@@ -84,16 +84,16 @@ class SubsearchOption(ttk.Labelframe):
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
         self.data = io_json.get_json_data()
-        self.subsearch_options = {
-            "context_menu": "Context menu",
-            "context_menu_icon": "Context menu icon",
-            "system_tray": "System tray icon",
-            "toast_summary": "Notification when done",
-            "manual_download_fail": "Manual download on fail",
-            "show_terminal": "Terminal while searching",
-            "log_to_file": "Create log file",
-            "use_threading": "Multithreading",
-            "multiple_app_instances": "Multiple instances",
+        self.subsearch_options: dict[str, list] = {
+            "context_menu": ["Context menu"],
+            "context_menu_icon": ["Context menu icon"],
+            "system_tray": ["System tray icon"],
+            "toast_summary": ["Notification when done"],
+            "manual_download_fail": ["Manual download on fail"],
+            "show_terminal": ["Terminal while searching"],
+            "log_to_file": ["Create log file"],
+            "use_threading": ["Multithreading"],
+            "multiple_app_instances": ["Multiple instances"],
         }
         for name, description in self.subsearch_options.items():
             self.subsearch_options[name] = [io_json.get_json_key(name), description]
@@ -143,7 +143,7 @@ class SubsearchOption(ttk.Labelframe):
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
-    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str]):
+    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]):
         # FileExtension checkboxes
         parent_key = key_pair[0]
         child_key = key_pair[1]
