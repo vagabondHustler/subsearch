@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import IntVar, ttk
 
-
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
 
@@ -9,7 +8,7 @@ from subsearch.utils import io_json
 class SelectLanguage(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
-        self.configure(text="Languages", padding=10) 
+        self.configure(text="Languages", padding=10)
         self.active_btn = None
         self.rownum = 0
         self.colnum = 1
@@ -20,7 +19,7 @@ class SelectLanguage(ttk.Labelframe):
         self.current_language = io_json.get_json_key("current_language")
         self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
         frame = None
-        for enum, (language, language_data ) in enumerate(self.languages.items()):
+        for enum, (language, language_data) in enumerate(self.languages.items()):
             if enum % 14 == 0:
                 frame = ttk.Frame(self)
                 frame.pack(side=tk.LEFT, anchor="n")

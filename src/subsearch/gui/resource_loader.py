@@ -3,8 +3,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from subsearch.data import app_paths
-from subsearch.gui.resources import config as cfg
 from subsearch.gui import sprites
+from subsearch.gui.resources import config as cfg
 
 
 def get_sprite(sprite_name):

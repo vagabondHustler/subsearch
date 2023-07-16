@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data import app_paths, video_data
-from subsearch.gui.resources import config as cfg
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.gui.resources import config as cfg
 from subsearch.providers import subscene
 from subsearch.utils import file_manager, log
 

@@ -210,6 +210,7 @@ class PrettifiedDownloadData:
     formatted_release: str
     formatted_url: str
 
+
 SUPPORTED_FILE_EXTENSIONS = [
     ".avi",
     ".mp4",

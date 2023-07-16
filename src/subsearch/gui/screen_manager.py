@@ -84,7 +84,9 @@ class ScreenManager(tk.Frame):
     def leave_menu_btn(self, event) -> None:
         _btn_key, btn_value = self.get_btn(self.buttons, event)
         btn_value.unbind("<ButtonPress>")
-        resource_loader.asset_menu_btn(self.buttons[_btn_key], _btn_key, "rest" if _btn_key != self.active_screen else "press")
+        resource_loader.asset_menu_btn(
+            self.buttons[_btn_key], _btn_key, "rest" if _btn_key != self.active_screen else "press"
+        )
 
     def press_menu_btn(self, event) -> None:
         btn_key, btn_widget = self.get_btn(self.buttons, event, False)
