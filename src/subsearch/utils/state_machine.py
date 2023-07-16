@@ -4,20 +4,20 @@ from enum import Enum
 
 @dataclass(order=True, frozen=True)
 class States(Enum):
-    UNKNOWN: Enum = 0
-    INITIALIZE: Enum = 1
-    INITIALIZED: Enum = 2
-    OPENSUBTITLES: Enum = 3
-    SUBSCENE: Enum = 4
-    YIFYSUBTITLES: Enum = 5
-    DOWNLOAD_FILES: Enum = 6
-    EXTRACT_FILES: Enum = 7
-    SUMMARY: Enum = 8
-    CLEAN_UP: Enum = 9
-    EXIT: Enum = 10
+    UNKNOWN: int = 0
+    INITIALIZE: int = 1
+    INITIALIZED: int = 2
+    OPENSUBTITLES: int = 3
+    SUBSCENE: int = 4
+    YIFYSUBTITLES: int = 5
+    DOWNLOAD_FILES: int = 6
+    EXTRACT_FILES: int = 7
+    SUMMARY: int = 8
+    CLEAN_UP: int = 9
+    EXIT: int = 10
 
-    NO_FILE: Enum = -1
-    GUI: Enum = -2
+    NO_FILE: int = -1
+    GUI: int = -2
 
 
 class StateMachine:
