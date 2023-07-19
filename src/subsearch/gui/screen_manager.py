@@ -64,7 +64,9 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
 
     def activate_screen(self) -> None:
-        self.available_screens[self.active_screen].place(x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center")
+        self.available_screens[self.active_screen].place(
+            x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center"
+        )
         resource_loader.asset_menu_btn(self.buttons[self.active_screen], self.active_screen, "press")
         title_tab = self.active_screen.capitalize().replace("_", " ")
         self.parent.title(f"Subsearch - {title_tab}")
@@ -154,7 +156,7 @@ def open_screen(tab_name: str, **kwargs) -> None:
     Returns:
         None: This function does not return anything, it manipulates the GUI instead.
     """
-
+    root.bind('<KeyPress>', close_mainloop)
     data: list | list[PrettifiedDownloadData] = kwargs.get("data", [])
     gui_toolkit.configure_root(root)
     resource_loader.set_ttk_theme(root)
@@ -168,3 +170,8 @@ def open_screen(tab_name: str, **kwargs) -> None:
     manager = ScreenManager(root, screens, tab_name.lower())
     manager.place(y=cfg.size.height - 82)
     root.mainloop()
+
+
+def close_mainloop(event):
+    if event.keysym == 'Escape':
+        root.quit()
