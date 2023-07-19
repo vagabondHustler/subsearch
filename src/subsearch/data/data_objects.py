@@ -92,7 +92,8 @@ class AppConfig:
     subtitle_type: dict[str, bool]
     foreign_only: bool
     percentage_threshold: int
-    rename_best_match: bool
+    autoload_rename: bool
+    autoload_move: bool
     context_menu: bool
     context_menu_icon: bool
     system_tray: bool
@@ -169,7 +170,7 @@ class ProviderUrls:
 @dataclass(order=True, frozen=True, slots=True)
 class DownloadData:
     """
-    A data class representing metadata for the to be downloaded subtitle file.
+    A data class representing download data for subtitle.
 
     Attributes:
         provider (str): The subtitle provider used to obtain the subtitle file.
@@ -209,6 +210,14 @@ class PrettifiedDownloadData:
     pct_result: int
     formatted_release: str
     formatted_url: str
+
+
+@dataclass(order=True, frozen=True)
+class DeviceInfo:
+    platform: str
+    mode: str
+    python: str
+    subsearch: str
 
 
 SUPPORTED_FILE_EXTENSIONS = [

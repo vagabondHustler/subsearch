@@ -1,13 +1,21 @@
+import platform
 import sys
 import tempfile
 from itertools import product
 from pathlib import Path
 from typing import no_type_check
 
-from subsearch.data.data_objects import SUPPORTED_FILE_EXTENSIONS, AppPaths, FileData
+from subsearch.data.data_objects import (
+    SUPPORTED_FILE_EXTENSIONS,
+    AppPaths,
+    DeviceInfo,
+    FileData,
+)
+
+from .version import __version__
 
 
-def paths() -> AppPaths:
+def get_app_paths() -> AppPaths:
     """
     Returns an instance of the AppPaths class representing the path configuration for Subsearch application.
 
@@ -29,7 +37,7 @@ def paths() -> AppPaths:
 
 
 @no_type_check
-def video_file() -> FileData:
+def get_video_file_data() -> FileData:
     """
     Returns an instance of the FileData class based on the file path provided in the command line arguments.
 
@@ -62,5 +70,20 @@ def video_file() -> FileData:
         return FileData(name, ext, file_path, directory, subs_directory, tmp_directory)
 
 
-video_data = video_file()
-app_paths = paths()
+def get_device_info() -> DeviceInfo:
+    if getattr(sys, "frozen", False):
+        # The script is running as an executable (e.g., a compiled .exe file)
+        mode = "executable"
+        python = ""
+    else:
+        # The script is running with a Python interpreter
+        python = platform.python_version()
+        mode = "interpreter"
+    platform_ = platform.platform().lower()
+
+    return DeviceInfo(platform_, mode, python, __version__)
+
+
+device_info = get_device_info()
+file_data = get_video_file_data()
+app_paths = get_app_paths()
