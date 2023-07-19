@@ -2,8 +2,8 @@ from selectolax.parser import Node
 
 from subsearch.data import app_paths
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
-from subsearch.providers import generic
-from subsearch.providers.generic import ProviderParameters
+from subsearch.providers import core_provider
+from subsearch.providers.core_provider import SearchArguments
 from subsearch.utils import log, string_parser
 
 
@@ -26,7 +26,7 @@ class YifySubtitlesScraper:
 
     def get_subtitle(self, url: str, current_language: str, hi_sub: bool, non_hi_sub: bool) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         product = tree.select("tr")
         for item in product.matches[1:]:
             if self.skip_item(item, hi_sub, non_hi_sub, current_language):
@@ -40,9 +40,9 @@ class YifySubtitlesScraper:
         return subtitles
 
 
-class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
+class YifiSubtitles(SearchArguments, YifySubtitlesScraper):
     def __init__(self, **kwargs):
-        ProviderParameters.__init__(self, **kwargs)
+        SearchArguments.__init__(self, **kwargs)
         YifySubtitlesScraper.__init__(self)
         self.logged_and_sorted: list[PrettifiedDownloadData] = []
 
@@ -58,24 +58,28 @@ class YifiSubtitles(ProviderParameters, YifySubtitlesScraper):
         # search for subtitle
         for key, value in subtitle_data.items():
             pct_result = string_parser.calculate_match(key, self.release)
-            log.output_match("yifysubtitles", pct_result, key)
-            formatted_data = generic.prettify_download_data("yifysubtitles", key, value, pct_result)
+            log.stdout_match(
+                provider="yifysubtitles",
+                subtitle_name=key,
+                result=pct_result,
+                threshold=self.app_config.percentage_threshold,
+            )
+            formatted_data = core_provider.prettify_download_data("yifysubtitles", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
+            if core_provider.is_threshold_met(self, key, pct_result) is False or self.manual_download_mode:
                 continue
             if value in to_be_downloaded.values():
                 continue
             to_be_downloaded[key] = value
 
-        self.sorted_metadata = generic.sort_prettified_data(to_be_sorted)
-        log.downlod_metadata("yifysubtitles", self.sorted_metadata, self.percentage_threashold)
+        self.sorted_site_results = core_provider.sort_site_results(to_be_sorted)
 
         if not to_be_downloaded:
             return []
 
         # pack download data
-        download_info = generic.create_download_data("yifysubtitles", app_paths.tmpdir, to_be_downloaded)
+        download_info = core_provider.set_download_data("yifysubtitles", app_paths.tmpdir, to_be_downloaded)
         return download_info
 
-    def _sorted_list(self) -> list[PrettifiedDownloadData]:
-        return self.sorted_metadata
+    def sorted_list(self) -> list[PrettifiedDownloadData]:
+        return self.sorted_site_results

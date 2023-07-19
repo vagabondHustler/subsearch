@@ -2,8 +2,8 @@ from selectolax.parser import Node
 
 from subsearch.data import app_paths
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
-from subsearch.providers import generic
-from subsearch.providers.generic import ProviderParameters
+from subsearch.providers import core_provider
+from subsearch.providers.core_provider import SearchArguments
 from subsearch.utils import log, string_parser
 
 
@@ -12,7 +12,7 @@ class SubsceneScraper:
         ...
 
     def find_title(self, url: str, current_language: str, definitive_match: list[str]) -> str | None:
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         products = tree.css("div.title")
         for item in products:
             node = item.css_first("a")
@@ -36,7 +36,7 @@ class SubsceneScraper:
 
     def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool, subscene_header) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url, subscene_header)
+        tree = core_provider.get_html_parser(url, subscene_header)
         products = tree.css("tr")
         for item in products[1:]:
             if self.skip_item(item, hi_sub, regular_sub):
@@ -50,15 +50,15 @@ class SubsceneScraper:
         return subtitles
 
     def get_download_url(self, url: str) -> str:
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         href = tree.css_first("#downloadButton").attributes["href"]
         download_url = f"https://subscene.com/{href}"
         return download_url
 
 
-class Subscene(ProviderParameters, SubsceneScraper):
+class Subscene(SearchArguments, SubsceneScraper):
     def __init__(self, **kwargs):
-        ProviderParameters.__init__(self, **kwargs)
+        SearchArguments.__init__(self, **kwargs)
         SubsceneScraper.__init__(self)
         self.logged_and_sorted: list[PrettifiedDownloadData] = []
 
@@ -71,7 +71,7 @@ class Subscene(ProviderParameters, SubsceneScraper):
         to_be_sorted: list[PrettifiedDownloadData] = []
         _to_be_downloaded: dict[str, str] = {}
         to_be_downloaded: dict[str, str] = {}
-        custom_subscene_header = generic.CustomSubsceneHeader(self.app_config)
+        custom_subscene_header = core_provider.CustomSubsceneHeader(self.app_config)
         header = custom_subscene_header.create_header()
         # find title
         definitive_match = self._definitive_match()
@@ -83,17 +83,21 @@ class Subscene(ProviderParameters, SubsceneScraper):
         subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub, header)
         for key, value in subtitle_data.items():
             pct_result = string_parser.calculate_match(key, self.release)
-            log.output_match("subscene", pct_result, key)
-            formatted_data = generic.prettify_download_data("subscene", key, value, pct_result)
+            log.stdout_match(
+                provider="subscene",
+                subtitle_name=key,
+                result=pct_result,
+                threshold=self.app_config.percentage_threshold,
+            )
+            formatted_data = core_provider.prettify_download_data("subscene", key, value, pct_result)
             to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
+            if core_provider.is_threshold_met(self, key, pct_result) is False or self.manual_download_mode:
                 continue
             if key in _to_be_downloaded.keys():
                 continue
             _to_be_downloaded[key] = value
 
-        self.sorted_metadata = generic.sort_prettified_data(to_be_sorted)
-        log.downlod_metadata("subscene", self.sorted_metadata, self.percentage_threashold)
+        self.sorted_site_results = core_provider.sort_site_results(to_be_sorted)
         if not _to_be_downloaded:
             return []
 
@@ -106,8 +110,8 @@ class Subscene(ProviderParameters, SubsceneScraper):
             return []
 
         # pack download data
-        download_info = generic.create_download_data("subscene", app_paths.tmpdir, to_be_downloaded)
+        download_info = core_provider.set_download_data("subscene", app_paths.tmpdir, to_be_downloaded)
         return download_info
 
-    def _sorted_list(self) -> list[PrettifiedDownloadData]:
-        return self.sorted_metadata
+    def sorted_list(self) -> list[PrettifiedDownloadData]:
+        return self.sorted_site_results
