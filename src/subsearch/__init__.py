@@ -13,12 +13,12 @@ sys.path.append(HOMEPATH)
 sys.path.append(PACKAGEPATH)
 
 
-class Subsearch(core.AppSteps):
+class Subsearch:
     def __init__(self) -> None:
         """
         Setup and gather all available parameters
         """
-        core.AppSteps.__init__(self)
+        self.subsearch_core = core.SubsearchCore()
 
     def thread_executor(self, *args) -> None:
         """
@@ -40,47 +40,49 @@ class Subsearch(core.AppSteps):
         """
         if io_json.get_json_key("use_threading"):
             self.thread_executor(
-                self._provider_subscene,
-                self._provider_opensubtitles,
-                self._provider_yifysubtitles,
+                self.subsearch_core.subscene,
+                self.subsearch_core.opensubtitles,
+                self.subsearch_core.yifysubtitles,
             )
         else:
-            self._provider_subscene()
-            self._provider_opensubtitles()
-            self._provider_yifysubtitles()
+            self.subsearch_core.subscene()
+            self.subsearch_core.opensubtitles()
+            self.subsearch_core.yifysubtitles()
 
     def provider_opensubtitles(self) -> None:
         """
         Search for subtitles on opensubtitles
         """
-        self._provider_opensubtitles()
+        self.subsearch_core.opensubtitles()
 
     def provider_subscene(self) -> None:
         """
         Search for subtitles on subscene
         """
-        self._provider_subscene()
+        self.subsearch_core.subscene()
 
     def provider_yifysubtitles(self) -> None:
         """
         Search for subtitles on yifysubtitles
         """
-        self._provider_yifysubtitles()
+        self.subsearch_core.yifysubtitles()
 
     def process_files(self) -> None:
         """
         Download zip files containing the .srt files, extract, rename and clean up tmp files
         """
-        self._download_files()
-        self._not_downloaded()
-        self._extract_zip_files()
-        self._clean_up()
+        self.subsearch_core.download_files()
+        self.subsearch_core.manual_download()
+        self.subsearch_core.extract_files()
+        self.subsearch_core.autoload_rename()
+        self.subsearch_core.autoload_move()
+        self.subsearch_core.clean_up()
 
     def on_exit(self) -> None:
         """
         Stop pref counter, log elapsed time and keep the terminal open if show_terminal is True
         """
-        self._on_exit()
+        self.subsearch_core.core_on_exit()
 
 
 def console() -> None:
