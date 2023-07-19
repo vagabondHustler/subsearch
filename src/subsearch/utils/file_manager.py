@@ -4,9 +4,9 @@ import sys
 import zipfile
 from pathlib import Path
 
-from subsearch.data import __guid__, video_data
+from subsearch.data import __guid__, file_data
 from subsearch.data.data_objects import DownloadData
-from subsearch.providers.generic import get_cloudscraper
+from subsearch.providers.core_provider import get_cloudscraper
 from subsearch.utils import log, string_parser
 
 
@@ -35,7 +35,7 @@ def download_subtitle(data: DownloadData) -> int:
     Raises:
       Any exception raised by the get_cloudscraper or IOError during writing of the subtitle file.
     """
-    log.output(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
+    log.stdout(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
     scraper = get_cloudscraper()
     r = scraper.get(data.url, stream=True)
     with open(data.file_path, "wb") as fd:
@@ -59,13 +59,13 @@ def extract_files(src: Path, dst: Path, extension: str) -> None:
     """
     for file in Path(src).glob(f"*{extension}"):
         filename = Path(src) / file
-        log.path_action("extract", file, dst)
+        log.stdout_path_action(action_type="extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
         zip_ref.close()
 
 
-def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
+def autoload_rename(release_name: str, extension: str) -> Path:
     """
     Function renames and moves the best matching subtitle file, based on the release name, to the specified path. If no match is found nothing happens.
 
@@ -77,26 +77,29 @@ def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
     Returns:
         None.
     """
-    if video_data is None:
+    if file_data is None:
         return None
     best_match = (0, Path())
-    for file in Path(video_data.subs_directory).glob(f"*{extension}"):
+    for file in Path(file_data.subs_directory).glob(f"*{extension}"):
         value = string_parser.calculate_match(file.name, release_name)
         if value >= best_match[0]:
             best_match = value, file
     if not best_match[1]:
         return None
     file_to_rename = best_match[1]
-    old_name_src = Path(video_data.subs_directory) / file_to_rename
-    new_name_dst = Path(video_data.subs_directory) / release_name
-    log.path_action("rename", file_to_rename, new_name_dst)
+    old_name_src = Path(file_data.subs_directory) / file_to_rename
+    new_name_dst = Path(file_data.subs_directory) / release_name.join(extension)
+    log.stdout_path_action(action_type="rename", src=file_to_rename, dst=new_name_dst)
     old_name_src.rename(new_name_dst)
-    move_src = new_name_dst
-    move_dst = Path(cwd) / release_name
-    log.path_action("move", move_src, cwd)
-    if move_dst.exists():
-        move_dst.unlink()
-    shutil.move(move_src, move_dst)
+    return new_name_dst
+
+
+def autoload_move(release_name: str, cwd: Path, src, extension: str) -> Path:
+    dst = Path(cwd) / release_name.join(extension)
+    log.stdout_path_action(action_type="move", src=src, dst=cwd)
+    if dst.exists():
+        dst.unlink()
+    shutil.move(src, dst)
 
 
 def clean_up_files(cwd: Path, extension: str) -> None:
@@ -111,7 +114,7 @@ def clean_up_files(cwd: Path, extension: str) -> None:
         None
     """
     for file in Path(cwd).glob(f"*{extension}"):
-        log.path_action("remove", file)
+        log.stdout_path_action(action_type="remove", src=file)
         file_path = Path(cwd) / file
         file_path.unlink()
 
@@ -126,7 +129,7 @@ def del_directory(directory: Path) -> None:
     Returns:
         None
     """
-    log.path_action("remove", directory)
+    log.stdout_path_action(action_type="remove", src=directory)
     shutil.rmtree(directory)
 
 
@@ -159,7 +162,7 @@ def get_hash(file_path: Path | None) -> str:
             filesize = file_path.stat().st_size
             hash = filesize
             if filesize < 65536 * 2:
-                log.output(f"SizeError: filesize is {filesize} bytes", False)
+                log.stdout(f"SizeError: filesize is {filesize} bytes", level="error")
                 return ""
             n1 = 65536 // bytesize
             for _x in range(n1):
@@ -184,7 +187,7 @@ def get_hash(file_path: Path | None) -> str:
 
 def delete_temp_files(temp_path: Path):
     for item in temp_path.iterdir():
-        log.path_action("remove", item)
+        log.stdout_path_action(action_type="remove", src=item)
         if item.is_file():
             item.unlink()
         if item.is_dir():
