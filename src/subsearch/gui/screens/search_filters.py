@@ -11,20 +11,27 @@ class Providers(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Search providers", padding=10)
-        self.providers = io_json.get_json_key("providers")
         self.data = io_json.get_json_data()
         self.chekboxes = {}
         self.last_key = ""
+
+        self.provider_options: dict = {
+            "opensubtitles_site": "Search on OpenSubtitles",
+            "opensubtitles_hash": "Search on OpenSubtitles with hash",
+            "subscene_site": "Search on Subscene",
+            "yifysubtitles_site": "Search on YIFYsubtitles",
+        }
+        for name, description in self.provider_options.items():
+            self.provider_options[name] = [io_json.get_json_key("providers")[name], description]
+
         frame = None
-        for enum, (key, value) in enumerate(self.providers.items()):
+        for enum, (key, value) in enumerate(self.provider_options.items()):
             if enum % 4 == 0:
                 frame = tk.Frame(self)
                 frame.pack(side=tk.LEFT, anchor="n", expand=True)
-            provider_type = key.split("_")[-1].lower()
-            provider = f"{key.split('_')[0]}".capitalize()
             boolean = tk.BooleanVar()
-            boolean.set(value)
-            btn = ttk.Checkbutton(frame, text=f"{provider} {provider_type}", onvalue=True, offvalue=False, variable=boolean)
+            boolean.set(value[0])
+            btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             btn.pack(padx=4, pady=4, ipadx=60)
             self.chekboxes[btn] = key, boolean
             if self.data["providers"][key] is True:
@@ -76,7 +83,8 @@ class SubtitleOptions(ttk.Labelframe):
             "hearing_impaired": "Include hearing impaird subtitles",
             "non_hearing_impaired": "Include regular subtitles",
             "foreign_only": "Only include subtitles for foreign parts",
-            "rename_best_match": "Rename best match for 'Autoload'",
+            "autoload_rename": "Rename subtitle for 'Autoload'",
+            "autoload_move": "Move subtitle to 'Autoload' directory",
         }
         for name, description in self.subtitle_options.items():
             if "hearing_impaired" in name:
@@ -89,7 +97,7 @@ class SubtitleOptions(ttk.Labelframe):
         for enum, (key, value) in enumerate(self.subtitle_options.items()):
             bool_value = value[0]
             description = value[1]
-            if enum % 4 == 0:
+            if enum % 5 == 0:
                 frame = ttk.Frame(self)
                 frame.pack(side=tk.LEFT, anchor="n")
 
@@ -154,7 +162,9 @@ class SearchThreshold(tk.Frame):
         gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
         x, y = gui_toolkit.calculate_btn_size(self, 36)
 
-        self.slider = ttk.Scale(frame_slider, from_=0, to=100, orient="horizontal", variable=self.current_value, length=500)
+        self.slider = ttk.Scale(
+            frame_slider, from_=0, to=100, orient="horizontal", variable=self.current_value, length=500
+        )
         self.slider.pack(side=tk.LEFT, anchor="n")
 
         frame_text.pack(side=tk.TOP, anchor="n")

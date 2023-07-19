@@ -2,7 +2,7 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import app_paths, video_data
+from subsearch.data import app_paths, file_data
 from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
 from subsearch.gui.resources import config as cfg
 from subsearch.providers import subscene
@@ -52,8 +52,6 @@ class DownloadList(tk.Frame):
         self._providers = {}
         self._releases = {}
         self._urls = {}
-        log.output("")
-        log.output_header("Processing files with GUI")
         # fil list box with all available subtitles that were found and not downloaded
         for enu, data in enumerate(self.formatted_data):
             self.sub_listbox.insert(tk.END, f"{data.formatted_release}\n")
@@ -95,7 +93,7 @@ class DownloadList(tk.Frame):
                 idx_lenght=1,
             )  # type: ignore
             file_manager.download_subtitle(enum)  # type: ignore
-            file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
+            file_manager.extract_files(app_paths.tmpdir, file_data.subs_directory, ".zip")
             file_manager.delete_temp_files(app_paths.tmpdir)
             break
         self.sub_listbox.delete(int(item_num))
