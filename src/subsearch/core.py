@@ -16,7 +16,7 @@ from subsearch.utils import (
 )
 
 
-def ignore_condition(func):
+def ignore_conditions(func):
     """
     Decorator to check if the conditions for a function are met before executing it.
 
@@ -137,7 +137,7 @@ class SubsearchCore(Initializer):
         if not self.all_providers_disabled():
             log.stdout_in_brackets("Search started")
 
-    @ignore_condition
+    @ignore_conditions
     def opensubtitles(self) -> None:
         self.core_state.update_state()
         _opensubs = opensubtitles.OpenSubtitles(**self.search_kwargs)
@@ -147,21 +147,21 @@ class SubsearchCore(Initializer):
             self.results["opensubtitles_site"] = _opensubs.parse_site_results()
         self.skipped_downloads["opensubtitles_site"] = _opensubs.sorted_list()
 
-    @ignore_condition
+    @ignore_conditions
     def subscene(self) -> None:
         self.core_state.update_state()
         _subscene = subscene.Subscene(**self.search_kwargs)
         self.results["subscene_site"] = _subscene.parse_site_results()
         self.skipped_downloads["subscene_site"] = _subscene.sorted_list()
 
-    @ignore_condition
+    @ignore_conditions
     def yifysubtitles(self) -> None:
         self.core_state.update_state()
         _yifysubs = yifysubtitles.YifiSubtitles(**self.search_kwargs)
         self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
         self.skipped_downloads["yifysubtitles_site"] = _yifysubs.sorted_list()
 
-    @ignore_condition
+    @ignore_conditions
     def download_files(self) -> None:
         self.core_state.update_state()
         log.stdout_in_brackets(f"Downloading subtitles")
@@ -179,34 +179,34 @@ class SubsearchCore(Initializer):
                 self.skipped_combined.append(data)
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def manual_download(self) -> None:
         log.stdout_in_brackets(f"Manual_download")
         screen_manager.open_screen("download_manager", data=self.skipped_combined)
         self.ran_download_tab = True
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def extract_files(self) -> None:
         self.core_state.update_state()
         log.stdout_in_brackets("Extracting downloads")
         file_manager.extract_files(app_paths.tmpdir, file_data.subs_directory, ".zip")
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def autoload_rename(self) -> None:
         log.stdout_in_brackets("Renaming best match")
         new_name = file_manager.autoload_rename(f"{self.release_data.release}", ".srt")
         self.autoload_src = new_name
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def autoload_move(self) -> None:
         log.stdout_in_brackets("Renaming best match")
         file_manager.autoload_move(f"{self.release_data.release}", file_data.directory_path, self.autoload_src, ".srt")
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def clean_up(self) -> None:
         self.core_state.update_state()
         log.stdout_in_brackets("Cleaning up")
@@ -216,7 +216,7 @@ class SubsearchCore(Initializer):
             file_manager.del_directory(file_data.subs_directory)
         log.stdout("Done with task", level="info", end_new_line=True)
 
-    @ignore_condition
+    @ignore_conditions
     def summary_toast(self, elapsed) -> None:
         self.core_state.update_state()
         elapsed_summary = f"Finished in {elapsed} seconds"
