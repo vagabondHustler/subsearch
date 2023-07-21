@@ -1,8 +1,6 @@
 import re
 
 import cloudscraper
-import requests
-import selectolax
 from packaging.version import Version
 
 from subsearch.data import __guid__, __version__
