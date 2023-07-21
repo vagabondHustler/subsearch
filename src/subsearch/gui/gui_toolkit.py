@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import Label, StringVar, ttk
 
-from subsearch.data import __version__, app_paths
+from subsearch.data import __version__
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import file_manager, io_json, io_winreg
+from subsearch.utils import io_file_system, io_json, io_winreg
 
 GWL_EXSTYLE = -20
 WS_EX_APPWINDOW = 0x00040000
@@ -258,7 +259,7 @@ class ToggleableFrameButton(tk.Frame):
         self.show_if_exe = kwargs.get("write_to_reg", True)
         self.tip_text = kwargs.get("tip_text", None)
         self.tip_present = False
-        if self.show_if_exe is False and file_manager.running_from_exe():
+        if self.show_if_exe is False and DEVICE_INFO.mode == "executable":
             return None
         label = tk.Label(self, text=self.setting_name)
         label.configure(DEFAULT_LABEL_CONFIG)
@@ -345,6 +346,6 @@ def configure_root(root):
     if io_json.get_json_key("context_menu"):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.dark_grey)
-    root.iconbitmap(app_paths.gui_assets / "subsearch.ico")
+    root.iconbitmap(APP_PATHS.gui_assets / "subsearch.ico")
     root.geometry(WindowPosition.set(root))  # type: ignore
     root.resizable(False, False)

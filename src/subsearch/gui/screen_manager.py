@@ -2,7 +2,7 @@ import tkinter as tk
 from typing import Any
 
 from subsearch.data import __version__
-from subsearch.data.data_objects import PrettifiedDownloadData
+from subsearch.data.data_classes import SkippedSubtitle
 from subsearch.gui import gui_toolkit, resource_loader, root
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
@@ -140,7 +140,7 @@ class SubsearchOptions(tk.Frame):
 
 
 class DownloadManager(tk.Frame):
-    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
+    def __init__(self, parent, formatted_data: list[SkippedSubtitle]) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.dark_grey)
         download_manager.DownloadList(self, formatted_data).pack(anchor="center")
@@ -156,8 +156,8 @@ def open_screen(tab_name: str, **kwargs) -> None:
     Returns:
         None: This function does not return anything, it manipulates the GUI instead.
     """
-    root.bind('<KeyPress>', close_mainloop)
-    data: list | list[PrettifiedDownloadData] = kwargs.get("data", [])
+    root.bind("<KeyPress>", close_mainloop)
+    data: list | list[SkippedSubtitle] = kwargs.get("data", [])
     gui_toolkit.configure_root(root)
     resource_loader.set_ttk_theme(root)
     resource_loader.set_custom_btn_styles()
@@ -173,5 +173,5 @@ def open_screen(tab_name: str, **kwargs) -> None:
 
 
 def close_mainloop(event):
-    if event.keysym == 'Escape':
+    if event.keysym == "Escape":
         root.quit()

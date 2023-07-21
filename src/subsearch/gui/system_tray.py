@@ -1,9 +1,10 @@
 import threading
+
 import pystray
 from PIL import Image
 
-from subsearch.data import __version__, app_paths
-
+from subsearch.data import __version__
+from subsearch.data.constants import APP_PATHS
 
 enable_system_tray: bool
 
@@ -36,7 +37,7 @@ class SystemTray:
     @system_tray_conditions
     def __init__(self) -> None:
         title = f"Subsearch {__version__}"
-        icon = Image.open(app_paths.gui_assets / "subsearch.ico")
+        icon = Image.open(APP_PATHS.gui_assets / "subsearch.ico")
         self.tray = pystray.Icon("Subsearch", icon=icon, title=title)
         self.thread_tray = threading.Thread(daemon=True, target=self._run_pystray)
 

@@ -1,13 +1,13 @@
 import re
 from tkinter import Tk
 
-from subsearch.data import app_paths
+from subsearch.data.constants import APP_PATHS
 
 
 def get_sprites() -> dict:
     pattern = r"\b(\w+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\b"
     data = {}
-    file_path = app_paths.gui_styles / "sprites.tcl"
+    file_path = APP_PATHS.gui_styles / "sprites.tcl"
     with file_path.open() as file:
         content = file.read()
         matches = re.findall(pattern, content)
