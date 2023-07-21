@@ -1,11 +1,12 @@
 import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
-from typing import Any, Iterable
+from typing import Any
 
 from subsearch.data import __version__
+from subsearch.data.constants import DEVICE_INFO
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import file_manager, io_json, io_winreg, update
+from subsearch.utils import io_file_system, io_json, io_winreg, update
 
 
 def check_disabled(func):
@@ -89,7 +90,7 @@ class SubsearchOption(ttk.Labelframe):
             "context_menu_icon": "Context menu icon",
             "system_tray": "System tray icon",
             "toast_summary": "Notification when done",
-            "manual_download_fail": "Manual download on fail",
+            "manual_download_on_fail": "Manual download on fail",
             "show_terminal": "Terminal while searching",
             "log_to_file": "Create log file",
             "use_threading": "Multithreading",
@@ -111,7 +112,7 @@ class SubsearchOption(ttk.Labelframe):
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             if key == "context_menu_icon" and not io_json.get_json_key("context_menu"):
                 check_btn.state(["disabled"])
-            if key == "show_terminal" and file_manager.running_from_exe():
+            if key == "show_terminal" and DEVICE_INFO.mode == "executable":
                 check_btn.state(["disabled"])
             if key == "toast_summary" and not io_json.get_json_key("system_tray"):
                 check_btn.state(["disabled"])

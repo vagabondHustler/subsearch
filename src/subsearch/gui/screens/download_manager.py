@@ -2,15 +2,15 @@ import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import app_paths, file_data
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.data.constants import APP_PATHS, VIDEO_FILE
+from subsearch.data.data_classes import SkippedSubtitle, Subtitle
 from subsearch.gui.resources import config as cfg
 from subsearch.providers import subscene
-from subsearch.utils import file_manager, log
+from subsearch.utils import io_file_system
 
 
 class DownloadList(tk.Frame):
-    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
+    def __init__(self, parent, formatted_data: list[SkippedSubtitle]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
         self.configure(bg=cfg.color.dark_grey, width=root_posx, height=root_posy - 82)
@@ -54,10 +54,10 @@ class DownloadList(tk.Frame):
         self._urls = {}
         # fil list box with all available subtitles that were found and not downloaded
         for enu, data in enumerate(self.formatted_data):
-            self.sub_listbox.insert(tk.END, f"{data.formatted_release}\n")
+            self.sub_listbox.insert(tk.END, f"{data.prettified_release}\n")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             self._providers[enu] = data.provider
-            self._releases[enu] = data.release
+            self._releases[enu] = data.name
             self._urls[enu] = data.url
 
     def mouse_b1_press(self, event) -> None:
@@ -83,18 +83,18 @@ class DownloadList(tk.Frame):
                 download_url = self.subscene_scrape.get_download_url(_url)
             else:
                 download_url = _url
-            path = f"{ app_paths.tmpdir}\\__{_provider}__{item_num}.zip"
-            enum = DownloadData(
+            path = f"{ APP_PATHS.tmp_dir}\\__{_provider}__{item_num}.zip"
+            enum = Subtitle(
                 provider=f"Downloading from {_provider}",
-                name=_release,
+                release_name=_release,
                 file_path=path,
-                url=download_url,
-                idx_num=1,
+                download_url=download_url,
+                idx_pos=1,
                 idx_lenght=1,
             )  # type: ignore
-            file_manager.download_subtitle(enum)  # type: ignore
-            file_manager.extract_files(app_paths.tmpdir, file_data.subs_directory, ".zip")
-            file_manager.delete_temp_files(app_paths.tmpdir)
+            io_file_system.download_subtitle(enum)  # type: ignore
+            io_file_system.extract_files_in_dir(APP_PATHS.tmp_dir, VIDEO_FILE.subs_dir, ".zip")
+            io_file_system.del_directory_content(APP_PATHS.tmp_dir)
             break
         self.sub_listbox.delete(int(item_num))
         self.sub_listbox.insert(int(item_num), f"✔ {_release}")

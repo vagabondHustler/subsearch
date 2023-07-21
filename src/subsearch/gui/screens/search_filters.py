@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Iterable
 
 from subsearch.gui import gui_toolkit
 from subsearch.gui.resources import config as cfg
