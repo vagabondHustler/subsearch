@@ -2,15 +2,12 @@ import json
 from pathlib import Path
 from typing import Any, Union
 
-from subsearch.data import SUPPORTED_FILE_EXTENSIONS, SUPPORTED_PROVIDERS, app_paths
-from subsearch.data.data_objects import AppConfig, LanguageData, ProviderAlphaCodeData
+from subsearch.data.constants import APP_PATHS, SUPPORTED_FILE_EXT, SUPPORTED_PROVIDERS
+from subsearch.data.data_classes import AppConfig, LanguageData, ProviderAlphaCodeData
 from subsearch.utils.exceptions import ProviderNotImplemented
 
-APPCON_JSON = Path(app_paths.appdata_local) / "application_config.json"
-LANGS_JSON = Path(app_paths.data) / "languages.json"
 
-
-def get_json_data(json_file: Path = APPCON_JSON) -> Any:
+def get_json_data(json_file: Path = APP_PATHS.application_config_json) -> Any:
     """
     Returns the contents of the json file as a Python object.
 
@@ -32,7 +29,7 @@ def get_json_key(key: str) -> Any:
     Args:
         key (str):
         current_language, languages, subtitle_type, percentage_threshold,
-        rename_best_match, context_menu, context_menu_icon, manual_download_fail, use_threading,
+        rename_best_match, context_menu, context_menu_icon, manual_download_on_fail, use_threading,
         show_terminal, log_to_file, file_extensions, providers
 
     Returns:
@@ -53,7 +50,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         None
     """
 
-    with open(APPCON_JSON, "r+", encoding="utf-8") as f:
+    with open(APP_PATHS.application_config_json, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -61,7 +58,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         f.truncate()
 
 
-def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APPCON_JSON) -> None:
+def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APP_PATHS.application_config_json) -> None:
     """
     Writes the provided configuration data to the config.json file.
 
@@ -91,13 +88,12 @@ def retrieve_application_config() -> dict[str, Any]:
         "context_menu_icon": True,
         "system_tray": True,
         "toast_summary": False,
-        "manual_download_fail": True,
-        "manual_download_mode": False,
+        "manual_download_on_fail": True,
         "use_threading": True,
         "multiple_app_instances": False,
         "show_terminal": False,
         "log_to_file": False,
-        "file_extensions": dict.fromkeys(SUPPORTED_FILE_EXTENSIONS, True),
+        "file_extensions": dict.fromkeys(SUPPORTED_FILE_EXT, True),
         "providers": dict.fromkeys(SUPPORTED_PROVIDERS, True),
     }
     return data
@@ -110,23 +106,24 @@ def create_config_file() -> None:
     Returns:
         None.
     """
-    if APPCON_JSON.exists():
+    if APP_PATHS.application_config_json.exists():
         return None
     application_config = retrieve_application_config()
-    with open(APPCON_JSON, "w", encoding="utf-8") as file:
+    with open(APP_PATHS.application_config_json, "w", encoding="utf-8") as file:
         file.seek(0)
         json.dump(application_config, file, indent=4)
         file.truncate()
 
 
-def get_app_config() -> AppConfig:
+def get_app_config(**kwargs) -> AppConfig:
     """
     Returns an instance of AppConfig that contains the current configuration settings.
 
     Returns:
         AppConfig: instance containing the current application configuration settings.
     """
-    data = get_json_data()
+    json_file = kwargs.get("json_file", APP_PATHS.application_config_json)
+    data = get_json_data(json_file)
     user_data = AppConfig(
         **data,
         hearing_impaired=data["subtitle_type"]["hearing_impaired"],
@@ -149,7 +146,7 @@ def get_language_data(language: str = "default") -> LanguageData:
     if language == "default":
         language = get_json_key("current_language")
 
-    data = get_json_data(LANGS_JSON)
+    data = get_json_data(APP_PATHS.languages_json)
     language_data = LanguageData(**data[language])
     return language_data
 
@@ -160,7 +157,7 @@ def get_language_data_value(key: str):
 
 
 def get_available_languages() -> dict:
-    return get_json_data(LANGS_JSON)
+    return get_json_data(APP_PATHS.languages_json)
 
 
 def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeData:
@@ -199,3 +196,59 @@ def check_language_compatibility(provider: str, language: str = "default") -> bo
     elif provider in data.incompatibility:
         return False
     return False
+
+
+def update_config_file() -> None:
+    """
+    Updates the application's configuration file to match the desired config,
+    preserving existing values.
+
+    Returns:
+        None.
+    """
+    if not APP_PATHS.application_config_json.exists():
+        return
+
+    config_dict = retrieve_application_config()
+    json_data = get_json_data()
+
+    keys_to_remove = []
+    for key in json_data:
+        if key not in config_dict:
+            keys_to_remove.append(key)
+
+    for key in keys_to_remove:
+        json_data.pop(key)
+
+    keys_to_add = []
+    for key in config_dict:
+        if key not in json_data:
+            keys_to_add.append(key)
+
+    for key in keys_to_add:
+        json_data[key] = config_dict[key]
+
+    set_json_data(json_data)
+
+
+def extract_dict_keys(dictionary, keys=[]) -> list:
+    """
+    Extracts all keys from a nested dictionary.
+
+    Args:
+        dictionary (dict): The dictionary to extract keys from.
+        keys (list, optional): The list of parent keys. Defaults to [].
+
+    Returns:
+        list: List of keys in the dictionary.
+    """
+    if keys is None:
+        keys = []
+    json_keys = []
+    for key, value in dictionary.items():
+        nested_keys = keys + [key]
+        if isinstance(value, dict):
+            json_keys.extend(extract_dict_keys(value, nested_keys))
+        else:
+            json_keys.append(".".join(nested_keys))
+    return json_keys
