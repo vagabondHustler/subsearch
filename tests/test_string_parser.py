@@ -1,0 +1,131 @@
+from src.subsearch.utils import imdb_lookup, io_json, string_parser
+from tests import toolkit
+
+
+def test_str_parser_movie() -> None:
+    """
+    test so to ensure that the src/subsearch/utils/string_parser.pct_value function returns a with the correct percentage
+    """
+    movie_1080p = "the.foo.bar.2021.1080p.web.h264-foobar"
+    movie_720p = "the.foo.bar.2021.720p.web.h264-foobar"
+    show_1080p = "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    show_720p = "the.foo.bar.s01e01.720p.web.h264-foobar"
+    no_match = "then.fooing.baring.2022.720p.webby.h265-f00bar"
+
+    pct0 = string_parser.calculate_match(movie_1080p, movie_720p)
+    pct1 = string_parser.calculate_match(show_1080p, show_720p)
+    pct2 = string_parser.calculate_match(movie_1080p, show_1080p)
+    pct3 = string_parser.calculate_match(show_1080p, movie_1080p)
+    pct4 = string_parser.calculate_match(movie_1080p, movie_1080p)
+    pct5 = string_parser.calculate_match(movie_1080p, no_match)
+
+    assert pct0 == 100
+    assert pct1 == 100
+    assert pct2 == 83
+    assert pct3 == 83
+    assert pct4 == 100
+    assert pct5 == 0
+
+
+def test_string_parser_movie() -> None:
+    """
+    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
+    """
+
+    filename = "the.foo.bar.2021.1080p.web.h264-foobar"
+    release_data = string_parser.get_release_data(filename)
+
+    assert release_data.title == "the foo bar"
+    assert release_data.year == 2021
+    assert release_data.season == ""
+    assert release_data.season_ordinal == ""
+    assert release_data.episode == ""
+    assert release_data.episode_ordinal == ""
+    assert release_data.tvseries is False
+    assert release_data.release == "the.foo.bar.2021.1080p.web.h264-foobar"
+    assert release_data.group == "foobar"
+
+
+def test_string_parser_show() -> None:
+    """
+    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
+    """
+    filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    release_data = string_parser.get_release_data(filename)
+
+    assert release_data.title == "the foo bar"
+    assert release_data.year == 0
+    assert release_data.season == "01"
+    assert release_data.season_ordinal == "first"
+    assert release_data.episode == "01"
+    assert release_data.episode_ordinal == "first"
+    assert release_data.tvseries is True
+    assert release_data.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    assert release_data.group == "foobar"
+
+
+def test_string_parser_bad_filename() -> None:
+    filename = "the foo bar 1080p web h264"
+    release_data = string_parser.get_release_data(filename)
+
+    assert release_data.title == "the foo bar 1080p web h264"
+    assert release_data.year == 0
+    assert release_data.season == ""
+    assert release_data.season_ordinal == ""
+    assert release_data.episode == ""
+    assert release_data.episode_ordinal == ""
+    assert release_data.tvseries is False
+    assert release_data.release == "the foo bar 1080p web h264"
+    assert release_data.group == "the foo bar 1080p web h264"
+
+
+def test_provider_urls_movie(monkeypatch):
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", toolkit.FAKE_MOVIE)
+    app_config = io_json.get_app_config(json_file=toolkit.FAKE_CONFIG_PATH)
+    filename = toolkit.FAKE_MOVIE.file_name
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_json.get_language_data()
+    create_provider_urls = string_parser.CreateProviderUrls(
+        app_config,
+        release_data,
+        language_data,
+    )
+    provider_url = create_provider_urls.retrieve_urls()
+
+    assert provider_url.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
+    assert (
+        provider_url.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    )
+    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
+    assert provider_url.yifysubtitles == ""
+
+
+def test_provider_urls_series(monkeypatch):
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", toolkit.FAKE_SERIES)
+    app_config = io_json.get_app_config(json_file=toolkit.FAKE_CONFIG_PATH)
+    filename = toolkit.FAKE_SERIES.file_name
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_json.get_language_data()
+    create_provider_urls = string_parser.CreateProviderUrls(
+        app_config,
+        release_data,
+        language_data,
+    )
+    provider_url = create_provider_urls.retrieve_urls()
+
+    assert (
+        provider_url.subscene
+        == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
+    )
+    assert (
+        provider_url.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    )
+    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
+    assert provider_url.yifysubtitles == ""
+
+
+def test_imdb_tt_id():
+    tt_id = imdb_lookup.FindImdbID("Arctic", 2019).id
+    assert tt_id == "tt6820256"
