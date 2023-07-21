@@ -1,10 +1,10 @@
 from selectolax.parser import Node
 
-from subsearch.data import app_paths
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.data.constants import APP_PATHS
+from subsearch.data.data_classes import SkippedSubtitle, Subtitle
 from subsearch.providers import core_provider
 from subsearch.providers.core_provider import SearchArguments
-from subsearch.utils import log, string_parser
+from subsearch.utils import io_log, string_parser
 
 
 class SubsceneScraper:
@@ -60,58 +60,50 @@ class Subscene(SearchArguments, SubsceneScraper):
     def __init__(self, **kwargs):
         SearchArguments.__init__(self, **kwargs)
         SubsceneScraper.__init__(self)
-        self.logged_and_sorted: list[PrettifiedDownloadData] = []
+        self._accepted_subtitles: list[Subtitle] = []
+        self._rejected_subtitles: list[Subtitle] = []
+        self.logged_and_sorted: list[SkippedSubtitle] = []
+        self.provider_name = self.__class__.__name__.lower()
 
     def _definitive_match(self) -> list[str]:
         if self.tvseries:
             return [f"{self.title} - {self.season_ordinal} season"]
         return [f"{self.title} ({self.year})", f"{self.title} ({(self.year-1)})"]
 
-    def parse_site_results(self) -> list | list[DownloadData]:
-        to_be_sorted: list[PrettifiedDownloadData] = []
-        _to_be_downloaded: dict[str, str] = {}
-        to_be_downloaded: dict[str, str] = {}
+    def start_search(self):
         custom_subscene_header = core_provider.CustomSubsceneHeader(self.app_config)
         header = custom_subscene_header.create_header()
-        # find title
         definitive_match = self._definitive_match()
         found_title_url = self.find_title(self.url_subscene, self.current_language, definitive_match)
+        
+
         if not found_title_url:
             return []
 
-        # search for subtitles
         subtitle_data = self.find_subtitles(found_title_url, self.hi_sub, self.non_hi_sub, header)
-        for key, value in subtitle_data.items():
-            pct_result = string_parser.calculate_match(key, self.release)
-            log.stdout_match(
-                provider="subscene",
-                subtitle_name=key,
+
+        for subtitle_name, subtitle_url in subtitle_data.items():
+            pct_result = string_parser.calculate_match(subtitle_name, self.release)
+            io_log.stdout_match(
+                provider=self.provider_name,
+                subtitle_name=subtitle_name,
                 result=pct_result,
                 threshold=self.app_config.percentage_threshold,
             )
-            formatted_data = core_provider.prettify_download_data("subscene", key, value, pct_result)
-            to_be_sorted.append(formatted_data)
-            if core_provider.is_threshold_met(self, key, pct_result) is False or self.manual_download_mode:
-                continue
-            if key in _to_be_downloaded.keys():
-                continue
-            _to_be_downloaded[key] = value
+            if core_provider.is_threshold_met(self, pct_result):
+                download_url = self.get_download_url(subtitle_url)
+                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), download_url)
+                self._accepted_subtitles.append(subtitle)
+            else:
+                # * 'get_download_url' on subtitle_url
+                # Would take to long to scrape all subtitle download urls
+                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
+                self._rejected_subtitles.append(subtitle)
 
-        self.sorted_site_results = core_provider.sort_site_results(to_be_sorted)
-        if not _to_be_downloaded:
-            return []
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        return self._accepted_subtitles
 
-        # gather subtitle download url
-        for release, subtitle_url in _to_be_downloaded.items():
-            zip_url = self.get_download_url(subtitle_url)
-            to_be_downloaded[release] = zip_url
-
-        if not to_be_downloaded:
-            return []
-
-        # pack download data
-        download_info = core_provider.set_download_data("subscene", app_paths.tmpdir, to_be_downloaded)
-        return download_info
-
-    def sorted_list(self) -> list[PrettifiedDownloadData]:
-        return self.sorted_site_results
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        return self._rejected_subtitles

@@ -1,10 +1,10 @@
 from selectolax.parser import Node
 
-from subsearch.data import app_paths
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.data.constants import APP_PATHS
+from subsearch.data.data_classes import SkippedSubtitle, Subtitle
 from subsearch.providers import core_provider
 from subsearch.providers.core_provider import SearchArguments
-from subsearch.utils import log, string_parser
+from subsearch.utils import io_log, string_parser
 
 
 class YifySubtitlesScraper:
@@ -44,42 +44,35 @@ class YifiSubtitles(SearchArguments, YifySubtitlesScraper):
     def __init__(self, **kwargs):
         SearchArguments.__init__(self, **kwargs)
         YifySubtitlesScraper.__init__(self)
-        self.logged_and_sorted: list[PrettifiedDownloadData] = []
+        self._accepted_subtitles: list[Subtitle] = []
+        self._rejected_subtitles: list[Subtitle] = []
+        self.provider_name = self.__class__.__name__.lower()
 
-    def parse_site_results(self) -> list | list[DownloadData]:
-        # search for title
+    def start_search(self) -> list | list[Subtitle]:
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
-        to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[PrettifiedDownloadData] = []
 
-        data_found = True if subtitle_data else False
-        if data_found is False:
-            return []
-        # search for subtitle
-        for key, value in subtitle_data.items():
-            pct_result = string_parser.calculate_match(key, self.release)
-            log.stdout_match(
-                provider="yifysubtitles",
-                subtitle_name=key,
+        if not subtitle_data:
+            return None
+
+        for subtitle_name, subtitle_url in subtitle_data.items():
+            pct_result = string_parser.calculate_match(subtitle_name, self.release)
+            io_log.stdout_match(
+                provider=self.provider_name,
+                subtitle_name=subtitle_name,
                 result=pct_result,
                 threshold=self.app_config.percentage_threshold,
             )
-            formatted_data = core_provider.prettify_download_data("yifysubtitles", key, value, pct_result)
-            to_be_sorted.append(formatted_data)
-            if core_provider.is_threshold_met(self, key, pct_result) is False or self.manual_download_mode:
-                continue
-            if value in to_be_downloaded.values():
-                continue
-            to_be_downloaded[key] = value
+            if core_provider.is_threshold_met(self, pct_result):
+                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
+                self._accepted_subtitles.append(subtitle)
+            else:
+                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
+                self._rejected_subtitles.append(subtitle)
 
-        self.sorted_site_results = core_provider.sort_site_results(to_be_sorted)
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        return self._accepted_subtitles
 
-        if not to_be_downloaded:
-            return []
-
-        # pack download data
-        download_info = core_provider.set_download_data("yifysubtitles", app_paths.tmpdir, to_be_downloaded)
-        return download_info
-
-    def sorted_list(self) -> list[PrettifiedDownloadData]:
-        return self.sorted_site_results
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        return self._rejected_subtitles

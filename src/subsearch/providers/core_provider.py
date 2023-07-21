@@ -3,14 +3,15 @@ from pathlib import Path
 import cloudscraper
 from selectolax.parser import HTMLParser
 
-from subsearch.data.data_objects import (
+from subsearch.data.constants import VIDEO_FILE
+from subsearch.data.data_classes import (
     AppConfig,
-    DownloadData,
     LanguageData,
-    PrettifiedDownloadData,
     ProviderUrls,
     ReleaseData,
+    SkippedSubtitle,
     SubsceneCookie,
+    Subtitle,
 )
 from subsearch.utils import io_json
 
@@ -75,14 +76,13 @@ class SearchArguments:
         self.tvseries = release_data.tvseries
         self.release = release_data.release
         self.group = release_data.group
-        self.file_hash = release_data.file_hash
+
         # user parameters
         self.current_language = app_config.current_language
         self.hi_sub = app_config.hearing_impaired
         self.non_hi_sub = app_config.non_hearing_impaired
         self.percentage_threashold = app_config.percentage_threshold
-        self.manual_download_fail = app_config.manual_download_fail
-        self.manual_download_mode = app_config.manual_download_mode
+        self.manual_download_on_fail = app_config.manual_download_on_fail
         # provider url data
         self.url_subscene = provider_urls.subscene
         self.url_opensubtitles = provider_urls.opensubtitles
@@ -90,26 +90,11 @@ class SearchArguments:
         self.url_yifysubtitles = provider_urls.yifysubtitles
 
         self.language_data = language_data
+        self.filehash = VIDEO_FILE.file_hash
 
 
-def is_threshold_met(cls: "SearchArguments", key: str, pct_result: int) -> bool:
-    """
-    Checks if the percentage threshold is met or if the given 'key' contains a title for a TV series.
-
-    Args:
-        key (str): Containing the data to be checked for matching with tvseries name
-        pct_result (int): Percentage value to compare with "percentage_threshold"
-
-    Returns:
-        bool : True or False depending on whether the percentage threshold is met or not
-                and tvseries title is matching or not.
-    """
-
-    if pct_result >= cls.percentage_threashold or (
-        cls.title
-        and f"{cls.season}{cls.episode}" in key.lower()
-        and cls.tvseries
-    ):
+def is_threshold_met(cls: "SearchArguments", pct_result: int) -> bool:
+    if pct_result >= cls.percentage_threashold:
         return True
     return False
 
@@ -138,51 +123,26 @@ def get_html_parser(url: str, header_=None):
     return HTMLParser(response.text)
 
 
-def set_download_data(provider: str, tmp_dir: Path, to_be_downloaded: dict[str, str]) -> list[DownloadData]:
-    """
-    Creates a list of data for each file to be downloaded.
-
-    Args:
-        provider (str): The name of the file provider.
-        tmp_directory (str): The directory where the temporary downloaded files will be saved.
-        to_be_downloaded (dict[str,str]): A dictionary with the name and url of each file to be downloaded.
-
-    Returns:
-        List[DownloadData]: A list containing metadata for each downloaded file.
-    """
+def prepare_subtitles_download(provider: str, tmp_dir: Path, to_be_downloaded: dict[str, str]) -> list[Subtitle]:
     download_info = []
     idx_lenght = len(to_be_downloaded)
     for idx_num, (name, url) in enumerate(to_be_downloaded.items(), start=1):
         file_path = f"{tmp_dir}\\{provider}_{idx_num}.zip"
-        data = DownloadData(provider, name, file_path, url, idx_num, idx_lenght)
+        data = Subtitle(provider, name, file_path, url, idx_num, idx_lenght)
         download_info.append(data)
     return download_info
 
 
-def prettify_download_data(provider: str, key: str, value: str, percentage_result: int) -> PrettifiedDownloadData:
-    """
-    Prettify the provided download data and return as UpdatedDownloadData object.
-
-    Args:
-        provider (str): The metadata provider.
-        key (str): Key of the meta-data.
-        value (str): Value of the key respective to input key.
-        percentage_result (int): Percentage value indicating the match between the found metadata
-                                and input query.
-
-    Returns:
-        PrettifiedDownloadData: An instance of PrettifiedDownloadData class populated with download data.
-
-    """
+def prepare_subtitles_skipped(provider: str, key: str, value: str, percentage_result: int) -> SkippedSubtitle:
     lenght_str = sum(1 for _char in f"{percentage_result:>3}% match:")
     number_of_spaces = " " * lenght_str
     pct_result_string = f"{percentage_result:>3}% match: {key}"
     url = f"{number_of_spaces} {value}"
-    data = PrettifiedDownloadData(provider, key, value, percentage_result, pct_result_string, url)
+    data = SkippedSubtitle(provider, key, value, percentage_result, pct_result_string, url)
     return data
 
 
-def sort_site_results(list_: list[PrettifiedDownloadData]) -> list[PrettifiedDownloadData]:
+def sort_skipped_subtitles(list_: list[SkippedSubtitle]) -> list[SkippedSubtitle]:
     """
     Sorts the list of PrettifiedDownloadData objects based on percentage result from Highest to Lowest.
 
