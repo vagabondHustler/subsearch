@@ -3,8 +3,8 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.data import app_paths
-from subsearch.utils import file_manager
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO
+from subsearch.utils import io_file_system
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = r"Software\Classes"
@@ -92,10 +92,10 @@ def get_command_value() -> str:
     # get latest json value from file
     from subsearch.utils import io_json
 
-    if file_manager.running_from_exe():
+    if DEVICE_INFO.mode == "executable":
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
-    elif file_manager.running_from_exe() is False:
+    elif DEVICE_INFO.mode == "interpreter":
         show_terminal = io_json.get_json_key("show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
@@ -103,7 +103,7 @@ def get_command_value() -> str:
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; os.chdir(r'{app_paths.home}');"
+        set_wd = f"import os; os.chdir(r'{APP_PATHS.home}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" "%1"'
@@ -125,7 +125,7 @@ def get_icon_value() -> str:
 
     show_icon: str = io_json.get_json_key("context_menu_icon")
     if show_icon:
-        return str(app_paths.gui_assets / "subsearch.ico")
+        return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
         return ""
 
