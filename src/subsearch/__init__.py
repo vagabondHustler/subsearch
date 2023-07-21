@@ -1,12 +1,14 @@
 import sys
+import time
 from pathlib import Path
 from threading import Thread
 
 from subsearch import core
 from subsearch.data import __guid__
 from subsearch.gui import screen_manager
-from subsearch.utils import io_json, io_winreg, mutex_synchronizer
+from subsearch.utils import io_json, io_winreg, mutex_manager, state_manager
 
+START = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
 sys.path.append(HOMEPATH)
@@ -18,7 +20,8 @@ class Subsearch:
         """
         Setup and gather all available parameters
         """
-        self.subsearch_core = core.SubsearchCore()
+        state_manager.CoreStateManager()
+        self.subsearch_core = core.SubsearchCore(START)
 
     def thread_executor(self, *args) -> None:
         """
@@ -72,7 +75,7 @@ class Subsearch:
         Download zip files containing the .srt files, extract, rename and clean up tmp files
         """
         self.subsearch_core.download_files()
-        self.subsearch_core.manual_download()
+        # self.subsearch_core.manual_download()
         self.subsearch_core.extract_files()
         self.subsearch_core.autoload_rename()
         self.subsearch_core.autoload_move()
@@ -138,7 +141,7 @@ def console() -> None:
             print(console.__doc__)
 
 
-@mutex_synchronizer.synchronized(__guid__)
+@mutex_manager.apply_mutex
 def main() -> None:
     for i in sys.argv:
         if i.startswith("--"):
