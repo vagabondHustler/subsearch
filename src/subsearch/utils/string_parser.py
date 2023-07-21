@@ -2,7 +2,8 @@ import re
 
 from num2words import num2words
 
-from subsearch.data.data_objects import (
+from subsearch.data.constants import VIDEO_FILE
+from subsearch.data.data_classes import (
     AppConfig,
     LanguageData,
     ProviderUrls,
@@ -139,16 +140,14 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, file_hash: str, app_config: AppConfig, release_data: ReleaseData, language_data: LanguageData):
+    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: LanguageData):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
         Args:
-            file_hash (str): The file hash.
             app_config (AppConfig): The application configuration
             release_metadata (ReleaseMetadata): The release metadata
         """
-        self.file_hash = file_hash
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
@@ -196,7 +195,7 @@ class CreateProviderUrls:
         """
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
-        return f"{domain}/{subtitle_type}/moviehash-{self.file_hash}"
+        return f"{domain}/{subtitle_type}/moviehash-{VIDEO_FILE.file_hash}"
 
     def yifysubtitles(self) -> str:
         """
@@ -245,25 +244,24 @@ class CreateProviderUrls:
         return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
 
 
-def get_release_metadata(filename: str, file_hash: str) -> ReleaseData:
+def get_release_data(filename: str) -> ReleaseData:
     """
-    Collects the necessary metadata from a filename.
+    Collects the necessary data from a filename.
 
     Args:
       filename (str): The name of the file to obtain release metadata from.
-      file_hash (str): The hash value of the file.
 
     Returns:
       ReleaseMetadata: A ReleaseMetadata object containing the relevant metadata for the inputted file.
 
     """
-    filename = filename.lower()
-    year = find_year(filename)
-    season_episode = find_season_episode(filename)
+    release = filename.lower()
+    year = find_year(release)
+    season_episode = find_season_episode(release)
     season, season_ordinal, episode, episode_ordinal, series = convert_to_ordinal_string(season_episode)
 
-    title = find_title(filename, year, series)
-    group = find_group(filename)
+    title = find_title(release, year, series)
+    group = find_group(release)
 
     parameters = ReleaseData(
         title,
@@ -273,9 +271,8 @@ def get_release_metadata(filename: str, file_hash: str) -> ReleaseData:
         episode,
         episode_ordinal,
         series,
-        filename,
+        release,
         group,
-        file_hash,
     )
     return parameters
 
