@@ -9,11 +9,10 @@ from subsearch.data.data_classes import (
     LanguageData,
     ProviderUrls,
     ReleaseData,
-    SkippedSubtitle,
     SubsceneCookie,
     Subtitle,
 )
-from subsearch.utils import io_json
+from subsearch.utils import io_json, io_log, string_parser
 
 
 class CustomSubsceneHeader:
@@ -93,6 +92,46 @@ class SearchArguments:
         self.filehash = VIDEO_FILE.file_hash
 
 
+class ProviderHelper(SearchArguments):
+    def __init__(self, **kwargs):
+        SearchArguments.__init__(self, **kwargs)
+        self._accepted_subtitles: list[Subtitle] = []
+        self._rejected_subtitles: list[Subtitle] = []
+
+    def start_search(self):
+        raise NotImplementedError("start_search method must be implemented in the subclasses.")
+
+    def _process_subtitle_data(self, provider_name: str, subtitle_data: dict[str, str]):
+        if not subtitle_data:
+            return None
+
+        for subtitle_name, subtitle_url in subtitle_data.items():
+            pct_result = string_parser.calculate_match(subtitle_name, self.release)
+            io_log.stdout_match(
+                provider=provider_name,
+                subtitle_name=subtitle_name,
+                result=pct_result,
+                threshold=self.app_config.percentage_threshold,
+            )
+            if is_threshold_met(self, pct_result):
+                if provider_name == "subscene":
+                    subtitle_url = self.subscene_get_download_url(subtitle_url)
+                subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
+                self._accepted_subtitles.append(subtitle)
+            else:
+                # * 'get_download_url' on subtitle_url from subscene
+                # Would take to long to scrape all subtitle download urls
+                subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
+                self._rejected_subtitles.append(subtitle)
+
+    @staticmethod
+    def subscene_get_download_url(url: str) -> str:
+        tree = get_html_parser(url)
+        href = tree.css_first("#downloadButton").attributes["href"]
+        download_url = f"https://subscene.com/{href}"
+        return download_url
+
+
 def is_threshold_met(cls: "SearchArguments", pct_result: int) -> bool:
     if pct_result >= cls.percentage_threashold:
         return True
@@ -131,26 +170,3 @@ def prepare_subtitles_download(provider: str, tmp_dir: Path, to_be_downloaded: d
         data = Subtitle(provider, name, file_path, url, idx_num, idx_lenght)
         download_info.append(data)
     return download_info
-
-
-def prepare_subtitles_skipped(provider: str, key: str, value: str, percentage_result: int) -> SkippedSubtitle:
-    lenght_str = sum(1 for _char in f"{percentage_result:>3}% match:")
-    number_of_spaces = " " * lenght_str
-    pct_result_string = f"{percentage_result:>3}% match: {key}"
-    url = f"{number_of_spaces} {value}"
-    data = SkippedSubtitle(provider, key, value, percentage_result, pct_result_string, url)
-    return data
-
-
-def sort_skipped_subtitles(list_: list[SkippedSubtitle]) -> list[SkippedSubtitle]:
-    """
-    Sorts the list of PrettifiedDownloadData objects based on percentage result from Highest to Lowest.
-
-    Args:
-        list_ (list): a list of PrettifiedDownloadData objects
-
-    Returns:
-        list: A sorted list of PrettifiedDownloadData objects in descending order by Percentage result.
-    """
-    list_.sort(key=lambda x: x.pct_result, reverse=True)
-    return list_

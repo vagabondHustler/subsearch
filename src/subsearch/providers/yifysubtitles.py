@@ -1,15 +1,12 @@
 from selectolax.parser import Node
 
-from subsearch.data.constants import APP_PATHS
-from subsearch.data.data_classes import SkippedSubtitle, Subtitle
+from subsearch.data.data_classes import Subtitle
 from subsearch.providers import core_provider
-from subsearch.providers.core_provider import SearchArguments
-from subsearch.utils import io_log, string_parser
 
 
-class YifySubtitlesScraper:
-    def __init__(self) -> None:
-        ...
+class YifySubtitlesScraper(core_provider.ProviderHelper):
+    def __init__(self, **kwargs) -> None:
+        core_provider.ProviderHelper.__init__(self, **kwargs)
 
     def skip_item(self, item: Node, hi_sub: bool, regular_sub: bool, current_language: str) -> bool:
         subtitle_language = item.css_first("span.sub-lang").child.text_content
@@ -40,12 +37,9 @@ class YifySubtitlesScraper:
         return subtitles
 
 
-class YifiSubtitles(SearchArguments, YifySubtitlesScraper):
+class YifiSubtitles(YifySubtitlesScraper):
     def __init__(self, **kwargs):
-        SearchArguments.__init__(self, **kwargs)
-        YifySubtitlesScraper.__init__(self)
-        self._accepted_subtitles: list[Subtitle] = []
-        self._rejected_subtitles: list[Subtitle] = []
+        YifySubtitlesScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self) -> list | list[Subtitle]:
@@ -54,20 +48,7 @@ class YifiSubtitles(SearchArguments, YifySubtitlesScraper):
         if not subtitle_data:
             return None
 
-        for subtitle_name, subtitle_url in subtitle_data.items():
-            pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            io_log.stdout_match(
-                provider=self.provider_name,
-                subtitle_name=subtitle_name,
-                result=pct_result,
-                threshold=self.app_config.percentage_threshold,
-            )
-            if core_provider.is_threshold_met(self, pct_result):
-                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
-                self._accepted_subtitles.append(subtitle)
-            else:
-                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
-                self._rejected_subtitles.append(subtitle)
+        self._process_subtitle_data(self.provider_name, subtitle_data)
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:

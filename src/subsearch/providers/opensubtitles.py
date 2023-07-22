@@ -1,16 +1,14 @@
 import re
 from typing import Any
 
-from subsearch.data.constants import APP_PATHS
-from subsearch.data.data_classes import SkippedSubtitle, Subtitle
+from subsearch.data.data_classes import Subtitle
 from subsearch.providers import core_provider
-from subsearch.providers.core_provider import SearchArguments
-from subsearch.utils import io_log, string_parser
+from subsearch.utils import io_log
 
 
-class OpenSubtitlesScraper:
-    def __init__(self) -> None:
-        ...
+class OpenSubtitlesScraper(core_provider.ProviderHelper):
+    def __init__(self, **kwargs) -> None:
+        core_provider.ProviderHelper.__init__(self, **kwargs)
 
     def opensubtitles_down(self, tree: Any):
         is_offline = tree.css_matches("pre")
@@ -48,22 +46,16 @@ class OpenSubtitlesScraper:
         return subtitles
 
 
-class OpenSubtitles(SearchArguments, OpenSubtitlesScraper):
+class OpenSubtitles(OpenSubtitlesScraper):
     def __init__(self, **kwargs):
-        SearchArguments.__init__(self, **kwargs)
-        OpenSubtitlesScraper.__init__(self)
-        self._accepted_subtitles: list[Subtitle] = []
-        self._rejected_subtitles: list[Subtitle] = []
+        OpenSubtitlesScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, flag: str):
-        flags = {
-            "hash": self.search_site,
-            "site": self.search_hash
-        }
+    def start_search(self, flag: str) -> None:
+        flags = {"hash": self.search_site, "site": self.search_hash}
         flags[flag]()
 
-    def search_hash(self):
+    def search_hash(self) -> None:
         subtitle_data = self.with_hash(self.url_opensubtitles_hash, self.release)
 
         if not subtitle_data:
@@ -75,39 +67,15 @@ class OpenSubtitles(SearchArguments, OpenSubtitlesScraper):
             result=100,
             threshold=self.app_config.percentage_threshold,
         )
-        for subtitle_name, subtitle_url in subtitle_data.items():
-            io_log.stdout_match(
-                provider=self.provider_name,
-                subtitle_name=subtitle_name,
-                result=100,
-                threshold=self.app_config.percentage_threshold,
-            )
-            
-            subtitle = Subtitle(100, self.provider_name, subtitle_name.lower(), subtitle_url)
-            self._accepted_subtitles.append(subtitle)
-            
+        self._process_subtitle_data(self.provider_name, subtitle_data)
 
-    def search_site(self) -> list | list[Subtitle]:
+    def search_site(self) -> None:
         subtitle_data = self.get_subtitles(self.url_opensubtitles)
 
         if not subtitle_data:
             return None
 
-        for subtitle_name, subtitle_url in subtitle_data.items():
-            pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            io_log.stdout_match(
-                provider=self.provider_name,
-                subtitle_name=subtitle_name,
-                result=pct_result,
-                threshold=self.app_config.percentage_threshold,
-            )
-            if core_provider.is_threshold_met(self, pct_result):
-                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
-                self._accepted_subtitles.append(subtitle)
-            else:
-                subtitle = Subtitle(pct_result, self.provider_name, subtitle_name.lower(), subtitle_url)
-                self._rejected_subtitles.append(subtitle)
-        
+        self._process_subtitle_data(self.provider_name, subtitle_data)
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
