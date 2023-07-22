@@ -1,6 +1,5 @@
 import ctypes
 import time
-from typing import Union
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.data.data_classes import Subtitle
@@ -9,42 +8,13 @@ from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
     app_health,
+    decorators,
     io_file_system,
     io_json,
     io_log,
     state_manager,
     string_parser,
 )
-
-
-def call_conditions(func):
-    """
-    Decorator to check if the conditions for a function are met before executing it.
-
-    Args:
-        func (callable): The function to be decorated.
-
-    Returns:
-        callable: The wrapped function.
-
-    Example:
-        @condition_check
-        def my_function(arg1, arg2):
-            # Function implementation
-
-        # Call the decorated function
-        my_function("value1", "value2")
-    """
-
-    def wrapper(*args, **kwargs):
-        function = f"{func.__name__}"
-        if not CallCondition.conditions(function=function, *args, **kwargs):
-            module_fn = f"{func.__module__}.{func.__name__}"
-            io_log.stdout(f"Call conditions for '{module_fn}', not met", level="debug", print_allowed=False)
-            return None
-        return func(*args, **kwargs)
-
-    return wrapper
 
 
 class Initializer:
@@ -59,7 +29,7 @@ class Initializer:
         io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
 
-        system_tray.enable_system_tray = self.app_config.system_tray
+        decorators.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()
 
@@ -148,7 +118,7 @@ class SubsearchCore(Initializer):
         self.rejected_subtitles.extend(search_provider.rejected_subtitles)
         provider_state.set_state(provider_state.state.FINNISHED)
 
-    @call_conditions
+    @decorators.call_conditions
     def opensubtitles(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_OPENSUBTITLES,
@@ -157,7 +127,7 @@ class SubsearchCore(Initializer):
         self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="hash")
         self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="site")
 
-    @call_conditions
+    @decorators.call_conditions
     def subscene(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_SUBSCENE,
@@ -165,7 +135,7 @@ class SubsearchCore(Initializer):
         }
         self._search_subtitles(state_obj=state_obj, provider=subscene.Subscene)
 
-    @call_conditions
+    @decorators.call_conditions
     def yifysubtitles(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_YIFYSUBTITLES,
@@ -173,7 +143,7 @@ class SubsearchCore(Initializer):
         }
         self._search_subtitles(state_obj=state_obj, provider=yifysubtitles.YifiSubtitles)
 
-    @call_conditions
+    @decorators.call_conditions
     def download_files(self) -> None:
         io_log.stdout_in_brackets(f"Downloading subtitles")
         self.core_state.set_state(self.core_state.state.DOWNLOAD_FILES)
@@ -183,7 +153,7 @@ class SubsearchCore(Initializer):
         self.subtitles_found = index_size
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @call_conditions
+    @decorators.call_conditions
     def manual_download(self) -> None:
         io_log.stdout_in_brackets(f"Manual download")
         self.core_state.set_state(self.core_state.state.MANUAL_DOWNLOAD)
@@ -192,14 +162,14 @@ class SubsearchCore(Initializer):
         self.subtitles_found += len(self.manually_accepted_subtitles)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @call_conditions
+    @decorators.call_conditions
     def extract_files(self) -> None:
         io_log.stdout_in_brackets("Extracting downloads")
         self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @call_conditions
+    @decorators.call_conditions
     def autoload_rename(self) -> None:
         io_log.stdout_in_brackets("Renaming best match")
         self.core_state.set_state(self.core_state.state.AUTOLOAD_RENAME)
@@ -207,14 +177,14 @@ class SubsearchCore(Initializer):
         self.autoload_src = new_name
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @call_conditions
+    @decorators.call_conditions
     def autoload_move(self) -> None:
         io_log.stdout_in_brackets("Move best match")
         self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE)
         io_file_system.move_and_replace(self.autoload_src, VIDEO_FILE.file_directory)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @call_conditions
+    @decorators.call_conditions
     def summary_toast(self, elapsed) -> None:
         io_log.stdout_in_brackets("Summary toast")
         self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
@@ -228,7 +198,7 @@ class SubsearchCore(Initializer):
             msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
             self.system_tray.display_toast(*msg)
 
-    @call_conditions
+    @decorators.call_conditions
     def clean_up(self) -> None:
         io_log.stdout_in_brackets("Cleaning up")
         self.core_state.set_state(self.core_state.state.CLEAN_UP)
@@ -254,47 +224,3 @@ class SubsearchCore(Initializer):
         except KeyboardInterrupt:
             pass
         self.core_state.set_state(self.core_state.state.EXIT)
-
-
-class CallCondition:
-    @staticmethod
-    def all_conditions_met(conditions: list[bool]) -> bool:
-        if all(condition for condition in conditions):
-            return True
-        return False
-
-    @staticmethod
-    def conditions(cls: Union["SubsearchCore", "Initializer"], *args, **kwargs) -> bool:
-        if not cls.file_exist:
-            return False
-        function = kwargs["function"]
-        conditions = {
-            "opensubtitles": [
-                not cls.app_config.foreign_only,
-                io_json.check_language_compatibility("opensubtitles"),
-                cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
-            ],
-            "subscene": [
-                io_json.check_language_compatibility("subscene"),
-                cls.app_config.providers["subscene_site"],
-            ],
-            "yifysubtitles": [
-                not cls.app_config.foreign_only,
-                io_json.check_language_compatibility("yifysubtitles"),
-                not cls.release_data.tvseries,
-                not cls.provider_urls.yifysubtitles == "",
-                cls.app_config.providers["yifysubtitles_site"],
-            ],
-            "download_files": [len(cls.accepted_subtitles) >= 1],
-            "manual_download": [
-                len(cls.accepted_subtitles) == 0,
-                len(cls.rejected_subtitles) >= 1,
-                cls.app_config.manual_download_on_fail,
-            ],
-            "extract_files": [len(cls.accepted_subtitles) >= 1],
-            "autoload_rename": [cls.app_config.autoload_rename, cls.subtitles_found > 1],
-            "autoload_move": [cls.app_config.autoload_move, cls.subtitles_found > 1],
-            "summary_toast": [cls.app_config.toast_summary],
-            "clean_up": [],
-        }
-        return CallCondition.all_conditions_met(conditions[function])

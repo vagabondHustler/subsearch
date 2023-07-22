@@ -6,7 +6,7 @@ from threading import Thread
 from subsearch import core
 from subsearch.data import __guid__
 from subsearch.gui import screen_manager
-from subsearch.utils import io_json, io_log, io_winreg, mutex_manager, state_manager
+from subsearch.utils import decorators, io_json, io_log, io_winreg, state_manager
 
 START = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -141,7 +141,7 @@ def console() -> None:
             print(console.__doc__)
 
 
-@mutex_manager.apply_mutex
+@decorators.apply_mutex
 def main() -> None:
     for i in sys.argv:
         if i.startswith("--"):
@@ -153,9 +153,11 @@ def main() -> None:
     app.process_files()
     app.on_exit()
 
+
 def custom_excepthook(exctype, value, traceback):
-    io_log.Logger._instance.debug_logger.error(value, exc_info=(exctype, value, traceback))
+    io_log._logger.debug_logger.error(value, exc_info=(exctype, value, traceback))
     sys.__excepthook__(exctype, value, traceback)
+
 
 if __name__ == "__main__":
     sys.excepthook = custom_excepthook

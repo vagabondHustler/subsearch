@@ -5,37 +5,19 @@ from pathlib import Path
 from typing import Optional, Type
 
 from subsearch.data.constants import APP_PATHS
+from subsearch.utils import decorators
 
 
-def thread_safe_log(func):
-    lock = threading.Lock()
-
-    def wrapper_log(cls, *args, **kwargs):
-        with lock:
-            return func(cls, *args, **kwargs)
-
-    return wrapper_log
-
-
+@decorators.singleton
 class Logger:
     """
     Singleton logging class
     """
 
-    _instance: Optional["Logger"] = None
-
-    def __init__(self) -> None:
-        if hasattr(self, "initialized"):
-            return
-
+    def __init__(self, *args, **kwargs) -> None:
         self.initialized = True
         debug_log_file = APP_PATHS.app_data_local / "subsearch.log"
         self.debug_logger = self.create_logger(debug_log_file, "debug")
-
-    def __new__(cls, *args, **kwargs) -> "Logger":
-        if not cls._instance:
-            cls._instance = super().__new__(cls)
-        return cls._instance
 
     def create_logger(self, log_file: Path, level: str) -> logging.Logger:
         logger = logging.getLogger(level)
@@ -52,15 +34,14 @@ class Logger:
             if isinstance(handler, logging.FileHandler):
                 handler.close()
 
-    @classmethod
-    @thread_safe_log
-    def log(cls, message: str, level: str, print_allowed: bool = True) -> None:
+    @decorators.thread_safe_log
+    def log(self, message: str, level: str, print_allowed: bool = True) -> None:
         log_methods = {
-            "debug": cls._instance.debug_logger.debug,
-            "info": cls._instance.debug_logger.info,
-            "warning": cls._instance.debug_logger.warning,
-            "error": cls._instance.debug_logger.error,
-            "critical": cls._instance.debug_logger.critical,
+            "debug": self.debug_logger.debug,
+            "info": self.debug_logger.info,
+            "warning": self.debug_logger.warning,
+            "error": self.debug_logger.error,
+            "critical": self.debug_logger.critical,
         }
 
         log_methods[level](message)
@@ -68,12 +49,16 @@ class Logger:
             print(message)
 
 
+_logger = Logger()
+
+
 def stdout(message: str, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
-    Logger.log(message, level, print_allowed)
+
+    _logger.log(message, level, print_allowed)
     if end_new_line:
-        Logger.log("", level, print_allowed)
+        _logger.log("", level, print_allowed)
 
 
 def stdout_in_brackets(message: str, **kwargs) -> None:
@@ -133,6 +118,3 @@ def stdout_dataclass(instance: Type[dataclasses.dataclass], **kwargs) -> None:
         value = getattr(instance, key)
         padding = " " * (30 - len(key))
         stdout(f"{key}:{padding}{value}", **kwargs)
-
-
-_logger = Logger()
