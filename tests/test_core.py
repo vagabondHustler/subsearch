@@ -1,6 +1,6 @@
 import pytest
 
-from src.subsearch.core import CallCondition
+from src.subsearch.utils.decorators import CallCondition
 from src.subsearch.utils import string_parser
 from tests import toolkit
 

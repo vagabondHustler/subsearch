@@ -49,13 +49,15 @@ class Logger:
             print(message)
 
 
-_logger = Logger()
 
 
 def stdout(message: str, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
-
+    if "_logger" in locals() and isinstance(_logger, Logger):
+        print("Logger instance already exists.")
+    else:
+        _logger = Logger()
     _logger.log(message, level, print_allowed)
     if end_new_line:
         _logger.log("", level, print_allowed)
