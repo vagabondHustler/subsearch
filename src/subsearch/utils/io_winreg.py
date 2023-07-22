@@ -4,7 +4,6 @@ import winreg
 from pathlib import Path
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO
-from subsearch.utils import io_file_system
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = r"Software\Classes"

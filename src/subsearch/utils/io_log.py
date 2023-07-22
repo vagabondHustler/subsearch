@@ -1,7 +1,6 @@
 import dataclasses
 import logging
 import threading
-from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Optional, Type
 
@@ -30,7 +29,7 @@ class Logger:
             return
 
         self.initialized = True
-        debug_log_file = APP_PATHS.app_data_local / "debug.log"
+        debug_log_file = APP_PATHS.app_data_local / "subsearch.log"
         self.debug_logger = self.create_logger(debug_log_file, "debug")
 
     def __new__(cls, *args, **kwargs) -> "Logger":
@@ -41,19 +40,7 @@ class Logger:
     def create_logger(self, log_file: Path, level: str) -> logging.Logger:
         logger = logging.getLogger(level)
         logger.setLevel(logging.DEBUG)
-
-        # Set max log file size to 10 MB (adjust as needed)
-        max_log_size_bytes = 10 * 1024 * 1024
-
-        # Keep up to 10 backup log files (adjust as needed)
-        backup_count = 10
-
-        file_handler = RotatingFileHandler(
-            log_file,
-            mode="a",
-            maxBytes=max_log_size_bytes,
-            backupCount=backup_count
-        )
+        file_handler = logging.FileHandler(log_file, mode="w")
         file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
         file_handler.setFormatter(formatter)
@@ -81,7 +68,7 @@ class Logger:
             print(message)
 
 
-def stdout(message: str, level: str = "debug", **kwargs) -> None:
+def stdout(message: str, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
     Logger.log(message, level, print_allowed)

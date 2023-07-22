@@ -331,3 +331,13 @@ def fill_shorter_list(big_lst, small_lst, difference):
         for _i in range(difference):
             small_lst.append(None)
     return small_lst
+
+
+def contains_forbidden_characters(input_string) -> bool:
+    forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
+    return bool(re.search(forbidden_characters_pattern, input_string))
+
+
+def replace_forbidden_characters(input_string) -> str:
+    forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
+    return re.sub(forbidden_characters_pattern, ".", input_string)

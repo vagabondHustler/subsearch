@@ -87,7 +87,7 @@ class StateManager(metaclass=Singleton):
     def set_state(self, state: Enum) -> None:
         self.current_state = state
         self.state_history.append(self.current_state)
-        io_log.stdout(self.current_state, print_allowed=False)
+        io_log.stdout(self.current_state, level="debug", print_allowed=False)
 
     def get_state(self) -> Enum:
         return self.current_state
