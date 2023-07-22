@@ -101,3 +101,8 @@ size = Size()
 position = Position()
 font = Font()
 color = Color()
+
+
+DEFAULT_LABEL_CONFIG = dict(bg=color.dark_grey, fg=color.white_grey, font=font.cas8b)
+DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
+DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
