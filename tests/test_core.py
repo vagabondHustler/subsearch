@@ -24,11 +24,11 @@ def fake_subsearch_core():
 
 
 def test_conditions_opensubtitles(fake_subsearch_core: FakeSubsearchCore):
-    fake_subsearch_core.foreign_only = True
+    fake_subsearch_core.app_config.foreign_only = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
     assert result is False
 
-    fake_subsearch_core.foreign_only = False
+    fake_subsearch_core.app_config.foreign_only = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
     assert result is True
 
@@ -87,13 +87,12 @@ def test_conditions_manual_download(fake_subsearch_core: FakeSubsearchCore):
 def test_conditions_extract_files(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.accepted_subtitles = []
     fake_subsearch_core.rejected_subtitles = ["subtitle1"]
-    fake_subsearch_core.app_config.manual_download_on_fail = True
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="extract_files")
-    assert result is True
-
-    fake_subsearch_core.app_config.manual_download_on_fail = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="extract_files")
     assert result is False
+
+    fake_subsearch_core.accepted_subtitles = ["subtitle1", "subtitle2"]
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="extract_files")
+    assert result is True
 
 
 def test_conditions_autoload_rename(fake_subsearch_core: FakeSubsearchCore):
