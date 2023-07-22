@@ -15,7 +15,6 @@ def system_tray_conditions(func):
             return func(*args, **kwargs)
         else:
             ...
-            # log.output(f"Skipping {func.__name__} execution because condition is False.", terminal=False)
 
     return wrapper
 
@@ -42,7 +41,7 @@ class SystemTray:
         self.thread_tray = threading.Thread(daemon=True, target=self._run_pystray)
 
     @system_tray_conditions
-    def toast_message(self, title: str, msg: str):
+    def display_toast(self, title: str, msg: str):
         self.tray.title
         self.tray.notify(msg, title)
 

@@ -4,15 +4,7 @@ from tkinter import Label, StringVar, ttk
 from subsearch.data import __version__
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_file_system, io_json, io_winreg
-
-GWL_EXSTYLE = -20
-WS_EX_APPWINDOW = 0x00040000
-WS_EX_TOOLWINDOW = 0x00000080
-
-DEFAULT_LABEL_CONFIG = dict(bg=cfg.color.dark_grey, fg=cfg.color.white_grey, font=cfg.font.cas8b)
-DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
-DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)
+from subsearch.utils import io_json, io_winreg
 
 
 def calculate_btn_size(cls, width_=18, height_=2) -> tuple[int, int]:
@@ -262,15 +254,15 @@ class ToggleableFrameButton(tk.Frame):
         if self.show_if_exe is False and DEVICE_INFO.mode == "executable":
             return None
         label = tk.Label(self, text=self.setting_name)
-        label.configure(DEFAULT_LABEL_CONFIG)
-        label.grid(DEFAULT_LABEL_GRID)
+        label.configure(cfg.DEFAULT_LABEL_CONFIG)
+        label.grid(cfg.DEFAULT_LABEL_GRID)
         btn_toggle = ttk.Button(
             self,
             textvariable=self.string_var,
             width=40,
             style=f"{self.string_var.get()}.TButton",
         )
-        btn_toggle.grid(DEFAULT_BTN_TOGGLE_GRID, padx=8)
+        btn_toggle.grid(cfg.DEFAULT_BTN_TOGGLE_GRID, padx=8)
         btn_toggle.bind("<Enter>", self.enter_button)
         btn_toggle.bind("<Leave>", self.leave_button)
         set_default_grid_size(self)

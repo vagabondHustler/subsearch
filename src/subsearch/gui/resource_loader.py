@@ -1,10 +1,7 @@
-from tkinter import ttk
-
 from PIL import Image, ImageTk
 
 from subsearch.data.constants import APP_PATHS
 from subsearch.gui import sprites
-from subsearch.gui.resources import config as cfg
 
 
 def get_sprite(sprite_name):
@@ -51,22 +48,6 @@ def update_asset(cls, img, x, y) -> None:
     cls.delete("all")
     cls.create_image(x, y, image=img)
     cls.photoimage = img
-
-
-def set_custom_btn_styles() -> None:
-    """
-    Sets custom button styles
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
-
-    custom_style = ttk.Style()
-    custom_style.configure("True.TButton", foreground=cfg.color.green)
-    custom_style.configure("False.TButton", foreground=cfg.color.red)
 
 
 def set_ttk_theme(root):
