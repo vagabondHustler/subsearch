@@ -6,7 +6,7 @@ from threading import Thread
 from subsearch import core
 from subsearch.data import __guid__
 from subsearch.gui import screen_manager
-from subsearch.utils import io_json, io_winreg, mutex_manager, state_manager
+from subsearch.utils import io_json, io_log, io_winreg, mutex_manager, state_manager
 
 START = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -75,7 +75,7 @@ class Subsearch:
         Download zip files containing the .srt files, extract, rename and clean up tmp files
         """
         self.subsearch_core.download_files()
-        # self.subsearch_core.manual_download()
+        self.subsearch_core.manual_download()
         self.subsearch_core.extract_files()
         self.subsearch_core.autoload_rename()
         self.subsearch_core.autoload_move()
@@ -153,6 +153,10 @@ def main() -> None:
     app.process_files()
     app.on_exit()
 
+def custom_excepthook(exctype, value, traceback):
+    io_log.Logger._instance.debug_logger.error(value, exc_info=(exctype, value, traceback))
+    sys.__excepthook__(exctype, value, traceback)
 
 if __name__ == "__main__":
+    sys.excepthook = custom_excepthook
     main()

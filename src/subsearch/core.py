@@ -5,6 +5,7 @@ from typing import Union
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.data.data_classes import Subtitle
 from subsearch.gui import screen_manager, system_tray
+from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
     app_health,
@@ -39,7 +40,7 @@ def call_conditions(func):
         function = f"{func.__name__}"
         if not CallCondition.conditions(function=function, *args, **kwargs):
             module_fn = f"{func.__module__}.{func.__name__}"
-            io_log.stdout(f"Call conditions for '{module_fn}', not met", print_allowed=False)
+            io_log.stdout(f"Call conditions for '{module_fn}', not met", level="debug", print_allowed=False)
             return None
         return func(*args, **kwargs)
 
@@ -70,8 +71,8 @@ class Initializer:
         self.ran_download_tab = False
         self.accepted_subtitles: list[Subtitle] = []
         self.rejected_subtitles: list[Subtitle] = []
+        self.manually_accepted_subtitles: list[Subtitle] = []
         self.language_data = io_json.get_language_data()
-        self.foreign_only = io_json.get_json_key("foreign_only")
 
         if self.file_exist:
             self.release_data = string_parser.get_release_data(VIDEO_FILE.file_name)
@@ -186,13 +187,9 @@ class SubsearchCore(Initializer):
     def manual_download(self) -> None:
         io_log.stdout_in_brackets(f"Manual download")
         self.core_state.set_state(self.core_state.state.MANUAL_DOWNLOAD)
-        for data_list in self.rejected_subtitles.values():
-            if not data_list:
-                continue
-            for data in data_list:
-                self.skipped_combined.append(data)
-        screen_manager.open_screen("download_manager", data=self.skipped_combined)
-        self.ran_download_tab = True
+        screen_manager.open_screen("download_manager", subtitles=self.rejected_subtitles)
+        self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
+        self.subtitles_found += len(self.manually_accepted_subtitles)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
     @call_conditions
@@ -222,15 +219,15 @@ class SubsearchCore(Initializer):
         io_log.stdout_in_brackets("Summary toast")
         self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
         elapsed_summary = f"Finished in {elapsed} seconds"
-        skipped_subtitles = 0
-        download_summary = f"Matches found {self.subtitles_found}/{skipped_subtitles}"
+        tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        download_summary = f"Matches found {self.subtitles_found}/{tot_num_of_subtitles}"
         if self.subtitles_found > 0:
             msg = "Search Succeeded", f"{download_summary}\n{elapsed_summary}"
-            self.system_tray.toast_message(*msg)
+            self.system_tray.display_toast(*msg)
         elif self.subtitles_found == 0:
             msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
-            self.system_tray.toast_message(*msg)
-            
+            self.system_tray.display_toast(*msg)
+
     @call_conditions
     def clean_up(self) -> None:
         io_log.stdout_in_brackets("Cleaning up")
@@ -273,7 +270,7 @@ class CallCondition:
         function = kwargs["function"]
         conditions = {
             "opensubtitles": [
-                not cls.foreign_only,
+                not cls.app_config.foreign_only,
                 io_json.check_language_compatibility("opensubtitles"),
                 cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
             ],
@@ -282,7 +279,7 @@ class CallCondition:
                 cls.app_config.providers["subscene_site"],
             ],
             "yifysubtitles": [
-                not cls.foreign_only,
+                not cls.app_config.foreign_only,
                 io_json.check_language_compatibility("yifysubtitles"),
                 not cls.release_data.tvseries,
                 not cls.provider_urls.yifysubtitles == "",
@@ -294,16 +291,10 @@ class CallCondition:
                 len(cls.rejected_subtitles) >= 1,
                 cls.app_config.manual_download_on_fail,
             ],
-            "extract_files": [
-                len(cls.accepted_subtitles) >= 1
-                or (
-                    len(cls.accepted_subtitles) == 0
-                    and len(cls.rejected_subtitles) >= 1
-                    and cls.app_config.manual_download_on_fail
-                ),
-            ],
+            "extract_files": [len(cls.accepted_subtitles) >= 1],
             "autoload_rename": [cls.app_config.autoload_rename, cls.subtitles_found > 1],
             "autoload_move": [cls.app_config.autoload_move, cls.subtitles_found > 1],
             "summary_toast": [cls.app_config.toast_summary],
+            "clean_up": [],
         }
         return CallCondition.all_conditions_met(conditions[function])
