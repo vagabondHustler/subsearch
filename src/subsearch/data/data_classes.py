@@ -146,47 +146,22 @@ class ProviderUrls:
     yifysubtitles: str
 
 
-@dataclass(order=True, frozen=True, slots=True)
+@dataclass(order=True, slots=True)
 class Subtitle:
     """
     A data class representing download data for subtitle.
 
     Attributes:
+        pct_result (str): How closely the release_name matches the release name of the video file.
         provider (str): The subtitle provider used to obtain the subtitle file.
-        name (str): The name of the media file associated with the subtitle file.
         file_path (str): The path to the subtitle file on the local filesystem.
-        url (str): The URL from which the subtitle file can be downloaded from.
-        idx_num (int): Index in which order the file is downloaded.
-        idx_length (int): The total length of index.
+        download_url (str): The URL from which the subtitle file can be downloaded from.
     """
 
-    pct_result: str
+    pct_result: int
     provider: str
     release_name: str
     download_url: str
-
-
-@dataclass(order=True, frozen=True, slots=True)
-class SkippedSubtitle:
-    """
-    Represents prettified version of DownloadData.
-
-    Attributes:
-        provider (str): The name of the metadata provider.
-        release (str): The name of the movie or TV show release.
-        url (str): The URL from which the subtitle file can be downloaded from.
-        pct_result (int): The percentage match between the search query and
-            the metadata.
-        formatted_release (str): The formatted name of the release.
-        formatted_url (str): The formatted URL of the metadata.
-    """
-
-    provider: str
-    name: str
-    url: str
-    pct_result: int
-    prettified_release: str
-    prettified_url: str
 
 
 @dataclass(order=True, frozen=True)
