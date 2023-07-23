@@ -6,7 +6,7 @@ from typing import Any
 from subsearch.data import __version__
 from subsearch.data.constants import DEVICE_INFO, FILE_PATHS
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_file_system, io_json, io_winreg, update
+from subsearch.utils import  io_json, io_winreg, update
 
 
 def check_disabled(func):
