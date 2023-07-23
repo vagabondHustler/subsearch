@@ -4,7 +4,7 @@ from tkinter import BooleanVar, ttk
 from typing import Any
 
 from subsearch.data import __version__
-from subsearch.data.constants import DEVICE_INFO
+from subsearch.data.constants import DEVICE_INFO, FILE_PATHS
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_file_system, io_json, io_winreg, update
 
@@ -26,8 +26,8 @@ class FileExtensions(ttk.Labelframe):
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="File Exstensions", padding=10)
         FileExtensions.instances.append(self)
-        self.data = io_json.get_json_data()
-        self.file_extensions = io_json.get_json_key("file_extensions")
+        self.data = io_json.get_json_data(FILE_PATHS.subsearch_config)
+        self.file_extensions = io_json.get_json_key("file_extensions", FILE_PATHS.subsearch_config)
 
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
 
@@ -40,7 +40,7 @@ class FileExtensions(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value)
             check_btn = ttk.Checkbutton(frame, text=key, onvalue=True, offvalue=False, variable=boolean)
-            if not io_json.get_json_key("context_menu"):
+            if not io_json.get_json_key("context_menu", FILE_PATHS.subsearch_config):
                 check_btn.state(["disabled"])
 
             check_btn.pack(padx=4, pady=4, ipadx=10)
@@ -65,7 +65,7 @@ class FileExtensions(ttk.Labelframe):
             self.data["file_extensions"][key] = False
         elif not value.get():
             self.data["file_extensions"][key] = True
-        io_json.set_json_data(self.data)
+        io_json.set_json_data(self.data, FILE_PATHS.subsearch_config)
 
         self.update_registry()
 
@@ -74,7 +74,7 @@ class FileExtensions(ttk.Labelframe):
 
     def update_state(self):
         for key in self.checkbuttons.keys():
-            if io_json.get_json_key("context_menu"):
+            if io_json.get_json_key("context_menu", FILE_PATHS.subsearch_config):
                 key.state(["!disabled"])
             else:
                 key.state(["disabled"])
@@ -84,7 +84,7 @@ class SubsearchOption(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
-        self.data = io_json.get_json_data()
+        self.data = io_json.get_json_data(FILE_PATHS.subsearch_config)
         self.subsearch_options = {
             "context_menu": "Context menu",
             "context_menu_icon": "Context menu icon",
@@ -97,7 +97,7 @@ class SubsearchOption(ttk.Labelframe):
             "multiple_app_instances": "Multiple instances",
         }
         for name, description in self.subsearch_options.items():
-            self.subsearch_options[name] = [io_json.get_json_key(name), description]
+            self.subsearch_options[name] = [io_json.get_json_key(name, FILE_PATHS.subsearch_config), description]
 
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
         frame = None
@@ -110,11 +110,11 @@ class SubsearchOption(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            if key == "context_menu_icon" and not io_json.get_json_key("context_menu"):
+            if key == "context_menu_icon" and not io_json.get_json_key("context_menu", FILE_PATHS.subsearch_config):
                 check_btn.state(["disabled"])
             if key == "show_terminal" and DEVICE_INFO.mode == "executable":
                 check_btn.state(["disabled"])
-            if key == "toast_summary" and not io_json.get_json_key("system_tray"):
+            if key == "toast_summary" and not io_json.get_json_key("system_tray", FILE_PATHS.subsearch_config):
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -138,7 +138,7 @@ class SubsearchOption(ttk.Labelframe):
             self.data[key] = False
         elif not value.get():
             self.data[key] = True
-        io_json.set_json_data(self.data)
+        io_json.set_json_data(self.data, FILE_PATHS.subsearch_config)
         self.update_registry(btn)
         keys = [("context_menu", "context_menu_icon"), ("system_tray", "toast_summary")]
         for key_pair in keys:
@@ -165,7 +165,7 @@ class SubsearchOption(ttk.Labelframe):
     def update_registry(self, btn) -> None:
         if btn["text"] != self.subsearch_options["context_menu"][1]:
             return None
-        menu = io_json.get_json_key("context_menu")
+        menu = io_json.get_json_key("context_menu", FILE_PATHS.subsearch_config)
         if menu:
             io_winreg.add_context_menu()
         else:

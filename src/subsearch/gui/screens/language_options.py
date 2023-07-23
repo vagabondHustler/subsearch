@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import IntVar, ttk
+from subsearch.data.constants import FILE_PATHS
 
 from subsearch.gui import gui_toolkit
 from subsearch.utils import io_json
@@ -16,7 +17,7 @@ class SelectLanguage(ttk.Labelframe):
         self.name_find_key = {}
         self.tip_present = False
         self.languages = io_json.get_available_languages()
-        self.current_language = io_json.get_json_key("current_language")
+        self.current_language = io_json.get_json_key("current_language", FILE_PATHS.subsearch_config)
         self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
         frame = None
         for enum, (language, language_data) in enumerate(self.languages.items()):
@@ -67,4 +68,4 @@ class SelectLanguage(ttk.Labelframe):
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
         json_key = self.name_find_key[btn["text"]]
-        io_json.set_config_key_value("current_language", json_key)
+        io_json.set_config_key_value("current_language", json_key, FILE_PATHS.subsearch_config)

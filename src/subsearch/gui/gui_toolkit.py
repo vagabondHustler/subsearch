@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import Label, StringVar, ttk
 
 from subsearch.data import __version__
-from subsearch.data.constants import APP_PATHS, DEVICE_INFO
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_json, io_winreg
 
@@ -158,7 +158,7 @@ class VarColorPicker:
             self.clabel.configure(fg=cfg.color.green)
 
         if self.is_pct:
-            _pct = io_json.get_json_key("percentage_threshold")
+            _pct = io_json.get_json_key("percentage_threshold", FILE_PATHS.subsearch_config)
             if _pct in range(75, 101):
                 self.clabel.configure(fg=cfg.color.green)
             elif _pct in range(50, 75):
@@ -244,7 +244,7 @@ class ToggleableFrameButton(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.configure(bg=cfg.color.dark_grey)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{io_json.get_json_key(config_key)}")
+        self.string_var.set(f"{io_json.get_json_key(config_key, FILE_PATHS.subsearch_config)}")
         self.setting_name = setting_label
         self.config_key = config_key
         self.write_to_reg = kwargs.get("write_to_reg", False)
@@ -306,7 +306,7 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        io_json.set_config_key_value(self.config_key, True)
+        io_json.set_config_key_value(self.config_key, True, FILE_PATHS.subsearch_config)
         if self.write_to_reg:
             io_winreg.add_context_menu()
             io_winreg.write_all_valuex()
@@ -322,7 +322,7 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        io_json.set_config_key_value(self.config_key, False)
+        io_json.set_config_key_value(self.config_key, False, FILE_PATHS.subsearch_config)
         if self.write_to_reg:
             io_winreg.remove_context_menu()
         self.enter_button(event)
@@ -335,7 +335,7 @@ def configure_root(root):
     Returns:
         tk.Tk: The initialized Tkinter root window.
     """
-    if io_json.get_json_key("context_menu"):
+    if io_json.get_json_key("context_menu", FILE_PATHS.subsearch_config):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.dark_grey)
     root.iconbitmap(APP_PATHS.gui_assets / "subsearch.ico")
