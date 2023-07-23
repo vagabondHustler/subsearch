@@ -9,7 +9,7 @@ from subsearch.data.constants import FILE_PATHS
 from subsearch.gui import screen_manager
 from subsearch.utils import decorators, io_json, io_log, io_winreg
 
-START = time.perf_counter()
+PREF_COUNTER = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
 HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
 sys.path.append(HOMEPATH)
@@ -21,7 +21,7 @@ class Subsearch:
         """
         Setup and gather all available parameters
         """
-        self.subsearch_core = core.SubsearchCore(START)
+        self.subsearch_core = core.SubsearchCore(PREF_COUNTER)
     
 
     def thread_executor(self, *args) -> None:
