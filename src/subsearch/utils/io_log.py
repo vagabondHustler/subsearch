@@ -1,10 +1,9 @@
 import dataclasses
 import logging
-import threading
 from pathlib import Path
 from typing import Optional, Type
 
-from subsearch.data.constants import APP_PATHS
+from subsearch.data.constants import FILE_PATHS
 from subsearch.utils import decorators
 
 
@@ -15,9 +14,9 @@ class Logger:
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        self.initialized = True
-        debug_log_file = APP_PATHS.app_data_local / "subsearch.log"
+        debug_log_file = FILE_PATHS.subsearch_log
         self.debug_logger = self.create_logger(debug_log_file, "debug")
+
 
     def create_logger(self, log_file: Path, level: str) -> logging.Logger:
         logger = logging.getLogger(level)
@@ -49,15 +48,10 @@ class Logger:
             print(message)
 
 
-
-
 def stdout(message: str, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
-    if "_logger" in locals() and isinstance(_logger, Logger):
-        print("Logger instance already exists.")
-    else:
-        _logger = Logger()
+    _logger = Logger()
     _logger.log(message, level, print_allowed)
     if end_new_line:
         _logger.log("", level, print_allowed)

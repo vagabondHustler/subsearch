@@ -3,7 +3,7 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.data.constants import APP_PATHS, DEVICE_INFO
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = r"Software\Classes"
@@ -95,7 +95,7 @@ def get_command_value() -> str:
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif DEVICE_INFO.mode == "interpreter":
-        show_terminal = io_json.get_json_key("show_terminal")
+        show_terminal = io_json.get_json_key("show_terminal", FILE_PATHS.subsearch_config)
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -122,7 +122,7 @@ def get_icon_value() -> str:
     """
     from subsearch.utils import io_json
 
-    show_icon: str = io_json.get_json_key("context_menu_icon")
+    show_icon: str = io_json.get_json_key("context_menu_icon", FILE_PATHS.subsearch_config)
     if show_icon:
         return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
@@ -140,7 +140,7 @@ def get_appliesto_value() -> str:
     # get latest json value from file
     from subsearch.utils import io_json
 
-    file_ext = io_json.get_json_key("file_extensions")
+    file_ext = io_json.get_json_key("file_extensions", FILE_PATHS.subsearch_config)
     # for which file types to show the SubSearch context entry on
     value = ""
     for k, v in zip(file_ext.keys(), file_ext.values()):

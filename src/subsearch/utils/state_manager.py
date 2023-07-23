@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Union
 
+from subsearch.data.constants import FILE_PATHS
 from subsearch.utils import io_log
 
 
@@ -16,6 +17,7 @@ class DataState(Enum):
 @dataclass(order=True, frozen=True)
 class CoreState(Enum):
     UNKNOWN = auto()
+    FILE_SYSTEM_OK = auto()
     INITIALIZE = auto()
     INITIALIZED = auto()
     CALL_OPENSUBTITLES = auto()

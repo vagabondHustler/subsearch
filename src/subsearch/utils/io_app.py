@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import no_type_check
 
 from subsearch.data import __version__
-from subsearch.data.data_classes import AppPaths, SystemInfo, VideoFile
+from subsearch.data.data_classes import AppPaths, FilePaths, SystemInfo, VideoFile
 
 
 def get_app_paths() -> AppPaths:
@@ -20,9 +20,16 @@ def get_app_paths() -> AppPaths:
         providers=app_home / "providers",
         utils=app_home / "utils",
         tmp_dir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
-        app_data_local=Path.home() / "AppData" / "Local" / "Subsearch",
-        application_config_json=Path.home() / "AppData" / "Local" / "Subsearch" / "application_config.json",
-        languages_json=app_home / "data" / "languages.json",
+        appdata_subsearch=Path.home() / "AppData" / "Local" / "Subsearch",
+    )
+
+
+def get_file_paths() -> FilePaths:
+    app_home = Path(__file__).resolve().parent.parent
+    return FilePaths(
+        subsearch_log=Path.home() / "AppData" / "Local" / "Subsearch" / "subsearch_log.log",
+        subsearch_config=Path.home() / "AppData" / "Local" / "Subsearch" / "subsearch_config.json",
+        languages_config=app_home / "data" / "languages_config.json",
     )
 
 
@@ -44,7 +51,7 @@ def get_video_file_data() -> VideoFile:
 
     if file_exist:
         video_file = VideoFile(
-            file_name=file_name,
+            filename=file_name,
             file_hash=file_hash,
             file_extension=file_ext,
             file_path=file_path,

@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 from typing import Any, Union
 
-from subsearch.data.constants import APP_PATHS, SUPPORTED_FILE_EXT, SUPPORTED_PROVIDERS
+from subsearch.data.constants import FILE_PATHS, SUPPORTED_FILE_EXT, SUPPORTED_PROVIDERS
 from subsearch.data.data_classes import AppConfig, LanguageData, ProviderAlphaCodeData
 from subsearch.utils.exceptions import ProviderNotImplemented
 
 
-def get_json_data(json_file: Path = APP_PATHS.application_config_json) -> Any:
+def get_json_data(json_file: Path) -> Any:
     """
     Returns the contents of the json file as a Python object.
 
@@ -22,7 +22,7 @@ def get_json_data(json_file: Path = APP_PATHS.application_config_json) -> Any:
     return data
 
 
-def get_json_key(key: str) -> Any:
+def get_json_key(key: str, json_file: Path) -> Any:
     """
     Get values of keys in config.json
 
@@ -35,10 +35,10 @@ def get_json_key(key: str) -> Any:
     Returns:
         Any: value
     """
-    return get_json_data()[f"{key}"]
+    return get_json_data(json_file)[f"{key}"]
 
 
-def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
+def set_config_key_value(key: str, value: Union[str, int, bool], json_file: Path) -> None:
     """
     Set the value of a key in the config.json file to a specified value.
 
@@ -50,7 +50,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         None
     """
 
-    with open(APP_PATHS.application_config_json, "r+", encoding="utf-8") as f:
+    with open(json_file, "r+", encoding="utf-8") as f:
         data = json.load(f)
         data[key] = value
         f.seek(0)
@@ -58,7 +58,7 @@ def set_config_key_value(key: str, value: Union[str, int, bool]) -> None:
         f.truncate()
 
 
-def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path = APP_PATHS.application_config_json) -> None:
+def set_json_data(data: dict[str, Union[str, int, bool]], json_file: Path) -> None:
     """
     Writes the provided configuration data to the config.json file.
 
@@ -106,23 +106,22 @@ def create_config_file() -> None:
     Returns:
         None.
     """
-    if APP_PATHS.application_config_json.exists():
+    if FILE_PATHS.subsearch_config.exists():
         return None
     application_config = retrieve_application_config()
-    with open(APP_PATHS.application_config_json, "w", encoding="utf-8") as file:
+    with open(FILE_PATHS.subsearch_config, "w", encoding="utf-8") as file:
         file.seek(0)
         json.dump(application_config, file, indent=4)
         file.truncate()
 
 
-def get_app_config(**kwargs) -> AppConfig:
+def get_app_config(json_file: Path) -> AppConfig:
     """
     Returns an instance of AppConfig that contains the current configuration settings.
 
     Returns:
         AppConfig: instance containing the current application configuration settings.
     """
-    json_file = kwargs.get("json_file", APP_PATHS.application_config_json)
     data = get_json_data(json_file)
     user_data = AppConfig(
         **data,
@@ -144,9 +143,9 @@ def get_language_data(language: str = "default") -> LanguageData:
         A LanguageData object containing the data associated with the specified language.
     """
     if language == "default":
-        language = get_json_key("current_language")
+        language = get_json_key("current_language", FILE_PATHS.subsearch_config)
 
-    data = get_json_data(APP_PATHS.languages_json)
+    data = get_json_data(FILE_PATHS.languages_config)
     language_data = LanguageData(**data[language])
     return language_data
 
@@ -157,7 +156,7 @@ def get_language_data_value(key: str):
 
 
 def get_available_languages() -> dict:
-    return get_json_data(APP_PATHS.languages_json)
+    return get_json_data(FILE_PATHS.languages_config)
 
 
 def get_provider_alpha_code_type(provider: str) -> ProviderAlphaCodeData:
@@ -188,7 +187,7 @@ def get_provider_alpha_code(provider: str) -> str:
 
 def check_language_compatibility(provider: str, language: str = "default") -> bool:
     if language == "default":
-        language = get_json_key("current_language")
+        language = get_json_key("current_language", FILE_PATHS.subsearch_config)
     data = get_language_data(language)
     if not data.incompatibility:
         return True
@@ -206,7 +205,7 @@ def update_config_file() -> None:
     Returns:
         None.
     """
-    if not APP_PATHS.application_config_json.exists():
+    if not FILE_PATHS.subsearch_config.exists():
         return
 
     config_dict = retrieve_application_config()

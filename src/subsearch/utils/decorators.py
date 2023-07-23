@@ -5,6 +5,7 @@ from typing import Callable, Union
 
 from subsearch import core
 from subsearch.data import __guid__
+from subsearch.data.constants import FILE_PATHS
 from subsearch.utils import exceptions, io_json, io_log
 
 
@@ -25,7 +26,7 @@ def apply_mutex(func: Callable) -> Callable:
 
     def inner(*args, **kwargs):
         try:
-            if io_json.get_json_key("multiple_app_instances"):
+            if io_json.get_json_key("multiple_app_instances", FILE_PATHS.subsearch_config):
                 return func()
         except FileNotFoundError:
             pass

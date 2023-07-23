@@ -1,4 +1,4 @@
-from subsearch.data.constants import APP_PATHS
+from subsearch.data.constants import APP_PATHS, FILE_PATHS
 from subsearch.utils import io_file_system, io_json
 
 
@@ -9,13 +9,13 @@ def check_config_integrity() -> bool:
     Returns:
         bool: True if the configuration is intact, False otherwise.
     """
-    if not APP_PATHS.application_config_json.exists():
+    if not FILE_PATHS.subsearch_config.exists():
         return False
     app_con_dict = io_json.extract_dict_keys(io_json.retrieve_application_config())
-    app_con_json = io_json.extract_dict_keys(io_json.get_json_data())
+    subsearch_config = io_json.extract_dict_keys(io_json.get_json_data(FILE_PATHS.subsearch_config))
     app_con_dict.sort()
-    app_con_json.sort()
-    return app_con_json == app_con_dict
+    subsearch_config.sort()
+    return subsearch_config == app_con_dict
 
 
 def resolve_on_integrity_failure() -> None:
@@ -26,8 +26,8 @@ def resolve_on_integrity_failure() -> None:
     Returns:
         None.
     """
-    if not check_config_integrity() and APP_PATHS.app_data_local.exists():
+    if not check_config_integrity() and APP_PATHS.appdata_subsearch.exists():
         try:
             io_json.update_config_file()
         except Exception:
-            io_file_system.del_directory_content(APP_PATHS.app_data_local)
+            io_file_system.del_directory_content(APP_PATHS.appdata_subsearch)
