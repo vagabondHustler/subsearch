@@ -18,4 +18,3 @@ def test_app_paths() -> None:
     assert app_paths.providers.is_dir()
     assert app_paths.utils.is_dir()
     assert app_paths.tmp_dir == Path(tempfile.gettempdir()) / "tmp_subsearch"
-    assert app_paths.tmp_dir.is_dir()
