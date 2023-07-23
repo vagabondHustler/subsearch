@@ -47,38 +47,32 @@ def apply_mutex(func: Callable) -> Callable:
     return inner
 
 
+import functools
+
 def singleton(cls):
     """
-    A handy decorator for creating singleton classes.
+    Decorator that turns a class into a singleton.
 
-    Description:
-        - Decorate your class with this decorator to ensure that only one instance of the class is created.
-        - If you attempt to create another instance of the same class, the decorator will return the previously created instance.
-        - It supports the creation of multiple instances of the same class with different arguments and keyword arguments.
-        - This decorator works for multiple classes.
+    This decorator ensures that only one instance of the class is created, and subsequent calls with the same arguments
+    will return the previously created instance.
 
-    Usage:
-        >>> from decorators import singleton
-        >>>
-        >>> @singleton
-        ... class A:
-        ...     def __init__(self, *args, **kwargs):
-        ...         pass
-        ...
-        >>>
-        >>> a = A(name='Siddhesh')
-        >>> b = A(name='Siddhesh', lname='Sathe')
-        >>> c = A(name='Siddhesh', lname='Sathe')
-        >>> a is b  # should return False
-        False
-        >>> b is c  # should return True
-        True
-        >>>
+    Args:
+        cls (class): The class to be turned into a singleton.
 
-    Credits:
-        This decorator is available at github/siddheshsathe/handy-decorators.
+    Returns:
+        function: The wrapped function that enforces the singleton behavior.
+
+    Example:
+        @singleton
+        class MyClass:
+            def __init__(self, arg1, arg2):
+                self.arg1 = arg1
+                self.arg2 = arg2
+
+        obj1 = MyClass(1, 2)
+        obj2 = MyClass(1, 2)
+        assert obj1 is obj2  # The same instance is returned.
     """
-
     previous_instances = {}
 
     @functools.wraps(cls)
@@ -90,6 +84,7 @@ def singleton(cls):
             return previous_instances[cls].get("instance")
 
     return wrapper
+
 
 
 def call_conditions(func):
