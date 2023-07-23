@@ -5,8 +5,9 @@ from threading import Thread
 
 from subsearch import core
 from subsearch.data import __guid__
+from subsearch.data.constants import FILE_PATHS
 from subsearch.gui import screen_manager
-from subsearch.utils import decorators, io_json, io_log, io_winreg, state_manager
+from subsearch.utils import decorators, io_json, io_log, io_winreg
 
 START = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -20,8 +21,8 @@ class Subsearch:
         """
         Setup and gather all available parameters
         """
-        state_manager.CoreStateManager()
         self.subsearch_core = core.SubsearchCore(START)
+    
 
     def thread_executor(self, *args) -> None:
         """
@@ -41,7 +42,7 @@ class Subsearch:
         """
         Runs a search with all active providers, either concurrently or separately.
         """
-        if io_json.get_json_key("use_threading"):
+        if io_json.get_json_key("use_threading", FILE_PATHS.subsearch_config):
             self.thread_executor(
                 self.subsearch_core.subscene,
                 self.subsearch_core.opensubtitles,

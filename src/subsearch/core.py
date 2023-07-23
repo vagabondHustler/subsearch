@@ -1,7 +1,7 @@
 import ctypes
 import time
 
-from subsearch.data.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.data.data_classes import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
@@ -19,13 +19,15 @@ from subsearch.utils import (
 
 class Initializer:
     def __init__(self, pref_counter: float) -> None:
-        self.start = pref_counter
-        self.core_state = state_manager.CoreStateManager()
-        self.core_state.set_state(self.core_state.state.INITIALIZE)
         self.file_exist = True if VIDEO_FILE else False
         self.setup_file_system()
+        state_manager.CoreStateManager()
+        self.core_state = state_manager.CoreStateManager()
+        self.core_state.set_state(self.core_state.state.FILE_SYSTEM_OK)
+        self.start = pref_counter
+        self.core_state.set_state(self.core_state.state.INITIALIZE)
 
-        self.app_config = io_json.get_app_config()
+        self.app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
         io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
 
@@ -45,7 +47,7 @@ class Initializer:
         self.language_data = io_json.get_language_data()
 
         if self.file_exist:
-            self.release_data = string_parser.get_release_data(VIDEO_FILE.file_name)
+            self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
             io_log.stdout_dataclass(self.release_data, level="debug", print_allowed=False)
             provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
             self.provider_urls = provider_urls.retrieve_urls()
@@ -70,14 +72,13 @@ class Initializer:
         """
         app_health.resolve_on_integrity_failure()
         io_file_system.create_directory(APP_PATHS.tmp_dir)
-        io_file_system.create_directory(APP_PATHS.app_data_local)
+        io_file_system.create_directory(APP_PATHS.appdata_subsearch)
         if self.file_exist:
             io_file_system.create_directory(VIDEO_FILE.subs_dir)
             io_file_system.create_directory(VIDEO_FILE.tmp_dir)
         io_json.create_config_file()
 
     def all_providers_disabled(self) -> bool:
-        self.app_config = io_json.get_app_config()
         if (
             self.app_config.providers["subscene_site"] is False
             and self.app_config.providers["opensubtitles_site"] is False
@@ -98,8 +99,8 @@ class SubsearchCore(Initializer):
             self.core_state.set_state(self.core_state.state.EXIT)
             return None
 
-        if " " in VIDEO_FILE.file_name:
-            io_log.stdout(f"{VIDEO_FILE.file_name} contains spaces, result may vary", level="warning")
+        if " " in VIDEO_FILE.filename:
+            io_log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
         if not self.all_providers_disabled():
             io_log.stdout_in_brackets("Search started")
@@ -173,7 +174,7 @@ class SubsearchCore(Initializer):
     def autoload_rename(self) -> None:
         io_log.stdout_in_brackets("Renaming best match")
         self.core_state.set_state(self.core_state.state.AUTOLOAD_RENAME)
-        new_name = io_file_system.autoload_rename(VIDEO_FILE.file_name, ".srt")
+        new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
