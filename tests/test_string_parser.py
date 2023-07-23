@@ -1,5 +1,6 @@
-from src.subsearch.utils import imdb_lookup, io_json, string_parser
-from tests import toolkit
+from subsearch.data.constants import FILE_PATHS
+from subsearch.utils import imdb_lookup, io_json, string_parser
+from tests import constants_test
 
 
 def test_str_parser_movie() -> None:
@@ -80,9 +81,9 @@ def test_string_parser_bad_filename() -> None:
 
 
 def test_provider_urls_movie(monkeypatch):
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", toolkit.FAKE_MOVIE)
-    app_config = io_json.get_app_config(json_file=toolkit.FAKE_CONFIG_PATH)
-    filename = toolkit.FAKE_MOVIE.file_name
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_MOVIE)
+    app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
+    filename = constants_test.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_json.get_language_data()
     create_provider_urls = string_parser.CreateProviderUrls(
@@ -102,9 +103,9 @@ def test_provider_urls_movie(monkeypatch):
 
 
 def test_provider_urls_series(monkeypatch):
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", toolkit.FAKE_SERIES)
-    app_config = io_json.get_app_config(json_file=toolkit.FAKE_CONFIG_PATH)
-    filename = toolkit.FAKE_SERIES.file_name
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_SERIES)
+    app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
+    filename = constants_test.FAKE_VIDEO_FILE_SERIES.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_json.get_language_data()
     create_provider_urls = string_parser.CreateProviderUrls(

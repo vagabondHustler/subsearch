@@ -1,17 +1,18 @@
 import pytest
 
-from src.subsearch.utils.decorators import CallCondition
-from src.subsearch.utils import string_parser
-from tests import toolkit
+from subsearch.data.constants import FILE_PATHS
+from subsearch.utils import io_json, string_parser
+from subsearch.utils.decorators import CallCondition
+from tests import constants_test
 
 
 class FakeSubsearchCore:
     def __init__(self):
         self.file_exist = True
         self.foreign_only = False
-        self.app_config = toolkit.FAKE_APP_CONFIG
-        self.release_data = string_parser.get_release_data(toolkit.FAKE_VIDEO_FILE.file_name)
-        self.provider_urls = toolkit.FAKE_PROVIDER_URLS
+        self.app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
+        self.release_data = string_parser.get_release_data(constants_test.FAKE_VIDEO_FILE_MOVIE.filename)
+        self.provider_urls = constants_test.FAKE_PROVIDER_URLS
         self.accepted_subtitles = []
         self.rejected_subtitles = []
         self.subtitles_found = 0
