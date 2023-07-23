@@ -28,8 +28,8 @@ class AppPaths:
         gui (Path): The directory containing GUI modules and files.
         providers (Path): The directory containing subtitle provider modules.
         utils (Path): The directory containing utility modules.
-        tmpdir(Path): The directory containing temporary files & folders.
-        appdata_local(Path): The directory containing the persistent application files.
+        tmp_dir(Path): The directory containing temporary files & folders.
+        appdata_subsearch(Path): The directory containing the persistent application files.
     """
 
     home: Path
@@ -40,9 +40,23 @@ class AppPaths:
     providers: Path
     utils: Path
     tmp_dir: Path
-    app_data_local: Path
-    application_config_json: Path
-    languages_json: Path
+    appdata_subsearch: Path
+
+
+@dataclass(order=True, slots=True)
+class FilePaths:
+    """
+    A dataclass representing the files used in the application.
+
+    Attributes:
+        subsearch_log (Path): The default subsearch_log.log file location
+        subsearch_config (Path): The default subsearch_config.json file location
+        languages_config (Path): The default languages_config.json file location
+    """
+
+    subsearch_log: Path
+    subsearch_config: Path
+    languages_config: Path
 
 
 @dataclass(order=True, slots=True)
@@ -59,7 +73,7 @@ class VideoFile:
         tmp_directory (pathlib.Path): Temporary directory path.
     """
 
-    file_name: str
+    filename: str
     file_hash: str
     file_extension: str
     file_path: Path
