@@ -84,6 +84,59 @@ class VideoFile:
 
 @dataclass(order=True, slots=True)
 class AppConfig:
+    """
+    Represents the configuration settings for an application.
+
+    This class is a data structure used to store various configuration settings for an application.
+    These settings include preferences related to language, subtitle types, file extensions, providers,
+    automatic actions, context menu options, system tray, logging, and other features.
+
+    Attributes:
+        current_language (str): The current language setting for the application.
+        subtitle_type (dict[str, bool]): A dictionary representing subtitle types and their enabled status.
+        foreign_only (bool): Show only foreign subtitles while searching.
+        percentage_threshold (int): The threshold subtitles has to pass to be downloaded.
+        autoload_rename (bool): Automatically rename downloaded subtitles.
+        autoload_move (bool): Automatically move downloaded subtitles to the appropriate folder.
+        context_menu (bool): Show context menu options.
+        context_menu_icon (bool): Display icons in the context menu.
+        system_tray (bool): Support a system tray.
+        toast_summary (bool): Display toast notifications.
+        manual_download_on_fail (bool): Application open the gui `download_manager` screen.
+        show_terminal (bool): Show the terminal/console.
+        use_threading (bool): Use threading.
+        multiple_app_instances (bool): Application allows multiple instances.
+        log_to_file (bool): Log output to a file.
+        file_extensions (dict[str, bool]): A dictionary representing file extensions and their enabled status.
+        providers (dict[str, bool]): A dictionary representing subtitle providers and their enabled status.
+        hearing_impaired (bool): Show hearing-impaired subtitles.
+        non_hearing_impaired (bool): Show non-hearing-impaired subtitles.
+
+    Examples:
+        Creating an `AppConfig` instance:
+
+        >>> config = AppConfig(
+        ...     current_language="english",
+        ...     subtitle_type={"hearing_impaired": True, "non_hearing_impaired": False},
+        ...     foreign_only=False,
+        ...     percentage_threshold=90,
+        ...     autoload_rename=True,
+        ...     autoload_move=True,
+        ...     context_menu=True,
+        ...     context_menu_icon=True,
+        ...     system_tray=True,
+        ...     toast_summary=True,
+        ...     manual_download_on_fail=True,
+        ...     show_terminal=False,
+        ...     use_threading=True,
+        ...     multiple_app_instances=False,
+        ...     log_to_file=True,
+        ...     file_extensions={".mkv": True, ".avi": False ...},
+        ...     providers={"subscene_site": True, "opensubtitles_site": True, "opensubtitles_hash": True ...},
+        ...     hearing_impaired=False,
+        ...     non_hearing_impaired=True,
+        ... )
+    """
     current_language: str
     subtitle_type: dict[str, bool]
     foreign_only: bool
@@ -107,6 +160,26 @@ class AppConfig:
 
 @dataclass(order=True, slots=True)
 class SubsceneCookie:
+    """
+    Represents Subscene website preferences stored in a cookie.
+
+    Store various preferences of a user's Subscene preferences.
+    The cookie preferences include settings for dark theme, sorting subtitles by date, 
+    language filter, hearing impaired filter, and foreign subtitles only.
+
+    Attributes:
+        dark_theme (bool): True if the user has enabled dark theme, False otherwise.
+        sort_subtitle_by_date (str): The preferred sorting option for subtitles by date.
+        language_filter (int): The language filter setting for subtitles.
+        hearing_impaired (int): The hearing impaired filter setting for subtitles.
+        foreign_only (bool): True if the user prefers foreign subtitles only, False otherwise.
+
+    Examples:
+        Creating a `SubsceneCookie` instance:
+
+        >>> cookie = SubsceneCookie(dark_theme=True, sort_subtitle_by_date=false,
+        ...                         language_filter=1, hearing_impaired=0, foreign_only=False)
+    """
     dark_theme: bool
     sort_subtitle_by_date: str
     language_filter: int
@@ -180,6 +253,23 @@ class Subtitle:
 
 @dataclass(order=True, frozen=True)
 class SystemInfo:
+    """
+    Represents system information.
+
+    This class is a data structure used to hold information about the system,
+    including the platform, mode, Python version, and subsearch.
+
+    Attributes:
+        platform (str): The platform or operating system of the system.
+        mode (str): The mode or state of the system.
+        python (str): The version of Python installed on the system.
+        subsearch (str): The subsearch associated with the system.
+
+    Examples:
+        Creating a `SystemInfo` instance:
+
+        >>> system_info = SystemInfo(platform="windows-10-10.0.22624-sp0", mode="interpreter", python="3.11.4", subsearch="2.37.1")
+    """
     platform: str
     mode: str
     python: str
