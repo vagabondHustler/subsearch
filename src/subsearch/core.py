@@ -23,14 +23,12 @@ class Initializer:
         self.setup_file_system()
         state_manager.CoreStateManager()
         self.core_state = state_manager.CoreStateManager()
-        self.core_state.set_state(self.core_state.state.FILE_SYSTEM_OK)
         self.start = pref_counter
         self.core_state.set_state(self.core_state.state.INITIALIZE)
 
         self.app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
         io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
-
         decorators.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()

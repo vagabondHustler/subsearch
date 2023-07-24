@@ -47,8 +47,6 @@ def apply_mutex(func: Callable) -> Callable:
     return inner
 
 
-import functools
-
 def singleton(cls):
     """
     Decorator that turns a class into a singleton.
@@ -84,7 +82,6 @@ def singleton(cls):
             return previous_instances[cls].get("instance")
 
     return wrapper
-
 
 
 def call_conditions(func):

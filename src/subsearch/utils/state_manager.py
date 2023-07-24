@@ -16,7 +16,6 @@ class DataState(Enum):
 @dataclass(order=True, frozen=True)
 class CoreState(Enum):
     UNKNOWN = auto()
-    FILE_SYSTEM_OK = auto()
     INITIALIZE = auto()
     INITIALIZED = auto()
     CALL_OPENSUBTITLES = auto()
