@@ -1,0 +1,489 @@
+[albanian]
+name = "Albanian"
+alpha_1 = "sq"
+alpha_2b = "alb"
+incompatibility = []
+subscene_id = 1
+
+[arabic]
+name = "Arabic"
+alpha_1 = "ar"
+alpha_2b = "ara"
+incompatibility = []
+subscene_id = 2
+
+[armenian]
+name = "Armenian"
+alpha_1 = "hy"
+alpha_2b = "arm"
+incompatibility = []
+subscene_id = 73
+
+[azerbaijani]
+name = "Azerbaijani"
+alpha_1 = "az"
+alpha_2b = "aze"
+incompatibility = []
+subscene_id = 55
+
+[basque]
+name = "Basque"
+alpha_1 = "eu"
+alpha_2b = "baq"
+incompatibility = []
+subscene_id = 74
+
+[belarusian]
+name = "Belarusian"
+alpha_1 = "be"
+alpha_2b = "bel"
+incompatibility = []
+subscene_id = 68
+
+[bosnian]
+name = "Bosnian"
+alpha_1 = "bs"
+alpha_2b = "bos"
+incompatibility = []
+subscene_id = 60
+
+[brazillian_portuguese]
+name = "Brazillian-Portuguese"
+alpha_1 = "pt"
+alpha_2b = "pob"
+incompatibility = []
+subscene_id = 4
+
+[bulgarian]
+name = "Bulgarian"
+alpha_1 = "bg"
+alpha_2b = "bul"
+incompatibility = []
+subscene_id = 5
+
+[bulgarian_english]
+name = "Bulgarian-English"
+alpha_1 = ""
+alpha_2b = ""
+incompatibility = ["opensubtitles"]
+subscene_id = 6
+
+[burmese]
+name = "Burmese"
+alpha_1 = "my"
+alpha_2b = "bur"
+incompatibility = []
+subscene_id = 61
+
+[cambodian_khmer]
+name = "Cambodian-Khmer"
+alpha_1 = "km"
+alpha_2b = "khm"
+incompatibility = []
+subscene_id = 79
+
+[catalan]
+name = "Catalan"
+alpha_1 = "ca"
+alpha_2b = "cat"
+incompatibility = []
+subscene_id = 49
+
+[chinese_bg_code]
+name = "Chinese-BG-Code"
+alpha_1 = ""
+alpha_2b = "zht"
+incompatibility = []
+subscene_id = 7
+
+[croatian]
+name = "Croatian"
+alpha_1 = "hr"
+alpha_2b = "hrv"
+incompatibility = []
+subscene_id = 8
+
+[czech]
+name = "Czech"
+alpha_1 = "cs"
+alpha_2b = "cze"
+incompatibility = []
+subscene_id = 9
+
+[danish]
+name = "Danish"
+alpha_1 = "da"
+alpha_2b = "dan"
+incompatibility = []
+subscene_id = 10
+
+[dutch]
+name = "Dutch"
+alpha_1 = "nl"
+alpha_2b = "dut"
+incompatibility = []
+subscene_id = 11
+
+[dutch_english]
+name = "Dutch-English"
+alpha_1 = ""
+alpha_2b = ""
+incompatibility = ["opensubtitles"]
+subscene_id = 12
+
+[english]
+name = "English"
+alpha_1 = "en"
+alpha_2b = "eng"
+incompatibility = []
+subscene_id = 13
+
+[english_german]
+name = "English-German"
+alpha_1 = ""
+alpha_2b = ""
+incompatibility = ["opensubtitles"]
+subscene_id = 15
+
+[esperanto]
+name = "Esperanto"
+alpha_1 = "eo"
+alpha_2b = "epo"
+incompatibility = []
+subscene_id = 47
+
+[estonian]
+name = "Estonian"
+alpha_1 = "et"
+alpha_2b = "est"
+incompatibility = []
+subscene_id = 16
+
+[finnish]
+name = "Finnish"
+alpha_1 = "fi"
+alpha_2b = "fin"
+incompatibility = []
+subscene_id = 17
+
+[french]
+name = "French"
+alpha_1 = "fr"
+alpha_2b = "fre"
+incompatibility = []
+subscene_id = 18
+
+[georgian]
+name = "Georgian"
+alpha_1 = "ka"
+alpha_2b = "geo"
+incompatibility = []
+subscene_id = 62
+
+[german]
+name = "German"
+alpha_1 = "de"
+alpha_2b = "ger"
+incompatibility = []
+subscene_id = 19
+
+[greenlandic]
+name = "Greenlandic"
+alpha_1 = "kl"
+alpha_2b = "kal"
+incompatibility = ["opensubtitles"]
+subscene_id = 57
+
+[hebrew]
+name = "Hebrew"
+alpha_1 = "he"
+alpha_2b = "heb"
+incompatibility = []
+subscene_id = 22
+
+[hindi]
+name = "Hindi"
+alpha_1 = "hi"
+alpha_2b = "hin"
+incompatibility = []
+subscene_id = 51
+
+[hungarian]
+name = "Hungarian"
+alpha_1 = "hu"
+alpha_2b = "hun"
+incompatibility = []
+subscene_id = 23
+
+[hungarian_english]
+name = "Hungarian-English"
+alpha_1 = ""
+alpha_2b = ""
+incompatibility = ["opensubtitles", "yifisubtitles"]
+subscene_id = 24
+
+[icelandic]
+name = "Icelandic"
+alpha_1 = "is"
+alpha_2b = "ice"
+incompatibility = []
+subscene_id = 25
+
+[indonesian]
+name = "Indonesian"
+alpha_1 = "name"
+alpha_2b = "ind"
+incompatibility = []
+subscene_id = 44
+
+[italian]
+name = "Italian"
+alpha_1 = "it"
+alpha_2b = "ita"
+incompatibility = []
+subscene_id = 26
+
+[japanese]
+name = "Japanese"
+alpha_1 = "ja"
+alpha_2b = "jpn"
+incompatibility = []
+subscene_id = 27
+
+[kannada]
+name = "Kannada"
+alpha_1 = "kn"
+alpha_2b = "kan"
+incompatibility = []
+subscene_id = 78
+
+[kinyarwanda]
+name = "Kinyarwanda"
+alpha_1 = "rw"
+alpha_2b = "kin"
+incompatibility = ["opensubtitles", "yifisubtitles"]
+subscene_id = 81
+
+[korean]
+name = "Korean"
+alpha_1 = "ko"
+alpha_2b = "kor"
+incompatibility = []
+subscene_id = 28
+
+[kurdish]
+name = "Kurdish"
+alpha_1 = "ku"
+alpha_2b = "kur"
+incompatibility = []
+subscene_id = 52
+
+[latvian]
+name = "Latvian"
+alpha_1 = "lv"
+alpha_2b = "lav"
+incompatibility = []
+subscene_id = 29
+
+[lithuanian]
+name = "Lithuanian"
+alpha_1 = "lt"
+alpha_2b = "lit"
+incompatibility = []
+subscene_id = 43
+
+[macedonian]
+name = "Macedonian"
+alpha_1 = "mk"
+alpha_2b = "mac"
+incompatibility = []
+subscene_id = 48
+
+[malayalam]
+name = "Malayalam"
+alpha_1 = "ml"
+alpha_2b = "mal"
+incompatibility = []
+subscene_id = 64
+
+[manipuri]
+name = "Manipuri"
+alpha_1 = "mni"
+alpha_2b = "mni"
+incompatibility = []
+subscene_id = 65
+
+[mongolian]
+name = "Mongolian"
+alpha_1 = "mn"
+alpha_2b = "mon"
+incompatibility = []
+subscene_id = 72
+
+[nepali]
+name = "Nepali"
+alpha_1 = "ne"
+alpha_2b = "nep"
+incompatibility = []
+subscene_id = 80
+
+[norwegian]
+name = "Norwegian"
+alpha_1 = "no"
+alpha_2b = "nor"
+incompatibility = []
+subscene_id = 30
+
+[pashto]
+name = "Pashto"
+alpha_1 = "ps"
+alpha_2b = "pus"
+incompatibility = ["opensubtitles"]
+subscene_id = 67
+
+[punjabi]
+name = "Punjabi"
+alpha_1 = "pa"
+alpha_2b = "pan"
+incompatibility = ["opensubtitles", "yifisubtitles"]
+subscene_id = 66
+
+[romanian]
+name = "Romanian"
+alpha_1 = "ro"
+alpha_2b = "rum"
+incompatibility = []
+subscene_id = 33
+
+[russian]
+name = "Russian"
+alpha_1 = "ru"
+alpha_2b = "rus"
+incompatibility = []
+subscene_id = 34
+
+[serbian]
+name = "Serbian"
+alpha_1 = "sr"
+alpha_2b = "scc"
+incompatibility = []
+subscene_id = 35
+
+[sinhala]
+name = "Sinhala"
+alpha_1 = "si"
+alpha_2b = "sin"
+incompatibility = []
+subscene_id = 58
+
+[slovak]
+name = "Slovak"
+alpha_1 = "sk"
+alpha_2b = "slo"
+incompatibility = []
+subscene_id = 36
+
+[slovenian]
+name = "Slovenian"
+alpha_1 = "sl"
+alpha_2b = "slv"
+incompatibility = []
+subscene_id = 37
+
+[somali]
+name = "Somali"
+alpha_1 = "so"
+alpha_2b = "som"
+incompatibility = []
+subscene_id = 70
+
+[spanish]
+name = "Spanish"
+alpha_1 = "es"
+alpha_2b = "spa"
+incompatibility = []
+subscene_id = 38
+
+[sundanese]
+name = "Sundanese"
+alpha_1 = "su"
+alpha_2b = "sun"
+incompatibility = []
+subscene_id = 76
+
+[swahili]
+name = "Swahili"
+alpha_1 = "sw"
+alpha_2b = "swa"
+incompatibility = []
+subscene_id = 75
+
+[swedish]
+name = "Swedish"
+alpha_1 = "sv"
+alpha_2b = "swe"
+incompatibility = []
+subscene_id = 39
+
+[tagalog]
+name = "Tagalog"
+alpha_1 = "tl"
+alpha_2b = "tgl"
+incompatibility = []
+subscene_id = 53
+
+[tamil]
+name = "Tamil"
+alpha_1 = "ta"
+alpha_2b = "tam"
+incompatibility = []
+subscene_id = 59
+
+[telugu]
+name = "Telugu"
+alpha_1 = "te"
+alpha_2b = "tel"
+incompatibility = []
+subscene_id = 63
+
+[thai]
+name = "Thai"
+alpha_1 = "th"
+alpha_2b = "tha"
+incompatibility = []
+subscene_id = 40
+
+[turkish]
+name = "Turkish"
+alpha_1 = "tr"
+alpha_2b = "tur"
+incompatibility = []
+subscene_id = 41
+
+[ukrainian]
+name = "Ukrainian"
+alpha_1 = "uk"
+alpha_2b = "ukr"
+incompatibility = []
+subscene_id = 56
+
+[urdu]
+name = "Urdu"
+alpha_1 = "ur"
+alpha_2b = "urd"
+incompatibility = []
+subscene_id = 42
+
+[vietnamese]
+name = "Vietnamese"
+alpha_1 = "vi"
+alpha_2b = "vie"
+incompatibility = []
+subscene_id = 45
+
+[yoruba]
+name = "Yoruba"
+alpha_1 = "yo"
+alpha_2b = "yor"
+incompatibility = ["opensubtitles", "yifisubtitles"]
+subscene_id = 71

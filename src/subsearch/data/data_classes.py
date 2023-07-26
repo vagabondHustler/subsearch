@@ -50,13 +50,13 @@ class FilePaths:
 
     Attributes:
         subsearch_log (Path): The default subsearch_log.log file location
-        subsearch_config (Path): The default subsearch_config.json file location
-        languages_config (Path): The default languages_config.json file location
+        subsearch_config (Path): The default subsearch_config.toml file location
+        languages_config (Path): The default languages_config.toml file location
     """
 
     subsearch_log: Path
     subsearch_config: Path
-    languages_config: Path
+    language_data: Path
 
 
 @dataclass(order=True, slots=True)
@@ -98,6 +98,7 @@ class AppConfig:
         percentage_threshold (int): The threshold subtitles has to pass to be downloaded.
         autoload_rename (bool): Automatically rename downloaded subtitles.
         autoload_move (bool): Automatically move downloaded subtitles to the appropriate folder.
+        autoload_dir (bool): Target directory of 'autoload_move.
         context_menu (bool): Show context menu options.
         context_menu_icon (bool): Display icons in the context menu.
         system_tray (bool): Support a system tray.
@@ -122,6 +123,7 @@ class AppConfig:
         ...     percentage_threshold=90,
         ...     autoload_rename=True,
         ...     autoload_move=True,
+        ...     autoload_dir="."
         ...     context_menu=True,
         ...     context_menu_icon=True,
         ...     system_tray=True,
@@ -131,18 +133,20 @@ class AppConfig:
         ...     use_threading=True,
         ...     multiple_app_instances=False,
         ...     log_to_file=True,
-        ...     file_extensions={".mkv": True, ".avi": False ...},
+        ...     file_extensions={"mkv": True, "avi": False ...},
         ...     providers={"subscene_site": True, "opensubtitles_site": True, "opensubtitles_hash": True ...},
         ...     hearing_impaired=False,
         ...     non_hearing_impaired=True,
         ... )
     """
+
     current_language: str
     subtitle_type: dict[str, bool]
     foreign_only: bool
     percentage_threshold: int
     autoload_rename: bool
     autoload_move: bool
+    autoload_dir: str
     context_menu: bool
     context_menu_icon: bool
     system_tray: bool
@@ -164,7 +168,7 @@ class SubsceneCookie:
     Represents Subscene website preferences stored in a cookie.
 
     Store various preferences of a user's Subscene preferences.
-    The cookie preferences include settings for dark theme, sorting subtitles by date, 
+    The cookie preferences include settings for dark theme, sorting subtitles by date,
     language filter, hearing impaired filter, and foreign subtitles only.
 
     Attributes:
@@ -180,6 +184,7 @@ class SubsceneCookie:
         >>> cookie = SubsceneCookie(dark_theme=True, sort_subtitle_by_date=false,
         ...                         language_filter=1, hearing_impaired=0, foreign_only=False)
     """
+
     dark_theme: bool
     sort_subtitle_by_date: str
     language_filter: int
@@ -270,6 +275,7 @@ class SystemInfo:
 
         >>> system_info = SystemInfo(platform="windows-10-10.0.22624-sp0", mode="interpreter", python="3.11.4", subsearch="2.37.1")
     """
+
     platform: str
     mode: str
     python: str
