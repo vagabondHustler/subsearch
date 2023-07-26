@@ -51,7 +51,7 @@ class FilePaths:
     Attributes:
         subsearch_log (Path): The default subsearch_log.log file location
         subsearch_config (Path): The default subsearch_config.toml file location
-        languages_config (Path): The default languages_config.toml file location
+        language_data (Path): The default language_data.toml file location
     """
 
     subsearch_log: Path

@@ -127,13 +127,12 @@ def thread_safe_log(func):
 class CallCondition:
     @staticmethod
     def check_language_compatibility(provider: str):
-        if language == "default":
-            language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "current_language")
+        current_language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "current_language")
         language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
-        if not language_data["incompatibility"]:
+        if not language_data[current_language]["incompatibility"]:
             return True
 
-        elif provider in language_data["incompatibility"]:
+        elif provider in language_data[current_language]["incompatibility"]:
             return False
         return False
 
