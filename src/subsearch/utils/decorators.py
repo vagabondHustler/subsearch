@@ -6,7 +6,7 @@ from typing import Callable, Union
 from subsearch import core
 from subsearch.data import __guid__
 from subsearch.data.constants import FILE_PATHS
-from subsearch.utils import exceptions, io_json, io_log
+from subsearch.utils import exceptions, io_log, io_toml
 
 
 def apply_mutex(func: Callable) -> Callable:
@@ -26,7 +26,7 @@ def apply_mutex(func: Callable) -> Callable:
 
     def inner(*args, **kwargs):
         try:
-            if io_json.get_json_key("multiple_app_instances", FILE_PATHS.subsearch_config):
+            if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "multiple_app_instances"):
                 return func()
         except FileNotFoundError:
             pass
@@ -126,6 +126,17 @@ def thread_safe_log(func):
 
 class CallCondition:
     @staticmethod
+    def check_language_compatibility(provider: str):
+        current_language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "current_language")
+        language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+        if not language_data[current_language]["incompatibility"]:
+            return True
+
+        elif provider in language_data[current_language]["incompatibility"]:
+            return False
+        return False
+
+    @staticmethod
     def all_conditions_met(conditions: list[bool]) -> bool:
         if all(condition for condition in conditions):
             return True
@@ -139,16 +150,16 @@ class CallCondition:
         conditions = {
             "opensubtitles": [
                 not cls.app_config.foreign_only,
-                io_json.check_language_compatibility("opensubtitles"),
+                CallCondition.check_language_compatibility("opensubtitles"),
                 cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
             ],
             "subscene": [
-                io_json.check_language_compatibility("subscene"),
+                CallCondition.check_language_compatibility("subscene"),
                 cls.app_config.providers["subscene_site"],
             ],
             "yifysubtitles": [
                 not cls.app_config.foreign_only,
-                io_json.check_language_compatibility("yifysubtitles"),
+                CallCondition.check_language_compatibility("yifysubtitles"),
                 not cls.release_data.tvseries,
                 not cls.provider_urls.yifysubtitles == "",
                 cls.app_config.providers["yifysubtitles_site"],

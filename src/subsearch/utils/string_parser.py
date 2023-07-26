@@ -151,6 +151,7 @@ class CreateProviderUrls:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
+        self.current_language_data = language_data[app_config.current_language]
 
     def retrieve_urls(self) -> ProviderUrls:
         """
@@ -228,9 +229,10 @@ class CreateProviderUrls:
         Returns:
             str: The subtitle types and language configurations to search for subtitles in Opensubtitles.
         """
+        alpha_2b = self.current_language_data["alpha_2b"]
         if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
-            return f"en/search/sublanguageid-{self.language_data.alpha_2b}/hearingimpaired-on"
-        return f"en/search/sublanguageid-{self.language_data.alpha_2b}"
+            return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on"
+        return f"en/search/sublanguageid-{alpha_2b}"
 
     def _opensubtitles_search_parameters(self) -> str:
         """

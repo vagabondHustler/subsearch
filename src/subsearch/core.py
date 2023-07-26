@@ -2,16 +2,15 @@ import ctypes
 import time
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.data.data_classes import Subtitle
+from subsearch.data.data_classes import AppConfig, Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
-    app_health,
     decorators,
     io_file_system,
-    io_json,
     io_log,
+    io_toml,
     state_manager,
     string_parser,
 )
@@ -26,7 +25,7 @@ class Initializer:
         self.start = pref_counter
         self.core_state.set_state(self.core_state.state.INITIALIZE)
 
-        self.app_config = io_json.get_app_config(FILE_PATHS.subsearch_config)
+        self.app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
         io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
         decorators.enable_system_tray = self.app_config.system_tray
@@ -42,7 +41,7 @@ class Initializer:
         self.accepted_subtitles: list[Subtitle] = []
         self.rejected_subtitles: list[Subtitle] = []
         self.manually_accepted_subtitles: list[Subtitle] = []
-        self.language_data = io_json.get_language_data()
+        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
 
         if self.file_exist:
             self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
@@ -68,13 +67,12 @@ class Initializer:
         Returns:
             None.
         """
-        app_health.resolve_on_integrity_failure()
+        io_toml.resolve_on_integrity_failure()
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
         if self.file_exist:
             io_file_system.create_directory(VIDEO_FILE.subs_dir)
             io_file_system.create_directory(VIDEO_FILE.tmp_dir)
-        io_json.create_config_file()
 
     def all_providers_disabled(self) -> bool:
         if (

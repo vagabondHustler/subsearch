@@ -4,6 +4,7 @@ import winreg
 from pathlib import Path
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS
+from subsearch.utils import io_toml
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = r"Software\Classes"
@@ -82,20 +83,14 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 
 
 def get_command_value() -> str:
-    """
-    Returns the command to execute when the context menu is used on a file for SubSearch.
-
-    Returns:
-        A string containing the command to execute for the corresponding value.
-    """
-    # get latest json value from file
-    from subsearch.utils import io_json
+    # get latest toml value from file
+    from subsearch.utils import io_toml
 
     if DEVICE_INFO.mode == "executable":
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif DEVICE_INFO.mode == "interpreter":
-        show_terminal = io_json.get_json_key("show_terminal", FILE_PATHS.subsearch_config)
+        show_terminal = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -120,9 +115,7 @@ def get_icon_value() -> str:
         str: Path of the icon file to be used in the context menu, or an empty string if the configuration specifies
              that it should not be shown.
     """
-    from subsearch.utils import io_json
-
-    show_icon: str = io_json.get_json_key("context_menu_icon", FILE_PATHS.subsearch_config)
+    show_icon: str = io_toml.load_toml_value(FILE_PATHS.subsearch_config,"context_menu_icon")
     if show_icon:
         return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
@@ -130,22 +123,12 @@ def get_icon_value() -> str:
 
 
 def get_appliesto_value() -> str:
-    """
-    Retrieve the latest json value from file `raw_json`.
-
-    Returns:
-        str: A string of file types to show the SubSearch context entry on
-            The file types are concatenated with `" OR "` in between.
-    """
-    # get latest json value from file
-    from subsearch.utils import io_json
-
-    file_ext = io_json.get_json_key("file_extensions", FILE_PATHS.subsearch_config)
+    file_ext = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
-    for k, v in zip(file_ext.keys(), file_ext.values()):
+    for ext, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:
-            value += "".join(f'"{k}" OR ')
+            value += "".join(f'".{ext}" OR ')
     if value.endswith(" OR "):  # remove last OR
         value = value[:-4]
 

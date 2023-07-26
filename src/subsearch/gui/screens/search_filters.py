@@ -1,16 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
 
+from subsearch.data.constants import FILE_PATHS
 from subsearch.gui import gui_toolkit
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_json
-from subsearch.data.constants import FILE_PATHS
+from subsearch.utils import io_toml
+
 
 class Providers(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Search providers", padding=10)
-        self.data = io_json.get_json_data(FILE_PATHS.subsearch_config)
+        self.data = io_toml.load_toml_data(FILE_PATHS.subsearch_config)
         self.chekboxes = {}
         self.last_key = ""
 
@@ -21,7 +22,10 @@ class Providers(ttk.Labelframe):
             "yifysubtitles_site": "Search on YIFYsubtitles",
         }
         for name, description in self.provider_options.items():
-            self.provider_options[name] = [io_json.get_json_key("providers", FILE_PATHS.subsearch_config)[name], description]
+            self.provider_options[name] = [
+                io_toml.load_toml_value(FILE_PATHS.subsearch_config, "providers")[name],
+                description,
+            ]
 
         frame = None
         for enum, (key, value) in enumerate(self.provider_options.items()):
@@ -59,7 +63,7 @@ class Providers(ttk.Labelframe):
             self.data["providers"][key] = False
         elif value.get() is False:
             self.data["providers"][key] = True
-        io_json.set_json_data(self.data, FILE_PATHS.subsearch_config)
+        io_toml.dump_toml_data(FILE_PATHS.subsearch_config, self.data)
 
     def toggle_providers(self, event) -> None:
         btn = event.widget
@@ -70,14 +74,14 @@ class Providers(ttk.Labelframe):
         elif self.data["providers"][key] is False:
             self.data["providers"][key] = True
             btn.configure(fg=cfg.color.green)
-        io_json.set_json_data(self.data, FILE_PATHS.subsearch_config)
+        io_toml.dump_toml_data(FILE_PATHS.subsearch_config, self.data)
 
 
 class SubtitleOptions(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle Options", padding=10)
-        self.data = io_json.get_json_data(FILE_PATHS.subsearch_config)
+        self.data = io_toml.load_toml_data(FILE_PATHS.subsearch_config)
         self.subtitle_options: dict = {
             "hearing_impaired": "Include hearing impaird subtitles",
             "non_hearing_impaired": "Include regular subtitles",
@@ -87,10 +91,10 @@ class SubtitleOptions(ttk.Labelframe):
         }
         for name, description in self.subtitle_options.items():
             if "hearing_impaired" in name:
-                subtitle_type = io_json.get_json_key("subtitle_type", FILE_PATHS.subsearch_config)
+                subtitle_type = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_type")
                 self.subtitle_options[name] = [subtitle_type[name], description]
             else:
-                self.subtitle_options[name] = [io_json.get_json_key(name, FILE_PATHS.subsearch_config), description]
+                self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.subsearch_config, name), description]
         frame = None
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
         for enum, (key, value) in enumerate(self.subtitle_options.items()):
@@ -129,9 +133,10 @@ class SubtitleOptions(ttk.Labelframe):
                 self.data["subtitle_type"][key] = True
             else:
                 self.data[key] = True
-        io_json.set_json_data(self.data, FILE_PATHS.subsearch_config)
-    def add_missig_json_key(self, name, description):
-        subtitle_type = io_json.get_json_key("subtitle_type", FILE_PATHS.subsearch_config)
+        io_toml.dump_toml_data(FILE_PATHS.subsearch_config, self.data)
+
+    def add_missig_toml_key(self, name, description):
+        subtitle_type = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_type")
         self.subtitle_options[name] = [subtitle_type[name], description]
 
 
@@ -139,7 +144,7 @@ class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=cfg.color.dark_grey)
-        self.pct_threashold = io_json.get_json_key("percentage_threshold", FILE_PATHS.subsearch_config)
+        self.pct_threashold = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "percentage_threshold")
 
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
@@ -209,6 +214,6 @@ class SearchThreshold(tk.Frame):
             self.update_config()
 
     def update_config(self) -> None:
-        update_svar = self.current_value.get()
-        io_json.set_config_key_value("percentage_threshold", update_svar, FILE_PATHS.subsearch_config)
+        value = self.current_value.get()
+        io_toml.update_toml_key(FILE_PATHS.subsearch_config, "percentage_threshold", value)
         gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)

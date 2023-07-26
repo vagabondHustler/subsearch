@@ -1,9 +1,9 @@
 import importlib
-import json
 import sys
 from pathlib import Path
 
 import pytest
+import toml
 
 from subsearch.data import constants
 from subsearch.utils import io_app
@@ -36,56 +36,18 @@ def fake_languages_config_file(tmp_path):
         "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": [], "subscene_id": 13}
     }
 
-    fake_file = tmp_path / "fake_languages_config.json"
+    fake_file = tmp_path / "fake_language_datag.toml"
     with fake_file.open("w") as f:
-        json.dump(fake_data, f)
+        toml.dump(fake_data, f)
     return fake_file
 
 
 @pytest.fixture
 def fake_subsearch_config_file(tmp_path):
-    fake_data = {
-        "current_language": "english",
-        "subtitle_type": {"hearing_impaired": True, "non_hearing_impaired": True},
-        "foreign_only": False,
-        "percentage_threshold": 90,
-        "autoload_rename": True,
-        "autoload_move": True,
-        "context_menu": True,
-        "context_menu_icon": True,
-        "system_tray": True,
-        "toast_summary": False,
-        "manual_download_on_fail": True,
-        "use_threading": True,
-        "multiple_app_instances": False,
-        "show_terminal": False,
-        "log_to_file": False,
-        "file_extensions": {
-            ".avi": True,
-            ".mp4": True,
-            ".mkv": True,
-            ".mpg": True,
-            ".mpeg": True,
-            ".mov": True,
-            ".rm": True,
-            ".vob": True,
-            ".wmv": True,
-            ".flv": True,
-            ".3gp": True,
-            ".3g2": True,
-            ".swf": True,
-            ".mswmm": True,
-        },
-        "providers": {
-            "opensubtitles_site": True,
-            "opensubtitles_hash": True,
-            "subscene_site": True,
-            "yifysubtitles_site": True,
-        },
-    }
-    fake_file = tmp_path / "fake_subsearch_config.json"
+    fake_data = io_app.get_default_app_config()
+    fake_file = tmp_path / "fake_subsearch_config.toml"
     with fake_file.open("w") as f:
-        json.dump(fake_data, f)
+        toml.dump(fake_data, f)
 
     return fake_file
 
@@ -106,7 +68,7 @@ def override_constants(fake_languages_config_file, fake_subsearch_config_file, f
     io_app.SUPPORTED_FILE_EXT = io_app.get_supported_file_ext()
     io_app.SUPPORTED_PROVIDERS = io_app.get_supported_providers()
     constants.FILE_PATHS.subsearch_config = fake_subsearch_config_file
-    constants.FILE_PATHS.languages_config = fake_languages_config_file
+    constants.FILE_PATHS.language_data = fake_languages_config_file
     constants.FILE_PATHS.subsearch_log = fake_subsearch_log_file
 
 
