@@ -3,7 +3,7 @@ from pathlib import Path
 import cloudscraper
 from selectolax.parser import HTMLParser
 
-from subsearch.data.constants import VIDEO_FILE
+from subsearch.data.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.data.data_classes import (
     AppConfig,
     LanguageData,
@@ -12,7 +12,7 @@ from subsearch.data.data_classes import (
     SubsceneCookie,
     Subtitle,
 )
-from subsearch.utils import io_json, io_log, string_parser
+from subsearch.utils import io_log, io_toml, string_parser
 
 
 class CustomSubsceneHeader:
@@ -29,10 +29,12 @@ class CustomSubsceneHeader:
         return value
 
     def _get_cookie(self) -> SubsceneCookie:
+        languages = io_toml.load_toml_data(FILE_PATHS.language_data)
+        subscene_id = languages[self.app_config.current_language]["subscene_id"]
         subscene_cookie = SubsceneCookie(
             dark_theme=False,
             sort_subtitle_by_date="false",
-            language_filter=io_json.get_language_data().subscene_id,
+            language_filter=subscene_id,
             hearing_impaired=self._get_hearing_impaired_int(),
             foreigen_only=self.app_config.foreign_only,
         )
