@@ -85,7 +85,7 @@ class SubsearchOption(ttk.Labelframe):
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.subsearch_config)
-        self.subsearch_options = {
+        self.subsearch_options: dict[str, Any] = {
             "gui.context_menu": "Context menu",
             "gui.context_menu_icon": "Context menu icon",
             "gui.system_tray": "System tray icon",

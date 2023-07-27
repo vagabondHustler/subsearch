@@ -1,6 +1,6 @@
 import functools
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 import toml
 
@@ -8,15 +8,15 @@ from subsearch.data.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.data.data_classes import AppConfig
 
 
-def load_toml_data(toml_file_path: Path) -> dict:
+def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
     with open(toml_file_path, "r") as f:
         return toml.load(f)
 
 
-def load_toml_value(toml_file_path: Path, key: str) -> Union[str, int, bool, None]:
+def load_toml_value(toml_file_path: Path, key: str) -> Any:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    value = functools.reduce(dict.get, keys, toml_data)
+    value = functools.reduce(dict.get, keys, toml_data) # type: ignore
     return value
 
 
@@ -28,21 +28,21 @@ def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
 def update_toml_key(toml_file_path: Path, key: str, value: Union[str, int, bool]) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value
+    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value # type: ignore
     dump_toml_data(toml_file_path, toml_data)
 
 
 def del_toml_key(toml_file_path: Path, key: str) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data).pop(keys[-1], None)
+    functools.reduce(dict.get, keys[:-1], toml_data).pop(keys[-1], None) # type: ignore
     dump_toml_data(toml_file_path, toml_data)
 
 
 def add_toml_key(toml_file_path: Path, key: str, value: Union[str, int, bool]) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value
+    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value # type: ignore
     dump_toml_data(toml_file_path, toml_data)
 
 
@@ -65,7 +65,7 @@ def repair_toml_config(toml_file_path: Path) -> None:
     for key in missing_keys:
         toml_data[key] = default_config[key]
 
-    dump_toml_data(toml_data)
+    dump_toml_data(FILE_PATHS.subsearch_config, toml_data)
 
 
 def get_keys_recursively(dictionary: dict) -> list[str]:
@@ -103,7 +103,7 @@ def resolve_on_integrity_failure() -> None:
     """
     if not validate_app_config_integrity() and FILE_PATHS.subsearch_config.exists():
         try:
-            repair_toml_config()
+            repair_toml_config(FILE_PATHS.subsearch_config)
         except Exception:
             FILE_PATHS.subsearch_config.unlink()
             dump_toml_data(FILE_PATHS.subsearch_config, DEFAULT_CONFIG)

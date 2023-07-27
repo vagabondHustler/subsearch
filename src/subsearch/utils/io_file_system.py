@@ -66,7 +66,7 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
     return new_file_path
 
 
-def move_and_replace(source_file: Path, destination_directory: Path) -> Path:
+def move_and_replace(source_file: Path, destination_directory: Path) -> None:
     source_file.replace(destination_directory / source_file.name)
 
 

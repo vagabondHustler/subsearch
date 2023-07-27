@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Union
+from typing import Generator, Union
 
 from subsearch.utils import io_log
 
@@ -56,7 +56,7 @@ class YifySubtitlesState(Enum):
 
 
 class Singleton(type):
-    _instances = {}
+    _instances: dict[type, type] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -66,13 +66,13 @@ class Singleton(type):
 
 class StateManager(metaclass=Singleton):
     current_state: Enum
-    enum_class = Union[CoreState, SubsceneState, OpenSubtitlesState, YifySubtitlesState]
-    state_history = []
+    enum_class = type[Union[DataState, CoreState, SubsceneState, OpenSubtitlesState, YifySubtitlesState]]
+    state_history: list[Enum] = []
 
     def __init__(self, _enum_class: enum_class) -> None:
         self.current_state = self.set_state(_enum_class.UNKNOWN)
 
-    def _yield_state(self) -> Enum:
+    def _yield_state(self) -> Generator:
         current_state = self.current_state
         state_names = [state for state in self.current_state.__class__]
         current_index = state_names.index(current_state)
@@ -83,8 +83,8 @@ class StateManager(metaclass=Singleton):
 
         self.set_state(state_names[next_index])
         yield self.current_state
-
-    def set_state(self, state: Enum) -> None:
+        
+    def set_state(self, state: Enum):
         self.current_state = state
         self.state_history.append(self.current_state)
         io_log.stdout(self.current_state, level="debug", print_allowed=False)

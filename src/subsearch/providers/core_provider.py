@@ -100,8 +100,6 @@ class ProviderHelper(SearchArguments):
         self._accepted_subtitles: list[Subtitle] = []
         self._rejected_subtitles: list[Subtitle] = []
 
-    def start_search(self):
-        raise NotImplementedError("start_search method must be implemented in the subclasses.")
 
     def _process_subtitle_data(self, provider_name: str, subtitle_data: dict[str, str]):
         if not subtitle_data:
@@ -162,13 +160,3 @@ def get_html_parser(url: str, header_=None):
     else:
         response = scraper.get(url, headers=header_)
     return HTMLParser(response.text)
-
-
-def prepare_subtitles_download(provider: str, tmp_dir: Path, to_be_downloaded: dict[str, str]) -> list[Subtitle]:
-    download_info = []
-    idx_lenght = len(to_be_downloaded)
-    for idx_num, (name, url) in enumerate(to_be_downloaded.items(), start=1):
-        file_path = f"{tmp_dir}\\{provider}_{idx_num}.zip"
-        data = Subtitle(provider, name, file_path, url, idx_num, idx_lenght)
-        download_info.append(data)
-    return download_info

@@ -3,7 +3,7 @@ import sys
 import tempfile
 from itertools import product
 from pathlib import Path
-from typing import no_type_check
+from typing import Any, no_type_check
 
 from subsearch.data import __version__
 from subsearch.data.data_classes import AppPaths, FilePaths, SystemInfo, VideoFile
@@ -33,7 +33,9 @@ def get_file_paths() -> FilePaths:
     )
 
 
-def get_default_app_config():
+def get_default_app_config() -> dict[str, Any]:
+    file_extensions = dict.fromkeys(get_supported_file_ext(), True)
+    providers = dict.fromkeys(get_supported_providers(), True)
     config = {
         "subtitle_filters": {
             "language": "english",
@@ -54,8 +56,8 @@ def get_default_app_config():
             "move": True,
             "move_dst": ".",
         },
-        "file_extensions": dict.fromkeys(get_supported_file_ext(), True),
-        "providers": dict.fromkeys(get_supported_providers(), True),
+        "file_extensions": file_extensions,
+        "providers": providers,
         "misc": {
             "manual_download_on_fail": True,
             "multithreading": True,

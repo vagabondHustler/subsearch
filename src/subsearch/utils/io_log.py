@@ -1,10 +1,12 @@
 import dataclasses
 import logging
 from pathlib import Path
-from typing import Optional, Type
+from typing import Any, Optional, TypeVar
 
 from subsearch.data.constants import FILE_PATHS
 from subsearch.utils import decorators
+
+DATACLASS = TypeVar("DATACLASS")
 
 
 @decorators.singleton
@@ -16,7 +18,6 @@ class Logger:
     def __init__(self, *args, **kwargs) -> None:
         debug_log_file = FILE_PATHS.subsearch_log
         self.debug_logger = self.create_logger(debug_log_file)
-
 
     def create_logger(self, log_file: Path) -> logging.Logger:
         logger = logging.getLogger("subsearch")
@@ -48,7 +49,7 @@ class Logger:
             print(message)
 
 
-def stdout(message: str, level: str = "info", **kwargs) -> None:
+def stdout(message: str | Any, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
     _logger = Logger()
@@ -105,7 +106,7 @@ def stdout_path_action(action_type: str, src: Path, dst: Optional[Path] = None, 
     stdout(message, **kwargs)
 
 
-def stdout_dataclass(instance: Type[dataclasses.dataclass], **kwargs) -> None:
+def stdout_dataclass(instance: DATACLASS, **kwargs) -> None:
     if not dataclasses.is_dataclass(instance):
         raise ValueError("Input is not a dataclass instance.")
     stdout_in_brackets(instance.__class__.__name__, **kwargs)

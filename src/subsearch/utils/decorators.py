@@ -1,7 +1,7 @@
 import ctypes
 import functools
 import threading
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 from subsearch import core
 from subsearch.data import __guid__
@@ -73,7 +73,7 @@ def singleton(cls):
         obj2 = MyClass(1, 2)
         assert obj1 is obj2  # The same instance is returned.
     """
-    previous_instances = {}
+    previous_instances: dict[Callable, Any] = {}
 
     @functools.wraps(cls)
     def wrapper(*args, **kwargs):
@@ -127,6 +127,7 @@ def thread_safe_log(func):
 
 
 class CallCondition:
+    @staticmethod
     def language_compatibility(provider: str):
         language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_filters.language")
         incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")

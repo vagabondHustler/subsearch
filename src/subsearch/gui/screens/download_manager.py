@@ -17,7 +17,7 @@ class DownloadManager(tk.Frame):
         self.configure(bg=cfg.color.dark_grey, width=root_posx, height=root_posy - 82)
         if subtitles:
             subtitles.sort(key=lambda x: x.pct_result, reverse=True)
-        self.failed_subtitle_downloads = []
+        self.failed_subtitle_downloads: list[Subtitle] = []
         self.download_number = 1
         self.download_index_size = len(subtitles)
         self.subtitles = subtitles
@@ -51,7 +51,7 @@ class DownloadManager(tk.Frame):
         self.scrollbar.lift()
 
     def fill_listbox(self) -> None:
-        self.listbox_index: dict[str, Subtitle] = {}
+        self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
             self.sub_listbox.insert(tk.END, f"{subtitle.pct_result} {subtitle.release_name}\n")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
@@ -87,7 +87,7 @@ class DownloadManager(tk.Frame):
             self.download_index_size += 1
             self.downloaded_subtitle.append(subtitle)
         except Exception as e:
-            io_log.stdout(e, level="error")
+            io_log.stdout(str(e), level="error")
             self.update_text(selection, "⨯", subtitle, cfg.color.red)
             self.failed_subtitle_downloads.append(subtitle)
         finally:

@@ -94,7 +94,7 @@ def main() -> None:
 
 
 def custom_excepthook(exctype, value, traceback):
-    io_log._logger.debug_logger.error(value, exc_info=(exctype, value, traceback))
+    io_log.Logger().debug_logger.error(value, exc_info=(exctype, value, traceback))
     sys.__excepthook__(exctype, value, traceback)
 
 

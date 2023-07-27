@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 from num2words import num2words
 
@@ -140,7 +141,7 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: LanguageData):
+    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: dict[str, Any]):
         """
         Initializes a new instance of the CreateProviderUrls class.
 
@@ -151,7 +152,7 @@ class CreateProviderUrls:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
-        self.current_language_data = language_data[app_config.language]
+        self.current_language_data: LanguageData = language_data[app_config.language]
 
     def retrieve_urls(self) -> ProviderUrls:
         """
@@ -229,7 +230,7 @@ class CreateProviderUrls:
         Returns:
             str: The subtitle types and language configurations to search for subtitles in Opensubtitles.
         """
-        alpha_2b = self.current_language_data["alpha_2b"]
+        alpha_2b = self.current_language_data.alpha_2b
         if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
             return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on"
         return f"en/search/sublanguageid-{alpha_2b}"
