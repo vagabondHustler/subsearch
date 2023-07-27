@@ -108,6 +108,7 @@ def resolve_on_integrity_failure() -> None:
             FILE_PATHS.subsearch_config.unlink()
             dump_toml_data(FILE_PATHS.subsearch_config, DEFAULT_CONFIG)
 
+
 def get_app_config(toml_file_path: Path) -> AppConfig:
     """
     Returns an instance of AppConfig that contains the current configuration settings.
@@ -117,12 +118,11 @@ def get_app_config(toml_file_path: Path) -> AppConfig:
     """
     data = load_toml_data(toml_file_path)
     user_data = AppConfig(
-        **data,
-        hearing_impaired=data["subtitle_type"]["hearing_impaired"],
-        non_hearing_impaired=data["subtitle_type"]["non_hearing_impaired"],
+        **data["subtitle_filters"],
+        **data["gui"],
+        autoload=data["autoload"],
+        file_extensions=data["file_extensions"],
+        providers=data["providers"],
+        **data["misc"],
     )
     return user_data
-
-if __name__ == "__main__":
-    a = load_toml_value(FILE_PATHS.subsearch_config, "current_language")
-    print(a)

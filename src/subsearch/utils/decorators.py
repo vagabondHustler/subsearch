@@ -26,11 +26,13 @@ def apply_mutex(func: Callable) -> Callable:
 
     def inner(*args, **kwargs):
         try:
-            if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "multiple_app_instances"):
+            if not io_toml.load_toml_value(FILE_PATHS.subsearch_config, "misc.single_instance"):
                 return func()
         except FileNotFoundError:
             pass
         except KeyError:
+            pass
+        except TypeError:
             pass
         kernel32 = ctypes.WinDLL("kernel32")
         mutex = kernel32.CreateMutexW(None, False, __guid__)
@@ -125,16 +127,12 @@ def thread_safe_log(func):
 
 
 class CallCondition:
-    @staticmethod
-    def check_language_compatibility(provider: str):
-        current_language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "current_language")
-        language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
-        if not language_data[current_language]["incompatibility"]:
-            return True
-
-        elif provider in language_data[current_language]["incompatibility"]:
+    def language_compatibility(provider: str):
+        language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_filters.language")
+        incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")
+        if provider in incompatibility:
             return False
-        return False
+        return True
 
     @staticmethod
     def all_conditions_met(conditions: list[bool]) -> bool:
@@ -149,17 +147,17 @@ class CallCondition:
         function = kwargs["function"]
         conditions = {
             "opensubtitles": [
-                not cls.app_config.foreign_only,
-                CallCondition.check_language_compatibility("opensubtitles"),
+                not cls.app_config.only_foreign_parts,
+                CallCondition.language_compatibility("opensubtitles"),
                 cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
             ],
             "subscene": [
-                CallCondition.check_language_compatibility("subscene"),
+                CallCondition.language_compatibility("subscene"),
                 cls.app_config.providers["subscene_site"],
             ],
             "yifysubtitles": [
-                not cls.app_config.foreign_only,
-                CallCondition.check_language_compatibility("yifysubtitles"),
+                not cls.app_config.only_foreign_parts,
+                CallCondition.language_compatibility("yifysubtitles"),
                 not cls.release_data.tvseries,
                 not cls.provider_urls.yifysubtitles == "",
                 cls.app_config.providers["yifysubtitles_site"],
@@ -171,9 +169,9 @@ class CallCondition:
                 cls.app_config.manual_download_on_fail,
             ],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
-            "autoload_rename": [cls.app_config.autoload_rename, cls.subtitles_found > 1],
-            "autoload_move": [cls.app_config.autoload_move, cls.subtitles_found > 1],
-            "summary_toast": [cls.app_config.toast_summary],
+            "autoload_rename": [cls.app_config.autoload["rename"], cls.subtitles_found > 1],
+            "autoload_move": [cls.app_config.autoload["move"], cls.subtitles_found > 1],
+            "summary_notification": [cls.app_config.summary_notification],
             "clean_up": [],
         }
         return CallCondition.all_conditions_met(conditions[function])

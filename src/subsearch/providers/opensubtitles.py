@@ -65,7 +65,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
             provider=self.provider_name,
             subtitle_name=self.release,
             result=100,
-            threshold=self.app_config.percentage_threshold,
+            threshold=self.app_config.accept_threshold,
         )
         self._process_subtitle_data(self.provider_name, subtitle_data)
 

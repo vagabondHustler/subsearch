@@ -2,7 +2,7 @@ import ctypes
 import time
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.data.data_classes import AppConfig, Subtitle
+from subsearch.data.data_classes import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
@@ -182,7 +182,7 @@ class SubsearchCore(Initializer):
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
     @decorators.call_conditions
-    def summary_toast(self, elapsed) -> None:
+    def summary_notification(self, elapsed) -> None:
         io_log.stdout_in_brackets("Summary toast")
         self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
         elapsed_summary = f"Finished in {elapsed} seconds"
@@ -208,16 +208,15 @@ class SubsearchCore(Initializer):
 
     def core_on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
-        self.summary_toast(elapsed)
+        self.summary_notification(elapsed)
         io_log.stdout(f"Finished in {elapsed} seconds")
         self.system_tray.stop()
-        if self.app_config.show_terminal is False:
+        if not self.app_config.show_terminal:
             return None
         if DEVICE_INFO.mode == "executable":
             return None
 
         try:
-            input("Ctrl + c or Enter to exit")
+            input("Enter to exit")
         except KeyboardInterrupt:
             pass
-        self.core_state.set_state(self.core_state.state.EXIT)

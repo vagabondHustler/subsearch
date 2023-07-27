@@ -151,7 +151,7 @@ class CreateProviderUrls:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
-        self.current_language_data = language_data[app_config.current_language]
+        self.current_language_data = language_data[app_config.language]
 
     def retrieve_urls(self) -> ProviderUrls:
         """

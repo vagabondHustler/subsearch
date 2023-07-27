@@ -122,53 +122,6 @@ class WindowPosition(tk.Frame):
             return w, h, x, y
         return value
 
-
-class VarColorPicker:
-    """
-    A class that initializes a color picker for given string variables.
-
-    Args:
-        string_var: A tkinter StringVar object to represent value of the color.
-        clabel: A tkinter Label object to represent the color label.
-        is_pct: A boolean variable initialized to False indicating if configured level in percentage.
-
-    Attributes:
-        string_var: A tkinter StringVar object representing value of the color.
-        clabel: A tkinter Label object representing the color label.
-        is_pct: A boolean variable to determine percentage threshold.
-
-    Methods:
-        pick(): Method to determine and update the color of clabel based on the string_var value.
-    """
-
-    def __init__(self, string_var: StringVar, clabel: Label, is_pct: bool = False):
-        self.string_var = string_var
-        self.clabel = clabel
-        self.is_pct = is_pct
-        self.pick()
-
-    def pick(self) -> None:
-        if self.string_var.get() == "True":
-            self.clabel.configure(fg=cfg.color.green)
-        elif self.string_var.get() == "False":
-            self.clabel.configure(fg=cfg.color.red)
-        elif self.string_var.get() == "Both":
-            self.clabel.configure(fg=cfg.color.blue)
-        elif self.string_var.get().startswith("Only"):
-            self.clabel.configure(fg=cfg.color.green)
-
-        if self.is_pct:
-            _pct = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "percentage_threshold")
-            if _pct in range(75, 101):
-                self.clabel.configure(fg=cfg.color.green)
-            elif _pct in range(50, 75):
-                self.clabel.configure(fg=cfg.color.green_brown)
-            elif _pct in range(25, 50):
-                self.clabel.configure(fg=cfg.color.red_brown)
-            elif _pct in range(0, 25):
-                self.clabel.configure(fg=cfg.color.red)
-
-
 class ToolTip(tk.Toplevel):
     """
     A toplevel widget that displays a message when the user hovers over a specified widget
@@ -335,7 +288,7 @@ def configure_root(root):
     Returns:
         tk.Tk: The initialized Tkinter root window.
     """
-    if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "context_menu"):
+    if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "gui.context_menu"):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.dark_grey)
     root.iconbitmap(APP_PATHS.gui_assets / "subsearch.ico")

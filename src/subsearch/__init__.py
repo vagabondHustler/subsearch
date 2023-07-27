@@ -6,8 +6,7 @@ from threading import Thread
 from subsearch import core
 from subsearch.data import __guid__
 from subsearch.data.constants import FILE_PATHS
-from subsearch.gui import screen_manager
-from subsearch.utils import decorators, io_log, io_toml, io_winreg
+from subsearch.utils import decorators, io_log, io_toml
 
 PREF_COUNTER = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
@@ -41,16 +40,14 @@ class Subsearch:
         """
         Runs a search with all active providers, either concurrently or separately.
         """
-        if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "use_threading"):
-            self.thread_executor(
-                self.subsearch_core.subscene,
-                self.subsearch_core.opensubtitles,
-                self.subsearch_core.yifysubtitles,
-            )
+        providers = [self.subsearch_core.subscene, self.subsearch_core.opensubtitles, self.subsearch_core.yifysubtitles]
+
+        if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "misc.multithreading"):
+            self.thread_executor(*providers)
+
         else:
-            self.subsearch_core.subscene()
-            self.subsearch_core.opensubtitles()
-            self.subsearch_core.yifysubtitles()
+            for provider in providers:
+                provider()
 
     def provider_opensubtitles(self) -> None:
         """
@@ -88,66 +85,8 @@ class Subsearch:
         self.subsearch_core.core_on_exit()
 
 
-def console() -> None:
-    r"""
-    Usages: subsearch [OPTIONS]
-
-    Options:
-        --settings [lang, search, app, dl]      Open the GUI settings menu
-                                                    ang: opens screen with available languages
-                                                    search: opens screen with settings such as available providers
-                                                    app: opens screen with app settings
-                                                    dl: opens screen for subtitles not downloaded
-
-        --registry-key [add, del]               Edit the registry
-                                                    add: adds the context menu  / replaces the context menu with default values
-                                                    del: deletes the context menu
-                                                    e.g: subsearch --registry-key add
-
-        --help                                  Prints usage information
-    """
-
-    for num, arg in enumerate(sys.argv[1:], 1):
-        if arg.startswith("--settings"):
-            if sys.argv[num + 1] == "lang":
-                sys.argv.pop(num), sys.argv.pop(num)
-                screen_manager.open_screen("language")
-            elif sys.argv[num + 1] == "search":
-                sys.argv.pop(num), sys.argv.pop(num)
-                screen_manager.open_screen("search")
-            elif sys.argv[num + 1] == "app":
-                sys.argv.pop(num), sys.argv.pop(num)
-                screen_manager.open_screen("settings")
-            elif sys.argv[num + 1] == "dl":
-                sys.argv.pop(num), sys.argv.pop(num)
-                screen_manager.open_screen("download")
-
-            break
-        elif arg.startswith("--registry-key") or arg.startswith("--add-key"):
-            if sys.argv[num + 1] == "add":
-                sys.argv.pop(num), sys.argv.pop(num)
-                io_winreg.add_context_menu()
-                break
-            elif sys.argv[num + 1] == "del":
-                sys.argv.pop(num), sys.argv.pop(num)
-                io_winreg.remove_context_menu()
-                break
-        elif arg.startswith("--help"):
-            sys.argv.pop(num)  # pop argument
-            print(console.__doc__)
-            break
-        elif len(sys.argv[1:]) == num:
-            print("Invalid argument")
-            print(console.__doc__)
-
-
 @decorators.apply_mutex
 def main() -> None:
-    for i in sys.argv:
-        if i.startswith("--"):
-            console()
-            return None
-
     app = Subsearch()
     app.search_for_subtitles()
     app.process_files()
