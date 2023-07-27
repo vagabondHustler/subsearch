@@ -9,7 +9,7 @@ from tests import constants_test
 class FakeSubsearchCore:
     def __init__(self):
         self.file_exist = True
-        self.foreign_only = False
+        self.only_foreign_parts = False
         self.app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
         self.release_data = string_parser.get_release_data(constants_test.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = constants_test.FAKE_PROVIDER_URLS
@@ -25,11 +25,11 @@ def fake_subsearch_core():
 
 
 def test_conditions_opensubtitles(fake_subsearch_core: FakeSubsearchCore):
-    fake_subsearch_core.app_config.foreign_only = True
+    fake_subsearch_core.app_config.only_foreign_parts = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
     assert result is False
 
-    fake_subsearch_core.app_config.foreign_only = False
+    fake_subsearch_core.app_config.only_foreign_parts = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
     assert result is True
 
@@ -53,14 +53,14 @@ def test_conditions_subscene(fake_subsearch_core: FakeSubsearchCore):
 
 
 def test_conditions_yifysubtitles(fake_subsearch_core: FakeSubsearchCore):
-    fake_subsearch_core.foreign_only = True
+    fake_subsearch_core.only_foreign_parts = True
     fake_subsearch_core.release_data.tvseries = True
     fake_subsearch_core.provider_urls.yifysubtitles = ""
     fake_subsearch_core.app_config.providers["yifysubtitles_site"] = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="yifysubtitles")
     assert result is False
 
-    fake_subsearch_core.foreign_only = False
+    fake_subsearch_core.only_foreign_parts = False
     fake_subsearch_core.release_data.tvseries = False
     fake_subsearch_core.provider_urls.yifysubtitles = "fake_url"
     result = CallCondition.conditions(cls=fake_subsearch_core, function="yifysubtitles")
@@ -98,33 +98,33 @@ def test_conditions_extract_files(fake_subsearch_core: FakeSubsearchCore):
 
 def test_conditions_autoload_rename(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.subtitles_found = 2
-    fake_subsearch_core.app_config.autoload_rename = True
+    fake_subsearch_core.app_config.autoload["rename"] = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_rename")
     assert result is True
 
-    fake_subsearch_core.app_config.autoload_rename = False
+    fake_subsearch_core.app_config.autoload["rename"] = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_rename")
     assert result is False
 
 
 def test_conditions_autoload_move(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.subtitles_found = 2
-    fake_subsearch_core.app_config.autoload_move = True
+    fake_subsearch_core.app_config.autoload["move"] = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_move")
     assert result is True
 
-    fake_subsearch_core.app_config.autoload_move = False
+    fake_subsearch_core.app_config.autoload["move"] = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_move")
     assert result is False
 
 
-def test_conditions_summary_toast(fake_subsearch_core: FakeSubsearchCore):
-    fake_subsearch_core.app_config.toast_summary = True
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="summary_toast")
+def test_conditions_summary_notification(fake_subsearch_core: FakeSubsearchCore):
+    fake_subsearch_core.app_config.summary_notification = True
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="summary_notification")
     assert result is True
 
-    fake_subsearch_core.app_config.toast_summary = False
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="summary_toast")
+    fake_subsearch_core.app_config.summary_notification = False
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="summary_notification")
     assert result is False
 
 
