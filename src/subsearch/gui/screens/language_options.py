@@ -17,7 +17,7 @@ class SelectLanguage(ttk.Labelframe):
         self.name_find_key = {}
         self.tip_present = False
         self.languages = io_toml.load_toml_data(FILE_PATHS.language_data)
-        self.current_language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "current_language")
+        self.current_language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_filters.language")
         self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
         frame = None
         for enum, (language, language_data) in enumerate(self.languages.items()):
@@ -68,4 +68,4 @@ class SelectLanguage(ttk.Labelframe):
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
         value = self.name_find_key[btn["text"]]
-        io_toml.update_toml_key(FILE_PATHS.subsearch_config, "current_language", value)
+        io_toml.update_toml_key(FILE_PATHS.subsearch_config, "subtitle_filters.language", value)

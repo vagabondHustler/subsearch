@@ -83,18 +83,14 @@ class SubtitleOptions(ttk.Labelframe):
         self.configure(text="Subtitle Options", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.subsearch_config)
         self.subtitle_options: dict = {
-            "hearing_impaired": "Include hearing impaird subtitles",
-            "non_hearing_impaired": "Include regular subtitles",
-            "foreign_only": "Only include subtitles for foreign parts",
-            "autoload_rename": "Rename subtitle for 'Autoload'",
-            "autoload_move": "Move subtitle to 'Autoload' directory",
+            "subtitle_filters.hearing_impaired": "Include hearing impaird subtitles",
+            "subtitle_filters.non_hearing_impaired": "Include regular subtitles",
+            "subtitle_filters.only_foreign_parts": "Only include subtitles for foreign parts",
+            "autoload.rename": "Rename subtitle for 'Autoload'",
+            "autoload.move": "Move subtitle to 'Autoload' directory",
         }
         for name, description in self.subtitle_options.items():
-            if "hearing_impaired" in name:
-                subtitle_type = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_type")
-                self.subtitle_options[name] = [subtitle_type[name], description]
-            else:
-                self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.subsearch_config, name), description]
+            self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.subsearch_config, name), description]
         frame = None
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
         for enum, (key, value) in enumerate(self.subtitle_options.items()):
@@ -124,32 +120,21 @@ class SubtitleOptions(ttk.Labelframe):
         key = self.checkbuttons[btn][0]
         value = self.checkbuttons[btn][1]
         if value.get() is True:
-            if "hearing_impaired" in key:
-                self.data["subtitle_type"][key] = False
-            else:
-                self.data[key] = False
+            io_toml.update_toml_key(FILE_PATHS.subsearch_config, key, False)
         elif value.get() is False:
-            if "hearing_impaired" in key:
-                self.data["subtitle_type"][key] = True
-            else:
-                self.data[key] = True
-        io_toml.dump_toml_data(FILE_PATHS.subsearch_config, self.data)
-
-    def add_missig_toml_key(self, name, description):
-        subtitle_type = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_type")
-        self.subtitle_options[name] = [subtitle_type[name], description]
+            io_toml.update_toml_key(FILE_PATHS.subsearch_config, key, True)
 
 
 class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=cfg.color.dark_grey)
-        self.pct_threashold = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "percentage_threshold")
+        self.pct_threashold = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_filters.accept_threshold")
 
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
-        self.string_var = tk.StringVar()
-        self.string_var.set(f"{self.pct_threashold} %")
+        self.pct_value = tk.StringVar()
+        self.pct_value.set(f"{self.pct_threashold} %")
 
         frame_text = tk.Frame(self, bg=cfg.color.dark_grey)
         frame_slider = tk.Frame(self, bg=cfg.color.dark_grey)
@@ -158,11 +143,11 @@ class SearchThreshold(tk.Frame):
         label_description.configure(bg=cfg.color.dark_grey, fg=cfg.color.white_grey, font=cfg.font.cas8b)
         label_description.pack(side=tk.LEFT, anchor="n")
 
-        self.label_pct = tk.Label(frame_text, textvariable=self.string_var, width=4)
+        self.label_pct = tk.Label(frame_text, textvariable=self.pct_value, width=4)
         self.label_pct.configure(bg=cfg.color.dark_grey, font=cfg.font.cas8b)
         self.label_pct.pack(side=tk.LEFT, anchor="n")
 
-        gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
+        self.set_label_color()
         x, y = gui_toolkit.calculate_btn_size(self, 36)
 
         self.slider = ttk.Scale(
@@ -174,13 +159,13 @@ class SearchThreshold(tk.Frame):
         frame_slider.pack(side=tk.TOP, anchor="n")
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
-        gui_toolkit.set_default_grid_size(self)
 
     def get_value(self):
         return self.current_value.get()
 
     def set_value(self, event) -> None:
-        self.string_var.set(f"{self.get_value()} %")
+        self.set_label_color()
+        self.pct_value.set(f"{self.get_value()} %")
 
     def enter_button(self, event) -> None:
         btn = event.widget
@@ -197,7 +182,7 @@ class SearchThreshold(tk.Frame):
         btn = event.widget
         if btn == self.slider:
             self.current_value.set(90)
-            self.string_var.set(f"{90} %")
+            self.pct_value.set(f"{90} %")
             self.slider.update()
             self.update_config()
 
@@ -215,5 +200,15 @@ class SearchThreshold(tk.Frame):
 
     def update_config(self) -> None:
         value = self.current_value.get()
-        io_toml.update_toml_key(FILE_PATHS.subsearch_config, "percentage_threshold", value)
-        gui_toolkit.VarColorPicker(self.string_var, self.label_pct, True)
+        io_toml.update_toml_key(FILE_PATHS.subsearch_config, "subtitle_filters.accept_threshold", value)
+
+    def set_label_color(self) -> None:
+        value = self.current_value.get()
+        if value in range(75, 101):
+            self.label_pct.configure(fg=cfg.color.green)
+        elif value in range(50, 75):
+            self.label_pct.configure(fg=cfg.color.green_brown)
+        elif value in range(25, 50):
+            self.label_pct.configure(fg=cfg.color.red_brown)
+        elif value in range(0, 25):
+            self.label_pct.configure(fg=cfg.color.red)
