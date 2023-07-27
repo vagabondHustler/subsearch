@@ -30,13 +30,13 @@ class CustomSubsceneHeader:
 
     def _get_cookie(self) -> SubsceneCookie:
         languages = io_toml.load_toml_data(FILE_PATHS.language_data)
-        subscene_id = languages[self.app_config.current_language]["subscene_id"]
+        subscene_id = languages[self.app_config.language]["subscene_id"]
         subscene_cookie = SubsceneCookie(
             dark_theme=False,
             sort_subtitle_by_date="false",
             language_filter=subscene_id,
             hearing_impaired=self._get_hearing_impaired_int(),
-            foreigen_only=self.app_config.foreign_only,
+            foreigen_only=self.app_config.only_foreign_parts,
         )
         return subscene_cookie
 
@@ -79,10 +79,10 @@ class SearchArguments:
         self.group = release_data.group
 
         # user parameters
-        self.current_language = app_config.current_language
+        self.current_language = app_config.language
         self.hi_sub = app_config.hearing_impaired
         self.non_hi_sub = app_config.non_hearing_impaired
-        self.percentage_threashold = app_config.percentage_threshold
+        self.percentage_threashold = app_config.accept_threshold
         self.manual_download_on_fail = app_config.manual_download_on_fail
         # provider url data
         self.url_subscene = provider_urls.subscene
@@ -113,7 +113,7 @@ class ProviderHelper(SearchArguments):
                 provider=provider_name,
                 subtitle_name=subtitle_name,
                 result=pct_result,
-                threshold=self.app_config.percentage_threshold,
+                threshold=self.app_config.accept_threshold,
             )
             if is_threshold_met(self, pct_result):
                 if provider_name == "subscene":
