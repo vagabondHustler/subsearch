@@ -35,27 +35,33 @@ def get_file_paths() -> FilePaths:
 
 def get_default_app_config():
     config = {
-        "current_language": "english",
-        "foreign_only": False,
-        "percentage_threshold": 90,
-        "autoload_rename": True,
-        "autoload_move": True,
-        "autoload_dir": ".",
-        "context_menu": True,
-        "context_menu_icon": True,
-        "system_tray": True,
-        "toast_summary": False,
-        "manual_download_on_fail": True,
-        "use_threading": True,
-        "multiple_app_instances": False,
-        "show_terminal": False,
-        "log_to_file": True,
-        "subtitle_type": {
+        "subtitle_filters": {
+            "language": "english",
+            "accept_threshold": 90,
             "hearing_impaired": True,
             "non_hearing_impaired": True,
+            "only_foreign_parts": False,
+        },
+        "gui": {
+            "context_menu": True,
+            "context_menu_icon": True,
+            "system_tray": True,
+            "summary_notification": False,
+            "show_terminal": False,
+        },
+        "autoload": {
+            "rename": True,
+            "move": True,
+            "move_dst": ".",
         },
         "file_extensions": dict.fromkeys(get_supported_file_ext(), True),
         "providers": dict.fromkeys(get_supported_providers(), True),
+        "misc": {
+            "manual_download_on_fail": True,
+            "multithreading": True,
+            "single_instance": True,
+            "logging": True,
+        },
     }
     return config
 
