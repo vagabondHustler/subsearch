@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 
 @dataclass(order=True)
@@ -85,81 +86,68 @@ class VideoFile:
 @dataclass(order=True, slots=True)
 class AppConfig:
     """
-    Represents the configuration settings for an application.
-
-    This class is a data structure used to store various configuration settings for an application.
-    These settings include preferences related to language, subtitle types, file extensions, providers,
-    automatic actions, context menu options, system tray, logging, and other features.
+    This class is a data structure used to store various configuration options for an application.
+    These options include preferences related to subtitle filters, file extensions, providers,
+    automatic actions, context menu options, logging, and other features.
 
     Attributes:
-        current_language (str): The current language setting for the application.
-        subtitle_type (dict[str, bool]): A dictionary representing subtitle types and their enabled status.
-        foreign_only (bool): Show only foreign subtitles while searching.
-        percentage_threshold (int): The threshold subtitles has to pass to be downloaded.
-        autoload_rename (bool): Automatically rename downloaded subtitles.
-        autoload_move (bool): Automatically move downloaded subtitles to the appropriate folder.
-        autoload_dir (bool): Target directory of 'autoload_move.
-        context_menu (bool): Show context menu options.
-        context_menu_icon (bool): Display icons in the context menu.
-        system_tray (bool): Support a system tray.
-        toast_summary (bool): Display toast notifications.
-        manual_download_on_fail (bool): Application open the gui `download_manager` screen.
-        show_terminal (bool): Show the terminal/console.
-        use_threading (bool): Use threading.
-        multiple_app_instances (bool): Application allows multiple instances.
-        log_to_file (bool): Log output to a file.
-        file_extensions (dict[str, bool]): A dictionary representing file extensions and their enabled status.
-        providers (dict[str, bool]): A dictionary representing subtitle providers and their enabled status.
-        hearing_impaired (bool): Show hearing-impaired subtitles.
-        non_hearing_impaired (bool): Show non-hearing-impaired subtitles.
+        language (str): The language setting for the application.
+        accept_threshold (int): The threshold value for accepting subtitles.
+        hearing_impaired (bool): A flag indicating whether to include hearing-impaired subtitles.
+        non_hearing_impaired (bool): A flag indicating whether to include non-hearing-impaired subtitles.
+        only_foreign_parts (bool): A flag indicating whether to include only foreign parts subtitles.
+        context_menu (bool): A flag indicating whether to enable context menu options.
+        context_menu_icon (bool): A flag indicating whether to display icons in the context menu.
+        system_tray (bool): A flag indicating whether to enable the application in the system tray.
+        summary_notification (bool): A flag indicating whether to display summary notifications.
+        show_terminal (bool): A flag indicating whether to show the terminal in the application.
+        autoload (dict[str, Union[bool, str]]): A dictionary containing autoload options.
+        file_extensions (dict[str, bool]): A dictionary containing file extensions.
+        providers (dict[str, bool]): A dictionary containing provider options.
+        manual_download_on_fail (bool): A flag indicating whether to enable manual downloads on failure.
+        multithreading (bool): A flag indicating whether to enable multithreading.
+        single_instance (bool): A flag indicating whether to enable single-instance mode.
+        logging (bool): A flag indicating whether to enable logging for the application.
 
     Examples:
-        Creating an `AppConfig` instance:
-
         >>> config = AppConfig(
-        ...     current_language="english",
-        ...     subtitle_type={"hearing_impaired": True, "non_hearing_impaired": False},
-        ...     foreign_only=False,
-        ...     percentage_threshold=90,
-        ...     autoload_rename=True,
-        ...     autoload_move=True,
-        ...     autoload_dir="."
+        ...     language="english",
+        ...     accept_threshold=False,
+        ...     hearing_impaired=90,
+        ...     non_hearing_impaired=True,
+        ...     only_foreign_parts=True,
         ...     context_menu=True,
         ...     context_menu_icon=True,
         ...     system_tray=True,
-        ...     toast_summary=True,
-        ...     manual_download_on_fail=True,
+        ...     summary_notification=True,
         ...     show_terminal=False,
-        ...     use_threading=True,
-        ...     multiple_app_instances=False,
-        ...     log_to_file=True,
-        ...     file_extensions={"mkv": True, "avi": False ...},
-        ...     providers={"subscene_site": True, "opensubtitles_site": True, "opensubtitles_hash": True ...},
-        ...     hearing_impaired=False,
-        ...     non_hearing_impaired=True,
+        ...     autoload={"rename": True, "move": True, "move_dst": "."},
+        ...     file_extensions=False,
+        ...     providers=True,
+        ...     manual_download_on_fail={"mkv": True, "avi": False ...},
+        ...     multithreading={"subscene_site": True, "opensubtitles_site": True, "opensubtitles_hash": True ...},
+        ...     single_instance=False,
+        ...     logging=True,
         ... )
     """
 
-    current_language: str
-    subtitle_type: dict[str, bool]
-    foreign_only: bool
-    percentage_threshold: int
-    autoload_rename: bool
-    autoload_move: bool
-    autoload_dir: str
+    language: str
+    accept_threshold: int
+    hearing_impaired: bool
+    non_hearing_impaired: bool
+    only_foreign_parts: bool
     context_menu: bool
     context_menu_icon: bool
     system_tray: bool
-    toast_summary: bool
-    manual_download_on_fail: bool
+    summary_notification: bool
     show_terminal: bool
-    use_threading: bool
-    multiple_app_instances: bool
-    log_to_file: bool
+    autoload: dict[str, Union[bool, str]]
     file_extensions: dict[str, bool]
     providers: dict[str, bool]
-    hearing_impaired: bool
-    non_hearing_impaired: bool
+    manual_download_on_fail: bool
+    multithreading: bool
+    single_instance: bool
+    logging: bool
 
 
 @dataclass(order=True, slots=True)
