@@ -16,7 +16,7 @@ def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
 def load_toml_value(toml_file_path: Path, key: str) -> Any:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    value = functools.reduce(dict.get, keys, toml_data) # type: ignore
+    value = functools.reduce(dict.get, keys, toml_data)  # type: ignore
     return value
 
 
@@ -28,25 +28,18 @@ def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
 def update_toml_key(toml_file_path: Path, key: str, value: Union[str, int, bool]) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value # type: ignore
+    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value  # type: ignore
     dump_toml_data(toml_file_path, toml_data)
 
 
 def del_toml_key(toml_file_path: Path, key: str) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data).pop(keys[-1], None) # type: ignore
+    functools.reduce(dict.get, keys[:-1], toml_data).pop(keys[-1], None)  # type: ignore
     dump_toml_data(toml_file_path, toml_data)
 
 
-def add_toml_key(toml_file_path: Path, key: str, value: Union[str, int, bool]) -> None:
-    toml_data = load_toml_data(toml_file_path)
-    keys = key.split(".")
-    functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value # type: ignore
-    dump_toml_data(toml_file_path, toml_data)
-
-
-def repair_toml_config(toml_file_path: Path) -> None:
+def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
     """
     Updates the application's configuration file to match the desired config,
     preserving existing values.
@@ -54,30 +47,31 @@ def repair_toml_config(toml_file_path: Path) -> None:
     Returns:
         None.
     """
-    default_config = DEFAULT_CONFIG
-    toml_data = load_toml_data(toml_file_path)
-
-    obsolete_keys = [key for key in toml_data if key not in default_config]
+    obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
         del_toml_key(toml_file_path, key)
 
-    missing_keys = [key for key in default_config if key not in toml_data]
+    missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        toml_data[key] = default_config[key]
+        keys = key.split(".")
+        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG) 
+        update_toml_key(FILE_PATHS.subsearch_config, key, value)
 
-    dump_toml_data(FILE_PATHS.subsearch_config, toml_data)
 
+def get_keys_recursively(dictionary: dict, prefix="", keys=None) -> list[str]:
+    if keys is None:
+        keys = []
 
-def get_keys_recursively(dictionary: dict) -> list[str]:
-    keys: list[str] = []
     if isinstance(dictionary, dict):
         for key in dictionary:
-            keys.append(key)
-            keys.extend(get_keys_recursively(dictionary[key]))
+            full_key = f"{prefix}.{key}" if prefix else key
+            keys.append(full_key)
+            get_keys_recursively(dictionary[key], full_key, keys)
+
     return keys
 
 
-def validate_app_config_integrity() -> bool:
+def valid_config(valid_config_keys: list[str], config_keys: list[str]) -> bool:
     """
     Checks the integrity of the application's configuration file.
 
@@ -86,11 +80,9 @@ def validate_app_config_integrity() -> bool:
     """
     if not FILE_PATHS.subsearch_config.exists():
         return False
-    default_config = get_keys_recursively(DEFAULT_CONFIG)
-    subsearch_config = get_keys_recursively(load_toml_data(FILE_PATHS.subsearch_config))
-    default_config.sort()
-    subsearch_config.sort()
-    return subsearch_config == default_config
+    valid_config_keys.sort()
+    config_keys.sort()
+    return config_keys == valid_config_keys
 
 
 def resolve_on_integrity_failure() -> None:
@@ -101,9 +93,12 @@ def resolve_on_integrity_failure() -> None:
     Returns:
         None.
     """
-    if not validate_app_config_integrity() and FILE_PATHS.subsearch_config.exists():
+    valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
+    config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.subsearch_config))
+    valid = valid_config(valid_config_keys, config_keys)
+    if not valid and FILE_PATHS.subsearch_config.exists():
         try:
-            repair_toml_config(FILE_PATHS.subsearch_config)
+            repair_toml_config(FILE_PATHS.subsearch_config, valid_config_keys, config_keys)
         except Exception:
             FILE_PATHS.subsearch_config.unlink()
             dump_toml_data(FILE_PATHS.subsearch_config, DEFAULT_CONFIG)
