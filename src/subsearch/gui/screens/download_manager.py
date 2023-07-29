@@ -14,7 +14,7 @@ class DownloadManager(tk.Frame):
     def __init__(self, parent, subtitles: list[Subtitle]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
-        self.configure(bg=cfg.color.dark_grey, width=root_posx, height=root_posy - 82)
+        self.configure(bg=cfg.color.default_bg, width=root_posx, height=root_posy - 82)
         if subtitles:
             subtitles.sort(key=lambda x: x.pct_result, reverse=True)
         self.failed_subtitle_downloads: list[Subtitle] = []
@@ -25,7 +25,7 @@ class DownloadManager(tk.Frame):
         self.sub_listbox = tk.Listbox(
             self,
             height=root_posy,
-            bg=cfg.color.dark_grey,
+            bg=cfg.color.default_bg,
             fg=cfg.color.light_grey,
             font=cfg.font.cas8b,
             bd=0,
@@ -78,8 +78,8 @@ class DownloadManager(tk.Frame):
     def download(self, event, subtitle: Subtitle, selection: int) -> None:
         self.sub_listbox.unbind("<ButtonRelease-1>")
         try:
-            if string_parser.contains_forbidden_characters(subtitle.release_name):
-                subtitle.release_name = string_parser.replace_forbidden_characters(subtitle.release_name)
+            if string_parser.valid_filename(subtitle.release_name):
+                subtitle.release_name = string_parser.fix_filename(subtitle.release_name)
             io_file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
             io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
             self.update_text(selection, "✓", subtitle, cfg.color.green)
