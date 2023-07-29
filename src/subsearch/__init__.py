@@ -42,7 +42,7 @@ class Subsearch:
         """
         providers = [self.subsearch_core.subscene, self.subsearch_core.opensubtitles, self.subsearch_core.yifysubtitles]
 
-        if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "misc.multithreading"):
+        if io_toml.load_toml_value(FILE_PATHS.config, "misc.multithreading"):
             self.thread_executor(*providers)
 
         else:
@@ -74,8 +74,7 @@ class Subsearch:
         self.subsearch_core.download_files()
         self.subsearch_core.manual_download()
         self.subsearch_core.extract_files()
-        self.subsearch_core.autoload_rename()
-        self.subsearch_core.autoload_move()
+        self.subsearch_core.subtitle_post_processing()
         self.subsearch_core.clean_up()
 
     def on_exit(self) -> None:

@@ -1,5 +1,6 @@
 import ctypes
 import time
+from pathlib import Path
 
 from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.data.data_classes import Subtitle
@@ -25,7 +26,7 @@ class Initializer:
         self.start = pref_counter
         self.core_state.set_state(self.core_state.state.INITIALIZE)
 
-        self.app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
+        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
         decorators.enable_system_tray = self.app_config.system_tray
@@ -91,7 +92,7 @@ class SubsearchCore(Initializer):
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
             self.core_state.set_state(self.core_state.state.GUI)
-            screen_manager.open_screen("search_filters")
+            screen_manager.open_screen("search_options")
             self.core_state.set_state(self.core_state.state.EXIT)
             return None
 
@@ -167,7 +168,16 @@ class SubsearchCore(Initializer):
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
     @decorators.call_conditions
-    def autoload_rename(self) -> None:
+    def subtitle_post_processing(self):
+        target = self.app_config.subtitle_post_processing["target_path"]
+        resolution = self.app_config.subtitle_post_processing["path_resolution"]
+        target_path = io_file_system.create_path_from_string(target, resolution)
+        self.subtitle_rename()
+        self.subtitle_move_best(target_path)
+        self.subtitle_move_all(target_path)
+
+    @decorators.call_conditions
+    def subtitle_rename(self) -> None:
         io_log.stdout_in_brackets("Renaming best match")
         self.core_state.set_state(self.core_state.state.AUTOLOAD_RENAME)
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
@@ -175,10 +185,18 @@ class SubsearchCore(Initializer):
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
     @decorators.call_conditions
-    def autoload_move(self) -> None:
+    def subtitle_move_best(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move best match")
         self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE)
-        io_file_system.move_and_replace(self.autoload_src, VIDEO_FILE.file_directory)
+
+        io_file_system.move_and_replace(self.autoload_src, target)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
+
+    @decorators.call_conditions
+    def subtitle_move_all(self, target: Path) -> None:
+        io_log.stdout_in_brackets("Move all")
+        self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE_ALL)
+        io_file_system.move_all(VIDEO_FILE.subs_dir, target)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
     @decorators.call_conditions
