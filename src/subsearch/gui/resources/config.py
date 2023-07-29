@@ -42,9 +42,9 @@ class Color:
         grey: #4c4c4c
         light_grey: #727272
         silver_grey: #8a8a8a
-        white_grey: #bdbdbd
-        dark_grey: #1a1b1b
-        mid_grey_black: #111111
+        default_fg: #bdbdbd
+        default_bg: #1a1b1b
+        default_bg_dark: #111111
         light_black: #0e0e0e
         black: #151515
         dark_black: #000000
@@ -65,9 +65,9 @@ class Color:
     grey: str = "#4c4c4c"
     light_grey: str = "#727272"
     silver_grey: str = "#8a8a8a"
-    white_grey: str = "#bdbdbd"
-    dark_grey: str = "#1a1b1b"
-    mid_grey_black: str = "#111111"
+    default_fg: str = "#bdbdbd"
+    default_bg: str = "#1a1b1b"
+    default_bg_dark: str = "#111111"
     light_black: str = "#0e0e0e"
     black: str = "#151515"
     dark_black: str = "#000000"
@@ -103,6 +103,6 @@ font = Font()
 color = Color()
 
 
-DEFAULT_LABEL_CONFIG = dict(bg=color.dark_grey, fg=color.white_grey, font=font.cas8b)
+DEFAULT_LABEL_CONFIG = dict(bg=color.default_bg, fg=color.default_fg, font=font.cas8b)
 DEFAULT_LABEL_GRID = dict(row=0, column=0, sticky="w", padx=2, pady=2)
 DEFAULT_BTN_TOGGLE_GRID = dict(row=0, column=2, pady=2)

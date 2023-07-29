@@ -5,9 +5,9 @@ set ::sprite_data [list \
   language_options_hover 51 41 51 41 \
   language_options_press 0 82 51 41 \
   language_options_rest 51 82 51 41 \
-  search_filters_hover 102 0 51 41 \
-  search_filters_press 102 41 51 41 \
-  search_filters_rest 102 82 51 41 \
+  search_options_hover 102 0 51 41 \
+  search_options_press 102 41 51 41 \
+  search_options_rest 102 82 51 41 \
   subsearch_options_hover 0 123 51 41 \
   subsearch_options_press 51 123 51 41 \
   subsearch_options_rest 102 123 51 41 \
@@ -39,6 +39,11 @@ set ::sprite_data [list \
   scroll_hor_trough 140 184 20 12 \
   scroll_vert_thumb 160 184 10 20 \
   scroll_vert_trough 170 184 12 20 \
+  textbox_dis 182 184 20 20 \
+  textbox_error 188 164 20 20 \
+  textbox_focus 203 0 20 20 \
+  textbox_hover 203 20 20 20 \
+  textbox_rest 203 40 20 20 \
   sizegrip 120 196 10 10 \
   scroll_down 130 196 8 6 \
   scroll_left 197 50 6 8 \
