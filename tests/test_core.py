@@ -10,7 +10,7 @@ class FakeSubsearchCore:
     def __init__(self):
         self.file_exist = True
         self.only_foreign_parts = False
-        self.app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
+        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         self.release_data = string_parser.get_release_data(constants_test.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = constants_test.FAKE_PROVIDER_URLS
         self.accepted_subtitles = []
@@ -96,25 +96,40 @@ def test_conditions_extract_files(fake_subsearch_core: FakeSubsearchCore):
     assert result is True
 
 
-def test_conditions_autoload_rename(fake_subsearch_core: FakeSubsearchCore):
+def test_conditions_subtitle_rename(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.subtitles_found = 2
-    fake_subsearch_core.app_config.autoload["rename"] = True
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_rename")
+    fake_subsearch_core.app_config.subtitle_post_processing["rename"] = True
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_rename")
     assert result is True
 
-    fake_subsearch_core.app_config.autoload["rename"] = False
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_rename")
+    fake_subsearch_core.app_config.subtitle_post_processing["rename"] = False
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_rename")
     assert result is False
 
 
-def test_conditions_autoload_move(fake_subsearch_core: FakeSubsearchCore):
+def test_conditions_subtitle_move_best(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.subtitles_found = 2
-    fake_subsearch_core.app_config.autoload["move"] = True
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_move")
+    fake_subsearch_core.app_config.subtitle_post_processing["move_best"] = True
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_best")
     assert result is True
 
-    fake_subsearch_core.app_config.autoload["move"] = False
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="autoload_move")
+    fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = True
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_best")
+    assert result is False
+    
+    fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = False
+    fake_subsearch_core.app_config.subtitle_post_processing["move_best"] = False
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_best")
+    assert result is False
+
+def test_conditions_subtitle_move_all(fake_subsearch_core: FakeSubsearchCore):
+    fake_subsearch_core.subtitles_found = 2
+    fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = True
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_all")
+    assert result is True
+
+    fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = False
+    result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_all")
     assert result is False
 
 
