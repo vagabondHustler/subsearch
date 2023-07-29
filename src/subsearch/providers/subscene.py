@@ -52,7 +52,6 @@ class Subscene(SubsceneScraper):
         SubsceneScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-
     def start_search(self):
         custom_subscene_header = core_provider.CustomSubsceneHeader(self.app_config)
         header = custom_subscene_header.create_header()

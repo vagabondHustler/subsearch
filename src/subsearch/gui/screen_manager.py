@@ -63,9 +63,7 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
 
     def activate_screen(self) -> None:
-        self.available_screens[self.active_screen].place(
-            x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center"
-        )
+        self.available_screens[self.active_screen].place(x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center")
         resource_loader.asset_menu_btn(self.buttons[self.active_screen], self.active_screen, "press")
         title_tab = self.active_screen.capitalize().replace("_", " ")
         self.parent.title(f"Subsearch - {title_tab}")
@@ -146,8 +144,6 @@ class DownloadManager(tk.Frame):
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.default_bg)
         download_manager.DownloadManager(self, subtitles).pack(anchor="center")
-        
-
 
 
 def open_screen(tab_name: str, **kwargs) -> None:

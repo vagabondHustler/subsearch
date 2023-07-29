@@ -50,7 +50,6 @@ class DownloadManager(tk.Frame):
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 
-            
     def fill_listbox(self) -> None:
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):

@@ -8,8 +8,6 @@ from subsearch.data.constants import APP_PATHS
 from subsearch.utils import decorators
 
 
-
-
 @decorators.singleton
 class SystemTray:
     """

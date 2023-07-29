@@ -84,7 +84,7 @@ class StateManager(metaclass=Singleton):
 
         self.set_state(state_names[next_index])
         yield self.current_state
-        
+
     def set_state(self, state: Enum):
         self.current_state = state
         self.state_history.append(self.current_state)

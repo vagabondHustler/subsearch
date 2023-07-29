@@ -100,7 +100,6 @@ class ProviderHelper(SearchArguments):
         self._accepted_subtitles: list[Subtitle] = []
         self._rejected_subtitles: list[Subtitle] = []
 
-
     def _process_subtitle_data(self, provider_name: str, subtitle_data: dict[str, str]):
         if not subtitle_data:
             return None

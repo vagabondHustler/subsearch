@@ -116,11 +116,12 @@ def test_conditions_subtitle_move_best(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = True
     result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_best")
     assert result is False
-    
+
     fake_subsearch_core.app_config.subtitle_post_processing["move_all"] = False
     fake_subsearch_core.app_config.subtitle_post_processing["move_best"] = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="subtitle_move_best")
     assert result is False
+
 
 def test_conditions_subtitle_move_all(fake_subsearch_core: FakeSubsearchCore):
     fake_subsearch_core.subtitles_found = 2
