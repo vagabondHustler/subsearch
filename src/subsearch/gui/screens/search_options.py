@@ -199,7 +199,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
 
         self.btn_resolution.bind("<Enter>", self.enter_btn_resolution)
         self.btn_resolution.bind("<Leave>", self.leave_btn_resolution)
-        apply_input.bind("<Enter>", self.apply_input_enter)
+        apply_input.bind("<Enter>", self.enter_btn_apply_input)
         apply_input.bind("<Leave>", self.leave_btn_apply_input)
         self.entry_path.bind("<Enter>", self.enter_entry_path)
 
