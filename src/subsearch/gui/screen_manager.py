@@ -3,7 +3,7 @@ from typing import Any
 
 from subsearch.data import __version__
 from subsearch.data.data_classes import Subtitle
-from subsearch.gui import gui_toolkit, resource_loader, root
+from subsearch.gui import resource_loader, root, utils
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
     download_manager,
@@ -59,7 +59,6 @@ class ScreenManager(tk.Frame):
             btn_widget.bind("<Leave>", self.leave_menu_btn)
             resource_loader.asset_menu_btn(btn_widget, btn_key, "rest")
 
-        gui_toolkit.set_default_grid_size(self)
         self.active_screen = active_screen
         self.activate_screen()
 
@@ -147,6 +146,8 @@ class DownloadManager(tk.Frame):
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.default_bg)
         download_manager.DownloadManager(self, subtitles).pack(anchor="center")
+        
+
 
 
 def open_screen(tab_name: str, **kwargs) -> None:
@@ -161,7 +162,7 @@ def open_screen(tab_name: str, **kwargs) -> None:
     """
     root.bind("<KeyPress>", close_mainloop)
     subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
-    gui_toolkit.configure_root(root)
+    utils.configure_root(root)
     resource_loader.set_ttk_theme(root)
     screens = {
         "language_options": LanguageOptions(root),
