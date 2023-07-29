@@ -26,7 +26,7 @@ def apply_mutex(func: Callable) -> Callable:
 
     def inner(*args, **kwargs):
         try:
-            if not io_toml.load_toml_value(FILE_PATHS.subsearch_config, "misc.single_instance"):
+            if not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance"):
                 return func()
         except FileNotFoundError:
             pass
@@ -47,6 +47,16 @@ def apply_mutex(func: Callable) -> Callable:
             kernel32.ReleaseMutex(mutex)
 
     return inner
+
+
+def check_option_disabled(func):
+    def wrapper(self, event, *args, **kwargs):
+        btn = event.widget
+        if btn.instate(["disabled"]):
+            return None
+        return func(self, event, *args, **kwargs)
+
+    return wrapper
 
 
 def singleton(cls):
@@ -129,7 +139,7 @@ def thread_safe_log(func):
 class CallCondition:
     @staticmethod
     def language_compatibility(provider: str):
-        language = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "subtitle_filters.language")
+        language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.language")
         incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")
         if provider in incompatibility:
             return False
@@ -170,8 +180,14 @@ class CallCondition:
                 cls.app_config.manual_download_on_fail,
             ],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
-            "autoload_rename": [cls.app_config.autoload["rename"], cls.subtitles_found > 1],
-            "autoload_move": [cls.app_config.autoload["move"], cls.subtitles_found > 1],
+            "subtitle_post_processing": [],
+            "subtitle_rename": [cls.app_config.subtitle_post_processing["rename"], cls.subtitles_found > 1],
+            "subtitle_move_best": [
+                cls.app_config.subtitle_post_processing["move_best"],
+                cls.subtitles_found > 1,
+                not cls.app_config.subtitle_post_processing["move_all"],
+            ],
+            "subtitle_move_all": [cls.app_config.subtitle_post_processing["move_all"], cls.subtitles_found > 1],
             "summary_notification": [cls.app_config.summary_notification],
             "clean_up": [],
         }

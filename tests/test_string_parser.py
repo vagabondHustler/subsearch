@@ -82,7 +82,7 @@ def test_string_parser_bad_filename() -> None:
 
 def test_provider_urls_movie(monkeypatch):
     monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_MOVIE)
-    app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = constants_test.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
@@ -104,7 +104,7 @@ def test_provider_urls_movie(monkeypatch):
 
 def test_provider_urls_series(monkeypatch):
     monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_SERIES)
-    app_config = io_toml.get_app_config(FILE_PATHS.subsearch_config)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = constants_test.FAKE_VIDEO_FILE_SERIES.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_toml.load_toml_data(FILE_PATHS.language_data)

@@ -145,8 +145,9 @@ namespace eval style_subsearch {
                 }
             }
         
+        
         }
-        # Labelframe
+        # LabelframePlain
         ttk::style layout TLabelframePlain {
         Labelframe.plain {
             Labelframe.padding -expand 1 -children {
@@ -159,6 +160,19 @@ namespace eval style_subsearch {
         ttk::style element create Labelframe.border image $sprites(card) -border 5 -padding 4 -sticky nsew
         ttk::style configure TLabelframe.border.Label -font "Cascadia 8 bold" -foreground $colors(-fg) -background $colors(-bg)
         ttk::style configure TLabelframe.plain.Label -font "Cascadia 8 bold" -foreground $colors(-fg) -background $colors(-bg)
+
+        # Entry
+        ttk::style configure TEntry -foreground $colors(-fg) -padding {6 1 4 2}
+        ttk::style map TEntry -foreground [list disabled "#757575" pressed "#cfcfcf"]
+
+        ttk::style element create Entry.field image \
+        [list $sprites(textbox_rest) \
+            {focus hover !invalid} $sprites(textbox_focus) \
+            invalid $sprites(textbox_error) \
+            disabled $sprites(textbox_dis) \
+            {focus !invalid} $sprites(textbox_focus) \
+            hover $sprites(textbox_hover) \
+        ] -border 5 -sticky nsew
 
 
     }

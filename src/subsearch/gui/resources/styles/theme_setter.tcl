@@ -10,8 +10,8 @@ proc set_theme {} {
         -fg             "#bdbdbd"
         -bg             "#1a1b1b"
         -disabledfg     "#59959"
-        -selectfg       "#ffffff"
-        -selectbg       "#2f60d8"
+        -selectfg       "#1a1b1b"
+        -selectbg       "#bdbdbd"
     }
     
     ttk::style configure . \

@@ -55,8 +55,8 @@ class FilePaths:
         language_data (Path): The default language_data.toml file location
     """
 
-    subsearch_log: Path
-    subsearch_config: Path
+    log: Path
+    config: Path
     language_data: Path
 
 
@@ -121,7 +121,7 @@ class AppConfig:
         ...     system_tray=True,
         ...     summary_notification=True,
         ...     show_terminal=False,
-        ...     autoload={"rename": True, "move": True, "move_dst": "."},
+        ...     autoload={"rename": True, "move": True, "target_path": "."},
         ...     file_extensions=False,
         ...     providers=True,
         ...     manual_download_on_fail={"mkv": True, "avi": False ...},
@@ -141,7 +141,7 @@ class AppConfig:
     system_tray: bool
     summary_notification: bool
     show_terminal: bool
-    autoload: dict[str, Union[bool, str]]
+    subtitle_post_processing: dict[str, Union[bool, str]]
     file_extensions: dict[str, bool]
     providers: dict[str, bool]
     manual_download_on_fail: bool

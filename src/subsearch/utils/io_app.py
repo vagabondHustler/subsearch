@@ -27,8 +27,8 @@ def get_app_paths() -> AppPaths:
 def get_file_paths() -> FilePaths:
     app_home = Path(__file__).resolve().parent.parent
     return FilePaths(
-        subsearch_log=Path.home() / "AppData" / "Local" / "Subsearch" / "subsearch_log.log",
-        subsearch_config=Path.home() / "AppData" / "Local" / "Subsearch" / "subsearch_config.toml",
+        log=Path.home() / "AppData" / "Local" / "Subsearch" / "log.log",
+        config=Path.home() / "AppData" / "Local" / "Subsearch" / "config.toml",
         language_data=app_home / "data" / "language_data.toml",
     )
 
@@ -51,10 +51,12 @@ def get_default_app_config() -> dict[str, Any]:
             "summary_notification": False,
             "show_terminal": False,
         },
-        "autoload": {
+        "subtitle_post_processing": {
             "rename": True,
-            "move": True,
-            "move_dst": ".",
+            "move_best": True,
+            "move_all": False,
+            "target_path": ".",
+            "path_resolution": "relative",
         },
         "file_extensions": file_extensions,
         "providers": providers,

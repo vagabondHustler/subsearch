@@ -122,6 +122,7 @@ class WindowPosition(tk.Frame):
             return w, h, x, y
         return value
 
+
 class ToolTip(tk.Toplevel):
     """
     A toplevel widget that displays a message when the user hovers over a specified widget
@@ -154,7 +155,7 @@ class ToolTip(tk.Toplevel):
             frame,
             text=lines,
             background=self.background,
-            foreground=cfg.color.white_grey,
+            foreground=cfg.color.default_fg,
             justify="left",
         )
         # get size of the label to use later for positioning and sizing of the tooltip
@@ -195,9 +196,9 @@ class ToggleableFrameButton(tk.Frame):
 
     def __init__(self, parent, setting_label: str, config_key: str, **kwargs) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         self.string_var = tk.StringVar()
-        self.string_var.set(f"{io_toml.load_toml_value(FILE_PATHS.subsearch_config, config_key)}")
+        self.string_var.set(f"{io_toml.load_toml_value(FILE_PATHS.config, config_key)}")
         self.setting_name = setting_label
         self.config_key = config_key
         self.write_to_reg = kwargs.get("write_to_reg", False)
@@ -259,7 +260,7 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"True")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        io_toml.update_toml_key(FILE_PATHS.subsearch_config, self.config_key, True)
+        io_toml.update_toml_key(FILE_PATHS.config, self.config_key, True)
         if self.write_to_reg:
             io_winreg.add_context_menu()
             io_winreg.write_all_valuex()
@@ -275,7 +276,7 @@ class ToggleableFrameButton(tk.Frame):
         btn = event.widget
         self.string_var.set(f"False")
         btn["style"] = f"{self.string_var.get()}.TButton"
-        io_toml.update_toml_key(FILE_PATHS.subsearch_config, self.config_key, False)
+        io_toml.update_toml_key(FILE_PATHS.config, self.config_key, False)
         if self.write_to_reg:
             io_winreg.remove_context_menu()
         self.enter_button(event)
@@ -288,9 +289,9 @@ def configure_root(root):
     Returns:
         tk.Tk: The initialized Tkinter root window.
     """
-    if io_toml.load_toml_value(FILE_PATHS.subsearch_config, "gui.context_menu"):
+    if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
         io_winreg.add_context_menu()
-    root.configure(background=cfg.color.dark_grey)
+    root.configure(background=cfg.color.default_bg)
     root.iconbitmap(APP_PATHS.gui_assets / "subsearch.ico")
     root.geometry(WindowPosition.set(root))  # type: ignore
     root.resizable(False, False)

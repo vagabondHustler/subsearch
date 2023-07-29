@@ -9,6 +9,23 @@ from subsearch.providers.core_provider import get_cloudscraper
 from subsearch.utils import io_log, string_parser
 
 
+def create_path_from_string(string: str, path_resolution: str) -> Path:
+    if path_resolution == "relative":
+        if string == ".":
+            path = VIDEO_FILE.file_directory
+        elif string.startswith(".\\") and len(string) > 2:
+            path = VIDEO_FILE.file_directory.joinpath(string[2:])
+        elif string == "..":
+            path = VIDEO_FILE.file_directory.parent
+        elif string.startswith("..\\") and len(string) > 3:
+            path = VIDEO_FILE.file_directory.parent.joinpath(string[3:])
+    elif path_resolution == "absolute":
+        path = Path(string)
+
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
     """
     Download the subtitle from the given url.
@@ -64,6 +81,11 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
     io_log.stdout_path_action(action_type="rename", src=old_file_path, dst=new_file_path)
     old_file_path.rename(new_file_path)
     return new_file_path
+
+
+def move_all(src: Path, dst: Path, extension: str = ".srt"):
+    for file in src.glob(f"*{extension}"):
+        move_and_replace(file.absolute(), dst)
 
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:
