@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from subsearch.data.constants import FILE_PATHS
-from subsearch.gui import gui_toolkit
+from subsearch.gui import utils
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, string_parser
 
@@ -177,7 +177,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
         self.configure(text="Subtitle move destination", padding=10)
         self.target_path = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_post_processing.target_path")
         self.path_resolution = tk.StringVar()
-        self._set_path_resolution()
+        self._get_path_resolution()
 
         frame_l = tk.Frame(self)
         frame_c = tk.Frame(self)
@@ -217,7 +217,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
             self.on_invalid_state(path)
             widget_.unbind("<ButtonPress-1>")
         elif not self.entry_path.instate(["invalid"]):
-            widget_.bind("<ButtonPress-1>", self.set_target_path)
+            widget_.bind("<ButtonPress-1>", self.update_config)
 
     def enter_btn_resolution(self, event) -> None:
         widget_ = event.widget
@@ -230,24 +230,26 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
             self.on_invalid_state(path)
             widget_.unbind("<ButtonPress-1>")
         elif not self.entry_path.instate(["invalid"]):
-            widget_.bind("<ButtonPress-1>", self.set_target_path)
+            widget_.bind("<ButtonPress-1>", self.update_config)
 
     def leave_btn_resolution(self, event) -> None:
         widget_ = event.widget
         widget_.unbind("<ButtonPress-1>")
 
-    def set_target_path(self, event):
-        path = self.entry_path.get()
-        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.target_path", path)
+    def update_config(self, event):
+        target_path = self.entry_path.get()
+        path_resolution = self.path_resolution.get().lower()
+        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.target_path", target_path)
+        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.path_resolution", path_resolution)
 
     def verify_path(self) -> str:
-        path = self.entry_path.get()
-        resolution = self.path_resolution.get().lower()
-        if not string_parser.valid_path(path, resolution):
+        target_path = self.entry_path.get()
+        path_resolution = self.path_resolution.get().lower()
+        if not string_parser.valid_path(target_path, path_resolution):
             self.entry_path.state(["invalid"])
         else:
             self.entry_path.state(["!invalid"])
-        return path
+        return target_path
 
     def on_invalid_state(self, path):
         invalid_path = path.replace("Invalid path: ", "")
@@ -260,15 +262,13 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
         if relative in current_resolution:
             self.btn_resolution["text"] = f"{absolute} path"
             self.path_resolution.set(absolute.capitalize())
-            io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.path_resolution", absolute)
         elif absolute in current_resolution:
             self.btn_resolution["text"] = f"{relative} to file"
             self.path_resolution.set(relative.capitalize())
-            io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.path_resolution", relative)
 
-    def _set_path_resolution(self) -> None:
-        resolution: str = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_post_processing.path_resolution")
-        self.path_resolution.set(resolution.capitalize())
+    def _get_path_resolution(self) -> None:
+        path_resolution: str = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_post_processing.path_resolution")
+        self.path_resolution.set(path_resolution.capitalize())
 
 
 class SearchThreshold(tk.Frame):
@@ -293,7 +293,6 @@ class SearchThreshold(tk.Frame):
         self.label_pct.pack(side=tk.LEFT, anchor="n")
 
         self.set_label_color()
-        x, y = gui_toolkit.calculate_btn_size(self, 36)
 
         self.slider = ttk.Scale(
             frame_slider,
