@@ -38,13 +38,13 @@
 
 #### Key Features
   
-  - Initiate a search for subtitles by simply right-clicking on a media file.
-  - Search for subtitles in 70 different languages
-  - User-friendly GUI for easy customization and configuration
-  - Available in three options, including a compiled executable and source code on GitHub and PyPI
-  - The setup process is straightforward and has minimal reliance on external modules.
+- Initiate a search for subtitles by simply right-clicking on a media file.
+- Search for subtitles in 70 different languages
+- User-friendly GUI for easy customization and configuration
+- Available in three options, including a compiled executable and source code on GitHub and PyPI
+- The setup process is straightforward and has minimal reliance on external modules.
 
-#### Details 
+#### Details
 
 Subsearch is an automated subtitle downloader and extractor that allows users to search and download subtitles for movies and TV shows with a single click from the context menu. The application features a graphical user interface for configuring settings, including options for searching subtitles in 70 different languages from various subtitle sites, filtering hearing-impaired subtitles, and adjusting filename matching criteria.
 
@@ -52,8 +52,7 @@ The application has a user-friendly GUI for all custom settings that can be easi
 
 The tool is available in three different options: as a compiled executable that can be run without the need for a Python interpreter and imported modules, as source code on GitHub, and on PyPI. Users can pick the source that suits them best.
 
-Initially created as a personal project to learn Python programming and git version control, this application has evolved into a daily-use tool that I continue to enjoy working on. While there are many similar repositories available that automatically download subtitles from the internet, this project may offer unique features that set it apart. The setup process has been designed to be as straightforward as possible with minimal reliance on external modules. 
-
+Initially created as a personal project to learn Python programming and git version control, this application has evolved into a daily-use tool that I continue to enjoy working on. While there are many similar repositories available that automatically download subtitles from the internet, this project may offer unique features that set it apart. The setup process has been designed to be as straightforward as possible with minimal reliance on external modules.
 
 ## Preview <a name = "preview"></a>
 
@@ -121,3 +120,4 @@ I would like to express my gratitude to the following repositories for providing
 - [psf/black](https://github.com/psf/black)
 - [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font)
 - [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme)
+- [siddheshsathe/handy-decorators](https://github.com/siddheshsathe/handy-decorators)

@@ -1,61 +1,81 @@
 import ctypes
 import time
+from pathlib import Path
 
-from subsearch.data import __version__, app_paths, video_data
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.data.data_classes import Subtitle
 from subsearch.gui import screen_manager, system_tray
+from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import app_integrity, file_manager, io_json, log, string_parser
+from subsearch.utils import (
+    decorators,
+    io_file_system,
+    io_log,
+    io_toml,
+    state_manager,
+    string_parser,
+)
 
 
 class Initializer:
-    def __init__(self) -> None:
-        app_integrity.initialize_application()
-        self.app_config = io_json.get_app_config()
-        system_tray.enable_system_tray = self.app_config.system_tray
+    def __init__(self, pref_counter: float) -> None:
+        self.file_exist = True if VIDEO_FILE else False
+        self.setup_file_system()
+        state_manager.CoreStateManager()
+        self.core_state = state_manager.CoreStateManager()
+        self.start = pref_counter
+        self.core_state.set_state(self.core_state.state.INITIALIZE)
+
+        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
+        io_log.stdout_dataclass(DEVICE_INFO, level="debug", print_allowed=False)
+        io_log.stdout_dataclass(self.app_config, level="debug", print_allowed=False)
+        decorators.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()
-        self.system_tray.update_progress_state()
-        if video_data is not None:
-            self.file_exist = True
-            file_manager.create_directory(video_data.subs_directory)
-            self.file_hash = file_manager.get_hash(video_data.file_path)
-        else:
-            self.system_tray.lock_to_state("no_file")
-            self.file_exist = False
-            self.file_hash = ""
-        self.results: dict[str, list[DownloadData]] = {}
-        self.skipped_downloads: dict[str, list[PrettifiedDownloadData]] = {}
-        self.skipped_combined: list[PrettifiedDownloadData] = []
-        self.downloads: dict[str, int] = {}
-        self.language_data = io_json.get_language_data()
 
-        for provider in self.app_config.providers.keys():
-            self.results[provider] = []
-            self.skipped_downloads[provider] = []
-            self.downloads[provider] = 0
-
-        self.ran_download_tab = False
-        self.foreign_only = io_json.get_json_key("foreign_only")
-        self.skip_step = SkipStep(self)
         if self.file_exist:
-            self.release_data = string_parser.get_release_metadata(video_data.filename, self.file_hash)
-            create_provider_urls = string_parser.CreateProviderUrls(
-                self.file_hash, self.app_config, self.release_data, self.language_data
-            )
-            self.provider_urls = create_provider_urls.retrieve_urls()
+            io_log.stdout_dataclass(VIDEO_FILE, level="debug", print_allowed=False)
+            io_file_system.create_directory(VIDEO_FILE.file_directory)
+
+        self.subtitles_found = 0
+        self.ran_download_tab = False
+        self.accepted_subtitles: list[Subtitle] = []
+        self.rejected_subtitles: list[Subtitle] = []
+        self.manually_accepted_subtitles: list[Subtitle] = []
+        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+
+        if self.file_exist:
+            self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
+            io_log.stdout_dataclass(self.release_data, level="debug", print_allowed=False)
+            provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
+            self.provider_urls = provider_urls.retrieve_urls()
+            io_log.stdout_dataclass(self.provider_urls, level="debug", print_allowed=False)
             self.search_kwargs = dict(
                 release_data=self.release_data,
                 app_config=self.app_config,
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
-            log.set_logger_data(**self.search_kwargs)
-            log.output_parameters()
-            self.system_tray.update_progress_state()
+
+        self.core_state.set_state(self.core_state.state.INITIALIZED)
+        if not self.file_exist:
+            self.core_state.set_state(self.core_state.state.NO_FILE)
+
+    def setup_file_system(self) -> None:
+        """
+        Initializes the application by performing necessary checks and setup.
+
+        Returns:
+            None.
+        """
+        io_toml.resolve_on_integrity_failure()
+        io_file_system.create_directory(APP_PATHS.tmp_dir)
+        io_file_system.create_directory(APP_PATHS.appdata_subsearch)
+        if self.file_exist:
+            io_file_system.create_directory(VIDEO_FILE.subs_dir)
+            io_file_system.create_directory(VIDEO_FILE.tmp_dir)
 
     def all_providers_disabled(self) -> bool:
-        self.app_config = io_json.get_app_config()
         if (
             self.app_config.providers["subscene_site"] is False
             and self.app_config.providers["opensubtitles_site"] is False
@@ -65,196 +85,156 @@ class Initializer:
             return True
         return False
 
-    def download_results(self, results: list[DownloadData]) -> int:
-        for result in results:
-            downloads = file_manager.download_subtitle(result)
-        return downloads
 
-
-class AppSteps(Initializer):
-    def __init__(self) -> None:
-        self.start = time.perf_counter()
-        Initializer.__init__(self)
-        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {__version__}")
+class SubsearchCore(Initializer):
+    def __init__(self, pref_counter: float) -> None:
+        Initializer.__init__(self, pref_counter)
+        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
-            self.system_tray.lock_to_state("gui")
-            screen_manager.open_screen("search_filters")
+            self.core_state.set_state(self.core_state.state.GUI)
+            screen_manager.open_screen("search_options")
+            self.core_state.set_state(self.core_state.state.EXIT)
             return None
 
-        if " " in video_data.filename:
-            log.warning_spaces_in_filename()
-        log.output_header("Search started")
+        if " " in VIDEO_FILE.filename:
+            io_log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
-    def _provider_opensubtitles(self) -> None:
-        self.system_tray.update_progress_state()
-        if self.skip_step.opensubtitles():
-            return None
-        # log.output_header("Searching on opensubtitles")
-        _opensubs = opensubtitles.OpenSubtitles(**self.search_kwargs)
-        if self.app_config.providers["opensubtitles_hash"] and self.file_hash != "":
-            self.results["opensubtitles_hash"] = _opensubs.parse_hash_results()
-        if self.app_config.providers["opensubtitles_site"]:
-            self.results["opensubtitles_site"] = _opensubs.parse_site_results()
-        self.skipped_downloads["opensubtitles_site"] = _opensubs._sorted_list()
+        if not self.all_providers_disabled():
+            io_log.stdout_in_brackets("Search started")
 
-    def _provider_subscene(self) -> None:
-        self.system_tray.update_progress_state()
-        if self.skip_step.subscene():
-            return None
-        _subscene = subscene.Subscene(**self.search_kwargs)
-        self.results["subscene_site"] = _subscene.parse_site_results()
-        self.skipped_downloads["subscene_site"] = _subscene._sorted_list()
+    def _search_subtitles(self, **kwargs) -> None:
+        flag = kwargs.get("flag")
+        self.core_state.set_state(kwargs["state_obj"]["call_state"])
+        provider_state = kwargs["state_obj"]["state_manager"]()
+        provider_state.set_state(provider_state.state.WORKING)
+        search_provider = kwargs["provider"](**self.search_kwargs)
+        if flag:
+            search_provider.start_search(flag=flag)
+        else:
+            search_provider.start_search()
+        self.accepted_subtitles.extend(search_provider.accepted_subtitles)
+        self.rejected_subtitles.extend(search_provider.rejected_subtitles)
+        provider_state.set_state(provider_state.state.FINNISHED)
 
-    def _provider_yifysubtitles(self) -> None:
-        self.system_tray.update_progress_state()
-        if self.skip_step.yifysubtitles():
-            return None
-        _yifysubs = yifysubtitles.YifiSubtitles(**self.search_kwargs)
-        self.results["yifysubtitles_site"] = _yifysubs.parse_site_results()
-        self.skipped_downloads["yifysubtitles_site"] = _yifysubs._sorted_list()
+    @decorators.call_conditions
+    def opensubtitles(self) -> None:
+        state_obj = {
+            "call_state": self.core_state.state.CALL_OPENSUBTITLES,
+            "state_manager": state_manager.OpenSubtitlesStateManager,
+        }
+        self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="hash")
+        self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="site")
 
-    def _download_files(self) -> None:
-        self.system_tray.update_progress_state()
-        if self.skip_step.download_files():
-            return None
-        log.output_header(f"Downloading subtitles")
-        for provider, data in self.results.items():
-            if self.app_config.providers[provider] is False:
-                continue
-            if not data:
-                continue
-            self.downloads[provider] = self.download_results(data)
-        log.output_done_with_tasks(end_new_line=True)
+    @decorators.call_conditions
+    def subscene(self) -> None:
+        state_obj = {
+            "call_state": self.core_state.state.CALL_SUBSCENE,
+            "state_manager": state_manager.SubsceneStateManager,
+        }
+        self._search_subtitles(state_obj=state_obj, provider=subscene.Subscene)
 
-    def _not_downloaded(self) -> None:
-        if self.skip_step.not_downloaded():
-            return None
-        for data_list in self.skipped_downloads.values():
-            if not data_list:
-                continue
-            for data in data_list:
-                self.skipped_combined.append(data)
+    @decorators.call_conditions
+    def yifysubtitles(self) -> None:
+        state_obj = {
+            "call_state": self.core_state.state.CALL_YIFYSUBTITLES,
+            "state_manager": state_manager.YifySubtitlesStateManager,
+        }
+        self._search_subtitles(state_obj=state_obj, provider=yifysubtitles.YifiSubtitles)
 
-        if self.skipped_combined:
-            screen_manager.open_screen("download_manager", data=self.skipped_combined)
-            self.ran_download_tab = True
-        log.output_done_with_tasks(end_new_line=True)
+    @decorators.call_conditions
+    def download_files(self) -> None:
+        io_log.stdout_in_brackets(f"Downloading subtitles")
+        self.core_state.set_state(self.core_state.state.DOWNLOAD_FILES)
+        index_size = len(self.accepted_subtitles)
+        for enum, subtitle in enumerate(self.accepted_subtitles, 1):
+            io_file_system.download_subtitle(subtitle, enum, index_size)
+        self.subtitles_found = index_size
+        io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    def _extract_zip_files(self) -> None:
-        self.system_tray.update_progress_state()
-        if self.skip_step.extract_zip():
-            return None
-        log.output_header("Extracting downloads")
-        file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
-        log.output_done_with_tasks(end_new_line=True)
+    @decorators.call_conditions
+    def manual_download(self) -> None:
+        io_log.stdout_in_brackets(f"Manual download")
+        self.core_state.set_state(self.core_state.state.MANUAL_DOWNLOAD)
+        screen_manager.open_screen("download_manager", subtitles=self.rejected_subtitles)
+        self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
+        self.subtitles_found += len(self.manually_accepted_subtitles)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    def _clean_up(self) -> None:
-        self.system_tray.update_progress_state()
-        if not self.file_exist:
-            return None
-        if self.app_config.rename_best_match:
-            log.output_header("Renaming best match")
-            file_manager.rename_best_match(f"{self.release_data.release}.srt", video_data.directory_path, ".srt")
-            log.output_done_with_tasks(end_new_line=True)
+    @decorators.call_conditions
+    def extract_files(self) -> None:
+        io_log.stdout_in_brackets("Extracting downloads")
+        self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
+        io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
 
-        log.output_header("Cleaning up")
-        file_manager.clean_up_files(video_data.subs_directory, "nfo")
-        file_manager.delete_temp_files(app_paths.tmpdir)
-        if file_manager.directory_is_empty(video_data.subs_directory):
-            file_manager.del_directory(video_data.subs_directory)
-        log.output_done_with_tasks(end_new_line=True)
+    @decorators.call_conditions
+    def subtitle_post_processing(self):
+        target = self.app_config.subtitle_post_processing["target_path"]
+        resolution = self.app_config.subtitle_post_processing["path_resolution"]
+        target_path = io_file_system.create_path_from_string(target, resolution)
+        self.subtitle_rename()
+        self.subtitle_move_best(target_path)
+        self.subtitle_move_all(target_path)
 
-    def _summary_toast(self, elapsed) -> None:
-        self.system_tray.update_progress_state()
-        if not self.file_exist or not self.app_config.toast_summary:
-            return None
+    @decorators.call_conditions
+    def subtitle_rename(self) -> None:
+        io_log.stdout_in_brackets("Renaming best match")
+        self.core_state.set_state(self.core_state.state.AUTOLOAD_RENAME)
+        new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
+        self.autoload_src = new_name
+        io_log.stdout("Done with task", level="info", end_new_line=True)
+
+    @decorators.call_conditions
+    def subtitle_move_best(self, target: Path) -> None:
+        io_log.stdout_in_brackets("Move best match")
+        self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE)
+
+        io_file_system.move_and_replace(self.autoload_src, target)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
+
+    @decorators.call_conditions
+    def subtitle_move_all(self, target: Path) -> None:
+        io_log.stdout_in_brackets("Move all")
+        self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE_ALL)
+        io_file_system.move_all(VIDEO_FILE.subs_dir, target)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
+
+    @decorators.call_conditions
+    def summary_notification(self, elapsed) -> None:
+        io_log.stdout_in_brackets("Summary toast")
+        self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
         elapsed_summary = f"Finished in {elapsed} seconds"
-        matches = len(self.results.items())
-        download_summary = f"Matches found {matches}"
-        self.system_tray.update_progress_state()
-        if matches > 0:
-            self.system_tray.toast_message(f"Search Succeeded", f"{download_summary}\n{elapsed_summary}")
-        elif matches == 0:
-            self.system_tray.toast_message(f"Search Failed", f"{download_summary}\n{elapsed_summary}")
+        tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        download_summary = f"Matches found {self.subtitles_found}/{tot_num_of_subtitles}"
+        if self.subtitles_found > 0:
+            msg = "Search Succeeded", f"{download_summary}\n{elapsed_summary}"
+            self.system_tray.display_toast(*msg)
+        elif self.subtitles_found == 0:
+            msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
+            self.system_tray.display_toast(*msg)
 
-    def _on_exit(self) -> None:
+    @decorators.call_conditions
+    def clean_up(self) -> None:
+        io_log.stdout_in_brackets("Cleaning up")
+        self.core_state.set_state(self.core_state.state.CLEAN_UP)
+        io_file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
+        io_file_system.del_directory_content(APP_PATHS.tmp_dir)
+        io_file_system.del_directory(VIDEO_FILE.tmp_dir)
+        if io_file_system.directory_is_empty(VIDEO_FILE.file_directory):
+            io_file_system.del_directory(VIDEO_FILE.subs_dir)
+        io_log.stdout("Done with task", level="info", end_new_line=True)
+
+    def core_on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
-        self._summary_toast(elapsed)
-        log.output(f"Finished in {elapsed} seconds")
+        self.summary_notification(elapsed)
+        io_log.stdout(f"Finished in {elapsed} seconds")
         self.system_tray.stop()
-        if self.app_config.show_terminal is False:
+        if not self.app_config.show_terminal:
             return None
-        if file_manager.running_from_exe():
+        if DEVICE_INFO.mode == "executable":
             return None
 
         try:
-            input("Ctrl + c or Enter to exit")
+            input("Enter to exit")
         except KeyboardInterrupt:
             pass
-
-
-class SkipStep:
-    def __init__(self, cls: AppSteps | Initializer):
-        self.cls = cls
-
-    def opensubtitles(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        if self.cls.foreign_only:
-            return True
-        if not io_json.check_language_compatibility("opensubtitles"):
-            return True
-        if not (self.cls.app_config.providers["opensubtitles_hash"] and self.cls.app_config.providers["opensubtitles_site"]):
-            return True
-        return False
-
-    def subscene(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        if not io_json.check_language_compatibility("subscene"):
-            return True
-        if not self.cls.app_config.providers["subscene_site"]:
-            return True
-        return False
-
-    def yifysubtitles(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        if self.cls.foreign_only:
-            return True
-        if not io_json.check_language_compatibility("yifysubtitles"):
-            return True
-        if self.cls.release_data.tvseries:
-            return True
-        if self.cls.provider_urls.yifysubtitles == "":
-            return True
-        if not self.cls.app_config.providers["yifysubtitles_site"]:
-            return True
-        return False
-
-    def download_files(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        if not any(self.cls.results.values()):
-            return True
-        return False
-
-    def not_downloaded(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        number_of_downloads = sum(v for v in self.cls.downloads.values())
-        if self.cls.app_config.manual_download_fail and number_of_downloads > 0:
-            return True
-
-        if self.cls.app_config.manual_download_mode and number_of_downloads < 1:
-            return False
-        return False
-
-    def extract_zip(self) -> bool:
-        if not self.cls.file_exist:
-            return True
-        if self.cls.ran_download_tab:
-            return True
-        if self.cls.all_providers_disabled():
-            return True
-        return False

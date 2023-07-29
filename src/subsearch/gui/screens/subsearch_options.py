@@ -1,21 +1,12 @@
 import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
-from typing import Any, Iterable
+from typing import Any
 
 from subsearch.data import __version__
+from subsearch.data.constants import DEVICE_INFO, FILE_PATHS
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import file_manager, io_json, io_winreg, update
-
-
-def check_disabled(func):
-    def wrapper(self, event, *args, **kwargs):
-        btn = event.widget
-        if btn.instate(["disabled"]):
-            return None
-        return func(self, event, *args, **kwargs)
-
-    return wrapper
+from subsearch.utils import decorators, io_toml, io_winreg, update
 
 
 class FileExtensions(ttk.Labelframe):
@@ -25,8 +16,8 @@ class FileExtensions(ttk.Labelframe):
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="File Exstensions", padding=10)
         FileExtensions.instances.append(self)
-        self.data = io_json.get_json_data()
-        self.file_extensions = io_json.get_json_key("file_extensions")
+        self.data = io_toml.load_toml_data(FILE_PATHS.config)
+        self.file_extensions = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
 
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
 
@@ -39,7 +30,7 @@ class FileExtensions(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value)
             check_btn = ttk.Checkbutton(frame, text=key, onvalue=True, offvalue=False, variable=boolean)
-            if not io_json.get_json_key("context_menu"):
+            if not io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
                 check_btn.state(["disabled"])
 
             check_btn.pack(padx=4, pady=4, ipadx=10)
@@ -55,7 +46,7 @@ class FileExtensions(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_ext)
 
-    @check_disabled
+    @decorators.check_option_disabled
     def toggle_ext(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
@@ -64,7 +55,7 @@ class FileExtensions(ttk.Labelframe):
             self.data["file_extensions"][key] = False
         elif not value.get():
             self.data["file_extensions"][key] = True
-        io_json.set_json_data(self.data)
+        io_toml.dump_toml_data(FILE_PATHS.config, self.data)
 
         self.update_registry()
 
@@ -73,7 +64,7 @@ class FileExtensions(ttk.Labelframe):
 
     def update_state(self):
         for key in self.checkbuttons.keys():
-            if io_json.get_json_key("context_menu"):
+            if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
                 key.state(["!disabled"])
             else:
                 key.state(["disabled"])
@@ -83,20 +74,23 @@ class SubsearchOption(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
-        self.data = io_json.get_json_data()
-        self.subsearch_options = {
-            "context_menu": "Context menu",
-            "context_menu_icon": "Context menu icon",
-            "system_tray": "System tray icon",
-            "toast_summary": "Notification when done",
-            "manual_download_fail": "Manual download on fail",
-            "show_terminal": "Terminal while searching",
-            "log_to_file": "Create log file",
-            "use_threading": "Multithreading",
-            "multiple_app_instances": "Multiple instances",
+        self.data = io_toml.load_toml_data(FILE_PATHS.config)
+        self.subsearch_options: dict[str, Any] = {
+            "gui.context_menu": "Context menu",
+            "gui.context_menu_icon": "Context menu icon",
+            "gui.system_tray": "System tray icon",
+            "gui.summary_notification": "Notification when done",
+            "gui.show_terminal": "Terminal while searching",
+            "misc.manual_download_on_fail": "Manual download on fail",
+            "misc.logging": "Create log file",
+            "misc.multithreading": "Multithreading",
+            "misc.single_instance": "Multiple instances",
         }
         for name, description in self.subsearch_options.items():
-            self.subsearch_options[name] = [io_json.get_json_key(name), description]
+            self.subsearch_options[name] = [
+                io_toml.load_toml_value(FILE_PATHS.config, name),
+                description,
+            ]
 
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
         frame = None
@@ -109,11 +103,13 @@ class SubsearchOption(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            if key == "context_menu_icon" and not io_json.get_json_key("context_menu"):
+            context_menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
+            system_tray = io_toml.load_toml_value(FILE_PATHS.config, "gui.system_tray")
+            if key == "gui.context_menu_icon" and not context_menu:
                 check_btn.state(["disabled"])
-            if key == "show_terminal" and file_manager.running_from_exe():
+            if key == "gui.show_terminal" and DEVICE_INFO.mode == "executable":
                 check_btn.state(["disabled"])
-            if key == "toast_summary" and not io_json.get_json_key("system_tray"):
+            if key == "gui.summary_notification" and not system_tray:
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -128,18 +124,17 @@ class SubsearchOption(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_btn)
 
-    @check_disabled
+    @decorators.check_option_disabled
     def toggle_btn(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
         value = self.checkbuttons[btn][1]
         if value.get():
-            self.data[key] = False
+            io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
-            self.data[key] = True
-        io_json.set_json_data(self.data)
+            io_toml.update_toml_key(FILE_PATHS.config, key, True)
         self.update_registry(btn)
-        keys = [("context_menu", "context_menu_icon"), ("system_tray", "toast_summary")]
+        keys = [("gui.context_menu", "gui.context_menu_icon"), ("gui.system_tray", "gui.summary_notification")]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
@@ -162,9 +157,9 @@ class SubsearchOption(ttk.Labelframe):
                 check_button.state(["!disabled"])
 
     def update_registry(self, btn) -> None:
-        if btn["text"] != self.subsearch_options["context_menu"][1]:
+        if btn["text"] != self.subsearch_options["gui.context_menu"][1]:
             return None
-        menu = io_json.get_json_key("context_menu")
+        menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
         if menu:
             io_winreg.add_context_menu()
         else:
@@ -175,8 +170,8 @@ class CheckForUpdates(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Update Subsearch", padding=10, style="TLabelframePlain")
-        frame_left = tk.Frame(self, bg=cfg.color.dark_grey)
-        frame_right = tk.Frame(self, bg=cfg.color.dark_grey)
+        frame_left = tk.Frame(self, bg=cfg.color.default_bg)
+        frame_right = tk.Frame(self, bg=cfg.color.default_bg)
 
         self.var_current = tk.StringVar(self, f"Current version:\t\t{__version__}")
         self.var_latest = tk.StringVar(self, "Latest version: \t\t")

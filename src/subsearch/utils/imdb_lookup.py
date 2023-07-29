@@ -1,6 +1,6 @@
 import re
 
-from subsearch.providers import generic
+from subsearch.providers import core_provider
 
 
 class AdvTitleSearch:
@@ -88,7 +88,7 @@ class FindImdbID(AdvTitleSearch):
         adv_search = AdvTitleSearch(self.title, self.year)
 
         url = adv_search.get_url()
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         product = tree.select("div.lister-item-content")
 
         for item in product.matches:

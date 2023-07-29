@@ -1,14 +1,11 @@
-from tkinter import ttk
-
 from PIL import Image, ImageTk
 
-from subsearch.data import app_paths
+from subsearch.data.constants import APP_PATHS
 from subsearch.gui import sprites
-from subsearch.gui.resources import config as cfg
 
 
 def get_sprite(sprite_name):
-    spritesheet_path = app_paths.gui_assets / "spritesheet.png"
+    spritesheet_path = APP_PATHS.gui_assets / "spritesheet.png"
     spritesheet_image = Image.open(spritesheet_path)
     sprite_x = sprites[sprite_name][0]
     sprite_y = sprites[sprite_name][1]
@@ -53,23 +50,7 @@ def update_asset(cls, img, x, y) -> None:
     cls.photoimage = img
 
 
-def set_custom_btn_styles() -> None:
-    """
-    Sets custom button styles
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
-
-    custom_style = ttk.Style()
-    custom_style.configure("True.TButton", foreground=cfg.color.green)
-    custom_style.configure("False.TButton", foreground=cfg.color.red)
-
-
 def set_ttk_theme(root):
-    initializer_tcl = app_paths.gui_styles / "theme_setter.tcl"
+    initializer_tcl = APP_PATHS.gui_styles / "theme_setter.tcl"
     root.tk.call("source", str(initializer_tcl))
     root.tk.call("set_theme")

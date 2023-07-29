@@ -3,8 +3,8 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.data import app_paths
-from subsearch.utils import file_manager
+from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS
+from subsearch.utils import io_toml
 
 COMPUTER_NAME = socket.gethostname()
 CLASSES_PATH = r"Software\Classes"
@@ -83,27 +83,21 @@ def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
 
 
 def get_command_value() -> str:
-    """
-    Returns the command to execute when the context menu is used on a file for SubSearch.
+    # get latest toml value from file
+    from subsearch.utils import io_toml
 
-    Returns:
-        A string containing the command to execute for the corresponding value.
-    """
-    # get latest json value from file
-    from subsearch.utils import io_json
-
-    if file_manager.running_from_exe():
+    if DEVICE_INFO.mode == "executable":
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
-    elif file_manager.running_from_exe() is False:
-        show_terminal = io_json.get_json_key("show_terminal")
+    elif DEVICE_INFO.mode == "interpreter":
+        show_terminal = io_toml.load_toml_value(FILE_PATHS.config, "gui.show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
         # import_sys = "import sys; media_file_path = sys.argv[-1];"
         set_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
         # gets the path of the root directory of subsearch
-        set_wd = f"import os; os.chdir(r'{app_paths.home}');"
+        set_wd = f"import os; os.chdir(r'{APP_PATHS.home}');"
         import_main = "import subsearch; subsearch.main()"
         if show_terminal is True:
             value = f'{python_path}\python.exe -c "{set_title} {set_wd} {import_main}" "%1"'
@@ -121,32 +115,20 @@ def get_icon_value() -> str:
         str: Path of the icon file to be used in the context menu, or an empty string if the configuration specifies
              that it should not be shown.
     """
-    from subsearch.utils import io_json
-
-    show_icon: str = io_json.get_json_key("context_menu_icon")
+    show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu_icon")
     if show_icon:
-        return str(app_paths.gui_assets / "subsearch.ico")
+        return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
         return ""
 
 
 def get_appliesto_value() -> str:
-    """
-    Retrieve the latest json value from file `raw_json`.
-
-    Returns:
-        str: A string of file types to show the SubSearch context entry on
-            The file types are concatenated with `" OR "` in between.
-    """
-    # get latest json value from file
-    from subsearch.utils import io_json
-
-    file_ext = io_json.get_json_key("file_extensions")
+    file_ext = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
-    for k, v in zip(file_ext.keys(), file_ext.values()):
+    for ext, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:
-            value += "".join(f'"{k}" OR ')
+            value += "".join(f'".{ext}" OR ')
     if value.endswith(" OR "):  # remove last OR
         value = value[:-4]
 

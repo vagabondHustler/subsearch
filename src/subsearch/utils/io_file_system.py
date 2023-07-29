@@ -1,28 +1,32 @@
 import shutil
 import struct
-import sys
 import zipfile
 from pathlib import Path
 
-from subsearch.data import __guid__, video_data
-from subsearch.data.data_objects import DownloadData
-from subsearch.providers.generic import get_cloudscraper
-from subsearch.utils import log, string_parser
+from subsearch.data.constants import VIDEO_FILE
+from subsearch.data.data_classes import Subtitle
+from subsearch.providers.core_provider import get_cloudscraper
+from subsearch.utils import io_log, string_parser
 
 
-def running_from_exe() -> bool:
-    """
-    Checks if the module is running from an executable file.
+def create_path_from_string(string: str, path_resolution: str) -> Path:
+    if path_resolution == "relative":
+        if string == ".":
+            path = VIDEO_FILE.file_directory
+        elif string.startswith(".\\") and len(string) > 2:
+            path = VIDEO_FILE.file_directory.joinpath(string[2:])
+        elif string == "..":
+            path = VIDEO_FILE.file_directory.parent
+        elif string.startswith("..\\") and len(string) > 3:
+            path = VIDEO_FILE.file_directory.parent.joinpath(string[3:])
+    elif path_resolution == "absolute":
+        path = Path(string)
 
-    Returns:
-        bool: True if the module is running from an executable file, False otherwise.
-    """
-    if sys.argv[0].endswith(".exe"):
-        return True
-    return False
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
-def download_subtitle(data: DownloadData) -> int:
+def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
     """
     Download the subtitle from the given url.
 
@@ -35,17 +39,17 @@ def download_subtitle(data: DownloadData) -> int:
     Raises:
       Any exception raised by the get_cloudscraper or IOError during writing of the subtitle file.
     """
-    log.output(f"{data.provider}: {data.idx_num}/{data.idx_lenght}: {data.name}")
+    io_log.stdout(f"{subtitle.provider}: {index_position}/{index_size}: {subtitle.release_name}")
     scraper = get_cloudscraper()
-    r = scraper.get(data.url, stream=True)
-    with open(data.file_path, "wb") as fd:
+    r = scraper.get(subtitle.download_url, stream=True)
+    file_name = f"{subtitle.provider}_{subtitle.release_name}_{index_position}.zip"
+    download_path = VIDEO_FILE.tmp_dir / file_name
+    with open(download_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
             fd.write(chunk)
 
-    return data.idx_num
 
-
-def extract_files(src: Path, dst: Path, extension: str) -> None:
+def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     """
     Extract files from a directory to a specified Destination.
 
@@ -57,49 +61,38 @@ def extract_files(src: Path, dst: Path, extension: str) -> None:
     Returns:
         None.
     """
-    for file in Path(src).glob(f"*{extension}"):
-        filename = Path(src) / file
-        log.path_action("extract", file, dst)
+    for file in src.glob(f"*{extension}"):
+        filename = src / file
+        io_log.stdout_path_action(action_type="extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
         zip_ref.close()
 
 
-def rename_best_match(release_name: str, cwd: Path, extension: str) -> None:
-    """
-    Function renames and moves the best matching subtitle file, based on the release name, to the specified path. If no match is found nothing happens.
-
-    Args:
-        release_name (str): The name of the video release whose subtitle is being renamed.
-        cwd (Path): The path to the working directory.
-        extension (str): The file type of the subtitles i.e ".srt".
-
-    Returns:
-        None.
-    """
-    if video_data is None:
-        return None
-    best_match = (0, Path())
-    for file in Path(video_data.subs_directory).glob(f"*{extension}"):
+def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
+    best_match = (0, Path("."))
+    for file in VIDEO_FILE.subs_dir.glob(f"*{extension}"):
         value = string_parser.calculate_match(file.name, release_name)
         if value >= best_match[0]:
             best_match = value, file
-    if not best_match[1]:
-        return None
-    file_to_rename = best_match[1]
-    old_name_src = Path(video_data.subs_directory) / file_to_rename
-    new_name_dst = Path(video_data.subs_directory) / release_name
-    log.path_action("rename", file_to_rename, new_name_dst)
-    old_name_src.rename(new_name_dst)
-    move_src = new_name_dst
-    move_dst = Path(cwd) / release_name
-    log.path_action("move", move_src, cwd)
-    if move_dst.exists():
-        move_dst.unlink()
-    shutil.move(move_src, move_dst)
+
+    old_file_path = best_match[1]
+    new_file_path = old_file_path.with_name(f"{release_name}{extension}")
+    io_log.stdout_path_action(action_type="rename", src=old_file_path, dst=new_file_path)
+    old_file_path.rename(new_file_path)
+    return new_file_path
 
 
-def clean_up_files(cwd: Path, extension: str) -> None:
+def move_all(src: Path, dst: Path, extension: str = ".srt"):
+    for file in src.glob(f"*{extension}"):
+        move_and_replace(file.absolute(), dst)
+
+
+def move_and_replace(source_file: Path, destination_directory: Path) -> None:
+    source_file.replace(destination_directory / source_file.name)
+
+
+def del_file_type(cwd: Path, extension: str) -> None:
     """
     Removes files with specific extensions in a given directory
 
@@ -111,7 +104,7 @@ def clean_up_files(cwd: Path, extension: str) -> None:
         None
     """
     for file in Path(cwd).glob(f"*{extension}"):
-        log.path_action("remove", file)
+        io_log.stdout_path_action(action_type="remove", src=file)
         file_path = Path(cwd) / file
         file_path.unlink()
 
@@ -126,7 +119,7 @@ def del_directory(directory: Path) -> None:
     Returns:
         None
     """
-    log.path_action("remove", directory)
+    io_log.stdout_path_action(action_type="remove", src=directory)
     shutil.rmtree(directory)
 
 
@@ -136,7 +129,20 @@ def directory_is_empty(directory: Path) -> bool:
     return False
 
 
-def get_hash(file_path: Path | None) -> str:
+def del_directory_content(directory: Path):
+    for item in directory.iterdir():
+        io_log.stdout_path_action(action_type="remove", src=item)
+        if item.is_file():
+            item.unlink()
+        if item.is_dir():
+            shutil.rmtree(item)
+
+
+def create_directory(path: Path):
+    path.mkdir(exist_ok=True)
+
+
+def get_file_hash(file_path: Path | None) -> str:
     """
     Calculates and returns the hash value of given file path.
 
@@ -159,7 +165,7 @@ def get_hash(file_path: Path | None) -> str:
             filesize = file_path.stat().st_size
             hash = filesize
             if filesize < 65536 * 2:
-                log.output(f"SizeError: filesize is {filesize} bytes", False)
+                io_log.stdout(f"SizeError: filesize is {filesize} bytes", level="error")
                 return ""
             n1 = 65536 // bytesize
             for _x in range(n1):
@@ -180,16 +186,3 @@ def get_hash(file_path: Path | None) -> str:
 
     except IOError:
         return ""
-
-
-def delete_temp_files(temp_path: Path):
-    for item in temp_path.iterdir():
-        log.path_action("remove", item)
-        if item.is_file():
-            item.unlink()
-        if item.is_dir():
-            shutil.rmtree(item)
-
-
-def create_directory(path: Path):
-    path.mkdir(exist_ok=True)

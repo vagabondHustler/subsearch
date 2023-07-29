@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import IntVar, ttk
 
-from subsearch.gui import gui_toolkit
-from subsearch.utils import io_json
+from subsearch.data.constants import FILE_PATHS
+from subsearch.gui import utils
+from subsearch.utils import io_toml
 
 
 class SelectLanguage(ttk.Labelframe):
@@ -15,8 +16,8 @@ class SelectLanguage(ttk.Labelframe):
         self.checkbox_values = {}
         self.name_find_key = {}
         self.tip_present = False
-        self.languages = io_json.get_available_languages()
-        self.current_language = io_json.get_json_key("current_language")
+        self.languages = io_toml.load_toml_data(FILE_PATHS.language_data)
+        self.current_language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.language")
         self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
         frame = None
         for enum, (language, language_data) in enumerate(self.languages.items()):
@@ -42,11 +43,11 @@ class SelectLanguage(ttk.Labelframe):
 
     def enter_button(self, event) -> None:
         btn = event.widget
-        json_key = self.name_find_key[btn["text"]]
-        providers = ", ".join(([_i.title() for _i in self.languages[json_key]["incompatibility"]]))
+        toml_key = self.name_find_key[btn["text"]]
+        providers = ", ".join(([_i.title() for _i in self.languages[toml_key]["incompatibility"]]))
         if providers:
             tip_text = f"If enabled, '{providers}' will be automatically skipped."
-            self.tip = gui_toolkit.ToolTip(btn, btn, tip_text)
+            self.tip = utils.ToolTip(btn, btn, tip_text)
             self.tip.show()
             self.tip_present = True
         btn.bind("<ButtonPress-1>", self.press_button)
@@ -66,5 +67,5 @@ class SelectLanguage(ttk.Labelframe):
         self.checkbox_values[self.active_btn].set(0)  # type: ignore
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
-        json_key = self.name_find_key[btn["text"]]
-        io_json.set_config_key_value("current_language", json_key)
+        value = self.name_find_key[btn["text"]]
+        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_filters.language", value)

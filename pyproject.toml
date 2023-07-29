@@ -4,14 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Subsearch"
-description = "Subsearch - Download subtitles for movies and shows, automatically with one easy mouse click."
+description = "Subsearch"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT license"}
-keywords = ["subsearch", "subscene", "opensubtitles", "yifysubtitles", "download", "subtitles", "movies", "shows", "automatically", "scrape"]
+license = { text = "MIT license" }
+keywords = [
+    "subsearch",
+    "subscene",
+    "opensubtitles",
+    "yifysubtitles",
+    "download",
+    "subtitles",
+    "movies",
+    "shows",
+    "automatically",
+    "scrape",
+]
 authors = [
-  {email = "vagabondHustler.github@gmail.com"},
-  {name = "vagabondHustler"}
+    { email = "vagabondHustler.github@gmail.com" },
+    { name = "vagabondHustler" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3.10",
@@ -20,9 +31,18 @@ classifiers = [
     "Topic :: Multimedia :: Video",
     "Topic :: Utilities",
     "Intended Audience :: Developers",
-    "Intended Audience :: End Users/Desktop"
+    "Intended Audience :: End Users/Desktop",
 ]
-dependencies = ["selectolax==0.3.16", "cloudscraper==1.2.71", "num2words==0.5.12", "packaging==23.1", "requests==2.31.0", "pillow==10.0.0", "pystray==0.19.4"]
+dependencies = [
+    "selectolax==0.3.15",
+    "cloudscraper==1.2.71",
+    "num2words==0.5.12",
+    "packaging==23.1",
+    "requests==2.31.0",
+    "pillow==10.0.0",
+    "pystray==0.19.4",
+    "toml==0.10.2",
+]
 dynamic = ["version"]
 
 [project.urls]
@@ -41,26 +61,29 @@ include = ["subsearch*"]
 exclude = ["examples*", "tools*", "subsearch.test*"]
 
 [tool.setuptools.dynamic]
-version = {attr = "subsearch.data.__version__"}
+version = { attr = "subsearch.data.__version__" }
 
 [project.optional-dependencies]
-optional = ["black==23.7.0", "isort==5.12.0", "twine==4.0.2", "build==0.10.0", "cx_Freeze==6.15.4", "mypy==1.4.1", "pipreqs==0.4.13"]
+optional = [
+    "black==23.7.0",
+    "isort==5.12.0",
+    "twine==4.0.2",
+    "build==0.10.0",
+    "cx_Freeze==6.15.4",
+    "mypy==1.4.1",
+    "pipreqs==0.4.13",
+]
 dev = ["pytest==7.4.0", "pytest-cov==4.1.0", "tox==4.6.4"]
 
-
 [tool.pytest.ini_options]
-filterwarnings =[
-    'ignore::DeprecationWarning'
-]
+filterwarnings = ['ignore::DeprecationWarning']
 log_cli = true
 log_cli_level = 'DEBUG'
 addopts = "--cov=src/subsearch"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
 [tool.black]
-line-length = 125
+line-length = 120
 
 [tool.isort]
 profile = "black"

@@ -2,13 +2,13 @@ import tkinter as tk
 from typing import Any
 
 from subsearch.data import __version__
-from subsearch.data.data_objects import PrettifiedDownloadData
-from subsearch.gui import gui_toolkit, resource_loader, root
+from subsearch.data.data_classes import Subtitle
+from subsearch.gui import resource_loader, root, utils
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
     download_manager,
     language_options,
-    search_filters,
+    search_options,
     subsearch_options,
 )
 
@@ -40,10 +40,10 @@ class ScreenManager(tk.Frame):
 
     def __init__(self, parent, available_screens: dict[str, Any], active_screen: str) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=cfg.color.mid_grey_black, width=cfg.size.width, height=82)
+        self.configure(bg=cfg.color.default_bg_dark, width=cfg.size.width, height=82)
         relx_value = 0.0
         btn_kwargs: dict[str, Any] = dict(
-            master=self, width=54, height=54, bg=cfg.color.mid_grey_black, highlightthickness=0
+            master=self, width=54, height=54, bg=cfg.color.default_bg_dark, highlightthickness=0
         )
         self.parent = parent
         self.available_screens = available_screens
@@ -59,12 +59,13 @@ class ScreenManager(tk.Frame):
             btn_widget.bind("<Leave>", self.leave_menu_btn)
             resource_loader.asset_menu_btn(btn_widget, btn_key, "rest")
 
-        gui_toolkit.set_default_grid_size(self)
         self.active_screen = active_screen
         self.activate_screen()
 
     def activate_screen(self) -> None:
-        self.available_screens[self.active_screen].place(x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center")
+        self.available_screens[self.active_screen].place(
+            x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center"
+        )
         resource_loader.asset_menu_btn(self.buttons[self.active_screen], self.active_screen, "press")
         title_tab = self.active_screen.capitalize().replace("_", " ")
         self.parent.title(f"Subsearch - {title_tab}")
@@ -110,38 +111,43 @@ class ScreenManager(tk.Frame):
 class LanguageOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         language_options.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
-class SearchFilters(tk.Frame):
+class SearchOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
-        group_a = tk.Frame(self, bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
+        group_a = tk.Frame(self, bg=cfg.color.default_bg)
         group_a.pack(anchor="center", expand=True, fill="both")
-        search_filters.Providers(group_a).pack(side=tk.RIGHT, anchor="center", expand=True, fill="both", padx=2)
-        search_filters.SubtitleOptions(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
-        tk.Frame(self, height=80, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
-        search_filters.SearchThreshold(self).pack(anchor="center")
+        search_options.SubtitleFilters(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
+        search_options.Providers(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
+        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        search_options.SubtitlePostProcessing(self).pack(anchor="center", expand=True, fill="x")
+        search_options.SubtitlePostProcessingDirectory(self).pack(anchor="center", expand=True, fill="x")
+        tk.Frame(self, height=60, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        search_options.SearchThreshold(self).pack(anchor="center")
 
 
 class SubsearchOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         subsearch_options.FileExtensions(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=40, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=40, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.SubsearchOption(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=80, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.CheckForUpdates(self)
 
 
 class DownloadManager(tk.Frame):
-    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
+    def __init__(self, parent, subtitles: list[Subtitle]) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
-        download_manager.DownloadList(self, formatted_data).pack(anchor="center")
+        self.configure(bg=cfg.color.default_bg)
+        download_manager.DownloadManager(self, subtitles).pack(anchor="center")
+        
+
 
 
 def open_screen(tab_name: str, **kwargs) -> None:
@@ -154,17 +160,21 @@ def open_screen(tab_name: str, **kwargs) -> None:
     Returns:
         None: This function does not return anything, it manipulates the GUI instead.
     """
-
-    data: list | list[PrettifiedDownloadData] = kwargs.get("data", [])
-    gui_toolkit.configure_root(root)
+    root.bind("<KeyPress>", close_mainloop)
+    subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
+    utils.configure_root(root)
     resource_loader.set_ttk_theme(root)
-    resource_loader.set_custom_btn_styles()
     screens = {
         "language_options": LanguageOptions(root),
-        "search_filters": SearchFilters(root),
+        "search_options": SearchOptions(root),
         "subsearch_options": SubsearchOptions(root),
-        "download_manager": DownloadManager(root, data),
+        "download_manager": DownloadManager(root, subtitles),
     }
     manager = ScreenManager(root, screens, tab_name.lower())
     manager.place(y=cfg.size.height - 82)
     root.mainloop()
+
+
+def close_mainloop(event):
+    if event.keysym == "Escape":
+        root.quit()

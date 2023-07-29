@@ -1,5 +1,6 @@
-from src.subsearch.core import Initializer
-from src.subsearch.utils import imdb_lookup, io_json, string_parser
+from subsearch.data.constants import FILE_PATHS
+from subsearch.utils import imdb_lookup, io_toml, string_parser
+from tests import constants_test
 
 
 def test_str_parser_movie() -> None:
@@ -33,19 +34,17 @@ def test_string_parser_movie() -> None:
     """
 
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    initializer = Initializer()
-    release_metadata = string_parser.get_release_metadata(filename, "")
+    release_data = string_parser.get_release_data(filename)
 
-    assert release_metadata.title == "the foo bar"
-    assert release_metadata.year == 2021
-    assert release_metadata.season == ""
-    assert release_metadata.season_ordinal == ""
-    assert release_metadata.episode == ""
-    assert release_metadata.episode_ordinal == ""
-    assert release_metadata.tvseries is False
-    assert release_metadata.release == "the.foo.bar.2021.1080p.web.h264-foobar"
-    assert release_metadata.group == "foobar"
-    assert release_metadata.file_hash == ""
+    assert release_data.title == "the foo bar"
+    assert release_data.year == 2021
+    assert release_data.season == ""
+    assert release_data.season_ordinal == ""
+    assert release_data.episode == ""
+    assert release_data.episode_ordinal == ""
+    assert release_data.tvseries is False
+    assert release_data.release == "the.foo.bar.2021.1080p.web.h264-foobar"
+    assert release_data.group == "foobar"
 
 
 def test_string_parser_show() -> None:
@@ -53,46 +52,43 @@ def test_string_parser_show() -> None:
     test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
     """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    _initializer = Initializer()
-    release_metadata = string_parser.get_release_metadata(filename, "")
+    release_data = string_parser.get_release_data(filename)
 
-    assert release_metadata.title == "the foo bar"
-    assert release_metadata.year == 0
-    assert release_metadata.season == "01"
-    assert release_metadata.season_ordinal == "first"
-    assert release_metadata.episode == "01"
-    assert release_metadata.episode_ordinal == "first"
-    assert release_metadata.tvseries is True
-    assert release_metadata.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    assert release_metadata.group == "foobar"
-    assert release_metadata.file_hash == ""
+    assert release_data.title == "the foo bar"
+    assert release_data.year == 0
+    assert release_data.season == "01"
+    assert release_data.season_ordinal == "first"
+    assert release_data.episode == "01"
+    assert release_data.episode_ordinal == "first"
+    assert release_data.tvseries is True
+    assert release_data.release == "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    assert release_data.group == "foobar"
 
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    release_metadata = string_parser.get_release_metadata(filename, "")
+    release_data = string_parser.get_release_data(filename)
 
-    assert release_metadata.title == "the foo bar 1080p web h264"
-    assert release_metadata.year == 0
-    assert release_metadata.season == ""
-    assert release_metadata.season_ordinal == ""
-    assert release_metadata.episode == ""
-    assert release_metadata.episode_ordinal == ""
-    assert release_metadata.tvseries is False
-    assert release_metadata.release == "the foo bar 1080p web h264"
-    assert release_metadata.group == "the foo bar 1080p web h264"
-    assert release_metadata.file_hash == ""
+    assert release_data.title == "the foo bar 1080p web h264"
+    assert release_data.year == 0
+    assert release_data.season == ""
+    assert release_data.season_ordinal == ""
+    assert release_data.episode == ""
+    assert release_data.episode_ordinal == ""
+    assert release_data.tvseries is False
+    assert release_data.release == "the foo bar 1080p web h264"
+    assert release_data.group == "the foo bar 1080p web h264"
 
 
-def test_provider_urls_movie():
-    initializer = Initializer()
-    filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    release_metadata = string_parser.get_release_metadata(filename, "")
-    language_data = io_json.get_language_data()
+def test_provider_urls_movie(monkeypatch):
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_MOVIE)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    filename = constants_test.FAKE_VIDEO_FILE_MOVIE.filename
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
     create_provider_urls = string_parser.CreateProviderUrls(
-        "",
-        initializer.app_config,
-        release_metadata,
+        app_config,
+        release_data,
         language_data,
     )
     provider_url = create_provider_urls.retrieve_urls()
@@ -106,20 +102,23 @@ def test_provider_urls_movie():
     assert provider_url.yifysubtitles == ""
 
 
-def test_provider_urls_series():
-    initializer = Initializer()
-    filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    release_metadata = string_parser.get_release_metadata(filename, "")
-    language_data = io_json.get_language_data()
+def test_provider_urls_series(monkeypatch):
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", constants_test.FAKE_VIDEO_FILE_SERIES)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    filename = constants_test.FAKE_VIDEO_FILE_SERIES.filename
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
     create_provider_urls = string_parser.CreateProviderUrls(
-        "",
-        initializer.app_config,
-        release_metadata,
+        app_config,
+        release_data,
         language_data,
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert provider_url.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
+    assert (
+        provider_url.subscene
+        == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
+    )
     assert (
         provider_url.opensubtitles
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"

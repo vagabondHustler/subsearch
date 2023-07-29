@@ -1,29 +1,31 @@
-import re
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data import app_paths, video_data
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
+from subsearch.data.constants import VIDEO_FILE
+from subsearch.data.data_classes import Subtitle
 from subsearch.gui.resources import config as cfg
-from subsearch.providers import subscene
-from subsearch.utils import file_manager, log
+from subsearch.providers import core_provider
+from subsearch.utils import io_file_system, io_log, string_parser
 
 
-class DownloadList(tk.Frame):
-    def __init__(self, parent, formatted_data: list[PrettifiedDownloadData]) -> None:
+class DownloadManager(tk.Frame):
+    downloaded_subtitle: list[Subtitle] = []
+
+    def __init__(self, parent, subtitles: list[Subtitle]) -> None:
         tk.Frame.__init__(self, parent)
         root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
-        self.configure(bg=cfg.color.dark_grey, width=root_posx, height=root_posy - 82)
-        if formatted_data is not None:
-            formatted_data.sort(key=lambda x: x.pct_result, reverse=True)
-        self.formatted_data = formatted_data
-        self.subscene_scrape = subscene.SubsceneScraper()
-        self.extent = 0
+        self.configure(bg=cfg.color.default_bg, width=root_posx, height=root_posy - 82)
+        if subtitles:
+            subtitles.sort(key=lambda x: x.pct_result, reverse=True)
+        self.failed_subtitle_downloads: list[Subtitle] = []
+        self.download_number = 1
+        self.download_index_size = len(subtitles)
+        self.subtitles = subtitles
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
             self,
             height=root_posy,
-            bg=cfg.color.dark_grey,
+            bg=cfg.color.default_bg,
             fg=cfg.color.light_grey,
             font=cfg.font.cas8b,
             bd=0,
@@ -42,62 +44,57 @@ class DownloadList(tk.Frame):
             bordermode="inside",
             anchor="w",
         )
-        if self.formatted_data is not None:
+        if self.subtitles is not None:
             self.fill_listbox()
         self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy - 82)
         self.scrollbar.config(command=self.sub_listbox.yview)
         self.scrollbar.lift()
 
+            
     def fill_listbox(self) -> None:
-        self._providers = {}
-        self._releases = {}
-        self._urls = {}
-        log.output("")
-        log.output_header("Processing files with GUI")
-        # fil list box with all available subtitles that were found and not downloaded
-        for enu, data in enumerate(self.formatted_data):
-            self.sub_listbox.insert(tk.END, f"{data.formatted_release}\n")
+        self.listbox_index: dict[int, Subtitle] = {}
+        for enum, subtitle in enumerate(self.subtitles):
+            self.sub_listbox.insert(tk.END, f"{subtitle.pct_result}% {subtitle.release_name}\n")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
-            self._providers[enu] = data.provider
-            self._releases[enu] = data.release
-            self._urls[enu] = data.url
+            self.listbox_index[enum] = subtitle
 
     def mouse_b1_press(self, event) -> None:
-        self.sub_listbox.bind("<<ListboxSelect>>", self.download_button)
+        self.sub_listbox.unbind("<ButtonPress-1>")
+        self.sub_listbox.bind("<<ListboxSelect>>", self.select_subtitle)
 
-    def mouse_b1_release(self, event) -> None:
-        self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
-
-    def download_button(self, event) -> None:
+    def select_subtitle(self, event) -> None:
         self.sub_listbox.unbind("<<ListboxSelect>>")
-        self.sub_listbox.bind("<ButtonRelease-1>", self.mouse_b1_release)
-        selection = str(self.sub_listbox.curselection())
-        item_num = re.findall("(\d+)", selection)[0]
-        self.sub_listbox.delete(int(item_num))
-        self.sub_listbox.insert(int(item_num), f"» DOWNLOADING «")
-        for enum, _provider, _release, _url in zip(
-            self._providers.keys(), self._providers.values(), self._releases.values(), self._urls.values()
-        ):
-            if enum != int(item_num):
-                continue
-            self.sub_listbox.itemconfig(int(enum), {"fg": cfg.color.blue})
-            if _provider == "subscene":
-                download_url = self.subscene_scrape.get_download_url(_url)
-            else:
-                download_url = _url
-            path = f"{ app_paths.tmpdir}\\__{_provider}__{item_num}.zip"
-            enum = DownloadData(
-                provider=f"Downloading from {_provider}",
-                name=_release,
-                file_path=path,
-                url=download_url,
-                idx_num=1,
-                idx_lenght=1,
-            )  # type: ignore
-            file_manager.download_subtitle(enum)  # type: ignore
-            file_manager.extract_files(app_paths.tmpdir, video_data.subs_directory, ".zip")
-            file_manager.delete_temp_files(app_paths.tmpdir)
-            break
-        self.sub_listbox.delete(int(item_num))
-        self.sub_listbox.insert(int(item_num), f"✔ {_release}")
-        self.sub_listbox.itemconfig(int(item_num), {"fg": cfg.color.green})
+        _selection = self.sub_listbox.curselection()
+        selection = _selection[0]
+        subtitle = self.listbox_index[selection]
+        if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
+            print("i'm here")
+            self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
+            return
+        if subtitle.provider == "subscene":
+            subtitle.download_url = core_provider.ProviderHelper.subscene_get_download_url(subtitle.download_url)
+        self.update_text(selection, "⊙", subtitle, cfg.color.orange)
+        self.sub_listbox.bind("<ButtonRelease-1>", lambda event: self.download(event, subtitle, selection))
+
+    def download(self, event, subtitle: Subtitle, selection: int) -> None:
+        self.sub_listbox.unbind("<ButtonRelease-1>")
+        try:
+            if string_parser.valid_filename(subtitle.release_name):
+                subtitle.release_name = string_parser.fix_filename(subtitle.release_name)
+            io_file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
+            io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+            self.update_text(selection, "✓", subtitle, cfg.color.green)
+            self.download_number += 1
+            self.download_index_size += 1
+            self.downloaded_subtitle.append(subtitle)
+        except Exception as e:
+            io_log.stdout(str(e), level="error")
+            self.update_text(selection, "⨯", subtitle, cfg.color.red)
+            self.failed_subtitle_downloads.append(subtitle)
+        finally:
+            self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
+
+    def update_text(self, selection: int, symbol: str, subtitle: Subtitle, color: str) -> None:
+        self.sub_listbox.delete(int(selection))
+        self.sub_listbox.insert(int(selection), f"{symbol} {subtitle.release_name}")
+        self.sub_listbox.itemconfig(int(selection), {"fg": color})

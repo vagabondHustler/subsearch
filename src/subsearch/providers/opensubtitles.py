@@ -1,16 +1,14 @@
 import re
 from typing import Any
 
-from subsearch.data import app_paths
-from subsearch.data.data_objects import DownloadData, PrettifiedDownloadData
-from subsearch.providers import generic
-from subsearch.providers.generic import ProviderParameters
-from subsearch.utils import log, string_parser
+from subsearch.data.data_classes import Subtitle
+from subsearch.providers import core_provider
+from subsearch.utils import io_log
 
 
-class OpenSubtitlesScraper:
-    def __init__(self) -> None:
-        ...
+class OpenSubtitlesScraper(core_provider.ProviderHelper):
+    def __init__(self, **kwargs) -> None:
+        core_provider.ProviderHelper.__init__(self, **kwargs)
 
     def opensubtitles_down(self, tree: Any):
         is_offline = tree.css_matches("pre")
@@ -18,13 +16,13 @@ class OpenSubtitlesScraper:
             return False
         offline_text = tree.css_first("pre").text()
         if offline_text.startswith("Site will be online soon"):
-            log.output(f"opensubtitles is down: {offline_text}", level="warning")
+            io_log.stdout(f"opensubtitles is down: {offline_text}", level="error")
             return True
         return False
 
     def get_subtitles(self, url: str):
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         items = tree.css("item")
         if self.opensubtitles_down(tree):
             return subtitles
@@ -37,7 +35,7 @@ class OpenSubtitlesScraper:
 
     def with_hash(self, url: str, release: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = generic.get_html_parser(url)
+        tree = core_provider.get_html_parser(url)
         if self.opensubtitles_down(tree):
             return subtitles
         try:
@@ -48,58 +46,41 @@ class OpenSubtitlesScraper:
         return subtitles
 
 
-class OpenSubtitles(ProviderParameters, OpenSubtitlesScraper):
+class OpenSubtitles(OpenSubtitlesScraper):
     def __init__(self, **kwargs):
-        ProviderParameters.__init__(self, **kwargs)
-        OpenSubtitlesScraper.__init__(self)
-        self.logged_and_sorted: list[PrettifiedDownloadData] = []
+        OpenSubtitlesScraper.__init__(self, **kwargs)
+        self.provider_name = self.__class__.__name__.lower()
 
-    def parse_hash_results(self) -> list | list[DownloadData]:
-        # search for hash
-        to_be_downloaded = self.with_hash(self.url_opensubtitles_hash, self.release)
+    def start_search(self, flag: str) -> None:
+        flags = {"hash": self.search_site, "site": self.search_hash}
+        flags[flag]()
 
-        # log results
-        data_found = True if to_be_downloaded else False
-        if data_found is False:
-            return []
-        log.output_match("opensubtitles", 100, self.release)
+    def search_hash(self) -> None:
+        subtitle_data = self.with_hash(self.url_opensubtitles_hash, self.release)
 
-        # pack download data
-        download_info = generic.create_download_data("opensubtitles", app_paths.tmpdir, to_be_downloaded)
-        return download_info
+        if not subtitle_data:
+            return None
 
-    def parse_site_results(self) -> list | list[DownloadData]:
-        # search for title
+        io_log.stdout_match(
+            provider=self.provider_name,
+            subtitle_name=self.release,
+            result=100,
+            threshold=self.app_config.accept_threshold,
+        )
+        self._process_subtitle_data(self.provider_name, subtitle_data)
+
+    def search_site(self) -> None:
         subtitle_data = self.get_subtitles(self.url_opensubtitles)
 
-        # log results
-        data_found = True if subtitle_data else False
-        if data_found is False:
-            return []
+        if not subtitle_data:
+            return None
 
-        # search for subtitle
-        to_be_downloaded: dict[str, str] = {}
-        to_be_sorted: list[PrettifiedDownloadData] = []
-        for key, value in subtitle_data.items():
-            pct_result = string_parser.calculate_match(key, self.release)
-            log.output_match("opensubtitles", pct_result, key)
-            formatted_data = generic.prettify_download_data("opensubtitles", key, value, pct_result)
-            to_be_sorted.append(formatted_data)
-            if self.is_threshold_met(key, pct_result) is False or self.manual_download_mode:
-                continue
-            if value in to_be_downloaded.values():
-                continue
-            to_be_downloaded[key] = value
+        self._process_subtitle_data(self.provider_name, subtitle_data)
 
-        self.sorted_metadata = generic.sort_prettified_data(to_be_sorted)
-        log.downlod_metadata("opensubtitles", self.sorted_metadata, self.percentage_threashold)
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        return self._accepted_subtitles
 
-        if not to_be_downloaded:
-            return []
-
-        # pack download data
-        download_info = generic.create_download_data("opensubtitles", app_paths.tmpdir, to_be_downloaded)
-        return download_info
-
-    def _sorted_list(self) -> list[PrettifiedDownloadData]:
-        return self.sorted_metadata
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        return self._rejected_subtitles

@@ -1,7 +1,7 @@
 import sys
 from io import StringIO
 
-from src.subsearch.data import __version__, version
+from subsearch.data import __version__, version
 
 
 def test_get_version():
