@@ -8,7 +8,7 @@ from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
     download_manager,
     language_options,
-    search_filters,
+    search_options,
     subsearch_options,
 )
 
@@ -40,10 +40,10 @@ class ScreenManager(tk.Frame):
 
     def __init__(self, parent, available_screens: dict[str, Any], active_screen: str) -> None:
         tk.Frame.__init__(self, parent)
-        self.configure(bg=cfg.color.mid_grey_black, width=cfg.size.width, height=82)
+        self.configure(bg=cfg.color.default_bg_dark, width=cfg.size.width, height=82)
         relx_value = 0.0
         btn_kwargs: dict[str, Any] = dict(
-            master=self, width=54, height=54, bg=cfg.color.mid_grey_black, highlightthickness=0
+            master=self, width=54, height=54, bg=cfg.color.default_bg_dark, highlightthickness=0
         )
         self.parent = parent
         self.available_screens = available_screens
@@ -112,37 +112,40 @@ class ScreenManager(tk.Frame):
 class LanguageOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         language_options.SelectLanguage(self).pack(anchor="center", expand=True)
 
 
-class SearchFilters(tk.Frame):
+class SearchOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
-        group_a = tk.Frame(self, bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
+        group_a = tk.Frame(self, bg=cfg.color.default_bg)
         group_a.pack(anchor="center", expand=True, fill="both")
-        search_filters.Providers(group_a).pack(side=tk.RIGHT, anchor="center", expand=True, fill="both", padx=2)
-        search_filters.SubtitleOptions(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
-        tk.Frame(self, height=80, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
-        search_filters.SearchThreshold(self).pack(anchor="center")
+        search_options.SubtitleFilters(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
+        search_options.Providers(group_a).pack(side=tk.LEFT, anchor="center", expand=True, fill="both", padx=2)
+        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        search_options.SubtitlePostProcessing(self).pack(anchor="center", expand=True, fill="x")
+        search_options.SubtitlePostProcessingDirectory(self).pack(anchor="center", expand=True, fill="x")
+        tk.Frame(self, height=60, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        search_options.SearchThreshold(self).pack(anchor="center")
 
 
 class SubsearchOptions(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         subsearch_options.FileExtensions(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=40, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=40, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.SubsearchOption(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=80, bg=cfg.color.dark_grey).pack(anchor="center", expand=True)
+        tk.Frame(self, height=80, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.CheckForUpdates(self)
 
 
 class DownloadManager(tk.Frame):
     def __init__(self, parent, subtitles: list[Subtitle]) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
-        self.configure(bg=cfg.color.dark_grey)
+        self.configure(bg=cfg.color.default_bg)
         download_manager.DownloadManager(self, subtitles).pack(anchor="center")
 
 
@@ -162,7 +165,7 @@ def open_screen(tab_name: str, **kwargs) -> None:
     resource_loader.set_ttk_theme(root)
     screens = {
         "language_options": LanguageOptions(root),
-        "search_filters": SearchFilters(root),
+        "search_options": SearchOptions(root),
         "subsearch_options": SubsearchOptions(root),
         "download_manager": DownloadManager(root, subtitles),
     }
