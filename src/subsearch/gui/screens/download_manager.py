@@ -54,7 +54,7 @@ class DownloadManager(tk.Frame):
     def fill_listbox(self) -> None:
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
-            self.sub_listbox.insert(tk.END, f"{subtitle.pct_result} {subtitle.release_name}\n")
+            self.sub_listbox.insert(tk.END, f"{subtitle.pct_result}% {subtitle.release_name}\n")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             self.listbox_index[enum] = subtitle
 
