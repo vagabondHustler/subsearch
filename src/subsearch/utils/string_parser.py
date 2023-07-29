@@ -336,11 +336,21 @@ def fill_shorter_list(big_lst, small_lst, difference):
     return small_lst
 
 
-def contains_forbidden_characters(input_string) -> bool:
+def valid_filename(input_string) -> bool:
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return bool(re.search(forbidden_characters_pattern, input_string))
 
 
-def replace_forbidden_characters(input_string) -> str:
+def fix_filename(input_string) -> str:
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return re.sub(forbidden_characters_pattern, ".", input_string)
+
+
+def valid_path(input_str, path_resolution) -> bool:
+    if input_str == "":
+        return False
+    if path_resolution == "relative":
+        pattern = r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$"
+    elif path_resolution == "absolute":
+        pattern = r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$"
+    return bool(re.match(pattern, input_str))

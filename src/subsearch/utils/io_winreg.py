@@ -90,7 +90,7 @@ def get_command_value() -> str:
         value = f'"{sys.argv[0]}" "%1"'
         # if SubSearch is compiled we dont need anything besides this
     elif DEVICE_INFO.mode == "interpreter":
-        show_terminal = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "gui.show_terminal")
+        show_terminal = io_toml.load_toml_value(FILE_PATHS.config, "gui.show_terminal")
         # gets the location to the python executable
         python_path = Path(sys.executable).parent
         # sys.args[-1] is going to be the path to the file we right clicked on
@@ -115,7 +115,7 @@ def get_icon_value() -> str:
         str: Path of the icon file to be used in the context menu, or an empty string if the configuration specifies
              that it should not be shown.
     """
-    show_icon: str = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "gui.context_menu_icon")
+    show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu_icon")
     if show_icon:
         return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
@@ -123,7 +123,7 @@ def get_icon_value() -> str:
 
 
 def get_appliesto_value() -> str:
-    file_ext = io_toml.load_toml_value(FILE_PATHS.subsearch_config, "file_extensions")
+    file_ext = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
     # for which file types to show the SubSearch context entry on
     value = ""
     for ext, v in zip(file_ext.keys(), file_ext.values()):

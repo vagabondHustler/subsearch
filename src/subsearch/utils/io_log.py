@@ -16,7 +16,7 @@ class Logger:
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        debug_log_file = FILE_PATHS.subsearch_log
+        debug_log_file = FILE_PATHS.log
         self.debug_logger = self.create_logger(debug_log_file)
 
     def create_logger(self, log_file: Path) -> logging.Logger:

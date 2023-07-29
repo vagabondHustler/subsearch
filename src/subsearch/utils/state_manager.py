@@ -25,6 +25,7 @@ class CoreState(Enum):
     MANUAL_DOWNLOAD = auto()
     AUTOLOAD_RENAME = auto()
     AUTOLOAD_MOVE = auto()
+    AUTOLOAD_MOVE_ALL = auto()
     EXTRACT_FILES = auto()
     SUMMARY_TOAST = auto()
     CLEAN_UP = auto()

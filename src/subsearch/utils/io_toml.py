@@ -54,8 +54,8 @@ def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], confi
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
         keys = key.split(".")
-        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG) 
-        update_toml_key(FILE_PATHS.subsearch_config, key, value)
+        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)
+        update_toml_key(FILE_PATHS.config, key, value)
 
 
 def get_keys_recursively(dictionary: dict, prefix="", keys=None) -> list[str]:
@@ -78,7 +78,7 @@ def valid_config(valid_config_keys: list[str], config_keys: list[str]) -> bool:
     Returns:
         bool: True if the configuration is intact, False otherwise.
     """
-    if not FILE_PATHS.subsearch_config.exists():
+    if not FILE_PATHS.config.exists():
         return False
     valid_config_keys.sort()
     config_keys.sort()
@@ -93,15 +93,19 @@ def resolve_on_integrity_failure() -> None:
     Returns:
         None.
     """
+    if not FILE_PATHS.config.exists():
+        dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
+        return None
     valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
-    config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.subsearch_config))
+    config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.config))
     valid = valid_config(valid_config_keys, config_keys)
-    if not valid and FILE_PATHS.subsearch_config.exists():
-        try:
-            repair_toml_config(FILE_PATHS.subsearch_config, valid_config_keys, config_keys)
-        except Exception:
-            FILE_PATHS.subsearch_config.unlink()
-            dump_toml_data(FILE_PATHS.subsearch_config, DEFAULT_CONFIG)
+    if valid:
+        return None
+    try:
+        repair_toml_config(FILE_PATHS.config, valid_config_keys, config_keys)
+    except Exception:
+        FILE_PATHS.config.unlink()
+        dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
 
 def get_app_config(toml_file_path: Path) -> AppConfig:
@@ -115,7 +119,7 @@ def get_app_config(toml_file_path: Path) -> AppConfig:
     user_data = AppConfig(
         **data["subtitle_filters"],
         **data["gui"],
-        autoload=data["autoload"],
+        subtitle_post_processing=data["subtitle_post_processing"],
         file_extensions=data["file_extensions"],
         providers=data["providers"],
         **data["misc"],
