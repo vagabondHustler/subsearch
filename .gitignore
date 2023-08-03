@@ -170,3 +170,4 @@ scripts/commit_generator/
 out/
 scripts/spritesheet_data.tcl
 scripts/spritesheet.png
+*.prof

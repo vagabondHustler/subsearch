@@ -82,9 +82,8 @@ class SubsearchOption(ttk.Labelframe):
             "gui.summary_notification": "Notification when done",
             "gui.show_terminal": "Terminal while searching",
             "misc.manual_download_on_fail": "Manual download on fail",
-            "misc.logging": "Create log file",
             "misc.multithreading": "Multithreading",
-            "misc.single_instance": "Multiple instances",
+            "misc.single_instance": "Single instance",
         }
         for name, description in self.subsearch_options.items():
             self.subsearch_options[name] = [

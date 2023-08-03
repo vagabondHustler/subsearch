@@ -88,7 +88,7 @@ class AppConfig:
     """
     This class is a data structure used to store various configuration options for an application.
     These options include preferences related to subtitle filters, file extensions, providers,
-    automatic actions, context menu options, logging, and other features.
+    automatic actions, context menu options,  and other features.
 
     Attributes:
         language (str): The language setting for the application.
@@ -107,7 +107,7 @@ class AppConfig:
         manual_download_on_fail (bool): A flag indicating whether to enable manual downloads on failure.
         multithreading (bool): A flag indicating whether to enable multithreading.
         single_instance (bool): A flag indicating whether to enable single-instance mode.
-        logging (bool): A flag indicating whether to enable logging for the application.
+
 
     Examples:
         >>> config = AppConfig(
@@ -127,7 +127,6 @@ class AppConfig:
         ...     manual_download_on_fail={"mkv": True, "avi": False ...},
         ...     multithreading={"subscene_site": True, "opensubtitles_site": True, "opensubtitles_hash": True ...},
         ...     single_instance=False,
-        ...     logging=True,
         ... )
     """
 
@@ -147,7 +146,7 @@ class AppConfig:
     manual_download_on_fail: bool
     multithreading: bool
     single_instance: bool
-    logging: bool
+
 
 
 @dataclass(order=True, slots=True)
