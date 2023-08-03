@@ -21,7 +21,7 @@
 - [MSI Installer](#msi)
 - [Acknowledgements](#thanks)
 
-#### Wiki Table of Contents
+#### Wiki Table of Contents (Outdated)
 
 - [Home](https://github.com/vagabondHustler/subsearch/wiki)
 - [Code Analysis and Verification Process](https://github.com/vagabondHustler/subsearch/wiki/Code-Analysis-and-Verification-Process)
@@ -81,8 +81,8 @@ Initially created as a personal project to learn Python programming and git vers
 
 - Download Python version 3.10 or later.
 - Install Subsearch by running `pip install subsearch` in the command prompt.
-- Add the context menu by running `subsearch --registry-key add`.
-- For additional options, run `subsearch --help` in the command prompt.
+- Launch the app by running `subsearch`.
+
 
 #### Source code <a name = "src"></a>
 
