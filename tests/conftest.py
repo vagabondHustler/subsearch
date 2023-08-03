@@ -6,7 +6,7 @@ import pytest
 import toml
 
 from subsearch.data import constants
-from subsearch.utils import io_app
+from subsearch.utils import io_app, io_log
 
 
 @pytest.fixture(scope="session")
@@ -79,3 +79,22 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 def reset_constants():
     # Reset the constants to their original values after testing
     importlib.reload(io_app)
+
+
+class MockLogger:
+    def __init__(self):
+        pass
+
+    def create_logger(self, log_file: Path):
+        pass
+
+    def log(self, message, level, print_allowed=True):
+        pass
+
+    def close_log_file(self):
+        pass
+
+
+@pytest.fixture(autouse=True)
+def mock_logger_instance(monkeypatch):
+    io_log.LOGGER = MockLogger()
