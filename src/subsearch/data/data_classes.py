@@ -148,7 +148,6 @@ class AppConfig:
     single_instance: bool
 
 
-
 @dataclass(order=True, slots=True)
 class SubsceneCookie:
     """
