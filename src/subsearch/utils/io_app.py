@@ -64,7 +64,6 @@ def get_default_app_config() -> dict[str, Any]:
             "manual_download_on_fail": True,
             "multithreading": True,
             "single_instance": True,
-            "logging": True,
         },
     }
     return config
