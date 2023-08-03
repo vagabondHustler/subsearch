@@ -49,16 +49,13 @@ class Logger:
             print(message)
 
 
-LOGGER = Logger()
-
-
 def stdout(message: str | Any, level: str = "info", **kwargs) -> None:
     print_allowed = kwargs.get("print_allowed", True)
     end_new_line = kwargs.get("end_new_line", False)
-
-    LOGGER.log(message, level, print_allowed)
+    _logger = Logger()
+    _logger.log(message, level, print_allowed)
     if end_new_line:
-        LOGGER.log("", level, print_allowed)
+        _logger.log("", level, print_allowed)
 
 
 def stdout_in_brackets(message: str, **kwargs) -> None:
