@@ -10,19 +10,6 @@ from subsearch.utils import decorators
 
 @decorators.singleton
 class SystemTray:
-    """
-    A class representing a system tray instance.
-
-    Attributes:
-        tray (pystray.Icon): The system tray icon.
-        thread_tray (threading.Thread): The thread for running the system tray.
-
-    Methods:
-        __init__(): Initializes the SystemTray class.
-        start(): Starts the system tray instance.
-        stop(): Stops the system tray instance.
-    """
-
     @decorators.system_tray_conditions
     def __init__(self) -> None:
         title = f"Subsearch {__version__}"

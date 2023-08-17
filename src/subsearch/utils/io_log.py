@@ -11,10 +11,6 @@ DATACLASS = TypeVar("DATACLASS")
 
 @decorators.singleton
 class Logger:
-    """
-    Singleton logging class
-    """
-
     def __init__(self, *args, **kwargs) -> None:
         debug_log_file = FILE_PATHS.log
         self.debug_logger = self.create_logger(debug_log_file)
@@ -70,17 +66,6 @@ def stdout_match(provider: str, subtitle_name: str, result: int, threshold: int,
 
 
 def stdout_path_action(action_type: str, src: Path, dst: Optional[Path] = None, **kwargs) -> None:
-    """
-    Logs a message indicating the removal, renaming, moving, or extraction of a file or directory.
-
-    Args:
-        action_type (str): A string representing the type of action being performed (e.g. "remove", "rename", "move", "extract").
-        src (Path): A Path object representing the file or directory being acted upon.
-        dst (Path, optional): An optional Path object representing the new location or name of the file or directory (used for renaming, moving and extracting actions). Defaults to None.
-
-    Returns:
-        None
-    """
     if src.is_file():
         type_ = "file"
     elif src.is_dir():

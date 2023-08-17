@@ -27,18 +27,6 @@ def create_path_from_string(string: str, path_resolution: str) -> Path:
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
-    """
-    Download the subtitle from the given url.
-
-    Args:
-      data: A DownloadMetaData object that has information about the subtitle file to be downloaded.
-
-    Returns:
-      An integer value that represents the index number of the subtitle that was downloaded.
-
-    Raises:
-      Any exception raised by the get_cloudscraper or IOError during writing of the subtitle file.
-    """
     io_log.stdout(f"{subtitle.provider}: {index_position}/{index_size}: {subtitle.release_name}")
     scraper = get_cloudscraper()
     r = scraper.get(subtitle.download_url, stream=True)
@@ -50,17 +38,6 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
 
 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
-    """
-    Extract files from a directory to a specified Destination.
-
-    Args:
-        src (Path): Source path to extract files
-        dst (Path): Destination path to extract files
-        extension (str): Extension of files to be extracted
-
-    Returns:
-        None.
-    """
     for file in src.glob(f"*{extension}"):
         filename = src / file
         io_log.stdout_path_action(action_type="extract", src=file, dst=dst)
@@ -93,16 +70,6 @@ def move_and_replace(source_file: Path, destination_directory: Path) -> None:
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
-    """
-    Removes files with specific extensions in a given directory
-
-    Args:
-        cwd (pathlib.Path): The directory path where the files to be deleted reside.
-        extension (str): The file extension of the files to be deleted.
-
-    Returns:
-        None
-    """
     for file in Path(cwd).glob(f"*{extension}"):
         io_log.stdout_path_action(action_type="remove", src=file)
         file_path = Path(cwd) / file
@@ -110,15 +77,6 @@ def del_file_type(cwd: Path, extension: str) -> None:
 
 
 def del_directory(directory: Path) -> None:
-    """
-    Remove a directory and its contents.
-
-    Args:
-        directory: A Path object representing the directory to be removed.
-
-    Returns:
-        None
-    """
     io_log.stdout_path_action(action_type="remove", src=directory)
     shutil.rmtree(directory)
 
@@ -143,19 +101,6 @@ def create_directory(path: Path):
 
 
 def get_file_hash(file_path: Path | None) -> str:
-    """
-    Calculates and returns the hash value of given file path.
-
-    Args:
-        file_path: A Path object indicating the location of the input file. If None, returns an all-zero string.
-
-    Returns:
-        A hexadecimal String indicating the unique hash value of the file. If the file cannot be read or its size is less than 131072 bytes, returns an all-zero string '000000000000000000'.
-
-    Examples:
-        get_hash(Path("my_folder/my_file.jpg")) returns "d020f52c464caedd"
-        get_hash(None) returns ""
-    """
     if file_path is None:
         return ""
     try:

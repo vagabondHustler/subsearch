@@ -62,12 +62,6 @@ class Initializer:
             self.core_state.set_state(self.core_state.state.NO_FILE)
 
     def setup_file_system(self) -> None:
-        """
-        Initializes the application by performing necessary checks and setup.
-
-        Returns:
-            None.
-        """
         io_toml.resolve_on_integrity_failure()
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
