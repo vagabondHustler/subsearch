@@ -11,7 +11,6 @@ from subsearch.utils import io_app
 
 @pytest.fixture(scope="session")
 def subsearch_app_path():
-    """Fixture to get the path to the subsearch directory."""
     app_path = Path(__file__).parent.parent / "src"
     sys.path.insert(0, str(app_path))
     return app_path
@@ -19,7 +18,6 @@ def subsearch_app_path():
 
 @pytest.fixture(scope="session")
 def cwd():
-    """Fixture to get the path to the subsearch directory."""
     cwd = Path.cwd() / "src"
     sys.path.insert(0, str(cwd))
     return cwd
@@ -27,7 +25,6 @@ def cwd():
 
 @pytest.fixture(scope="session")
 def tests_path():
-    """Fixture to get the path to the tests directory."""
     tests_path = Path(__file__).parent
     sys.path.insert(0, str(tests_path))
     return tests_path
@@ -77,5 +74,4 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 
 @pytest.fixture(autouse=True)
 def reset_constants():
-    # Reset the constants to their original values after testing
     importlib.reload(io_app)
