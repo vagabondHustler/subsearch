@@ -1,7 +1,9 @@
 import shutil
 import struct
 import zipfile
+from io import BufferedReader
 from pathlib import Path
+from typing import Any
 
 from subsearch.data.constants import VIDEO_FILE
 from subsearch.data.data_classes import Subtitle
@@ -100,34 +102,45 @@ def create_directory(path: Path):
     path.mkdir(exist_ok=True)
 
 
-def get_file_hash(file_path: Path | None) -> str:
-    if file_path is None:
+def get_file_hash(file_path: Path) -> str:
+    if not file_path:
         return ""
-    try:
-        longlongformat = "<q"
-        bytesize = struct.calcsize(longlongformat)
-        with open(file_path, "rb") as f:
-            filesize = file_path.stat().st_size
-            hash = filesize
-            if filesize < 65536 * 2:
-                io_log.stdout(f"SizeError: filesize is {filesize} bytes", level="error")
-                return ""
-            n1 = 65536 // bytesize
-            for _x in range(n1):
-                buffer = f.read(bytesize)
-                (l_value,) = struct.unpack(longlongformat, buffer)
-                hash += l_value
-                hash = hash & 0xFFFFFFFFFFFFFFFF
-            f.seek(max(0, filesize - 65536), 0)
-            n2 = 65536 // bytesize
-            for _x in range(n2):
-                buffer = f.read(bytesize)
-                (l_value,) = struct.unpack(longlongformat, buffer)
-                hash += l_value
-                hash = hash & 0xFFFFFFFFFFFFFFFF
 
-        returnedhash = "%016x" % hash
-        return returnedhash
+    hash_algorithm = MPCHashAlgorithm(file_path)
+    return hash_algorithm.get_hash()
 
-    except IOError:
-        return ""
+
+class MPCHashAlgorithm:
+    def __init__(self, file_path: Path, **kwargs) -> None:
+        file_size = file_path.stat().st_size
+        self.file_path = file_path
+        self.chunk_size = kwargs.get("chunk_size", 65536)
+        self.file_size, self.hash_chunk = file_size, file_size
+        self.hash = self.mpc_hash_algorithm()
+
+    def mpc_hash_algorithm(self) -> str:
+        if not self.valid_file_size():
+            return ""
+
+        with open(self.file_path, "rb") as file:
+            self.byte_size = struct.calcsize("<q")
+            self.update_hash_chunk(file)
+            file.seek(max(0, self.file_size - self.chunk_size), 0)
+            self.update_hash_chunk(file)
+            return "%016x" % self.hash_chunk
+
+    def valid_file_size(self) -> None:
+        if self.file_size < self.chunk_size * 2:
+            io_log.stdout(f"Invalid file size, {self.file_size} bytes", level="warning")
+            return False
+        return True
+
+    def update_hash_chunk(self, file: BufferedReader) -> None:
+        for _ in range(self.chunk_size // self.byte_size):
+            buffer = file.read(self.byte_size)
+            (chunk_value,) = struct.unpack("<q", buffer)
+            self.hash_chunk += chunk_value
+            self.hash_chunk = self.hash_chunk & 0xFFFFFFFFFFFFFFFF
+
+    def get_hash(self) -> str:
+        return self.hash
