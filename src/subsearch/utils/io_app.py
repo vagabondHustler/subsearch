@@ -1,4 +1,5 @@
 import platform
+import socket
 import sys
 import tempfile
 from itertools import product
@@ -6,7 +7,13 @@ from pathlib import Path
 from typing import Any, no_type_check
 
 from subsearch.data import __version__
-from subsearch.data.data_classes import AppPaths, FilePaths, SystemInfo, VideoFile
+from subsearch.data.data_classes import (
+    AppPaths,
+    FilePaths,
+    SystemInfo,
+    VideoFile,
+    WindowsRegistryPaths,
+)
 
 
 def get_app_paths() -> AppPaths:
@@ -133,3 +140,18 @@ def get_supported_file_ext() -> list[str]:
 def get_supported_providers() -> list[str]:
     providers = ["opensubtitles_site", "opensubtitles_hash", "subscene_site", "yifysubtitles_site"]
     return providers
+
+
+def get_windows_registry_paths() -> WindowsRegistryPaths:
+    registry_paths = WindowsRegistryPaths(
+        classes=r"Software\Classes",
+        asterisk=r"Software\Classes\*",
+        shell=r"Software\Classes\*\shell",
+        subsearch=r"Software\Classes\*\shell\Subsearch",
+        subsearch_command=r"Software\Classes\*\shell\Subsearch\command",
+    )
+    return registry_paths
+
+
+def get_computer_name() -> str:
+    return socket.gethostname()
