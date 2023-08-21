@@ -25,7 +25,7 @@ def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
         toml.dump(toml_data, f)
 
 
-def update_toml_key(toml_file_path: Path, key: str, value: Union[str, int, bool]) -> None:
+def update_toml_key(toml_file_path: Path, key: str, value: Any | None) -> None:
     toml_data = load_toml_data(toml_file_path)
     keys = key.split(".")
     functools.reduce(dict.get, keys[:-1], toml_data)[keys[-1]] = value  # type: ignore
@@ -47,7 +47,7 @@ def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], confi
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
         keys = key.split(".")
-        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)
+        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG) # type: ignore
         update_toml_key(FILE_PATHS.config, key, value)
 
 
