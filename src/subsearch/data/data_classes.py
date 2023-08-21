@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Union
+from typing import Any, Literal, LiteralString, Union
 
 
 @dataclass(order=True)
@@ -61,7 +61,7 @@ class AppConfig:
     system_tray: bool
     summary_notification: bool
     show_terminal: bool
-    subtitle_post_processing: dict[str, Union[bool, str]]
+    subtitle_post_processing: dict[str, Any]
     file_extensions: dict[str, bool]
     providers: dict[str, bool]
     manual_download_on_fail: bool
@@ -117,8 +117,8 @@ class SystemInfo:
 
 @dataclass(order=True, slots=True, frozen=True)
 class WindowsRegistryPaths:
-    classes: Literal
-    asterisk: Literal
-    shell: Literal
-    subsearch: Literal
-    subsearch_command: Literal
+    classes: str
+    asterisk: str
+    shell: str
+    subsearch: str
+    subsearch_command: str
