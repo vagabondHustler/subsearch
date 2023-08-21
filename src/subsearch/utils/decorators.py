@@ -10,20 +10,6 @@ from subsearch.utils import exceptions, io_log, io_toml
 
 
 def apply_mutex(func: Callable) -> Callable:
-    """
-    A decorator for safe concurrent code execution.
-
-    Args:
-        mutex_name (str): The name of the mutex.
-
-    Returns:
-        Callable: A decorated function that is synchronized using the named mutex.
-
-    Raises:
-        MultipleInstancesError: If another instance of the application is already running.
-
-    """
-
     def inner(*args, **kwargs):
         try:
             if not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance"):
@@ -60,29 +46,6 @@ def check_option_disabled(func):
 
 
 def singleton(cls):
-    """
-    Decorator that turns a class into a singleton.
-
-    This decorator ensures that only one instance of the class is created, and subsequent calls with the same arguments
-    will return the previously created instance.
-
-    Args:
-        cls (class): The class to be turned into a singleton.
-
-    Returns:
-        function: The wrapped function that enforces the singleton behavior.
-
-    Example:
-        @singleton
-        class MyClass:
-            def __init__(self, arg1, arg2):
-                self.arg1 = arg1
-                self.arg2 = arg2
-
-        obj1 = MyClass(1, 2)
-        obj2 = MyClass(1, 2)
-        assert obj1 is obj2  # The same instance is returned.
-    """
     previous_instances: dict[Callable, Any] = {}
 
     @functools.wraps(cls)
@@ -97,24 +60,6 @@ def singleton(cls):
 
 
 def call_conditions(func):
-    """
-    Decorator to check if the conditions for a function are met before executing it.
-
-    Args:
-        func (callable): The function to be decorated.
-
-    Returns:
-        callable: The wrapped function.
-
-    Example:
-        @condition_check
-        def my_function(arg1, arg2):
-            # Function implementation
-
-        # Call the decorated function
-        my_function("value1", "value2")
-    """
-
     def wrapper(*args, **kwargs):
         function = f"{func.__name__}"
         if not CallCondition.conditions(function=function, *args, **kwargs):
@@ -201,7 +146,5 @@ def system_tray_conditions(func):
     def wrapper(*args, **kwargs):
         if enable_system_tray:
             return func(*args, **kwargs)
-        else:
-            ...
 
     return wrapper

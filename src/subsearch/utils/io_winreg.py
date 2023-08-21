@@ -15,9 +15,6 @@ COMMAND_PATH = r"Software\Classes\*\shell\Subsearch\command"
 
 
 def write_keys() -> None:
-    """
-    Writes keys to the windows registry.
-    """
     key_paths = [(CLASSES_PATH, "*"), (ASTERISK_PATH, "shell"), (SHELL_PATH, "Subsearch"), (SUBSEARCH_PATH, "command")]
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         for path, sub_key in key_paths:
@@ -26,24 +23,12 @@ def write_keys() -> None:
 
 
 def write_all_valuex() -> None:
-    """
-    Write values to the registry for `subsearch`, `icon`, `appliesto` and `command`.
-    """
     items = ["subsearch", "icon", "appliesto", "command"]
     for i in items:
         write_valuex(i)
 
 
 def write_valuex(key: str) -> None:
-    """
-    Write a value to registry key.
-
-    Args:
-        key: A string that represents the target registry key.
-
-    Returns:
-        None.
-    """
     key_map = {
         "subsearch": {"key_type": SUBSEARCH_PATH, "value_name": "", "value": "Subsearch"},
         "icon": {"key_type": SUBSEARCH_PATH, "value_name": "Icon", "value": get_icon_value()},
@@ -60,17 +45,6 @@ def write_valuex(key: str) -> None:
 
 
 def open_write_valuex(sub_key: str, value_name: str, value: str) -> None:
-    """
-    Writes a value to a specific key in the Windows registry.
-
-    Args:
-        sub_key (str): The path of the registry key.
-        value_name (str): The value name that the data will be written to.
-        value (str): The data to be written to the registry.
-
-    Raises:
-        FileNotFoundError: If the specified registry key or value does not exist.
-    """
     try:
         # connect to Computer_NAME\HKEY_CURRENT_USER\
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
@@ -108,13 +82,6 @@ def get_command_value() -> str:
 
 
 def get_icon_value() -> str:
-    """
-    Returns the icon path to use in the context menu, or an empty string if configuration specifies it should not be shown
-
-    Returns:
-        str: Path of the icon file to be used in the context menu, or an empty string if the configuration specifies
-             that it should not be shown.
-    """
     show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu_icon")
     if show_icon:
         return str(APP_PATHS.gui_assets / "subsearch.ico")
@@ -124,7 +91,6 @@ def get_icon_value() -> str:
 
 def get_appliesto_value() -> str:
     file_ext = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
-    # for which file types to show the SubSearch context entry on
     value = ""
     for ext, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:
@@ -145,19 +111,13 @@ def remove_context_menu() -> None:
             winreg.DeleteKey(sk, "Subsearch")
 
 
-# write keys to registry then write values
+
 def add_context_menu() -> None:
     write_keys()
     write_all_valuex()
 
 
 def registry_key_exists() -> bool:
-    """
-    Check if the Subsearch context menu key is already present in the Windows registry.
-
-    Returns:
-        bool: True, If the key exists in the registry, else False.
-    """
     sub_key = rf"Software\Classes\*\shell\Subsearch\command"
     try:
         with winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as hkey:
@@ -168,12 +128,6 @@ def registry_key_exists() -> bool:
 
 
 def key_no_value() -> bool:
-    """
-    Checks if the "command" value name has no value.
-
-    Returns:
-        True if the "command" value name does not have a value, False otherwise.
-    """
     sub_key = rf"Software\Classes\*\shell\Subsearch\command"
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, sub_key) as subkey:

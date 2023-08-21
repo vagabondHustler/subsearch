@@ -55,10 +55,6 @@ class CustomSubsceneHeader:
 
 
 class SearchArguments:
-    """
-    Helper class for provider
-    """
-
     def __init__(self, **kwargs):
         release_data: ReleaseData = kwargs["release_data"]
         app_config: AppConfig = kwargs["app_config"]
@@ -142,17 +138,6 @@ def get_cloudscraper():
 
 
 def get_html_parser(url: str, header_=None):
-    """
-    Returns a parsed HTML from a given URL using cloudscraper package.
-
-    Args:
-        url (str): The URL from where HTML is to be fetched, parsed and returned.
-
-    Returns:
-        A `HTMLParser` object which has the parsed HTML content of the given URL text as its attributes.
-
-    """
-
     scraper = get_cloudscraper()
     if header_ is None:
         response = scraper.get(url)

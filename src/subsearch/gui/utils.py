@@ -8,12 +8,6 @@ from subsearch.utils import io_toml, io_winreg
 
 class WindowPosition(tk.Frame):
     def __init__(self, parent) -> None:
-        """
-        Constructor Method for WindowPosition Class
-
-        Args:
-            parent: The parent widget.
-        """
         tk.Frame.__init__(self, parent)
 
     def set(self, **kwargs):
@@ -30,19 +24,6 @@ class WindowPosition(tk.Frame):
 
 
 class ToolTip(tk.Toplevel):
-    """
-    A toplevel widget that displays a message when the user hovers over a specified widget
-
-    Args:
-        parent (tkinter.Tk): The parent widget
-        _widget (tkinter.Widget): The widget to attach the tooltip to
-        *_text (str): The text to be displayed in the tooltip
-        _background (str): The background color of the tooltip
-
-    Methods:
-        show(): Creates and displays a toplevel widget containing the text to be displayed in the tooltip
-    """
-
     def __init__(self, parent, widget, *text_strings, **kwargs):
         self.parent = parent
         self.widget = widget
@@ -89,12 +70,6 @@ class ToolTip(tk.Toplevel):
 
 
 def configure_root(root):
-    """
-    Initialize the root Tkinter window for the Subsearch application.
-
-    Returns:
-        tk.Tk: The initialized Tkinter root window.
-    """
     if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.default_bg)

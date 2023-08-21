@@ -4,9 +4,6 @@ from tests import constants_test
 
 
 def test_str_parser_movie() -> None:
-    """
-    test so to ensure that the src/subsearch/utils/string_parser.pct_value function returns a with the correct percentage
-    """
     movie_1080p = "the.foo.bar.2021.1080p.web.h264-foobar"
     movie_720p = "the.foo.bar.2021.720p.web.h264-foobar"
     show_1080p = "the.foo.bar.s01e01.1080p.web.h264-foobar"
@@ -29,10 +26,6 @@ def test_str_parser_movie() -> None:
 
 
 def test_string_parser_movie() -> None:
-    """
-    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a movie so as to be able to search for subtitles
-    """
-
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
     release_data = string_parser.get_release_data(filename)
 
@@ -48,9 +41,6 @@ def test_string_parser_movie() -> None:
 
 
 def test_string_parser_show() -> None:
-    """
-    test to ensure that the src/subsearch/utils/file_parser.get_parameters function returns the correct parameters for a show so as to be able to search for subtitles
-    """
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
     release_data = string_parser.get_release_data(filename)
 

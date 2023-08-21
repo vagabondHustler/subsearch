@@ -40,13 +40,6 @@ def del_toml_key(toml_file_path: Path, key: str) -> None:
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    """
-    Updates the application's configuration file to match the desired config,
-    preserving existing values.
-
-    Returns:
-        None.
-    """
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
         del_toml_key(toml_file_path, key)
@@ -72,12 +65,6 @@ def get_keys_recursively(dictionary: dict, prefix="", keys=None) -> list[str]:
 
 
 def valid_config(valid_config_keys: list[str], config_keys: list[str]) -> bool:
-    """
-    Checks the integrity of the application's configuration file.
-
-    Returns:
-        bool: True if the configuration is intact, False otherwise.
-    """
     if not FILE_PATHS.config.exists():
         return False
     valid_config_keys.sort()
@@ -86,13 +73,6 @@ def valid_config(valid_config_keys: list[str], config_keys: list[str]) -> bool:
 
 
 def resolve_on_integrity_failure() -> None:
-    """
-    Resolves the application's configuration if the integrity check fails.
-    Re-creates the configuration file with default values if the repair operation fails.
-
-    Returns:
-        None.
-    """
     if not FILE_PATHS.config.exists():
         dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
         return None
@@ -109,12 +89,6 @@ def resolve_on_integrity_failure() -> None:
 
 
 def get_app_config(toml_file_path: Path) -> AppConfig:
-    """
-    Returns an instance of AppConfig that contains the current configuration settings.
-
-    Returns:
-        AppConfig: instance containing the current application configuration settings.
-    """
     data = load_toml_data(toml_file_path)
     user_data = AppConfig(
         **data["subtitle_filters"],

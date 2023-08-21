@@ -14,30 +14,6 @@ from subsearch.gui.screens import (
 
 
 class ScreenManager(tk.Frame):
-    """
-    A class used to manage the screens of a parent widget.
-
-    Args:
-        parent: The parent widget.
-        screens (dict[str, Any]): A dictionary containing screens as a key-value pair. Key is the name of the screen and value is the content of the screen.
-        active_tab (str): The current active screen.
-
-    Attributes:
-        parent: The parent widget.
-        screens (dict[str, Any]): A dictionary containing screens as a key-value pair. Key is the name of the screen and value is the content of the screen.
-        buttons: A dictionary containing button widgets as a key-value pair. Key is the name of the associated screen and value is the corresponding button widget.
-        active_tab (str): The current active screen.
-
-    Methods:
-        activate_screens(): Place the content of the active screen on the parent widget.
-        release_tab(event): Called when a screen button is released. Set the active screen and call 'activate_screens()' method.
-        press_tab(event): Called when a screen button is pressed. Bind '<ButtonRelease>' event to the button widget.
-        deactivate_screens(): Hide the content of all screens except the active one.
-        enter_tab(event): Called when mouse enters a screen button. Bind '<ButtonPress>' event to the button widget.
-        leave_tab(event):  Called when mouse leaves a screen button. Unbind '<ButtonPress>' event from the button widget, and call 'activate_screens()' and 'deactivate_screens()' methods.
-        get_btn(dict_, event_, equals=True): Helper method to retrieve the button widget and its key.
-    """
-
     def __init__(self, parent, available_screens: dict[str, Any], active_screen: str) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=cfg.color.default_bg_dark, width=cfg.size.width, height=82)
@@ -147,15 +123,6 @@ class DownloadManager(tk.Frame):
 
 
 def open_screen(tab_name: str, **kwargs) -> None:
-    """
-    Opens a new screen depending on the tab_name argument passed in.
-
-    Args:
-        tab_name (str): A string representing which screen to activate.
-
-    Returns:
-        None: This function does not return anything, it manipulates the GUI instead.
-    """
     root.bind("<KeyPress>", close_mainloop)
     subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
     utils.configure_root(root)
