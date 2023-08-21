@@ -47,7 +47,7 @@ def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], confi
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
         keys = key.split(".")
-        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG) # type: ignore
+        value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         update_toml_key(FILE_PATHS.config, key, value)
 
 
