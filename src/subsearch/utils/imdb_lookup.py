@@ -34,25 +34,6 @@ class AdvTitleSearch:
 
 
 class FindImdbID(AdvTitleSearch):
-    """
-    This class is used to find the IMDb ID of a movie or TV show based on its title and year.
-
-    Args:
-        title (str): The title of the movie or TV show.
-        year (int): The year the movie or TV show was released.
-
-    Attributes:
-        title (str): The lowercased title of the movie or TV show.
-        year (int): The year the movie or TV show was released.
-        id (str or None): The IMDb ID of the movie or TV show if found. Otherwise, set to None.
-
-    Methods:
-        find_imdb_title: This method finds the title of a movie or TV show on IMDb.
-        find_imdb_year: This method finds the year of release of a movie or TV show on IMDb.
-        get_imdb_id: This method retrieves the IMDb ID of a movie or TV show from its page on IMDb.
-
-    """
-
     def __init__(self, title: str, year: int):
         self.title = title.lower()
         self.year = year
