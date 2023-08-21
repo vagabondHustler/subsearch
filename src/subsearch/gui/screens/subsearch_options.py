@@ -162,7 +162,7 @@ class SubsearchOption(ttk.Labelframe):
         if menu:
             io_winreg.add_context_menu()
         else:
-            io_winreg.remove_context_menu()
+            io_winreg.del_context_menu()
 
 
 class CheckForUpdates(ttk.Labelframe):

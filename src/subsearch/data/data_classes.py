@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Literal, Union
 
 
 @dataclass(order=True)
@@ -113,3 +113,12 @@ class SystemInfo:
     mode: str
     python: str
     subsearch: str
+
+
+@dataclass(order=True, slots=True, frozen=True)
+class WindowsRegistryPaths:
+    classes: Literal
+    asterisk: Literal
+    shell: Literal
+    subsearch: Literal
+    subsearch_command: Literal

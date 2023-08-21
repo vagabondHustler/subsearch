@@ -16,7 +16,3 @@ def test_get_hash() -> None:
     hash1 = io_file_system.get_file_hash(CWD / "fake.none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == ""
-
-
-def test_got_key() -> None:
-    assert io_winreg.registry_key_exists() or io_winreg.registry_key_exists() is False
