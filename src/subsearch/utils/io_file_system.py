@@ -127,9 +127,9 @@ class MPCHashAlgorithm:
             self.update_hash_chunk(file)
             file.seek(max(0, self.file_size - self.chunk_size), 0)
             self.update_hash_chunk(file)
-            return "%016x" % self.hash_chunk
+        return "%016x" % self.hash_chunk
 
-    def valid_file_size(self) -> None:
+    def valid_file_size(self) -> bool:
         if self.file_size < self.chunk_size * 2:
             io_log.stdout(f"Invalid file size, {self.file_size} bytes", level="warning")
             return False
