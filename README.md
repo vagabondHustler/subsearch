@@ -1,14 +1,12 @@
 <h1 align="center"><img src="https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/subsearch_v2.png"/></h1>
 
 <div align="center">
-
-![Status](https://img.shields.io/badge/status-active-success?&style=flat-square)
-![Tests](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/tests.yml?branch=main&label=tests&style=flat-square)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square)
-![Version](https://img.shields.io/github/v/release/vagabondHustler/SubSearch?&display_name=tag&include_prereleases&style=flat-square)
-![Dls_total](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?label=downloads%40total&style=flat-square)
-![Dls_latest](https://img.shields.io/github/downloads/vagabondhustler/subsearch/latest/total?style=flat-square)
-![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square)
+  
+![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&label=release&labelColor=1e1e2e&color=a6e3a1)
+![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&label=release&labelColor=1e1e2e&color=eba0ac)
+![Downloads](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelColor=1e1e2e&color=f5c2e7)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&label=release&labelColor=1e1e2e&color=fab387)
+![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&label=release&labelColor=1e1e2e&color=b4befe)
 
 </div>
 
@@ -21,12 +19,12 @@
 - [MSI Installer](#msi)
 - [Acknowledgements](#thanks)
 
-#### Wiki Table of Contents (Outdated)
+#### Wiki Table of Contents
 
 - [Home](https://github.com/vagabondHustler/subsearch/wiki)
 - [Code Analysis and Verification Process](https://github.com/vagabondHustler/subsearch/wiki/Code-Analysis-and-Verification-Process)
 - [Fixing Context Menu Issue in Subsearch](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch)
-- [Subsearch Settings](https://github.com/vagabondHustler/subsearch/wiki/Subsearch-Settings)
+- [GUI-Options](https://github.com/vagabondHustler/subsearch/wiki/GUI-Options)
 - [Troubleshooting Subtitle Search Issues](https://github.com/vagabondHustler/subsearch/wiki/Troubleshooting-Subtitle-Search-Issues)
 
 #### Misc Table of Contents
@@ -40,17 +38,16 @@
   
 - Initiate a search for subtitles by simply right-clicking on a media file.
 - Search for subtitles in 70 different languages
+- Some of the subtitle filters are HI, non-HI, foreign parts only.
 - User-friendly GUI for easy customization and configuration
-- Available in three options, including a compiled executable and source code on GitHub and PyPI
-- The setup process is straightforward and has minimal reliance on external modules.
+- Available as a compiled executable, source code via GitHub and PyPI
+- The setup process is straightforward.
 
 #### Details
 
 Subsearch is an automated subtitle downloader and extractor that allows users to search and download subtitles for movies and TV shows with a single click from the context menu. The application features a graphical user interface for configuring settings, including options for searching subtitles in 70 different languages from various subtitle sites, filtering hearing-impaired subtitles, and adjusting filename matching criteria.
 
 The application has a user-friendly GUI for all custom settings that can be easily configured. It supports 70 different languages, most of which work on all available subtitle sites. Users can configure it to include hearing impaired subtitles only, non-hearing impaired subtitles only, or both. They can also adjust how strictly the file name matches the search results.
-
-The tool is available in three different options: as a compiled executable that can be run without the need for a Python interpreter and imported modules, as source code on GitHub, and on PyPI. Users can pick the source that suits them best.
 
 Initially created as a personal project to learn Python programming and git version control, this application has evolved into a daily-use tool that I continue to enjoy working on. While there are many similar repositories available that automatically download subtitles from the internet, this project may offer unique features that set it apart. The setup process has been designed to be as straightforward as possible with minimal reliance on external modules.
 
