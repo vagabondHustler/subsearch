@@ -80,7 +80,6 @@ Initially created as a personal project to learn Python programming and git vers
 - Install Subsearch by running `pip install subsearch` in the command prompt.
 - Launch the app by running `subsearch`.
 
-
 #### Source code <a name = "src"></a>
 
 - Download and install Python version 3.10 or later.
@@ -118,4 +117,4 @@ I would like to express my gratitude to the following repositories for providing
 - [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
 - [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
 - [siddheshsathe/handy-decorators](https://github.com/siddheshsathe/handy-decorators)
-- [TransparentLC](https://github.com/TransparentLC) // spriteshet_generator.js
+- [TransparentLC](https://github.com/TransparentLC) // spritesheet_generator.js
