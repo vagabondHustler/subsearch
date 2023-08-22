@@ -60,13 +60,13 @@ Initially created as a personal project to learn Python programming and git vers
 <details>
 <summary>Screenshots of the interface</summary>
 
-![prtsc_language](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/language_options.png)
+![prtsc_language](https://github.com/vagabondHustler/subsearch/blob/main/assets/language_options.png?raw=true)
 
-![prtsc_search](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/search_filters.png)
+![prtsc_search](https://github.com/vagabondHustler/subsearch/blob/main/assets/search_filters.png?raw=true)
 
-![prtsc_settings](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/subsearch_options.png)
+![prtsc_settings](https://github.com/vagabondHustler/subsearch/blob/main/assets/subsearch_options.png?raw=true)
 
-![prtsc_download](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/download_manager.png)
+![prtsc_download](https://github.com/vagabondHustler/subsearch/blob/main/assets/download_manager.png?raw=true)
 
 </details>
 
