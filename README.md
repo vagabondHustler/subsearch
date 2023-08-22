@@ -109,12 +109,13 @@ Initially created as a personal project to learn Python programming and git vers
 
 ## Acknowledgements<a name = "thanks"></a>
 
-I would like to express my gratitude to the following repositories for providing templates, inspiration, themes, and solutions to similar problems:
+I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
 
 - [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 - [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md)
 - [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader)
 - [psf/black](https://github.com/psf/black)
-- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font)
-- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme)
+- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
+- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
 - [siddheshsathe/handy-decorators](https://github.com/siddheshsathe/handy-decorators)
+- [TransparentLC](https://github.com/TransparentLC) // spriteshet_generator.js
