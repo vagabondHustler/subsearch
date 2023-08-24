@@ -2,11 +2,11 @@
 
 <div align="center">
   
-![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&label=release&labelColor=1e1e2e&color=a6e3a1)
-![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&label=release&labelColor=1e1e2e&color=eba0ac)
+![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&labelColor=1e1e2e&color=a6e3a1)
+![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&color=eba0ac)
 ![Downloads](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelColor=1e1e2e&color=f5c2e7)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&label=release&labelColor=1e1e2e&color=fab387)
-![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&label=release&labelColor=1e1e2e&color=b4befe)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e&color=fab387)
+![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e&color=b4befe)
 
 </div>
 
