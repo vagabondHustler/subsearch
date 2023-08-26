@@ -231,7 +231,7 @@ subscene_id = 25
 
 [indonesian]
 name = "Indonesian"
-alpha_1 = "name"
+alpha_1 = "id"
 alpha_2b = "ind"
 incompatibility = []
 subscene_id = 44
