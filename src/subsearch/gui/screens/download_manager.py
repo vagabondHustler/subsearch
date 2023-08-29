@@ -8,23 +8,28 @@ from subsearch.providers import core_provider
 from subsearch.utils import io_file_system, io_log, string_parser
 
 
-class DownloadManager(tk.Frame):
+class DownloadManager(ttk.LabelFrame):
     downloaded_subtitle: list[Subtitle] = []
 
     def __init__(self, parent, subtitles: list[Subtitle]) -> None:
-        tk.Frame.__init__(self, parent)
-        root_posx, root_posy = parent.winfo_reqwidth(), parent.winfo_reqheight()
-        self.configure(bg=cfg.color.default_bg, width=root_posx, height=root_posy - 82)
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Available subtitles", padding=10)
         if subtitles:
             subtitles.sort(key=lambda x: x.pct_result, reverse=True)
+        frame_left = tk.Frame(self)
+        frame_sep = tk.Frame(self, width=5)
+        frame_right = tk.Frame(self)
+        frame_left.pack(side=tk.LEFT, expand=True, fill="both")
+        frame_sep.pack(side=tk.LEFT, fill="y")
+        frame_right.pack(side=tk.LEFT, fill="y")
         self.failed_subtitle_downloads: list[Subtitle] = []
         self.download_number = 1
         self.download_index_size = len(subtitles)
         self.subtitles = subtitles
-        self.scrollbar = ttk.Scrollbar(self, orient="vertical", style="Vertical.TScrollbar")
+        self.scrollbar = ttk.Scrollbar(frame_right, orient="vertical", style="Vertical.TScrollbar")
         self.sub_listbox = tk.Listbox(
-            self,
-            height=root_posy,
+            frame_left,
+            height=36,
             bg=cfg.color.default_bg,
             fg=cfg.color.light_grey,
             font=cfg.font.cas8b,
@@ -35,20 +40,11 @@ class DownloadManager(tk.Frame):
             activestyle="none",
             yscrollcommand=self.scrollbar.set,
         )
-        hsx, _hsy = self.scrollbar.winfo_reqwidth(), self.scrollbar.winfo_reqheight()
-        self.sub_listbox.place(
-            height=root_posy - 82,
-            width=root_posx - hsx - 20,
-            x=18,
-            rely=0.5,
-            bordermode="inside",
-            anchor="w",
-        )
+        self.sub_listbox.pack(expand=True, fill="both")
         if self.subtitles is not None:
             self.fill_listbox()
-        self.scrollbar.place(x=root_posx - 17, y=0, bordermode="inside", height=root_posy - 82)
+        self.scrollbar.pack(expand=True, fill="y")
         self.scrollbar.config(command=self.sub_listbox.yview)
-        self.scrollbar.lift()
 
     def fill_listbox(self) -> None:
         self.listbox_index: dict[int, Subtitle] = {}

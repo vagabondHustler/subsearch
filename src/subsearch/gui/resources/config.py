@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class Size:
     width: int = 800
     height: int = 680
+    max_content_width = width - 20
 
 
 @dataclass(order=True, frozen=True)
