@@ -39,9 +39,7 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
 
     def activate_screen(self) -> None:
-        self.available_screens[self.active_screen].place(
-            x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center"
-        )
+        self.available_screens[self.active_screen].place(x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center")
         resource_loader.asset_menu_btn(self.buttons[self.active_screen], self.active_screen, "press")
         title_tab = self.active_screen.capitalize().replace("_", " ")
         self.parent.title(f"Subsearch - {title_tab}")
