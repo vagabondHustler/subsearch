@@ -84,42 +84,10 @@ jobs:
           git commit -S -m "Reformat codebase with black & isort"
           git fetch origin main
           git push origin HEAD:main
-
-  bump_version:
-    name: Bump version
-    needs: [variables, test_tox, black_isort]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: main
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "*"
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-
-      - name: Bump version.py
-        run: python scripts/bump_version.py ${{ needs.variables.outputs.valid_semver }}
-
-      - name: Push new version
-        run: |
-          git status
-          git add src/subsearch/data/version.py
-          git commit -S -m "Bump version ${{ needs.variables.outputs.past_valid_semver }} → ${{ needs.variables.outputs.valid_semver }}"
-          git fetch origin main
-          git push origin HEAD:main
-
+  
   build_msi:
     name: Build MSI
-    needs: [variables, bump_version]
+    needs: [variables, black_isort]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -150,7 +118,7 @@ jobs:
 
   msi_verification:
     name: MSI verification
-    needs: [variables, bump_version, build_msi]
+    needs: [variables, black_isort, build_msi]
     runs-on: windows-latest
     steps:
       - name: Download MSI artifact
@@ -186,6 +154,39 @@ jobs:
             Write-Output "MSI package uninstalled successfully."
           }
         shell: pwsh
+
+  bump_version:
+    name: Bump version
+    needs: [variables, test_tox, black_isort, msi_verification]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "*"
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+
+      - name: Bump version.py
+        run: python scripts/bump_version.py ${{ needs.variables.outputs.valid_semver }}
+
+      - name: Push new version
+        run: |
+          git status
+          git add src/subsearch/data/version.py
+          git commit -S -m "Bump version ${{ needs.variables.outputs.past_valid_semver }} → ${{ needs.variables.outputs.valid_semver }}"
+          git fetch origin main
+          git push origin HEAD:main
+
 
   generate_changelog:
     name: Generate changelog
