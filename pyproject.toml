@@ -73,7 +73,7 @@ optional = [
     "mypy==1.5.1",
     "pipreqs==0.4.13",
 ]
-dev = ["pytest==7.4.1", "pytest-cov==4.1.0", "tox==4.11.1"]
+dev = ["pytest==7.4.1", "pytest-cov==4.1.0", "tox==4.11.2"]
 
 [tool.pytest.ini_options]
 filterwarnings = ['ignore::DeprecationWarning']
