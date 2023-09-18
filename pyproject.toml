@@ -39,7 +39,7 @@ dependencies = [
     "num2words==0.5.12",
     "packaging==23.1",
     "requests==2.31.0",
-    "pillow==10.0.0",
+    "pillow==10.0.1",
     "pystray==0.19.4",
     "toml==0.10.2",
 ]
