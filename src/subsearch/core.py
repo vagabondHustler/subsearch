@@ -62,9 +62,9 @@ class Initializer:
             self.core_state.set_state(self.core_state.state.NO_FILE)
 
     def setup_file_system(self) -> None:
-        io_toml.resolve_on_integrity_failure()
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
+        io_toml.resolve_on_integrity_failure()
         if self.file_exist:
             io_file_system.create_directory(VIDEO_FILE.subs_dir)
             io_file_system.create_directory(VIDEO_FILE.tmp_dir)
