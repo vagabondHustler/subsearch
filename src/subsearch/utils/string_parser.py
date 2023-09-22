@@ -116,14 +116,38 @@ class CreateProviderUrls:
 
     def _opensubtitles_subtitle_type(self) -> str:
         alpha_2b = self.current_language_data.alpha_2b
-        if self.app_config.hearing_impaired and self.app_config.non_hearing_impaired is False:
+        hearing_imparied, hearing_imparied_foreign_parts, foreign_parts = self.subtitle_type_logic()
+        if hearing_imparied:
             return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on"
-        return f"en/search/sublanguageid-{alpha_2b}"
+        elif foreign_parts:
+            return f"en/search/sublanguageid-{alpha_2b}/foreignpartsonly-on"
+        elif hearing_imparied_foreign_parts:
+            return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on/foreignpartsonly-on"
+        else:
+            return f"en/search/sublanguageid-{alpha_2b}"
 
     def _opensubtitles_search_parameters(self) -> str:
         if self.release_data.tvseries:
             return f"searchonlytvseries-on/season-{self.release_data.season}/episode-{self.release_data.episode}/moviename-{self.release_data.title}"
         return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
+
+    def subtitle_type_logic(self):
+        hi_all_parts = (
+            self.app_config.hearing_impaired
+            and not self.app_config.non_hearing_impaired
+            and not self.app_config.only_foreign_parts
+        )
+        hi_foreign_parts = (
+            self.app_config.hearing_impaired
+            and not self.app_config.non_hearing_impaired
+            and self.app_config.only_foreign_parts
+        )
+        non_hi_foreign_parts = (
+            not self.app_config.hearing_impaired
+            and self.app_config.non_hearing_impaired
+            and self.app_config.only_foreign_parts
+        )
+        return hi_all_parts, hi_foreign_parts, non_hi_foreign_parts
 
 
 def get_release_data(filename: str) -> ReleaseData:

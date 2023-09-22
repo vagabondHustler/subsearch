@@ -103,7 +103,6 @@ class CallCondition:
         function = kwargs["function"]
         conditions = {
             "opensubtitles": [
-                not cls.app_config.only_foreign_parts,
                 CallCondition.language_compatibility("opensubtitles"),
                 cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
             ],

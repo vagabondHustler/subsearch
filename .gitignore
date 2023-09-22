@@ -164,10 +164,9 @@ src/*subs/
 old*
 src/subsearch/test*
 test_media/*
-scripts/spritesheet_generator
-scripts/gpt_commit
+scripts/spritesheet_generator/.input
+scripts/spritesheet_generator/package-lock.json
+scripts/spritesheet_generator/node_modules
 scripts/commit_generator/
 out/
-scripts/spritesheet_data.tcl
-scripts/spritesheet.png
 *.prof

@@ -25,14 +25,6 @@ def fake_subsearch_core():
 
 
 def test_conditions_opensubtitles(fake_subsearch_core: FakeSubsearchCore):
-    fake_subsearch_core.app_config.only_foreign_parts = True
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
-    assert result is False
-
-    fake_subsearch_core.app_config.only_foreign_parts = False
-    result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
-    assert result is True
-
     fake_subsearch_core.app_config.providers["opensubtitles_hash"] = False
     result = CallCondition.conditions(cls=fake_subsearch_core, function="opensubtitles")
     assert result is True
