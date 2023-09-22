@@ -39,8 +39,8 @@ dependencies = [
     "num2words==0.5.12",
     "packaging==23.1",
     "requests==2.31.0",
-    "pillow==10.0.0",
-    "pystray==0.19.4",
+    "pillow==10.0.1",
+    "pystray==0.19.5",
     "toml==0.10.2",
 ]
 dynamic = ["version"]
@@ -65,15 +65,15 @@ version = { attr = "subsearch.data.__version__" }
 
 [project.optional-dependencies]
 optional = [
-    "black==23.7.0",
+    "black==23.9.1",
     "isort==5.12.0",
     "twine==4.0.2",
-    "build==0.10.0",
-    "cx_Freeze==6.15.6",
+    "build==1.0.3",
+    "cx_Freeze==6.15.8",
     "mypy==1.5.1",
     "pipreqs==0.4.13",
 ]
-dev = ["pytest==7.4.0", "pytest-cov==4.1.0", "tox==4.11.0"]
+dev = ["pytest==7.4.2", "pytest-cov==4.1.0", "tox==4.11.3"]
 
 [tool.pytest.ini_options]
 filterwarnings = ['ignore::DeprecationWarning']
