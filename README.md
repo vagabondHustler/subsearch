@@ -2,11 +2,11 @@
 
 <div align="center">
   
-![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&label=release&labelColor=1e1e2e&color=a6e3a1)
-![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&label=release&labelColor=1e1e2e&color=eba0ac)
+![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&labelColor=1e1e2e&color=a6e3a1)
+![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&color=eba0ac)
 ![Downloads](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelColor=1e1e2e&color=f5c2e7)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&label=release&labelColor=1e1e2e&color=fab387)
-![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&label=release&labelColor=1e1e2e&color=b4befe)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e&color=fab387)
+![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e&color=b4befe)
 
 </div>
 
@@ -80,7 +80,6 @@ Initially created as a personal project to learn Python programming and git vers
 - Install Subsearch by running `pip install subsearch` in the command prompt.
 - Launch the app by running `subsearch`.
 
-
 #### Source code <a name = "src"></a>
 
 - Download and install Python version 3.10 or later.
@@ -109,12 +108,13 @@ Initially created as a personal project to learn Python programming and git vers
 
 ## Acknowledgements<a name = "thanks"></a>
 
-I would like to express my gratitude to the following repositories for providing templates, inspiration, themes, and solutions to similar problems:
+I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
 
 - [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 - [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md)
 - [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader)
 - [psf/black](https://github.com/psf/black)
-- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font)
-- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme)
+- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
+- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
 - [siddheshsathe/handy-decorators](https://github.com/siddheshsathe/handy-decorators)
+- [TransparentLC](https://github.com/TransparentLC) // spritesheet_generator.js
