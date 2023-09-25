@@ -10,7 +10,7 @@ jobs:
     name: Set enviroment variables
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
       - uses: actions/setup-python@v4
@@ -40,7 +40,7 @@ jobs:
       matrix:
         python-version: ["3.10.*", "3.11.*"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -57,7 +57,7 @@ jobs:
     name: Reformat codebase with black & isort
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v5
@@ -90,7 +90,7 @@ jobs:
     needs: [variables, test_tox, black_isort]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
       - uses: actions/setup-python@v4
@@ -122,7 +122,7 @@ jobs:
     needs: [variables, bump_version]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
 
@@ -192,7 +192,7 @@ jobs:
     needs: [variables, bump_version, msi_verification]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
 
@@ -251,7 +251,7 @@ jobs:
     needs: [variables, bump_version, build_msi, msi_verification, generate_changelog]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
 
@@ -318,7 +318,7 @@ jobs:
     needs: [bump_version, generate_changelog]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
       - uses: actions/setup-python@v4
@@ -346,7 +346,7 @@ jobs:
     needs: [generate_changelog]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: main
 
