@@ -16,7 +16,7 @@ jobs:
           echo "current_version=${v_version:1}" >> $GITHUB_ENV
 
       - name: VirusTotal Scan
-        uses: crazy-max/ghaction-virustotal@v3
+        uses: crazy-max/ghaction-virustotal@v4
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
           github_token: ${{ secrets.ACTIONS_TOKEN }}
