@@ -37,7 +37,7 @@ dependencies = [
     "selectolax==0.3.16",
     "cloudscraper==1.2.71",
     "num2words==0.5.12",
-    "packaging==23.1",
+    "packaging==23.2",
     "requests==2.31.0",
     "pillow==10.0.0",
     "pystray==0.19.4",
