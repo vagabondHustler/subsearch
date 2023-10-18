@@ -34,7 +34,7 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
 ]
 dependencies = [
-    "selectolax==0.3.16",
+    "selectolax==0.3.17",
     "cloudscraper==1.2.71",
     "num2words==0.5.12",
     "packaging==23.2",
