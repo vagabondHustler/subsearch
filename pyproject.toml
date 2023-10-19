@@ -36,7 +36,7 @@ classifiers = [
 dependencies = [
     "selectolax==0.3.17",
     "cloudscraper==1.2.71",
-    "num2words==0.5.12",
+    "num2words==0.5.13",
     "packaging==23.2",
     "requests==2.31.0",
     "pillow==10.1.0",
