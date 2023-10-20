@@ -15,7 +15,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "*"
+          python-version: "3.11.6"
       - name: Set variables
         run: |
           _past_full_release=$(cat .github/configs/latest_release.yml)
@@ -95,7 +95,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "*"
+          python-version: "3.11.6"
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
@@ -129,7 +129,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "*"
+          python-version: "3.11.6"
 
       - name: Install requirements
         run: |
@@ -323,7 +323,7 @@ jobs:
           ref: main
       - uses: actions/setup-python@v4
         with:
-          python-version: "*"
+          python-version: "3.11.6"
       - name: Install requirements
         run: |
           git fetch origin main
