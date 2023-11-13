@@ -70,7 +70,7 @@ optional = [
     "twine==4.0.2",
     "build==1.0.3",
     "cx_Freeze==6.15.10",
-    "mypy==1.6.1",
+    "mypy==1.7.0",
     "pipreqs==0.4.13",
 ]
 dev = ["pytest==7.4.3", "pytest-cov==4.1.0", "tox==4.11.3"]
