@@ -43,28 +43,20 @@ class FindImdbID(AdvTitleSearch):
 
         url = adv_search.get_url()
         tree = core_provider.get_html_parser(url)
-        product = tree.select("div.lister-item-content")
 
-        for item in product.matches:
-            self.data = item.css_first("h3.lister-item-header")
+        product = tree.css("a.ipc-title-link-wrapper h3.ipc-title__text")
 
-            if self.title != self.find_imdb_title():
+        for item in product:
+            href_ = item.parent.attrs["href"]
+            imdb_id = href_.split("/")[2]
+            title_ = item.text().split(". ")[-1]
+            year_ = int(item.parent.parent.next.child.child.html)
+
+            if self.title != title_.lower():
                 continue
 
-            if self.year != self.find_imdb_year() and (self.year - 1) != self.find_imdb_year():
+            if self.year != year_ and (self.year - 1) != year_:
                 continue
 
-            self.id = self.get_imdb_id()
+            self.id = imdb_id
             break
-
-    def find_imdb_title(self) -> str:
-        title = self.data.css_first("a").text()
-        return title.lower()
-
-    def find_imdb_year(self) -> int:
-        year = self.data.css_first("span.lister-item-year").child.text_content
-        return int(re.findall("[0-9]+", year)[0])
-
-    def get_imdb_id(self) -> str:
-        href = self.data.css_first("a")
-        return re.findall("tt[0-9]+", href.attributes["href"])[0]
