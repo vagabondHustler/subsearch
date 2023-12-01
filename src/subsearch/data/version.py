@@ -1,6 +1,6 @@
 import sys
 
-__version__ = "2.39.5"
+__version__ = "2.39.6rc1"
 
 if sys.argv[-1] == "--get-version":
     print(__version__)
