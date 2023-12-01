@@ -125,10 +125,10 @@ class CallCondition:
             ],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
             "subtitle_post_processing": [],
-            "subtitle_rename": [cls.app_config.subtitle_post_processing["rename"], cls.subtitles_found > 1],
+            "subtitle_rename": [cls.app_config.subtitle_post_processing["rename"], cls.subtitles_found >= 1],
             "subtitle_move_best": [
                 cls.app_config.subtitle_post_processing["move_best"],
-                cls.subtitles_found > 1,
+                cls.subtitles_found >= 1,
                 not cls.app_config.subtitle_post_processing["move_all"],
             ],
             "subtitle_move_all": [cls.app_config.subtitle_post_processing["move_all"], cls.subtitles_found > 1],
