@@ -34,6 +34,7 @@ class Initializer:
         self.system_tray.start()
 
         if self.file_exist:
+            VIDEO_FILE.file_hash = io_file_system.get_file_hash(VIDEO_FILE.file_path)
             io_log.stdout_dataclass(VIDEO_FILE, level="debug", print_allowed=False)
             io_file_system.create_directory(VIDEO_FILE.file_directory)
 
