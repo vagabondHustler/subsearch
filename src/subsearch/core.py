@@ -34,6 +34,7 @@ class Initializer:
         self.system_tray.start()
 
         if self.file_exist:
+            VIDEO_FILE.file_hash = io_file_system.get_file_hash(VIDEO_FILE.file_path)
             io_log.stdout_dataclass(VIDEO_FILE, level="debug", print_allowed=False)
             io_file_system.create_directory(VIDEO_FILE.file_directory)
 
@@ -173,7 +174,7 @@ class SubsearchCore(Initializer):
     @decorators.call_conditions
     def subtitle_rename(self) -> None:
         io_log.stdout_in_brackets("Renaming best match")
-        self.core_state.set_state(self.core_state.state.AUTOLOAD_RENAME)
+        self.core_state.set_state(self.core_state.state.SUBTITLE_RENAME)
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
         io_log.stdout("Done with task", level="info", end_new_line=True)
@@ -181,7 +182,7 @@ class SubsearchCore(Initializer):
     @decorators.call_conditions
     def subtitle_move_best(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move best match")
-        self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE)
+        self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
 
         io_file_system.move_and_replace(self.autoload_src, target)
         io_log.stdout("Done with task", level="info", end_new_line=True)
@@ -189,7 +190,7 @@ class SubsearchCore(Initializer):
     @decorators.call_conditions
     def subtitle_move_all(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move all")
-        self.core_state.set_state(self.core_state.state.AUTOLOAD_MOVE_ALL)
+        self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE_ALL)
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
