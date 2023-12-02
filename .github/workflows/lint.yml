@@ -1,0 +1,37 @@
+name: Lint codebase
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+
+      - name: Lint codebase
+        run: |
+          pip install black
+          pip install isort
+          isort ./src ./tests --profile 'black'
+          black ./src ./tests -l 125
+
+      - name: Commit and push
+        run: |
+          git status
+          git add -A
+          git commit -S -m "Reformat codebase with black & isort"
+          git fetch origin main
+          git push origin HEAD:main
