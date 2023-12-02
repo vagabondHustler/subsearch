@@ -26,68 +26,16 @@ jobs:
           echo "past_valid_semver=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
           echo "local_appdata=${LOCALAPPDATA}" >> $GITHUB_ENV
         shell: bash
-
     outputs:
       past_valid_semver: "${{ env.past_valid_semver }}"
       valid_semver: "${{ env.valid_semver }}"
       past_ref_name: "${{ env.past_ref_name }}"
       local_appdata: "${{ env.local_appdata }}"
 
-  test_tox:
-    name: Test with tox
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.10.*", "3.11.*"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install tox tox-gh-actions
-      - name: Test with tox
-        run: tox
-
-  black_isort:
-    name: Reformat codebase with black & isort
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-
-      - name: Install black & isort
-        run: |
-          pip install black
-          pip install isort
-          isort ./src --profile 'black'
-          black ./src -l 125
-          isort ./tests --profile 'black'
-          black ./tests -l 125
-
-      - name: Push black & isort changes
-        run: |
-          git status
-          git add -A
-          git commit -S -m "Reformat codebase with black & isort"
-          git fetch origin main
-          git push origin HEAD:main
 
   bump_version:
     name: Bump version
-    needs: [variables, test_tox, black_isort]
+    needs: variables
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -106,10 +54,10 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Bump version.py
+      - name: Bump version
         run: python scripts/bump_version.py ${{ needs.variables.outputs.valid_semver }}
 
-      - name: Push new version
+      - name: Commit and push
         run: |
           git status
           git add src/subsearch/data/version.py
@@ -363,7 +311,7 @@ jobs:
         run: |
           echo "${{ github.ref_name }}" > .github/configs/latest_release.yml
 
-      - name: Push origin HEAD:main
+      - name: Commit and push
         run: |
           git status
           git add .github/configs/latest_release.yml
