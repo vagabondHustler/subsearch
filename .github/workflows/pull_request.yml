@@ -1,4 +1,4 @@
-name: Add labels & assignees to PR's
+name: Pull request labler
 
 on:
   pull_request:
