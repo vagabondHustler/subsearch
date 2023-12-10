@@ -13,7 +13,7 @@ jobs:
       - name: Check changes
         id: check_changes
         run: |
-          echo "changed_files=$(git diff --name-only)" >> $GITHUB_EN
+          echo "changed_files=$(git diff --name-only)" >> $GITHUB_ENV
         shell: bash
     outputs:
       changed_files: "${{ env.changed_files }}"
