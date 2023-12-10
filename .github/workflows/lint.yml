@@ -9,6 +9,7 @@ on:
     - 'scripts/**'
     - 'tests/**'
 
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -31,9 +32,18 @@ jobs:
           isort ./src ./tests --profile 'black'
           black ./src ./tests -l 125
 
-      - name: Commit and push
+      - name: Check for changes
+        id: git_status
         run: |
-          git status
+          if [ -n "$(git status --porcelain)" ]; then
+            changes=true
+          else
+            changes=false
+          fi
+
+      - name: Commit and push
+        if: ${{ steps.git_status.outputs.changes == 'true' }}
+        run: |
           git add -A
           git commit -S -m "Reformat codebase with black & isort"
           git fetch origin main
