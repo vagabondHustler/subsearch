@@ -3,11 +3,24 @@ name: Continuous integration
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - 'src/**'
 
 jobs:
+  check_changes:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check changes
+        id: check_changes
+        run: |
+          echo "changed_files=$(git diff --name-only)" >> $GITHUB_EN
+        shell: bash
+    outputs:
+      changed_files: "${{ env.changed_files }}"
+
   test:
+    needs: check_changes
+    if: contains(needs.check_changes.outputs.changed_files, 'src/')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -16,7 +29,7 @@ jobs:
         
     steps:
       - uses: actions/checkout@v4
-
+        
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
