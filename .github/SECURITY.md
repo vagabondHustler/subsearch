@@ -1,11 +1,24 @@
 # Security Policy
 
-### Supported Versions
+## Reporting a Security Vulnerability
 
-[Latest](https://github.com/vagabondHustler/SubSearch/releases/latest) release and pre-releases greater than latest.
+If you believe you have found a security vulnerability, please follow these steps to report it.
 
-### Reporting a Vulnerability
+### Step 1: Do Not Disclose Publicly
 
-Send a e-mail to [vagabondHustler](mailto:vagabondHustler.github@gmail.com)
+Please do not disclose the issue publicly until it has been addressed.
 
-Privately reporting a security vulnerability, [see](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability)
+### Step 2: Submitting a Report
+
+- **Option 1 (Preferred):** Submit a report through [security vulnerability submission form](https://github.com/vagabondHustler/subsearch/security/advisories/new).
+- **Option 2:** If you are unable to use the form, you can also email [vagabondHustler](mailto:vagabondhustler.github@gmail.com).
+
+When submitting a report, please include the following information:
+
+- A detailed description of the vulnerability, including steps to reproduce (if applicable).
+- The version of the project in which the vulnerability was discovered.
+- Your name and affiliation (if any).
+
+## Supported Versions
+
+Latest stable release and pre-release
