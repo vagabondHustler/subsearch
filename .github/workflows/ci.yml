@@ -3,8 +3,6 @@ name: Continuous integration
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - 'src/**'
 
 jobs:
   test:
@@ -17,15 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            src:
+              - 'src/**'
+
       - name: Set up Python ${{ matrix.python-version }}
+        if: steps.changes.outputs.src == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        if: steps.changes.outputs.src == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
 
       - name: Test with tox
+        if: steps.changes.outputs.src == 'true'
         run: tox

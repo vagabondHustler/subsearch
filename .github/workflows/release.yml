@@ -18,18 +18,18 @@ jobs:
           python-version: "3.11.6"
       - name: Set variables
         run: |
-          _past_full_release=$(cat .github/configs/latest_release.yml)
+          _past_tags=$(cat .github/configs/latest_release.yml)
           _ref_name=${{ github.ref_name }}
 
-          echo "past_ref_name=$_past_full_release" >> $GITHUB_ENV
-          echo "valid_semver=${_ref_name:1}" >> $GITHUB_ENV
-          echo "past_valid_semver=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
+          echo "past_tags=$_past_tags" >> $GITHUB_ENV
+          echo "new_tags=${_ref_name:1}" >> $GITHUB_ENV
+          echo "current_tags=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
           echo "local_appdata=${LOCALAPPDATA}" >> $GITHUB_ENV
         shell: bash
     outputs:
-      past_valid_semver: "${{ env.past_valid_semver }}"
-      valid_semver: "${{ env.valid_semver }}"
-      past_ref_name: "${{ env.past_ref_name }}"
+      current_tags: "${{ env.current_tags }}"
+      new_tags: "${{ env.new_tags }}"
+      past_tags: "${{ env.past_tags }}"
       local_appdata: "${{ env.local_appdata }}"
 
 
@@ -55,13 +55,13 @@ jobs:
           git_config_global: true
 
       - name: Bump version
-        run: python scripts/bump_version.py ${{ needs.variables.outputs.valid_semver }}
+        run: python scripts/bump_version.py ${{ needs.variables.outputs.new_tags }}
 
       - name: Commit and push
         run: |
           git status
           git add src/subsearch/data/version.py
-          git commit -S -m "Bump version ${{ needs.variables.outputs.past_valid_semver }} → ${{ needs.variables.outputs.valid_semver }}"
+          git commit -S -m "Bump version ${{ needs.variables.outputs.current_tags }} → ${{ needs.variables.outputs.new_tags }}"
           git fetch origin main
           git push origin HEAD:main
 
@@ -93,8 +93,8 @@ jobs:
       - name: Upload msi artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
-          path: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+          path: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
 
   msi_verification:
     name: MSI verification
@@ -104,13 +104,13 @@ jobs:
       - name: Download MSI artifact
         uses: actions/download-artifact@v3
         with:
-          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
 
-      - name: Install Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi & verify install
+      - name: Install Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify install
         id: install_msi
         run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/i Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi", "/norestart", "/quiet") -Wait
+          Start-Process -FilePath msiexec.exe -ArgumentList @("/i Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
           $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
           $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
           if ($files.Count -eq 1 -and $registry.Count -eq 1) {
@@ -121,10 +121,10 @@ jobs:
           }
         shell: pwsh
 
-      - name: Uninstall Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi & verify uninstall
+      - name: Uninstall Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify uninstall
         id: uninstall_msi
         run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/x Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi", "/norestart", "/quiet") -Wait
+          Start-Process -FilePath msiexec.exe -ArgumentList @("/x Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
           $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
           $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
           if ($files.Count -gt 0 -or $registry.Count -gt 0) {
@@ -147,7 +147,7 @@ jobs:
       - name: Download MSI artifact
         uses: actions/download-artifact@v3
         with:
-          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
 
       - name: Build changelog for pre-release
@@ -164,7 +164,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4
         if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
         with:
-          fromTag: ${{ needs.variables.outputs.past_ref_name }}
+          fromTag: ${{ needs.variables.outputs.past_tags }}
           toTag: ${{ github.ref_name }}
           configuration: .github/configs/changelog_builder.json
         env:
@@ -175,24 +175,24 @@ jobs:
         run: |
           $pre_releases = @('rc', 'a', 'b')
           $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
-          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
           $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
           $virustotal_no_file = "VirusTotal analysis: No file uploaded"
-          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
+          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
           if ($is_pre_release){$virustotal_analysis = $virustotal_no_file} else {$virustotal_analysis = $virustotal_url}
-          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/${{  needs.variables.outputs.past_ref_name }}...${{ github.ref_name }})"
+          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/${{  needs.variables.outputs.past_tags }}...${{ github.ref_name }})"
           $full_changelog = "Full changelog: $comparison_link"
           if ($is_pre_release) {
-            echo "${{ steps.changelog_pre_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.valid_semver }}.md
+            echo "${{ steps.changelog_pre_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
           } else {
-            echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.valid_semver }}.md
+            echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
           }
-          echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.valid_semver }}.md
+          echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.new_tags }}.md
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
-          name: changelog-${{ needs.variables.outputs.valid_semver }}.md
-          path: changelog-${{ needs.variables.outputs.valid_semver }}.md
+          name: changelog-${{ needs.variables.outputs.new_tags }}.md
+          path: changelog-${{ needs.variables.outputs.new_tags }}.md
 
   publish_github:
     name: Publish to GitHub
@@ -215,20 +215,20 @@ jobs:
       - name: Download changelog artifact
         uses: actions/download-artifact@v3
         with:
-          name: changelog-${{ needs.variables.outputs.valid_semver }}.md
+          name: changelog-${{ needs.variables.outputs.new_tags }}.md
           path: .
 
       - name: Download MSI artifact
         uses: actions/download-artifact@v3
         with:
-          name: Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
 
       - name: Create hashes file
         id: hashes
         run: |
           $filenames = @(
-          "Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi"
+          "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi"
           )
 
           $hashAlgorithm = "SHA256"
@@ -252,13 +252,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: ${{ needs.variables.outputs.valid_semver }}
-          body_path: changelog-${{ needs.variables.outputs.valid_semver }}.md
+          name: ${{ needs.variables.outputs.new_tags }}
+          body_path: changelog-${{ needs.variables.outputs.new_tags }}.md
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
             hashes.sha256
-            Subsearch-${{ needs.variables.outputs.valid_semver }}-win64.msi
+            Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
 
   publish_pypi:
     if: ${{ !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
