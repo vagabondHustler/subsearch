@@ -19,13 +19,11 @@
 - [MSI Installer](#msi)
 - [Acknowledgements](#thanks)
 
-#### Wiki Table of Contents
+#### FAQ Table of Contents
 
-- [Home](https://github.com/vagabondHustler/subsearch/wiki)
-- [Code Analysis and Verification Process](https://github.com/vagabondHustler/subsearch/wiki/Code-Analysis-and-Verification-Process)
-- [Fixing Context Menu Issue in Subsearch](https://github.com/vagabondHustler/subsearch/wiki/Fixing-Context-Menu-Issue-in-Subsearch)
-- [GUI-Options](https://github.com/vagabondHustler/subsearch/wiki/GUI-Options)
-- [Troubleshooting Subtitle Search Issues](https://github.com/vagabondHustler/subsearch/wiki/Troubleshooting-Subtitle-Search-Issues)
+- [GUI Options Explained](https://github.com/vagabondHustler/subsearch/discussions/556)
+- [Code Analysis and False Positives](https://github.com/vagabondHustler/subsearch/discussions/557)
+- [Supported Languages](https://github.com/vagabondHustler/subsearch/discussions/558)
 
 #### Misc Table of Contents
 
