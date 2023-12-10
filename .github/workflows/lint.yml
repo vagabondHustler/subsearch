@@ -1,9 +1,13 @@
 name: Lint codebase
 
 on:
-  pull_request:
+  push:
     branches:
       - main
+    paths:
+    - 'src/**'
+    - 'scripts/**'
+    - 'tests/**'
 
 jobs:
   lint:
@@ -23,8 +27,7 @@ jobs:
 
       - name: Lint codebase
         run: |
-          pip install black
-          pip install isort
+          pip install black isort
           isort ./src ./tests --profile 'black'
           black ./src ./tests -l 125
 
