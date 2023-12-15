@@ -79,7 +79,7 @@ class BdistMSI(_bdist_msi):
             "Can be done at a later point in time.",
         )
         launch_app = dialog.pushbutton(
-            "Launch App", 25, 130, 320, 30, 3, "Launch [ProductName] and Exit installer", None
+            "Launch App", 25, 130, 320, 30, 3, "Launch [ProductName] and exit installer", None
         )
         launch_app.event("DoAction", "VSDCA_Launch", 'LAUNCHAPP="1"', "0")
         launch_app.event("EndDialog", "Return")
