@@ -3,50 +3,49 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "*.*.*"
 
 jobs:
   variables:
     name: Set enviroment variables
     runs-on: windows-latest
+    outputs:
+      new_tags: "${{ steps.new_tags.outputs.tags }}"
+      current_tags: "${{ steps.current_tags.outputs.tags }}"
+      previous_stable_tags: "${{ steps.previous_stable_tags.outputs.tags }}"
+      
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
-      - name: Set variables
+          python-version: "*"
+  
+      - name: New tags
+        id: new_tags
         run: |
-          _past_tags=$(cat .github/configs/latest_release.yml)
-          _ref_name=${{ github.ref_name }}
+          $refName = $env:GITHUB_REF_NAME.Substring(1)
+          Write-Host "new_tags=$refName"
 
-          echo "past_tags=$_past_tags" >> $GITHUB_ENV
-          echo "new_tags=${_ref_name:1}" >> $GITHUB_ENV
-          echo "current_tags=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
-          echo "local_appdata=${LOCALAPPDATA}" >> $GITHUB_ENV
-        shell: bash
-    outputs:
-      current_tags: "${{ env.current_tags }}"
-      new_tags: "${{ env.new_tags }}"
-      past_tags: "${{ env.past_tags }}"
-      local_appdata: "${{ env.local_appdata }}"
+      - name: Current tags
+        id: current_tags
+        run: ${{ vars.CLI_JSON }} --read current_version
+
+      - name: Previous stable tags
+        id: previous_stable_tags
+        run: ${{ vars.CLI_JSON }} --read previous_stable_version
 
 
-  bump_version:
-    name: Bump version
+
+
+  version_control:
+    name: Version Control
     needs: variables
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11.6"
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -54,8 +53,17 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Bump version
-        run: python scripts/bump_version.py ${{ needs.variables.outputs.new_tags }}
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.6"
+
+      - name: Bump Subsearch version
+        run: |
+          ${{ vars.CLI_PY }} --new-string ${{ needs.variables.outputs.new_tags }}
 
       - name: Commit and push
         run: |
@@ -65,90 +73,121 @@ jobs:
           git fetch origin main
           git push origin HEAD:main
 
-  build_msi:
-    name: Build MSI
-    needs: [variables, bump_version]
+  build_binaries:
+    name: Build binaries
+    needs: [variables, version_control]
     runs-on: windows-latest
+    outputs:
+      msi_hash: ${{ steps.hashes.outputs.msi_hash }}
+      exe_hash: ${{ steps.hashes.outputs.exe_hash }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11.6"
 
-      - name: Install requirements
+      - name: Build binaries
+        id: build
         run: |
           git fetch origin main
           python -m pip install --upgrade pip
           pip install -e .[dev,optional]
+          python -m setup bdist_msi
 
-      - name: Build executable and MSI installer
-        id: build_msi
+      - name: Create hashes file
+        id: hashes
         run: |
-          python setup.py bdist_msi -d .
+          ${{ vars.CLI_SOFTWARE }} --write-hashes
 
-      - name: Upload msi artifact
+      - name: Upload hashes.sha256 artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: hashes.sha256
+          path: artifacts
+          if-no-files-found: error
+
+      - name: Upload MSI artifact
         uses: actions/upload-artifact@v3
         with:
           name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+          path: dist
+          if-no-files-found: error
 
-  msi_verification:
-    name: MSI verification
-    needs: [variables, bump_version, build_msi]
-    runs-on: windows-latest
-    steps:
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
+          name: Subsearch.exe
+          path: build/exe.win-amd64-3.11
+          if-no-files-found: error
 
-      - name: Install Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify install
-        id: install_msi
-        run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/i Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
-          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
-          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
-          if ($files.Count -eq 1 -and $registry.Count -eq 1) {
-            Write-Output "MSI package installed successfully"
-          } else {
-            Write-Output "MSI package failed to install"
-            Exit 1
-          }
-        shell: pwsh
-
-      - name: Uninstall Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify uninstall
-        id: uninstall_msi
-        run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/x Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
-          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
-          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
-          if ($files.Count -gt 0 -or $registry.Count -gt 0) {
-            Write-Output "MSI package failed to uninstall"
-            Exit 1
-          } else {
-            Write-Output "MSI package uninstalled successfully."
-          }
-        shell: pwsh
-
-  generate_changelog:
-    name: Generate changelog
-    needs: [variables, bump_version, msi_verification]
+  test_binaries:
+    name: Test binaries
+    needs: [variables, version_control, build_binaries]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+      - uses: actions/setup-python@v5
         with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
+          python-version: "*"
+
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
+
+      - name: Run tests
+        id: tests
+        run: |
+          ${{ vars.CLI_SOFTWARE }} --run-test -t install -f msi_artifact
+          ${{ vars.CLI_SOFTWARE }} --run-test -t executable
+          ${{ vars.CLI_SOFTWARE }} --run-test -t uninstall -f msi_artifact
+
+  virustotal_scan:
+    name: VirusTotal scan of binaries
+    if: ${{  !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+    needs: [variables, test_binaries]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          github_token: ${{ secrets.ACTIONS_TOKEN }}
+          update_release_body: false
+          request_rate: 4
+          files: |
+            artifacts/Subsearch.exe
+            artifacts/Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+
+  changelog:
+    name: Generate changelog
+    needs: [variables, build_binaries, test_binaries]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
 
       - name: Build changelog for pre-release
         id: changelog_pre_release
@@ -164,7 +203,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4
         if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
         with:
-          fromTag: ${{ needs.variables.outputs.past_tags }}
+          fromTag: ${{ needs.variables.outputs.previous_stable_tags }}
           toTag: ${{ github.ref_name }}
           configuration: .github/configs/changelog_builder.json
         env:
@@ -173,38 +212,35 @@ jobs:
       - name: Update changelog
         id: update_changelog
         run: |
-          $pre_releases = @('rc', 'a', 'b')
-          $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
-          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
-          $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
-          $virustotal_no_file = "VirusTotal analysis: No file uploaded"
-          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
-          if ($is_pre_release){$virustotal_analysis = $virustotal_no_file} else {$virustotal_analysis = $virustotal_url}
-          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/${{  needs.variables.outputs.past_tags }}...${{ github.ref_name }})"
-          $full_changelog = "Full changelog: $comparison_link"
-          if ($is_pre_release) {
-            echo "${{ steps.changelog_pre_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
-          } else {
-            echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
-          }
-          echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.new_tags }}.md
+          msi=${{ needs.build_binaries.outputs.msi_hash }}
+          exe=${{ needs.build_binaries.outputs.exe_hash }}
+          new_tags=${{ needs.variables.outputs.new_tags }}
+          ${{ vars.CLI_CHANGELOG }} --new-tags $new_tags --hashes $msi;$exe
+
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v3
         with:
           name: changelog-${{ needs.variables.outputs.new_tags }}.md
-          path: changelog-${{ needs.variables.outputs.new_tags }}.md
+          path: artifacts
 
   publish_github:
     name: Publish to GitHub
-    needs: [variables, bump_version, build_msi, msi_verification, generate_changelog]
+    needs: [variables, changelog]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
+
+      - uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -212,44 +248,7 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Download changelog artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: changelog-${{ needs.variables.outputs.new_tags }}.md
-          path: .
-
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
-
-      - name: Create hashes file
-        id: hashes
-        run: |
-          $filenames = @(
-          "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi"
-          )
-
-          $hashAlgorithm = "SHA256"
-          $targetFilePath = "hashes.sha256"
-
-          foreach ($filename in $filenames) {
-            $filePath = $filename
-            $hash = Get-FileHash -Path $filePath -Algorithm $hashAlgorithm | Select-Object -ExpandProperty Hash
-            $line = "$hash *$filename"
-
-            $line | Out-File -FilePath $targetFilePath -Append
-          }
-
-      - name: Upload hashes artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: hashes.sha256
-          path: hashes.sha256
-
-      - name: Publish release
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: ${{ needs.variables.outputs.new_tags }}
@@ -257,21 +256,23 @@ jobs:
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
           files: |
-            hashes.sha256
-            Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+            artifacts/hashes.sha256
+            artifacts/Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
 
   publish_pypi:
     if: ${{ !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
     name: Publish to PyPi
-    needs: [bump_version, generate_changelog]
+    needs: [version_control, changelog]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
+          python-version: "*"
+
       - name: Install requirements
         run: |
           git fetch origin main
@@ -288,10 +289,11 @@ jobs:
         run: |
           twine upload --verbose -u '__token__' dist/*
 
-  update_latest_release:
-    if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
+
+
+  post_version_control:
     name: Update latest_release.yml
-    needs: [generate_changelog]
+    needs: [changelog]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -307,8 +309,9 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Write to latest_release
+      - name: Update previous stable version
         run: |
+          ${{ vars.CLI_JSON }} -w 
           echo "${{ github.ref_name }}" > .github/configs/latest_release.yml
 
       - name: Commit and push
