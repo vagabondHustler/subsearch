@@ -170,3 +170,4 @@ scripts/spritesheet_generator/node_modules
 scripts/commit_generator/
 out/
 *.prof
+artifacts/*
