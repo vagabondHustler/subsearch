@@ -91,7 +91,7 @@ jobs:
           python setup.py bdist_msi -d .
 
       - name: Upload msi artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
@@ -189,7 +189,7 @@ jobs:
           }
           echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.new_tags }}.md
       - name: Upload changelog artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: changelog-${{ needs.variables.outputs.new_tags }}.md
           path: changelog-${{ needs.variables.outputs.new_tags }}.md
@@ -243,7 +243,7 @@ jobs:
           }
 
       - name: Upload hashes artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hashes.sha256
           path: hashes.sha256
