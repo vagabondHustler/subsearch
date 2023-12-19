@@ -102,7 +102,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
@@ -145,7 +145,7 @@ jobs:
           ref: main
 
       - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
@@ -213,13 +213,13 @@ jobs:
           git_config_global: true
 
       - name: Download changelog artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: changelog-${{ needs.variables.outputs.new_tags }}.md
           path: .
 
       - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
           path: .
