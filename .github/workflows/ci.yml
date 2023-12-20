@@ -1,16 +1,25 @@
 name: Continuous integration
+run-name: Continuous integration
 
 on:
   pull_request:
     branches: ["main"]
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
+  dependency_review:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@v3
+        
+  tox:
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest]
-        python-version: ["3.10.*", "3.11.6"]
+        python-version: ["3.10.*", "3.11.*"]
         
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +44,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
 
-      - name: Test with tox
+      - name: Run tests
         if: steps.changes.outputs.src == 'true'
         run: tox
