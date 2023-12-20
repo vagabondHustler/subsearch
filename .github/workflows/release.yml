@@ -150,6 +150,7 @@ jobs:
         run: |
           git status
           git fetch origin main
+          git push origin HEAD:main
           git push origin --tags
 
       - name: Push develop
