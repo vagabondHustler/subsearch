@@ -1,0 +1,26 @@
+name: Labeler
+run-name: Labler
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  pr-labeler:
+    if: |
+      startsWith(github.head_ref, 'feat/') ||
+      startsWith(github.head_ref, 'feature/') ||
+      startsWith(github.head_ref, 'fix/') ||
+      startsWith(github.head_ref, 'chore/') ||
+      startsWith(github.head_ref, 'dependency/') ||
+      startsWith(github.head_ref, 'workflow/') ||
+      startsWith(github.head_ref, 'test/')
+    runs-on: windows-latest
+    
+    steps:
+      - name: Auto label
+        uses: TimonVS/pr-labeler-action@v4
+        with:
+          configuration-path: .github/configs/auto_label.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
