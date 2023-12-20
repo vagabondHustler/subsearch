@@ -141,7 +141,7 @@ jobs:
       - name: Bump last stable release
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
-          ${{ env.CLI }} json -w last_stable_release ${{ needs.init.outputs.current_tags }}
+          ${{ env.CLI }} json -w last_stable_release ${{ inputs.new_tags }}
           git add ${{ env.VERSION_CONTROL_PATH }} 
           git commit -S -m "Bump last stable release ${{ needs.init.outputs.last_stable_release }} → ${{ inputs.new_tags }}"
 
