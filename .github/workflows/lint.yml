@@ -36,11 +36,12 @@ jobs:
       - name: Check for changes
         id: git_status
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            changes=true
-          else
-            changes=false
-          fi
+          $gitStatus = git status --porcelain
+          if ($gitStatus) {
+              $changes = $true
+          } else {
+              $changes = $false
+          }
 
       - name: Commit and push
         if: ${{ steps.git_status.outputs.changes == 'true' }}
