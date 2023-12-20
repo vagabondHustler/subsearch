@@ -6,7 +6,7 @@ on:
     types: [opened]
 
 jobs:
-  pr-labeler:
+  pr_labeler:
     if: |
       startsWith(github.head_ref, 'feat/') ||
       startsWith(github.head_ref, 'feature/') ||
