@@ -1,0 +1,47 @@
+name: Schedule
+run-name: Schedule
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+
+jobs:
+  stale:
+    runs-on: windows-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/stale@v9
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        days-before-stale: 60
+        stale-issue-message: 'No activity in the last 60 days. Marking as stale; will close in 7 days without further activity.'
+        stale-pr-message: 'No activity in the last 60 days. Marking as stale; will close in 7 days without further activity.'
+        stale-issue-label: 'stale'
+        stale-pr-label: 'stale'
+
+  codeql:
+    runs-on: windows-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize Codeql
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+
+    - uses: github/codeql-action/autobuild@v2
+
+    - uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"

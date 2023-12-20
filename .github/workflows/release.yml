@@ -1,52 +1,102 @@
 name: Release
+run-name: Release ${{ inputs.new_tags }}
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      new_tags:
+        description: "Release version."
+        type: string
+        required: true
+      python_version: 
+        description: "Python version to use when building binaries."
+        type: string
+        required: false
+        default: "3.11.6"
+      checkout_branch:
+        description: "Branch to checkout."
+        type: string
+        required: false
+        default: main
+      artifact_retention_days:
+        description: "Number of days to retain build artifacts in GitHub Actions."
+        type: number
+        required: false
+        default: 7
+      timeout_minutes:
+        description: "Timeout in minutes for jobs in GitHub Actions."
+        type: number
+        required: false
+        default: 10
+      runs_on:
+        description: "GitHub Actions runner environment for jobs in the workflow."
+        type: string
+        required: false
+        default: windows-latest
 
+env:
+  CLI: python -m tools.cli.commands
+  NEW_VERSION: ${{ inputs.new_tags }}
+  ID: "${{ inputs.new_tags }}_${{ github.ref_name }}_${{ github.run_id }}"
+  VERSION_CONTROL_PATH: ".github/configs/version_control.json"
+  VERSION_PY_PATH: "src/subsearch/data/version.py"
+  MSI_NAME: "Subsearch-${{ inputs.new_tags }}-win64.msi"
+  EXE_NAME: "Subsearch.exe"
+  HASHES_NAME: "hashes.sha256"
+  CHANGELOG_NAME: "changelog.md"
+
+  
 jobs:
-  variables:
-    name: Set enviroment variables
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11.6"
-      - name: Set variables
-        run: |
-          _past_tags=$(cat .github/configs/latest_release.yml)
-          _ref_name=${{ github.ref_name }}
-
-          echo "past_tags=$_past_tags" >> $GITHUB_ENV
-          echo "new_tags=${_ref_name:1}" >> $GITHUB_ENV
-          echo "current_tags=$(python src/subsearch/data/version.py --get-version)" >> $GITHUB_ENV
-          echo "local_appdata=${LOCALAPPDATA}" >> $GITHUB_ENV
-        shell: bash
+  init:
+    name: Initializing environments
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}} # fromJson because https://github.com/orgs/community/discussions/55332#discussioncomment-5887877
     outputs:
-      current_tags: "${{ env.current_tags }}"
-      new_tags: "${{ env.new_tags }}"
-      past_tags: "${{ env.past_tags }}"
-      local_appdata: "${{ env.local_appdata }}"
-
-
-  bump_version:
-    name: Bump version
-    needs: variables
-    runs-on: ubuntu-latest
+      current_tags: "${{ steps.current_tags.outputs.tags }}"
+      previous_tags: "${{ steps.previous_tags.outputs.tags }}"
+      last_stable_release: "${{ steps.last_stable_release.outputs.tags }}"
+      
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ inputs.checkout_branch }}
+
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
+          python-version: "*"
 
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: Validate that the tags are new
+        run: git tag ${{ inputs.new_tags }}
+
+      - name: Validate inputs
+        id: valid_inputs
+        run: >
+          ${{ env.CLI }} init 
+          --validate-inputs 
+          "new_tags=${{ inputs.new_tags }};
+          python_version=${{ inputs.python_version }};
+          checkout_branch=${{ inputs.checkout_branch }}"
+
+      - name: Current tags 
+        id: current_tags
+        run: ${{ env.CLI }} json --read current_version  # tags=value
+
+      - name: Previous stable tags 
+        id: last_stable_release
+        run: ${{ env.CLI }} json --read last_stable_release # tags=value
+
+      - name: Previous tags 
+        id: previous_tags
+        run: ${{ env.CLI }} json --read previous_version # tags=value
+
+
+  version_control:
+    name: Version control
+    needs: init
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    steps:
+      - uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -54,157 +104,214 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Bump version
-        run: python scripts/bump_version.py ${{ needs.variables.outputs.new_tags }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_branch }}
 
-      - name: Commit and push
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "*"
+
+      - name: Get previous version
+        id: version
+        run: ${{ env.CLI}} python --read-string # version=value
+
+      - name: Create new tags
+        if: ${{ !contains(inputs.new_tags, 'dev') }}
+        run: git tag -a ${{ inputs.new_tags }} -m "Release ${{ inputs.new_tags }}"
+
+      - name: Bump subsearch version 
+        run: |
+          ${{ env.CLI}} python --write-string ${{ inputs.new_tags }}
+          git add ${{ env.VERSION_PY_PATH }}
+          git commit -S -m "Bump version ${{ steps.version.outputs.version }} → ${{ inputs.new_tags }}"
+
+      - name: Bump current version
+        run: |
+          ${{ env.CLI }} json -w current_version ${{ inputs.new_tags }}
+          git add ${{ env.VERSION_CONTROL_PATH }} 
+          git commit -S -m "Bump current version ${{ needs.init.outputs.current_tags }} → ${{ inputs.new_tags }}" 
+
+      - name: Bump previous version
+        run: |
+          ${{ env.CLI }} json -w previous_version ${{ needs.init.outputs.current_tags }}
+          git add ${{ env.VERSION_CONTROL_PATH }} 
+          git commit -S -m "Bump previous version ${{ needs.init.outputs.previous_tags }} → ${{ needs.init.outputs.current_tags }}"
+
+      - name: Bump last stable release
+        if: ${{ !contains(inputs.new_tags, 'dev')  }}
+        run: |
+          ${{ env.CLI }} json -w last_stable_release ${{ inputs.new_tags }}
+          git add ${{ env.VERSION_CONTROL_PATH }} 
+          git commit -S -m "Bump last stable release ${{ needs.init.outputs.last_stable_release }} → ${{ inputs.new_tags }}"
+
+      - name: Push stable 
+        if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
           git status
-          git add src/subsearch/data/version.py
-          git commit -S -m "Bump version ${{ needs.variables.outputs.current_tags }} → ${{ needs.variables.outputs.new_tags }}"
+          git fetch origin main
+          git push origin HEAD:main
+          git push origin --tags
+
+      - name: Push develop
+        if: ${{ contains(inputs.new_tags, 'dev')  }}
+        run: |
+          git status
           git fetch origin main
           git push origin HEAD:main
 
-  build_msi:
-    name: Build MSI
-    needs: [variables, bump_version]
-    runs-on: windows-latest
+  build_binaries:
+    name: Build binaries
+    needs: [init, version_control]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+    outputs:
+      msi_hash: ${{ steps.hashes.outputs.msi_hash }}
+      exe_hash: ${{ steps.hashes.outputs.exe_hash }}
+
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ inputs.checkout_branch }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
+          python-version: ${{ inputs.python_version }}
 
-      - name: Install requirements
+      - name: Build binaries
+        id: build
         run: |
           git fetch origin main
           python -m pip install --upgrade pip
           pip install -e .[dev,optional]
+          python -m setup bdist_msi
 
-      - name: Build executable and MSI installer
-        id: build_msi
-        run: |
-          python setup.py bdist_msi -d .
+      - name: Create hashes file and set outputs
+        id: hashes
+        run:  ${{ env.CLI }} binaries --write-hash # suffix_hash=value
 
-      - name: Upload msi artifact
-        uses: actions/upload-artifact@v3
+      - name: Prepare artifacts
+        run: ${{ env.CLI }} binaries --prepare-build-artifacts
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+          name: build_${{ env.ID }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact_retention_days }}
 
-  msi_verification:
-    name: MSI verification
-    needs: [variables, bump_version, build_msi]
-    runs-on: windows-latest
-    steps:
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
-
-      - name: Install Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify install
-        id: install_msi
-        run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/i Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
-          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
-          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
-          if ($files.Count -eq 1 -and $registry.Count -eq 1) {
-            Write-Output "MSI package installed successfully"
-          } else {
-            Write-Output "MSI package failed to install"
-            Exit 1
-          }
-        shell: pwsh
-
-      - name: Uninstall Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi & verify uninstall
-        id: uninstall_msi
-        run: |
-          Start-Process -FilePath msiexec.exe -ArgumentList @("/x Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi", "/norestart", "/quiet") -Wait
-          $files = Get-ChildItem -Path "${{ needs.variables.outputs.local_appdata }}\Programs\Subsearch" -Recurse -Include "Subsearch.exe" -ErrorAction SilentlyContinue
-          $registry = Get-Item -LiteralPath HKCU:\Software\Classes\*\shell\Subsearch -ErrorAction SilentlyContinue
-          if ($files.Count -gt 0 -or $registry.Count -gt 0) {
-            Write-Output "MSI package failed to uninstall"
-            Exit 1
-          } else {
-            Write-Output "MSI package uninstalled successfully."
-          }
-        shell: pwsh
-
-  generate_changelog:
-    name: Generate changelog
-    needs: [variables, bump_version, msi_verification]
-    runs-on: windows-latest
+  test_binaries:
+    name: Test binaries
+    needs: [init, version_control, build_binaries]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ inputs.checkout_branch }}
 
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+      - uses: actions/setup-python@v5
         with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
+          python-version: "*"
 
-      - name: Build changelog for pre-release
-        id: changelog_pre_release
-        uses: mikepenz/release-changelog-builder-action@v4
-        if: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
+      - uses: actions/download-artifact@v4
+        id: download
         with:
-          configuration: .github/configs/changelog_builder.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: build_${{ env.ID }}
+          path: artifacts
 
-      - name: Build changelog for full-release
-        id: changelog_full_release
-        uses: mikepenz/release-changelog-builder-action@v4
-        if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
-        with:
-          fromTag: ${{ needs.variables.outputs.past_tags }}
-          toTag: ${{ github.ref_name }}
-          configuration: .github/configs/changelog_builder.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ steps.download.outputs.download-path }}
 
-      - name: Update changelog
-        id: update_changelog
+      - name: Run tests
+        id: tests
         run: |
-          $pre_releases = @('rc', 'a', 'b')
-          $is_pre_release = $null -ne ($pre_releases | ? { "${{ github.ref_name }}" -match $_ })
-          $sha256_hash = Get-FileHash -Path "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
-          $subsearch_repo = "https://github.com/vagabondHustler/subsearch"
-          $virustotal_no_file = "VirusTotal analysis: No file uploaded"
-          $virustotal_url = "VirusTotal analysis: [Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi](https://www.virustotal.com/gui/file/$sha256_hash)"
-          if ($is_pre_release){$virustotal_analysis = $virustotal_no_file} else {$virustotal_analysis = $virustotal_url}
-          $comparison_link = "[${{ github.ref_name }}]($subsearch_repo/compare/${{  needs.variables.outputs.past_tags }}...${{ github.ref_name }})"
-          $full_changelog = "Full changelog: $comparison_link"
-          if ($is_pre_release) {
-            echo "${{ steps.changelog_pre_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
-          } else {
-            echo "${{ steps.changelog_full_release.outputs.changelog }}" > changelog-${{ needs.variables.outputs.new_tags }}.md
-          }
-          echo "###### $virustotal_analysis$hash_info<p>$full_changelog" >> changelog-${{ needs.variables.outputs.new_tags }}.md
-      - name: Upload changelog artifact
-        uses: actions/upload-artifact@v3
+          ${{ env.CLI }} binaries --run-test -t install -f msi_artifact
+          ${{ env.CLI }} binaries --run-test -t executable
+          ${{ env.CLI }} binaries --run-test -t uninstall -f msi_artifact
+
+  upload_binaries:
+    name: Upload binaries to virustotal
+    if: ${{  !contains(inputs.new_tags, 'dev') }}
+    needs: [init, build_binaries]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    steps:
+      - uses: actions/checkout@v4
         with:
-          name: changelog-${{ needs.variables.outputs.new_tags }}.md
-          path: changelog-${{ needs.variables.outputs.new_tags }}.md
+          ref: ${{ inputs.checkout_branch }}
+
+      - uses: actions/download-artifact@v4
+        id: download
+        with:
+          name: build_${{ env.ID }}
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ steps.download.outputs.download-path }}
+
+      - uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          github_token: ${{ secrets.ACTIONS_TOKEN }}
+          update_release_body: false
+          request_rate: 4
+          files: |
+            artifacts/${{ env.EXE_NAME }}
+            artifacts/${{ env.MSI_NAME }}
+
+  changelog:
+    name: Changelog
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [init, build_binaries]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_branch }}
+
+      - name: Build
+        id: build
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          fromTag: ${{ needs.init.outputs.last_stable_release }}
+          toTag: ${{ inputs.new_tags }}
+          configuration: .github/configs/changelog_builder.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create markdown
+        run: |
+          mkdir "artifacts"
+          echo "${{ steps.build.outputs.changelog }}" > artifacts/${{ env.CHANGELOG_NAME }}
+
+      - name: Update
+        run: >
+          ${{ env.CLI }} changelog
+          --tags "${{ inputs.new_tags }};${{ needs.init.outputs.last_stable_release }}"
+          --file-names "${{ env.MSI_NAME }};${{ env.EXE_NAME }}"
+          --hashes "${{ needs.build_binaries.outputs.msi_hash }};${{ needs.build_binaries.outputs.exe_hash }}"
+
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog_${{ env.ID }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact_retention_days }}
 
   publish_github:
-    name: Publish to GitHub
-    needs: [variables, bump_version, build_msi, msi_verification, generate_changelog]
-    runs-on: windows-latest
+    name: Publish to gitHub
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [init, test_binaries, changelog]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -212,66 +319,45 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - name: Download changelog artifact
-        uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
         with:
-          name: changelog-${{ needs.variables.outputs.new_tags }}.md
-          path: .
+          ref: ${{ inputs.checkout_branch }}
 
-      - name: Download MSI artifact
-        uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
+        id: download
         with:
-          name: Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
-          path: .
+          path: artifacts
 
-      - name: Create hashes file
-        id: hashes
-        run: |
-          $filenames = @(
-          "Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi"
-          )
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ steps.download.outputs.download-path }}
 
-          $hashAlgorithm = "SHA256"
-          $targetFilePath = "hashes.sha256"
-
-          foreach ($filename in $filenames) {
-            $filePath = $filename
-            $hash = Get-FileHash -Path $filePath -Algorithm $hashAlgorithm | Select-Object -ExpandProperty Hash
-            $line = "$hash *$filename"
-
-            $line | Out-File -FilePath $targetFilePath -Append
-          }
-
-      - name: Upload hashes artifact
-        uses: actions/upload-artifact@v3
+      - uses: softprops/action-gh-release@v1
         with:
-          name: hashes.sha256
-          path: hashes.sha256
-
-      - name: Publish release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: ${{ needs.variables.outputs.new_tags }}
-          body_path: changelog-${{ needs.variables.outputs.new_tags }}.md
+          name: ${{ inputs.new_tags }}
+          tag_name: ${{ inputs.new_tags }}
+          body_path: artifacts/changelog_${{ env.ID }}/${{ env.CHANGELOG_NAME }}
           token: ${{ secrets.ACTIONS_TOKEN }}
-          prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'b') || contains(github.ref_name, 'a') }}
+          prerelease: ${{ contains(inputs.new_tags, 'dev') }}
           files: |
-            hashes.sha256
-            Subsearch-${{ needs.variables.outputs.new_tags }}-win64.msi
+            artifacts/build_${{ env.ID }}/${{ env.HASHES_NAME }}
+            artifacts/build_${{ env.ID }}/${{ env.MSI_NAME }}
 
   publish_pypi:
-    if: ${{ !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
-    name: Publish to PyPi
-    needs: [bump_version, generate_changelog]
-    runs-on: ubuntu-latest
+    name: Publish to pypi
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [version_control, test_binaries]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ inputs.checkout_branch }}
+
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
+          python-version: ${{ inputs.python_version }}
+
       - name: Install requirements
         run: |
           git fetch origin main
@@ -282,39 +368,8 @@ jobs:
         run: |
           python -m build
 
-      - name: Upload to PyPI via Twine
+      - name: Upload to pypi
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           twine upload --verbose -u '__token__' dist/*
-
-  update_latest_release:
-    if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'a') }}
-    name: Update latest_release.yml
-    needs: [generate_changelog]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-
-      - name: Write to latest_release
-        run: |
-          echo "${{ github.ref_name }}" > .github/configs/latest_release.yml
-
-      - name: Commit and push
-        run: |
-          git status
-          git add .github/configs/latest_release.yml
-          git commit -S -m "Chore update latest_release.yml"
-          git fetch origin main
-          git push origin HEAD:main
