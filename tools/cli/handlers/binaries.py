@@ -10,14 +10,13 @@ from tools.cli.globals import (
     APP_CONFIG_PATH,
     APP_LOG_PATH,
     ARTIFACTS_PATH,
-    EXE_BUILD,
-    EXE_INSTALLED,
+    EXE_BUILD_PATH,
+    EXE_INSTALLED_PATH,
     HASHES_PATH,
-    MSI_DIST,
-    PRE_RELEASE,
+    MSI_DIST_PATH,
     STYLE_SEPERATOR,
 )
-from tools.cli.handlers import github_actions, io_json, io_python, log
+from tools.cli.handlers import github_actions, io_python, log
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -66,7 +65,7 @@ def print_exe_duration(duration: int, test_lenght: int):
 
 def test_executable(test_lenght: int = 10) -> None:
     try:
-        process = subprocess.Popen([EXE_INSTALLED.as_posix()])
+        process = subprocess.Popen([EXE_INSTALLED_PATH.as_posix()])
         duration = wait_for_process(process, test_lenght)
         print_exe_duration(duration, test_lenght)
     except Exception as e:
@@ -85,7 +84,10 @@ def registry_key_exists() -> bool:
 
 
 def _software_test_result(name: str, result: str) -> None:
-    summary = f"EXE exists: {EXE_INSTALLED.is_file()}, LOG exists: {APP_LOG_PATH.is_file()}, CONFIG exists: {APP_CONFIG_PATH.is_file()}. REGISTY_KEY exists: {registry_key_exists()}"
+    summary = f"Exe exists: {EXE_INSTALLED_PATH.is_file()}, Log exists: {APP_LOG_PATH.is_file()}, Config exists: {APP_CONFIG_PATH.is_file()}, Registry key exists: {registry_key_exists()}"
+    github_actions.set_step_summary(f"After {name} test:")
+    github_actions.set_step_summary(summary.replace(",", "\n"))
+    github_actions.set_step_summary(f"Test {result}\n")
     print(f"")
     log.verbose_print(f"{summary}")
     log.verbose_print(f"{name.capitalize()} {result}")
@@ -94,9 +96,9 @@ def _software_test_result(name: str, result: str) -> None:
 
 def set_test_result(name: str) -> None:
     tests = {
-        "install": EXE_INSTALLED.is_file() and registry_key_exists(),
+        "install": EXE_INSTALLED_PATH.is_file() and registry_key_exists(),
         "executable": APP_LOG_PATH.is_file() and APP_CONFIG_PATH.is_file(),
-        "uninstall": not EXE_INSTALLED.is_file() and not registry_key_exists(),
+        "uninstall": not EXE_INSTALLED_PATH.is_file() and not registry_key_exists(),
     }
     if tests[name]:
         _software_test_result(name, "passed")
@@ -122,13 +124,22 @@ def create_hashes_file(**kwargs: dict[str, Any]) -> None:
     if not ARTIFACTS_PATH.is_dir():
         ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
     with open(hashes_path, "w") as f:
+        log.verbose_print(f"Created file: {hashes_path}")
         pass
-    log.verbose_print(f"Created file: {hashes_path}")
+
+
+def prepare_build_artifacts():
+    log.verbose_print(f"Collecting files")
+    files = [MSI_DIST_PATH, EXE_BUILD_PATH]
+    for file in files:
+        file.replace(ARTIFACTS_PATH / file.name)
+        log.verbose_print(f"{file.name} moved to ./artifacts")
 
 
 def write_to_hashes(**kwargs: dict[str, Any]) -> None:
+    log.verbose_print(f"Collectiong hashes")
     lines: dict[int, str] = {}
-    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_DIST, EXE_BUILD])
+    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_DIST_PATH, EXE_BUILD_PATH])
     hashes_path: Path = kwargs.get("hashes_path", HASHES_PATH)
 
     if not hashes_path.is_file():
@@ -138,9 +149,13 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
         sha256 = calculate_sha256(file_path)
         file_name = f"{file_path.name}"
         lines[enum] = f"{sha256} *{file_name}\n"
-        github_actions.set_output(name=f"{file_name}_hash", value=f"{sha256}")
+        log.verbose_print(f"Setting new Github Action output")
+        log.verbose_print(f"{file_path.suffix[1:]}_hash={sha256}")
+        github_actions.set_step_output(name=f"{file_path.suffix[1:]}_hash", value=f"{sha256}")
+        github_actions.set_step_summary(f"{file_name}: {sha256}")
 
     with open(hashes_path, "a") as file:
+        log.verbose_print(f"Writing to {hashes_path.name}")
         file.writelines(lines.values())
 
-    [log.verbose_print(f"Wrote {i} to {hashes_path}") for i in lines.values()]
+    [log.verbose_print(f"Wrote {i} to file") for i in lines.values()]

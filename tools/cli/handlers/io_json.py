@@ -22,14 +22,14 @@ def load_json_value(json_file_path: Path, key: str) -> Any:
         return value
 
 
-def update_json_key(json_file_path: Path, key: str, value: Any | None) -> None:
+def update_json_key(json_file_path: Path, key: str, value: Any) -> None:
     """
     Update a key in a JSON file with a new value.
 
     Args:
         json_file_path (Path): The path to the JSON file.
         key (str): The key to be updated.
-        value (Any | None): The new value for the specified key. If None, the key will be removed.
+        value (Any): The new value for the specified key. If None, the key will be removed.
     """
     with open(json_file_path, "r") as f:
         json_data = json.load(f)
