@@ -69,7 +69,7 @@ optional = [
     "isort==5.13.2",
     "twine==4.0.2",
     "build==1.0.3",
-    "cx_Freeze==6.15.11",
+    "cx_Freeze==6.15.12",
     "mypy==1.7.1",
     "pipreqs==0.4.13",
 ]
