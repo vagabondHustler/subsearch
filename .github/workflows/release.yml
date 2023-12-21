@@ -35,7 +35,7 @@ on:
         default: windows-latest
 
 env:
-  CLI: python -m tools.cli.commands
+  CLI: python -m tools.cli_github_actions.commands
   NEW_VERSION: ${{ inputs.new_tags }}
   ID: "${{ inputs.new_tags }}_${{ github.ref_name }}_${{ github.run_id }}"
   VERSION_CONTROL_PATH: ".github/configs/version_control.json"
@@ -183,8 +183,8 @@ jobs:
         run: |
           git fetch origin main
           python -m pip install --upgrade pip
-          pip install -e .[dev,optional]
-          python -m setup bdist_msi
+          pip install -e .[dev]
+          python -m tools.cx_freeze_build bdist_msi
 
       - name: Create hashes file and set outputs
         id: hashes
