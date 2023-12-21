@@ -1,7 +1,7 @@
 import argparse
 from argparse import ArgumentParser, Namespace
 import functools
-from tools.cli.globals import (
+from tools.cli_github_actions.globals import (
     EXE_BUILD_PATH,
     EXE_INSTALLED_PATH,
     FILE_PATHS,
@@ -12,7 +12,7 @@ from tools.cli.globals import (
     VERSION_PATTERN,
     VERSION_PYTON_PATH,
 )
-from tools.cli.handlers import (
+from tools.cli_github_actions.handlers import (
     binaries,
     changelog,
     github_actions,
@@ -31,6 +31,7 @@ def _parser_init(subparsers: ArgumentParser) -> ArgumentParser:
         help="Validate the workflow_dispatch inputs",
     )
     return subparser
+
 
 
 def _parser_binaries(subparsers: ArgumentParser) -> ArgumentParser:
@@ -299,4 +300,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
