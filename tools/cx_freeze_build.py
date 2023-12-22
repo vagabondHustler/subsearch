@@ -31,11 +31,11 @@ class MonekyPatchBdistMSI:
             355,
             180,
             0x30003,
-            "It's recommended to launch [ProductName] to ensure proper initialization.\n"
+            "Run [ProductName] once to ensure proper initialization.\n"
             "This can be done at a later point in time.",
         )
         group = dialog.radiogroup(
-            "LaunchRadioGroup",
+            "RunRadioGroup",
             15,
             108,
             330,
@@ -45,7 +45,7 @@ class MonekyPatchBdistMSI:
             "",
             None,
         )
-        group.add("Launch", 0, 18, 300, 17, "Launch [ProductName]")
+        group.add("Run", 0, 18, 300, 17, "Run [ProductName]")
         group.add("DoNothing", 0, 36, 300, 17, "Do nothing")
 
         dialog.backbutton("< Back", "Finish", active=False)
@@ -57,13 +57,13 @@ class MonekyPatchBdistMSI:
             320,
             20,
             0x30003,
-            "Click the Finish button to exit the installer.",
+            "Click the Finish button to exit the installer [RunSubsearch_Action].",
         )
 
         button = dialog.nextbutton("Finish", "Cancel", name="Finish")
-        button.event("[LaunchApp]", "INSTALL", 'LaunchSubsearch_Action="Launch"', 1)
-        button.event("[DoNothing]", "INSTALL", 'LaunchSubsearch_Action="DoNothing"', 2)
-        button.event("DoAction", "LaunchApp", 'LaunchSubsearch_Action="Launch"', 3)
+        button.event("[RunApp]", "INSTALL", 'RunSubsearch_Action="Run"', 1)
+        button.event("[DoNothing]", "INSTALL", 'RunSubsearch_Action="DoNothing"', 2)
+        button.event("DoAction", "RunApp", 'RunSubsearch_Action="Run"', 3)
         button.event("EndDialog", "Return")
 
 
@@ -77,8 +77,8 @@ def _get_data():
             (f"{APP_NAME}_regz_appliesto", -1, registry_path, "AppliesTo", None, script_component),
             (f"{APP_NAME}_key_command", -1, rf"{registry_path}\command", None, "", script_component),
         },
-        "Property": {("LaunchSubsearch_Action", "DoNothing")},
-        "CustomAction": {("LaunchApp", 210, "Subsearch.exe", "")},
+        "Property": {("RunSubsearch_Action", "DoNothing")},
+        "CustomAction": {("RunApp", 210, "Subsearch.exe", "")},
     }
     return data
 
