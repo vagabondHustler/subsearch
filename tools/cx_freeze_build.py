@@ -8,8 +8,10 @@ ICON = "src/subsearch/gui/resources/assets/subsearch.ico"
 
 
 class MonekyPatchBdistMSI:
+    """Contains static methods for monkey patching the creation of the msi binary package"""
+
     @staticmethod
-    def add_exit_dialog(cls):
+    def add_exit_dialog(cls) -> None:
         dialog = PyDialog(
             cls.db,
             "ExitDialog",
@@ -31,8 +33,7 @@ class MonekyPatchBdistMSI:
             355,
             180,
             0x30003,
-            "Run [ProductName] once to ensure proper initialization.\n"
-            "This can be done at a later point in time.",
+            "Run [ProductName] once to ensure proper initialization.\n" "This can be done at a later point in time.",
         )
         group = dialog.radiogroup(
             "RunRadioGroup",
@@ -47,7 +48,6 @@ class MonekyPatchBdistMSI:
         )
         group.add("Run", 0, 18, 300, 17, "Run [ProductName]")
         group.add("DoNothing", 0, 36, 300, 17, "Do nothing")
-
         dialog.backbutton("< Back", "Finish", active=False)
         dialog.cancelbutton("Cancel", "Back", active=False)
         dialog.text(
@@ -57,17 +57,16 @@ class MonekyPatchBdistMSI:
             320,
             20,
             0x30003,
-            "Click the Finish button to exit the installer [RunSubsearch_Action].",
+            "Click the Finish button to exit the installer.",
         )
-
         button = dialog.nextbutton("Finish", "Cancel", name="Finish")
-        button.event("[RunApp]", "INSTALL", 'RunSubsearch_Action="Run"', 1)
-        button.event("[DoNothing]", "INSTALL", 'RunSubsearch_Action="DoNothing"', 2)
+        button.event("[RunApp]", "ALL", 'RunSubsearch_Action="Run"', 1)
+        button.event("[DoNothing]", "ALL", 'RunSubsearch_Action="DoNothing"', 2)
         button.event("DoAction", "RunApp", 'RunSubsearch_Action="Run"', 3)
         button.event("EndDialog", "Return")
 
 
-def _get_data():
+def _get_data_table():
     script_component = f"_cx_executable0__Executable_script_src_{APP_NAME.lower()}___main__.py_"
     registry_path = rf"Software\Classes\*\shell\Subsearch"
     data = {
@@ -83,7 +82,7 @@ def _get_data():
     return data
 
 
-def get_executable():
+def get_executable() -> list[Executable]:
     executable = [
         Executable(
             "src/subsearch/__main__.py",
@@ -98,17 +97,17 @@ def get_executable():
 
 
 def get_options():
-    data = _get_data()
+    data = _get_data_table()
     bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": data}
     options = {"bdist_msi": bdist_msi}
     return options
 
 
-def monkey_patch_exit_dialog():
+def monkey_patch_exit_dialog() -> None:
     BdistMSI.add_exit_dialog = MonekyPatchBdistMSI.add_exit_dialog
 
 
-def main():
+def main() -> None:
     executable = get_executable()
     options = get_options()
     monkey_patch_exit_dialog()
