@@ -81,16 +81,16 @@ Requires Python 3.10+
 Requires Python 3.10+
 
 - Clone the Subsearch repository by running `git clone https://github.com/vagabondHustler/subsearch.git`.
-- Install Subsearch by running `pip install -e <local project path>[package-options]`. For example, run `pip install -e .` for only required dependencies or `pip install -e .[dev]` for develop dependencies, see `[project.optional-dependencies]`` in pyproject.toml.
+- Install Subsearch by running `pip install -e .` for only required dependencies or `pip install -e .[dev]` for develop dependencies, see `[project.optional-dependencies]`` in pyproject.toml.
 - Build the executable and MSI installer by running `python -m tools.cx_freeze_build bdist_msi`.
 
 #### Windows installer <a name = "msi"></a>
 
 Requires windows 10/11, probably works on 8.
 
-- Download the windows installer `Subsearch-x.x.x-win64.msi` from [here](https://github.com/vagabondHustler/subsearch/releases).
+- Download the windows installer "Subsearch-x.x.x-win64.msi" from [here](https://github.com/vagabondHustler/subsearch/releases).
 - Run the installer.
-- If you receive a PUA message, click `More info` → `Run anyway`.
+- If you receive a PUA message, click "More info" → "Run anyway".
 - Run Subsearch at least once for all the context menu options to appear
 
 <details>
