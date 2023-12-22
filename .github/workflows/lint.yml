@@ -38,9 +38,9 @@ jobs:
         run: |
           $gitStatus = git status --porcelain
           if ($gitStatus) {
-              $changes = $true
+              $changes="true"
           } else {
-              $changes = $false
+              $changes="false"
           }
 
       - name: Commit and push
