@@ -1,5 +1,5 @@
-from tools.cli.globals import ARTIFACTS_PATH
-from tools.cli.handlers import github_actions
+from tools.cli_github_actions.globals import ARTIFACTS_PATH
+from tools.cli_github_actions.handlers import github_actions
 
 
 def _unpack_inputs(input_string: str) -> tuple[str, str]:

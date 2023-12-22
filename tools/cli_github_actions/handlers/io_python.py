@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from tools.cli.globals import VERSION_PATTERN, VERSION_PYTON_PATH
+from tools.cli_github_actions.globals import VERSION_PATTERN, VERSION_PYTON_PATH
 
 
 def read_string(**kwargs) -> str:

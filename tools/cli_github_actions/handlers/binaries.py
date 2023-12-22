@@ -6,7 +6,7 @@ import winreg
 from pathlib import Path
 from typing import Any
 
-from tools.cli.globals import (
+from tools.cli_github_actions.globals import (
     APP_CONFIG_PATH,
     APP_LOG_PATH,
     ARTIFACTS_PATH,
@@ -16,7 +16,7 @@ from tools.cli.globals import (
     MSI_DIST_PATH,
     STYLE_SEPERATOR,
 )
-from tools.cli.handlers import github_actions, io_python, log
+from tools.cli_github_actions.handlers import github_actions, io_python, log
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
