@@ -16,6 +16,7 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-stale: 60
+        days-before-close: 6
         stale-issue-message: 'No activity in the last 60 days. Marking as stale; will close in 7 days without further activity.'
         stale-pr-message: 'No activity in the last 60 days. Marking as stale; will close in 7 days without further activity.'
         stale-issue-label: 'stale'
