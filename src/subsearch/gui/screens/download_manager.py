@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.data.constants import VIDEO_FILE
-from subsearch.data.data_classes import Subtitle
+from subsearch.globals.constants import VIDEO_FILE
+from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui.resources import config as cfg
-from subsearch.providers import core_provider
+from subsearch.providers import common_utils
 from subsearch.utils import io_file_system, io_log, string_parser
 
 
@@ -67,7 +67,7 @@ class DownloadManager(ttk.LabelFrame):
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
         if subtitle.provider == "subscene":
-            subtitle.download_url = core_provider.ProviderHelper.subscene_get_download_url(subtitle.download_url)
+            subtitle.download_url = common_utils.ProviderHelper.subscene_get_download_url(subtitle.download_url)
         self.update_text(selection, "⊙", subtitle, cfg.color.orange)
         self.sub_listbox.bind("<ButtonRelease-1>", lambda event: self.download(event, subtitle, selection))
 

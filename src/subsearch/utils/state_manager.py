@@ -3,6 +3,7 @@ from enum import Enum, auto
 from typing import Generator, Union
 
 from subsearch.utils import io_log
+from subsearch.globals import metaclasses
 
 
 @dataclass(order=True, frozen=True)
@@ -56,16 +57,7 @@ class YifySubtitlesState(Enum):
     FINNISHED = auto()
 
 
-class Singleton(type):
-    _instances: dict[type, type] = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class StateManager(metaclass=Singleton):
+class StateManager(metaclass=metaclasses.Singleton):
     current_state: Enum
     enum_class = type[Union[DataState, CoreState, SubsceneState, OpenSubtitlesState, YifySubtitlesState]]
     state_history: list[Enum] = []

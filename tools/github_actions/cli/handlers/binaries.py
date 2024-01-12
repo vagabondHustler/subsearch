@@ -6,7 +6,7 @@ import winreg
 from pathlib import Path
 from typing import Any
 
-from tools.cli_github_actions.globals import (
+from tools.github_actions.cli.globals import (
     APP_CONFIG_PATH,
     APP_LOG_PATH,
     ARTIFACTS_PATH,
@@ -16,7 +16,7 @@ from tools.cli_github_actions.globals import (
     MSI_DIST_PATH,
     STYLE_SEPERATOR,
 )
-from tools.cli_github_actions.handlers import github_actions, io_python, log
+from tools.github_actions.cli.handlers import github_actions, io_python, log
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -24,7 +24,7 @@ def test_msi_package(name: str, msi_package_path: Path) -> None:
     installer_action = {"install": "/i", "uninstall": "/x"}.get(name, None)
     log.verbose_print(f"MSI Package is {name}ing Subsearch {_app_version}")
     command = ["msiexec.exe", installer_action, msi_package_path, "/norestart", "/quiet"]
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True)  # type: ignore
     log.verbose_print(f"{name.capitalize()} completed")
 
 
@@ -109,11 +109,11 @@ def set_test_result(name: str) -> None:
 
 def calculate_sha256(file_path: str) -> str:
     sha256_hash = hashlib.sha256()
-    file_path = Path(file_path)
-    if not Path(file_path).is_file():
-        raise FileNotFoundError(f"No file found at {file_path}")
+    _file_path = Path(file_path)
+    if not Path(_file_path).is_file():
+        raise FileNotFoundError(f"No file found at {_file_path}")
 
-    with open(file_path, "rb") as file:
+    with open(_file_path, "rb") as file:
         for byte_block in iter(lambda: file.read(4096), b""):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
@@ -123,7 +123,7 @@ def create_hashes_file(**kwargs: dict[str, Any]) -> None:
     hashes_path = kwargs.get("hashes_path", HASHES_PATH)
     if not ARTIFACTS_PATH.is_dir():
         ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
-    with open(hashes_path, "w") as f:
+    with open(hashes_path, "w") as f:  # type: ignore
         log.verbose_print(f"Created file: {hashes_path}")
         pass
 
@@ -139,14 +139,14 @@ def prepare_build_artifacts():
 def write_to_hashes(**kwargs: dict[str, Any]) -> None:
     log.verbose_print(f"Collectiong hashes")
     lines: dict[int, str] = {}
-    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_DIST_PATH, EXE_BUILD_PATH])
-    hashes_path: Path = kwargs.get("hashes_path", HASHES_PATH)
+    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_DIST_PATH, EXE_BUILD_PATH])  # type: ignore
+    hashes_path: Path = kwargs.get("hashes_path", HASHES_PATH)  # type: ignore
 
     if not hashes_path.is_file():
-        create_hashes_file(hashes_path=hashes_path)
+        create_hashes_file(hashes_path=hashes_path)  # type: ignore
 
     for enum, file_path in enumerate(file_paths):
-        sha256 = calculate_sha256(file_path)
+        sha256 = calculate_sha256(file_path)  # type: ignore
         file_name = f"{file_path.name}"
         lines[enum] = f"{sha256} *{file_name}\n"
         log.verbose_print(f"Setting new Github Action output")
@@ -158,4 +158,4 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
         log.verbose_print(f"Writing to {hashes_path.name}")
         file.writelines(lines.values())
 
-    [log.verbose_print(f"Wrote {i} to file") for i in lines.values()]
+    [log.verbose_print(f"Wrote {i} to file") for i in lines.values()]  # type: ignore

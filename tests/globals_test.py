@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from subsearch.data.data_classes import ProviderUrls, VideoFile
+from subsearch.globals.dataclasses import ProviderUrls, VideoFile
 
 FAKE_VIDEO_FILE_MOVIE = VideoFile(
     filename="the.foo.bar.2021.1080p.web.h264-foobar",

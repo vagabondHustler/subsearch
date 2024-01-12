@@ -6,11 +6,12 @@ import pyperclip
 
 # script with a prompt for chat gpt to help writing commit msgs 'cus I'm very lazy
 
+
 def get_prompt(git_branch, git_diff, git_status, git_log):
     prompt = f"""
     You are a expert programmer working on `{git_branch}` git branch.
     You are about to commit your changes to the branch and need to write the perfect commit, your output may only contain one commit!.
-    Your response can only contain `type`, `desciption` and `bullt point`-summaries
+    Your response can only contain `type`, `description` and `bullet point`-summaries
 
     A commit messages must follow this format:
     `type` `description`
@@ -22,13 +23,13 @@ def get_prompt(git_branch, git_diff, git_status, git_log):
         Chore – changes that do not relate to a fix or feature and don't modify src or test files (for example updating dependencies)
         Refactor – refactored code that neither fixes a bug nor adds a feature.
         
-    Here are the rulse you MUST follow:
+    Here are the rules you MUST follow:
         - Capitalize `type`
-        - Select the type that holds the highest importances.
+        - Select the type that holds the highest importance.
         - Only include the type, description, and bullet points summarizing the changes made. 
         - Exclude any additional notes or sections.
         - Write a short description of the commit in present tense.
-        - The description plust type must be 50 characters or less.
+        - The description and type must be 50 characters or less.
         - The subject should never be capitalized.
         - The subject must end with a newline.
         - Do not repeat the commit summaries or the file summaries. Do not use the characters "[", "]", ":", or ";" in the summary or type.
@@ -42,7 +43,7 @@ def get_prompt(git_branch, git_diff, git_status, git_log):
         ```
         Refactor update class `FileData`
 
-        - Remamed `FileMetaData` to `FileData`
+        - Renamed `FileMetaData` to `FileData`
         - Removed unused imports in `core.py`
         ```
     Reminders about the git diff format::
@@ -76,7 +77,7 @@ def get_prompt(git_branch, git_diff, git_status, git_log):
 
     -----
 
-    This is how read the status of the other files that will be commited later
+    This is how read the status of the other files that will be committed later
     `??`: Untracked file
     `A`: New file added to the staging area
     `M`: File modified
@@ -110,7 +111,7 @@ def run_command(command: list[str]) -> str:
     return git_diff_output.decode("utf-8")
 
 
-def save_git_diff_to_clipboard():
+def save_git_diff_to_clipboard() -> None:
     commands = {
         "git_branch": "git rev-parse --abbrev-ref HEAD",
         "git_diff": "git diff --color=never --unified=3 --staged",
@@ -118,8 +119,8 @@ def save_git_diff_to_clipboard():
         "git_log": "git log -n 10 --oneline",
     }
     outputs = {}
-    for key, command in commands.items():
-        command = command.split(" ")
+    for key, _command in commands.items():
+        command = _command.split(" ")
         output = run_command(command)
         output = remove_commit_hashes_from_git_log(output)
         outputs[key] = output

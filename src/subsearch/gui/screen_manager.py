@@ -2,8 +2,8 @@ import tkinter as tk
 from typing import Any
 
 from subsearch.data import __version__
-from subsearch.data.data_classes import Subtitle
-from subsearch.gui import resource_loader, root, utils
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.gui import common_utils, resource_loader, root
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
     download_manager,
@@ -39,7 +39,9 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
 
     def activate_screen(self) -> None:
-        self.available_screens[self.active_screen].place(x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center")
+        self.available_screens[self.active_screen].place(
+            x=cfg.position.screen_x, y=cfg.position.screen_y, anchor="center"
+        )
         resource_loader.asset_menu_btn(self.buttons[self.active_screen], self.active_screen, "press")
         title_tab = self.active_screen.capitalize().replace("_", " ")
         self.parent.title(f"Subsearch - {title_tab}")
@@ -127,7 +129,7 @@ class DownloadManager(tk.Frame):
 def open_screen(tab_name: str, **kwargs) -> None:
     root.bind("<KeyPress>", close_mainloop)
     subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
-    utils.configure_root(root)
+    common_utils.configure_root(root)
     resource_loader.set_ttk_theme(root)
     screens = {
         "language_options": LanguageOptions(root),

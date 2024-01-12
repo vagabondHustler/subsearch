@@ -4,9 +4,10 @@ from pathlib import Path
 from threading import Thread
 
 from subsearch import core
+from subsearch.globals import decorators
 from subsearch.data import __guid__
-from subsearch.data.constants import FILE_PATHS
-from subsearch.utils import decorators, io_log, io_toml
+from subsearch.globals.constants import FILE_PATHS
+from subsearch.utils import io_log, io_toml
 
 PREF_COUNTER = time.perf_counter()
 PACKAGEPATH = Path(__file__).resolve().parent.as_posix()

@@ -3,8 +3,8 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.data.constants import VIDEO_FILE
-from subsearch.data.data_classes import (
+from subsearch.globals.constants import VIDEO_FILE
+from subsearch.globals.dataclasses import (
     AppConfig,
     LanguageData,
     ProviderUrls,

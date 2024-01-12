@@ -1,20 +1,20 @@
 from selectolax.parser import Node
 
-from subsearch.data.data_classes import Subtitle
-from subsearch.providers import core_provider
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.providers import common_utils
 
 
-class SubsceneScraper(core_provider.ProviderHelper):
+class SubsceneScraper(common_utils.ProviderHelper):
     def __init__(self, **kwargs) -> None:
-        core_provider.ProviderHelper.__init__(self, **kwargs)
+        common_utils.ProviderHelper.__init__(self, **kwargs)
 
     def find_title(self, url: str, current_language: str, definitive_match: list[str]) -> str | None:
-        tree = core_provider.get_html_parser(url)
+        tree = common_utils.get_html_parser(url)
         products = tree.css("div.title")
         for item in products:
             node = item.css_first("a")
             result_href = node.attributes["href"]
-            result_title = str(node.child.html).lower()
+            result_title = str(node.child.html).lower()  # type: ignore
             if result_title not in definitive_match:
                 continue
             current_language = current_language.lower()
@@ -33,27 +33,27 @@ class SubsceneScraper(core_provider.ProviderHelper):
 
     def find_subtitles(self, url: str, hi_sub: bool, regular_sub: bool, subscene_header) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = core_provider.get_html_parser(url, subscene_header)
+        tree = common_utils.get_html_parser(url, subscene_header)
         products = tree.css("tr")
         for item in products[1:]:
             if self.skip_item(item, hi_sub, regular_sub):
                 continue
             node = item.css_first("a")
-            if node.child.text_content == "upload":
+            if node.child.text_content == "upload":  # type: ignore
                 continue
             subtitle_href = node.attributes["href"]
-            filename = item.css_first("span:nth-child(2)").child.text_content.strip()
+            filename = item.css_first("span:nth-child(2)").child.text_content.strip()  # type: ignore
             subtitles[filename] = f"https://subscene.com{subtitle_href}"
         return subtitles
 
 
 class Subscene(SubsceneScraper):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         SubsceneScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self):
-        custom_subscene_header = core_provider.CustomSubsceneHeader(self.app_config)
+        custom_subscene_header = common_utils.CustomSubsceneHeader(self.app_config)
         header = custom_subscene_header.create_header()
         definitive_match = self._definitive_match()
         found_title_url = self.find_title(self.url_subscene, self.current_language, definitive_match)

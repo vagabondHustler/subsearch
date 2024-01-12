@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import toml
 
-from subsearch.data import constants
+from subsearch.globals import constants
 from subsearch.utils import io_app
 
 

@@ -1,10 +1,8 @@
-from pathlib import Path
-
 import cloudscraper
 from selectolax.parser import HTMLParser
 
-from subsearch.data.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.data.data_classes import (
+from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
+from subsearch.globals.dataclasses import (
     AppConfig,
     LanguageData,
     ProviderUrls,
@@ -54,8 +52,8 @@ class CustomSubsceneHeader:
         return {"Cookie": cookie_values}
 
 
-class SearchArguments:
-    def __init__(self, **kwargs):
+class BaseProviderDataContainer:
+    def __init__(self, **kwargs) -> None:
         release_data: ReleaseData = kwargs["release_data"]
         app_config: AppConfig = kwargs["app_config"]
         provider_urls: ProviderUrls = kwargs["provider_urls"]
@@ -90,9 +88,9 @@ class SearchArguments:
         self.filehash = VIDEO_FILE.file_hash
 
 
-class ProviderHelper(SearchArguments):
-    def __init__(self, **kwargs):
-        SearchArguments.__init__(self, **kwargs)
+class ProviderHelper(BaseProviderDataContainer):
+    def __init__(self, **kwargs) -> None:
+        BaseProviderDataContainer.__init__(self, **kwargs)
         self._accepted_subtitles: list[Subtitle] = []
         self._rejected_subtitles: list[Subtitle] = []
 
@@ -127,17 +125,17 @@ class ProviderHelper(SearchArguments):
         return download_url
 
 
-def is_threshold_met(cls: "SearchArguments", pct_result: int) -> bool:
+def is_threshold_met(cls: "BaseProviderDataContainer", pct_result: int) -> bool:
     if pct_result >= cls.percentage_threashold:
         return True
     return False
 
 
-def get_cloudscraper():
+def get_cloudscraper() -> cloudscraper.CloudScraper:
     return cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def get_html_parser(url: str, header_=None):
+def get_html_parser(url: str, header_=None) -> HTMLParser:
     scraper = get_cloudscraper()
     if header_ is None:
         response = scraper.get(url)

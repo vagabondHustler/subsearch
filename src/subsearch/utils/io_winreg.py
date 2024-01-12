@@ -2,7 +2,7 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.data.constants import (
+from subsearch.globals.constants import (
     APP_PATHS,
     COMPUTER_NAME,
     DEVICE_INFO,

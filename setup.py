@@ -1,7 +1,7 @@
 import setuptools
 
 
-def setup():
+def setup() -> None:
     setuptools.setup()
 
 

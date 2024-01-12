@@ -1,7 +1,7 @@
 import argparse
 from argparse import ArgumentParser, Namespace
 import functools
-from tools.cli_github_actions.globals import (
+from tools.github_actions.cli.globals import (
     EXE_BUILD_PATH,
     EXE_INSTALLED_PATH,
     FILE_PATHS,
@@ -12,7 +12,7 @@ from tools.cli_github_actions.globals import (
     VERSION_PATTERN,
     VERSION_PYTON_PATH,
 )
-from tools.cli_github_actions.handlers import (
+from tools.github_actions.cli.handlers import (
     binaries,
     changelog,
     github_actions,
@@ -23,7 +23,7 @@ from tools.cli_github_actions.handlers import (
 
 
 def _parser_init(subparsers: ArgumentParser) -> ArgumentParser:
-    subparser = subparsers.add_parser("init")
+    subparser = subparsers.add_parser("init")  # type: ignore
     subparser.add_argument(
         "-vi",
         "--validate-inputs",
@@ -33,9 +33,8 @@ def _parser_init(subparsers: ArgumentParser) -> ArgumentParser:
     return subparser
 
 
-
 def _parser_binaries(subparsers: ArgumentParser) -> ArgumentParser:
-    subparser = subparsers.add_parser("binaries")
+    subparser = subparsers.add_parser("binaries")  # type: ignore
     subparser.add_argument(
         "-r",
         "--read-hash",
@@ -85,7 +84,7 @@ def _parser_binaries(subparsers: ArgumentParser) -> ArgumentParser:
 
 
 def _parser_json(subparsers: ArgumentParser) -> ArgumentParser:
-    subparser = subparsers.add_parser("json")
+    subparser = subparsers.add_parser("json")  # type: ignore
     subparser.add_argument(
         "-f",
         "--file",
@@ -110,7 +109,7 @@ def _parser_json(subparsers: ArgumentParser) -> ArgumentParser:
 
 
 def _parser_python(subparsers: ArgumentParser) -> ArgumentParser:
-    subparser = subparsers.add_parser("python")
+    subparser = subparsers.add_parser("python")  # type: ignore
     subparser.add_argument(
         "-f",
         "--file",
@@ -142,7 +141,7 @@ def _parser_python(subparsers: ArgumentParser) -> ArgumentParser:
 
 
 def _parser_changelog(subparsers: ArgumentParser) -> ArgumentParser:
-    subparser = subparsers.add_parser("changelog")
+    subparser = subparsers.add_parser("changelog")  # type: ignore
     subparser.add_argument(
         "--tags",
         type=str,
@@ -219,7 +218,7 @@ def _binaries_parse(args: Namespace) -> None:
         selected_path = paths.get(args.file_path)
 
     if args.read_hash:
-        value = binaries.calculate_sha256(selected_path)
+        value = binaries.calculate_sha256(selected_path)  # type: ignore
         log.verbose_print(f"New output availible: hash={value}")
         github_actions.set_step_output("hash", f"{value}")
 
@@ -273,11 +272,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="CLI for Github Actions workflow")
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
 
-    init_subparser = _parser_init(subparsers)
-    binaries_subparser = _parser_binaries(subparsers)
-    jason_subparser = _parser_json(subparsers)
-    python_subparser = _parser_python(subparsers)
-    changelog_subparser = _parser_changelog(subparsers)
+    init_subparser = _parser_init(subparsers)  # type: ignore
+    binaries_subparser = _parser_binaries(subparsers)  # type: ignore
+    jason_subparser = _parser_json(subparsers)  # type: ignore
+    python_subparser = _parser_python(subparsers)  # type: ignore
+    changelog_subparser = _parser_changelog(subparsers)  # type: ignore
 
     args = parser.parse_args()
 

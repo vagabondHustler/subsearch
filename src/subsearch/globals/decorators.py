@@ -1,16 +1,15 @@
 import ctypes
-import functools
-import threading
 from typing import Any, Callable, Union
 
 from subsearch import core
+from subsearch.globals import exceptions
+from subsearch.globals.constants import FILE_PATHS
 from subsearch.data import __guid__
-from subsearch.data.constants import FILE_PATHS
-from subsearch.utils import exceptions, io_log, io_toml
+from subsearch.utils import io_log, io_toml
 
 
 def apply_mutex(func: Callable) -> Callable:
-    def inner(*args, **kwargs):
+    def inner(*args, **kwargs) -> Any:
         try:
             if not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance"):
                 return func()
@@ -35,8 +34,8 @@ def apply_mutex(func: Callable) -> Callable:
     return inner
 
 
-def check_option_disabled(func):
-    def wrapper(self, event, *args, **kwargs):
+def check_option_disabled(func) -> Callable:
+    def wrapper(self, event, *args, **kwargs) -> Any:
         btn = event.widget
         if btn.instate(["disabled"]):
             return None
@@ -45,45 +44,21 @@ def check_option_disabled(func):
     return wrapper
 
 
-def singleton(cls):
-    previous_instances: dict[Callable, Any] = {}
-
-    @functools.wraps(cls)
-    def wrapper(*args, **kwargs):
-        if cls in previous_instances and previous_instances.get(cls, None).get("args") == (args, kwargs):
-            return previous_instances[cls].get("instance")
-        else:
-            previous_instances[cls] = {"args": (args, kwargs), "instance": cls(*args, **kwargs)}
-            return previous_instances[cls].get("instance")
-
-    return wrapper
-
-
-def call_conditions(func):
-    def wrapper(*args, **kwargs):
-        function = f"{func.__name__}"
-        if not CallCondition.conditions(function=function, *args, **kwargs):
-            module_fn = f"{func.__module__}.{func.__name__}"
-            io_log.stdout(f"Call conditions for '{module_fn}', not met", level="debug", print_allowed=False)
+def call_func(func) -> Callable:
+    def wrapper(*args, **kwargs) -> Any:
+        func_name = f"{func.__name__}"
+        if not _CoreSubsearchFuncCondtitons.conditions_met(func_name=func_name, *args, **kwargs):
+            module_func = f"{func.__module__}.{func.__name__}"
+            io_log.stdout(f"Call conditions for '{module_func}', not met", level="debug", print_allowed=False)
             return None
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def thread_safe_log(func):
-    lock = threading.Lock()
-
-    def wrapper_log(cls, *args, **kwargs):
-        with lock:
-            return func(cls, *args, **kwargs)
-
-    return wrapper_log
-
-
-class CallCondition:
+class _CoreSubsearchFuncCondtitons:
     @staticmethod
-    def language_compatibility(provider: str):
+    def language_compatibility(provider: str) -> bool:
         language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.language")
         incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")
         if provider in incompatibility:
@@ -91,28 +66,28 @@ class CallCondition:
         return True
 
     @staticmethod
-    def all_conditions_met(conditions: list[bool]) -> bool:
-        if all(condition for condition in conditions):
-            return True
-        return False
+    def eval_all_true(conditions: list[bool]) -> bool:
+        if False in conditions:
+            return False
+        return True
 
     @staticmethod
-    def conditions(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
+    def conditions_met(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
         if not cls.file_exist:
             return False
-        function = kwargs["function"]
-        conditions = {
+        func_name = kwargs["func_name"]
+        conditions: dict[str, list[bool]] = {
             "opensubtitles": [
-                CallCondition.language_compatibility("opensubtitles"),
+                _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
                 cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
             ],
             "subscene": [
-                CallCondition.language_compatibility("subscene"),
+                _CoreSubsearchFuncCondtitons.language_compatibility("subscene"),
                 cls.app_config.providers["subscene_site"],
             ],
             "yifysubtitles": [
                 not cls.app_config.only_foreign_parts,
-                CallCondition.language_compatibility("yifysubtitles"),
+                _CoreSubsearchFuncCondtitons.language_compatibility("yifysubtitles"),
                 not cls.release_data.tvseries,
                 not cls.provider_urls.yifysubtitles == "",
                 cls.app_config.providers["yifysubtitles_site"],
@@ -135,14 +110,14 @@ class CallCondition:
             "summary_notification": [cls.app_config.summary_notification],
             "clean_up": [],
         }
-        return CallCondition.all_conditions_met(conditions[function])
+        return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
 
 
 enable_system_tray: bool
 
 
-def system_tray_conditions(func):
-    def wrapper(*args, **kwargs):
+def system_tray_conditions(func) -> Callable:
+    def wrapper(*args, **kwargs) -> Any:
         if enable_system_tray:
             return func(*args, **kwargs)
 
