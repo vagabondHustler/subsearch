@@ -45,20 +45,20 @@
     readme = "README.md"
     requires-python = ">=3.10"
 
-    [project.urls]
-        repository = "https://github.com/vagabondHustler/subsearch"
+[project.urls]
+    repository = "https://github.com/vagabondHustler/subsearch"
 
-    [project.scripts]
-        subsearch = "subsearch:main"
+[project.scripts]
+    subsearch = "subsearch:main"
 
 [tool.setuptools]
     platforms = ["win32"]
     zip-safe = false
 
-    [tool.setuptools.packages.find]
-        exclude = ["examples*", "subsearch.test*", "tools*"]
-        include = ["subsearch*"]
-        where = ["src"]
+[tool.setuptools.packages.find]
+    exclude = ["examples*", "subsearch.test*", "tools*"]
+    include = ["subsearch*"]
+    where = ["src"]
 
 [tool.setuptools.dynamic]
     version = {attr = "subsearch.data.__version__"}

@@ -17,7 +17,6 @@
 - [Install from pypi](#pypi)
 - [Clone from github](#clone)
 - [Install from MSI Package](#msi)
-- [Acknowledgements](#thanks)
 
 #### FAQ Table of Contents
 
@@ -81,7 +80,7 @@ Requires Python 3.10+
 Requires Python 3.10+
 
 - Clone the Subsearch repository by running `git clone https://github.com/vagabondHustler/subsearch.git`.
-- Install Subsearch by running `pip install -e .` for only required dependencies or `pip install -e .[dev]` for develop dependencies, see `[project.optional-dependencies]`` in pyproject.toml.
+- Install Subsearch by running `pip install -e .` or `pip install -e .[build,lint,tests,tools,type]` for optional dependencies.
 - Build the executable and MSI installer by running `python -m tools.cx_freeze_build bdist_msi`.
 
 #### Windows installer <a name = "msi"></a>
@@ -105,16 +104,3 @@ Requires windows 10/11, probably works on 8.
 </details>
 
 More about potentially unwanted applications (PUA) can be found [here](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e) on Microsoft's support page.
-
-## Acknowledgements<a name = "thanks"></a>
-
-I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
-
-- [othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-- [pimoroni/template-python](https://github.com/pimoroni/template-python/blob/master/.github/CONTRIBUTING.md)
-- [manojmj92/subtitle-downloader](https://github.com/manojmj92/subtitle-downloader)
-- [psf/black](https://github.com/psf/black) 
-- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
-- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
-- [siddheshsathe/handy-decorators](https://github.com/siddheshsathe/handy-decorators)
-- [TransparentLC](https://github.com/TransparentLC) // spritesheet_generator.js
