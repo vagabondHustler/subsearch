@@ -1,12 +1,14 @@
 <h1 align="center"><img src="https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/subsearch_v2.png"/></h1>
 
 <div align="center">
-  
-![Status](https://img.shields.io/badge/status-active-success?&style=flat-square&labelColor=1e1e2e&color=a6e3a1)
-![Version](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&color=eba0ac)
-![Downloads](https://img.shields.io/pypi/dm/subsearch?style=flat-square&labelColor=1e1e2e&color=f5c2e7)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e&color=fab387)
-![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e&color=b4befe)
+
+![Tests](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/ci.yml?style=flat-square&labelColor=1e1e2e&label=ci)
+![Tags](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e)
+![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e)
+
+![downloads-total)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&label=downloads%40total&labelColor=%231e1e2e)
+![downloads-latest)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/latest/total?style=flat-square&label=downloads%40latest&labelColor=%231e1e2e)
 
 </div>
 
@@ -17,6 +19,7 @@
 - [Install from pypi](#pypi)
 - [Clone from github](#clone)
 - [Install from MSI Package](#msi)
+- [Acknowledgements](#thanks)
 
 #### FAQ Table of Contents
 
@@ -104,3 +107,12 @@ Requires windows 10/11, probably works on 8.
 </details>
 
 More about potentially unwanted applications (PUA) can be found [here](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e) on Microsoft's support page.
+
+## Acknowledgements<a name = "thanks"></a>
+
+I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
+
+
+- [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
+- [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
+- [TransparentLC](https://github.com/TransparentLC) // spritesheet_generator.js
