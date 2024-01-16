@@ -2,11 +2,12 @@ import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
 from typing import Any
+from subsearch.globals import decorators
 
 from subsearch.data import __version__
-from subsearch.data.constants import DEVICE_INFO, FILE_PATHS
+from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import decorators, io_toml, io_winreg, update
+from subsearch.utils import io_toml, io_winreg, update
 
 
 class FileExtensions(ttk.Labelframe):

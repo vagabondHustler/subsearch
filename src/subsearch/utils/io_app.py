@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, no_type_check
 
 from subsearch.data import __version__
-from subsearch.data.data_classes import (
+from subsearch.globals.dataclasses import (
     AppPaths,
     FilePaths,
     SystemInfo,

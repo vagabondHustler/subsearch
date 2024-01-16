@@ -1,5 +1,6 @@
 from cx_Freeze import Executable, setup
 from cx_Freeze.command.bdist_msi import BdistMSI, PyDialog
+from typing import Any
 
 from subsearch.data import __guid__
 
@@ -66,7 +67,7 @@ class MonekyPatchBdistMSI:
         button.event("EndDialog", "Return")
 
 
-def _get_data_table():
+def _get_data_table() -> dict[str, Any]:
     script_component = f"_cx_executable0__Executable_script_src_{APP_NAME.lower()}___main__.py_"
     registry_path = rf"Software\Classes\*\shell\Subsearch"
     data = {
@@ -96,7 +97,7 @@ def get_executable() -> list[Executable]:
     return executable
 
 
-def get_options():
+def get_options() -> dict[str, Any]:
     data = _get_data_table()
     bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": data}
     options = {"bdist_msi": bdist_msi}

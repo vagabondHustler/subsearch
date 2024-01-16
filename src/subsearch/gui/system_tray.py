@@ -4,12 +4,12 @@ import pystray
 from PIL import Image
 
 from subsearch.data import __version__
-from subsearch.data.constants import APP_PATHS
-from subsearch.utils import decorators
+from subsearch.globals.constants import APP_PATHS
+from subsearch.globals import decorators
+from subsearch.globals import metaclasses
 
 
-@decorators.singleton
-class SystemTray:
+class SystemTray(metaclass=metaclasses.Singleton):
     @decorators.system_tray_conditions
     def __init__(self) -> None:
         title = f"Subsearch {__version__}"

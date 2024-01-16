@@ -5,9 +5,9 @@ from io import BufferedReader
 from pathlib import Path
 from typing import Any
 
-from subsearch.data.constants import VIDEO_FILE
-from subsearch.data.data_classes import Subtitle
-from subsearch.providers.core_provider import get_cloudscraper
+from subsearch.globals.constants import VIDEO_FILE
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.providers.common_utils import get_cloudscraper
 from subsearch.utils import io_log, string_parser
 
 

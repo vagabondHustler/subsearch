@@ -150,11 +150,14 @@ desktop.ini
 # snakeviz
 profiling.prof
 
-#Offline testing
+#JS
+tools/spritesheet_generator/.input
+tools/spritesheet_generator/package-lock.json
+tools/spritesheet_generator/node_modules
+
+#Misc
 tests/__subsearch__.log
 src/subsearch/subsearch.log
-scripts/git_branch.py
-scripts/get_msi_component_table.py
 src/*test*
 src/*language
 src/*.zip
@@ -164,10 +167,6 @@ src/*subs/
 old*
 src/subsearch/test*
 test_media/*
-scripts/spritesheet_generator/.input
-scripts/spritesheet_generator/package-lock.json
-scripts/spritesheet_generator/node_modules
-scripts/commit_generator/
 out/
 *.prof
 artifacts

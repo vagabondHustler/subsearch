@@ -1,16 +1,16 @@
 import dataclasses
 import logging
 from pathlib import Path
+import threading
 from typing import Any, Optional, TypeVar
 
-from subsearch.data.constants import FILE_PATHS
-from subsearch.utils import decorators
+from subsearch.globals import metaclasses
+from subsearch.globals.constants import FILE_PATHS
 
 DATACLASS = TypeVar("DATACLASS")
 
 
-@decorators.singleton
-class Logger:
+class Logger(metaclass=metaclasses.Singleton):
     def __init__(self, *args, **kwargs) -> None:
         debug_log_file = FILE_PATHS.log
         self.debug_logger = self.create_logger(debug_log_file)
@@ -30,8 +30,13 @@ class Logger:
             if isinstance(handler, logging.FileHandler):
                 handler.close()
 
-    @decorators.thread_safe_log
     def log(self, message: str, level: str, print_allowed: bool = True) -> None:
+        lock = threading.Lock()
+        with lock:
+            self._log(message, level)
+            self._print(message, print_allowed)
+
+    def _log(self, message: str, level: str) -> None:
         log_methods = {
             "debug": self.debug_logger.debug,
             "info": self.debug_logger.info,
@@ -41,6 +46,8 @@ class Logger:
         }
 
         log_methods[level](message)
+
+    def _print(self, message, print_allowed) -> None:
         if print_allowed:
             print(message)
 

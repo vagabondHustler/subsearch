@@ -1,16 +1,16 @@
 import re
 from typing import Any
 
-from subsearch.data.data_classes import Subtitle
-from subsearch.providers import core_provider
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.providers import common_utils
 from subsearch.utils import io_log
 
 
-class OpenSubtitlesScraper(core_provider.ProviderHelper):
+class OpenSubtitlesScraper(common_utils.ProviderHelper):
     def __init__(self, **kwargs) -> None:
-        core_provider.ProviderHelper.__init__(self, **kwargs)
+        common_utils.ProviderHelper.__init__(self, **kwargs)
 
-    def opensubtitles_down(self, tree: Any):
+    def is_opensubtitles_down(self, tree: Any) -> bool:
         is_offline = tree.css_matches("pre")
         if is_offline is False:
             return False
@@ -20,23 +20,23 @@ class OpenSubtitlesScraper(core_provider.ProviderHelper):
             return True
         return False
 
-    def get_subtitles(self, url: str):
+    def get_subtitles(self, url: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = core_provider.get_html_parser(url)
+        tree = common_utils.get_html_parser(url)
         items = tree.css("item")
-        if self.opensubtitles_down(tree):
+        if self.is_opensubtitles_down(tree):
             return subtitles
         for item in items:
             dl_url = item.css_first("enclosure").attributes["url"]
-            released_as = item.css_first("description").child.text_content.strip()
+            released_as = item.css_first("description").child.text_content.strip()  # type: ignore
             release_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
-            subtitles[release_name] = dl_url
+            subtitles[release_name] = dl_url  # type: ignore
         return subtitles
 
     def with_hash(self, url: str, release: str) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = core_provider.get_html_parser(url)
-        if self.opensubtitles_down(tree):
+        tree = common_utils.get_html_parser(url)
+        if self.is_opensubtitles_down(tree):
             return subtitles
         try:
             sub_id = tree.css_first("#bt-dwl-bt").attributes["data-product-id"]
@@ -47,7 +47,7 @@ class OpenSubtitlesScraper(core_provider.ProviderHelper):
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         OpenSubtitlesScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 

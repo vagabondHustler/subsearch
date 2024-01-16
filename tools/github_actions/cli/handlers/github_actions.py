@@ -3,7 +3,8 @@ import re
 import uuid
 from typing import Any, Literal
 
-from tools.cli_github_actions.globals import VERSION_PATTERN
+from tools.github_actions.cli.globals import VERSION_PATTERN
+
 
 def set_step_output(name: str, value: str) -> None:
     with open(os.environ["GITHUB_OUTPUT"], "a") as env:

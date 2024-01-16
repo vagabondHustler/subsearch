@@ -1,6 +1,6 @@
 from PIL import Image, ImageTk
 
-from subsearch.data.constants import APP_PATHS
+from subsearch.globals.constants import APP_PATHS
 from subsearch.gui import sprites
 
 

@@ -1,7 +1,7 @@
 import re
 from tkinter import Tk
 
-from subsearch.data.constants import APP_PATHS
+from subsearch.globals.constants import APP_PATHS
 
 
 def get_sprites() -> dict:

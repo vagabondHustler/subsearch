@@ -1,17 +1,17 @@
 from selectolax.parser import Node
 
-from subsearch.data.data_classes import Subtitle
-from subsearch.providers import core_provider
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.providers import common_utils
 
 
-class YifySubtitlesScraper(core_provider.ProviderHelper):
+class YifySubtitlesScraper(common_utils.ProviderHelper):
     def __init__(self, **kwargs) -> None:
-        core_provider.ProviderHelper.__init__(self, **kwargs)
+        common_utils.ProviderHelper.__init__(self, **kwargs)
 
     def skip_item(self, item: Node, hi_sub: bool, regular_sub: bool, current_language: str) -> bool:
-        subtitle_language = item.css_first("span.sub-lang").child.text_content
+        subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
         hearing_impaired = item.css_matches("span.hi-subtitle")
-        if subtitle_language.lower() != current_language.lower():
+        if subtitle_language.lower() != current_language.lower():  # type: ignore
             return True
         if (hi_sub and regular_sub) or (hi_sub is False and regular_sub is False):
             pass
@@ -23,14 +23,14 @@ class YifySubtitlesScraper(core_provider.ProviderHelper):
 
     def get_subtitle(self, url: str, current_language: str, hi_sub: bool, non_hi_sub: bool) -> dict[str, str]:
         subtitles: dict[str, str] = {}
-        tree = core_provider.get_html_parser(url)
+        tree = common_utils.get_html_parser(url)
         product = tree.select("tr")
-        for item in product.matches[1:]:
+        for item in product.matches[1:]:  # type: ignore
             if self.skip_item(item, hi_sub, non_hi_sub, current_language):
                 continue
             node = item.css_first("a")
             titles = node.text().strip().split("subtitle ")[-1].split("\n")
-            _href = node.attributes["href"].split("/")
+            _href = node.attributes["href"].split("/")  # type: ignore
             href = _href[-1]
             for title in titles:
                 subtitles[title] = f"https://yifysubtitles.org/subtitle/{href}.zip"
@@ -38,7 +38,7 @@ class YifySubtitlesScraper(core_provider.ProviderHelper):
 
 
 class YifiSubtitles(YifySubtitlesScraper):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         YifySubtitlesScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 

@@ -2,13 +2,13 @@ import ctypes
 import time
 from pathlib import Path
 
-from subsearch.data.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.data.data_classes import Subtitle
+from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.globals import decorators
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
 from subsearch.utils import (
-    decorators,
     io_file_system,
     io_log,
     io_toml,
@@ -111,7 +111,7 @@ class SubsearchCore(Initializer):
         self.rejected_subtitles.extend(search_provider.rejected_subtitles)
         provider_state.set_state(provider_state.state.FINNISHED)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def opensubtitles(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_OPENSUBTITLES,
@@ -120,7 +120,7 @@ class SubsearchCore(Initializer):
         self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="hash")
         self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="site")
 
-    @decorators.call_conditions
+    @decorators.call_func
     def subscene(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_SUBSCENE,
@@ -128,7 +128,7 @@ class SubsearchCore(Initializer):
         }
         self._search_subtitles(state_obj=state_obj, provider=subscene.Subscene)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def yifysubtitles(self) -> None:
         state_obj = {
             "call_state": self.core_state.state.CALL_YIFYSUBTITLES,
@@ -136,7 +136,7 @@ class SubsearchCore(Initializer):
         }
         self._search_subtitles(state_obj=state_obj, provider=yifysubtitles.YifiSubtitles)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def download_files(self) -> None:
         io_log.stdout_in_brackets(f"Downloading subtitles")
         self.core_state.set_state(self.core_state.state.DOWNLOAD_FILES)
@@ -146,7 +146,7 @@ class SubsearchCore(Initializer):
         self.subtitles_found = index_size
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def manual_download(self) -> None:
         io_log.stdout_in_brackets(f"Manual download")
         self.core_state.set_state(self.core_state.state.MANUAL_DOWNLOAD)
@@ -155,14 +155,14 @@ class SubsearchCore(Initializer):
         self.subtitles_found += len(self.manually_accepted_subtitles)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def extract_files(self) -> None:
         io_log.stdout_in_brackets("Extracting downloads")
         self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def subtitle_post_processing(self):
         target = self.app_config.subtitle_post_processing["target_path"]
         resolution = self.app_config.subtitle_post_processing["path_resolution"]
@@ -171,7 +171,7 @@ class SubsearchCore(Initializer):
         self.subtitle_move_best(target_path)
         self.subtitle_move_all(target_path)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def subtitle_rename(self) -> None:
         io_log.stdout_in_brackets("Renaming best match")
         self.core_state.set_state(self.core_state.state.SUBTITLE_RENAME)
@@ -179,7 +179,7 @@ class SubsearchCore(Initializer):
         self.autoload_src = new_name
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def subtitle_move_best(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move best match")
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
@@ -187,14 +187,14 @@ class SubsearchCore(Initializer):
         io_file_system.move_and_replace(self.autoload_src, target)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def subtitle_move_all(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move all")
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE_ALL)
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
         io_log.stdout("Done with task", level="info", end_new_line=True)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def summary_notification(self, elapsed) -> None:
         io_log.stdout_in_brackets("Summary toast")
         self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
@@ -208,7 +208,7 @@ class SubsearchCore(Initializer):
             msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
             self.system_tray.display_toast(*msg)
 
-    @decorators.call_conditions
+    @decorators.call_func
     def clean_up(self) -> None:
         io_log.stdout_in_brackets("Cleaning up")
         self.core_state.set_state(self.core_state.state.CLEAN_UP)

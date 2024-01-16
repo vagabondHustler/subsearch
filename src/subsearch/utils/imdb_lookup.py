@@ -1,6 +1,7 @@
 import re
+from typing import no_type_check
 
-from subsearch.providers import core_provider
+from subsearch.providers import common_utils
 
 
 class AdvTitleSearch:
@@ -34,7 +35,8 @@ class AdvTitleSearch:
 
 
 class FindImdbID(AdvTitleSearch):
-    def __init__(self, title: str, year: int):
+    @no_type_check
+    def __init__(self, title: str, year: int) -> None:
         self.title = title.lower()
         self.year = year
         self.id = None
@@ -42,7 +44,7 @@ class FindImdbID(AdvTitleSearch):
         adv_search = AdvTitleSearch(self.title, self.year)
 
         url = adv_search.get_url()
-        tree = core_provider.get_html_parser(url)
+        tree = common_utils.get_html_parser(url)
 
         product = tree.css("a.ipc-title-link-wrapper h3.ipc-title__text")
 
