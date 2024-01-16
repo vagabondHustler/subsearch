@@ -4,8 +4,7 @@ from tkinter import BooleanVar, ttk
 from typing import Any
 from subsearch.globals import decorators
 
-from subsearch.data import __version__
-from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS
+from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, io_winreg, update
 
@@ -173,7 +172,7 @@ class CheckForUpdates(ttk.Labelframe):
         frame_left = tk.Frame(self, bg=cfg.color.default_bg)
         frame_right = tk.Frame(self, bg=cfg.color.default_bg)
 
-        self.var_current = tk.StringVar(self, f"Current version:\t\t{__version__}")
+        self.var_current = tk.StringVar(self, f"Current version:\t\t{VERSION}")
         self.var_latest = tk.StringVar(self, "Latest version: \t\t")
         self.var_misc = tk.StringVar()
 

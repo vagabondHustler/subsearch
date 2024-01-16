@@ -6,7 +6,7 @@ from itertools import product
 from pathlib import Path
 from typing import Any, no_type_check
 
-from subsearch.data import __version__
+from subsearch.data import __version__, __guid__
 from subsearch.globals.dataclasses import (
     AppPaths,
     FilePaths,
@@ -158,3 +158,6 @@ def get_computer_name() -> str:
 
 def get_app_version() -> str:
     return str(__version__)
+
+def get_guid() -> str:
+    return str(__guid__)

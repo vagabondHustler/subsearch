@@ -1,6 +1,5 @@
 import tkinter as tk
 
-from subsearch.data import __version__
 from subsearch.globals.constants import APP_PATHS, FILE_PATHS
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, io_winreg

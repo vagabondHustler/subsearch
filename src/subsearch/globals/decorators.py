@@ -3,8 +3,7 @@ from typing import Any, Callable, Union
 
 from subsearch import core
 from subsearch.globals import exceptions
-from subsearch.globals.constants import FILE_PATHS
-from subsearch.data import __guid__
+from subsearch.globals.constants import FILE_PATHS, GUID
 from subsearch.utils import io_log, io_toml
 
 
@@ -20,11 +19,11 @@ def apply_mutex(func: Callable) -> Callable:
         except TypeError:
             pass
         kernel32 = ctypes.WinDLL("kernel32")
-        mutex = kernel32.CreateMutexW(None, False, __guid__)
+        mutex = kernel32.CreateMutexW(None, False, GUID)
         last_error = kernel32.GetLastError()
 
         if last_error == 183:
-            raise exceptions.MultipleInstancesError(__guid__)
+            raise exceptions.MultipleInstancesError(GUID)
         try:
             kernel32.WaitForSingleObject(mutex, -1)
             return func(*args, **kwargs)

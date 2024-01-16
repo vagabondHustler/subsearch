@@ -1,7 +1,6 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.data import __version__
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import common_utils, resource_loader, root
 from subsearch.gui.resources import config as cfg

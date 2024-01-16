@@ -3,7 +3,7 @@ import re
 import cloudscraper
 from packaging.version import Version
 
-from subsearch.data import __guid__, __version__
+from subsearch.globals.constants import VERSION
 
 
 def find_semantic_version(version: str) -> str:
@@ -31,7 +31,7 @@ def is_new_version_avail() -> tuple[bool, bool]:
     new_repo_avail, repo_is_prerelease = False, False
     released_version = get_latest_version()
 
-    if Version(__version__) < Version(released_version):
+    if Version(VERSION) < Version(released_version):
         if Version(released_version).is_prerelease:
             repo_is_prerelease = True
         new_repo_avail = True
