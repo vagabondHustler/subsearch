@@ -29,12 +29,16 @@
     description = "Subsearch"
     dynamic = ["version"]
     keywords = [
-        "automatically",
+        "subtitles",
+        "sub",
+        "srt",
+        "tool",
+        "tools",
         "download",
         "movies",
-        "opensubtitles",
-        "scrape",
         "shows",
+        "scrape",
+        "opensubtitles",
         "subscene",
         "subsearch",
         "subtitles",
