@@ -144,7 +144,7 @@ class SubsearchCore(Initializer):
         for enum, subtitle in enumerate(self.accepted_subtitles, 1):
             io_file_system.download_subtitle(subtitle, enum, index_size)
         self.subtitles_found = index_size
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def manual_download(self) -> None:
@@ -153,14 +153,14 @@ class SubsearchCore(Initializer):
         screen_manager.open_screen("download_manager", subtitles=self.rejected_subtitles)
         self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
         self.subtitles_found += len(self.manually_accepted_subtitles)
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def extract_files(self) -> None:
         io_log.stdout_in_brackets("Extracting downloads")
         self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def subtitle_post_processing(self):
@@ -177,7 +177,7 @@ class SubsearchCore(Initializer):
         self.core_state.set_state(self.core_state.state.SUBTITLE_RENAME)
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def subtitle_move_best(self, target: Path) -> None:
@@ -185,14 +185,14 @@ class SubsearchCore(Initializer):
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
 
         io_file_system.move_and_replace(self.autoload_src, target)
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def subtitle_move_all(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move all")
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE_ALL)
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     @decorators.call_func
     def summary_notification(self, elapsed) -> None:
@@ -203,9 +203,11 @@ class SubsearchCore(Initializer):
         download_summary = f"Matches found {self.subtitles_found}/{tot_num_of_subtitles}"
         if self.subtitles_found > 0:
             msg = "Search Succeeded", f"{download_summary}\n{elapsed_summary}"
+            io_log.stdout(download_summary, hex_color="#a6e3a1")
             self.system_tray.display_toast(*msg)
         elif self.subtitles_found == 0:
             msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
+            io_log.stdout(download_summary, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
 
     @decorators.call_func
@@ -217,12 +219,12 @@ class SubsearchCore(Initializer):
         io_file_system.del_directory(VIDEO_FILE.tmp_dir)
         if io_file_system.directory_is_empty(VIDEO_FILE.file_directory):
             io_file_system.del_directory(VIDEO_FILE.subs_dir)
-        io_log.stdout("Done with task", level="info", end_new_line=True)
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     def core_on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
         self.summary_notification(elapsed)
-        io_log.stdout(f"Finished in {elapsed} seconds")
+        io_log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         self.system_tray.stop()
         if not self.app_config.show_terminal:
             return None

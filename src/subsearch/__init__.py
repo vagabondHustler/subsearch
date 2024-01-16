@@ -40,6 +40,7 @@ class Subsearch:
         else:
             for provider in providers:
                 provider()
+        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
 
     def provider_opensubtitles(self) -> None:
         self.subsearch_core.opensubtitles()
@@ -70,7 +71,7 @@ def main() -> None:
 
 
 def custom_excepthook(exctype, value, traceback):
-    io_log.Logger().debug_logger.error(value, exc_info=(exctype, value, traceback))
+    io_log.Logger()._debug_logger.error(value, exc_info=(exctype, value, traceback))
     sys.__excepthook__(exctype, value, traceback)
 
 
