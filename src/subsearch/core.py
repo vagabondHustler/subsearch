@@ -2,7 +2,7 @@ import ctypes
 import time
 from pathlib import Path
 
-from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE, VERSION
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.globals import decorators
 from subsearch.gui import screen_manager, system_tray
@@ -19,6 +19,8 @@ from subsearch.utils import (
 
 class Initializer:
     def __init__(self, pref_counter: float) -> None:
+        io_log.stdout(f"Subsearch version {VERSION}", level="info", hex_color="#cdd6f4", style="bold")
+        io_log.stdout(f"Getting ready...", level="info", end_new_line=True)
         self.file_exist = True if VIDEO_FILE else False
         self.setup_file_system()
         state_manager.CoreStateManager()
@@ -144,7 +146,7 @@ class SubsearchCore(Initializer):
         for enum, subtitle in enumerate(self.accepted_subtitles, 1):
             io_file_system.download_subtitle(subtitle, enum, index_size)
         self.subtitles_found = index_size
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def manual_download(self) -> None:
@@ -153,14 +155,14 @@ class SubsearchCore(Initializer):
         screen_manager.open_screen("download_manager", subtitles=self.rejected_subtitles)
         self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
         self.subtitles_found += len(self.manually_accepted_subtitles)
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def extract_files(self) -> None:
         io_log.stdout_in_brackets("Extracting downloads")
         self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def subtitle_post_processing(self):
@@ -177,7 +179,7 @@ class SubsearchCore(Initializer):
         self.core_state.set_state(self.core_state.state.SUBTITLE_RENAME)
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def subtitle_move_best(self, target: Path) -> None:
@@ -185,14 +187,14 @@ class SubsearchCore(Initializer):
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
 
         io_file_system.move_and_replace(self.autoload_src, target)
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def subtitle_move_all(self, target: Path) -> None:
         io_log.stdout_in_brackets("Move all")
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE_ALL)
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     @decorators.call_func
     def summary_notification(self, elapsed) -> None:
@@ -219,7 +221,7 @@ class SubsearchCore(Initializer):
         io_file_system.del_directory(VIDEO_FILE.tmp_dir)
         if io_file_system.directory_is_empty(VIDEO_FILE.file_directory):
             io_file_system.del_directory(VIDEO_FILE.subs_dir)
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     def core_on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start

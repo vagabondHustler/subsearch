@@ -40,7 +40,7 @@ class Subsearch:
         else:
             for provider in providers:
                 provider()
-        io_log.stdout(**io_log.LogMessage.DONE_WITH_TASKS)
+        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     def provider_opensubtitles(self) -> None:
         self.subsearch_core.opensubtitles()

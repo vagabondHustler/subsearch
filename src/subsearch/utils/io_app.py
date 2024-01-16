@@ -155,3 +155,6 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
 
 def get_computer_name() -> str:
     return socket.gethostname()
+
+def get_app_version() -> str:
+    return str(__version__)

@@ -20,15 +20,6 @@ class ANSIEscapeSequences:
     UNDERLINE = "\033[4m"
 
 
-class LogMessage:
-    DONE_WITH_TASKS = dict(
-        message="Done with task",
-        level="info",
-        hex_color="#89b4fa",
-        end_new_line=True,
-    )
-
-
 class Logger(metaclass=metaclasses.Singleton):
     def __init__(self, *args, **kwargs) -> None:
         self.logger_name = kwargs.get("logger_name", "subsearch")
