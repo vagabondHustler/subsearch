@@ -16,6 +16,7 @@ if not environs_exists():
 
     dotenv.load_dotenv(".env")
 
+raise Exception("testing thins")
 NEW_VERSION = os.environ["NEW_VERSION"]
 ID = os.environ["ID"]
 VERSON_CONTROL_NAME = os.environ["VERSION_CONTROL_PATH"]
