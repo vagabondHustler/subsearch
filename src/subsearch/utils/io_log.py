@@ -5,7 +5,7 @@ import threading
 from typing import Optional, TypeVar
 
 from subsearch.globals import metaclasses
-from subsearch.globals.constants import FILE_PATHS
+from subsearch.globals.constants import FILE_PATHS, APP_PATHS
 
 DATACLASS = TypeVar("DATACLASS")
 
@@ -23,13 +23,15 @@ class ANSIEscapeSequences:
 class Logger(metaclass=metaclasses.Singleton):
     def __init__(self, *args, **kwargs) -> None:
         self.logger_name = kwargs.get("logger_name", "subsearch")
+        if not APP_PATHS.appdata_subsearch.exists():
+            APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
         self.log_file_path = kwargs.get("debug_log_file", FILE_PATHS.log)
         self.datefmt = kwargs.get("datefmt", "%d-%b-%y %H:%M:%S")
         self.txtfmt = kwargs.get("txtfmt" "%(asctime)s - %(levelname)s - %(message)s")
         self._debug_logger = self.create_logger()
         self._lock = threading.Lock()
         self._ansi = ANSIEscapeSequences
-
+        
     def create_logger(self) -> logging.Logger:
         logger = logging.getLogger(self.logger_name)
         logger.setLevel(logging.DEBUG)

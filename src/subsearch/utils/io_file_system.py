@@ -99,7 +99,7 @@ def del_directory_content(directory: Path):
 
 
 def create_directory(path: Path):
-    path.mkdir(exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def get_file_hash(file_path: Path) -> str:

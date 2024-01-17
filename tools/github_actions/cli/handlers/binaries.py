@@ -69,7 +69,7 @@ def expected_files_exists():
     expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
     for i in expected_files:
         if not i.parent.exists():
-            raise FileNotFoundError(f"Directory '{i}' does not exist.")
+            raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
         if not i.is_file():
             raise FileNotFoundError(f"File '{i}' does not exist.")
 
