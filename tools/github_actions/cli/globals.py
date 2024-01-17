@@ -1,6 +1,19 @@
 import os
 import sys
 from pathlib import Path
+import dotenv
+
+
+def environs_exists():
+    try:
+        os.environ["NEW_VERSION"]
+    except KeyError:
+        return False
+    return True
+
+
+if not environs_exists():
+    dotenv.load_dotenv(".env")
 
 NEW_VERSION = os.environ["NEW_VERSION"]
 ID = os.environ["ID"]
