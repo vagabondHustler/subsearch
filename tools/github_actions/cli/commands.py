@@ -2,15 +2,15 @@ import argparse
 from argparse import ArgumentParser, Namespace
 import functools
 from tools.github_actions.cli.globals import (
-    EXE_BUILD_PATH,
+    EXE_FREEZE_PATH,
     EXE_INSTALLED_PATH,
     FILE_PATHS,
     MSI_ARTIFACT_PATH,
-    MSI_DIST_PATH,
+    MSI_FREEZE_PATH,
     TEST_NAMES,
     VERSION_CONTROL_PATH,
     VERSION_PATTERN,
-    VERSION_PYTON_PATH,
+    VERSION_PY_PATH,
 )
 from tools.github_actions.cli.handlers import (
     binaries,
@@ -77,7 +77,7 @@ def _parser_binaries(subparsers: ArgumentParser) -> ArgumentParser:
         "--prepare-build-artifacts",
         dest="prepare_build_artifacts",
         action="store_true",
-        help=f"Move {MSI_DIST_PATH}, {EXE_BUILD_PATH} to ./artifacts",
+        help=f"Move {MSI_FREEZE_PATH}, {EXE_FREEZE_PATH} to ./artifacts",
         required=False,
     )
     return subparser
@@ -114,7 +114,7 @@ def _parser_python(subparsers: ArgumentParser) -> ArgumentParser:
         "-f",
         "--file",
         dest="file",
-        default=VERSION_PYTON_PATH,
+        default=VERSION_PY_PATH,
         help="Path to the python file.",
     )
     subparser.add_argument(
@@ -210,8 +210,8 @@ def _binaries_parse(args: Namespace) -> None:
     if args.file_path:
         paths = {
             "exe_installed": EXE_INSTALLED_PATH,
-            "exe_build": EXE_BUILD_PATH,
-            "msi_dist": MSI_DIST_PATH,
+            "exe_build": EXE_FREEZE_PATH,
+            "msi_dist": MSI_FREEZE_PATH,
             "msi_artifact": MSI_ARTIFACT_PATH,
         }
 

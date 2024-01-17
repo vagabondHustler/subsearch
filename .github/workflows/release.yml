@@ -181,7 +181,7 @@ jobs:
       - name: Build binaries
         id: build
         run: |
-          git fetch origin main
+          git fetch origin ${{ inputs.checkout_branch }}
           python -m pip install --upgrade pip
           pip install -e .[build]
           python -m tools.build bdist_msi
@@ -357,7 +357,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          git fetch origin main
+          git fetch origin ${{ inputs.checkout_branch }}
           python -m pip install --upgrade --disable-pip-version-check pip
           python -m pip install --upgrade build twine
 

@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from tools.github_actions.cli.globals import VERSION_PATTERN, VERSION_PYTON_PATH
+from tools.github_actions.cli.globals import VERSION_PATTERN, VERSION_PY_PATH
 
 
 def read_string(**kwargs) -> str:
@@ -15,7 +15,7 @@ def read_string(**kwargs) -> str:
     Returns:
         str: The matched version string.
     """
-    file = kwargs.get("file", VERSION_PYTON_PATH)
+    file = kwargs.get("file", VERSION_PY_PATH)
     pattern = kwargs.get("pattern", VERSION_PATTERN)
     with open(file, "r") as f:
         file_content = f.read()
