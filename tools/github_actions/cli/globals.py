@@ -1,7 +1,6 @@
 import os
 import sys
 from pathlib import Path
-import dotenv
 
 
 def environs_exists():
@@ -13,6 +12,8 @@ def environs_exists():
 
 
 if not environs_exists():
+    import dotenv
+
     dotenv.load_dotenv(".env")
 
 NEW_VERSION = os.environ["NEW_VERSION"]
