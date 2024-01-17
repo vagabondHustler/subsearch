@@ -226,7 +226,7 @@ jobs:
         working-directory: ${{ steps.download.outputs.download-path }}
 
       - run: ${{ env.CLI }} binaries --run-test -t install -f msi_artifact        
-      - run: ${{ env.CLI }} binaries --run-test -t executable
+      - run:  ${{ env.CLI }} binaries --run-test -t executable
       - run: ${{ env.CLI }} binaries --run-test -t uninstall -f msi_artifact
 
   upload_binaries:

@@ -12,13 +12,13 @@ def environs_exists():
 
 
 if not environs_exists():
-    import dotenv
+    import dotenv  # type: ignore
 
     dotenv.load_dotenv(".env")
 
 NEW_VERSION = os.environ["NEW_VERSION"]
 ID = os.environ["ID"]
-VERSON_CONTROL_NAME = os.environ["VERSION_CONTROL_PATH"]
+VERSION_CONTROL_PATH = os.environ["VERSION_CONTROL_PATH"]
 VERSION_PY_PATH = os.environ["VERSION_PY_PATH"]
 MSI_NAME = os.environ["MSI_NAME"]
 EXE_NAME = os.environ["EXE_NAME"]
@@ -37,6 +37,5 @@ HASHES_PATH = Path.cwd() / "artifacts" / HASHES_NAME
 ARTIFACTS_PATH = Path.cwd() / "artifacts"
 APP_LOG_PATH = Path.home() / "AppData" / "Local" / "Subsearch" / "log.log"
 APP_CONFIG_PATH = Path.home() / "AppData" / "Local" / "Subsearch" / "config.toml"
-VERSION_CONTROL_PATH = Path.cwd() / ".github" / "configs" / "version_control.json"
 CHANGELOG_BUILDER_PATH = Path.cwd() / ".github" / "configs" / "changelog_builder.json"
 VERSION_PYTON_PATH = Path(Path.cwd()) / "src" / "subsearch" / "data" / "version.py"

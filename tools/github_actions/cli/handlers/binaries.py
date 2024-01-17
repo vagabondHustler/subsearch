@@ -63,6 +63,19 @@ def print_exe_duration(duration: int, test_lenght: int):
         log.verbose_print(f"Subsearch.exe did not run for the expected duration")
 
 
+def list_files_in_directory(directory: Path):
+    try:
+        files = list(directory.glob("*"))
+        for file in files:
+            log.verbose_print(file)
+    except FileNotFoundError:
+        log.verbose_print(f"The directory {directory} does not exist.")
+    except PermissionError:
+        log.verbose_print(f"Permission error accessing {directory}.")
+    except Exception as e:
+        log.verbose_print(f"An error occurred: {e}")
+
+
 def test_executable(test_lenght: int = 10) -> None:
     try:
         process = subprocess.Popen([EXE_INSTALLED_PATH.as_posix()])
@@ -103,6 +116,8 @@ def set_test_result(name: str) -> None:
     if tests[name]:
         _software_test_result(name, "passed")
     else:
+        list_files_in_directory(EXE_INSTALLED_PATH.parent)
+        list_files_in_directory(APP_LOG_PATH.parent)
         _software_test_result(name, "failed")
         raise RuntimeError(f"{name} test failed")
 
