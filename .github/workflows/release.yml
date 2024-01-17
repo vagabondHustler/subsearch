@@ -149,16 +149,16 @@ jobs:
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
           git status
-          git fetch origin main
-          git push origin HEAD:main
+          git fetch origin ${{ inputs.checkout_branch }}
+          git push origin HEAD:${{ inputs.checkout_branch }}
           git push origin --tags
 
       - name: Push develop
         if: ${{ contains(inputs.new_tags, 'dev')  }}
         run: |
           git status
-          git fetch origin main
-          git push origin HEAD:main
+          git fetch origin ${{ inputs.checkout_branch }}
+          git push origin HEAD:${{ inputs.checkout_branch }}
 
   build_binaries:
     name: Build binaries
@@ -181,7 +181,7 @@ jobs:
       - name: Build binaries
         id: build
         run: |
-          git fetch origin main
+          git fetch origin ${{ inputs.checkout_branch }}
           python -m pip install --upgrade pip
           pip install -e .[build]
           python -m tools.build bdist_msi
@@ -225,12 +225,9 @@ jobs:
         run: ls -R
         working-directory: ${{ steps.download.outputs.download-path }}
 
-      - name: Run tests
-        id: tests
-        run: |
-          ${{ env.CLI }} binaries --run-test -t install -f msi_artifact
-          ${{ env.CLI }} binaries --run-test -t executable
-          ${{ env.CLI }} binaries --run-test -t uninstall -f msi_artifact
+      - run: ${{ env.CLI }} binaries --run-test -t install -f msi_artifact        
+      - run:  ${{ env.CLI }} binaries --run-test -t executable
+      - run: ${{ env.CLI }} binaries --run-test -t uninstall -f msi_artifact
 
   upload_binaries:
     name: Upload binaries to virustotal
@@ -360,7 +357,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          git fetch origin main
+          git fetch origin ${{ inputs.checkout_branch }}
           python -m pip install --upgrade --disable-pip-version-check pip
           python -m pip install --upgrade build twine
 

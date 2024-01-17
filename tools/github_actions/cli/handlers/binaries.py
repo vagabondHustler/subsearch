@@ -1,4 +1,5 @@
 import hashlib
+import importlib
 import socket
 import subprocess
 import time
@@ -7,16 +8,17 @@ from pathlib import Path
 from typing import Any
 
 from tools.github_actions.cli.globals import (
-    APP_CONFIG_PATH,
-    APP_LOG_PATH,
+    CONFIG_TOML_PATH,
+    LOG_LOG_PATH,
     ARTIFACTS_PATH,
-    EXE_BUILD_PATH,
+    EXE_FREEZE_PATH,
     EXE_INSTALLED_PATH,
     HASHES_PATH,
-    MSI_DIST_PATH,
+    MSI_FREEZE_PATH,
     STYLE_SEPERATOR,
 )
 from tools.github_actions.cli.handlers import github_actions, io_python, log
+from tools.github_actions.cli import install_module
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -28,50 +30,63 @@ def test_msi_package(name: str, msi_package_path: Path) -> None:
     log.verbose_print(f"{name.capitalize()} completed")
 
 
-def is_process_running(process_name) -> bool:
+def list_files_in_directory(directory: Path):
     try:
-        result = subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {process_name}"], capture_output=True, text=True)
-        return process_name.lower() in result.stdout.lower()
-    except subprocess.CalledProcessError:
-        return False
+        files = list(directory.glob("*"))
+        for file in files:
+            log.verbose_print(file)
+    except FileNotFoundError:
+        log.verbose_print(f"The directory {directory} does not exist.")
+    except PermissionError:
+        log.verbose_print(f"Permission error accessing {directory}.")
+    except Exception as e:
+        log.verbose_print(f"An error occurred: {e}")
 
 
-def wait_for_process(process: subprocess.Popen[bytes], test_lenght: int) -> int:
-    log.verbose_print(f"Subsearch.exe has been initiated for testing")
-    duration = 0
-    while process.poll() is None and duration <= test_lenght:
+def is_process_running(psutil, process_name) -> bool:
+    for process in psutil.process_iter(["pid", "name"]):
+        if process.info["name"].lower() == process_name.lower():
+            return True
+    return False
+
+
+def wait_for_process(psutil, process_name: str, test_length: int) -> int:
+    for duration in range(test_length + 1):
+        if not is_process_running(psutil, process_name):
+            return duration
         time.sleep(1)
-        if is_process_running("Subsearch.exe"):
-            log.verbose_print(f"Subsearch.exe is running ({duration}/{test_lenght} seconds)")
-            duration += 1
-        else:
-            log.verbose_print(f"Subsearch.exe unexpectedly terminated")
-            break
     return duration
 
 
-def end_process(process: subprocess.Popen[bytes]) -> None:
-    if process.poll() is None:
-        log.verbose_print(f"Terminating Subsearch.exe")
-        process.kill()
+def end_process(psutil, process_name: str) -> None:
+    for process in psutil.process_iter(["pid", "name"]):
+        if process.info["name"].lower() == process_name.lower():
+            log.verbose_print(f"Terminating {process_name}")
+            process.terminate()
 
 
-def print_exe_duration(duration: int, test_lenght: int):
-    if duration >= test_lenght:
-        log.verbose_print(f"Subsearch.exe ran for 10 seconds without crashing")
-    else:
-        log.verbose_print(f"Subsearch.exe did not run for the expected duration")
+def expected_files_exists():
+    expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
+    for i in expected_files:
+        if not i.parent.exists():
+            raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
+        if not i.is_file():
+            raise FileNotFoundError(f"File '{i}' does not exist.")
 
 
-def test_executable(test_lenght: int = 10) -> None:
-    try:
-        process = subprocess.Popen([EXE_INSTALLED_PATH.as_posix()])
-        duration = wait_for_process(process, test_lenght)
-        print_exe_duration(duration, test_lenght)
-    except Exception as e:
-        log.verbose_print(f"An unexpected error occurred during testing: {e}")
-    finally:
-        end_process(process)
+def test_executable(test_length: int = 10) -> None:
+    psutil = install_module._psutil()
+    process_name = EXE_INSTALLED_PATH.name
+    log.verbose_print(f"{process_name} has been initiated for testing")
+    subprocess.Popen([EXE_INSTALLED_PATH.as_posix()])
+    log.verbose_print(f"Waiting {test_length} seconds for process...")
+    duration = wait_for_process(psutil, process_name, test_length)
+    expected_files_exists()
+    log.verbose_print(f"{process_name} created expected files")
+    log.verbose_print(f"{process_name} ran for the expected {test_length} seconds")
+    if duration < test_length:
+        raise RuntimeError(f"{process_name} did not run for the expected duration")
+    end_process(psutil, process_name)
 
 
 def registry_key_exists() -> bool:
@@ -84,7 +99,7 @@ def registry_key_exists() -> bool:
 
 
 def _software_test_result(name: str, result: str) -> None:
-    summary = f"Exe exists: {EXE_INSTALLED_PATH.is_file()}, Log exists: {APP_LOG_PATH.is_file()}, Config exists: {APP_CONFIG_PATH.is_file()}, Registry key exists: {registry_key_exists()}"
+    summary = f"Exe exists: {EXE_INSTALLED_PATH.is_file()}, Log exists: {LOG_LOG_PATH.is_file()}, Config exists: {CONFIG_TOML_PATH.is_file()}, Registry key exists: {registry_key_exists()}"
     github_actions.set_step_summary(f"After {name} test:")
     github_actions.set_step_summary(summary.replace(",", "\n"))
     github_actions.set_step_summary(f"Test {result}\n")
@@ -97,12 +112,14 @@ def _software_test_result(name: str, result: str) -> None:
 def set_test_result(name: str) -> None:
     tests = {
         "install": EXE_INSTALLED_PATH.is_file() and registry_key_exists(),
-        "executable": APP_LOG_PATH.is_file() and APP_CONFIG_PATH.is_file(),
+        "executable": LOG_LOG_PATH.is_file() and CONFIG_TOML_PATH.is_file(),
         "uninstall": not EXE_INSTALLED_PATH.is_file() and not registry_key_exists(),
     }
     if tests[name]:
         _software_test_result(name, "passed")
     else:
+        list_files_in_directory(EXE_INSTALLED_PATH.parent)
+        list_files_in_directory(LOG_LOG_PATH.parent)
         _software_test_result(name, "failed")
         raise RuntimeError(f"{name} test failed")
 
@@ -130,7 +147,7 @@ def create_hashes_file(**kwargs: dict[str, Any]) -> None:
 
 def prepare_build_artifacts():
     log.verbose_print(f"Collecting files")
-    files = [MSI_DIST_PATH, EXE_BUILD_PATH]
+    files = [MSI_FREEZE_PATH, EXE_FREEZE_PATH]
     for file in files:
         file.replace(ARTIFACTS_PATH / file.name)
         log.verbose_print(f"{file.name} moved to ./artifacts")
@@ -139,7 +156,7 @@ def prepare_build_artifacts():
 def write_to_hashes(**kwargs: dict[str, Any]) -> None:
     log.verbose_print(f"Collectiong hashes")
     lines: dict[int, str] = {}
-    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_DIST_PATH, EXE_BUILD_PATH])  # type: ignore
+    file_paths: list[Path] = kwargs.get("hashes_path", [MSI_FREEZE_PATH, EXE_FREEZE_PATH])  # type: ignore
     hashes_path: Path = kwargs.get("hashes_path", HASHES_PATH)  # type: ignore
 
     if not hashes_path.is_file():
