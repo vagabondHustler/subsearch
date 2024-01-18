@@ -12,7 +12,7 @@ on:
         description: "Python version to use when building binaries."
         type: string
         required: false
-        default: "3.11.6"
+        default: "3.12.1"
       checkout_branch:
         description: "Branch to checkout."
         type: string
