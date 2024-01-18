@@ -183,7 +183,7 @@ jobs:
         run: |
           git fetch origin ${{ inputs.checkout_branch }}
           python -m pip install --upgrade pip
-          pip install -e .[build]
+          pip install -e .[whl_cp312]
           python -m tools.build bdist_msi
 
       - name: Create hashes file and set outputs
