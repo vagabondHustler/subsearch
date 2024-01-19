@@ -13,11 +13,6 @@ on:
         type: string
         required: false
         default: "3.12.1"
-      checkout_branch:
-        description: "Branch to checkout."
-        type: string
-        required: false
-        default: main
       artifact_retention_days:
         description: "Number of days to retain build artifacts in GitHub Actions."
         type: number
@@ -59,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -75,7 +70,7 @@ jobs:
           --validate-inputs 
           "new_tags=${{ inputs.new_tags }};
           python_version=${{ inputs.python_version }};
-          checkout_branch=${{ inputs.checkout_branch }}"
+          checkout_branch=${{ github.ref_name }}"
 
       - name: Current tags 
         id: current_tags
@@ -106,7 +101,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -149,16 +144,16 @@ jobs:
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
           git status
-          git fetch origin ${{ inputs.checkout_branch }}
-          git push origin HEAD:${{ inputs.checkout_branch }}
+          git fetch origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
           git push origin --tags
 
       - name: Push develop
         if: ${{ contains(inputs.new_tags, 'dev')  }}
         run: |
           git status
-          git fetch origin ${{ inputs.checkout_branch }}
-          git push origin HEAD:${{ inputs.checkout_branch }}
+          git fetch origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
 
   build_binaries:
     name: Build binaries
@@ -172,7 +167,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -181,7 +176,7 @@ jobs:
       - name: Build binaries
         id: build
         run: |
-          git fetch origin ${{ inputs.checkout_branch }}
+          git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
           pip install -e .[whl_cp312]
           python -m tools.build bdist_msi
@@ -209,7 +204,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -238,7 +233,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/download-artifact@v4
         id: download
@@ -269,7 +264,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - name: Build
         id: build
@@ -318,7 +313,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/download-artifact@v4
         id: download
@@ -349,7 +344,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.checkout_branch }}
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -357,7 +352,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          git fetch origin ${{ inputs.checkout_branch }}
+          git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade --disable-pip-version-check pip
           python -m pip install --upgrade build twine
 
