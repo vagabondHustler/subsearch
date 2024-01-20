@@ -365,3 +365,39 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           twine upload --verbose -u '__token__' dist/*
+
+  pr_merge:
+    name: Create pr and merge
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [publish_github]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+        git_config_global: true
+
+    - uses: actions/download-artifact@v4
+      id: download
+      with:
+        path: artifacts
+
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: ${{ steps.download.outputs.download-path }}
+
+    - name: Create PR and Merge
+      run: |
+        git fetch --all
+        $changelogContent = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
+        gh pr create --base main --head dev --title "Release ${{ inputs.new_tags }}" --body "$changelogContent" --base main
+        gh pr merge --squash --auto
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
