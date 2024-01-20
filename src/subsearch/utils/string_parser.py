@@ -14,7 +14,7 @@ from subsearch.utils import imdb_lookup
 
 
 def find_year(string: str) -> int:
-    re_year = re.findall("^.*\.([1-2][0-9]{3})\.", string)
+    re_year = re.findall(r"^.*\.([1-2][0-9]{3})\.", string)
     if re_year:
         year = re_year[0]
         return int(year)
@@ -22,7 +22,7 @@ def find_year(string: str) -> int:
 
 
 def find_title_by_year(string: str) -> str:
-    re_title = re.findall("^(.*)\.[1-2][0-9]{3}\.", string)
+    re_title = re.findall(r"^(.*)\.[1-2][0-9]{3}\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
@@ -31,7 +31,7 @@ def find_title_by_year(string: str) -> str:
 
 
 def find_title_by_show(string: str) -> str:
-    re_title = re.findall("^(.*)\.[s]\d*[e]\d*\.", string)
+    re_title = re.findall(r"^(.*)\.[s]\d*[e]\d*\.", string)
     if re_title:
         title: str = re_title[0]
         title = title.replace(".", " ")
@@ -40,7 +40,7 @@ def find_title_by_show(string: str) -> str:
 
 
 def find_season_episode(string: str) -> str:
-    re_se = re.findall("\.([s]\d*[e]\d*)\.", string)
+    re_se = re.findall(r"\.([s]\d*[e]\d*)\.", string)
     if re_se:
         se: str = re_se[0]
         return se
