@@ -47,7 +47,6 @@
 
 Subsearch is an automated subtitle downloader and extractor with support for many [languages](https://github.com/vagabondHustler/subsearch/discussions/558). It allows users to search and download subtitles for movies and TV shows with a single click from the context menu. The application features a graphical user interface for configuring options, such as selecting which websites to search on, choosing the subtitle language, applying filters for hearing-impaired, among [other options](https://github.com/vagabondHustler/subsearch/discussions/556).
 
-
 ## Preview <a name = "preview"></a>
 
 <div align="center">
@@ -80,11 +79,14 @@ Requires Python 3.10+
 
 #### Clone from github <a name = "clone"></a>
 
-Requires Python 3.10+
+Requires Python *3.10+
 
 - Clone the Subsearch repository by running `git clone https://github.com/vagabondHustler/subsearch.git`.
-- Install Subsearch by running `pip install -e .` or `pip install -e .[build,lint,tests,tools,type]` for optional dependencies.
+- Install Subsearch by running `pip install -e .` or *`pip install -e .[build,lint,tests,tools,type]` for optional dependencies.
 - Build the executable and MSI installer by running `python -m tools.cx_freeze_build bdist_msi`.
+
+> [!IMPORTANT]  
+> ###### For python 3.12+ use `whl_cp312` instead of `build`, more info [here](https://github.com/marcelotduarte/cx_Freeze/issues/2153).
 
 #### Windows installer <a name = "msi"></a>
 
@@ -111,7 +113,6 @@ More about potentially unwanted applications (PUA) can be found [here](https://s
 ## Acknowledgements<a name = "thanks"></a>
 
 I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
-
 
 - [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
 - [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
