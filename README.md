@@ -86,7 +86,7 @@ Requires Python *3.10+
 - Build the executable and MSI installer by running `python -m tools.cx_freeze_build bdist_msi`.
 
 > [!IMPORTANT]  
-> ###### For python 3.12+ use `whl_cp312` instead of `build`, more info [here](https://github.com/marcelotduarte/cx_Freeze/issues/2153).
+> ###### Python 3.12+ use pip install -e .[`whl_cp312`...] instead of `build`, more info [here](https://github.com/marcelotduarte/cx_Freeze/issues/2153).
 
 #### Windows installer <a name = "msi"></a>
 
