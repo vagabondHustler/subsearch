@@ -218,7 +218,7 @@ class SubsearchCore(Initializer):
         io_file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
         io_file_system.del_directory_content(APP_PATHS.tmp_dir)
         io_file_system.del_directory(VIDEO_FILE.tmp_dir)
-        if io_file_system.directory_is_empty(VIDEO_FILE.file_directory):
+        if io_file_system.directory_is_empty(VIDEO_FILE.subs_dir):
             io_file_system.del_directory(VIDEO_FILE.subs_dir)
         io_log.stdout.task_completed()
 

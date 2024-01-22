@@ -23,7 +23,7 @@
         "pillow==10.2.0",
         "pystray==0.19.5",
         "requests==2.31.0",
-        "selectolax==0.3.17",
+        "selectolax==0.3.18",
         "toml==0.10.2",
     ]
     description = "Subsearch"
@@ -68,9 +68,27 @@
     version = {attr = "subsearch.data.__version__"}
 
 [project.optional-dependencies]
-    build = ["build==1.0.3", "cx_Freeze==6.15.12", "twine==4.0.2", "psutil==5.9.7"]
+    build = [
+        "build==1.0.3",
+        "cx_Freeze==6.15.12",
+        "twine==4.0.2",
+        "psutil==5.9.8",
+    ]
+    whl_cp312 = [
+        "build==1.0.3",
+        "cx_Freeze @ https://marcelotduarte.github.io/packages/cx-freeze/cx_Freeze-6.16.0.dev13-cp312-cp312-win_amd64.whl",
+        "cx_Logging @ https://marcelotduarte.github.io/packages/cx-logging/cx_Logging-3.1.0-cp312-cp312-win_amd64.whl",
+        "lief @ https://marcelotduarte.github.io/packages/lief/lief-0.14.0-cp312-cp312-win_amd64.whl",
+        "twine==4.0.2",
+        "psutil==5.9.8",
+    ]
     lint = ["black==23.12.1", "isort==5.13.2"]
-    tests = ["pytest-cov==4.1.0", "pytest==7.4.4", "tox==4.12.1", "python-dotenv==1.0.0"]
+    tests = [
+        "pytest-cov==4.1.0",
+        "pytest==7.4.4",
+        "tox==4.12.1",
+        "python-dotenv==1.0.0",
+    ]
     tools = ["pyperclip==1.8.2"]
     type = ["mypy==1.8.0"]
 
