@@ -96,6 +96,7 @@ def get_app_config(toml_file_path: Path) -> AppConfig:
         subtitle_post_processing=data["subtitle_post_processing"],
         file_extensions=data["file_extensions"],
         providers=data["providers"],
+        **data["download_manager"],
         **data["misc"],
     )
     return user_data

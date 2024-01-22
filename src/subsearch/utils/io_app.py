@@ -67,8 +67,12 @@ def get_default_app_config() -> dict[str, Any]:
         },
         "file_extensions": file_extensions,
         "providers": providers,
+        "download_manager":{
+            "open_on_no_matches": True,
+            "always_open": False,
+            "no_automatic_downloads": False,
+        },
         "misc": {
-            "manual_download_on_fail": True,
             "multithreading": True,
             "single_instance": True,
         },

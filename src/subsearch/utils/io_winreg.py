@@ -25,8 +25,8 @@ class LaunchOptions:
 
     def _get_mode_interpreter(self) -> str:
         python_executable = {
-            True: f'{self.python_path}\python.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
-            False: f'{self.python_path}\pythonw.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
+            True: f'{self.python_path}\\python.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
+            False: f'{self.python_path}\\pythonw.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
         }
         return python_executable[self.show_terminal]
 

@@ -77,7 +77,7 @@ class BaseProviderDataContainer:
         self.hi_sub = app_config.hearing_impaired
         self.non_hi_sub = app_config.non_hearing_impaired
         self.percentage_threashold = app_config.accept_threshold
-        self.manual_download_on_fail = app_config.manual_download_on_fail
+        self.manual_download_on_fail = app_config.open_on_no_matches
         # provider url data
         self.url_subscene = provider_urls.subscene
         self.url_opensubtitles = provider_urls.opensubtitles
@@ -100,7 +100,7 @@ class ProviderHelper(BaseProviderDataContainer):
 
         for subtitle_name, subtitle_url in subtitle_data.items():
             pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            io_log.stdout_match(
+            io_log.stdout.subtitle_match(
                 provider=provider_name,
                 subtitle_name=subtitle_name,
                 result=pct_result,
