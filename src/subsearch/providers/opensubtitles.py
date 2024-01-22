@@ -61,7 +61,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
         if not subtitle_data:
             return None
 
-        io_log.stdout_match(
+        io_log.stdout.subtitle_match(
             provider=self.provider_name,
             subtitle_name=self.release,
             result=100,
