@@ -108,7 +108,7 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
         elif src.is_dir():
             type_ = "directory"
         else:
-            return None
+            type_ = "item"
 
         __src = src.relative_to(src.parent.parent) if src else None
         __dst = dst.relative_to(dst.parent.parent) if dst else None

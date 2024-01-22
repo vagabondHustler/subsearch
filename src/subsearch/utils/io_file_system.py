@@ -69,6 +69,7 @@ def move_all(src: Path, dst: Path, extension: str = ".srt"):
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:
     source_file.replace(destination_directory / source_file.name)
+    io_log.stdout.file_system_action(action_type="move", src=source_file, dst=destination_directory)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:

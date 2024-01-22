@@ -184,7 +184,6 @@ class SubsearchCore(Initializer):
     def subtitle_move_best(self, target: Path) -> None:
         io_log.stdout.brackets("Move best match")
         self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
-
         io_file_system.move_and_replace(self.autoload_src, target)
         io_log.stdout.task_completed()
 
