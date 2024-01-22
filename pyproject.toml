@@ -72,7 +72,7 @@
         "build==1.0.3",
         "cx_Freeze==6.15.12",
         "twine==4.0.2",
-        "psutil==5.9.7",
+        "psutil==5.9.8",
     ]
     whl_cp312 = [
         "build==1.0.3",
@@ -80,7 +80,7 @@
         "cx_Logging @ https://marcelotduarte.github.io/packages/cx-logging/cx_Logging-3.1.0-cp312-cp312-win_amd64.whl",
         "lief @ https://marcelotduarte.github.io/packages/lief/lief-0.14.0-cp312-cp312-win_amd64.whl",
         "twine==4.0.2",
-        "psutil==5.9.7",
+        "psutil==5.9.8",
     ]
     lint = ["black==23.12.1", "isort==5.13.2"]
     tests = [
