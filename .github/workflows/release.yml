@@ -369,7 +369,7 @@ jobs:
   pr_merge:
     name: Create pr and merge
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [publish_github]
+    needs: [changelog]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
 
