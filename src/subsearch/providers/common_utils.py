@@ -100,7 +100,7 @@ class ProviderHelper(BaseProviderDataContainer):
 
         for subtitle_name, subtitle_url in subtitle_data.items():
             pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            io_log.stdout_match(
+            io_log.stdout.subtitle_match(
                 provider=provider_name,
                 subtitle_name=subtitle_name,
                 result=pct_result,
