@@ -76,7 +76,7 @@
     ]
     whl_cp312 = [
         "build==1.0.3",
-        "cx_Freeze @ https://marcelotduarte.github.io/packages/cx-freeze/cx_Freeze-6.16.0.dev13-cp312-cp312-win_amd64.whl",
+        "cx_Freeze @ https://marcelotduarte.github.io/packages/cx-freeze/cx_Freeze-6.16.0.dev22-cp312-cp312-win_amd64.whl",
         "cx_Logging @ https://marcelotduarte.github.io/packages/cx-logging/cx_Logging-3.1.0-cp312-cp312-win_amd64.whl",
         "lief @ https://marcelotduarte.github.io/packages/lief/lief-0.14.0-cp312-cp312-win_amd64.whl",
         "twine==4.0.2",
