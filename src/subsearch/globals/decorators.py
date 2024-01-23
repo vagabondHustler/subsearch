@@ -99,14 +99,14 @@ class _CoreSubsearchFuncCondtitons:
             ],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
             "subtitle_post_processing": [],
-            "subtitle_rename": [cls.app_config.subtitle_post_processing["rename"], cls.subtitles_found >= 1],
+            "subtitle_rename": [cfg.subtitle_post_processing["rename"], cls.downloaded_subtitles >= 1],
             "subtitle_move_best": [
-                cls.app_config.subtitle_post_processing["move_best"],
-                cls.subtitles_found >= 1,
-                not cls.app_config.subtitle_post_processing["move_all"],
+                cfg.subtitle_post_processing["move_best"],
+                cls.downloaded_subtitles >= 1,
+                not cfg.subtitle_post_processing["move_all"],
             ],
-            "subtitle_move_all": [cls.app_config.subtitle_post_processing["move_all"], cls.subtitles_found > 1],
-            "summary_notification": [cls.app_config.summary_notification],
+            "subtitle_move_all": [cfg.subtitle_post_processing["move_all"], cls.downloaded_subtitles > 1],
+            "summary_notification": [cfg.summary_notification],
             "clean_up": [],
         }
         return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
