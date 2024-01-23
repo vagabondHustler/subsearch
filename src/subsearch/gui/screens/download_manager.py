@@ -1,19 +1,20 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.globals.constants import VIDEO_FILE
+from subsearch.globals.constants import VIDEO_FILE, FILE_PATHS
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui.resources import config as cfg
 from subsearch.providers import common_utils
-from subsearch.utils import io_file_system, io_log, string_parser
+from subsearch.utils import io_file_system, io_log, io_toml, string_parser
 
 
 class DownloadManager(ttk.LabelFrame):
     downloaded_subtitle: list[Subtitle] = []
 
-    def __init__(self, parent, subtitles: list[Subtitle]) -> None:
+    def __init__(self, parent, **kwargs) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Available subtitles", padding=10)
+        subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
         if subtitles:
             subtitles.sort(key=lambda x: x.pct_result, reverse=True)
         frame_left = tk.Frame(self)
@@ -47,9 +48,15 @@ class DownloadManager(ttk.LabelFrame):
         self.scrollbar.config(command=self.sub_listbox.yview)
 
     def fill_listbox(self) -> None:
+        accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
+        no_automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.no_automatic_downloads")
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
             self.sub_listbox.insert(tk.END, f"{subtitle.pct_result}% {subtitle.release_name}\n")
+            if subtitle.pct_result == accept_threshold and not no_automatic_downloads:
+                self.downloaded_subtitle.append(subtitle)
+                self.download_number += 1
+                self.update_text(enum, "✓", subtitle, cfg.color.green)
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             self.listbox_index[enum] = subtitle
 
@@ -63,7 +70,6 @@ class DownloadManager(ttk.LabelFrame):
         selection = _selection[0]
         subtitle = self.listbox_index[selection]
         if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
-            print("i'm here")
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
         if subtitle.provider == "subscene":
@@ -78,6 +84,8 @@ class DownloadManager(ttk.LabelFrame):
                 subtitle.release_name = string_parser.fix_filename(subtitle.release_name)
             io_file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
             io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+            zip_archive = VIDEO_FILE.tmp_dir / f"{subtitle.provider}_{subtitle.release_name}_{self.download_number}.zip"
+            zip_archive.unlink()
             self.update_text(selection, "✓", subtitle, cfg.color.green)
             self.download_number += 1
             self.download_index_size += 1

@@ -23,7 +23,7 @@ class CoreState(Enum):
     CALL_SUBSCENE = auto()
     CALL_YIFYSUBTITLES = auto()
     DOWNLOAD_FILES = auto()
-    MANUAL_DOWNLOAD = auto()
+    DOWNLOAD_MANAGER = auto()
     SUBTITLE_RENAME = auto()
     SUBTITLE_MOVE = auto()
     SUBTITLE_MOVE_ALL = auto()

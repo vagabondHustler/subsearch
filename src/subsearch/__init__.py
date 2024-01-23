@@ -39,7 +39,6 @@ class Subsearch:
         else:
             for provider in providers:
                 provider()
-        io_log.stdout("Done with task", level="info", hex_color="#89b4fa", end_new_line=True)
 
     def provider_opensubtitles(self) -> None:
         self.subsearch_core.opensubtitles()
@@ -52,7 +51,7 @@ class Subsearch:
 
     def process_files(self) -> None:
         self.subsearch_core.download_files()
-        self.subsearch_core.manual_download()
+        self.subsearch_core.download_manager()
         self.subsearch_core.extract_files()
         self.subsearch_core.subtitle_post_processing()
         self.subsearch_core.clean_up()

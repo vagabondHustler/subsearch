@@ -64,7 +64,9 @@ class AppConfig:
     subtitle_post_processing: dict[str, Any]
     file_extensions: dict[str, bool]
     providers: dict[str, bool]
-    manual_download_on_fail: bool
+    open_on_no_matches: bool
+    always_open: bool
+    no_automatic_downloads: bool
     multithreading: bool
     single_instance: bool
 
