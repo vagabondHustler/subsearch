@@ -110,31 +110,32 @@ class SubsearchOptions(tk.Frame):
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.default_bg)
         subsearch_options.FileExtensions(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=40, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.SubsearchOption(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=80, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        subsearch_options.DownloadManagerOptions(self).pack(anchor="center", fill="x")
+        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.CheckForUpdates(self)
 
 
 class DownloadManager(tk.Frame):
-    def __init__(self, parent, subtitles: list[Subtitle]) -> None:
+    def __init__(self, parent, **kwargs) -> None:
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.default_bg)
-        download_manager.DownloadManager(self, subtitles).pack(anchor="center", expand=True, fill="x")
+        download_manager.DownloadManager(self, **kwargs).pack(anchor="center", expand=True, fill="x")
         enforce_width = tk.Frame(self, height=0, width=cfg.size.max_content_width, bg=cfg.color.default_bg)
         enforce_width.pack(anchor="center", expand=True)
 
 
 def open_screen(tab_name: str, **kwargs) -> None:
     root.bind("<KeyPress>", close_mainloop)
-    subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
     common_utils.configure_root(root)
     resource_loader.set_ttk_theme(root)
     screens = {
         "language_options": LanguageOptions(root),
         "search_options": SearchOptions(root),
         "subsearch_options": SubsearchOptions(root),
-        "download_manager": DownloadManager(root, subtitles),
+        "download_manager": DownloadManager(root, **kwargs),
     }
     manager = ScreenManager(root, screens, tab_name.lower())
     manager.place(y=cfg.size.height - 82)

@@ -33,14 +33,12 @@ def select_branch_type(date_time: int) -> dict[str, str]:
 
 
 def index_available_branches(branches: list[str]) -> list[tuple[int, str]]:
-    main_seen = False
     index_branches = []
-    for num, branch in enumerate(branches, 1):
-        if main_seen:
-            num -= 1
-        if branch == "main":
-            main_seen = True
+    for num, branch in enumerate(branches, 2):
+        if branch == "dev":
             num = 0
+        if branch == "main":
+            num = 1
         index_branches.append((num, branch))
     index_branches.sort()
     return index_branches

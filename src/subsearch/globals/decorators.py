@@ -74,29 +74,40 @@ class _CoreSubsearchFuncCondtitons:
     def conditions_met(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
         if not cls.file_exist:
             return False
+          
+        cfg = cls.app_config
+        acc_subs = cls.accepted_subtitles
+        rej_subs = cls.rejected_subtitles
+        
+        df_senario_1 = not cfg.always_open and not cfg.no_automatic_downloads
+        df_senario_2 = cfg.always_open and not cfg.no_automatic_downloads
+        
+        open_dm_senario_1 = len(acc_subs) == 0 and len(rej_subs) >= 1 and cfg.open_on_no_matches
+        open_dm_senario_2 = len(acc_subs) >= 1 and cfg.always_open and cfg.no_automatic_downloads
+        open_dm_senario_3 = len(rej_subs) >= 1 and cfg.always_open
+        
         func_name = kwargs["func_name"]
         conditions: dict[str, list[bool]] = {
             "opensubtitles": [
                 _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
-                cls.app_config.providers["opensubtitles_hash"] or cls.app_config.providers["opensubtitles_site"],
+                cfg.providers["opensubtitles_hash"] or cfg.providers["opensubtitles_site"],
             ],
             "subscene": [
                 _CoreSubsearchFuncCondtitons.language_compatibility("subscene"),
-                cls.app_config.providers["subscene_site"],
+                cfg.providers["subscene_site"],
             ],
             "yifysubtitles": [
-                not cls.app_config.only_foreign_parts,
+                not cfg.only_foreign_parts,
                 _CoreSubsearchFuncCondtitons.language_compatibility("yifysubtitles"),
                 not cls.release_data.tvseries,
                 not cls.provider_urls.yifysubtitles == "",
-                cls.app_config.providers["yifysubtitles_site"],
+                cfg.providers["yifysubtitles_site"],
             ],
-            "download_files": [len(cls.accepted_subtitles) >= 1],
-            "manual_download": [
-                len(cls.accepted_subtitles) == 0,
-                len(cls.rejected_subtitles) >= 1,
-                cls.app_config.manual_download_on_fail,
+            "download_files": [
+                len(cls.accepted_subtitles) >= 1,
+                (df_senario_1 or df_senario_2),
             ],
+            "download_manager": [(open_dm_senario_1 or open_dm_senario_2 or open_dm_senario_3)],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
             "subtitle_post_processing": [],
             "subtitle_rename": [cfg.subtitle_post_processing["rename"], cls.downloaded_subtitles >= 1],
