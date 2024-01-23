@@ -77,7 +77,7 @@ class BaseProviderDataContainer:
         self.hi_sub = app_config.hearing_impaired
         self.non_hi_sub = app_config.non_hearing_impaired
         self.percentage_threashold = app_config.accept_threshold
-        self.manual_download_on_fail = app_config.manual_download_on_fail
+        self.manual_download_on_fail = app_config.open_on_no_matches
         # provider url data
         self.url_subscene = provider_urls.subscene
         self.url_opensubtitles = provider_urls.opensubtitles

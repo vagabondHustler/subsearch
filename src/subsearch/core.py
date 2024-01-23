@@ -148,10 +148,11 @@ class SubsearchCore(Initializer):
         io_log.stdout.task_completed()
 
     @decorators.call_func
-    def manual_download(self) -> None:
-        io_log.stdout.brackets(f"Manual download")
-        self.core_state.set_state(self.core_state.state.MANUAL_DOWNLOAD)
-        screen_manager.open_screen("download_manager", subtitles=self.rejected_subtitles)
+    def download_manager(self) -> None:
+        io_log.stdout.brackets(f"Download Manager")
+        self.core_state.set_state(self.core_state.state.DOWNLOAD_MANAGER)
+        subtitles = self.rejected_subtitles + self.accepted_subtitles
+        screen_manager.open_screen("download_manager", subtitles=subtitles)
         self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
         self.subtitles_found += len(self.manually_accepted_subtitles)
         io_log.stdout.task_completed()

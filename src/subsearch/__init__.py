@@ -51,7 +51,7 @@ class Subsearch:
 
     def process_files(self) -> None:
         self.subsearch_core.download_files()
-        self.subsearch_core.manual_download()
+        self.subsearch_core.download_manager()
         self.subsearch_core.extract_files()
         self.subsearch_core.subtitle_post_processing()
         self.subsearch_core.clean_up()

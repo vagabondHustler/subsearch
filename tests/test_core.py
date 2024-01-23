@@ -63,17 +63,37 @@ def test_conditions_yifysubtitles(fake_cls: FakeSubsearchCore) -> None:
 
 def test_conditions_download_files(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
+    fake_cls.app_config.always_open = False
+    fake_cls.app_config.no_automatic_downloads = False
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
+    
+    fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
+    fake_cls.app_config.always_open = True
+    fake_cls.app_config.no_automatic_downloads = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
 
-def test_conditions_manual_download(fake_cls: FakeSubsearchCore) -> None:
+def test_conditions_download_manager(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.accepted_subtitles = []
     fake_cls.rejected_subtitles = ["subtitle1"]
-    fake_cls.app_config.manual_download_on_fail = True
+    fake_cls.app_config.open_on_no_matches = True
+    fake_cls.app_config.always_open = False
+    fake_cls.app_config.no_automatic_downloads = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
-    fake_cls.app_config.manual_download_on_fail = False
+    fake_cls.app_config.open_on_no_matches = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
+
+    fake_cls.app_config.open_on_no_matches = False
+    fake_cls.app_config.always_open = True
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
+
+    fake_cls.accepted_subtitles = ["subtitle1"]
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
+
+    fake_cls.app_config.no_automatic_downloads = True
+    fake_cls.rejected_subtitles = []
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
 
 def test_conditions_extract_files(fake_cls: FakeSubsearchCore) -> None:
