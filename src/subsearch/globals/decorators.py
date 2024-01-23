@@ -74,14 +74,18 @@ class _CoreSubsearchFuncCondtitons:
     def conditions_met(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
         if not cls.file_exist:
             return False
+          
         cfg = cls.app_config
         acc_subs = cls.accepted_subtitles
         rej_subs = cls.rejected_subtitles
+        
         df_senario_1 = not cfg.always_open and not cfg.no_automatic_downloads
         df_senario_2 = cfg.always_open and not cfg.no_automatic_downloads
+        
         open_dm_senario_1 = len(acc_subs) == 0 and len(rej_subs) >= 1 and cfg.open_on_no_matches
         open_dm_senario_2 = len(acc_subs) >= 1 and cfg.always_open and cfg.no_automatic_downloads
         open_dm_senario_3 = len(rej_subs) >= 1 and cfg.always_open
+        
         func_name = kwargs["func_name"]
         conditions: dict[str, list[bool]] = {
             "opensubtitles": [
@@ -106,13 +110,13 @@ class _CoreSubsearchFuncCondtitons:
             "download_manager": [(open_dm_senario_1 or open_dm_senario_2 or open_dm_senario_3)],
             "extract_files": [len(cls.accepted_subtitles) >= 1],
             "subtitle_post_processing": [],
-            "subtitle_rename": [cfg.subtitle_post_processing["rename"], cls.subtitles_found >= 1],
+            "subtitle_rename": [cfg.subtitle_post_processing["rename"], cls.downloaded_subtitles >= 1],
             "subtitle_move_best": [
                 cfg.subtitle_post_processing["move_best"],
-                cls.subtitles_found >= 1,
+                cls.downloaded_subtitles >= 1,
                 not cfg.subtitle_post_processing["move_all"],
             ],
-            "subtitle_move_all": [cfg.subtitle_post_processing["move_all"], cls.subtitles_found > 1],
+            "subtitle_move_all": [cfg.subtitle_post_processing["move_all"], cls.downloaded_subtitles > 1],
             "summary_notification": [cfg.summary_notification],
             "clean_up": [],
         }

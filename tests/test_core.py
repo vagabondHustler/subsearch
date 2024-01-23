@@ -16,7 +16,7 @@ class FakeSubsearchCore:
         self.provider_urls = globals_test.FAKE_PROVIDER_URLS
         self.accepted_subtitles = []
         self.rejected_subtitles = []
-        self.subtitles_found = 0
+        self.downloaded_subtitles = 0
         self.call_func = _CoreSubsearchFuncCondtitons.conditions_met
 
     @property
@@ -106,7 +106,7 @@ def test_conditions_extract_files(fake_cls: FakeSubsearchCore) -> None:
 
 
 def test_conditions_subtitle_rename(fake_cls: FakeSubsearchCore) -> None:
-    fake_cls.subtitles_found = 2
+    fake_cls.downloaded_subtitles = 2
     fake_cls.app_config.subtitle_post_processing["rename"] = True
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
@@ -115,7 +115,7 @@ def test_conditions_subtitle_rename(fake_cls: FakeSubsearchCore) -> None:
 
 
 def test_conditions_subtitle_move_best(fake_cls: FakeSubsearchCore) -> None:
-    fake_cls.subtitles_found = 2
+    fake_cls.downloaded_subtitles = 2
     fake_cls.app_config.subtitle_post_processing["move_best"] = True
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
@@ -128,7 +128,7 @@ def test_conditions_subtitle_move_best(fake_cls: FakeSubsearchCore) -> None:
 
 
 def test_conditions_subtitle_move_all(fake_cls: FakeSubsearchCore) -> None:
-    fake_cls.subtitles_found = 2
+    fake_cls.downloaded_subtitles = 2
     fake_cls.app_config.subtitle_post_processing["move_all"] = True
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 

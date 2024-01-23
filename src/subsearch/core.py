@@ -39,7 +39,7 @@ class Initializer:
             io_log.stdout.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
             io_file_system.create_directory(VIDEO_FILE.file_directory)
 
-        self.subtitles_found = 0
+        self.downloaded_subtitles = 0
         self.ran_download_tab = False
         self.accepted_subtitles: list[Subtitle] = []
         self.rejected_subtitles: list[Subtitle] = []
@@ -201,14 +201,14 @@ class SubsearchCore(Initializer):
         self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
         elapsed_summary = f"Finished in {elapsed} seconds"
         tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        download_summary = f"Matches found {self.subtitles_found}/{tot_num_of_subtitles}"
-        if self.subtitles_found > 0:
-            msg = "Search Succeeded", f"{download_summary}\n{elapsed_summary}"
-            io_log.stdout(download_summary, hex_color="#a6e3a1")
+        matches_downloaded = f"Downloaded: {self.downloaded_subtitles}/{tot_num_of_subtitles}"
+        if self.downloaded_subtitles > 0:
+            msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
+            io_log.stdout(matches_downloaded, hex_color="#a6e3a1")
             self.system_tray.display_toast(*msg)
-        elif self.subtitles_found == 0:
-            msg = "Search Failed", f"{download_summary}\n{elapsed_summary}"
-            io_log.stdout(download_summary, hex_color="#f38ba8")
+        elif self.downloaded_subtitles == 0:
+            msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
+            io_log.stdout(matches_downloaded, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
 
     @decorators.call_func
