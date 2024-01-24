@@ -178,7 +178,9 @@ jobs:
         run: |
           git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
-          pip install -e .[whl_cp312]
+          pip install -e .
+          pip install --force --no-cache --pre --extra-index-url https://marcelotduarte.github.io/packages/ cx_Freeze
+          pip install build psutil
           python -m tools.build bdist_msi
 
       - name: Create hashes file and set outputs
@@ -398,6 +400,6 @@ jobs:
         git fetch --all
         $changelogContent = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
         gh pr create --base main --head dev --title "Release ${{ inputs.new_tags }}" --body "$changelogContent" --base main
-        gh pr merge --squash --auto
+        gh pr merge --squash --auto --subject "Release ${{ inputs.new_tags }}t" --body "$changelogContent"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

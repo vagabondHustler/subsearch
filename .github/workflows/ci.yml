@@ -3,7 +3,8 @@ run-name: Continuous integration
 
 on:
   pull_request:
-    branches: ["dev"]
+    branches: 
+      - dev
 
 jobs:
   dependency_review:
