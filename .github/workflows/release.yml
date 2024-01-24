@@ -178,7 +178,9 @@ jobs:
         run: |
           git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
-          pip install -e .[whl_cp312]
+          pip install -e .
+          pip install --force --no-cache --pre --extra-index-url https://marcelotduarte.github.io/packages/ cx_Freeze
+          pip install build psutil
           python -m tools.build bdist_msi
 
       - name: Create hashes file and set outputs
