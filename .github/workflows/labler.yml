@@ -3,7 +3,8 @@ run-name: Labler
 
 on:
   pull_request:
-    types: [opened]
+    types: 
+      - opened
 
 jobs:
   pr_labeler:

@@ -116,44 +116,33 @@ jobs:
         run: git tag -a ${{ inputs.new_tags }} -m "Release ${{ inputs.new_tags }}"
 
       - name: Bump subsearch version 
-        run: |
-          ${{ env.CLI}} python --write-string ${{ inputs.new_tags }}
-          git add ${{ env.VERSION_PY_PATH }}
-          git commit -S -m "Bump version ${{ steps.version.outputs.version }} → ${{ inputs.new_tags }}"
+        run: ${{ env.CLI}} python --write-string ${{ inputs.new_tags }}
+
 
       - name: Bump current version
-        run: |
-          ${{ env.CLI }} json -w current_version ${{ inputs.new_tags }}
-          git add ${{ env.VERSION_CONTROL_PATH }} 
-          git commit -S -m "Bump current version ${{ needs.init.outputs.current_tags }} → ${{ inputs.new_tags }}" 
+        run: ${{ env.CLI }} json -w current_version ${{ inputs.new_tags }}
+
 
       - name: Bump previous version
-        run: |
-          ${{ env.CLI }} json -w previous_version ${{ needs.init.outputs.current_tags }}
-          git add ${{ env.VERSION_CONTROL_PATH }} 
-          git commit -S -m "Bump previous version ${{ needs.init.outputs.previous_tags }} → ${{ needs.init.outputs.current_tags }}"
+        run: ${{ env.CLI }} json -w previous_version ${{ needs.init.outputs.current_tags }}
+
 
       - name: Bump last stable release
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
-        run: |
-          ${{ env.CLI }} json -w last_stable_release ${{ inputs.new_tags }}
-          git add ${{ env.VERSION_CONTROL_PATH }} 
-          git commit -S -m "Bump last stable release ${{ needs.init.outputs.last_stable_release }} → ${{ inputs.new_tags }}"
+        run: ${{ env.CLI }} json -w last_stable_release ${{ inputs.new_tags }}
 
-      - name: Push stable 
+      - name: Push commits
+        run: |
+          git status
+          git fetch origin ${{ github.ref_name }}
+          git add ${{ env.VERSION_PY_PATH }} ${{ env.VERSION_CONTROL_PATH }} 
+          git commit -S -m "Bump version to ${{ inputs.new_tags }}"
+          git push origin HEAD:${{ github.ref_name }}
+        
+      - name: Push tags
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
-          git status
-          git fetch origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
           git push origin --tags
-
-      - name: Push develop
-        if: ${{ contains(inputs.new_tags, 'dev')  }}
-        run: |
-          git status
-          git fetch origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
 
   build_binaries:
     name: Build binaries
@@ -178,7 +167,9 @@ jobs:
         run: |
           git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
-          pip install -e .[whl_cp312]
+          pip install -e .
+          pip install --force --no-cache --pre --extra-index-url https://marcelotduarte.github.io/packages/ cx_Freeze
+          pip install build psutil
           python -m tools.build bdist_msi
 
       - name: Create hashes file and set outputs
@@ -398,6 +389,6 @@ jobs:
         git fetch --all
         $changelogContent = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
         gh pr create --base main --head dev --title "Release ${{ inputs.new_tags }}" --body "$changelogContent" --base main
-        gh pr merge --squash --auto
+        gh pr merge --squash --auto --subject "Release ${{ inputs.new_tags }}t" --body "$changelogContent"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
