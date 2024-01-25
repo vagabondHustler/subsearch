@@ -70,7 +70,7 @@
 [project.optional-dependencies]
     build = [
         "build==1.0.3",
-        "cx_Freeze==6.15.12",
+        "cx_Freeze==6.15.13",
         "twine==4.0.2",
         "psutil==5.9.8",
     ]
