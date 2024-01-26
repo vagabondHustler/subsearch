@@ -1,12 +1,11 @@
 import dataclasses
-import logging
+import picologging as logging
 from pathlib import Path
 import threading
 from typing import Optional, TypeVar
-from datetime import date
 
 
-from subsearch.globals import metaclasses
+from subsearch.globals import decorators, metaclasses
 from subsearch.globals.constants import FILE_PATHS, APP_PATHS
 
 DATACLASS = TypeVar("DATACLASS")
@@ -31,15 +30,13 @@ class Logger(metaclass=metaclasses.Singleton):
         self._debug_logger = self.create_logger()
         self._lock = threading.Lock()
         self._ansi = ANSIEscapeSequences
-        today = date.today()
-        self.log(today, print_allowed=False)
 
     def create_logger(self) -> logging.Logger:
         logger = logging.getLogger(self.logger_name)
         logger.setLevel(logging.DEBUG)
         file_handler = logging.FileHandler(self.log_file_path, mode="w")
         file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
+        formatter = logging.Formatter("%(message)s", datefmt="%H:%M:%S")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger
@@ -58,8 +55,11 @@ class Logger(metaclass=metaclasses.Singleton):
             "error": self._debug_logger.error,
             "critical": self._debug_logger.critical,
         }
-
-        log_methods[level](message)
+        module = kwargs.get("call_module")
+        lineno = kwargs.get("call_lineno")
+        time = kwargs.get("call_ct")
+        log_msg = f"{level.upper()} {module}:{lineno} {time}: {message}"
+        log_methods[level](log_msg)
 
     def _print(self, message, **kwargs) -> None:
         print_allowed = kwargs.get("print_allowed", True)
@@ -88,20 +88,30 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
         self._logger = Logger()
 
     def __call__(self, message: str, **kwargs) -> None:
+        self.log(message, **kwargs)
+
+    def log(self, message: str, **kwargs) -> None:
         end_new_line = kwargs.get("end_new_line", False)
         self._logger.log(message, **kwargs)
         if end_new_line:
             self._logger.log("", **kwargs)
 
+    @decorators.capture_call_info
+    def stdout(self, message: str, **kwargs) -> None:
+        self(message, **kwargs)
+
+    @decorators.capture_call_info
     def brackets(self, message: str, **kwargs) -> None:
         self(f"--- [{message}] ---", hex_color="#fab387", style="bold", **kwargs)
 
+    @decorators.capture_call_info
     def subtitle_match(self, provider: str, subtitle_name: str, result: int, threshold: int, **kwargs) -> None:
         if result >= threshold:
-            self(f"> {provider:<14}{result:>3}% {subtitle_name}", hex_color="#a6e3a1")
+            self(f"{provider:<14}{result:>3}% {subtitle_name}", hex_color="#a6e3a1", **kwargs)
         else:
-            self(f"  {provider:<14}{result:>3}% {subtitle_name}")
+            self(f"{provider:<14}{result:>3}% {subtitle_name}", **kwargs)
 
+    @decorators.capture_call_info
     def file_system_action(self, action_type: str, src: Path, dst: Optional[Path] = None, **kwargs) -> None:
         if src.is_file():
             type_ = "file"
@@ -127,18 +137,21 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
 
         self(message, **kwargs)
 
+    @decorators.capture_call_info
     def dataclass(self, instance: DATACLASS, **kwargs) -> None:
         if not dataclasses.is_dataclass(instance):
             raise ValueError("Input is not a dataclass instance.")
-        self.brackets(instance.__class__.__name__, **kwargs)
+        instance_name = f"--- [{instance.__class__.__name__}] ---"
+        self(instance_name, hex_color="#fab387", style="bold", **kwargs)
         for field in dataclasses.fields(instance):
             key = field.name
             value = getattr(instance, key)
             padding = " " * (30 - len(key))
             self(f"{key}:{padding}{value}", **kwargs)
 
-    def task_completed(self) -> None:
-        self("Task completed", level="info", hex_color="#89b4fa")
+    @decorators.capture_call_info
+    def task_completed(self, **kwargs) -> None:
+        self("Task completed", level="info", hex_color="#89b4fa", **kwargs)
 
 
-stdout = StdoutHandler()
+log = StdoutHandler()
