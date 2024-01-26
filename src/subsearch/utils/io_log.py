@@ -1,5 +1,5 @@
 import dataclasses
-import logging
+import picologging as logging
 from pathlib import Path
 import threading
 from typing import Optional, TypeVar
