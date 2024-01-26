@@ -98,7 +98,6 @@ class SubsearchOption(ttk.Labelframe):
             "gui.system_tray": "System tray icon",
             "gui.summary_notification": "Notification when done",
             "gui.show_terminal": "Terminal while searching",
-            "misc.multithreading": "Multithreading",
             "misc.single_instance": "Single instance",
         }
         for name, description in self.subsearch_options.items():
@@ -111,7 +110,7 @@ class SubsearchOption(ttk.Labelframe):
         frame = None
 
         for enum, (key, value) in enumerate(self.subsearch_options.items()):
-            if enum % 3 == 0:
+            if enum % 2 == 0:
                 frame = ttk.Frame(self)
                 frame.pack(side=tk.LEFT, anchor="n")
 
