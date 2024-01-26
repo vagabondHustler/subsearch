@@ -67,7 +67,6 @@ class AppConfig:
     open_on_no_matches: bool
     always_open: bool
     no_automatic_downloads: bool
-    multithreading: bool
     single_instance: bool
 
 

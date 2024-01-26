@@ -73,7 +73,6 @@ def get_default_app_config() -> dict[str, Any]:
             "no_automatic_downloads": False,
         },
         "misc": {
-            "multithreading": True,
             "single_instance": True,
         },
     }
