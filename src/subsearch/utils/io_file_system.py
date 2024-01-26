@@ -29,7 +29,7 @@ def create_path_from_string(string: str, path_resolution: str) -> Path:
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
-    io_log.stdout(f"{subtitle.provider}: {index_position}/{index_size}: {subtitle.release_name}")
+    io_log.log.stdout(f"{subtitle.provider}: {index_position}/{index_size}: {subtitle.release_name}")
     scraper = get_cloudscraper()
     r = scraper.get(subtitle.download_url, stream=True)
     file_name = f"{subtitle.provider}_{subtitle.release_name}_{index_position}.zip"
@@ -42,7 +42,7 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
         filename = src / file
-        io_log.stdout.file_system_action(action_type="extract", src=file, dst=dst)
+        io_log.log.file_system_action(action_type="extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
         zip_ref.close()
@@ -57,7 +57,7 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
 
     old_file_path = best_match[1]
     new_file_path = old_file_path.with_name(f"{release_name}{extension}")
-    io_log.stdout.file_system_action(action_type="rename", src=old_file_path, dst=new_file_path)
+    io_log.log.file_system_action(action_type="rename", src=old_file_path, dst=new_file_path)
     old_file_path.rename(new_file_path)
     return new_file_path
 
@@ -69,18 +69,18 @@ def move_all(src: Path, dst: Path, extension: str = ".srt"):
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:
     source_file.replace(destination_directory / source_file.name)
-    io_log.stdout.file_system_action(action_type="move", src=source_file, dst=destination_directory)
+    io_log.log.file_system_action(action_type="move", src=source_file, dst=destination_directory)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
     for file in Path(cwd).glob(f"*{extension}"):
-        io_log.stdout.file_system_action(action_type="remove", src=file)
+        io_log.log.file_system_action(action_type="remove", src=file)
         file_path = Path(cwd) / file
         file_path.unlink()
 
 
 def del_directory(directory: Path) -> None:
-    io_log.stdout.file_system_action(action_type="remove", src=directory)
+    io_log.log.file_system_action(action_type="remove", src=directory)
     shutil.rmtree(directory)
 
 
@@ -92,7 +92,7 @@ def directory_is_empty(directory: Path) -> bool:
 
 def del_directory_content(directory: Path):
     for item in directory.iterdir():
-        io_log.stdout.file_system_action(action_type="remove", src=item)
+        io_log.log.file_system_action(action_type="remove", src=item)
         if item.is_file():
             item.unlink()
         if item.is_dir():
@@ -132,7 +132,7 @@ class MPCHashAlgorithm:
 
     def valid_file_size(self) -> bool:
         if self.file_size < self.chunk_size * 2:
-            io_log.stdout(f"Invalid file size, {self.file_size} bytes", level="warning")
+            io_log.log.stdout(f"Invalid file size, {self.file_size} bytes", level="warning")
             return False
         return True
 
