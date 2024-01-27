@@ -1,7 +1,8 @@
 import ctypes
+import secrets
 import time
 from pathlib import Path
-
+from subsearch.globals import propagating_thread
 from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE, VERSION
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.globals import decorators
@@ -12,31 +13,27 @@ from subsearch.utils import (
     io_file_system,
     io_log,
     io_toml,
-    state_manager,
     string_parser,
 )
 
 
 class Initializer:
     def __init__(self, pref_counter: float) -> None:
-        io_log.stdout(f"Loading components...", level="info", end_new_line=True)
+        io_log.log.stdout(f"Loading components...", level="info", end_new_line=True)
         self.file_exist = True if VIDEO_FILE else False
         self.setup_file_system()
-        state_manager.CoreStateManager()
-        self.core_state = state_manager.CoreStateManager()
         self.start = pref_counter
-        self.core_state.set_state(self.core_state.state.INITIALIZE)
 
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
-        io_log.stdout.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
-        io_log.stdout.dataclass(self.app_config, level="debug", print_allowed=False)
+        io_log.log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
+        io_log.log.dataclass(self.app_config, level="debug", print_allowed=False)
         decorators.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()
 
         if self.file_exist:
             VIDEO_FILE.file_hash = io_file_system.get_file_hash(VIDEO_FILE.file_path)
-            io_log.stdout.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
+            io_log.log.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
             io_file_system.create_directory(VIDEO_FILE.file_directory)
 
         self.downloaded_subtitles = 0
@@ -48,20 +45,16 @@ class Initializer:
 
         if self.file_exist:
             self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
-            io_log.stdout.dataclass(self.release_data, level="debug", print_allowed=False)
+            io_log.log.dataclass(self.release_data, level="debug", print_allowed=False)
             provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
             self.provider_urls = provider_urls.retrieve_urls()
-            io_log.stdout.dataclass(self.provider_urls, level="debug", print_allowed=False)
+            io_log.log.dataclass(self.provider_urls, level="debug", print_allowed=False)
             self.search_kwargs = dict(
                 release_data=self.release_data,
                 app_config=self.app_config,
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
-
-        self.core_state.set_state(self.core_state.state.INITIALIZED)
-        if not self.file_exist:
-            self.core_state.set_state(self.core_state.state.NO_FILE)
 
     def setup_file_system(self) -> None:
         io_file_system.create_directory(APP_PATHS.tmp_dir)
@@ -87,82 +80,66 @@ class SubsearchCore(Initializer):
         Initializer.__init__(self, pref_counter)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
-            self.core_state.set_state(self.core_state.state.GUI)
             screen_manager.open_screen("search_options")
-            self.core_state.set_state(self.core_state.state.EXIT)
             return None
 
         if " " in VIDEO_FILE.filename:
-            io_log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
+            io_log.log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
         if not self.all_providers_disabled():
-            io_log.stdout.brackets("Search started")
+            io_log.log.brackets("Search started")
 
-    def _search_subtitles(self, **kwargs) -> None:
-        flag = kwargs.get("flag")
-        self.core_state.set_state(kwargs["state_obj"]["call_state"])
-        provider_state = kwargs["state_obj"]["state_manager"]()
-        provider_state.set_state(provider_state.state.WORKING)
-        search_provider = kwargs["provider"](**self.search_kwargs)
+    def search_for_subtitles(self, *tasks) -> None:
+        propagating_thread.handle_tasks(*tasks)
+        io_log.log.task_completed()
+
+    def start_search(self, provider, flag: str = "") -> None:
+        search_provider = provider(**self.search_kwargs)
+        provider.aaaaaaaaaaaaaaaaaa
         if flag:
             search_provider.start_search(flag=flag)
         else:
             search_provider.start_search()
         self.accepted_subtitles.extend(search_provider.accepted_subtitles)
         self.rejected_subtitles.extend(search_provider.rejected_subtitles)
-        provider_state.set_state(provider_state.state.FINNISHED)
 
     @decorators.call_func
     def opensubtitles(self) -> None:
-        state_obj = {
-            "call_state": self.core_state.state.CALL_OPENSUBTITLES,
-            "state_manager": state_manager.OpenSubtitlesStateManager,
-        }
-        self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="hash")
-        self._search_subtitles(state_obj=state_obj, provider=opensubtitles.OpenSubtitles, flag="site")
+        self.start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
+        self.start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
     @decorators.call_func
     def subscene(self) -> None:
-        state_obj = {
-            "call_state": self.core_state.state.CALL_SUBSCENE,
-            "state_manager": state_manager.SubsceneStateManager,
-        }
-        self._search_subtitles(state_obj=state_obj, provider=subscene.Subscene)
+        self.start_search(provider=subscene.Subscene)
 
     @decorators.call_func
     def yifysubtitles(self) -> None:
-        state_obj = {
-            "call_state": self.core_state.state.CALL_YIFYSUBTITLES,
-            "state_manager": state_manager.YifySubtitlesStateManager,
-        }
-        self._search_subtitles(state_obj=state_obj, provider=yifysubtitles.YifiSubtitles)
+        self.start_search(provider=yifysubtitles.YifiSubtitles)
 
     @decorators.call_func
     def download_files(self) -> None:
-        io_log.stdout.brackets(f"Downloading subtitles")
-        self.core_state.set_state(self.core_state.state.DOWNLOAD_FILES)
+        io_log.log.brackets(f"Downloading subtitles")
         index_size = len(self.accepted_subtitles)
         for enum, subtitle in enumerate(self.accepted_subtitles, 1):
             io_file_system.download_subtitle(subtitle, enum, index_size)
+            self.downloaded_subtitles += 1
         self.subtitles_found = index_size
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def download_manager(self) -> None:
-        io_log.stdout.brackets(f"Download Manager")
-        self.core_state.set_state(self.core_state.state.DOWNLOAD_MANAGER)
+        io_log.log.brackets(f"Download Manager")
         subtitles = self.rejected_subtitles + self.accepted_subtitles
         screen_manager.open_screen("download_manager", subtitles=subtitles)
         self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
         self.subtitles_found += len(self.manually_accepted_subtitles)
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def extract_files(self) -> None:
-        io_log.stdout.brackets("Extracting downloads")
-        self.core_state.set_state(self.core_state.state.EXTRACT_FILES)
+        io_log.log.brackets("Extracting downloads")
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def subtitle_post_processing(self):
@@ -175,57 +152,52 @@ class SubsearchCore(Initializer):
 
     @decorators.call_func
     def subtitle_rename(self) -> None:
-        io_log.stdout.brackets("Renaming best match")
-        self.core_state.set_state(self.core_state.state.SUBTITLE_RENAME)
+        io_log.log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def subtitle_move_best(self, target: Path) -> None:
-        io_log.stdout.brackets("Move best match")
-        self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE)
+        io_log.log.brackets("Move best match")
         io_file_system.move_and_replace(self.autoload_src, target)
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def subtitle_move_all(self, target: Path) -> None:
-        io_log.stdout.brackets("Move all")
-        self.core_state.set_state(self.core_state.state.SUBTITLE_MOVE_ALL)
+        io_log.log.brackets("Move all")
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     @decorators.call_func
     def summary_notification(self, elapsed) -> None:
-        io_log.stdout.brackets("Summary toast")
-        self.core_state.set_state(self.core_state.state.SUMMARY_TOAST)
+        io_log.log.brackets("Summary toast")
         elapsed_summary = f"Finished in {elapsed} seconds"
         tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
         matches_downloaded = f"Downloaded: {self.downloaded_subtitles}/{tot_num_of_subtitles}"
         if self.downloaded_subtitles > 0:
             msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
-            io_log.stdout(matches_downloaded, hex_color="#a6e3a1")
+            io_log.log.stdout(matches_downloaded, hex_color="#a6e3a1")
             self.system_tray.display_toast(*msg)
         elif self.downloaded_subtitles == 0:
             msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
-            io_log.stdout(matches_downloaded, hex_color="#f38ba8")
+            io_log.log.stdout(matches_downloaded, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
 
     @decorators.call_func
     def clean_up(self) -> None:
-        io_log.stdout.brackets("Cleaning up")
-        self.core_state.set_state(self.core_state.state.CLEAN_UP)
+        io_log.log.brackets("Cleaning up")
         io_file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
         io_file_system.del_directory_content(APP_PATHS.tmp_dir)
         io_file_system.del_directory(VIDEO_FILE.tmp_dir)
         if io_file_system.directory_is_empty(VIDEO_FILE.subs_dir):
             io_file_system.del_directory(VIDEO_FILE.subs_dir)
-        io_log.stdout.task_completed()
+        io_log.log.task_completed()
 
     def core_on_exit(self) -> None:
         elapsed = time.perf_counter() - self.start
         self.summary_notification(elapsed)
-        io_log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
+        io_log.log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         self.system_tray.stop()
         if not self.app_config.show_terminal:
             return None

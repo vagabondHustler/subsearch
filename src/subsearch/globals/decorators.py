@@ -1,10 +1,15 @@
 import ctypes
+from datetime import datetime
+import inspect
+import sys
 from typing import Any, Callable, Union
 
 from subsearch import core
 from subsearch.globals import exceptions
 from subsearch.globals.constants import FILE_PATHS, GUID
-from subsearch.utils import io_log, io_toml
+from subsearch.utils import io_toml
+
+enable_system_tray: bool
 
 
 def apply_mutex(func: Callable) -> Callable:
@@ -47,8 +52,6 @@ def call_func(func) -> Callable:
     def wrapper(*args, **kwargs) -> Any:
         func_name = f"{func.__name__}"
         if not _CoreSubsearchFuncCondtitons.conditions_met(func_name=func_name, *args, **kwargs):
-            module_func = f"{func.__module__}.{func.__name__}"
-            io_log.stdout(f"Call conditions for '{module_func}', not met", level="debug", print_allowed=False)
             return None
         return func(*args, **kwargs)
 
@@ -74,18 +77,18 @@ class _CoreSubsearchFuncCondtitons:
     def conditions_met(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
         if not cls.file_exist:
             return False
-          
+
         cfg = cls.app_config
         acc_subs = cls.accepted_subtitles
         rej_subs = cls.rejected_subtitles
-        
+
         df_senario_1 = not cfg.always_open and not cfg.no_automatic_downloads
         df_senario_2 = cfg.always_open and not cfg.no_automatic_downloads
-        
+
         open_dm_senario_1 = len(acc_subs) == 0 and len(rej_subs) >= 1 and cfg.open_on_no_matches
         open_dm_senario_2 = len(acc_subs) >= 1 and cfg.always_open and cfg.no_automatic_downloads
         open_dm_senario_3 = len(rej_subs) >= 1 and cfg.always_open
-        
+
         func_name = kwargs["func_name"]
         conditions: dict[str, list[bool]] = {
             "opensubtitles": [
@@ -123,12 +126,30 @@ class _CoreSubsearchFuncCondtitons:
         return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
 
 
-enable_system_tray: bool
+def capture_call_info(func):
+    def wrapper(*args, **kwargs):
+        frame = inspect.currentframe().f_back
+        current_time = datetime.now().time()
+        call_time = current_time.strftime("%H:%M:%S.%f")[:-3]
+        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]
+        kwargs["call_lineno"] = frame.f_lineno
+        kwargs["call_ct"] = call_time
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def system_tray_conditions(func) -> Callable:
     def wrapper(*args, **kwargs) -> Any:
         if enable_system_tray:
             return func(*args, **kwargs)
+
+    return wrapper
+
+
+def except_hook(func, excepthook_) -> Callable:
+    def wrapper(*args, **kwargs) -> Any:
+        sys.excepthook = excepthook_
+        return func(*args, **kwargs)
 
     return wrapper

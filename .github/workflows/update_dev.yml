@@ -1,0 +1,23 @@
+name: Update dev branch
+run-name: Update dev branch
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  update-dev-branch:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Delete and recreate dev branch
+        run: |
+          git fetch origin main
+          git push origin --delete dev
+          gh repo create dev --branch main --master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

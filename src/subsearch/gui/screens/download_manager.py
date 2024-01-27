@@ -91,7 +91,7 @@ class DownloadManager(ttk.LabelFrame):
             self.download_index_size += 1
             self.downloaded_subtitle.append(subtitle)
         except Exception as e:
-            io_log.stdout(str(e), level="error")
+            io_log.log.stdout(str(e), level="error")
             self.update_text(selection, "⨯", subtitle, cfg.color.red)
             self.failed_subtitle_downloads.append(subtitle)
         finally:

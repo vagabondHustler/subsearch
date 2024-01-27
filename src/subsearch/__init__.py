@@ -1,44 +1,28 @@
 import sys
 import time
 from pathlib import Path
-from threading import Thread
+
 
 from subsearch import core
 from subsearch.globals import decorators
-from subsearch.globals.constants import FILE_PATHS
-from subsearch.utils import io_log, io_toml
 
 PREF_COUNTER = time.perf_counter()
-PACKAGEPATH = Path(__file__).resolve().parent.as_posix()
-HOMEPATH = Path(PACKAGEPATH).parent.as_posix()
-sys.path.append(HOMEPATH)
-sys.path.append(PACKAGEPATH)
+PACKAGE_PATH = Path(__file__).resolve().parent.as_posix()
+HOME_PATH = Path(PACKAGE_PATH).parent.as_posix()
+sys.path.append(HOME_PATH)
+sys.path.append(PACKAGE_PATH)
 
 
 class Subsearch:
     def __init__(self) -> None:
         self.subsearch_core = core.SubsearchCore(PREF_COUNTER)
 
-    def thread_executor(self, *args) -> None:
-        provider_threads = {}
-        for provider in args:
-            provider_threads[provider] = Thread(target=provider)
-
-        for thread in provider_threads.values():
-            thread.start()
-
-        for thread in provider_threads.values():
-            thread.join()
-
     def search_for_subtitles(self) -> None:
-        providers = [self.subsearch_core.subscene, self.subsearch_core.opensubtitles, self.subsearch_core.yifysubtitles]
-
-        if io_toml.load_toml_value(FILE_PATHS.config, "misc.multithreading"):
-            self.thread_executor(*providers)
-
-        else:
-            for provider in providers:
-                provider()
+        self.subsearch_core.search_for_subtitles(
+            self.provider_opensubtitles,
+            self.provider_subscene,
+            self.provider_yifysubtitles,
+        )
 
     def provider_opensubtitles(self) -> None:
         self.subsearch_core.opensubtitles()
@@ -68,11 +52,5 @@ def main() -> None:
     app.on_exit()
 
 
-def custom_excepthook(exctype, value, traceback):
-    io_log.Logger()._debug_logger.error(value, exc_info=(exctype, value, traceback))
-    sys.__excepthook__(exctype, value, traceback)
-
-
 if __name__ == "__main__":
-    sys.excepthook = custom_excepthook
     main()
