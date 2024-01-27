@@ -95,7 +95,6 @@ class SubsearchCore(Initializer):
 
     def start_search(self, provider, flag: str = "") -> None:
         search_provider = provider(**self.search_kwargs)
-        provider.aaaaaaaaaaaaaaaaaa
         if flag:
             search_provider.start_search(flag=flag)
         else:
