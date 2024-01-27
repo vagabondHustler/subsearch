@@ -16,7 +16,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             return False
         offline_text = tree.css_first("pre").text()
         if offline_text.startswith("Site will be online soon"):
-            io_log.stdout(f"opensubtitles is down: {offline_text}", level="error")
+            io_log.log.stdout(f"opensubtitles is down: {offline_text}", level="error")
             return True
         return False
 
@@ -61,7 +61,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
         if not subtitle_data:
             return None
 
-        io_log.stdout.subtitle_match(
+        io_log.log.subtitle_match(
             provider=self.provider_name,
             subtitle_name=self.release,
             result=100,
