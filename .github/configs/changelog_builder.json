@@ -2,7 +2,7 @@
 	"categories": [
 		{
 			"title": "#### ✨ Features:",
-			"labels": ["feature"]
+			"labels": ["feat", "feature"]
 		},
 		{
 			"title": "#### 🐛 Fixes:",
