@@ -1,4 +1,4 @@
-feature: ["feature/*", "feat/*"]
+feat: "feat/"
 fix: "fix/*"
 test: "test/*"
 chore: "chore/*"
