@@ -6,6 +6,19 @@ from subsearch.data import __guid__
 
 APP_NAME = "Subsearch"
 ICON = "src/subsearch/gui/resources/assets/subsearch.ico"
+asdf = [
+    "concurrent",
+    "lib2to3",
+    "multiprocessing",
+    "distutils",
+    "tcl8",
+    "test",
+    "unittest",
+    "xml",
+    "xmlrpc",
+    "asyncio",
+    "chardet",
+]
 
 
 class MonekyPatchBdistMSI:
@@ -100,7 +113,8 @@ def get_executable() -> list[Executable]:
 def get_options() -> dict[str, Any]:
     data = _get_data_table()
     bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": data}
-    options = {"bdist_msi": bdist_msi}
+    build_exe = {"excludes": [*asdf]}
+    options = {"build_exe": build_exe, "bdist_msi": bdist_msi}
     return options
 
 
