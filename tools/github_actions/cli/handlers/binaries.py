@@ -1,5 +1,4 @@
 import hashlib
-import importlib
 import socket
 import subprocess
 import time
@@ -77,15 +76,31 @@ def print_log_file(file_path):
 
 
 def expected_files_exists() -> None:
+def print_log_file(file_path):
+    try:
+        with open(file_path, "r") as log_file:
+            contents = log_file.read()
+            print(contents)
+    except FileNotFoundError:
+        print(f"The file {file_path} does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def expected_files_exists() -> None:
     expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
     for i in expected_files:
         if not i.parent.exists():
+            list_files_in_directory(i.parent.parent)
             list_files_in_directory(i.parent.parent)
             raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
         if not i.is_file():
             print_log_file()
             list_files_in_directory(i.parent)
+            print_log_file()
+            list_files_in_directory(i.parent)
             raise FileNotFoundError(f"File '{i}' does not exist.")
+        print_log_file(i)
         print_log_file(i)
 
 
@@ -113,6 +128,42 @@ def registry_key_exists() -> bool:
         return False
 
 
+def _get_test_result_text(result: bool) -> str:
+    test_result = "Test failed"
+    if result:
+        test_result = "Test passed"
+    return test_result
+
+
+def _get_emojis(exe, log, cfg, key) -> tuple[str, str, str, str]:
+    emojis = {True: ":heavy_check_mark:", False: ":x:"}
+    return emojis[exe], emojis[log], emojis[cfg], emojis[key]
+
+
+def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
+    return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
+
+
+def _get_expected_yea_nah(name: str, yea: str, nah: str) -> tuple:
+    x = {
+        "install": (yea, nah, nah, yea),
+        "executable": (yea, yea, yea, yea),
+        "uninstall": (nah, yea, yea, nah),
+    }
+    return x[name]
+
+
+def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
+    x = {
+        "install": (True, False, False, True),
+        "executable": (True, True, True, True),
+        "uninstall": (False, True, True, False),
+    }
+    return x[name]
+
+
+def _software_verbose_print(name: str, result: str, exe: bool, log_: bool, cfg: bool, key: bool) -> None:
+    summary = f"Exe exists: {exe}, Log exists: {log_}, Config exists: {cfg}, Registry key exists: {key}"
 def _get_test_result_text(result: bool) -> str:
     test_result = "Test failed"
     if result:
@@ -182,6 +233,14 @@ def _software_test_result(name: str) -> None:
         list_files_in_directory(LOG_LOG_PATH.parent)
         _software_verbose_print(name, result, exe, log_, cfg, key)
         raise RuntimeError(f"{name} test failed")
+
+
+def set_test_result(name: str) -> None:
+    header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
+    line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
+    github_actions.set_step_summary(f"{header}")
+    github_actions.set_step_summary(f"{line}")
+    _software_test_result(name)
 
 
 def set_test_result(name: str) -> None:
