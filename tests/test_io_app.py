@@ -1,11 +1,11 @@
 import tempfile
 from pathlib import Path
 
-from subsearch.utils import io_app
+from subsearch.globals import app_config
 
 
 def test_app_paths() -> None:
-    app_paths = io_app.get_app_paths()
+    app_paths = app_config.get_app_paths()
     assert app_paths.home.is_dir()
     assert app_paths.data.is_dir()
     assert app_paths.gui.is_dir()

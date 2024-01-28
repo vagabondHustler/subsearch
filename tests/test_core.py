@@ -3,7 +3,7 @@ import pytest
 
 from subsearch.globals.constants import FILE_PATHS
 from subsearch.utils import io_toml, string_parser
-from subsearch.globals.decorators import _CoreSubsearchFuncCondtitons
+from subsearch.globals import metaclasses 
 from tests import globals_test
 
 
@@ -17,7 +17,7 @@ class FakeSubsearchCore:
         self.accepted_subtitles = []
         self.rejected_subtitles = []
         self.downloaded_subtitles = 0
-        self.call_func = _CoreSubsearchFuncCondtitons.conditions_met
+        self.call_func = metaclasses.SubsearchFuncCondtitons.conditions_met
 
     @property
     def func_name(self) -> str:
@@ -66,7 +66,7 @@ def test_conditions_download_files(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.app_config.always_open = False
     fake_cls.app_config.no_automatic_downloads = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
-    
+
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
     fake_cls.app_config.always_open = True
     fake_cls.app_config.no_automatic_downloads = False

@@ -2,7 +2,7 @@ import ctypes
 import time
 from pathlib import Path
 from subsearch.globals import propagating_thread
-from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE, VERSION
+from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.globals import decorators
 from subsearch.gui import screen_manager, system_tray
@@ -18,46 +18,20 @@ from subsearch.utils import (
 
 class Initializer:
     def __init__(self, pref_counter: float) -> None:
+        self.start = pref_counter
         io_log.log.brackets("Initializing")
         io_log.log.stdout(f"Loading components...", level="info", end_new_line=True)
+        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         self.file_exist = True if VIDEO_FILE else False
-        self.setup_file_system()
-        self.start = pref_counter
-
-        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
-        io_log.log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
-        io_log.log.dataclass(self.app_config, level="debug", print_allowed=False)
-        decorators.enable_system_tray = self.app_config.system_tray
-        self.system_tray = system_tray.SystemTray()
-        self.system_tray.start()
-
-        if self.file_exist:
-            VIDEO_FILE.file_hash = io_file_system.get_file_hash(VIDEO_FILE.file_path)
-            io_log.log.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
-            io_file_system.create_directory(VIDEO_FILE.file_directory)
-
-        self.downloaded_subtitles = 0
-        self.ran_download_tab = False
-        self.accepted_subtitles: list[Subtitle] = []
-        self.rejected_subtitles: list[Subtitle] = []
-        self.manually_accepted_subtitles: list[Subtitle] = []
+        self.verify_files_and_paths()
+        self.initialize_app_data()
+        self.initialize_system_tray()
+        self.initialize_subtitle_variables()
         self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
-
-        if self.file_exist:
-            self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
-            io_log.log.dataclass(self.release_data, level="debug", print_allowed=False)
-            provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
-            self.provider_urls = provider_urls.retrieve_urls()
-            io_log.log.dataclass(self.provider_urls, level="debug", print_allowed=False)
-            self.search_kwargs = dict(
-                release_data=self.release_data,
-                app_config=self.app_config,
-                provider_urls=self.provider_urls,
-                language_data=self.language_data,
-            )
+        self.process_video_file()
         io_log.log.task_completed()
 
-    def setup_file_system(self) -> None:
+    def verify_files_and_paths(self) -> None:
         io_log.log.stdout("Verifing files and paths", level="debug")
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
@@ -66,6 +40,40 @@ class Initializer:
         if self.file_exist:
             io_file_system.create_directory(VIDEO_FILE.subs_dir)
             io_file_system.create_directory(VIDEO_FILE.tmp_dir)
+
+    def initialize_app_data(self) -> None:
+        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
+        io_log.log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
+        io_log.log.dataclass(self.app_config, level="debug", print_allowed=False)
+
+    def initialize_system_tray(self):
+        decorators.enable_system_tray = self.app_config.system_tray
+        self.system_tray = system_tray.SystemTray()
+        self.system_tray.start()
+
+    def initialize_subtitle_variables(self) -> None:
+        self.downloaded_subtitles = 0
+        self.accepted_subtitles: list[Subtitle] = []
+        self.rejected_subtitles: list[Subtitle] = []
+        self.manually_accepted_subtitles: list[Subtitle] = []
+
+    def process_video_file(self) -> None:
+        if not self.file_exist:
+            return None
+        VIDEO_FILE.file_hash = io_file_system.get_file_hash(VIDEO_FILE.file_path)
+        io_log.log.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
+        io_file_system.create_directory(VIDEO_FILE.file_directory)
+        self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
+        io_log.log.dataclass(self.release_data, level="debug", print_allowed=False)
+        provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
+        self.provider_urls = provider_urls.retrieve_urls()
+        io_log.log.dataclass(self.provider_urls, level="debug", print_allowed=False)
+        self.search_kwargs = dict(
+            release_data=self.release_data,
+            app_config=self.app_config,
+            provider_urls=self.provider_urls,
+            language_data=self.language_data,
+        )
 
     def all_providers_disabled(self) -> bool:
         if (
@@ -81,18 +89,24 @@ class Initializer:
 class SubsearchCore(Initializer):
     def __init__(self, pref_counter: float) -> None:
         Initializer.__init__(self, pref_counter)
-        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
-            io_log.log.brackets("GUI")
-            screen_manager.open_screen("search_options")
-            io_log.log.stdout("Exiting GUI", level="debug")
-            return None
+            return self._open_gui()
+        self._start_subsearch_core()
 
+    def _open_gui(self, screen="search_options") -> None:
+        io_log.log.brackets("GUI")
+        screen_manager.open_screen(screen)
+        io_log.log.stdout("Exiting GUI", level="debug")
+        return None
+
+    def _start_subsearch_core(self) -> None:
+        if not self.all_providers_disabled():
+            self._check_filename_has_spaces()
+            io_log.log.brackets("Search started")
+
+    def _check_filename_has_spaces(self) -> None:
         if " " in VIDEO_FILE.filename:
             io_log.log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
-
-        if not self.all_providers_disabled():
-            io_log.log.brackets("Search started")
 
     def search_for_subtitles(self, *tasks) -> None:
         propagating_thread.handle_tasks(*tasks)
@@ -196,18 +210,20 @@ class SubsearchCore(Initializer):
             io_file_system.del_directory(VIDEO_FILE.subs_dir)
         io_log.log.task_completed()
 
+    def _wait_for_input(self) -> None:
+        try:
+            input("Enter to exit")
+        except KeyboardInterrupt:
+            pass
+
     def core_on_exit(self) -> None:
-        io_log.log.brackets("Exit")
         elapsed = time.perf_counter() - self.start
         self.summary_notification(elapsed)
+        io_log.log.brackets("Exit")
         self.system_tray.stop()
         io_log.log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         if not self.app_config.show_terminal:
             return None
         if DEVICE_INFO.mode == "executable":
             return None
-
-        try:
-            input("Enter to exit")
-        except KeyboardInterrupt:
-            pass
+        self._wait_for_input()
