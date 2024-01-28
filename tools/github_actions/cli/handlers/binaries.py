@@ -183,11 +183,16 @@ def _software_test_result(name: str) -> None:
         raise RuntimeError(f"{name} test failed")
 
 
+def _create_markdown_table_header(name: str) -> None:
+    if name == "install":
+        header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
+        line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
+        github_actions.set_step_summary(f"{header}")
+        github_actions.set_step_summary(f"{line}")
+
+
 def set_test_result(name: str) -> None:
-    header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
-    line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
-    github_actions.set_step_summary(f"{header}")
-    github_actions.set_step_summary(f"{line}")
+    _create_markdown_table_header(name)
     _software_test_result(name)
 
 
