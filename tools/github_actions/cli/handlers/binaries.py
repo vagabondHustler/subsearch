@@ -65,6 +65,17 @@ def end_process(psutil, process_name: str) -> None:
             process.terminate()
 
 
+def print_log_file(file_path):
+    try:
+        with open(file_path, "r") as log_file:
+            contents = log_file.read()
+            print(contents)
+    except FileNotFoundError:
+        print(f"The file {file_path} does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
 def expected_files_exists() -> None:
     expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
     for i in expected_files:
@@ -72,8 +83,10 @@ def expected_files_exists() -> None:
             list_files_in_directory(i.parent.parent)
             raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
         if not i.is_file():
+            print_log_file()
             list_files_in_directory(i.parent)
             raise FileNotFoundError(f"File '{i}' does not exist.")
+        print_log_file(i)
 
 
 def test_executable(test_length: int = 10) -> None:
