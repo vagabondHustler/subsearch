@@ -152,15 +152,15 @@ def _software_test_result(name: str) -> None:
     else:
         list_files_in_directory(EXE_INSTALLED_PATH.parent)
         list_files_in_directory(LOG_LOG_PATH.parent)
-        _software_test_result(name, "failed")
+        _software_verbose_print(name, result, exe, log, cfg, key)
         raise RuntimeError(f"{name} test failed")
 
 
 def set_test_result(name: str) -> None:
     header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
     line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
-    github_actions.set_step_summary(f"header")
-    github_actions.set_step_summary(f"line")
+    github_actions.set_step_summary(f"{header}")
+    github_actions.set_step_summary(f"{line}")
     _software_test_result(name)
 
 
