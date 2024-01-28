@@ -92,8 +92,10 @@ def directory_is_empty(directory: Path) -> bool:
     return False
 
 
-def del_directory_content(directory: Path):
+def del_directory_content(directory: Path) -> None:
     for item in directory.iterdir():
+        if not item.is_file():
+            return None
         io_log.log.file_system_action(action_type="remove", src=item)
         if item.is_file():
             item.unlink()
@@ -101,7 +103,7 @@ def del_directory_content(directory: Path):
             shutil.rmtree(item)
 
 
-def create_directory(path: Path):
+def create_directory(path: Path) -> None:
     io_log.log.stdout(f"Creating {path}", level="debug")
     path.mkdir(parents=True, exist_ok=True)
 
