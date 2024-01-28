@@ -233,7 +233,10 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
 
     if not hashes_path.is_file():
         create_hashes_file(hashes_path=hashes_path)  # type: ignore
-
+    l0 = f"| File | SHA256 |"
+    l1 = f"|------|--------|"
+    github_actions.set_step_summary(f"| File | SHA256 |")
+    github_actions.set_step_summary(f"|------|--------|")
     for enum, file_path in enumerate(file_paths):
         sha256 = calculate_sha256(file_path)  # type: ignore
         file_name = f"{file_path.name}"
@@ -241,7 +244,7 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
         log.verbose_print(f"Setting new Github Action output")
         log.verbose_print(f"{file_path.suffix[1:]}_hash={sha256}")
         github_actions.set_step_output(name=f"{file_path.suffix[1:]}_hash", value=f"{sha256}")
-        github_actions.set_step_summary(f"{file_name}: {sha256}")
+        github_actions.set_step_summary(f"| {file_name} | {sha256} |")
 
     with open(hashes_path, "a") as file:
         log.verbose_print(f"Writing to {hashes_path.name}")
