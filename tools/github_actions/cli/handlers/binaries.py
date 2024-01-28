@@ -98,30 +98,70 @@ def registry_key_exists() -> bool:
         return False
 
 
-def _software_test_result(name: str, result: str) -> None:
-    summary = f"Exe exists: {EXE_INSTALLED_PATH.is_file()}, Log exists: {LOG_LOG_PATH.is_file()}, Config exists: {CONFIG_TOML_PATH.is_file()}, Registry key exists: {registry_key_exists()}"
-    github_actions.set_step_summary(f"After {name} test:")
-    github_actions.set_step_summary(summary.replace(",", "\n"))
-    github_actions.set_step_summary(f"Test {result}\n")
+def _get_test_result_text(result: bool) -> str:
+    test_result = "Test failed"
+    if result:
+        test_result = "Test passed"
+    return test_result
+
+
+def _get_emojis(exe, log, cfg, key) -> tuple[str, str, str, str]:
+    emojis = {True: ":heavy_check_mark:", False: ":x:"}
+    return emojis[exe], emojis[log], emojis[cfg], emojis[key]
+
+
+def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
+    return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
+
+
+def _get_expected_results(name: str, yea: str, nah: str) -> tuple:
+    x = {
+        "install": (yea, nah, nah, yea),
+        "executable": (yea, yea, yea, yea),
+        "uninstall": (nah, yea, yea, nah),
+    }
+    return x[name]
+
+
+def _software_verbose_print(name: str, result: str, exe: bool, log: bool, cfg: bool, key: bool) -> None:
+    summary = f"Exe exists: {exe}, Log exists: {log}, Config exists: {cfg}, Registry key exists: {key}"
     print(f"")
     log.verbose_print(f"{summary}")
     log.verbose_print(f"{name.capitalize()} {result}")
     print(f"{STYLE_SEPERATOR}")
 
 
-def set_test_result(name: str) -> None:
-    tests = {
-        "install": EXE_INSTALLED_PATH.is_file() and registry_key_exists(),
-        "executable": LOG_LOG_PATH.is_file() and CONFIG_TOML_PATH.is_file(),
-        "uninstall": not EXE_INSTALLED_PATH.is_file() and not registry_key_exists(),
+def _software_test_result(name: str) -> None:
+    yea = ":heavy_check_mark:"
+    nah = ":x:"
+    exe, log, cfg, key = _get_booleans_result()
+    e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log, cfg, key)
+    expected_results = _get_expected_results(name, yea, nah)
+    result_is_expected = expected_results[name] == (exe, log, cfg, key)
+    result = _get_test_result_text(result_is_expected)
+
+    markdown_table = {
+        "install": f"| Install test       | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {yea}, {nah}, {nah}, {yea} |",
+        "executable": f"| Executable test | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {yea}, {yea}, {yea}, {yea} |",
+        "uninstall": f"| Uninstall test   | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {nah}, {yea}, {yea}, {nah} |",
     }
-    if tests[name]:
-        _software_test_result(name, "passed")
+
+    if result_is_expected:
+        github_actions.set_step_summary(f"{markdown_table[name]}")
+        _software_verbose_print(name, result, exe, log, cfg, key)
     else:
         list_files_in_directory(EXE_INSTALLED_PATH.parent)
         list_files_in_directory(LOG_LOG_PATH.parent)
         _software_test_result(name, "failed")
         raise RuntimeError(f"{name} test failed")
+
+
+def set_test_result(name: str) -> None:
+    header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
+    line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
+    github_actions.set_step_summary(f"header")
+    github_actions.set_step_summary(f"line")
+    _software_test_result(name)
 
 
 def calculate_sha256(file_path: str) -> str:
