@@ -114,11 +114,20 @@ def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
     return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
 
 
-def _get_expected_results(name: str, yea: str, nah: str) -> tuple:
+def _get_expected_yea_nah(name: str, yea: str, nah: str) -> tuple:
     x = {
         "install": (yea, nah, nah, yea),
         "executable": (yea, yea, yea, yea),
         "uninstall": (nah, yea, yea, nah),
+    }
+    return x[name]
+
+
+def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
+    x = {
+        "install": (True, False, False, True),
+        "executable": (True, True, True, True),
+        "uninstall": (False, True, True, False),
     }
     return x[name]
 
@@ -136,8 +145,12 @@ def _software_test_result(name: str) -> None:
     nah = ":x:"
     exe, log, cfg, key = _get_booleans_result()
     e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log, cfg, key)
-    expected_results = _get_expected_results(name, yea, nah)
-    result_is_expected = expected_results == (exe, log, cfg, key)
+    expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
+    a, b, c, d = _get_expected_result(name)
+    if (a, b, c, d) == (exe, log, cfg, key):
+        result_is_expected = True
+    else:
+        result_is_expected = False
     result = _get_test_result_text(result_is_expected)
 
     markdown_table = {
