@@ -6,7 +6,7 @@ import winreg
 from pathlib import Path
 from typing import Any
 
-from tools.github_actions.cli.globals import (
+from tools.github_actions.globals import (
     CONFIG_TOML_PATH,
     LOG_LOG_PATH,
     ARTIFACTS_PATH,
@@ -16,8 +16,8 @@ from tools.github_actions.cli.globals import (
     MSI_FREEZE_PATH,
     STYLE_SEPERATOR,
 )
-from tools.github_actions.cli.handlers import github_actions, io_python, log
-from tools.github_actions.cli import install_module
+from tools.github_actions.handlers import github_actions, io_python, log
+from tools.github_actions import install_module
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -154,14 +154,21 @@ def _software_verbose_print(name: str, result: str, exe: bool, log_: bool, cfg: 
     print(f"{STYLE_SEPERATOR}")
 
 
-def _software_test_result(name: str) -> None:
+def _create_markdown_table_binaries() -> None:
+    line0 = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
+    line1 = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
+    github_actions.set_step_summary(f"{line0}")
+    github_actions.set_step_summary(f"{line1}")
+
+
+def _add_markdown_table_result(name: str) -> None:
     yea = ":heavy_check_mark:"
     nah = ":x:"
     exe, log_, cfg, key = _get_booleans_result()
     e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log_, cfg, key)
     expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
-    a, b, c, d = _get_expected_result(name)
-    if (a, b, c, d) == (exe, log_, cfg, key):
+    passing_result = _get_expected_result(name)
+    if passing_result == (exe, log_, cfg, key):
         result_is_expected = True
     else:
         result_is_expected = False
@@ -173,27 +180,12 @@ def _software_test_result(name: str) -> None:
         "uninstall": f"| Uninstall test   | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {nah}, {yea}, {yea}, {nah} |",
     }
 
-    if result_is_expected:
-        github_actions.set_step_summary(f"{markdown_table[name]}")
-        _software_verbose_print(name, result, exe, log_, cfg, key)
-    else:
+    github_actions.set_step_summary(f"{markdown_table[name]}")
+    _software_verbose_print(name, result, exe, log_, cfg, key)
+    if not result_is_expected:
         list_files_in_directory(EXE_INSTALLED_PATH.parent)
         list_files_in_directory(LOG_LOG_PATH.parent)
-        _software_verbose_print(name, result, exe, log_, cfg, key)
         raise RuntimeError(f"{name} test failed")
-
-
-def _create_markdown_table_header(name: str) -> None:
-    if name == "install":
-        header = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
-        line = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
-        github_actions.set_step_summary(f"{header}")
-        github_actions.set_step_summary(f"{line}")
-
-
-def set_test_result(name: str) -> None:
-    _create_markdown_table_header(name)
-    _software_test_result(name)
 
 
 def calculate_sha256(file_path: str) -> str:
@@ -233,8 +225,6 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
 
     if not hashes_path.is_file():
         create_hashes_file(hashes_path=hashes_path)  # type: ignore
-    l0 = f"| File | SHA256 |"
-    l1 = f"|------|--------|"
     github_actions.set_step_summary(f"| File | SHA256 |")
     github_actions.set_step_summary(f"|------|--------|")
     for enum, file_path in enumerate(file_paths):
