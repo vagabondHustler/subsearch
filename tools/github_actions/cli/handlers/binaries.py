@@ -89,7 +89,7 @@ def expected_files_exists() -> None:
         print_log_file(i)
 
 
-def test_executable(test_length: int = 10) -> None:
+def test_executable(test_length: int = 30) -> None:
     psutil = install_module._psutil()
     process_name = EXE_INSTALLED_PATH.name
     log.verbose_print(f"{process_name} has been initiated for testing")
