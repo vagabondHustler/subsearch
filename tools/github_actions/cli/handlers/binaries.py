@@ -162,8 +162,7 @@ def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
     return x[name]
 
 
-def _software_verbose_print(name: str, result: str, exe: bool, log_: bool, cfg: bool, key: bool) -> None:
-    summary = f"Exe exists: {exe}, Log exists: {log_}, Config exists: {cfg}, Registry key exists: {key}"
+    
 def _get_test_result_text(result: bool) -> str:
     test_result = "Test failed"
     if result:
@@ -179,14 +178,6 @@ def _get_emojis(exe, log, cfg, key) -> tuple[str, str, str, str]:
 def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
     return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
 
-
-def _get_expected_yea_nah(name: str, yea: str, nah: str) -> tuple:
-    x = {
-        "install": (yea, nah, nah, yea),
-        "executable": (yea, yea, yea, yea),
-        "uninstall": (nah, yea, yea, nah),
-    }
-    return x[name]
 
 
 def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
