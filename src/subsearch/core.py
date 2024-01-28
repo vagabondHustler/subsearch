@@ -1,5 +1,4 @@
 import ctypes
-import secrets
 import time
 from pathlib import Path
 from subsearch.globals import propagating_thread
