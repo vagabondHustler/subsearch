@@ -146,7 +146,11 @@ def _software_test_result(name: str) -> None:
     exe, log, cfg, key = _get_booleans_result()
     e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log, cfg, key)
     expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
-    result_is_expected = _get_expected_result == (exe, log, cfg, key)
+    a, b, c, d = _get_expected_result(name)
+    if (a, b, c, d) == (exe, log, cfg, key):
+        result_is_expected = True
+    else:
+        result_is_expected = False
     result = _get_test_result_text(result_is_expected)
 
     markdown_table = {
