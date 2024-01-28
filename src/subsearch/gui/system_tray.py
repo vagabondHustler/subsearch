@@ -6,6 +6,7 @@ from PIL import Image
 from subsearch.globals.constants import APP_PATHS, VERSION
 from subsearch.globals import decorators
 from subsearch.globals import metaclasses
+from subsearch.utils import io_log
 
 
 class SystemTray(metaclass=metaclasses.Singleton):
@@ -23,12 +24,14 @@ class SystemTray(metaclass=metaclasses.Singleton):
 
     @decorators.system_tray_conditions
     def start(self) -> None:
+        io_log.log.stdout("Subsearch was added to the system tray", level="debug")
         self.thread_tray.start()
 
     @decorators.system_tray_conditions
     def stop(self) -> None:
         self.tray.stop()
         self.thread_tray.join()
+        io_log.log.stdout("Subsearch was removed from the system tray", level="debug")
 
     def _run_pystray(self) -> None:
         self.tray.run()

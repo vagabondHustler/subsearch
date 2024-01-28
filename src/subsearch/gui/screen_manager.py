@@ -10,6 +10,7 @@ from subsearch.gui.screens import (
     search_options,
     subsearch_options,
 )
+from subsearch.utils import io_log
 
 
 class ScreenManager(tk.Frame):
@@ -139,6 +140,7 @@ def open_screen(tab_name: str, **kwargs) -> None:
     }
     manager = ScreenManager(root, screens, tab_name.lower())
     manager.place(y=cfg.size.height - 82)
+    io_log.log.stdout("GUI is running", level="debug")
     root.mainloop()
 
 

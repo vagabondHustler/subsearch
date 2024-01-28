@@ -1,5 +1,4 @@
 import hashlib
-import importlib
 import socket
 import subprocess
 import time
@@ -7,7 +6,7 @@ import winreg
 from pathlib import Path
 from typing import Any
 
-from tools.github_actions.cli.globals import (
+from tools.github_actions.globals import (
     CONFIG_TOML_PATH,
     LOG_LOG_PATH,
     ARTIFACTS_PATH,
@@ -17,8 +16,8 @@ from tools.github_actions.cli.globals import (
     MSI_FREEZE_PATH,
     STYLE_SEPERATOR,
 )
-from tools.github_actions.cli.handlers import github_actions, io_python, log
-from tools.github_actions.cli import install_module
+from tools.github_actions.handlers import github_actions, io_python, log
+from tools.github_actions import install_module
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -65,16 +64,31 @@ def end_process(psutil, process_name: str) -> None:
             process.terminate()
 
 
-def expected_files_exists():
+def _print_file_content(file_path):
+    try:
+        with open(file_path, "r") as log_file:
+            contents = log_file.read()
+            print(contents)
+    except FileNotFoundError:
+        print(f"The file {file_path} does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def expected_files_exists() -> None:
     expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
     for i in expected_files:
         if not i.parent.exists():
+            list_files_in_directory(i.parent.parent)
             raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
         if not i.is_file():
+            list_files_in_directory(i.parent)
             raise FileNotFoundError(f"File '{i}' does not exist.")
+        if i.is_file():
+            _print_file_content(i)
 
 
-def test_executable(test_length: int = 10) -> None:
+def test_executable(test_length: int = 30) -> None:
     psutil = install_module._psutil()
     process_name = EXE_INSTALLED_PATH.name
     log.verbose_print(f"{process_name} has been initiated for testing")
@@ -98,29 +112,79 @@ def registry_key_exists() -> bool:
         return False
 
 
-def _software_test_result(name: str, result: str) -> None:
-    summary = f"Exe exists: {EXE_INSTALLED_PATH.is_file()}, Log exists: {LOG_LOG_PATH.is_file()}, Config exists: {CONFIG_TOML_PATH.is_file()}, Registry key exists: {registry_key_exists()}"
-    github_actions.set_step_summary(f"After {name} test:")
-    github_actions.set_step_summary(summary.replace(",", "\n"))
-    github_actions.set_step_summary(f"Test {result}\n")
+def _get_test_result_text(result: bool) -> str:
+    test_result = "Test failed"
+    if result:
+        test_result = "Test passed"
+    return test_result
+
+
+def _get_emojis(exe, log_, cfg, key) -> tuple[str, str, str, str]:
+    emojis = {True: ":heavy_check_mark:", False: ":x:"}
+    return emojis[exe], emojis[log_], emojis[cfg], emojis[key]
+
+
+def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
+    return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
+
+
+def _get_expected_yea_nah(name: str, yea: str, nah: str) -> tuple:
+    x = {
+        "install": (yea, nah, nah, yea),
+        "executable": (yea, yea, yea, yea),
+        "uninstall": (nah, yea, yea, nah),
+    }
+    return x[name]
+
+
+def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
+    x = {
+        "install": (True, False, False, True),
+        "executable": (True, True, True, True),
+        "uninstall": (False, True, True, False),
+    }
+    return x[name]
+
+
+def _software_verbose_print(name: str, result: str, exe: bool, log_: bool, cfg: bool, key: bool) -> None:
+    summary = f"Exe exists: {exe}, Log exists: {log_}, Config exists: {cfg}, Registry key exists: {key}"
     print(f"")
     log.verbose_print(f"{summary}")
     log.verbose_print(f"{name.capitalize()} {result}")
     print(f"{STYLE_SEPERATOR}")
 
 
-def set_test_result(name: str) -> None:
-    tests = {
-        "install": EXE_INSTALLED_PATH.is_file() and registry_key_exists(),
-        "executable": LOG_LOG_PATH.is_file() and CONFIG_TOML_PATH.is_file(),
-        "uninstall": not EXE_INSTALLED_PATH.is_file() and not registry_key_exists(),
-    }
-    if tests[name]:
-        _software_test_result(name, "passed")
+def _create_markdown_table_binaries() -> None:
+    line0 = f"| Test Stage            | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
+    line1 = f"|-----------------------|------------|------------|---------------|---------------------|-------------|-----------------|"
+    github_actions.set_step_summary(f"{line0}")
+    github_actions.set_step_summary(f"{line1}")
+
+
+def _add_markdown_table_result(name: str) -> None:
+    yea = ":heavy_check_mark:"
+    nah = ":x:"
+    exe, log_, cfg, key = _get_booleans_result()
+    e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log_, cfg, key)
+    expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
+    passing_result = _get_expected_result(name)
+    if passing_result == (exe, log_, cfg, key):
+        result_is_expected = True
     else:
+        result_is_expected = False
+    result = _get_test_result_text(result_is_expected)
+
+    markdown_table = {
+        "install": f"| Install test       | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {yea}, {nah}, {nah}, {yea} |",
+        "executable": f"| Executable test | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {yea}, {yea}, {yea}, {yea} |",
+        "uninstall": f"| Uninstall test   | {e_exe} | {e_log} | {e_cfg} | {e_key}  | {result} | {nah}, {yea}, {yea}, {nah} |",
+    }
+
+    github_actions.set_step_summary(f"{markdown_table[name]}")
+    _software_verbose_print(name, result, exe, log_, cfg, key)
+    if not result_is_expected:
         list_files_in_directory(EXE_INSTALLED_PATH.parent)
         list_files_in_directory(LOG_LOG_PATH.parent)
-        _software_test_result(name, "failed")
         raise RuntimeError(f"{name} test failed")
 
 
@@ -161,7 +225,8 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
 
     if not hashes_path.is_file():
         create_hashes_file(hashes_path=hashes_path)  # type: ignore
-
+    github_actions.set_step_summary(f"| File | SHA256 |")
+    github_actions.set_step_summary(f"|------|--------|")
     for enum, file_path in enumerate(file_paths):
         sha256 = calculate_sha256(file_path)  # type: ignore
         file_name = f"{file_path.name}"
@@ -169,7 +234,7 @@ def write_to_hashes(**kwargs: dict[str, Any]) -> None:
         log.verbose_print(f"Setting new Github Action output")
         log.verbose_print(f"{file_path.suffix[1:]}_hash={sha256}")
         github_actions.set_step_output(name=f"{file_path.suffix[1:]}_hash", value=f"{sha256}")
-        github_actions.set_step_summary(f"{file_name}: {sha256}")
+        github_actions.set_step_summary(f"| {file_name} | {sha256} |")
 
     with open(hashes_path, "a") as file:
         log.verbose_print(f"Writing to {hashes_path.name}")

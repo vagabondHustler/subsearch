@@ -9,7 +9,7 @@ from subsearch.globals.constants import (
     FILE_PATHS,
     REGISTRY_PATHS,
 )
-from subsearch.utils import io_toml
+from subsearch.utils import io_log, io_toml
 
 
 class LaunchOptions:
