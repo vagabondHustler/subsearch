@@ -65,12 +65,14 @@ def end_process(psutil, process_name: str) -> None:
             process.terminate()
 
 
-def expected_files_exists():
+def expected_files_exists() -> None:
     expected_files: list[Path] = [LOG_LOG_PATH, CONFIG_TOML_PATH]
     for i in expected_files:
         if not i.parent.exists():
+            list_files_in_directory(i.parent.parent)
             raise FileNotFoundError(f"Directory '{i.parent}' does not exist.")
         if not i.is_file():
+            list_files_in_directory(i.parent)
             raise FileNotFoundError(f"File '{i}' does not exist.")
 
 
