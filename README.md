@@ -7,9 +7,6 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e)
 ![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e)
 
-![downloads-total)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&label=downloads%40total&labelColor=%231e1e2e)
-![downloads-latest)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/latest/total?style=flat-square&label=downloads%40latest&labelColor=%231e1e2e)
-
 </div>
 
 #### Readme Table of Contents
