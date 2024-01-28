@@ -1,9 +1,11 @@
 import shutil
 import struct
+import time
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import Any
+
+import requests
 
 from subsearch.globals.constants import VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
@@ -90,8 +92,10 @@ def directory_is_empty(directory: Path) -> bool:
     return False
 
 
-def del_directory_content(directory: Path):
+def del_directory_content(directory: Path) -> None:
     for item in directory.iterdir():
+        if not item.is_file():
+            return None
         io_log.log.file_system_action(action_type="remove", src=item)
         if item.is_file():
             item.unlink()
@@ -99,11 +103,13 @@ def del_directory_content(directory: Path):
             shutil.rmtree(item)
 
 
-def create_directory(path: Path):
+def create_directory(path: Path) -> None:
+    io_log.log.stdout(f"Creating {path}", level="debug")
     path.mkdir(parents=True, exist_ok=True)
 
 
 def get_file_hash(file_path: Path) -> str:
+    io_log.log.stdout("Calculating hash of video file", level="debug")
     if not file_path:
         return ""
 
@@ -145,3 +151,21 @@ class MPCHashAlgorithm:
 
     def get_hash(self) -> str:
         return self.hash
+
+
+def download_response(msi_package_path: Path, response: requests.Response):
+    start_time = time.time()
+    with open(msi_package_path, "wb") as msi_file:
+        total_size = int(response.headers.get("content-length", 0))
+        downloaded_size = 0
+        io_log.log.stdout(f"Download started for {msi_package_path.name}")
+        io_log.log.stdout(f"Downloading 0%")
+        for chunk in response.iter_content(chunk_size=128):
+            msi_file.write(chunk)
+            downloaded_size += len(chunk)
+            progress_percentage = (downloaded_size / total_size) * 100
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 0.5:
+                io_log.log.stdout(f"Downloading {progress_percentage:.2f}%")
+                start_time = time.time()
+        io_log.log.stdout(f"Download complete.")

@@ -46,6 +46,17 @@ class DownloadManager(ttk.LabelFrame):
             self.fill_listbox()
         self.scrollbar.pack(expand=True, fill="y")
         self.scrollbar.config(command=self.sub_listbox.yview)
+        if not self.subtitles:
+            self.nothing_label = tk.Label(
+                self,
+                text="It's very empty...\n\n:(",
+                font=cfg.font.cas20b,
+                fg=cfg.color.default_fg,
+                bg=cfg.color.default_bg,
+                anchor="center",
+                justify="center"
+            )
+            self.nothing_label.place(x=cfg.size.height //2, y=cfg.size.width//4, anchor="center")
 
     def fill_listbox(self) -> None:
         accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")

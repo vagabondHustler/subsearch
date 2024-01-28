@@ -4,7 +4,7 @@ from tkinter import ttk
 from subsearch.globals.constants import FILE_PATHS
 from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_toml, string_parser
+from subsearch.utils import io_log, io_toml, string_parser
 
 
 class Providers(ttk.Labelframe):

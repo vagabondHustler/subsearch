@@ -1,7 +1,6 @@
 import argparse
 from argparse import ArgumentParser, Namespace
-import functools
-from tools.github_actions.cli.globals import (
+from tools.github_actions.globals import (
     EXE_FREEZE_PATH,
     EXE_INSTALLED_PATH,
     FILE_PATHS,
@@ -12,7 +11,7 @@ from tools.github_actions.cli.globals import (
     VERSION_PATTERN,
     VERSION_PY_PATH,
 )
-from tools.github_actions.cli.handlers import (
+from tools.github_actions.handlers import (
     binaries,
     changelog,
     github_actions,
@@ -50,26 +49,11 @@ def _parser_binaries(subparsers: ArgumentParser) -> ArgumentParser:
         help="Creates and writes values to hashes.sha256",
     )
     subparser.add_argument(
-        "-rt",
-        "--run-test",
-        dest="run_test",
-        action="store_true",
-        help="Run a test on the selected file",
-    )
-    subparser.add_argument(
         "-f",
         "--file-path",
         dest="file_path",
         choices=FILE_PATHS,
         help=f"Specify a file path, one of: {FILE_PATHS}",
-        required=False,
-    )
-    subparser.add_argument(
-        "-t",
-        "--test-name",
-        dest="test_name",
-        choices=TEST_NAMES,
-        help=f"Specify a test name: {TEST_NAMES}",
         required=False,
     )
     subparser.add_argument(
@@ -168,15 +152,8 @@ def _init_error_handle(args: Namespace, parser: ArgumentParser) -> None:
 
 
 def _binaries_error_handle(args: Namespace, parser: ArgumentParser) -> None:
-    if args.read_hash and args.run_test:
-        parser.error("Cannot use --get-hash and --run-test together.")
     if args.read_hash and not args.file_path:
         parser.error(f"--get-hash requires specifying one of {FILE_PATHS}.")
-    if args.test_name:
-        if args.test_name == "executable" and args.file_path:
-            parser.error(f"Cannot specify both --test-name executable and one of {FILE_PATHS}.")
-        elif args.test_name != "executable" and not args.file_path:
-            parser.error(f"--test-name requires specifying one of {FILE_PATHS}.")
 
 
 def _json_error_handle(args: Namespace, parser: ArgumentParser) -> None:
@@ -221,15 +198,6 @@ def _binaries_parse(args: Namespace) -> None:
         value = binaries.calculate_sha256(selected_path)  # type: ignore
         log.verbose_print(f"New output availible: hash={value}")
         github_actions.set_step_output("hash", f"{value}")
-
-    elif args.run_test and args.test_name:
-        tests = {
-            "install": functools.partial(binaries.test_msi_package, "install", selected_path),
-            "executable": functools.partial(binaries.test_executable),
-            "uninstall": functools.partial(binaries.test_msi_package, "uninstall", selected_path),
-        }
-        tests[args.test_name]()
-        binaries.set_test_result(args.test_name)
 
 
 def _json_parse(args: Namespace) -> None:
