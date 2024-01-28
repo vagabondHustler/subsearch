@@ -127,7 +127,6 @@ class SubsearchCore(Initializer):
         for enum, subtitle in enumerate(self.accepted_subtitles, 1):
             io_file_system.download_subtitle(subtitle, enum, index_size)
             self.downloaded_subtitles += 1
-        self.subtitles_found = index_size
         io_log.log.task_completed()
 
     @decorators.call_func
@@ -136,7 +135,6 @@ class SubsearchCore(Initializer):
         subtitles = self.rejected_subtitles + self.accepted_subtitles
         screen_manager.open_screen("download_manager", subtitles=subtitles)
         self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
-        self.subtitles_found += len(self.manually_accepted_subtitles)
         io_log.log.task_completed()
 
     @decorators.call_func
