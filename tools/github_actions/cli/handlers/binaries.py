@@ -158,7 +158,7 @@ def _software_test_result(name: str) -> None:
     yea = ":heavy_check_mark:"
     nah = ":x:"
     exe, log_, cfg, key = _get_booleans_result()
-    e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log, cfg, key)
+    e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log_, cfg, key)
     expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
     a, b, c, d = _get_expected_result(name)
     if (a, b, c, d) == (exe, log_, cfg, key):
