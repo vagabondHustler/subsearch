@@ -123,8 +123,8 @@ def _get_expected_results(name: str, yea: str, nah: str) -> tuple:
     return x[name]
 
 
-def _software_verbose_print(name: str, result: str, exe: bool, log: bool, cfg: bool, key: bool) -> None:
-    summary = f"Exe exists: {exe}, Log exists: {log}, Config exists: {cfg}, Registry key exists: {key}"
+def _software_verbose_print(name: str, result: str, exe: bool, log_: bool, cfg: bool, key: bool) -> None:
+    summary = f"Exe exists: {exe}, Log exists: {log_}, Config exists: {cfg}, Registry key exists: {key}"
     print(f"")
     log.verbose_print(f"{summary}")
     log.verbose_print(f"{name.capitalize()} {result}")
