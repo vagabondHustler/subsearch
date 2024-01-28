@@ -6,6 +6,7 @@ import toml
 
 from subsearch.globals.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.globals.dataclasses import AppConfig
+from subsearch.utils import io_log
 
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
@@ -40,12 +41,15 @@ def del_toml_key(toml_file_path: Path, key: str) -> None:
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
+    io_log.log.stdout(f"Reparing config", level="debug")
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
+        io_log.log.stdout(f"Removing obsolete key {key}", level="debug")
         del_toml_key(toml_file_path, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
+        io_log.log.stdout(f"Adding missing key {key}", level="debug")
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         update_toml_key(FILE_PATHS.config, key, value)
@@ -74,18 +78,23 @@ def valid_config(valid_config_keys: list[str], config_keys: list[str]) -> bool:
 
 def resolve_on_integrity_failure() -> None:
     if not FILE_PATHS.config.exists():
+        io_log.log.stdout(f"No config.toml exsist, creating default at {FILE_PATHS.config}", level="debug")
         dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
         return None
     valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
     config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.config))
     valid = valid_config(valid_config_keys, config_keys)
     if valid:
+        io_log.log.stdout(f"Config is valid", level="debug")
         return None
     try:
+        io_log.log.stdout(f"Config not valid", level="debug")
         repair_toml_config(FILE_PATHS.config, valid_config_keys, config_keys)
     except Exception:
+        io_log.log.stdout(f"Repair faild, creating default at {FILE_PATHS.config}", level="debug")
         FILE_PATHS.config.unlink()
         dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
+    io_log.log.stdout(f"Repair succeeded", level="debug")
 
 
 def get_app_config(toml_file_path: Path) -> AppConfig:

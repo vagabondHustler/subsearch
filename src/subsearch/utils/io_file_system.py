@@ -102,10 +102,12 @@ def del_directory_content(directory: Path):
 
 
 def create_directory(path: Path):
+    io_log.log.stdout(f"Creating {path}", level="debug")
     path.mkdir(parents=True, exist_ok=True)
 
 
 def get_file_hash(file_path: Path) -> str:
+    io_log.log.stdout("Calculating hash of video file", level="debug")
     if not file_path:
         return ""
 

@@ -1,5 +1,4 @@
 import ctypes
-import secrets
 import time
 from pathlib import Path
 from subsearch.globals import propagating_thread
@@ -19,6 +18,7 @@ from subsearch.utils import (
 
 class Initializer:
     def __init__(self, pref_counter: float) -> None:
+        io_log.log.brackets("Initializing")
         io_log.log.stdout(f"Loading components...", level="info", end_new_line=True)
         self.file_exist = True if VIDEO_FILE else False
         self.setup_file_system()
@@ -55,8 +55,10 @@ class Initializer:
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
+        io_log.log.task_completed()
 
     def setup_file_system(self) -> None:
+        io_log.log.stdout("Verifing files and paths", level="debug")
         io_file_system.del_directory_content(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
@@ -81,7 +83,9 @@ class SubsearchCore(Initializer):
         Initializer.__init__(self, pref_counter)
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
+            io_log.log.brackets("GUI")
             screen_manager.open_screen("search_options")
+            io_log.log.stdout("Exiting GUI", level="debug")
             return None
 
         if " " in VIDEO_FILE.filename:
@@ -195,10 +199,11 @@ class SubsearchCore(Initializer):
         io_log.log.task_completed()
 
     def core_on_exit(self) -> None:
+        io_log.log.brackets("Exit")
         elapsed = time.perf_counter() - self.start
         self.summary_notification(elapsed)
-        io_log.log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         self.system_tray.stop()
+        io_log.log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         if not self.app_config.show_terminal:
             return None
         if DEVICE_INFO.mode == "executable":

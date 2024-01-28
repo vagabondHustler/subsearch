@@ -10,7 +10,7 @@ from subsearch.globals.dataclasses import (
     ProviderUrls,
     ReleaseData,
 )
-from subsearch.utils import imdb_lookup
+from subsearch.utils import imdb_lookup, io_log
 
 
 def find_year(string: str) -> int:
@@ -75,7 +75,7 @@ def find_title(filename: str, year: int, series: bool):
 
 
 class CreateProviderUrls:
-    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: dict[str, Any]):
+    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: dict[str, Any]) -> None:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
