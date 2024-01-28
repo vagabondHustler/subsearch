@@ -1,9 +1,11 @@
 import shutil
 import struct
+import time
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import Any
+
+import requests
 
 from subsearch.globals.constants import VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
@@ -145,3 +147,21 @@ class MPCHashAlgorithm:
 
     def get_hash(self) -> str:
         return self.hash
+
+
+def download_response(msi_package_path: Path, response: requests.Response):
+    start_time = time.time()
+    with open(msi_package_path, "wb") as msi_file:
+        total_size = int(response.headers.get("content-length", 0))
+        downloaded_size = 0
+        io_log.log.stdout(f"Download started for {msi_package_path.name}")
+        io_log.log.stdout(f"Downloading 0%")
+        for chunk in response.iter_content(chunk_size=128):
+            msi_file.write(chunk)
+            downloaded_size += len(chunk)
+            progress_percentage = (downloaded_size / total_size) * 100
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 0.5:
+                io_log.log.stdout(f"Downloading {progress_percentage:.2f}%")
+                start_time = time.time()
+        io_log.log.stdout(f"Download complete.")

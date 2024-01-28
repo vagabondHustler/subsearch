@@ -57,6 +57,7 @@ class Initializer:
             )
 
     def setup_file_system(self) -> None:
+        io_file_system.del_directory_content(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
         io_toml.resolve_on_integrity_failure()
