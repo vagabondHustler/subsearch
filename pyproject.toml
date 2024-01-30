@@ -99,9 +99,13 @@
 
 [tool.isort]
     profile = "black"
+    skip = ".gitignore"
+    extend_skip = [".md", ".json", ".yml", ".toml"]
+    line_length = 120
+
 
 [tool.mypy]
     check_untyped_defs = true
     ignore_missing_imports = true
-    mypy_path = "src"
+    mypy_path = ["src", "tests", "tools"]
     warn_no_return = false
