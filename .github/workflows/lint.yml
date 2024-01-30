@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v5
       - uses: psf/black@stable
         with:
-          options: "--config --verbose"
+          options: "--verbose"
       - uses: isort/isort-action@master
         with:
           configuration: "--verbose"
