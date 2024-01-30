@@ -1,14 +1,14 @@
-from typing import Any
-from subsearch.utils import io_log
-
 import threading
+from typing import Any
+
+from subsearch.utils import io_log
 
 
 class PropagatingThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:
         self._target = None
         self._args = ()
-        self._kwargs = {}
+        self._kwargs = {}  # type: ignore
         super().__init__(*args, **kwargs)
         self.exception = None
         self.return_value = None
@@ -20,7 +20,7 @@ class PropagatingThread(threading.Thread):
             if self._target:
                 self.return_value = self._target(*self._args, **self._kwargs)
         except Exception as e:
-            self.exception = e
+            self.exception = e  # type: ignore
         finally:
             del self._target, self._args, self._kwargs
 

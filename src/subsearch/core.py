@@ -1,19 +1,14 @@
 import ctypes
 import time
 from pathlib import Path
-from subsearch.globals import propagating_thread
+
+from subsearch.globals import _thread, decorators
 from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
-from subsearch.globals import decorators
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    io_file_system,
-    io_log,
-    io_toml,
-    string_parser,
-)
+from subsearch.utils import io_file_system, io_log, io_toml, string_parser
 
 
 class Initializer:
@@ -108,8 +103,8 @@ class SubsearchCore(Initializer):
         if " " in VIDEO_FILE.filename:
             io_log.log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
-    def search_for_subtitles(self, *tasks) -> None:
-        propagating_thread.handle_tasks(*tasks)
+    def _search_for_subtitles(self, *tasks) -> None:
+        _thread.handle_tasks(*tasks)
         io_log.log.task_completed()
 
     def start_search(self, provider, flag: str = "") -> None:

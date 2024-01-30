@@ -2,14 +2,7 @@ import cloudscraper
 from selectolax.parser import HTMLParser
 
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.globals.dataclasses import (
-    AppConfig,
-    LanguageData,
-    ProviderUrls,
-    ReleaseData,
-    SubsceneCookie,
-    Subtitle,
-)
+from subsearch.globals.dataclasses import AppConfig, LanguageData, ProviderUrls, ReleaseData, SubsceneCookie, Subtitle
 from subsearch.utils import io_log, io_toml, string_parser
 
 

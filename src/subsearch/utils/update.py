@@ -1,13 +1,13 @@
-from pathlib import Path
 import re
 import subprocess
+import sys
+from pathlib import Path
 
 import cloudscraper
+import requests
 from packaging.version import Version
 
-from subsearch.globals.constants import VERSION, APP_PATHS
-import requests
-import sys
+from subsearch.globals.constants import APP_PATHS, VERSION
 from subsearch.utils import io_file_system, io_log
 
 

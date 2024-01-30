@@ -1,10 +1,9 @@
 import ctypes
-from datetime import datetime
 import inspect
-from typing import Any, Callable
+from datetime import datetime
+from typing import Any, Callable, no_type_check
 
-from subsearch.globals import exceptions
-from subsearch.globals import metaclasses
+from subsearch.globals import exceptions, metaclasses
 from subsearch.globals.constants import FILE_PATHS, GUID
 from subsearch.utils import io_toml
 
@@ -56,8 +55,8 @@ def call_func(func) -> Callable:
 
     return wrapper
 
-
-def capture_call_info(func):
+@no_type_check
+def capture_call_info(func) -> Callable:
     def wrapper(*args, **kwargs):
         frame = inspect.currentframe().f_back
         current_time = datetime.now().time()

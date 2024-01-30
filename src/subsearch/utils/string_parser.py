@@ -4,12 +4,7 @@ from typing import Any
 from num2words import num2words
 
 from subsearch.globals.constants import VIDEO_FILE
-from subsearch.globals.dataclasses import (
-    AppConfig,
-    LanguageData,
-    ProviderUrls,
-    ReleaseData,
-)
+from subsearch.globals.dataclasses import AppConfig, LanguageData, ProviderUrls, ReleaseData
 from subsearch.utils import imdb_lookup, io_log
 
 

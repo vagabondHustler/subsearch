@@ -1,7 +1,8 @@
 from typing import Union
+
+from subsearch import core
 from subsearch.globals.constants import FILE_PATHS
 from subsearch.utils import io_toml
-from subsearch import core
 
 
 class Singleton(type):

@@ -1,12 +1,12 @@
 import dataclasses
-import picologging as logging
-from pathlib import Path
 import threading
+from pathlib import Path
 from typing import Optional, TypeVar
 
+import picologging as logging
 
 from subsearch.globals import decorators, metaclasses
-from subsearch.globals.constants import FILE_PATHS, APP_PATHS
+from subsearch.globals.constants import APP_PATHS, FILE_PATHS
 
 DATACLASS = TypeVar("DATACLASS")
 

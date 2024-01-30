@@ -6,14 +6,8 @@ from itertools import product
 from pathlib import Path
 from typing import Any, no_type_check
 
-from subsearch.data import __version__, __guid__
-from subsearch.globals.dataclasses import (
-    AppPaths,
-    FilePaths,
-    SystemInfo,
-    VideoFile,
-    WindowsRegistryPaths,
-)
+from subsearch.data import __guid__, __version__
+from subsearch.globals.dataclasses import AppPaths, FilePaths, SystemInfo, VideoFile, WindowsRegistryPaths
 
 
 def get_app_paths() -> AppPaths:
@@ -67,7 +61,7 @@ def get_default_app_config() -> dict[str, Any]:
         },
         "file_extensions": file_extensions,
         "providers": providers,
-        "download_manager":{
+        "download_manager": {
             "open_on_no_matches": True,
             "always_open": False,
             "no_automatic_downloads": False,
@@ -159,8 +153,10 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
 def get_computer_name() -> str:
     return socket.gethostname()
 
+
 def get_app_version() -> str:
     return str(__version__)
+
 
 def get_guid() -> str:
     return str(__guid__)
