@@ -73,7 +73,7 @@
         # until cx_Freeze supports Python 3.12 on windows, use:
         # pip install --force --no-cache --pre --extra-index-url https://marcelotduarte.github.io/packages/ cx_Freeze
         # https://github.com/marcelotduarte/cx_Freeze/issues/2153
-        "build==1.1.1",
+        "build==1.2.1",
         "twine==5.0.0",
         "psutil==5.9.8",
     ]
