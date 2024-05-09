@@ -1,6 +1,8 @@
-from cx_Freeze import Executable, setup
-from cx_Freeze.command.bdist_msi import BdistMSI, PyDialog
 from typing import Any
+
+from cx_Freeze import Executable, setup
+from cx_Freeze.command.bdist_msi import PyDialog
+from cx_Freeze.command.bdist_msi import bdist_msi as _BdistMsi
 
 from subsearch.data import __guid__
 
@@ -119,7 +121,7 @@ def get_options() -> dict[str, Any]:
 
 
 def monkey_patch_exit_dialog() -> None:
-    BdistMSI.add_exit_dialog = MonekyPatchBdistMSI.add_exit_dialog
+    _BdistMsi.add_exit_dialog = MonekyPatchBdistMSI.add_exit_dialog
 
 
 def main() -> None:
