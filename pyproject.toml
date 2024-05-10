@@ -48,7 +48,7 @@
     license = {text = "MIT license"}
     name = "Subsearch"
     readme = "README.md"
-    requires-python = ">=3.10"
+    requires-python = ">=3.12"
 
 [project.urls]
     repository = "https://github.com/vagabondHustler/subsearch"
