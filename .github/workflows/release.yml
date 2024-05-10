@@ -12,7 +12,7 @@ on:
         description: "Python version to use when building binaries."
         type: string
         required: false
-        default: "3.12.1"
+        default: "3.12"
       artifact_retention_days:
         description: "Number of days to retain build artifacts in GitHub Actions."
         type: number
