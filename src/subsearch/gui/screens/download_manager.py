@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.globals.constants import VIDEO_FILE, FILE_PATHS
+from subsearch.globals import log
+from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui.resources import config as cfg
 from subsearch.providers import common_utils
-from subsearch.utils import io_file_system, io_log, io_toml, string_parser
+from subsearch.utils import io_file_system, io_toml, string_parser
 
 
 class DownloadManager(ttk.LabelFrame):
@@ -54,9 +55,9 @@ class DownloadManager(ttk.LabelFrame):
                 fg=cfg.color.default_fg,
                 bg=cfg.color.default_bg,
                 anchor="center",
-                justify="center"
+                justify="center",
             )
-            self.nothing_label.place(x=cfg.size.height //2, y=cfg.size.width//4, anchor="center")
+            self.nothing_label.place(x=cfg.size.height // 2, y=cfg.size.width // 4, anchor="center")
 
     def fill_listbox(self) -> None:
         accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
@@ -102,7 +103,7 @@ class DownloadManager(ttk.LabelFrame):
             self.download_index_size += 1
             self.downloaded_subtitle.append(subtitle)
         except Exception as e:
-            io_log.log.stdout(str(e), level="error")
+            log.stdout(str(e), level="error")
             self.update_text(selection, "⨯", subtitle, cfg.color.red)
             self.failed_subtitle_downloads.append(subtitle)
         finally:

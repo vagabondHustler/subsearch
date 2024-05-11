@@ -3,6 +3,7 @@ from typing import Any
 
 from num2words import num2words
 
+from subsearch.globals import log
 from subsearch.globals.constants import VIDEO_FILE
 from subsearch.globals.dataclasses import (
     AppConfig,
@@ -10,7 +11,7 @@ from subsearch.globals.dataclasses import (
     ProviderUrls,
     ReleaseData,
 )
-from subsearch.utils import imdb_lookup, io_log
+from subsearch.utils import imdb_lookup
 
 
 def find_year(string: str) -> int:

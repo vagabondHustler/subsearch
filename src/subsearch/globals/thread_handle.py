@@ -1,7 +1,7 @@
 import threading
 from typing import Any
 
-from subsearch.utils import io_log
+from subsearch.globals import log
 
 
 class CreateThread(threading.Thread):
@@ -16,7 +16,7 @@ class CreateThread(threading.Thread):
 
     def run(self) -> None:
         try:
-            io_log.log.stdout(f"Thread {self.name} started", level="debug", print_allowed=False)
+            log.stdout(f"Thread {self.name} started", level="debug", print_allowed=False)
             if self._target:
                 self.return_value = self._target(*self._args, **self._kwargs)
         except Exception as e:
@@ -28,8 +28,8 @@ class CreateThread(threading.Thread):
         super().join(timeout)
         if self.exception:
             msg = f"\nError occurred in thread {self.name}\n\tTraceback (most recent call last):\n\t\t{self.exception}"
-            io_log.log.stdout(msg, level="error", print_allowed=False)
+            log.stdout(msg, level="error", print_allowed=False)
             raise self.exception
         else:
-            io_log.log.stdout(f"Thread {self.name} finnished", level="debug", print_allowed=False)
+            log.stdout(f"Thread {self.name} finnished", level="debug", print_allowed=False)
         return self.return_value
