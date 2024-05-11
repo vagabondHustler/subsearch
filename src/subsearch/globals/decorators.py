@@ -1,7 +1,7 @@
 import ctypes
-from datetime import datetime
 import inspect
 import sys
+from datetime import datetime
 from typing import Any, Callable, Union
 
 from subsearch import core
@@ -91,6 +91,7 @@ class _CoreSubsearchFuncCondtitons:
 
         func_name = kwargs["func_name"]
         conditions: dict[str, list[bool]] = {
+            "add_providers": [],
             "opensubtitles": [
                 _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
                 cfg.providers["opensubtitles_hash"] or cfg.providers["opensubtitles_site"],
@@ -128,11 +129,11 @@ class _CoreSubsearchFuncCondtitons:
 
 def capture_call_info(func):
     def wrapper(*args, **kwargs):
-        frame = inspect.currentframe().f_back
+        frame = inspect.currentframe().f_back  # type: ignore
         current_time = datetime.now().time()
         call_time = current_time.strftime("%H:%M:%S.%f")[:-3]
-        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]
-        kwargs["call_lineno"] = frame.f_lineno
+        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]  # type: ignore
+        kwargs["call_lineno"] = frame.f_lineno  # type: ignore
         kwargs["call_ct"] = call_time
         return func(*args, **kwargs)
 
