@@ -1,4 +1,3 @@
-import re
 from typing import no_type_check
 
 from subsearch.providers import common_utils
@@ -52,13 +51,18 @@ class FindImdbID(AdvTitleSearch):
             href_ = item.parent.attrs["href"]
             imdb_id = href_.split("/")[2]
             title_ = item.text().split(". ")[-1]
-            year_ = int(item.parent.parent.next.child.child.html)
+            _year = item.parent.parent.next.child.child.html
+            release_year = self._handle_ongoing_show(_year)
 
             if self.title != title_.lower():
                 continue
 
-            if self.year != year_ and (self.year - 1) != year_:
+            if self.year != release_year and (self.year - 1) != release_year:
                 continue
 
             self.id = imdb_id
             break
+
+    def _handle_ongoing_show(self, year: str) -> int:
+        release_year = year.split("–")[0]
+        return int(release_year)
