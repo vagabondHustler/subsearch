@@ -8,7 +8,7 @@ on:
         description: "Release version."
         type: string
         required: true
-      python_version: 
+      python_version:
         description: "Python version to use when building binaries."
         type: string
         required: false
@@ -40,7 +40,6 @@ env:
   HASHES_NAME: "hashes.sha256"
   CHANGELOG_NAME: "changelog.md"
 
-  
 jobs:
   init:
     name: Initializing environments
@@ -50,7 +49,7 @@ jobs:
       current_tags: "${{ steps.current_tags.outputs.tags }}"
       previous_tags: "${{ steps.previous_tags.outputs.tags }}"
       last_stable_release: "${{ steps.last_stable_release.outputs.tags }}"
-      
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,18 +71,17 @@ jobs:
           python_version=${{ inputs.python_version }};
           checkout_branch=${{ github.ref_name }}"
 
-      - name: Current tags 
+      - name: Current tags
         id: current_tags
-        run: ${{ env.CLI }} json --read current_version  # tags=value
+        run: ${{ env.CLI }} json --read current_version # tags=value
 
-      - name: Previous stable tags 
+      - name: Previous stable tags
         id: last_stable_release
         run: ${{ env.CLI }} json --read last_stable_release # tags=value
 
-      - name: Previous tags 
+      - name: Previous tags
         id: previous_tags
         run: ${{ env.CLI }} json --read previous_version # tags=value
-
 
   version_control:
     name: Version control
@@ -115,17 +113,14 @@ jobs:
         if: ${{ !contains(inputs.new_tags, 'dev') }}
         run: git tag -a ${{ inputs.new_tags }} -m "Release ${{ inputs.new_tags }}"
 
-      - name: Bump subsearch version 
+      - name: Bump subsearch version
         run: ${{ env.CLI}} python --write-string ${{ inputs.new_tags }}
-
 
       - name: Bump current version
         run: ${{ env.CLI }} json -w current_version ${{ inputs.new_tags }}
 
-
       - name: Bump previous version
         run: ${{ env.CLI }} json -w previous_version ${{ needs.init.outputs.current_tags }}
-
 
       - name: Bump last stable release
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
@@ -138,7 +133,7 @@ jobs:
           git add ${{ env.VERSION_PY_PATH }} ${{ env.VERSION_CONTROL_PATH }} 
           git commit -S -m "Bump version to ${{ inputs.new_tags }}"
           git push origin HEAD:${{ github.ref_name }}
-        
+
       - name: Push tags
         if: ${{ !contains(inputs.new_tags, 'dev')  }}
         run: |
@@ -172,7 +167,7 @@ jobs:
 
       - name: Create hashes file and set outputs
         id: hashes
-        run:  ${{ env.CLI }} binaries --write-hash # suffix_hash=value
+        run: ${{ env.CLI }} binaries --write-hash # suffix_hash=value
 
       - name: Prepare artifacts
         run: ${{ env.CLI }} binaries --prepare-build-artifacts
@@ -283,10 +278,52 @@ jobs:
           if-no-files-found: error
           retention-days: ${{ inputs.artifact_retention_days }}
 
+  pr_merge:
+    name: Create pr and merge
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [init, changelog]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+
+      - uses: actions/download-artifact@v4
+        id: download
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ steps.download.outputs.download-path }}
+
+      - name: Set PR title and body
+        run: |
+
+      - name: Create PR and Merge
+        run: |
+          $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare""
+          $fromToValue = {url_repository}/${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}
+          $changelogTitle = "Release ${{ inputs.new_tags }}"
+          $changelogBody = "###### Full changelog: [${{ inputs.new_tags }}]($repositoryUrl/$fromToValue)"
+          git fetch --all
+          gh pr create --base main --head dev --title "$changelogTitle" --body "$changelogBody"
+          gh pr merge --squash --auto --subject "$changelogTitle"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   publish_github:
     name: Publish to gitHub
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [init, test_binaries, changelog]
+    needs: [init, test_binaries, changelog, pr_merge]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
     steps:
@@ -325,7 +362,7 @@ jobs:
   publish_pypi:
     name: Publish to pypi
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [version_control, test_binaries]
+    needs: [version_control, test_binaries, pr_merge]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
