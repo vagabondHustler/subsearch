@@ -6,18 +6,18 @@ import winreg
 from pathlib import Path
 from typing import Any
 
+from tools.github_actions import install_module
 from tools.github_actions.globals import (
-    CONFIG_TOML_PATH,
-    LOG_LOG_PATH,
     ARTIFACTS_PATH,
+    CONFIG_TOML_PATH,
     EXE_FREEZE_PATH,
     EXE_INSTALLED_PATH,
     HASHES_PATH,
+    LOG_LOG_PATH,
     MSI_FREEZE_PATH,
     STYLE_SEPERATOR,
 )
 from tools.github_actions.handlers import github_actions, io_python, log
-from tools.github_actions import install_module
 
 
 def test_msi_package(name: str, msi_package_path: Path) -> None:
@@ -33,7 +33,8 @@ def list_files_in_directory(directory: Path):
     try:
         files = list(directory.glob("*"))
         for file in files:
-            log.verbose_print(file)
+            f = file.as_posix()
+            log.verbose_print(f)
     except FileNotFoundError:
         log.verbose_print(f"The directory {directory} does not exist.")
     except PermissionError:
@@ -128,15 +129,6 @@ def _get_booleans_result() -> tuple[bool, bool, bool, bool]:
     return EXE_INSTALLED_PATH.is_file(), LOG_LOG_PATH.is_file(), CONFIG_TOML_PATH.is_file(), registry_key_exists()
 
 
-def _get_expected_yea_nah(name: str, yea: str, nah: str) -> tuple:
-    x = {
-        "install": (yea, nah, nah, yea),
-        "executable": (yea, yea, yea, yea),
-        "uninstall": (nah, yea, yea, nah),
-    }
-    return x[name]
-
-
 def _get_expected_result(name: str) -> tuple[bool, bool, bool, bool]:
     x = {
         "install": (True, False, False, True),
@@ -166,7 +158,6 @@ def _add_markdown_table_result(name: str) -> None:
     nah = ":x:"
     exe, log_, cfg, key = _get_booleans_result()
     e_exe, e_log, e_cfg, e_key = _get_emojis(exe, log_, cfg, key)
-    expected_yeah_nah = _get_expected_yea_nah(name, yea, nah)
     passing_result = _get_expected_result(name)
     if passing_result == (exe, log_, cfg, key):
         result_is_expected = True

@@ -4,7 +4,7 @@ run-name: Lint codebase
 on:
   push:
     branches:
-      - dev
+      - main
     paths:
     - 'src/**'
     - 'scripts/**'

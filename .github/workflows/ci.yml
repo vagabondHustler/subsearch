@@ -4,7 +4,7 @@ run-name: Continuous integration
 on:
   pull_request:
     branches: 
-      - dev
+      - main
 
 jobs:
   dependency_review:
@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ["3.10.*", "3.11.*", "3.12.*"]
+        python-version: ["3.12.*"]
         
     steps:
       - uses: actions/checkout@v4
