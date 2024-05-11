@@ -1,14 +1,29 @@
 import dataclasses
-import picologging as logging
-from pathlib import Path
+import inspect
 import threading
+from datetime import datetime
+from pathlib import Path
 from typing import Optional, TypeVar
 
+import picologging as logging
 
-from subsearch.globals import decorators, metaclasses
-from subsearch.globals.constants import FILE_PATHS, APP_PATHS
+from subsearch.globals import metaclasses
+from subsearch.globals.constants import APP_PATHS, FILE_PATHS
 
 DATACLASS = TypeVar("DATACLASS")
+
+
+def capture_call_info(func):
+    def wrapper(*args, **kwargs):
+        frame = inspect.currentframe().f_back  # type: ignore
+        current_time = datetime.now().time()
+        call_time = current_time.strftime("%H:%M:%S.%f")[:-3]
+        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]  # type: ignore
+        kwargs["call_lineno"] = frame.f_lineno  # type: ignore
+        kwargs["call_ct"] = call_time
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 class ANSIEscapeSequences:
@@ -96,22 +111,22 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
         if end_new_line:
             self._logger.log("", **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def stdout(self, message: str, **kwargs) -> None:
         self(message, **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def brackets(self, message: str, **kwargs) -> None:
         self(f"--- [{message}] ---", hex_color="#fab387", style="bold", **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def subtitle_match(self, provider: str, subtitle_name: str, result: int, threshold: int, **kwargs) -> None:
         if result >= threshold:
             self(f"{provider:<14}{result:>3}% {subtitle_name}", hex_color="#a6e3a1", **kwargs)
         else:
             self(f"{provider:<14}{result:>3}% {subtitle_name}", **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def file_system_action(self, action_type: str, src: Path, dst: Optional[Path] = None, **kwargs) -> None:
         if src.is_file():
             type_ = "file"
@@ -137,7 +152,7 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
 
         self(message, **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def dataclass(self, instance: DATACLASS, **kwargs) -> None:
         if not dataclasses.is_dataclass(instance):
             raise ValueError("Input is not a dataclass instance.")
@@ -149,9 +164,6 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
             padding = " " * (30 - len(key))
             self(f"{key}:{padding}{value}", **kwargs)
 
-    @decorators.capture_call_info
+    @capture_call_info
     def task_completed(self, **kwargs) -> None:
         self("Task completed", level="info", hex_color="#89b4fa", **kwargs)
-
-
-log = StdoutHandler()

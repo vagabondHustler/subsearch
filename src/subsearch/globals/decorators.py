@@ -1,7 +1,5 @@
 import ctypes
-import inspect
 import sys
-from datetime import datetime
 from typing import Any, Callable, Union
 
 from subsearch import core
@@ -125,19 +123,6 @@ class _CoreSubsearchFuncCondtitons:
             "clean_up": [],
         }
         return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
-
-
-def capture_call_info(func):
-    def wrapper(*args, **kwargs):
-        frame = inspect.currentframe().f_back  # type: ignore
-        current_time = datetime.now().time()
-        call_time = current_time.strftime("%H:%M:%S.%f")[:-3]
-        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]  # type: ignore
-        kwargs["call_lineno"] = frame.f_lineno  # type: ignore
-        kwargs["call_ct"] = call_time
-        return func(*args, **kwargs)
-
-    return wrapper
 
 
 def system_tray_conditions(func) -> Callable:
