@@ -20,7 +20,7 @@ jobs:
     
     steps:
       - name: Auto label
-        uses: TimonVS/pr-labeler-action@v4
+        uses: TimonVS/pr-labeler-action@v5
         with:
           configuration-path: .github/configs/auto_label.yml
         env:
