@@ -2,7 +2,6 @@ import sys
 import time
 from pathlib import Path
 
-
 from subsearch import core
 from subsearch.globals import decorators
 
@@ -18,7 +17,7 @@ class Subsearch:
         self.subsearch_core = core.SubsearchCore(PREF_COUNTER)
 
     def search_for_subtitles(self) -> None:
-        self.subsearch_core.search_for_subtitles(
+        self.subsearch_core.init_search(
             self.provider_opensubtitles,
             self.provider_subscene,
             self.provider_yifysubtitles,

@@ -1,19 +1,15 @@
 import ctypes
 import time
 from pathlib import Path
-from subsearch.globals import propagating_thread
-from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE, VERSION
+from typing import Callable
+
+from subsearch.globals import decorators, thread_handle
+from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
-from subsearch.globals import decorators
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subscene, yifysubtitles
-from subsearch.utils import (
-    io_file_system,
-    io_log,
-    io_toml,
-    string_parser,
-)
+from subsearch.utils import io_file_system, io_log, io_toml, string_parser
 
 
 class Initializer:
@@ -94,9 +90,18 @@ class SubsearchCore(Initializer):
         if not self.all_providers_disabled():
             io_log.log.brackets("Search started")
 
-    def search_for_subtitles(self, *tasks) -> None:
-        propagating_thread.handle_tasks(*tasks)
+    @decorators.call_func
+    def init_search(self, *providers: Callable[..., None]) -> None:
+        self._create_threads(*providers)
         io_log.log.task_completed()
+
+    def _create_threads(self, *tasks) -> None:
+        for thread_count, target in enumerate(tasks, start=1):
+            func_name = str(target.__name__).split("_")[-1]
+            name = f"thread_{thread_count}_{func_name}"
+            task_thread = thread_handle.CreateThread(target=target, name=name)
+            task_thread.start()
+            task_thread.join()
 
     def start_search(self, provider, flag: str = "") -> None:
         search_provider = provider(**self.search_kwargs)

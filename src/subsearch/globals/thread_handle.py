@@ -1,14 +1,14 @@
+import threading
 from typing import Any
+
 from subsearch.utils import io_log
 
-import threading
 
-
-class PropagatingThread(threading.Thread):
+class CreateThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:
         self._target = None
         self._args = ()
-        self._kwargs = {}
+        self._kwargs = {}  # type: ignore
         super().__init__(*args, **kwargs)
         self.exception = None
         self.return_value = None
@@ -20,7 +20,7 @@ class PropagatingThread(threading.Thread):
             if self._target:
                 self.return_value = self._target(*self._args, **self._kwargs)
         except Exception as e:
-            self.exception = e
+            self.exception = e  # type: ignore
         finally:
             del self._target, self._args, self._kwargs
 
@@ -33,12 +33,3 @@ class PropagatingThread(threading.Thread):
         else:
             io_log.log.stdout(f"Thread {self.name} finnished", level="debug", print_allowed=False)
         return self.return_value
-
-
-def handle_tasks(*tasks) -> None:
-    for thread_count, target in enumerate(tasks, start=1):
-        func_name = str(target.__name__).split("_")[-1]
-        name = f"thread_{thread_count}_{func_name}"
-        task_thread = PropagatingThread(target=target, name=name)
-        task_thread.start()
-        task_thread.join()
