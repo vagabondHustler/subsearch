@@ -1,9 +1,9 @@
 import re
 from typing import Any
 
+from subsearch.globals import log
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.providers import common_utils
-from subsearch.utils import io_log
 
 
 class OpenSubtitlesScraper(common_utils.ProviderHelper):
@@ -16,7 +16,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             return False
         offline_text = tree.css_first("pre").text()
         if offline_text.startswith("Site will be online soon"):
-            io_log.log.stdout(f"opensubtitles is down: {offline_text}", level="error")
+            log.stdout(f"opensubtitles is down: {offline_text}", level="error")
             return True
         return False
 
@@ -61,7 +61,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
         if not subtitle_data:
             return None
 
-        io_log.log.subtitle_match(
+        log.subtitle_match(
             provider=self.provider_name,
             subtitle_name=self.release,
             result=100,

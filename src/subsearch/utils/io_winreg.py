@@ -2,6 +2,7 @@ import sys
 import winreg
 from pathlib import Path
 
+from subsearch.globals import log
 from subsearch.globals.constants import (
     APP_PATHS,
     COMPUTER_NAME,
@@ -9,7 +10,7 @@ from subsearch.globals.constants import (
     FILE_PATHS,
     REGISTRY_PATHS,
 )
-from subsearch.utils import io_log, io_toml
+from subsearch.utils import io_toml
 
 
 class LaunchOptions:
