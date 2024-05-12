@@ -312,8 +312,8 @@ jobs:
         run: |
           git fetch --all
           $changelogContent = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
-          gh pr create --base main --head dev --title "Release ${{ inputs.new_tags }}" --body "$changelogContent" --label release
-          gh pr merge --merge --auto
+          gh pr create -B main -H dev -t "Release ${{ inputs.new_tags }}" -b "$changelogContent" -l "release"
+          gh pr merge --m --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
