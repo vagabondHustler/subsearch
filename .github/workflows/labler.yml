@@ -4,6 +4,8 @@ run-name: Labeler
 on:
   pull_request:
     types:
+      - opened
+      - reopened
       - unlabeled
     branches:
       - "build/**"
