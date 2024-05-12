@@ -89,7 +89,7 @@ class _CoreSubsearchFuncCondtitons:
 
         func_name = kwargs["func_name"]
         conditions: dict[str, list[bool]] = {
-            "add_providers": [],
+            "init_search": [],
             "opensubtitles": [
                 _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
                 cfg.providers["opensubtitles_hash"] or cfg.providers["opensubtitles_site"],
