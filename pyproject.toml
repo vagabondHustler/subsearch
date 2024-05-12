@@ -11,8 +11,7 @@
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Multimedia :: Video",
         "Topic :: Utilities",
     ]
@@ -48,7 +47,7 @@
     license = {text = "MIT license"}
     name = "Subsearch"
     readme = "README.md"
-    requires-python = ">=3.10"
+    requires-python = ">=3.12"
 
 [project.urls]
     repository = "https://github.com/vagabondHustler/subsearch"

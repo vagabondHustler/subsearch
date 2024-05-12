@@ -20,12 +20,12 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ["3.10.*", "3.11.*", "3.12.*"]
+        python-version: ["3.12.*"]
         
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: changes
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

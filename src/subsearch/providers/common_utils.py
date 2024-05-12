@@ -1,6 +1,7 @@
 import cloudscraper
 from selectolax.parser import HTMLParser
 
+from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import (
     AppConfig,
@@ -10,7 +11,7 @@ from subsearch.globals.dataclasses import (
     SubsceneCookie,
     Subtitle,
 )
-from subsearch.utils import io_log, io_toml, string_parser
+from subsearch.utils import io_toml, string_parser
 
 
 class CustomSubsceneHeader:
@@ -100,7 +101,7 @@ class ProviderHelper(BaseProviderDataContainer):
 
         for subtitle_name, subtitle_url in subtitle_data.items():
             pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            io_log.log.subtitle_match(
+            log.subtitle_match(
                 provider=provider_name,
                 subtitle_name=subtitle_name,
                 result=pct_result,

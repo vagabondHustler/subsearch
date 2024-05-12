@@ -2,13 +2,12 @@
 
 <div align="center">
 
-![Tests](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/ci.yml?style=flat-square&labelColor=1e1e2e&label=ci)
-![Tags](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e)
-![License](https://img.shields.io/github/license/vagabondhustler/SUbSearch?&style=flat-square&labelColor=1e1e2e)
-
-![downloads-total)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&label=downloads%40total&labelColor=%231e1e2e)
-![downloads-latest)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/latest/total?style=flat-square&label=downloads%40latest&labelColor=%231e1e2e)
+![tests](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/ci.yml?style=flat-square&labelColor=1e1e2e&label=ci)
+![github_commit_activity](https://img.shields.io/github/last-commit/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e&label=commit%20activity)
+![python_version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FvagabondHustler%2Fsubsearch%2Fmain%2Fpyproject.toml&style=flat-square&labelColor=1e1e2e)
+![release](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&label=latest%20release)
+![downloads-total)](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelColor=%231e1e2e&label=downloads)
+![license](https://img.shields.io/github/license/vagabondhustler/subsearch?&style=flat-square&labelColor=1e1e2e)
 
 </div>
 
@@ -72,21 +71,14 @@ Subsearch is an automated subtitle downloader and extractor with support for man
 
 #### Install from pypi: <a name = "pypi"></a>
 
-Requires Python 3.10+
-
 - Install Subsearch by running `pip install subsearch` in the command prompt.
 - Launch the app by running `subsearch` in the command prompt.
 
 #### Clone from github <a name = "clone"></a>
 
-Requires Python *3.10+
-
 - Clone the Subsearch repository by running `git clone https://github.com/vagabondHustler/subsearch.git`.
 - Install Subsearch by running `pip install -e .` or *`pip install -e .[build,lint,tests,tools,type]` for optional dependencies.
 - Build the executable and MSI installer by running `python -m tools.cx_freeze_build bdist_msi`.
-
-> [!IMPORTANT]  
-> ###### If you are using Python 3.12+ and cx_Freeze, please refer to [this issue](https://github.com/marcelotduarte/cx_Freeze/issues/2153).
 
 #### Windows installer <a name = "msi"></a>
 
@@ -97,8 +89,7 @@ Requires windows 10/11, probably works on 8.
 - If you receive a PUA message, click "More info" → "Run anyway".
 - Run Subsearch at least once for all the context menu options to appear
 
-> [!NOTE]  
-> ###### Development builds can be located in the [release](https://github.com/vagabondHustler/subsearch/actions/workflows/release.yml) action job, within the generated artifacts.
+###### Development builds can be located in the [release](https://github.com/vagabondHustler/subsearch/actions/workflows/release.yml) action job, within the generated artifacts.
 
 <details>
 <summary>Screenshots of PUA message<a name = "pua"></a></summary>
@@ -115,7 +106,7 @@ More about potentially unwanted applications (PUA) can be found [here](https://s
 
 ## Acknowledgements<a name = "thanks"></a>
 
-I would like to express my gratitude to the following repositories for providing templates, scripts, inspiration, themes, and solutions to similar problems:
+The following repositories provided templates, scripts, inspiration, themes, etc:
 
 - [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
 - [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
