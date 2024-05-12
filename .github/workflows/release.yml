@@ -281,7 +281,7 @@ jobs:
   pr_merge:
     name: Create pr and merge
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [init, changelog]
+    needs: [init, test_binaries, changelog]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
 
@@ -311,12 +311,12 @@ jobs:
       - name: Create PR and Merge
         run: |
           $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare"
-          $fromToValue = "{url_repository}/${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}"
+          $fromToValue = "${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}"
           $changelogTitle = "Release ${{ inputs.new_tags }}"
           $changelogBody = "###### Full changelog: [${{ inputs.new_tags }}]($repositoryUrl/$fromToValue)"
           git fetch --all
           gh pr create --base main --head dev --title "$changelogTitle" --body "$changelogBody"
-          gh pr merge --squash --auto --subject "$changelogTitle"
+          gh pr merge --merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

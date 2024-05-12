@@ -1,6 +1,12 @@
-feat: "feat/"
+build: "build/*"
+ci: "ci/*"
+docs: "docs/*"
+feat: "feat/*"
 fix: "fix/*"
+perf: "perf/*"
+refactor: "refactor/*"
+style: "style/*"
 test: "test/*"
-chore: "chore/*"
-dependency: ["dependabot/*", "dependency/*"]
-workflow: ["workflow/*"]
+other: "other/*"
+dependency: "dependency/*"
+release: "release/*"
