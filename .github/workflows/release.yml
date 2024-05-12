@@ -310,8 +310,8 @@ jobs:
 
       - name: Create PR and Merge
         run: |
-          $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare""
-          $fromToValue = {url_repository}/${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}
+          $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare"
+          $fromToValue = "{url_repository}/${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}"
           $changelogTitle = "Release ${{ inputs.new_tags }}"
           $changelogBody = "###### Full changelog: [${{ inputs.new_tags }}]($repositoryUrl/$fromToValue)"
           git fetch --all
