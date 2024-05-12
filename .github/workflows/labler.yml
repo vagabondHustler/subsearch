@@ -8,18 +8,18 @@ on:
       - reopened
       - unlabeled
     branches:
-      - "build/**"
-      - "ci/**"
-      - "docs/**"
-      - "feat/**"
-      - "fix/**"
-      - "perf/**"
-      - "refactor/**"
-      - "style/**"
-      - "test/**"
-      - "other/**"
-      - "dependency/**"
-      - "release/**"
+      - build/*
+      - ci/*
+      - docs/*
+      - feat/*
+      - fix/*
+      - perf/*
+      - refactor/*
+      - style/*
+      - test/*
+      - other/*
+      - dependency/*
+      - release/*
 
 jobs:
   pr_labeler:
