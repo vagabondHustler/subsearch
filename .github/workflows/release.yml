@@ -5,26 +5,26 @@ on:
   workflow_dispatch:
     inputs:
       new_tags:
-        description: "Release version"
+        description: "Release version."
         type: string
         required: true
       python_version:
-        description: "Python version to use when building binaries"
+        description: "Python version to use when building binaries."
         type: string
         required: false
         default: "3.12"
       artifact_retention_days:
-        description: "Number of days to retain build artifacts in GitHub Actions"
+        description: "Number of days to retain build artifacts in GitHub Actions."
         type: number
         required: false
         default: 7
       timeout_minutes:
-        description: "Timeout in minutes for jobs in GitHub Actions"
+        description: "Timeout in minutes for jobs in GitHub Actions."
         type: number
         required: false
         default: 10
       runs_on:
-        description: "GitHub Actions runner environment for jobs in the workflow"
+        description: "GitHub Actions runner environment for jobs in the workflow."
         type: string
         required: false
         default: windows-latest
@@ -310,10 +310,13 @@ jobs:
 
       - name: Create PR and Merge
         run: |
+          $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare"
+          $fromToValue = "${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}"
+          $changelogTitle = "Release ${{ inputs.new_tags }}"
+          $changelogBody = "###### Full changelog: [${{ inputs.new_tags }}]($repositoryUrl/$fromToValue)"
           git fetch --all
-          $changelogContent = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
-          gh pr create -B main -H dev -t "Release ${{ inputs.new_tags }}" -b "$changelogContent" -l "release"
-          gh pr merge --m --auto
+          gh pr create --base main --head dev --title "$changelogTitle" --body "$changelogBody"
+          gh pr merge --merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
