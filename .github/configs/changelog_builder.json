@@ -1,27 +1,32 @@
 {
-	"categories": [
-		{
-			"title": "#### ✨ Features:",
-			"labels": ["feat", "feature"]
-		},
-		{
-			"title": "#### 🐛 Fixes:",
-			"labels": ["fix"]
-		},
-		{
-			"title": "#### 🧪Tests:",
-			"labels": ["test"]
-		},
-		{
-			"title": "#### 💤 Chores:",
-			"labels": ["chore", "other"]
-		},
-		{
-			"title": "#### 📦 Dependencies & workflows:",
-			"labels": ["dependency", "dependabot", "workflow", "github-actions"]
-		}
-	],
-	"template": "${{CHANGELOG}}\n\n",
-	"empty_template": "No changes\n\n",
-	"pr_template": "- ${{TITLE}} - [PR${{NUMBER}}](${{URL}})"
+  "categories": [
+    {
+      "title": "#### ✨ Features:",
+      "labels": ["feat"]
+    },
+    {
+      "title": "#### 🐛 Fixes:",
+      "labels": ["fix"]
+    },
+    {
+      "title": "#### 📚 Docs:",
+      "labels": ["test"]
+    },
+    {
+      "title": "#### ⚙️ Other:",
+      "labels": [
+        "build",
+        "ci",
+        "perf",
+        "refactor",
+        "style",
+        "test",
+        "other",
+        "dependency"
+      ]
+    }
+  ],
+  "template": "${{CHANGELOG}}\n\n",
+  "empty_template": "No changes\n\n",
+  "pr_template": "- ${{TITLE}} - [PR${{NUMBER}}](${{URL}})"
 }
