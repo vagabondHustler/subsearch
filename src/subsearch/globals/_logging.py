@@ -3,17 +3,16 @@ import inspect
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, TypeVar
+from typing import Callable, Optional
 
 import picologging as logging
 
 from subsearch.globals import metaclasses
 from subsearch.globals.constants import APP_PATHS, FILE_PATHS
+from subsearch.globals.dataclasses import GenericDataClass
 
-DATACLASS = TypeVar("DATACLASS")
 
-
-def capture_call_info(func):
+def capture_call_info(func) -> Callable[..., None]:
     def wrapper(*args, **kwargs):
         frame = inspect.currentframe().f_back  # type: ignore
         current_time = datetime.now().time()
@@ -36,7 +35,7 @@ class ANSIEscapeSequences:
     UNDERLINE = "\033[4m"
 
 
-class Logger(metaclass=metaclasses.Singleton):
+class _Logging(metaclass=metaclasses.Singleton):
     def __init__(self, *args, **kwargs) -> None:
         self.logger_name = kwargs.get("logger_name", "subsearch")
         if not APP_PATHS.appdata_subsearch.exists():
@@ -98,9 +97,9 @@ class Logger(metaclass=metaclasses.Singleton):
         print(f"{style_code}{color_code}{message}{self._ansi.RESET}")
 
 
-class StdoutHandler(metaclass=metaclasses.Singleton):
+class Logger(metaclass=metaclasses.Singleton):
     def __init__(self) -> None:
-        self._logger = Logger()
+        self._logger = _Logging()
 
     def __call__(self, message: str, **kwargs) -> None:
         self.log(message, **kwargs)
@@ -153,7 +152,7 @@ class StdoutHandler(metaclass=metaclasses.Singleton):
         self(message, **kwargs)
 
     @capture_call_info
-    def dataclass(self, instance: DATACLASS, **kwargs) -> None:
+    def dataclass(self, instance: GenericDataClass, **kwargs) -> None:
         if not dataclasses.is_dataclass(instance):
             raise ValueError("Input is not a dataclass instance.")
         instance_name = f"--- [{instance.__class__.__name__}] ---"
