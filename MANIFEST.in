@@ -1,3 +1,6 @@
+include README.md
+include LICENSE
+
 graft src
 
 exclude tox.ini
@@ -6,4 +9,6 @@ prune assets
 prune tests
 prune */.pytest_cache 
 
-global-exclude */__pycache__/* *.log
+global-exclude */__pycache__/* 
+global-exclude *.log
+global-exclude *.pyc
