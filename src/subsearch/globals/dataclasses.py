@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import Field, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar, Protocol
 
 
 @dataclass(order=True)
@@ -112,3 +112,7 @@ class WindowsRegistryPaths:
     shell: str
     subsearch: str
     subsearch_command: str
+
+
+class GenericDataClass(Protocol):
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
