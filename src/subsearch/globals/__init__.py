@@ -1,3 +1,3 @@
-from ._logging import StdoutHandler
+from ._logging import Logger
 
-log = StdoutHandler()
+log = Logger()
