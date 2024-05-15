@@ -305,23 +305,20 @@ jobs:
         run: ls -R
         working-directory: ${{ steps.download.outputs.download-path }}
 
-      - name: Set PR title and body
+      - name: Create PR
         run: |
-
-      - name: Create PR and Merge
-        run: |
-          $repositoryUrl = "https://github.com/vagabondHustler/subsearch/compare"
-          $fromToValue = "${{ needs.init.outputs.last_stable_release }}...${{ inputs.new_tags }}"
           $changelogTitle = "Release ${{ inputs.new_tags }}"
-          $changelogBody = "###### Full changelog: [${{ inputs.new_tags }}]($repositoryUrl/$fromToValue)"
+          $changelogBody = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
           git fetch --all
-          gh pr create --base main --head dev --title "$changelogTitle" --body "$changelogBody"
-          gh pr merge --merge
+          gh pr create -B main -H dev -t "$changelogTitle" -b "$changelogBody" -l "release"
+          gh pr merge -m
+          git rebase main dev
+          git fetch origin dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_github:
-    name: Publish to gitHub
+    name: Publish to github
     if: ${{ !contains(inputs.new_tags, 'dev') }}
     needs: [init, test_binaries, changelog, pr_merge]
     runs-on: ${{ inputs.runs_on }}

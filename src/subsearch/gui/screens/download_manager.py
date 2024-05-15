@@ -84,8 +84,6 @@ class DownloadManager(ttk.LabelFrame):
         if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
-        if subtitle.provider == "subscene":
-            subtitle.download_url = common_utils.ProviderHelper.subscene_get_download_url(subtitle.download_url)
         self.update_text(selection, "⊙", subtitle, cfg.color.orange)
         self.sub_listbox.bind("<ButtonRelease-1>", lambda event: self.download(event, subtitle, selection))
 

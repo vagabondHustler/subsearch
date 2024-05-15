@@ -83,7 +83,6 @@ def test_provider_urls_movie(monkeypatch):
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert provider_url.subscene == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar"
     assert (
         provider_url.opensubtitles
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
@@ -105,10 +104,6 @@ def test_provider_urls_series(monkeypatch):
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert (
-        provider_url.subscene
-        == "https://subscene.com/subtitles/searchbytitle?query=the%20foo%20bar%20-%20first%20season"
-    )
     assert (
         provider_url.opensubtitles
         == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"

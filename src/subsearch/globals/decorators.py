@@ -94,10 +94,6 @@ class _CoreSubsearchFuncCondtitons:
                 _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
                 cfg.providers["opensubtitles_hash"] or cfg.providers["opensubtitles_site"],
             ],
-            "subscene": [
-                _CoreSubsearchFuncCondtitons.language_compatibility("subscene"),
-                cfg.providers["subscene_site"],
-            ],
             "yifysubtitles": [
                 not cfg.only_foreign_parts,
                 _CoreSubsearchFuncCondtitons.language_compatibility("yifysubtitles"),

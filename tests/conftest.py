@@ -33,7 +33,7 @@ def tests_path():
 @pytest.fixture
 def fake_language_data_file(tmp_path):
     fake_data = {
-        "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": [], "subscene_id": 13}
+        "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}
     }
 
     fake_file = tmp_path / "fake_language_datag.toml"

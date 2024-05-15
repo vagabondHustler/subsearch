@@ -155,7 +155,7 @@ tools/spritesheet_generator/.input
 tools/spritesheet_generator/package-lock.json
 tools/spritesheet_generator/node_modules
 
-#Misc
+# Test, .env, log related files and folders
 tests/__subsearch__.log
 src/subsearch/subsearch.log
 src/*test*

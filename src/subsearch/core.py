@@ -8,7 +8,7 @@ from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
-from subsearch.providers import opensubtitles, subscene, yifysubtitles
+from subsearch.providers import opensubtitles, yifysubtitles
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -65,8 +65,7 @@ class Initializer:
 
     def all_providers_disabled(self) -> bool:
         if (
-            self.app_config.providers["subscene_site"] is False
-            and self.app_config.providers["opensubtitles_site"] is False
+            self.app_config.providers["opensubtitles_site"] is False
             and self.app_config.providers["opensubtitles_hash"] is False
             and self.app_config.providers["yifysubtitles_site"] is False
         ):
@@ -103,27 +102,20 @@ class SubsearchCore(Initializer):
             task_thread.start()
             task_thread.join()
 
-    def start_search(self, provider, flag: str = "") -> None:
+    def _start_search(self, provider, flag: str) -> None:
         search_provider = provider(**self.search_kwargs)
-        if flag:
-            search_provider.start_search(flag=flag)
-        else:
-            search_provider.start_search()
+        search_provider.start_search(flag=flag)
         self.accepted_subtitles.extend(search_provider.accepted_subtitles)
         self.rejected_subtitles.extend(search_provider.rejected_subtitles)
 
     @decorators.call_func
     def opensubtitles(self) -> None:
-        self.start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
-        self.start_search(provider=opensubtitles.OpenSubtitles, flag="site")
-
-    @decorators.call_func
-    def subscene(self) -> None:
-        self.start_search(provider=subscene.Subscene)
+        self._start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
+        self._start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
     @decorators.call_func
     def yifysubtitles(self) -> None:
-        self.start_search(provider=yifysubtitles.YifiSubtitles)
+        self._start_search(provider=yifysubtitles.YifiSubtitles, flag="site")
 
     @decorators.call_func
     def download_files(self) -> None:
