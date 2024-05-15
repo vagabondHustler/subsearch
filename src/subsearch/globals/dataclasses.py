@@ -9,7 +9,6 @@ class LanguageData:
     alpha_1: str
     alpha_2b: str
     incompatibility: list[str]
-    subscene_id: int
 
 
 @dataclass(order=True, slots=True)
@@ -71,15 +70,6 @@ class AppConfig:
 
 
 @dataclass(order=True, slots=True)
-class SubsceneCookie:
-    dark_theme: bool
-    sort_subtitle_by_date: str
-    language_filter: int
-    hearing_impaired: int
-    foreigen_only: bool
-
-
-@dataclass(order=True, slots=True)
 class ReleaseData:
     title: str
     year: int
@@ -94,7 +84,6 @@ class ReleaseData:
 
 @dataclass(order=True, slots=True)
 class ProviderUrls:
-    subscene: str
     opensubtitles: str
     opensubtitles_hash: str
     yifysubtitles: str
