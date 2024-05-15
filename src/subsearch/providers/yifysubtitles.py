@@ -42,7 +42,7 @@ class YifiSubtitles(YifySubtitlesScraper):
         YifySubtitlesScraper.__init__(self, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self) -> list[Subtitle] | None:
+    def start_search(self, **kwargs) -> list[Subtitle] | None:
         subtitle_data = self.get_subtitle(self.url_yifysubtitles, self.current_language, self.hi_sub, self.non_hi_sub)
 
         if not subtitle_data:
