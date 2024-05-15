@@ -19,15 +19,12 @@ class Subsearch:
     def search_for_subtitles(self) -> None:
         self.subsearch_core.init_search(
             self.provider_opensubtitles,
-            self.provider_subscene,
             self.provider_yifysubtitles,
         )
 
     def provider_opensubtitles(self) -> None:
         self.subsearch_core.opensubtitles()
 
-    def provider_subscene(self) -> None:
-        self.subsearch_core.subscene()
 
     def provider_yifysubtitles(self) -> None:
         self.subsearch_core.yifysubtitles()

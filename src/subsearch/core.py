@@ -8,7 +8,7 @@ from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
-from subsearch.providers import opensubtitles, subscene, yifysubtitles
+from subsearch.providers import opensubtitles,  yifysubtitles
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -65,8 +65,7 @@ class Initializer:
 
     def all_providers_disabled(self) -> bool:
         if (
-            self.app_config.providers["subscene_site"] is False
-            and self.app_config.providers["opensubtitles_site"] is False
+            self.app_config.providers["opensubtitles_site"] is False
             and self.app_config.providers["opensubtitles_hash"] is False
             and self.app_config.providers["yifysubtitles_site"] is False
         ):
@@ -117,9 +116,6 @@ class SubsearchCore(Initializer):
         self.start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
         self.start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
-    @decorators.call_func
-    def subscene(self) -> None:
-        self.start_search(provider=subscene.Subscene)
 
     @decorators.call_func
     def yifysubtitles(self) -> None:

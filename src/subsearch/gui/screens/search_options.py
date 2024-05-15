@@ -19,7 +19,6 @@ class Providers(ttk.Labelframe):
         self.provider_options: dict = {
             "opensubtitles_site": "Opensubtitles",
             "opensubtitles_hash": "Opensubtitles with hash",
-            "subscene_site": "Subscene",
             "yifysubtitles_site": "YIFYsubtitles",
         }
         for name, description in self.provider_options.items():

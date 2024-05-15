@@ -83,14 +83,8 @@ class CreateProviderUrls:
         self.current_language_data: LanguageData = LanguageData(**language_data[app_config.language])
 
     def retrieve_urls(self) -> ProviderUrls:
-        return ProviderUrls(self.subscene(), self.opensubtitles(), self.opensubtitles_hash(), self.yifysubtitles())
+        return ProviderUrls(self.opensubtitles(), self.opensubtitles_hash(), self.yifysubtitles())
 
-    def subscene(self) -> str:
-        domain = "https://subscene.com"
-        query = "subtitles/searchbytitle?query"
-        search_parameters = self._subscene_search_parameters()
-        url_subscene = f"{domain}/{query}={search_parameters}"
-        return url_subscene.replace(" ", "%20")
 
     def opensubtitles(self) -> str:
         domain = "https://www.opensubtitles.org"
@@ -110,10 +104,6 @@ class CreateProviderUrls:
         tt_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
         return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else ""
 
-    def _subscene_search_parameters(self) -> str:
-        if self.release_data.tvseries:
-            return f"{self.release_data.title} - {self.release_data.season_ordinal} season"
-        return f"{self.release_data.title}"
 
     def _opensubtitles_subtitle_type(self) -> str:
         alpha_2b = self.current_language_data.alpha_2b

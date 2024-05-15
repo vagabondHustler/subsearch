@@ -41,11 +41,6 @@ def test_conditions_opensubtitles(fake_cls: FakeSubsearchCore) -> None:
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
 
-def test_conditions_subscene(fake_cls: FakeSubsearchCore) -> None:
-    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
-
-    fake_cls.app_config.providers["subscene_site"] = False
-    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
 
 def test_conditions_yifysubtitles(fake_cls: FakeSubsearchCore) -> None:
