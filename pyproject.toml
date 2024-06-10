@@ -19,7 +19,7 @@
         "picologging==0.9.3",
         "cloudscraper==1.2.71",
         "num2words==0.5.13",
-        "packaging==24.0",
+        "packaging==24.1",
         "pillow==10.3.0",
         "pystray==0.19.5",
         "requests==2.31.0",
