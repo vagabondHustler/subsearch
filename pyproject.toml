@@ -71,7 +71,7 @@
     build = [
         "build==1.2.1",
         "cx_Freeze==7.0.0",
-        "twine==5.0.0",
+        "twine==5.1.1",
         "psutil==5.9.8",
     ]
     lint = ["black==24.4.2", "isort==5.13.2"]
