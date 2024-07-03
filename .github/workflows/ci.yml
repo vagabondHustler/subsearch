@@ -18,13 +18,15 @@ jobs:
 
   pr_labeler:
     runs-on: windows-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Auto label
         uses: TimonVS/pr-labeler-action@v5
         with:
+          repo-token: ${{ secrets.ACTIONS_TOKEN }}
           configuration-path: .github/configs/labeler.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
   paths_filter:
     runs-on: windows-latest
