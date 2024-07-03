@@ -81,8 +81,9 @@
         "tox==4.16.0",
         "python-dotenv==1.0.1",
     ]
-    tools = ["pyperclip==1.8.2"]
+    tools = ["pyperclip==1.9.0"]
     type = ["mypy==1.10.1"]
+
 
 [tool.pytest.ini_options]
     addopts = "--cov=src/subsearch"
