@@ -87,6 +87,7 @@ class ProviderUrls:
     opensubtitles: str
     opensubtitles_hash: str
     yifysubtitles: str
+    subsource: str
 
 
 @dataclass(order=True, slots=True)
@@ -116,3 +117,4 @@ class WindowsRegistryPaths:
 
 class GenericDataClass(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
+
