@@ -50,7 +50,7 @@ class VideoFile:
 
 @dataclass(order=True, slots=True)
 class AppConfig:
-    language: str
+    current_language: str
     accept_threshold: int
     hearing_impaired: bool
     non_hearing_impaired: bool
@@ -80,6 +80,7 @@ class ReleaseData:
     tvseries: bool
     release: str
     group: str
+    imdb_id: str
 
 
 @dataclass(order=True, slots=True)
@@ -87,14 +88,15 @@ class ProviderUrls:
     opensubtitles: str
     opensubtitles_hash: str
     yifysubtitles: str
+    subsource: str
 
 
 @dataclass(order=True, slots=True)
 class Subtitle:
-    pct_result: int
-    provider: str
-    release_name: str
-    download_url: str
+    precentage_result: int
+    provider_name: str
+    subtitle_name: str
+    subtitle_download_url: str
 
 
 @dataclass(order=True, frozen=True)
@@ -116,3 +118,18 @@ class WindowsRegistryPaths:
 
 class GenericDataClass(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
+
+
+@dataclass(order=True, slots=True)
+class ProviderApiLimit:
+    opensubtitles: int
+    yifysubtitles: int
+    subsource: int
+
+
+@dataclass(order=True, slots=True)
+class SubtitleUndetermined:
+    provider_name: str
+    precentage_result: int
+    passed_threshold: bool
+    data: dict[str, Any]

@@ -45,7 +45,7 @@ def get_default_app_config() -> dict[str, Any]:
     providers = dict.fromkeys(get_supported_providers(), True)
     config = {
         "subtitle_filters": {
-            "language": "english",
+            "current_language": "english",
             "accept_threshold": 90,
             "hearing_impaired": True,
             "non_hearing_impaired": True,
@@ -141,7 +141,7 @@ def get_supported_file_ext() -> list[str]:
 
 
 def get_supported_providers() -> list[str]:
-    providers = ["opensubtitles_site", "opensubtitles_hash",  "yifysubtitles_site"]
+    providers = ["opensubtitles_site", "opensubtitles_hash",  "yifysubtitles_site", "subsource_site"]
     return providers
 
 
