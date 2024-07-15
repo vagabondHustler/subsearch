@@ -36,7 +36,7 @@ def apply_mutex(func: Callable) -> Callable:
     return inner
 
 
-def check_option_disabled(func) -> Callable:
+def check_option_disabled(func) -> Callable[..., Any]:
     def wrapper(self, event, *args, **kwargs) -> Any:
         btn = event.widget
         if btn.instate(["disabled"]):
@@ -46,7 +46,7 @@ def check_option_disabled(func) -> Callable:
     return wrapper
 
 
-def call_func(func) -> Callable:
+def call_func(func) -> Callable[..., Any]:
     def wrapper(*args, **kwargs) -> Any:
         func_name = f"{func.__name__}"
         if not _CoreSubsearchFuncCondtitons.conditions_met(func_name=func_name, *args, **kwargs):
@@ -101,6 +101,11 @@ class _CoreSubsearchFuncCondtitons:
                 not cls.provider_urls.yifysubtitles == "",
                 cfg.providers["yifysubtitles_site"],
             ],
+            "subsource": [
+                not cfg.only_foreign_parts,
+                _CoreSubsearchFuncCondtitons.language_compatibility("subsource"),
+                cfg.providers["subsource_site"],
+            ],
             "download_files": [
                 len(cls.accepted_subtitles) >= 1,
                 (df_senario_1 or df_senario_2),
@@ -121,7 +126,7 @@ class _CoreSubsearchFuncCondtitons:
         return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
 
 
-def system_tray_conditions(func) -> Callable:
+def system_tray_conditions(func) -> Callable[..., Any]:
     def wrapper(*args, **kwargs) -> Any:
         if enable_system_tray:
             return func(*args, **kwargs)
@@ -129,7 +134,7 @@ def system_tray_conditions(func) -> Callable:
     return wrapper
 
 
-def except_hook(func, excepthook_) -> Callable:
+def except_hook(func, excepthook_) -> Callable[..., Any]:
     def wrapper(*args, **kwargs) -> Any:
         sys.excepthook = excepthook_
         return func(*args, **kwargs)
