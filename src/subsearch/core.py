@@ -8,7 +8,7 @@ from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
-from subsearch.providers import opensubtitles, yifysubtitles
+from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -68,6 +68,7 @@ class Initializer:
             self.app_config.providers["opensubtitles_site"] is False
             and self.app_config.providers["opensubtitles_hash"] is False
             and self.app_config.providers["yifysubtitles_site"] is False
+            and self.app_config.providers["subsource_site"] is False
         ):
             return True
         return False
@@ -116,6 +117,10 @@ class SubsearchCore(Initializer):
     @decorators.call_func
     def yifysubtitles(self) -> None:
         self._start_search(provider=yifysubtitles.YifiSubtitles, flag="site")
+        
+    @decorators.call_func
+    def subsource(self) -> None:
+        self._start_search(provider=subsource.Subsource, flag="site")
 
     @decorators.call_func
     def download_files(self) -> None:

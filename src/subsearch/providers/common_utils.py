@@ -1,6 +1,6 @@
+
 import cloudscraper
 from selectolax.parser import HTMLParser
-
 from subsearch.globals import log
 from subsearch.globals.constants import VIDEO_FILE
 from subsearch.globals.dataclasses import (
@@ -43,9 +43,12 @@ class BaseProviderDataContainer:
         self.url_opensubtitles = provider_urls.opensubtitles
         self.url_opensubtitles_hash = provider_urls.opensubtitles_hash
         self.url_yifysubtitles = provider_urls.yifysubtitles
+        self.url_subsource = provider_urls.subsource
 
         self.language_data = language_data
         self.filehash = VIDEO_FILE.file_hash
+
+
 
 
 class ProviderHelper(BaseProviderDataContainer):
@@ -66,12 +69,14 @@ class ProviderHelper(BaseProviderDataContainer):
                 result=pct_result,
                 threshold=self.app_config.accept_threshold,
             )
+
             if is_threshold_met(self, pct_result):
                 subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
                 self._accepted_subtitles.append(subtitle)
             else:
                 subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
                 self._rejected_subtitles.append(subtitle)
+
 
 
 def is_threshold_met(cls: "BaseProviderDataContainer", pct_result: int) -> bool:

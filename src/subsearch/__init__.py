@@ -20,6 +20,7 @@ class Subsearch:
         self.subsearch_core.init_search(
             self.provider_opensubtitles,
             self.provider_yifysubtitles,
+            self.provider_subsource,
         )
 
     def provider_opensubtitles(self) -> None:
@@ -28,6 +29,9 @@ class Subsearch:
 
     def provider_yifysubtitles(self) -> None:
         self.subsearch_core.yifysubtitles()
+        
+    def provider_subsource(self) -> None:
+        self.subsearch_core.subsource()
 
     def process_files(self) -> None:
         self.subsearch_core.download_files()
