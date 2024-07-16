@@ -80,6 +80,7 @@ class ReleaseData:
     tvseries: bool
     release: str
     group: str
+    imdb_id: str
 
 
 @dataclass(order=True, slots=True)
