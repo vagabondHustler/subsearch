@@ -14,6 +14,13 @@ from subsearch.globals.dataclasses import (
 from subsearch.utils import imdb_lookup
 
 
+def remove_padded_zero(x: str) -> str:
+    lenght = len(x)
+    if x.startswith("0") and lenght > 1:
+        return str(x)[1:]
+    return x
+
+
 def find_year(string: str) -> int:
     re_year = re.findall(r"^.*\.([1-2][0-9]{3})\.", string)
     if re_year:
@@ -92,9 +99,8 @@ class CreateProviderUrls:
         return urls
 
     @property
-    def subsource(self):
-        imdb_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
-        return imdb_id
+    def subsource(self) -> str:
+        return "https://api.subsource.net/api"
 
     @property
     def opensubtitles(self) -> str:
@@ -114,8 +120,7 @@ class CreateProviderUrls:
         if self.release_data.tvseries:
             return ""
         domain = "https://yifysubtitles.org"
-        tt_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
-        return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else ""
+        return f"{domain}/movie-imdb/{self.release_data.imdb_id}" if self.release_data.imdb_id is not None else ""
 
     def _opensubtitles_subtitle_type(self) -> str:
         alpha_2b = self.current_language_data.alpha_2b
@@ -161,6 +166,8 @@ def get_release_data(filename: str) -> ReleaseData:
 
     title = find_title(release, year, series)
     group = find_group(release)
+    find_id = imdb_lookup.FindImdbID(title, year, series)
+    imdb_id = find_id.imdb_id
 
     parameters = ReleaseData(
         title,
@@ -172,6 +179,7 @@ def get_release_data(filename: str) -> ReleaseData:
         series,
         release,
         group,
+        imdb_id,
     )
     return parameters
 
