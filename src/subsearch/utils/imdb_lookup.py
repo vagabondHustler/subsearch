@@ -3,44 +3,69 @@ from typing import no_type_check
 from subsearch.providers import common_utils
 
 
-class AdvTitleSearch:
-    def __init__(self, title: str, year: int) -> None:
+class AdvancedSearch:
+    def __init__(self, *args, **kwargs) -> None: ...
+
+    def get_url(self) -> str: ...
+
+
+class ImdbMovieSearch(AdvancedSearch):
+    def __init__(self, title: str, year: int, *args, **kwargs) -> None:
+        super().__init__(self, *args, **kwargs)
         self.title = title
         self.year = year
 
     def get_url(self) -> str:
         imdb_domain = "https://www.imdb.com"
-        return f"{imdb_domain}/search/title/?{self.title_search}&{self.release_date_search}"
+        return f"{imdb_domain}/search/title/?{self._title_search}&{self._release_date_search}"
 
     @property
-    def prior_year(self) -> str:
+    def _prior_year(self) -> str:
         return f"{self.year-1}-01-01"
 
     @property
-    def release_year(self) -> str:
+    def _release_year(self) -> str:
         return f"{self.year}-12-31"
 
     @property
-    def release_title(self) -> str:
+    def _release_title(self) -> str:
         return self.title.replace(" ", "+")
 
     @property
-    def title_search(self) -> str:
-        return f"title={self.release_title}"
+    def _title_search(self) -> str:
+        return f"title={self._release_title}"
 
     @property
-    def release_date_search(self) -> str:
-        return f"release_date={self.prior_year},{self.release_year}"
+    def _release_date_search(self) -> str:
+        return f"release_date={self._prior_year},{self._release_year}"
 
 
-class FindImdbID(AdvTitleSearch):
+class ImdbTvseriesSearch(AdvancedSearch):
+    def __init__(self, title: str, *args, **kwargs) -> None:
+        super().__init__(self, *args, **kwargs)
+        self.title = title
+
+    def get_url(self) -> str:
+        imdb_domain = "https://www.imdb.com"
+        return f"{imdb_domain}/search/title/?{self._title_search}"
+
+    @property
+    def _release_title(self) -> str:
+        return self.title.replace(" ", "+")
+
+    @property
+    def _title_search(self) -> str:
+        return f"title={self._release_title}"
+
+
+class FindImdbID:
     @no_type_check
-    def __init__(self, title: str, year: int) -> None:
+    def __init__(self, title: str, year: int, tvseries: bool) -> None:
         self.title = title.lower()
         self.year = year
-        self.id = None
-
-        adv_search = AdvTitleSearch(self.title, self.year)
+        self.tvseries = tvseries
+        self.imdb_id = ""
+        adv_search = self._advanced_search()
 
         url = adv_search.get_url()
         tree = common_utils.get_html_parser(url)
@@ -56,13 +81,20 @@ class FindImdbID(AdvTitleSearch):
 
             if self.title != title_.lower():
                 continue
+            if not self.tvseries:
+                if self.year != release_year and (self.year - 1) != release_year:
+                    continue
 
-            if self.year != release_year and (self.year - 1) != release_year:
-                continue
-
-            self.id = imdb_id
+            self.imdb_id = str(imdb_id)
             break
 
+    def _advanced_search(self) -> AdvancedSearch:
+        if self.tvseries:
+            return ImdbTvseriesSearch(self.title)
+        else:
+            return ImdbMovieSearch(self.title, self.year)
+
     def _handle_ongoing_show(self, year: str) -> int:
-        release_year = year.split("–")[0]
-        return int(release_year)
+        if not self.tvseries:
+            release_year = year.split("–")[0]
+            return int(release_year)
