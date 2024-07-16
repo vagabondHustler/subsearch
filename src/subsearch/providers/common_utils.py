@@ -1,6 +1,6 @@
-
 import cloudscraper
 from selectolax.parser import HTMLParser
+
 from subsearch.globals import log
 from subsearch.globals.constants import VIDEO_FILE
 from subsearch.globals.dataclasses import (
@@ -13,14 +13,17 @@ from subsearch.globals.dataclasses import (
 from subsearch.utils import string_parser
 
 
-class BaseProviderDataContainer:
+class ProviderDataContainer:
     def __init__(self, **kwargs) -> None:
-        release_data: ReleaseData = kwargs["release_data"]
-        app_config: AppConfig = kwargs["app_config"]
-        provider_urls: ProviderUrls = kwargs["provider_urls"]
-        language_data: LanguageData = kwargs["language_data"]
+        release_data: ReleaseData = kwargs.get("release_data")
+        app_config: AppConfig = kwargs.get("app_config")
+        provider_urls: ProviderUrls = kwargs.get("provider_urls")
+        language_data: LanguageData = kwargs.get("language_data")
 
         self.app_config = app_config
+        self.release_data = release_data
+        self.provider_urls = provider_urls
+        self.language_data = language_data
 
         # file parameters
         self.title = release_data.title
@@ -32,6 +35,7 @@ class BaseProviderDataContainer:
         self.tvseries = release_data.tvseries
         self.release = release_data.release
         self.group = release_data.group
+        self.imdb_id = release_data.imdb_id
 
         # user parameters
         self.current_language = app_config.language
@@ -45,15 +49,33 @@ class BaseProviderDataContainer:
         self.url_yifysubtitles = provider_urls.yifysubtitles
         self.url_subsource = provider_urls.subsource
 
-        self.language_data = language_data
         self.filehash = VIDEO_FILE.file_hash
+        self.season_no_padding = self._season_no_padding()
+        self.episode_no_padding = self._episode_no_padding()
+        self.ok_season_episode_pattern = self._ok_season_episode_pattern()
+
+    def _season_no_padding(self) -> str:
+        return string_parser.remove_padded_zero(self.release_data.season)
+
+    def _episode_no_padding(self) -> str:
+        return string_parser.remove_padded_zero(self.release_data.episode)
+
+    def _ok_season_episode_pattern(self) -> list[str]:
+        season_episode_pattern_0 = [
+            f"season.{self.season}.",
+            f"s{self.season}e{self.episode}.",
+            f"s{self.season}.e{self.episode}.",
+        ]
+        season_episode_pattern_1 = [
+            f"season.{self.season_no_padding}.",
+            f"s{self.season_no_padding}.e{self.episode_no_padding}.",
+        ]
+        return season_episode_pattern_0 + season_episode_pattern_1
 
 
-
-
-class ProviderHelper(BaseProviderDataContainer):
+class ProviderHelper(ProviderDataContainer):
     def __init__(self, **kwargs) -> None:
-        BaseProviderDataContainer.__init__(self, **kwargs)
+        ProviderDataContainer.__init__(self, **kwargs)
         self._accepted_subtitles: list[Subtitle] = []
         self._rejected_subtitles: list[Subtitle] = []
 
@@ -78,8 +100,7 @@ class ProviderHelper(BaseProviderDataContainer):
                 self._rejected_subtitles.append(subtitle)
 
 
-
-def is_threshold_met(cls: "BaseProviderDataContainer", pct_result: int) -> bool:
+def is_threshold_met(cls: "ProviderDataContainer", pct_result: int) -> bool:
     if pct_result >= cls.percentage_threashold:
         return True
     return False
