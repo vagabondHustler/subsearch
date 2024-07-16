@@ -9,6 +9,8 @@ from subsearch.providers import common_utils
 from subsearch.utils import string_parser
 
 
+#TODO refactor this mess ^_^
+
 class SubsourcePost:
     def __init__(self, base_url: str, **kwargs) -> None:
         self.api = {
