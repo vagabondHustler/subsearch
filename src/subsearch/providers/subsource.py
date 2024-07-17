@@ -6,9 +6,12 @@ import requests
 from subsearch.globals import log
 from subsearch.globals.dataclasses import Subtitle, SubtitleUndetermined
 from subsearch.providers import common_utils
-from subsearch.utils import string_parser
 
-# TODO refactor this mess ^_^
+
+# TODO refactor 
+# TODO Implement a limit to how many requests can be made in quick succession
+# TODO Implement a way for the user to interact with this limit in the gui, as advanced feature
+
 
 
 class SubsourceApi:
