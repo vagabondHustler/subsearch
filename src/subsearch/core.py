@@ -9,7 +9,7 @@ from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.utils import io_file_system, io_toml, string_parser
+from subsearch.utils import imdb_lookup, io_file_system, io_toml, string_parser
 
 
 class Initializer:
@@ -41,6 +41,7 @@ class Initializer:
 
         if self.file_exist:
             self.release_data = string_parser.get_release_data(VIDEO_FILE.filename)
+            self.update_imdb_id()
             log.dataclass(self.release_data, level="debug", print_allowed=False)
             provider_urls = string_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
             self.provider_urls = provider_urls.retrieve_urls()
@@ -52,6 +53,10 @@ class Initializer:
                 language_data=self.language_data,
             )
         log.task_completed()
+
+    def update_imdb_id(self) -> None:
+        find_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year, self.release_data.tvseries)
+        self.release_data.imdb_id = find_id.imdb_id
 
     def setup_file_system(self) -> None:
         log.stdout("Verifing files and paths", level="debug")

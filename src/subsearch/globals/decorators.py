@@ -59,7 +59,7 @@ def call_func(func) -> Callable[..., Any]:
 class _CoreSubsearchFuncCondtitons:
     @staticmethod
     def language_compatibility(provider: str) -> bool:
-        language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.language")
+        language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.current_language")
         incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")
         if provider in incompatibility:
             return False

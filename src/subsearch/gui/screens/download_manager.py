@@ -5,7 +5,6 @@ from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui.resources import config as cfg
-from subsearch.providers import common_utils
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -64,8 +63,8 @@ class DownloadManager(ttk.LabelFrame):
         no_automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.no_automatic_downloads")
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
-            self.sub_listbox.insert(tk.END, f"{subtitle.pct_result}% {subtitle.release_name}\n")
-            if subtitle.pct_result == accept_threshold and not no_automatic_downloads:
+            self.sub_listbox.insert(tk.END, f"{subtitle.precentage_result}% {subtitle.subtitle_name}\n")
+            if subtitle.precentage_result == accept_threshold and not no_automatic_downloads:
                 self.downloaded_subtitle.append(subtitle)
                 self.download_number += 1
                 self.update_text(enum, "✓", subtitle, cfg.color.green)
@@ -90,11 +89,13 @@ class DownloadManager(ttk.LabelFrame):
     def download(self, event, subtitle: Subtitle, selection: int) -> None:
         self.sub_listbox.unbind("<ButtonRelease-1>")
         try:
-            if string_parser.valid_filename(subtitle.release_name):
-                subtitle.release_name = string_parser.fix_filename(subtitle.release_name)
+            if string_parser.valid_filename(subtitle.subtitle_name):
+                subtitle.subtitle_name = string_parser.fix_filename(subtitle.subtitle_name)
             io_file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
             io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
-            zip_archive = VIDEO_FILE.tmp_dir / f"{subtitle.provider}_{subtitle.release_name}_{self.download_number}.zip"
+            zip_archive = (
+                VIDEO_FILE.tmp_dir / f"{subtitle.provider_name}_{subtitle.subtitle_name}_{self.download_number}.zip"
+            )
             zip_archive.unlink()
             self.update_text(selection, "✓", subtitle, cfg.color.green)
             self.download_number += 1
@@ -109,5 +110,5 @@ class DownloadManager(ttk.LabelFrame):
 
     def update_text(self, selection: int, symbol: str, subtitle: Subtitle, color: str) -> None:
         self.sub_listbox.delete(int(selection))
-        self.sub_listbox.insert(int(selection), f"{symbol} {subtitle.release_name}")
+        self.sub_listbox.insert(int(selection), f"{symbol} {subtitle.subtitle_name}")
         self.sub_listbox.itemconfig(int(selection), {"fg": color})

@@ -87,7 +87,7 @@ class CreateProviderUrls:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
-        self.current_language_data: LanguageData = LanguageData(**language_data[app_config.language])
+        self.current_language_data: LanguageData = LanguageData(**language_data[app_config.current_language])
 
     def retrieve_urls(self) -> ProviderUrls:
         urls = ProviderUrls(
@@ -120,7 +120,9 @@ class CreateProviderUrls:
         if self.release_data.tvseries:
             return ""
         domain = "https://yifysubtitles.org"
-        return f"{domain}/movie-imdb/{self.release_data.imdb_id}" if self.release_data.imdb_id is not None else ""
+        if self.release_data.imdb_id:
+            return f"{domain}/movie-imdb/{self.release_data.imdb_id}"
+        return ""
 
     def _opensubtitles_subtitle_type(self) -> str:
         alpha_2b = self.current_language_data.alpha_2b
@@ -166,8 +168,7 @@ def get_release_data(filename: str) -> ReleaseData:
 
     title = find_title(release, year, series)
     group = find_group(release)
-    find_id = imdb_lookup.FindImdbID(title, year, series)
-    imdb_id = find_id.imdb_id
+    imdb_id = ""
 
     parameters = ReleaseData(
         title,

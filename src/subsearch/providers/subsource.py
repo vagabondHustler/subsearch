@@ -202,10 +202,10 @@ class Subsource(SubsourceParser):
                 continue
             download_url = self.parse_get_sub_response(response)
             subtitle = Subtitle(
-                pct_result=item.precentage_result,
-                provider=item.provider,
-                release_name=item["release_name"],
-                download_url=download_url
+                precentage_result=item.precentage_result,
+                provider_name=item.provider_name,
+                subtitle_name=item["release_name"],
+                subtitle_download_url=download_url
             )
             self.accepted_subtitles.append(subtitle)
                 

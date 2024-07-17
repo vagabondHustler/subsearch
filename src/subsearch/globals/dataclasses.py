@@ -2,8 +2,6 @@ from dataclasses import Field, dataclass
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
-from subsearch.providers import yifysubtitles
-
 
 @dataclass(order=True)
 class LanguageData:
@@ -52,7 +50,7 @@ class VideoFile:
 
 @dataclass(order=True, slots=True)
 class AppConfig:
-    language: str
+    current_language: str
     accept_threshold: int
     hearing_impaired: bool
     non_hearing_impaired: bool
@@ -95,10 +93,10 @@ class ProviderUrls:
 
 @dataclass(order=True, slots=True)
 class Subtitle:
-    pct_result: int
-    provider: str
-    release_name: str
-    download_url: str
+    precentage_result: int
+    provider_name: str
+    subtitle_name: str
+    subtitle_download_url: str
 
 
 @dataclass(order=True, frozen=True)
@@ -131,7 +129,7 @@ class ProviderApiLimit:
 
 @dataclass(order=True, slots=True)
 class SubtitleUndetermined:
-    provider: str
+    provider_name: str
     precentage_result: int
     passed_threshold: bool
     data: dict[str, Any]

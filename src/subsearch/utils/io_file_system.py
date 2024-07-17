@@ -32,10 +32,10 @@ def create_path_from_string(string: str, path_resolution: str) -> Path:
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
-    log.stdout(f"{subtitle.provider}: {index_position}/{index_size}: {subtitle.release_name}")
+    log.stdout(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     scraper = get_cloudscraper()
-    r = scraper.get(subtitle.download_url, stream=True)
-    file_name = f"{subtitle.provider}_{subtitle.release_name}_{index_position}.zip"
+    r = scraper.get(subtitle.subtitle_download_url, stream=True)
+    file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = VIDEO_FILE.tmp_dir / file_name
     with open(download_path, "wb") as fd:
         for chunk in r.iter_content(chunk_size=1024):
