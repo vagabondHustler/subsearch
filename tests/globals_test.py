@@ -22,5 +22,5 @@ FAKE_VIDEO_FILE_SERIES = VideoFile(
 )
 
 FAKE_PROVIDER_URLS = ProviderUrls(
-    opensubtitles="fake_url", opensubtitles_hash="fake_url", yifysubtitles="fake_url"
+    opensubtitles="fake_url", opensubtitles_hash="fake_url", yifysubtitles="fake_url", subsource="fake_url"
 )

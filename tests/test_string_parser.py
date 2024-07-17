@@ -112,6 +112,10 @@ def test_provider_urls_series(monkeypatch):
     assert provider_url.yifysubtitles == ""
 
 
-def test_imdb_tt_id():
-    tt_id = imdb_lookup.FindImdbID("Arctic", 2019).id
-    assert tt_id == "tt6820256"
+def test_imdb_movie():
+    imdb = imdb_lookup.FindImdbID("Arctic", 2019, False)
+    assert imdb.imdb_id == "tt6820256"
+
+def test_imdb_tvseries():
+    imdb = imdb_lookup.FindImdbID("Breaking bad", 0, True)
+    assert imdb.imdb_id == "tt0903747"

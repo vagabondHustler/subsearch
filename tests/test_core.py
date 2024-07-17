@@ -1,16 +1,16 @@
 import inspect
+
 import pytest
 
 from subsearch.globals.constants import FILE_PATHS
-from subsearch.utils import io_toml, string_parser
 from subsearch.globals.decorators import _CoreSubsearchFuncCondtitons
+from subsearch.utils import io_toml, string_parser
 from tests import globals_test
 
 
 class FakeSubsearchCore:
     def __init__(self) -> None:
         self.file_exist = True
-        self.only_foreign_parts = False
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         self.release_data = string_parser.get_release_data(globals_test.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = globals_test.FAKE_PROVIDER_URLS
@@ -41,18 +41,26 @@ def test_conditions_opensubtitles(fake_cls: FakeSubsearchCore) -> None:
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
 
-
-
 def test_conditions_yifysubtitles(fake_cls: FakeSubsearchCore) -> None:
-    fake_cls.only_foreign_parts = True
+    fake_cls.app_config.only_foreign_parts = True
     fake_cls.release_data.tvseries = True
     fake_cls.provider_urls.yifysubtitles = ""
     fake_cls.app_config.providers["yifysubtitles_site"] = True
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
-    fake_cls.only_foreign_parts = False
+    fake_cls.app_config.only_foreign_parts = False
     fake_cls.release_data.tvseries = False
     fake_cls.provider_urls.yifysubtitles = "fake_url"
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
+
+
+def test_conditions_subsource(fake_cls: FakeSubsearchCore) -> None:
+    fake_cls.app_config.only_foreign_parts = True
+    fake_cls.release_data.tvseries = True
+    fake_cls.app_config.providers["subsource_site"] = True
+    assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
+
+    fake_cls.app_config.only_foreign_parts = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
 
@@ -61,7 +69,7 @@ def test_conditions_download_files(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.app_config.always_open = False
     fake_cls.app_config.no_automatic_downloads = False
     assert fake_cls.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
-    
+
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
     fake_cls.app_config.always_open = True
     fake_cls.app_config.no_automatic_downloads = False
