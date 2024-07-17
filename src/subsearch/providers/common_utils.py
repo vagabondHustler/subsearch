@@ -11,12 +11,76 @@ from subsearch.globals.dataclasses import (
     ProviderUrls,
     ReleaseData,
     Subtitle,
+    SubtitleUndetermined,
 )
 from subsearch.utils import string_parser
 
 
+class _PrepareSubtitleDownload:
+    accepted_subtitles: list[Subtitle] = []
+    rejected_subtitles: list[Subtitle] = []
+    undetermined_subtitles: list[SubtitleUndetermined] = []
+
+    def __init__(self, master: "ProviderHelper", *args, **kwargs) -> None:
+        self._provider_name = master.provider_name
+        self._subtitle_name = master.subtitle_name
+        self._precentage_result = 0
+        self._download_url = master.subtitle_download_url
+        self._release_name = VIDEO_FILE.filename
+        self._percentage_threashold = master.percentage_threashold
+        self._subtitle_met_threashold = master.subtitle_met_threashold
+        self._force_undetermined = master.force_undetermined
+        self._post_request_data = master.post_request_data
+        self.master = master
+
+    @property
+    def _subtitle(self) -> Subtitle:
+        subtitle = Subtitle(
+            self._precentage_result,
+            self._provider_name,
+            self._subtitle_name.lower(),
+            self._download_url,
+        )
+        return subtitle
+
+    @property
+    def _subtitle_undetermined(self, *args, **kwargs) -> SubtitleUndetermined:
+        subtitle = SubtitleUndetermined(
+            provider=self._provider_name,
+            precentage_result=self._precentage_result,
+            passed_threshold=self._subtitle_met_threashold,
+            data=self._post_request_data,
+        )
+        return subtitle
+
+    def prepare_subtitle(self) -> None:
+        self.set_percentage_result()
+        self.log_subtitle_match()
+        self.populate_correct_subtitle_list()
+
+    def set_percentage_result(self) -> None:
+        self._precentage_result = string_parser.calculate_match(self._subtitle_name, self._release_name)
+
+    def log_subtitle_match(self) -> None:
+        log.subtitle_match(
+            self._provider_name,
+            self._subtitle_name,
+            self._precentage_result,
+            self._percentage_threashold,
+        )
+
+    def populate_correct_subtitle_list(self) -> None:
+        if self.master.threshold_met(self._precentage_result):
+            if self._force_undetermined:
+                _PrepareSubtitleDownload.undetermined_subtitles.append(self._subtitle_undetermined)
+            else:
+                _PrepareSubtitleDownload.accepted_subtitles.append(self._subtitle)
+            return None
+        _PrepareSubtitleDownload.rejected_subtitles.append(self._subtitle)
+
+
 class ProviderDataContainer:
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         release_data: ReleaseData = kwargs.get("release_data")
         app_config: AppConfig = kwargs.get("app_config")
         provider_urls: ProviderUrls = kwargs.get("provider_urls")
@@ -76,57 +140,72 @@ class ProviderDataContainer:
 
 
 class ProviderHelper(ProviderDataContainer):
-    def __init__(self, **kwargs) -> None:
-        ProviderDataContainer.__init__(self, **kwargs)
-        self._accepted_subtitles: list[Subtitle] = []
-        self._rejected_subtitles: list[Subtitle] = []
 
-    def _process_subtitle_data(self, provider_name: str, subtitle_data: dict[str, str]):
+    def __init__(self, *args, **kwargs) -> None:
+        ProviderDataContainer.__init__(self, *args, **kwargs)
+        self.provider_name = ""
+        self.subtitle_name = ""
+        self.subtitle_download_url = ""
+        self.subtitle_met_threashold = False
+
+    def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
+        self.provider_name: str = args[0]
+        self.subtitle_name: str = args[1]
+        self.subtitle_download_url: str = args[2]
+        self.force_undetermine: bool = kwargs.get("force_undetermined", False)
+        self.post_request_data: dict[str, Any] = kwargs.get("post_request_data", {})
+
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        return _PrepareSubtitleDownload.accepted_subtitles
+
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        return _PrepareSubtitleDownload.rejected_subtitles
+
+    @property
+    def undetermined_subtitles(self) -> list[Subtitle]:
+        return _PrepareSubtitleDownload.undetermined_subtitles
+
+    def prepare_multiple_subtitles(self, provider_name: str, subtitle_data: dict[str, str], *args, **kwargs) -> None:
         if not subtitle_data:
-            return None
+            return subtitle_data
 
-        for subtitle_name, subtitle_url in subtitle_data.items():
-            pct_result = string_parser.calculate_match(subtitle_name, self.release)
-            log.subtitle_match(
-                provider=provider_name,
-                subtitle_name=subtitle_name,
-                result=pct_result,
-                threshold=self.app_config.accept_threshold,
-            )
+        for subtitle_name, subtitle_download_url in subtitle_data.items():
+            self.prepare_subtitle(provider_name, subtitle_name, subtitle_download_url)
 
-            if is_threshold_met(self, pct_result):
-                subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
-                self._accepted_subtitles.append(subtitle)
-            else:
-                subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
-                self._rejected_subtitles.append(subtitle)
+    def prepare_subtitle(self, provider_name: str, subtitle_name: str, download_url: str, *args, **kwargs) -> None:
+        self._set_subtitle_cls_vars(provider_name, subtitle_name, download_url, *args, **kwargs)
+        prepare = _PrepareSubtitleDownload(self)
+        prepare.prepare_subtitle()
 
-    def subtitle_hi_match(self, data: dict[str, Any]) -> bool:
+    def subtitle_hi_match(self, hi: bool) -> bool:
         if self.hi_sub and self.non_hi_sub:
-            pass
-        else:
-            if not self.hi_sub and data["hi"] == 1:
-                return False
-            if not self.non_hi_sub and data["hi"] == 0:
-                return False
-        return True
-
-    def subtitle_language_match(self, data: dict[str, Any]) -> bool:
-        if self.current_language.lower() != data["lang"].lower():
+            return True
+        if not self.hi_sub and hi:
+            return False
+        if not self.non_hi_sub and hi:
             return False
         return True
 
-    def keys_exsist(self, data: dict[str, Any], keys: list[str]) -> bool:
+    def subtitle_language_match(self, language: str) -> bool:
+        if self.current_language.lower() != language.lower():
+            return False
+        return True
+
+    def keys_exsist(self, dict_: dict[str, Any], keys: list[str]) -> bool:
         for key in keys:
-            if key not in data:
+            if key not in dict_:
                 return False
         return True
 
-
-def is_threshold_met(cls: "ProviderDataContainer", pct_result: int) -> bool:
-    if pct_result >= cls.percentage_threashold:
-        return True
-    return False
+    def threshold_met(self, precentage_result: int) -> bool:
+        if precentage_result >= self.percentage_threashold:
+            i = True
+        else:
+            i = False
+        self.subtitle_met_threashold = i
+        return i
 
 
 def get_cloudscraper() -> cloudscraper.CloudScraper:

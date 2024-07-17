@@ -1,10 +1,10 @@
-from typing import Any, Iterable
+from typing import Any
 
 import cloudscraper
 import requests
 
 from subsearch.globals import log
-from subsearch.globals.dataclasses import Subtitle
+from subsearch.globals.dataclasses import Subtitle, SubtitleUndetermined
 from subsearch.providers import common_utils
 from subsearch.utils import string_parser
 
@@ -12,14 +12,17 @@ from subsearch.utils import string_parser
 
 
 class SubsourceApi:
-    def __init__(self, base_url: str, **kwargs) -> None:
+    def __init__(self, base_url: str, *args, **kwargs) -> None:
         self.method = {
             "search_movie": f"{base_url}/searchMovie",
             "get_movie": f"{base_url}/getMovie",
             "get_sub": f"{base_url}/getSub",
+            "download_sub": f"{base_url}/downloadSub"
         }
 
         self.post = cloudscraper.requests.post
+        self.call_limit = 5
+        self.provider_name = ""
 
     def search_movie(self, imdb_id: str, *args, **kwargs) -> requests.Response:
         url = self.method["search_movie"]
@@ -46,17 +49,18 @@ class SubsourceApi:
         return response
 
     def response_status_ok(self, response: requests.Response) -> bool:
-        status = f"Url: {response.url}, status code: {response.status_code}, reason: {response.reason}"
-        log.stdout(f"{status}", print_allowed=False)
+        log.stdout(f"{response.url} status_code: {response.status_code} {response.reason}")
         if response.status_code != 200:
             return False
         return True
 
 
 class SubsourceParser(common_utils.ProviderHelper):
-    def __init__(self, **kwargs) -> None:
-        common_utils.ProviderHelper.__init__(self, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        common_utils.ProviderHelper.__init__(self, *args, **kwargs)
         self.api = SubsourceApi(self.url_subsource)
+        self.provider_name = ""
+        self.api.provider_name = self.provider_name
 
     def parse_search_movie_response(self, response: requests.Response) -> dict[str, Any]:
         data = response.json()
@@ -73,10 +77,8 @@ class SubsourceParser(common_utils.ProviderHelper):
             parsed_response["link_name"] = release["linkName"]
         return parsed_response
 
-    def parse_get_movie_response(self, response: requests.Response) -> list[dict[str, str]]:
+    def parse_get_movie_response(self, response: requests.Response)  -> None:
         data = response.json()
-        all_subtitles = {}
-
         for sub in data["subs"]:
             if self.skip_get_movie_item(sub):
                 continue
@@ -84,34 +86,26 @@ class SubsourceParser(common_utils.ProviderHelper):
             release_name = sub["releaseName"]
             if self.skip_tvseries(release_name):
                 continue
-            pct_result = string_parser.calculate_match(release_name, self.release)
-            all_subtitles[pct_result] = post_data
-
-        sorted_data = self.populate_return_data(all_subtitles, limit=5)
-        return sorted_data
-
-    def populate_return_data(self, all_subtitles: list[dict], limit: int) -> list[dict[str, str]]:
-        subtitle_data = []
-        sorted_dict = dict(sorted(all_subtitles.items(), key=lambda item: item[0], reverse=True))
-        for k, v in list(sorted_dict.items()):
-            if len(subtitle_data) == limit:
-                break
-            v = sorted_dict.pop(k)
-            subtitle_data.append(v)
-        return subtitle_data
-
-    def skip_tvseries(self, release_name: str):
+            url = self.api.method["get_sub"]
+            self.prepare_subtitle(
+                self.provider_name,
+                release_name,url,
+                force_undetermined=True,
+                post_request_data=post_data,
+                )
+            
+    def skip_tvseries(self, release_name: str) -> bool:
         if self.tvseries:
             patterns = self.ok_season_episode_pattern
             return any(item in release_name.lower() for item in patterns)
         return False
 
-    def set_post_data(self, sub: dict[str, Any]):  # -> dict[str, Any]:
+    def set_post_data(self, x: dict[str, Any]) -> dict[str, Any]:
         data = {
-            "movie": sub["linkName"],
-            "lang": sub["lang"],
-            "id": str(sub["subId"]),
-            "release_name": sub["releaseName"],
+            "movie": x["linkName"],
+            "lang": x["lang"],
+            "id": str(x["subId"]),
+            "release_name": x["releaseName"],
         }
         return data
 
@@ -121,16 +115,14 @@ class SubsourceParser(common_utils.ProviderHelper):
                 return True
         return False
 
-    def parse_get_sub_response(self, response: requests.Response) -> dict[str, str]:
+    def parse_get_sub_response(self, response: requests.Response) -> str:
         data = response.json()
         sub = data["sub"]
 
         if self.skip_get_sub_item(sub):
-            return {}
+            return ""
 
-        download_token = sub["downloadToken"]
-        download_url = f"https://api.subsource.net/api/downloadSub/{download_token}"
-        return download_url
+        return f"{self.api.method["download_sub"]}/{sub["downloadToken"]}"
 
     def skip_search_movie_item(self, items: dict[str, Any]) -> bool:
         keys = ["subCount", "type", "title", "linkName"]
@@ -150,9 +142,9 @@ class SubsourceParser(common_utils.ProviderHelper):
         keys = ["releaseName", "linkName", "lang", "subId"]
         if not self.keys_exsist(items, keys):
             return True
-        elif not self.subtitle_hi_match(items):
+        elif not self.subtitle_hi_match(items["hi"]):
             return True
-        elif not self.subtitle_language_match(items):
+        elif not self.subtitle_language_match(items["lang"]):
             return True
         return False
 
@@ -164,63 +156,57 @@ class SubsourceParser(common_utils.ProviderHelper):
 
 
 class Subsource(SubsourceParser):
-    def __init__(self, **kwargs) -> None:
-        SubsourceParser.__init__(self, **kwargs)
+    def __init__(self, api_limit: int = 5, *args, **kwargs) -> None:
+        SubsourceParser.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, **kwargs) -> None:
-        search_results = self.handle_search_movie(self.imdb_id)
 
-        if not search_results:
-            return None
 
-        movie_results = self.handle_get_movie(search_results)
+    def start_search(self, *args, **kwargs) -> None:
+        self.api.call_limit = 5 # default, requests made in quick succession
+        release_results = self.find_release(self.imdb_id)
+        self.find_subtitles(release_results)
+        self.processes_undetermined_subtitles(self.undetermined_subtitles)
 
-        if not movie_results:
-            return None
-
-        subtitle_data = self.handle_get_sub(movie_results)
-
-        if not subtitle_data:
-            return None
-
-        self._process_subtitle_data(self.provider_name, subtitle_data)
-
-    def handle_search_movie(self, imdb_id: str) -> dict[str, str]:
+    def find_release(self, imdb_id: str) -> dict[str, str]:
         response = self.api.search_movie(imdb_id)
         if not self.api.response_status_ok(response):
             return ""
         data = self.parse_search_movie_response(response)
         return data
 
-    def handle_get_movie(self, request_data) -> dict[str, str]:
+    def find_subtitles(self, request_data:dict[str, str]) -> None:
+        if not request_data:
+            return None
+        
         if self.tvseries:
-            response = self.api.get_tvseries(
-                self.current_language,
-                request_data["link_name"],
-                request_data["season"],
-            )
+            i = self.current_language, request_data["link_name"], request_data["season"]
+            response = self.api.get_tvseries(*i)
         else:
             response = self.api.get_movie(self.current_language, request_data["link_name"])
+        
         if not self.api.response_status_ok(response):
-            return {}
-        data = self.parse_get_movie_response(response)
-        return data
+            return None
+        
+        self.parse_get_movie_response(response)
 
-    def handle_get_sub(self, parsed_get_movie_data) -> dict[str, str]:
-        subtitles: dict[str, str] = {}
-        for subtitle in parsed_get_movie_data:
-            response = self.api.get_sub(subtitle["movie"], subtitle["lang"], subtitle["id"])
+
+    def processes_undetermined_subtitles(self, subtitles: list[SubtitleUndetermined]) -> None:
+        if not subtitles:
+            return None
+        for item in subtitles:
+            if not item.passed_threshold:
+                continue
+            response = self.api.get_sub(item.data["movie"], item.data["lang"], item.data["id"])
             if not self.api.response_status_ok(response):
-                return {}
+                continue
             download_url = self.parse_get_sub_response(response)
-            subtitles[subtitle["release_name"]] = download_url
-        return subtitles
+            subtitle = Subtitle(
+                pct_result=item.precentage_result,
+                provider=item.provider,
+                release_name=item["release_name"],
+                download_url=download_url
+            )
+            self.accepted_subtitles.append(subtitle)
+                
 
-    @property
-    def accepted_subtitles(self) -> list[Subtitle]:
-        return self._accepted_subtitles
-
-    @property
-    def rejected_subtitles(self) -> list[Subtitle]:
-        return self._rejected_subtitles
