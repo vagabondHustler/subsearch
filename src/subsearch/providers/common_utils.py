@@ -1,3 +1,5 @@
+from typing import Any
+
 import cloudscraper
 from selectolax.parser import HTMLParser
 
@@ -98,6 +100,27 @@ class ProviderHelper(ProviderDataContainer):
             else:
                 subtitle = Subtitle(pct_result, provider_name, subtitle_name.lower(), subtitle_url)
                 self._rejected_subtitles.append(subtitle)
+
+    def subtitle_hi_match(self, data: dict[str, Any]) -> bool:
+        if self.hi_sub and self.non_hi_sub:
+            pass
+        else:
+            if not self.hi_sub and data["hi"] == 1:
+                return False
+            if not self.non_hi_sub and data["hi"] == 0:
+                return False
+        return True
+
+    def subtitle_language_match(self, data: dict[str, Any]) -> bool:
+        if self.current_language.lower() != data["lang"].lower():
+            return False
+        return True
+
+    def keys_exsist(self, data: dict[str, Any], keys: list[str]) -> bool:
+        for key in keys:
+            if key not in data:
+                return False
+        return True
 
 
 def is_threshold_met(cls: "ProviderDataContainer", pct_result: int) -> bool:
