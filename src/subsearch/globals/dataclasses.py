@@ -2,6 +2,8 @@ from dataclasses import Field, dataclass
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
+from subsearch.providers import yifysubtitles
+
 
 @dataclass(order=True)
 class LanguageData:
@@ -119,3 +121,17 @@ class WindowsRegistryPaths:
 class GenericDataClass(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
 
+
+@dataclass(order=True, slots=True)
+class ProviderApiLimit:
+    opensubtitles: int
+    yifysubtitles: int
+    subsource: int
+
+
+@dataclass(order=True, slots=True)
+class SubtitleUndetermined:
+    provider: str
+    precentage_result: int
+    passed_threshold: bool
+    data: dict[str, Any]
