@@ -146,4 +146,4 @@ def open_screen(tab_name: str, **kwargs) -> None:
 
 def close_mainloop(event):
     if event.keysym == "Escape":
-        root.quit()
+        root.destroy()

@@ -16,40 +16,27 @@ class Subsearch:
     def __init__(self) -> None:
         self.subsearch_core = core.SubsearchCore(PREF_COUNTER)
 
-    def search_for_subtitles(self) -> None:
+    def start_app(self) -> None:
         self.subsearch_core.init_search(
-            self.provider_opensubtitles,
-            self.provider_yifysubtitles,
-            self.provider_subsource,
+            self.subsearch_core.opensubtitles,
+            self.subsearch_core.yifysubtitles,
+            self.subsearch_core.subsource,
         )
-
-    def provider_opensubtitles(self) -> None:
-        self.subsearch_core.opensubtitles()
-
-
-    def provider_yifysubtitles(self) -> None:
-        self.subsearch_core.yifysubtitles()
-        
-    def provider_subsource(self) -> None:
-        self.subsearch_core.subsource()
-
-    def process_files(self) -> None:
         self.subsearch_core.download_files()
         self.subsearch_core.download_manager()
         self.subsearch_core.extract_files()
         self.subsearch_core.subtitle_post_processing()
         self.subsearch_core.clean_up()
 
-    def on_exit(self) -> None:
+    def exit_app(self) -> None:
         self.subsearch_core.core_on_exit()
 
 
 @decorators.apply_mutex
 def main() -> None:
-    app = Subsearch()
-    app.search_for_subtitles()
-    app.process_files()
-    app.on_exit()
+    subsearch = Subsearch()
+    subsearch.start_app()
+    subsearch.exit_app()
 
 
 if __name__ == "__main__":

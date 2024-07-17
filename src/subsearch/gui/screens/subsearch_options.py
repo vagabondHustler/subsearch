@@ -177,7 +177,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         self.download_manager_options: dict[str, Any] = {
             "download_manager.open_on_no_matches": "Open on no matches found",
             "download_manager.always_open": "Always open",
-            "download_manager.no_automatic_downloads": "No automatic downloads",
+            "download_manager.automatic_downloads": "Automatic downloads",
         }
         for name, description in self.download_manager_options.items():
             self.download_manager_options[name] = [
@@ -197,7 +197,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             always_open = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.always_open")
-            if key == "download_manager.no_automatic_downloads" and not always_open:
+            if key == "download_manager.automatic_downloads" and not always_open:
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -221,7 +221,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
-        keys = [("download_manager.always_open", "download_manager.no_automatic_downloads")]
+        keys = [("download_manager.always_open", "download_manager.automatic_downloads")]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
@@ -291,11 +291,11 @@ class CheckForUpdates(ttk.Labelframe):
             self.btn_search.state(["disabled"])
             self.btn_visit_release_page.state(["!disabled"])
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
-            if DEVICE_INFO.mode == "executable": 
+            if DEVICE_INFO.mode == "executable":
                 self.btn_update_install.state(["!disabled"])
                 self.btn_update_install.bind("<ButtonRelease-1>", self.download_and_update)
             else:
-                self.btn_update_install["text"]="Only availible with MSI"
+                self.btn_update_install["text"] = "Only availible with MSI"
             if repo_is_prerelease:
                 self.var_misc.set(f"Pre-release")
                 self.frame_misc.configure(fg=cfg.color.orange)
@@ -309,7 +309,7 @@ class CheckForUpdates(ttk.Labelframe):
 
     def visit_repository_button(self, event) -> None:
         webbrowser.open(f"https://github.com/vagabondHustler/subsearch/releases")
-        
+
     def download_and_update(self, event) -> None:
         update.download_and_update()
         self.btn_visit_release_page.state(["disabled"])

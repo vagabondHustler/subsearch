@@ -98,6 +98,10 @@ class CreateProviderUrls:
         )
         return urls
 
+    @classmethod
+    def no_urls(cls) -> ProviderUrls:
+        return ProviderUrls("", "", "", "")
+
     @property
     def subsource(self) -> str:
         return "https://api.subsource.net/api"
@@ -161,6 +165,8 @@ class CreateProviderUrls:
 
 
 def get_release_data(filename: str) -> ReleaseData:
+    if not filename:
+        return no_release_data()
     release = filename.lower()
     year = find_year(release)
     season_episode = find_season_episode(release)
@@ -183,6 +189,10 @@ def get_release_data(filename: str) -> ReleaseData:
         imdb_id,
     )
     return parameters
+
+
+def no_release_data() -> ReleaseData:
+    return ReleaseData("", 0, "", "", "", "", False, "", "", "")
 
 
 def calculate_match(from_user: str, from_website: str) -> int:

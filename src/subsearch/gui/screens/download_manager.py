@@ -4,7 +4,9 @@ from tkinter import ttk
 from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
+from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
+from subsearch.providers import subsource
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -14,9 +16,9 @@ class DownloadManager(ttk.LabelFrame):
     def __init__(self, parent, **kwargs) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Available subtitles", padding=10)
-        subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
+        subtitles: list[Subtitle] = kwargs.get("subtitles", [])
         if subtitles:
-            subtitles.sort(key=lambda x: x.pct_result, reverse=True)
+            subtitles.sort(key=lambda x: x.precentage_result, reverse=True)
         frame_left = tk.Frame(self)
         frame_sep = tk.Frame(self, width=5)
         frame_right = tk.Frame(self)
@@ -60,11 +62,11 @@ class DownloadManager(ttk.LabelFrame):
 
     def fill_listbox(self) -> None:
         accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
-        no_automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.no_automatic_downloads")
+        automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.automatic_downloads")
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
             self.sub_listbox.insert(tk.END, f"{subtitle.precentage_result}% {subtitle.subtitle_name}\n")
-            if subtitle.precentage_result == accept_threshold and not no_automatic_downloads:
+            if subtitle.precentage_result == accept_threshold and not automatic_downloads:
                 self.downloaded_subtitle.append(subtitle)
                 self.download_number += 1
                 self.update_text(enum, "✓", subtitle, cfg.color.green)
@@ -83,6 +85,14 @@ class DownloadManager(ttk.LabelFrame):
         if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
+        if subtitle.provider_name == "subsource":
+            subsource_api = subsource.GetDownloadUrl()
+            download_url = subsource_api.get_url(subtitle)
+            if not download_url:
+                self.update_text(selection, "⨯", subtitle, cfg.color.red)
+            else:
+                subtitle.download_url = download_url
+                subtitle.request_data = {}
         self.update_text(selection, "⊙", subtitle, cfg.color.orange)
         self.sub_listbox.bind("<ButtonRelease-1>", lambda event: self.download(event, subtitle, selection))
 

@@ -165,4 +165,4 @@ class Logger(metaclass=metaclasses.Singleton):
 
     @capture_call_info
     def task_completed(self, **kwargs) -> None:
-        self("Task completed", level="info", hex_color="#89b4fa", **kwargs)
+        self("Tasks completed", level="info", hex_color="#89b4fa", **kwargs)
