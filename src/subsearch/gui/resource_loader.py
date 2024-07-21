@@ -4,7 +4,7 @@ from subsearch.globals.constants import APP_PATHS
 from subsearch.gui import sprites
 
 
-def get_sprite(sprite_name)  -> Image.Image:
+def get_sprite(sprite_name) -> Image.Image:
     spritesheet_path = APP_PATHS.gui_assets / "spritesheet.png"
     spritesheet_image = Image.open(spritesheet_path)
     sprite_x = sprites[sprite_name][0]

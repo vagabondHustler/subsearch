@@ -177,21 +177,21 @@ class Subsource(SubsourceParser):
             return None
 
         self.parse_get_movie_response(response)
-        
-        
-        
+
+
 class GetDownloadUrl:
     def __init__(self) -> None:
         self._api = SubsourceApi()
         self._response = None
 
-        
     def get_url(self, item: Subtitle) -> str:
-        self._response = self._api.get_sub(item.request_data["movie"], item.request_data["lang"], item.request_data["id"])
+        self._response = self._api.get_sub(
+            item.request_data["movie"], item.request_data["lang"], item.request_data["id"]
+        )
         if self._api.response_status_ok(self._response):
-           return self._parse_get_sub_response()
+            return self._parse_get_sub_response()
         return ""
-    
+
     def _parse_get_sub_response(self) -> str:
         data = self._response.json()
         sub = data["sub"]

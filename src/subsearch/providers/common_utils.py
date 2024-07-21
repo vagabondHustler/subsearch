@@ -18,6 +18,7 @@ from subsearch.utils import string_parser
 api_calls_made: dict[str, int] = {}
 _thread_lock = threading.Lock()
 
+
 class ProviderDataContainer:
     def __init__(self, *args, **kwargs) -> None:
         release_data: ReleaseData = kwargs.get("release_data")
@@ -154,7 +155,6 @@ class ProviderHelper(ProviderDataContainer):
         self.provider_name = ""
         self.subtitle_name = ""
         self.download_url = ""
-        
 
     def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
         self.provider_name: str = args[0]

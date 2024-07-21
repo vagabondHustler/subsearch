@@ -105,7 +105,7 @@ def get_video_file_data() -> VideoFile:
             break
 
     video_file = VideoFile(
-        file_exist = file_exist,
+        file_exist=file_exist,
         filename=file_name,
         file_hash=file_hash,
         file_extension=file_ext,

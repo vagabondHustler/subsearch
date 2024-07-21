@@ -53,6 +53,3 @@ def _start_search(cls: "core.SubsearchCore", provider: Callable[..., Any], flag:
     search_provider.start_search(flag=flag)
     cls.accepted_subtitles.extend(search_provider.accepted_subtitles)
     cls.rejected_subtitles.extend(search_provider.rejected_subtitles)
-
-
-

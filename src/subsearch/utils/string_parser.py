@@ -97,7 +97,7 @@ class CreateProviderUrls:
             subsource=self.subsource,
         )
         return urls
-    
+
     @classmethod
     def no_urls(cls) -> ProviderUrls:
         return ProviderUrls("", "", "", "")
@@ -190,8 +190,10 @@ def get_release_data(filename: str) -> ReleaseData:
     )
     return parameters
 
+
 def no_release_data() -> ReleaseData:
     return ReleaseData("", 0, "", "", "", "", False, "", "", "")
+
 
 def calculate_match(from_user: str, from_website: str) -> int:
     max_percentage = 100
