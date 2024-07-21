@@ -22,8 +22,8 @@ class YifySubtitlesScraper(common_utils.ProviderHelper):
         _href = node.attributes["href"].split("/")  # type: ignore
         href = _href[-1]
         download_url = f"https://yifysubtitles.org/subtitle/{href}.zip"
-        for title in titles:
-            self.prepare_subtitle(self.provider_name, title, download_url)
+        for subtitle_name in titles:
+            self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
     def skip_item(self, item: Node) -> bool:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore

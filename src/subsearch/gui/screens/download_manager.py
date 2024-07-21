@@ -3,8 +3,10 @@ from tkinter import ttk
 
 from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.globals.dataclasses import Subtitle, SubtitleUndetermined, SubtitleMixed
+from subsearch.globals.dataclasses import Subtitle
+from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
+from subsearch.providers import subsource
 from subsearch.utils import io_file_system, io_toml, string_parser
 
 
@@ -14,7 +16,7 @@ class DownloadManager(ttk.LabelFrame):
     def __init__(self, parent, **kwargs) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Available subtitles", padding=10)
-        subtitles: list[SubtitleUndetermined | Subtitle] = kwargs.get("subtitles", [])
+        subtitles: list[Subtitle] = kwargs.get("subtitles", [])
         if subtitles:
             subtitles.sort(key=lambda x: x.precentage_result, reverse=True)
         frame_left = tk.Frame(self)
@@ -83,6 +85,14 @@ class DownloadManager(ttk.LabelFrame):
         if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
+        if subtitle.provider_name == "subsource":
+            subsource_api = subsource.GetDownloadUrl()
+            download_url = subsource_api.get_url(subtitle)
+            if not download_url:
+                self.update_text(selection, "⨯", subtitle, cfg.color.red)
+            else:
+                subtitle.download_url = download_url
+                subtitle.request_data = {}
         self.update_text(selection, "⊙", subtitle, cfg.color.orange)
         self.sub_listbox.bind("<ButtonRelease-1>", lambda event: self.download(event, subtitle, selection))
 

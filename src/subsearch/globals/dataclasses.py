@@ -100,22 +100,7 @@ class Subtitle:
     provider_name: str
     subtitle_name: str
     download_url: str
-
-
-@dataclass(order=True, slots=True)
-class SubtitleUndetermined:
-    precentage_result: int
-    provider_name: str
-    data: dict[str, Any]
-
-
-@dataclass(order=True, slots=True)
-class SubtitleMixed:
-    precentage_result: int
-    provider_name: str
-    subtitle_name: str
-    download_url: str
-    data: dict[str, Any]
+    request_data: dict[str, Any]
 
 
 @dataclass(order=True, frozen=True)

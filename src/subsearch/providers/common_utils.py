@@ -1,3 +1,4 @@
+import threading
 from typing import Any
 
 import cloudscraper
@@ -11,12 +12,11 @@ from subsearch.globals.dataclasses import (
     ProviderUrls,
     ReleaseData,
     Subtitle,
-    SubtitleUndetermined,
 )
 from subsearch.utils import string_parser
 
 api_calls_made: dict[str, int] = {}
-
+_thread_lock = threading.Lock()
 
 class ProviderDataContainer:
     def __init__(self, *args, **kwargs) -> None:
@@ -84,35 +84,44 @@ class ProviderDataContainer:
 class _PrepareSubtitleDownload:
     accepted_subtitles: list[Subtitle] = []
     rejected_subtitles: list[Subtitle] = []
-    undetermined_subtitles: list[SubtitleUndetermined] = []
 
     def __init__(self, master: "ProviderHelper", *args, **kwargs) -> None:
         self.provider_name = master.provider_name
         self.subtitle_name = master.subtitle_name
         self.precentage_result = 0
-        self.subtitle_download_url = master.subtitle_download_url
+        self.download_url = master.download_url
         self.release_name = VIDEO_FILE.filename
         self.accept_threshold = master.accept_threshold
-        self.force_undetermined = master.force_undetermined
-        self.post_request_data = master.post_request_data
+        self.request_data = master.request_data
         self.master = master
 
     @property
     def _subtitle(self) -> Subtitle:
+        if self.download_url:
+            subtitle = self._get_subtitle_no_request_data()
+        elif self.request_data:
+            subtitle = self._get_subtitle_with_download_url()
+        else:
+            raise Exception("Subtitle not corectlly populated")
+        return subtitle
+
+    def _get_subtitle_no_request_data(self) -> Subtitle:
         subtitle = Subtitle(
-            self.precentage_result,
-            self.provider_name,
-            self.subtitle_name.lower(),
-            self.subtitle_download_url,
+            precentage_result=self.precentage_result,
+            provider_name=self.provider_name,
+            subtitle_name=self.subtitle_name.lower(),
+            download_url=self.download_url,
+            request_data={},
         )
         return subtitle
 
-    @property
-    def _subtitle_undetermined(self, *args, **kwargs) -> SubtitleUndetermined:
-        subtitle = SubtitleUndetermined(
+    def _get_subtitle_with_download_url(self) -> Subtitle:
+        subtitle = Subtitle(
             precentage_result=self.precentage_result,
             provider_name=self.provider_name,
-            data=self.post_request_data,
+            subtitle_name=self.subtitle_name.lower(),
+            download_url="",
+            request_data=self.request_data,
         )
         return subtitle
 
@@ -134,8 +143,6 @@ class _PrepareSubtitleDownload:
 
     def populate_correct_subtitle_list(self) -> None:
         if self.master.threshold_met(self.precentage_result):
-            if self.force_undetermined:
-                return _PrepareSubtitleDownload.undetermined_subtitles.append(self._subtitle_undetermined)
             return _PrepareSubtitleDownload.accepted_subtitles.append(self._subtitle)
         return _PrepareSubtitleDownload.rejected_subtitles.append(self._subtitle)
 
@@ -146,41 +153,30 @@ class ProviderHelper(ProviderDataContainer):
         ProviderDataContainer.__init__(self, *args, **kwargs)
         self.provider_name = ""
         self.subtitle_name = ""
-        self.subtitle_download_url = ""
+        self.download_url = ""
+        
 
     def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
         self.provider_name: str = args[0]
         self.subtitle_name: str = args[1]
-        self.subtitle_download_url: str = args[2]
-        self.force_undetermined: bool = kwargs.get("force_undetermined", False)
-        self.post_request_data: dict[str, Any] = kwargs.get("post_request_data", {})
+        self.download_url: str = args[2]
+        self.request_data: dict[str, Any] = kwargs.get("request_data", {}) or args[3]
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
-        i = _PrepareSubtitleDownload.accepted_subtitles
-        return sorted(i, key=lambda i: i.precentage_result, reverse=True)
+        with _thread_lock:
+            return _PrepareSubtitleDownload.accepted_subtitles
 
     @property
     def rejected_subtitles(self) -> list[Subtitle]:
-        i = _PrepareSubtitleDownload.rejected_subtitles
-        return sorted(i, key=lambda i: i.precentage_result, reverse=True)
+        with _thread_lock:
+            return _PrepareSubtitleDownload.rejected_subtitles
 
-    @property
-    def undetermined_subtitles(self) -> list[SubtitleUndetermined]:
-        i = _PrepareSubtitleDownload.undetermined_subtitles
-        return sorted(i, key=lambda i: i.precentage_result, reverse=True)
-
-    def prepare_multiple_subtitles(self, provider_name: str, subtitle_data: dict[str, str], *args, **kwargs) -> None:
-        if not subtitle_data:
-            return subtitle_data
-
-        for subtitle_name, subtitle_download_url in subtitle_data.items():
-            self.prepare_subtitle(provider_name, subtitle_name, subtitle_download_url)
-
-    def prepare_subtitle(self, provider_name: str, subtitle_name: str, download_url: str, *args, **kwargs) -> None:
-        self._set_subtitle_cls_vars(provider_name, subtitle_name, download_url, *args, **kwargs)
-        prepare = _PrepareSubtitleDownload(self)
-        prepare.prepare_subtitle()
+    def prepare_subtitle(self, provider_name: str, subtitle_name: str, download_url: str, request_data: dict) -> None:
+        with _thread_lock:
+            self._set_subtitle_cls_vars(provider_name, subtitle_name, download_url, request_data)
+            prepare = _PrepareSubtitleDownload(self)
+            prepare.prepare_subtitle()
 
     def subtitle_hi_match(self, hi: bool) -> bool:
         if self.hearing_impaired and self.non_hearing_impaired:
@@ -204,11 +200,8 @@ class ProviderHelper(ProviderDataContainer):
 
     def threshold_met(self, precentage_result: int) -> bool:
         if precentage_result >= self.accept_threshold:
-            i = True
-        else:
-            i = False
-        self.subtitle_met_threashold = i
-        return i
+            return True
+        return False
 
 
 def get_cloudscraper() -> cloudscraper.CloudScraper:
@@ -222,3 +215,8 @@ def get_html_parser(url: str, header_=None) -> HTMLParser:
     else:
         response = scraper.get(url, headers=header_)
     return HTMLParser(response.text)
+
+
+def sort_list_by_precentage_result(list_: list) -> list:
+    with _thread_lock:
+        return sorted(list_, key=lambda i: i.precentage_result, reverse=True)

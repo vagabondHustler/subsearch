@@ -45,11 +45,6 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
         filename = src / file
-        if filename.exists():
-            number = len(src.glob(f"{file.name}_v*.{extension}"))
-            number + 1
-            f"{file.name}v{number}.{file.stem}"
-            filename = src / "{}"
         log.file_system_action(action_type="extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
