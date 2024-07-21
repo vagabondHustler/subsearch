@@ -151,7 +151,7 @@ class SubsearchCore(Initializer):
         log.brackets(f"Download Manager")
         subtitles = self.rejected_subtitles + self.accepted_subtitles
         screen_manager.open_screen("download_manager", subtitles=subtitles)
-        self.manually_accepted_subtitles.extend(download_manager.DownloadManager.downloaded_subtitle)
+        self.manually_accepted_subtitles = download_manager.DownloadManager.downloaded_subtitle
         log.task_completed()
 
     @decorators.call_func
@@ -193,12 +193,13 @@ class SubsearchCore(Initializer):
         log.brackets("Summary toast")
         elapsed_summary = f"Finished in {elapsed} seconds"
         tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        matches_downloaded = f"Downloaded: {self.downloaded_subtitles}/{tot_num_of_subtitles}"
-        if self.downloaded_subtitles > 0:
+        all_downloaded = self.downloaded_subtitles + len(self.manually_accepted_subtitles)
+        matches_downloaded = f"Downloaded: {all_downloaded}/{tot_num_of_subtitles}"
+        if all_downloaded > 0:
             msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
             log.stdout(matches_downloaded, hex_color="#a6e3a1")
             self.system_tray.display_toast(*msg)
-        elif self.downloaded_subtitles == 0:
+        elif all_downloaded == 0:
             msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
             log.stdout(matches_downloaded, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
