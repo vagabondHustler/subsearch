@@ -114,7 +114,7 @@ class SubsourceParser(common_utils.ProviderHelper):
         if self.skip_get_sub_item(sub):
             return ""
 
-        return f"{self.api.method["download_sub"]}/{sub["downloadToken"]}"
+        return f"{self.api.method['download_sub']}/{sub['downloadToken']}"
 
     def skip_search_movie_item(self, items: dict[str, Any]) -> bool:
         keys = ["subCount", "type", "title", "linkName"]
@@ -199,7 +199,7 @@ class GetDownloadUrl:
         if self._skip_get_sub_item(sub):
             return ""
 
-        return f"{self._api.method["download_sub"]}/{sub["downloadToken"]}"
+        return f"{self._api.method['download_sub']}/{sub['downloadToken']}"
 
     def _skip_get_sub_item(self, items: dict[str, Any]) -> bool:
         keys = ["ri", "downloadToken"]
