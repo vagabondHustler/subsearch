@@ -31,10 +31,10 @@ def create_path_from_string(string: str, path_resolution: str) -> Path:
     return path
 
 
-def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
+def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
     log.stdout(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     scraper = get_cloudscraper()
-    r = scraper.get(subtitle.subtitle_download_url, stream=True)
+    r = scraper.get(subtitle.download_url, stream=True)
     file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = VIDEO_FILE.tmp_dir / file_name
     with open(download_path, "wb") as fd:
@@ -45,6 +45,11 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int):
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
         filename = src / file
+        if filename.exists():
+            number = len(src.glob(f"{file.name}_v*.{extension}"))
+            number + 1
+            f"{file.name}v{number}.{file.stem}"
+            filename = src / "{}"
         log.file_system_action(action_type="extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
@@ -105,6 +110,8 @@ def del_directory_content(directory: Path) -> None:
 
 
 def create_directory(path: Path) -> None:
+    if path.exists():
+        return None
     log.stdout(f"Creating {path}", level="debug")
     path.mkdir(parents=True, exist_ok=True)
 

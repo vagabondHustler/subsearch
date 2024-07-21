@@ -107,5 +107,6 @@ def get_app_config(toml_file_path: Path) -> AppConfig:
         providers=data["providers"],
         **data["download_manager"],
         **data["misc"],
+        **data["advanced_user"]
     )
     return user_data

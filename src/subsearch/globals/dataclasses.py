@@ -39,6 +39,7 @@ class FilePaths:
 
 @dataclass(order=True, slots=True)
 class VideoFile:
+    file_exist: bool
     filename: str
     file_hash: str
     file_extension: str
@@ -65,8 +66,10 @@ class AppConfig:
     providers: dict[str, bool]
     open_on_no_matches: bool
     always_open: bool
-    no_automatic_downloads: bool
+    automatic_downloads: bool
     single_instance: bool
+    api_call_limit: int
+    api_sleep_ms: int
 
 
 @dataclass(order=True, slots=True)
@@ -96,7 +99,23 @@ class Subtitle:
     precentage_result: int
     provider_name: str
     subtitle_name: str
-    subtitle_download_url: str
+    download_url: str
+
+
+@dataclass(order=True, slots=True)
+class SubtitleUndetermined:
+    precentage_result: int
+    provider_name: str
+    data: dict[str, Any]
+
+
+@dataclass(order=True, slots=True)
+class SubtitleMixed:
+    precentage_result: int
+    provider_name: str
+    subtitle_name: str
+    download_url: str
+    data: dict[str, Any]
 
 
 @dataclass(order=True, frozen=True)
@@ -125,11 +144,3 @@ class ProviderApiLimit:
     opensubtitles: int
     yifysubtitles: int
     subsource: int
-
-
-@dataclass(order=True, slots=True)
-class SubtitleUndetermined:
-    provider_name: str
-    precentage_result: int
-    passed_threshold: bool
-    data: dict[str, Any]

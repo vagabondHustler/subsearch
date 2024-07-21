@@ -3,7 +3,7 @@ from tkinter import ttk
 
 from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.globals.dataclasses import Subtitle
+from subsearch.globals.dataclasses import Subtitle, SubtitleUndetermined, SubtitleMixed
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_file_system, io_toml, string_parser
 
@@ -14,9 +14,9 @@ class DownloadManager(ttk.LabelFrame):
     def __init__(self, parent, **kwargs) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Available subtitles", padding=10)
-        subtitles: list | list[Subtitle] = kwargs.get("subtitles", [])
+        subtitles: list[SubtitleUndetermined | Subtitle] = kwargs.get("subtitles", [])
         if subtitles:
-            subtitles.sort(key=lambda x: x.pct_result, reverse=True)
+            subtitles.sort(key=lambda x: x.precentage_result, reverse=True)
         frame_left = tk.Frame(self)
         frame_sep = tk.Frame(self, width=5)
         frame_right = tk.Frame(self)
@@ -60,11 +60,11 @@ class DownloadManager(ttk.LabelFrame):
 
     def fill_listbox(self) -> None:
         accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
-        no_automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.no_automatic_downloads")
+        automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.automatic_downloads")
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
             self.sub_listbox.insert(tk.END, f"{subtitle.precentage_result}% {subtitle.subtitle_name}\n")
-            if subtitle.precentage_result == accept_threshold and not no_automatic_downloads:
+            if subtitle.precentage_result == accept_threshold and not automatic_downloads:
                 self.downloaded_subtitle.append(subtitle)
                 self.download_number += 1
                 self.update_text(enum, "✓", subtitle, cfg.color.green)

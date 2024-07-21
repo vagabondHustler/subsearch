@@ -177,7 +177,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         self.download_manager_options: dict[str, Any] = {
             "download_manager.open_on_no_matches": "Open on no matches found",
             "download_manager.always_open": "Always open",
-            "download_manager.no_automatic_downloads": "No automatic downloads",
+            "download_manager.automatic_downloads": "Automatic downloads",
         }
         for name, description in self.download_manager_options.items():
             self.download_manager_options[name] = [
@@ -197,7 +197,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             always_open = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.always_open")
-            if key == "download_manager.no_automatic_downloads" and not always_open:
+            if key == "download_manager.automatic_downloads" and not always_open:
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -221,7 +221,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
-        keys = [("download_manager.always_open", "download_manager.no_automatic_downloads")]
+        keys = [("download_manager.always_open", "download_manager.automatic_downloads")]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 

@@ -7,7 +7,6 @@ from subsearch.globals import log
 from subsearch.globals.dataclasses import Subtitle, SubtitleUndetermined
 from subsearch.providers import common_utils
 
-
 # TODO refactor 
 # TODO Implement a limit to how many requests can be made in quick succession
 # TODO Implement a way for the user to interact with this limit in the gui, as advanced feature
@@ -92,10 +91,11 @@ class SubsourceParser(common_utils.ProviderHelper):
             url = self.api.method["get_sub"]
             self.prepare_subtitle(
                 self.provider_name,
-                release_name,url,
+                release_name,
+                url,
                 force_undetermined=True,
                 post_request_data=post_data,
-                )
+            )
             
     def skip_tvseries(self, release_name: str) -> bool:
         if self.tvseries:
@@ -197,19 +197,25 @@ class Subsource(SubsourceParser):
     def processes_undetermined_subtitles(self, subtitles: list[SubtitleUndetermined]) -> None:
         if not subtitles:
             return None
-        for item in subtitles:
-            if not item.passed_threshold:
+        api_calls_made = 0
+        for enum, item in enumerate(subtitles):
+            if api_calls_made >= self.api_call_limit:
+                continue
+            if not item.precentage_result >= self.accept_threshold:
                 continue
             response = self.api.get_sub(item.data["movie"], item.data["lang"], item.data["id"])
             if not self.api.response_status_ok(response):
+                api_calls_made += 1
                 continue
             download_url = self.parse_get_sub_response(response)
             subtitle = Subtitle(
                 precentage_result=item.precentage_result,
                 provider_name=item.provider_name,
-                subtitle_name=item["release_name"],
-                subtitle_download_url=download_url
+                subtitle_name=item.data["release_name"],
+                download_url=download_url
             )
+            subtitles.pop(enum)
             self.accepted_subtitles.append(subtitle)
+            api_calls_made += 1
                 
 

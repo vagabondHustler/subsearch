@@ -1,7 +1,9 @@
 import threading
-from typing import Any
+from typing import Any, Callable
 
+from subsearch import core
 from subsearch.globals import log
+
 
 
 class CreateThread(threading.Thread):
@@ -33,3 +35,22 @@ class CreateThread(threading.Thread):
         else:
             log.stdout(f"Thread {self.name} finnished", level="debug", print_allowed=False)
         return self.return_value
+
+
+def _create_threads(*tasks) -> None:
+    threads = []
+    for target in tasks:
+        name = f"{target.__name__.lower()}"
+        task_thread = CreateThread(target=target, name=name)
+        task_thread.start()
+        threads.append(task_thread)
+
+    for t in threads:
+        t.join()
+
+
+def _start_search(cls: "core.SubsearchCore", provider: Callable[..., Any], flag: str) -> None:
+    search_provider = provider(**cls.search_kwargs)
+    search_provider.start_search(flag=flag)
+    cls.accepted_subtitles.extend(search_provider.accepted_subtitles)
+    cls.rejected_subtitles.extend(search_provider.rejected_subtitles)

@@ -1,8 +1,8 @@
 import ctypes
+import functools
 import sys
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
-from subsearch import core
 from subsearch.globals import exceptions
 from subsearch.globals.constants import FILE_PATHS, GUID
 from subsearch.utils import io_toml
@@ -47,83 +47,15 @@ def check_option_disabled(func) -> Callable[..., Any]:
 
 
 def call_func(func) -> Callable[..., Any]:
+
+    @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         func_name = f"{func.__name__}"
-        if not _CoreSubsearchFuncCondtitons.conditions_met(func_name=func_name, *args, **kwargs):
+        if not args[0].call_conditions.call_func(func_name=func_name, *args, **kwargs):
             return None
         return func(*args, **kwargs)
 
     return wrapper
-
-
-class _CoreSubsearchFuncCondtitons:
-    @staticmethod
-    def language_compatibility(provider: str) -> bool:
-        language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.current_language")
-        incompatibility: list[str] = io_toml.load_toml_value(FILE_PATHS.language_data, f"{language}.incompatibility")
-        if provider in incompatibility:
-            return False
-        return True
-
-    @staticmethod
-    def eval_all_true(conditions: list[bool]) -> bool:
-        if False in conditions:
-            return False
-        return True
-
-    @staticmethod
-    def conditions_met(cls: Union["core.SubsearchCore", "core.Initializer"], *args, **kwargs) -> bool:
-        if not cls.file_exist:
-            return False
-
-        cfg = cls.app_config
-        acc_subs = cls.accepted_subtitles
-        rej_subs = cls.rejected_subtitles
-
-        df_senario_1 = not cfg.always_open and not cfg.no_automatic_downloads
-        df_senario_2 = cfg.always_open and not cfg.no_automatic_downloads
-
-        open_dm_senario_1 = len(acc_subs) == 0 and len(rej_subs) >= 1 and cfg.open_on_no_matches
-        open_dm_senario_2 = len(acc_subs) >= 1 and cfg.always_open and cfg.no_automatic_downloads
-        open_dm_senario_3 = len(rej_subs) >= 1 and cfg.always_open
-
-        func_name = kwargs["func_name"]
-        conditions: dict[str, list[bool]] = {
-            "init_search": [],
-            "opensubtitles": [
-                _CoreSubsearchFuncCondtitons.language_compatibility("opensubtitles"),
-                cfg.providers["opensubtitles_hash"] or cfg.providers["opensubtitles_site"],
-            ],
-            "yifysubtitles": [
-                not cfg.only_foreign_parts,
-                _CoreSubsearchFuncCondtitons.language_compatibility("yifysubtitles"),
-                not cls.release_data.tvseries,
-                not cls.provider_urls.yifysubtitles == "",
-                cfg.providers["yifysubtitles_site"],
-            ],
-            "subsource": [
-                not cfg.only_foreign_parts,
-                _CoreSubsearchFuncCondtitons.language_compatibility("subsource"),
-                cfg.providers["subsource_site"],
-            ],
-            "download_files": [
-                len(cls.accepted_subtitles) >= 1,
-                (df_senario_1 or df_senario_2),
-            ],
-            "download_manager": [(open_dm_senario_1 or open_dm_senario_2 or open_dm_senario_3)],
-            "extract_files": [len(cls.accepted_subtitles) >= 1],
-            "subtitle_post_processing": [],
-            "subtitle_rename": [cfg.subtitle_post_processing["rename"], cls.downloaded_subtitles >= 1],
-            "subtitle_move_best": [
-                cfg.subtitle_post_processing["move_best"],
-                cls.downloaded_subtitles >= 1,
-                not cfg.subtitle_post_processing["move_all"],
-            ],
-            "subtitle_move_all": [cfg.subtitle_post_processing["move_all"], cls.downloaded_subtitles > 1],
-            "summary_notification": [cfg.summary_notification],
-            "clean_up": [],
-        }
-        return _CoreSubsearchFuncCondtitons.eval_all_true(conditions[func_name])
 
 
 def system_tray_conditions(func) -> Callable[..., Any]:
