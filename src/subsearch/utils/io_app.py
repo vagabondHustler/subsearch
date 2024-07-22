@@ -6,7 +6,7 @@ from itertools import product
 from pathlib import Path
 from typing import Any, no_type_check
 
-from subsearch.data import __version__, __guid__
+from subsearch.data import __guid__, __version__
 from subsearch.globals.dataclasses import (
     AppPaths,
     FilePaths,
@@ -45,7 +45,7 @@ def get_default_app_config() -> dict[str, Any]:
     providers = dict.fromkeys(get_supported_providers(), True)
     config = {
         "subtitle_filters": {
-            "language": "english",
+            "current_language": "english",
             "accept_threshold": 90,
             "hearing_impaired": True,
             "non_hearing_impaired": True,
@@ -67,13 +67,18 @@ def get_default_app_config() -> dict[str, Any]:
         },
         "file_extensions": file_extensions,
         "providers": providers,
-        "download_manager":{
+        "download_manager": {
             "open_on_no_matches": True,
             "always_open": False,
-            "no_automatic_downloads": False,
+            "automatic_downloads": True,
         },
         "misc": {
             "single_instance": True,
+        },
+        "advanced_user": {
+            "api_call_limit": 4,
+            "request_connect_timeout": 4,
+            "request_read_timeout": 5,
         },
     }
     return config
@@ -83,6 +88,11 @@ def get_default_app_config() -> dict[str, Any]:
 def get_video_file_data() -> VideoFile:
     file_exist = False
     supported_exts = get_supported_file_ext()
+    file_name, file_hash, file_ext = "", "", ""
+    file_path = Path("")
+    file_directory = Path("")
+    subs_dir = Path("")
+    tmp_dir = Path("")
     for i in product(supported_exts, sys.argv):
         if i[1].endswith(i[0]) and str(i[1])[i[1].rfind("\\") :].startswith("\\"):
             file_path = Path(i[1])
@@ -95,17 +105,17 @@ def get_video_file_data() -> VideoFile:
             file_hash = ""
             break
 
-    if file_exist:
-        video_file = VideoFile(
-            filename=file_name,
-            file_hash=file_hash,
-            file_extension=file_ext,
-            file_path=file_path,
-            file_directory=file_directory,
-            subs_dir=subs_dir,
-            tmp_dir=tmp_dir,
-        )
-        return video_file
+    video_file = VideoFile(
+        file_exist=file_exist,
+        filename=file_name,
+        file_hash=file_hash,
+        file_extension=file_ext,
+        file_path=file_path,
+        file_directory=file_directory,
+        subs_dir=subs_dir,
+        tmp_dir=tmp_dir,
+    )
+    return video_file
 
 
 def get_system_info() -> SystemInfo:
@@ -141,7 +151,7 @@ def get_supported_file_ext() -> list[str]:
 
 
 def get_supported_providers() -> list[str]:
-    providers = ["opensubtitles_site", "opensubtitles_hash",  "yifysubtitles_site"]
+    providers = ["opensubtitles_site", "opensubtitles_hash", "yifysubtitles_site", "subsource_site"]
     return providers
 
 
@@ -159,8 +169,10 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
 def get_computer_name() -> str:
     return socket.gethostname()
 
+
 def get_app_version() -> str:
     return str(__version__)
+
 
 def get_guid() -> str:
     return str(__guid__)

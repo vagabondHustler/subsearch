@@ -25,7 +25,7 @@ jobs:
       - name: Auto label
         uses: TimonVS/pr-labeler-action@v5
         with:
-          repo-token: ${{ secrets.ACTIONS_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/configs/labeler.yml
 
   paths_filter:

@@ -312,8 +312,15 @@ jobs:
           git fetch --all
           gh pr create -B main -H dev -t "$changelogTitle" -b "$changelogBody" -l "release"
           gh pr merge -m
-          git rebase main dev
-          git fetch origin dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Synchronize dev with main
+        run: |
+          git fetch --all
+          git checkout dev
+          git rebase main
+          git push origin dev --force-with-lease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -2,7 +2,6 @@ import tkinter as tk
 from typing import Any
 
 from subsearch.globals import log
-from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import common_utils, resource_loader, root
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
@@ -111,11 +110,13 @@ class SubsearchOptions(tk.Frame):
         tk.Frame.__init__(self, parent, width=cfg.size.width, height=cfg.size.height)
         self.configure(bg=cfg.color.default_bg)
         subsearch_options.FileExtensions(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        tk.Frame(self, height=15, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.SubsearchOption(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        tk.Frame(self, height=15, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.DownloadManagerOptions(self).pack(anchor="center", fill="x")
-        tk.Frame(self, height=30, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        tk.Frame(self, height=15, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
+        subsearch_options.AdvancedUser(self).pack(anchor="center", fill="x")
+        tk.Frame(self, height=15, bg=cfg.color.default_bg).pack(anchor="center", expand=True)
         subsearch_options.CheckForUpdates(self)
 
 
@@ -146,4 +147,4 @@ def open_screen(tab_name: str, **kwargs) -> None:
 
 def close_mainloop(event):
     if event.keysym == "Escape":
-        root.quit()
+        root.destroy()
