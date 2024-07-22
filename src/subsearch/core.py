@@ -126,7 +126,8 @@ class SubsearchCore(Initializer):
             if subtitle.provider_name not in self.api_calls_made:
                 self.api_calls_made[subtitle.provider_name] = 0
             if not self.api_calls_made[subtitle.provider_name] == self.app_config.api_call_limit:
-                self._handle_subsource_subtitle(enum, subtitle)
+                if subtitle.provider_name == 'subsource':
+                    self._handle_subsource_subtitle(enum, subtitle)
                 io_file_system.download_subtitle(subtitle, enum, index_size)
                 self.downloaded_subtitles += 1
                 self.api_calls_made[subtitle.provider_name] += 1
@@ -135,7 +136,7 @@ class SubsearchCore(Initializer):
                 self.rejected_subtitles.append(s)
         log.task_completed()
 
-    def _handle_subsource_subtitle(self, enum: int, subtitle: Subtitle) -> None:
+    def _handle_subsource_subtitle(self, enum: int, subtitle: Subtitle) -> None: 
         if self.app_config.providers["subsource_site"]:
             subsource_api = subsource.GetDownloadUrl()
             download_url = subsource_api.get_url(subtitle)
