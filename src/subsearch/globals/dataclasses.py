@@ -69,7 +69,8 @@ class AppConfig:
     automatic_downloads: bool
     single_instance: bool
     api_call_limit: int
-    api_sleep_ms: int
+    request_connect_timeout: int
+    request_read_timeout: int
 
 
 @dataclass(order=True, slots=True)

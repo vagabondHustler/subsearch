@@ -363,3 +363,5 @@ class SearchThreshold(tk.Frame):
             self.label_pct.configure(fg=cfg.color.red_brown)
         elif value in range(0, 25):
             self.label_pct.configure(fg=cfg.color.red)
+
+

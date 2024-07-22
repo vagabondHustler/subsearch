@@ -2,11 +2,12 @@ import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
 from typing import Any
-from subsearch.globals import decorators
 
+from subsearch.globals import decorators
 from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
+from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_toml, io_winreg, update
+from subsearch.utils import io_toml, io_winreg, string_parser, update
 
 
 def _handle_file_extensions_check_btn(cls, parent_key) -> None:
@@ -230,6 +231,100 @@ class DownloadManagerOptions(ttk.Labelframe):
         if btn["text"] != self.download_manager_options[parent_key][1]:
             return None
         _handle_other_check_btn(self, value, child_key)
+
+
+class AdvancedUser(ttk.Labelframe):
+    def __init__(self, parent) -> None:
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Advanced user ( Requests / API )", padding=10)
+        self.data = io_toml.load_toml_data(FILE_PATHS.config)
+        self.tip_present = False
+        self.tip = None
+        adv_user = self.data["advanced_user"]
+        adv_default_values = [
+            adv_user["api_call_limit"],
+            adv_user["request_connect_timeout"],
+            adv_user["request_read_timeout"],
+        ]
+
+        self.adv_user_options: dict = {
+            "advanced_user.api_call_limit": "API call limit",
+            "advanced_user.request_connect_timeout": "Request connection timeout",
+            "advanced_user.request_read_timeout": "Request read timeout",
+        }
+        for name, description in self.adv_user_options.items():
+            self.adv_user_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]
+        frame = None
+        frame_c = tk.Frame(self)
+        frame_r = tk.Frame(self)
+
+        self.entry_fields: dict[ttk.Entry, tuple[str, tk.IntVar]] = {}
+        for enum, (key, value) in enumerate(self.adv_user_options.items()):
+            bool_value = value[0]
+            description = value[1]
+
+            int_value = tk.IntVar()
+            int_value.set(bool_value)
+            field_name = ttk.Label(frame_c, text=description, justify="left")
+            field = ttk.Entry(frame_c, width=3, justify="right")
+            field.insert(tk.END, adv_default_values[enum])
+            field_name.pack(side="left", anchor="center", fill="x")
+            field.pack(side="left", anchor="center", padx=4)
+            field.bind("<Enter>", self.enter_entry_field)
+            self.entry_fields[field] = key, int_value
+            # field.bind("<Enter>", self.enter_button)
+        frame_c.pack(side=tk.LEFT, expand=True, fill="x")
+        frame_r.pack(side=tk.LEFT, expand=False, after=frame_c)
+
+        apply_input = ttk.Button(frame_r, text="Apply", width=10)
+        apply_input.bind("<Enter>", self.enter_btn_apply_input)
+        apply_input.bind("<Leave>", self.leave_btn_apply_input)
+        apply_input.pack(anchor="center")
+
+    def enter_btn_apply_input(self, event) -> None:
+        btn = event.widget
+        field_ok = True
+        tip_text = (
+            "If you don't know what these values do, don't touch them.",
+            "Sending too many requests can get your IP banned.",
+        )
+        self.tip = common_utils.ToolTip(btn, btn, *tip_text)
+        self.tip.show()
+        self.tip_present = True
+        for field, values in self.entry_fields.items():
+            field: ttk.Entry
+            user_input = self.verify_field(field)
+            if field.instate(["invalid"]):
+                self.on_invalid_state(user_input)
+                btn.unbind("<ButtonPress-1>")
+                field_ok = False
+        if field_ok:
+            btn.bind("<ButtonPress-1>", self.update_config)
+
+    def leave_btn_apply_input(self, event) -> None:
+        btn = event.widget
+        self.tip.hide()
+        self.tip_present = False
+        btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
+
+
+    def update_config(self, event):
+        for field, values in self.entry_fields.items():
+            value = field.get()
+            key = values[0]
+            io_toml.update_toml_key(FILE_PATHS.config, key, int(value))
+
+    def verify_field(self, field: ttk.Entry) -> str:
+        user_input = field.get()
+        if not string_parser.valid_api_request_input(user_input):
+            field.state(["invalid"])
+        else:
+            field.state(["!invalid"])
+        return user_input
+
+    def on_invalid_state(self, path): ...
+
+    def enter_entry_field(self, event): ...
 
 
 class CheckForUpdates(ttk.Labelframe):

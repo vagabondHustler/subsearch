@@ -16,6 +16,7 @@ class Initializer:
     def __init__(self, pref_counter: float) -> None:
         self.start = pref_counter
         log.brackets("Initializing")
+
         self.api_calls_made: dict[str, int] = {}
         self.downloaded_subtitles = 0
         self.ran_download_tab = False
@@ -25,11 +26,11 @@ class Initializer:
         self.release_data = string_parser.no_release_data()
         self.provider_urls = string_parser.CreateProviderUrls.no_urls()
         self.file_exist = VIDEO_FILE.file_exist
-        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
-        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
 
         log.stdout("Verifing files and paths", level="debug")
         self.setup_file_system()
+        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+        self.app_config = io_toml.get_app_config(FILE_PATHS.config)
 
         log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         log.dataclass(self.app_config, level="debug", print_allowed=False)
@@ -60,10 +61,17 @@ class Initializer:
         log.task_completed()
 
     def update_imdb_id(self) -> None:
-        find_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year, self.release_data.tvseries)
+        timeout = self.app_config.request_connect_timeout, self.app_config.request_read_timeout
+        find_id = imdb_lookup.FindImdbID(
+            self.release_data.title,
+            self.release_data.year,
+            self.release_data.tvseries,
+            request_timeout=timeout,
+        )
         self.release_data.imdb_id = find_id.imdb_id
 
     def setup_file_system(self) -> None:
+
         io_file_system.create_directory(APP_PATHS.tmp_dir)
         io_file_system.create_directory(APP_PATHS.appdata_subsearch)
         io_toml.resolve_on_integrity_failure()
