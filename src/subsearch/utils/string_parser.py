@@ -14,6 +14,13 @@ from subsearch.globals.dataclasses import (
 from subsearch.utils import imdb_lookup
 
 
+def remove_padded_zero(x: str) -> str:
+    lenght = len(x)
+    if x.startswith("0") and lenght > 1:
+        return str(x)[1:]
+    return x
+
+
 def find_year(string: str) -> int:
     re_year = re.findall(r"^.*\.([1-2][0-9]{3})\.", string)
     if re_year:
@@ -80,30 +87,46 @@ class CreateProviderUrls:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
-        self.current_language_data: LanguageData = LanguageData(**language_data[app_config.language])
+        self.current_language_data: LanguageData = LanguageData(**language_data[app_config.current_language])
 
     def retrieve_urls(self) -> ProviderUrls:
-        return ProviderUrls(self.opensubtitles(), self.opensubtitles_hash(), self.yifysubtitles())
+        urls = ProviderUrls(
+            opensubtitles=self.opensubtitles,
+            opensubtitles_hash=self.opensubtitles_hash,
+            yifysubtitles=self.yifysubtitles,
+            subsource=self.subsource,
+        )
+        return urls
 
+    @classmethod
+    def no_urls(cls) -> ProviderUrls:
+        return ProviderUrls("", "", "", "")
 
+    @property
+    def subsource(self) -> str:
+        return "https://api.subsource.net/api"
+
+    @property
     def opensubtitles(self) -> str:
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
-        search_parameters = self._opensubtitles_search_parameters()
-        return f"{domain}/{subtitle_type}/{search_parameters}/rss_2_00".replace(" ", "%20")
+        search_parameter = self._opensubtitles_search_parameter()
+        return f"{domain}/{subtitle_type}/{search_parameter}/rss_2_00".replace(" ", "%20")
 
+    @property
     def opensubtitles_hash(self) -> str:
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
         return f"{domain}/{subtitle_type}/moviehash-{VIDEO_FILE.file_hash}"
 
+    @property
     def yifysubtitles(self) -> str:
         if self.release_data.tvseries:
             return ""
         domain = "https://yifysubtitles.org"
-        tt_id = imdb_lookup.FindImdbID(self.release_data.title, self.release_data.year).id
-        return f"{domain}/movie-imdb/{tt_id}" if tt_id is not None else ""
-
+        if self.release_data.imdb_id:
+            return f"{domain}/movie-imdb/{self.release_data.imdb_id}"
+        return ""
 
     def _opensubtitles_subtitle_type(self) -> str:
         alpha_2b = self.current_language_data.alpha_2b
@@ -117,7 +140,7 @@ class CreateProviderUrls:
         else:
             return f"en/search/sublanguageid-{alpha_2b}"
 
-    def _opensubtitles_search_parameters(self) -> str:
+    def _opensubtitles_search_parameter(self) -> str:
         if self.release_data.tvseries:
             return f"searchonlytvseries-on/season-{self.release_data.season}/episode-{self.release_data.episode}/moviename-{self.release_data.title}"
         return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
@@ -142,6 +165,8 @@ class CreateProviderUrls:
 
 
 def get_release_data(filename: str) -> ReleaseData:
+    if not filename:
+        return no_release_data()
     release = filename.lower()
     year = find_year(release)
     season_episode = find_season_episode(release)
@@ -149,6 +174,7 @@ def get_release_data(filename: str) -> ReleaseData:
 
     title = find_title(release, year, series)
     group = find_group(release)
+    imdb_id = ""
 
     parameters = ReleaseData(
         title,
@@ -160,8 +186,13 @@ def get_release_data(filename: str) -> ReleaseData:
         series,
         release,
         group,
+        imdb_id,
     )
     return parameters
+
+
+def no_release_data() -> ReleaseData:
+    return ReleaseData("", 0, "", "", "", "", False, "", "", "")
 
 
 def calculate_match(from_user: str, from_website: str) -> int:
@@ -228,3 +259,8 @@ def valid_path(input_str, path_resolution) -> bool:
     elif path_resolution == "absolute":
         pattern = r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$"
     return bool(re.match(pattern, input_str))
+
+
+def valid_api_request_input(input: int) -> bool:
+    pattern = r"[0-9]"
+    return bool(re.match(pattern, input))

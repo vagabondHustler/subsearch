@@ -4,7 +4,7 @@ from subsearch.globals.constants import APP_PATHS
 from subsearch.gui import sprites
 
 
-def get_sprite(sprite_name):
+def get_sprite(sprite_name) -> Image.Image:
     spritesheet_path = APP_PATHS.gui_assets / "spritesheet.png"
     spritesheet_image = Image.open(spritesheet_path)
     sprite_x = sprites[sprite_name][0]
@@ -27,7 +27,7 @@ def update_asset(cls, img, x, y) -> None:
     cls.photoimage = img
 
 
-def set_ttk_theme(root):
+def set_ttk_theme(root) -> None:
     initializer_tcl = APP_PATHS.gui_styles / "theme_setter.tcl"
     root.tk.call("source", str(initializer_tcl))
     root.tk.call("set_theme")

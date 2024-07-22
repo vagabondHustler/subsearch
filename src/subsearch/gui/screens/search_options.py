@@ -19,7 +19,8 @@ class Providers(ttk.Labelframe):
         self.provider_options: dict = {
             "opensubtitles_site": "Opensubtitles",
             "opensubtitles_hash": "Opensubtitles with hash",
-            "yifysubtitles_site": "YIFYsubtitles",
+            "yifysubtitles_site": "Yifysubtitles",
+            "subsource_site": "Subsource",
         }
         for name, description in self.provider_options.items():
             self.provider_options[name] = [
@@ -362,3 +363,5 @@ class SearchThreshold(tk.Frame):
             self.label_pct.configure(fg=cfg.color.red_brown)
         elif value in range(0, 25):
             self.label_pct.configure(fg=cfg.color.red)
+
+

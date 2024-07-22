@@ -2,13 +2,13 @@ import re
 from typing import Any
 
 from subsearch.globals import log
-from subsearch.globals.dataclasses import Subtitle
 from subsearch.providers import common_utils
 
 
 class OpenSubtitlesScraper(common_utils.ProviderHelper):
-    def __init__(self, **kwargs) -> None:
-        common_utils.ProviderHelper.__init__(self, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        common_utils.ProviderHelper.__init__(self, *args, **kwargs)
+        self.provider_name = ""
 
     def is_opensubtitles_down(self, tree: Any) -> bool:
         is_offline = tree.css_matches("pre")
@@ -20,35 +20,36 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             return True
         return False
 
-    def get_subtitles(self, url: str) -> dict[str, str]:
-        subtitles: dict[str, str] = {}
-        tree = common_utils.get_html_parser(url)
+    def get_subtitles(self, url: str) -> None:
+        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        if not tree:
+            return None
         items = tree.css("item")
         if self.is_opensubtitles_down(tree):
-            return subtitles
+            return None
         for item in items:
-            dl_url = item.css_first("enclosure").attributes["url"]
+            download_url = item.css_first("enclosure").attributes["url"]
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
-            release_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
-            subtitles[release_name] = dl_url  # type: ignore
-        return subtitles
+            subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
+            self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
-    def with_hash(self, url: str, release: str) -> dict[str, str]:
-        subtitles: dict[str, str] = {}
-        tree = common_utils.get_html_parser(url)
+    def with_hash(self, url: str, subtitle_name: str):
+        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        if not tree:
+            return None
         if self.is_opensubtitles_down(tree):
-            return subtitles
+            return None
         try:
             sub_id = tree.css_first("#bt-dwl-bt").attributes["data-product-id"]
         except AttributeError:
-            return subtitles
-        subtitles[release] = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
-        return subtitles
+            return None
+        download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
+        self.prepare_subtitle(self.provider_name, subtitle_name, download_url)
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
-    def __init__(self, **kwargs) -> None:
-        OpenSubtitlesScraper.__init__(self, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        OpenSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self, flag: str) -> None:
@@ -56,31 +57,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
         flags[flag]()
 
     def search_hash(self) -> None:
-        subtitle_data = self.with_hash(self.url_opensubtitles_hash, self.release)
-
-        if not subtitle_data:
-            return None
-
-        log.subtitle_match(
-            provider=self.provider_name,
-            subtitle_name=self.release,
-            result=100,
-            threshold=self.app_config.accept_threshold,
-        )
-        self._process_subtitle_data(self.provider_name, subtitle_data)
+        self.with_hash(self.url_opensubtitles_hash, self.release)
 
     def search_site(self) -> None:
-        subtitle_data = self.get_subtitles(self.url_opensubtitles)
-
-        if not subtitle_data:
-            return None
-
-        self._process_subtitle_data(self.provider_name, subtitle_data)
-
-    @property
-    def accepted_subtitles(self) -> list[Subtitle]:
-        return self._accepted_subtitles
-
-    @property
-    def rejected_subtitles(self) -> list[Subtitle]:
-        return self._rejected_subtitles
+        self.get_subtitles(self.url_opensubtitles)

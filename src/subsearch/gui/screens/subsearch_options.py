@@ -2,11 +2,12 @@ import tkinter as tk
 import webbrowser
 from tkinter import BooleanVar, ttk
 from typing import Any
-from subsearch.globals import decorators
 
+from subsearch.globals import decorators
 from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
+from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_toml, io_winreg, update
+from subsearch.utils import io_toml, io_winreg, string_parser, update
 
 
 def _handle_file_extensions_check_btn(cls, parent_key) -> None:
@@ -177,7 +178,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         self.download_manager_options: dict[str, Any] = {
             "download_manager.open_on_no_matches": "Open on no matches found",
             "download_manager.always_open": "Always open",
-            "download_manager.no_automatic_downloads": "No automatic downloads",
+            "download_manager.automatic_downloads": "Automatic downloads",
         }
         for name, description in self.download_manager_options.items():
             self.download_manager_options[name] = [
@@ -197,7 +198,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             always_open = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.always_open")
-            if key == "download_manager.no_automatic_downloads" and not always_open:
+            if key == "download_manager.automatic_downloads" and not always_open:
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -221,7 +222,7 @@ class DownloadManagerOptions(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
-        keys = [("download_manager.always_open", "download_manager.no_automatic_downloads")]
+        keys = [("download_manager.always_open", "download_manager.automatic_downloads")]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
@@ -230,6 +231,100 @@ class DownloadManagerOptions(ttk.Labelframe):
         if btn["text"] != self.download_manager_options[parent_key][1]:
             return None
         _handle_other_check_btn(self, value, child_key)
+
+
+class AdvancedUser(ttk.Labelframe):
+    def __init__(self, parent) -> None:
+        ttk.Labelframe.__init__(self, parent)
+        self.configure(text="Advanced user ( Requests / API )", padding=10)
+        self.data = io_toml.load_toml_data(FILE_PATHS.config)
+        self.tip_present = False
+        self.tip = None
+        adv_user = self.data["advanced_user"]
+        adv_default_values = [
+            adv_user["api_call_limit"],
+            adv_user["request_connect_timeout"],
+            adv_user["request_read_timeout"],
+        ]
+
+        self.adv_user_options: dict = {
+            "advanced_user.api_call_limit": "API call limit",
+            "advanced_user.request_connect_timeout": "Request connection timeout",
+            "advanced_user.request_read_timeout": "Request read timeout",
+        }
+        for name, description in self.adv_user_options.items():
+            self.adv_user_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]
+        frame = None
+        frame_c = tk.Frame(self)
+        frame_r = tk.Frame(self)
+
+        self.entry_fields: dict[ttk.Entry, tuple[str, tk.IntVar]] = {}
+        for enum, (key, value) in enumerate(self.adv_user_options.items()):
+            bool_value = value[0]
+            description = value[1]
+
+            int_value = tk.IntVar()
+            int_value.set(bool_value)
+            field_name = ttk.Label(frame_c, text=description, justify="left")
+            field = ttk.Entry(frame_c, width=3, justify="right")
+            field.insert(tk.END, adv_default_values[enum])
+            field_name.pack(side="left", anchor="center", fill="x")
+            field.pack(side="left", anchor="center", padx=4)
+            field.bind("<Enter>", self.enter_entry_field)
+            self.entry_fields[field] = key, int_value
+            # field.bind("<Enter>", self.enter_button)
+        frame_c.pack(side=tk.LEFT, expand=True, fill="x")
+        frame_r.pack(side=tk.LEFT, expand=False, after=frame_c)
+
+        apply_input = ttk.Button(frame_r, text="Apply", width=10)
+        apply_input.bind("<Enter>", self.enter_btn_apply_input)
+        apply_input.bind("<Leave>", self.leave_btn_apply_input)
+        apply_input.pack(anchor="center")
+
+    def enter_btn_apply_input(self, event) -> None:
+        btn = event.widget
+        field_ok = True
+        tip_text = (
+            "If you don't know what these values do, don't touch them.",
+            "Sending too many requests can get your IP banned.",
+        )
+        self.tip = common_utils.ToolTip(btn, btn, *tip_text)
+        self.tip.show()
+        self.tip_present = True
+        for field, values in self.entry_fields.items():
+            field: ttk.Entry
+            user_input = self.verify_field(field)
+            if field.instate(["invalid"]):
+                self.on_invalid_state(user_input)
+                btn.unbind("<ButtonPress-1>")
+                field_ok = False
+        if field_ok:
+            btn.bind("<ButtonPress-1>", self.update_config)
+
+    def leave_btn_apply_input(self, event) -> None:
+        btn = event.widget
+        self.tip.hide()
+        self.tip_present = False
+        btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
+
+
+    def update_config(self, event):
+        for field, values in self.entry_fields.items():
+            value = field.get()
+            key = values[0]
+            io_toml.update_toml_key(FILE_PATHS.config, key, int(value))
+
+    def verify_field(self, field: ttk.Entry) -> str:
+        user_input = field.get()
+        if not string_parser.valid_api_request_input(user_input):
+            field.state(["invalid"])
+        else:
+            field.state(["!invalid"])
+        return user_input
+
+    def on_invalid_state(self, path): ...
+
+    def enter_entry_field(self, event): ...
 
 
 class CheckForUpdates(ttk.Labelframe):
@@ -291,11 +386,11 @@ class CheckForUpdates(ttk.Labelframe):
             self.btn_search.state(["disabled"])
             self.btn_visit_release_page.state(["!disabled"])
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
-            if DEVICE_INFO.mode == "executable": 
+            if DEVICE_INFO.mode == "executable":
                 self.btn_update_install.state(["!disabled"])
                 self.btn_update_install.bind("<ButtonRelease-1>", self.download_and_update)
             else:
-                self.btn_update_install["text"]="Only availible with MSI"
+                self.btn_update_install["text"] = "Only availible with MSI"
             if repo_is_prerelease:
                 self.var_misc.set(f"Pre-release")
                 self.frame_misc.configure(fg=cfg.color.orange)
@@ -309,7 +404,7 @@ class CheckForUpdates(ttk.Labelframe):
 
     def visit_repository_button(self, event) -> None:
         webbrowser.open(f"https://github.com/vagabondHustler/subsearch/releases")
-        
+
     def download_and_update(self, event) -> None:
         update.download_and_update()
         self.btn_visit_release_page.state(["disabled"])

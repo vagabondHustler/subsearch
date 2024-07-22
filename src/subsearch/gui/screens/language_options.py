@@ -17,7 +17,7 @@ class SelectLanguage(ttk.Labelframe):
         self.name_find_key = {}
         self.tip_present = False
         self.languages = io_toml.load_toml_data(FILE_PATHS.language_data)
-        self.current_language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.language")
+        self.current_language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.current_language")
         self.checkbuttons: dict[ttk.Checkbutton, IntVar] = {}
         frame = None
         for enum, (language, language_data) in enumerate(self.languages.items()):
@@ -33,7 +33,7 @@ class SelectLanguage(ttk.Labelframe):
             else:
                 valuevar.set(0)
                 self.checkbox_values[btn] = valuevar
-            btn.pack(padx=2, pady=8)
+            btn.pack(padx=2, pady=9)
             if valuevar.get() == 1:
                 self.active_btn = btn
 
@@ -68,4 +68,4 @@ class SelectLanguage(ttk.Labelframe):
         self.active_btn.state(["!alternate"])  # type: ignore
         self.active_btn = btn
         value = self.name_find_key[btn["text"]]
-        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_filters.language", value)
+        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_filters.current_language", value)

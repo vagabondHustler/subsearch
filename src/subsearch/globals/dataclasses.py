@@ -39,6 +39,7 @@ class FilePaths:
 
 @dataclass(order=True, slots=True)
 class VideoFile:
+    file_exist: bool
     filename: str
     file_hash: str
     file_extension: str
@@ -50,7 +51,7 @@ class VideoFile:
 
 @dataclass(order=True, slots=True)
 class AppConfig:
-    language: str
+    current_language: str
     accept_threshold: int
     hearing_impaired: bool
     non_hearing_impaired: bool
@@ -65,8 +66,11 @@ class AppConfig:
     providers: dict[str, bool]
     open_on_no_matches: bool
     always_open: bool
-    no_automatic_downloads: bool
+    automatic_downloads: bool
     single_instance: bool
+    api_call_limit: int
+    request_connect_timeout: int
+    request_read_timeout: int
 
 
 @dataclass(order=True, slots=True)
@@ -80,6 +84,7 @@ class ReleaseData:
     tvseries: bool
     release: str
     group: str
+    imdb_id: str
 
 
 @dataclass(order=True, slots=True)
@@ -87,14 +92,16 @@ class ProviderUrls:
     opensubtitles: str
     opensubtitles_hash: str
     yifysubtitles: str
+    subsource: str
 
 
 @dataclass(order=True, slots=True)
 class Subtitle:
-    pct_result: int
-    provider: str
-    release_name: str
+    precentage_result: int
+    provider_name: str
+    subtitle_name: str
     download_url: str
+    request_data: dict[str, Any]
 
 
 @dataclass(order=True, frozen=True)
@@ -116,3 +123,10 @@ class WindowsRegistryPaths:
 
 class GenericDataClass(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
+
+
+@dataclass(order=True, slots=True)
+class ProviderApiLimit:
+    opensubtitles: int
+    yifysubtitles: int
+    subsource: int
