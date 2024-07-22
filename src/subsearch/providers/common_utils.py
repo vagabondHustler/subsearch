@@ -52,7 +52,6 @@ class ProviderDataContainer:
         self.accept_threshold = app_config.accept_threshold
         self.open_on_no_matches = app_config.open_on_no_matches
         self.api_call_limit = app_config.api_call_limit
-        self.api_sleep_ms = app_config.api_sleep_ms
         self.request_connect_timeout = app_config.request_connect_timeout
         self.request_read_timeout = app_config.request_read_timeout
         self.request_timeout = (self.request_connect_timeout, self.request_read_timeout)
