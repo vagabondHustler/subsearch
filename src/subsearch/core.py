@@ -122,30 +122,31 @@ class SubsearchCore(Initializer):
         log.brackets(f"Downloading subtitles")
         index_size = len(self.accepted_subtitles)
         self.accepted_subtitles = sorted(self.accepted_subtitles, key=lambda i: i.precentage_result, reverse=True)
-        for enum, subtitle in enumerate(self.accepted_subtitles, 1):
+        for index_position, subtitle in enumerate(self.accepted_subtitles):
             if subtitle.provider_name not in self.api_calls_made:
                 self.api_calls_made[subtitle.provider_name] = 0
             if not self.api_calls_made[subtitle.provider_name] == self.app_config.api_call_limit:
-                if subtitle.provider_name == 'subsource':
-                    self._handle_subsource_subtitle(enum, subtitle)
-                io_file_system.download_subtitle(subtitle, enum, index_size)
-                self.downloaded_subtitles += 1
+                if subtitle.provider_name == "subsource":
+                    self._handle_subsource_subtitle(index_position, subtitle)
+                sub_count = sum(self.api_calls_made.values(), 1)
+                io_file_system.download_subtitle(subtitle, sub_count, index_size)
+                self.downloaded_subtitles == sub_count
                 self.api_calls_made[subtitle.provider_name] += 1
             else:
-                s = self.accepted_subtitles.pop(enum - 1)
+                s = self.accepted_subtitles.pop(index_position)
                 self.rejected_subtitles.append(s)
         log.task_completed()
 
-    def _handle_subsource_subtitle(self, enum: int, subtitle: Subtitle) -> None: 
+    def _handle_subsource_subtitle(self, index_position: int, subtitle: Subtitle) -> None:
         if self.app_config.providers["subsource_site"]:
             subsource_api = subsource.GetDownloadUrl()
             download_url = subsource_api.get_url(subtitle)
             if not download_url:
-                self.accepted_subtitles.pop(enum - 1)
+                self.accepted_subtitles.pop(index_position)
                 log.stdout(f"{subtitle.provider_name} could not be reached. Removed {subtitle.subtitle_name}")
             else:
-                self.accepted_subtitles[enum - 1].download_url = download_url
-                self.accepted_subtitles[enum - 1].request_data = {}
+                self.accepted_subtitles[index_position].download_url = download_url
+                self.accepted_subtitles[index_position].request_data = {}
 
     @decorators.call_func
     def download_manager(self) -> None:
