@@ -138,7 +138,7 @@ class SubsearchCore(Initializer):
                     self._handle_subsource_subtitle(index_position, subtitle)
                 sub_count = sum(self.api_calls_made.values(), 1)
                 io_file_system.download_subtitle(subtitle, sub_count, index_size)
-                self.downloaded_subtitles == sub_count
+                self.downloaded_subtitles += 1
                 self.api_calls_made[subtitle.provider_name] += 1
             else:
                 s = self.accepted_subtitles.pop(index_position)

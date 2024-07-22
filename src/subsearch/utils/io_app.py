@@ -76,9 +76,9 @@ def get_default_app_config() -> dict[str, Any]:
             "single_instance": True,
         },
         "advanced_user": {
-            "api_call_limit": 5,
+            "api_call_limit": 4,
             "request_connect_timeout": 4,
-            "request_read_timeout": 8,
+            "request_read_timeout": 5,
         },
     }
     return config
