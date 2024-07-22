@@ -2,6 +2,8 @@ import threading
 from typing import Any
 
 import cloudscraper
+from cloudscraper import CloudScraper
+from requests import Response, exceptions
 from selectolax.parser import HTMLParser
 
 from subsearch.globals import log
@@ -51,7 +53,9 @@ class ProviderDataContainer:
         self.open_on_no_matches = app_config.open_on_no_matches
         self.api_call_limit = app_config.api_call_limit
         self.api_sleep_ms = app_config.api_sleep_ms
-
+        self.request_connect_timeout = app_config.request_connect_timeout
+        self.request_read_timeout = app_config.request_read_timeout
+        self.request_timeout = (self.request_connect_timeout, self.request_read_timeout)
         # provider url data
         self.url_opensubtitles = provider_urls.opensubtitles
         self.url_opensubtitles_hash = provider_urls.opensubtitles_hash
@@ -204,17 +208,28 @@ class ProviderHelper(ProviderDataContainer):
         return False
 
 
-def get_cloudscraper() -> cloudscraper.CloudScraper:
+def get_cloudscraper() -> CloudScraper:
     return cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
 
 
-def get_html_parser(url: str, header_=None) -> HTMLParser:
-    scraper = get_cloudscraper()
-    if header_ is None:
-        response = scraper.get(url)
-    else:
-        response = scraper.get(url, headers=header_)
+def send_request(url: str, scraper: CloudScraper, timeout: tuple[int, int], header=None) -> Response:
+    if header is None:
+        return scraper.get(url, timeout=timeout)
+    return scraper.get(url, timeout=timeout, headers=header)
+
+
+def parse_scraper_response(response: Response) -> HTMLParser:
     return HTMLParser(response.text)
+
+
+def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser:
+    scraper = get_cloudscraper()
+    try:
+        response = send_request(url, scraper, timeout=timeout, header=header)
+    except exceptions.Timeout as e:
+        log.stdout(e, level="warning", print_allowed=False)
+        return ""
+    return parse_scraper_response(response)
 
 
 def sort_list_by_precentage_result(list_: list) -> list:

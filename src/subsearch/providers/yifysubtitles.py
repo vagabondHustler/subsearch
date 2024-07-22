@@ -9,7 +9,10 @@ class YifySubtitlesScraper(common_utils.ProviderHelper):
         self.provider_name = ""
 
     def get_subtitles(self) -> None:
-        tree = common_utils.get_html_parser(self.url_yifysubtitles)
+        tree = common_utils.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
+        if not tree:
+            return None
+        
         product = tree.select("tr")
         for item in product.matches[1:]:  # type: ignore
             if self.skip_item(item):

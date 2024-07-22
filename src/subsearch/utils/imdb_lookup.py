@@ -60,7 +60,7 @@ class ImdbTvseriesSearch(AdvancedSearch):
 
 class FindImdbID:
     @no_type_check
-    def __init__(self, title: str, year: int, tvseries: bool) -> None:
+    def __init__(self, title: str, year: int, tvseries: bool, request_timeout=(4, 8)) -> None:
         self.title = title.lower()
         self.year = year
         self.tvseries = tvseries
@@ -68,7 +68,9 @@ class FindImdbID:
         adv_search = self._advanced_search()
 
         url = adv_search.get_url()
-        tree = common_utils.get_html_parser(url)
+        tree = common_utils.request_parsed_response(url=url, timeout=request_timeout)
+        if not tree:
+            return None
 
         product = tree.css("a.ipc-title-link-wrapper h3.ipc-title__text")
 

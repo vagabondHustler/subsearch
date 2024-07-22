@@ -33,7 +33,7 @@ class SelectLanguage(ttk.Labelframe):
             else:
                 valuevar.set(0)
                 self.checkbox_values[btn] = valuevar
-            btn.pack(padx=2, pady=8)
+            btn.pack(padx=2, pady=9)
             if valuevar.get() == 1:
                 self.active_btn = btn
 

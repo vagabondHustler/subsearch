@@ -259,3 +259,8 @@ def valid_path(input_str, path_resolution) -> bool:
     elif path_resolution == "absolute":
         pattern = r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$"
     return bool(re.match(pattern, input_str))
+
+
+def valid_api_request_input(input: int) -> bool:
+    pattern = r"[0-9]"
+    return bool(re.match(pattern, input))

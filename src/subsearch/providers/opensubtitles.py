@@ -21,7 +21,9 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
         return False
 
     def get_subtitles(self, url: str) -> None:
-        tree = common_utils.get_html_parser(url)
+        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        if not tree:
+            return None
         items = tree.css("item")
         if self.is_opensubtitles_down(tree):
             return None
@@ -32,7 +34,9 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
     def with_hash(self, url: str, subtitle_name: str):
-        tree = common_utils.get_html_parser(url)
+        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        if not tree:
+            return None
         if self.is_opensubtitles_down(tree):
             return None
         try:
