@@ -32,7 +32,7 @@ class CreateThread(threading.Thread):
             log.stdout(msg, level="error", print_allowed=False)
             raise self.exception
         else:
-            log.stdout(f"Thread {self.name} finnished", level="debug", print_allowed=False)
+            log.stdout(f"Thread {self.name} finished", level="debug", print_allowed=False)
         return self.return_value
 
 
