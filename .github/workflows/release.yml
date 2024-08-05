@@ -250,7 +250,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
           fromTag: ${{ needs.init.outputs.last_stable_release }}
           toTag: ${{ inputs.new_tags }}
