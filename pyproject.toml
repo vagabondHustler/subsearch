@@ -72,7 +72,7 @@
         "build==1.2.2.post1",
         "cx_Freeze==7.2.7",
         "twine==5.1.1",
-        "psutil==6.1.0",
+        "psutil==6.1.1",
     ]
     lint = ["black==24.10.0", "isort==5.13.2"]
     tests = [
