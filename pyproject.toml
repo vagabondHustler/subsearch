@@ -78,7 +78,7 @@
     tests = [
         "pytest-cov==6.0.0",
         "pytest==8.3.4",
-        "tox==4.23.2",
+        "tox==4.24.1",
         "python-dotenv==1.0.1",
     ]
     tools = ["pyperclip==1.9.0"]
