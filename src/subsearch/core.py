@@ -26,6 +26,7 @@ class Initializer:
         self.release_data = string_parser.no_release_data()
         self.provider_urls = string_parser.CreateProviderUrls.no_urls()
         self.file_exist = VIDEO_FILE.file_exist
+        self.autoload_src = ""
 
         log.stdout("Verifing files and paths", level="debug")
         self.setup_file_system()
@@ -56,9 +57,11 @@ class Initializer:
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
-
-        self.call_conditions = CallConditions(self)
+        self.refresh_call_conditions_attrs()
         log.task_completed()
+
+    def refresh_call_conditions_attrs(self) -> None:
+        self.call_conditions = CallConditions(self)
 
     def update_imdb_id(self) -> None:
         timeout = self.app_config.request_connect_timeout, self.app_config.request_read_timeout
@@ -143,6 +146,7 @@ class SubsearchCore(Initializer):
             else:
                 s = self.accepted_subtitles.pop(index_position)
                 self.rejected_subtitles.append(s)
+        self.refresh_call_conditions_attrs()
         log.task_completed()
 
     def _handle_subsource_subtitle(self, index_position: int, subtitle: Subtitle) -> None:
@@ -243,7 +247,7 @@ class SubsearchCore(Initializer):
 
 class CallConditions:
 
-    def __init__(self, cls: Initializer) -> None:
+    def __init__(self, cls: SubsearchCore) -> None:
         self.app_config = cls.app_config
         self.file_exist = cls.file_exist
         self.release_data = cls.release_data
@@ -317,15 +321,18 @@ class CallConditions:
                 self.file_exist,
             ],
             "subtitle_rename": [
+                self.file_exist,
                 self.app_config.subtitle_post_processing["rename"],
                 self.downloaded_subtitles >= 1,
             ],
             "subtitle_move_best": [
+                self.file_exist,
                 self.app_config.subtitle_post_processing["move_best"],
                 self.downloaded_subtitles >= 1,
                 not self.app_config.subtitle_post_processing["move_all"],
             ],
             "subtitle_move_all": [
+                self.file_exist,
                 self.app_config.subtitle_post_processing["move_all"],
                 self.downloaded_subtitles > 1,
             ],
