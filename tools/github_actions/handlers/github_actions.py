@@ -49,7 +49,7 @@ def _validate_new_tags(inputs: dict[str, Any]) -> None:
 
 
 def _validate_python_version(inputs: dict[str, Any]) -> None:
-    valid_python_versions = ["3.13"]
+    valid_python_versions = ["3.12"]
     if "python_version" in inputs:
         version = inputs["python_version"]
         if not version.startswith(tuple(valid_python_versions)):

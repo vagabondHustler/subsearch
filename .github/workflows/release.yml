@@ -12,7 +12,7 @@ on:
         description: "Python version to use when building binaries."
         type: string
         required: false
-        default: "3.13"
+        default: "3.12"
       artifact_retention_days:
         description: "Number of days to retain build artifacts in GitHub Actions."
         type: number
@@ -315,6 +315,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
   publish_github:
     name: Publish to github
     if: ${{ !contains(inputs.new_tags, 'dev') }}
@@ -385,6 +386,7 @@ jobs:
         run: |
           twine upload --verbose -u '__token__' dist/*
 
+
   sync_dev:
     name: Synchronize dev with main
     if: ${{ !contains(inputs.new_tags, 'dev') }}
@@ -402,6 +404,7 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_config_global: true
+
 
       - name: Synchronize dev with main
         run: |
