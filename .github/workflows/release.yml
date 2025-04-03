@@ -250,7 +250,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
           fromTag: ${{ needs.init.outputs.last_stable_release }}
           toTag: ${{ inputs.new_tags }}
@@ -278,8 +278,8 @@ jobs:
           if-no-files-found: error
           retention-days: ${{ inputs.artifact_retention_days }}
 
-  pr_merge:
-    name: Create pr and merge
+  update_main:
+    name: Create pull request and update main
     if: ${{ !contains(inputs.new_tags, 'dev') }}
     needs: [init, test_binaries, changelog]
     runs-on: ${{ inputs.runs_on }}
@@ -315,19 +315,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Synchronize dev with main
-        run: |
-          git fetch --all
-          git checkout dev
-          git rebase main
-          git push origin dev --force-with-lease
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_github:
     name: Publish to github
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [init, test_binaries, changelog, pr_merge]
+    needs: [init, test_binaries, changelog, update_main]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
     steps:
@@ -366,7 +358,7 @@ jobs:
   publish_pypi:
     name: Publish to pypi
     if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [version_control, test_binaries, pr_merge]
+    needs: [version_control, test_binaries, update_main]
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
@@ -393,3 +385,32 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           twine upload --verbose -u '__token__' dist/*
+
+
+  sync_dev:
+    name: Synchronize dev with main
+    if: ${{ !contains(inputs.new_tags, 'dev') }}
+    needs: [init, publish_pypi, publish_github]
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+
+
+      - name: Synchronize dev with main
+        run: |
+          git fetch --all
+          git checkout dev
+          git rebase main
+          git push origin dev --force-with-lease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

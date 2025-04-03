@@ -18,12 +18,12 @@
     dependencies = [
         "picologging==0.9.3",
         "cloudscraper==1.2.71",
-        "num2words==0.5.13",
-        "packaging==24.1",
-        "pillow==10.4.0",
+        "num2words==0.5.14",
+        "packaging==24.2",
+        "pillow==11.1.0",
         "pystray==0.19.5",
         "requests==2.32.3",
-        "selectolax==0.3.21",
+        "selectolax==0.3.28",
         "toml==0.10.2",
     ]
     description = "Subsearch"
@@ -69,20 +69,20 @@
 
 [project.optional-dependencies]
     build = [
-        "build==1.2.1",
-        "cx_Freeze==7.2.0",
-        "twine==5.1.1",
-        "psutil==6.0.0",
+        "build==1.2.2.post1",
+        "cx_Freeze==8.0.0",
+        "twine==6.1.0",
+        "psutil==7.0.0",
     ]
-    lint = ["black==24.4.2", "isort==5.13.2"]
+    lint = ["black==25.1.0", "isort==6.0.1"]
     tests = [
-        "pytest-cov==5.0.0",
-        "pytest==8.3.1",
-        "tox==4.16.0",
-        "python-dotenv==1.0.1",
+        "pytest-cov==6.0.0",
+        "pytest==8.3.5",
+        "tox==4.24.2",
+        "python-dotenv==1.1.0",
     ]
     tools = ["pyperclip==1.9.0"]
-    type = ["mypy==1.11.0"]
+    type = ["mypy==1.15.0"]
 
 
 [tool.pytest.ini_options]
