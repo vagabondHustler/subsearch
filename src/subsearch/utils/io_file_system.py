@@ -1,6 +1,7 @@
 import shutil
 import struct
 import time
+from typing import Iterable, Optional
 import zipfile
 from io import BufferedReader
 from pathlib import Path
@@ -118,6 +119,14 @@ def get_file_hash(file_path: Path) -> str:
 
     hash_algorithm = MPCHashAlgorithm(file_path)
     return hash_algorithm.get_hash()
+
+
+def count_files_in_directory(path: Path, extensions: Optional[Iterable[str]] = None) -> int:
+    extensions = {ext.lower() for ext in extensions} if extensions else None
+    file_count = sum(
+        1 for file in path.iterdir() if file.is_file() and (extensions is None or file.suffix.lower() in extensions)
+    )
+    return file_count
 
 
 class MPCHashAlgorithm:
