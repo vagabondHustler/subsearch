@@ -8,7 +8,7 @@ from subsearch.data import __guid__
 
 APP_NAME = "Subsearch"
 ICON = "src/subsearch/gui/resources/assets/subsearch.ico"
-asdf = [
+_libs_to_exclude = [
     "concurrent",
     "lib2to3",
     "multiprocessing",
@@ -92,8 +92,8 @@ def _get_data_table() -> dict[str, Any]:
             (f"{APP_NAME}_regz_appliesto", -1, registry_path, "AppliesTo", None, script_component),
             (f"{APP_NAME}_key_command", -1, rf"{registry_path}\command", None, "", script_component),
         },
-        "Property": {("RunSubsearch_Action", "DoNothing")},
-        "CustomAction": {("RunApp", 210, "Subsearch.exe", "")},
+        # "Property": {("RunSubsearch_Action", "DoNothing")},
+        # "CustomAction": {("RunApp", 210, "Subsearch.exe", "")},
     }
     return data
 
@@ -115,7 +115,7 @@ def get_executable() -> list[Executable]:
 def get_options() -> dict[str, Any]:
     data = _get_data_table()
     bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": data}
-    build_exe = {"excludes": [*asdf]}
+    build_exe = {"excludes": [*_libs_to_exclude]}
     options = {"build_exe": build_exe, "bdist_msi": bdist_msi}
     return options
 
@@ -127,7 +127,7 @@ def monkey_patch_exit_dialog() -> None:
 def main() -> None:
     executable = get_executable()
     options = get_options()
-    monkey_patch_exit_dialog()
+    # monkey_patch_exit_dialog()
     setup(options=options, executables=executable)
 
 
