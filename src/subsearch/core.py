@@ -94,6 +94,19 @@ class Initializer:
             return True
         return False
 
+    def prevent_conflicting_config_settings(self) -> None:
+        # TODO
+        # make settings exclusive in GUI
+        if self.app_config.open_on_no_matches and self.app_config.always_open:
+            self.app_config.open_on_no_matches = False
+            io_toml.update_toml_key(FILE_PATHS.config, "download_manager.open_on_no_matches", False)
+        if (
+            self.app_config.subtitle_post_processing["move_best"]
+            and self.app_config.subtitle_post_processing["move_all"]
+        ):
+            self.app_config.subtitle_post_processing["move_best"] = False
+            io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.move_best", False)
+
 
 class SubsearchCore(Initializer):
     def __init__(self, pref_counter: float) -> None:
@@ -103,13 +116,17 @@ class SubsearchCore(Initializer):
             log.brackets("GUI")
             screen_manager.open_screen("search_options")
             log.stdout("Exiting GUI", level="debug")
+            self.prevent_conflicting_config_settings()
             return None
 
         if " " in VIDEO_FILE.filename:
             log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
         if not self.all_providers_disabled():
+            self.prevent_conflicting_config_settings()
             log.brackets("Search started")
+
+
 
     @decorators.call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -339,7 +356,6 @@ class CallConditions:
             ],
             "subtitle_move_all": [
                 self.extracted_subtitle_archives >= 1,
-                not self.app_config.subtitle_post_processing["move_best"],
                 self.app_config.subtitle_post_processing["move_all"],
             ],
             "summary_notification": [

@@ -134,6 +134,7 @@ def test_conditions_subtitle_move_best(fake_cls: FakeSubsearchCore) -> None:
     assert fake_cls.call_conditions.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
     fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.subtitle_post_processing["move_best"] = True
     fake_cls.app_config.subtitle_post_processing["move_all"] = True
     assert fake_cls.call_conditions.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
@@ -161,8 +162,8 @@ def test_conditions_subtitle_move_all(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.app_config.subtitle_post_processing["move_all"] = True
     assert fake_cls.call_conditions.call_func(cls=fake_cls, func_name=fake_cls.func_name) is True
 
-    # fake_cls.app_config.subtitle_post_processing["move_all"] = False
-    # assert fake_cls.call_conditions.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
+    fake_cls.app_config.subtitle_post_processing["move_all"] = False
+    assert fake_cls.call_conditions.call_func(cls=fake_cls, func_name=fake_cls.func_name) is False
 
 
 def test_conditions_summary_notification(fake_cls: FakeSubsearchCore) -> None:
