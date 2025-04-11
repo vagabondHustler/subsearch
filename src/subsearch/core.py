@@ -18,7 +18,6 @@ class Initializer:
         log.brackets("Initializing")
 
         self.api_calls_made: dict[str, int] = {}
-        self.downloaded_subtitles = 0
         self.ran_download_tab = False
         self.accepted_subtitles: list[Subtitle] = []
         self.rejected_subtitles: list[Subtitle] = []
@@ -27,6 +26,11 @@ class Initializer:
         self.provider_urls = string_parser.CreateProviderUrls.no_urls()
         self.file_exist = VIDEO_FILE.file_exist
         self.autoload_src = ""
+
+        self.downloaded_subtitles: int = 0
+        self.downloaded_subtitle_archives: int = 0
+        self.extracted_subtitle_archives: int = 0
+        self.user_downloaded_files = False
 
         log.stdout("Verifing files and paths", level="debug")
         self.setup_file_system()
@@ -57,11 +61,8 @@ class Initializer:
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
-        self.refresh_call_conditions_attrs()
-        log.task_completed()
-
-    def refresh_call_conditions_attrs(self) -> None:
         self.call_conditions = CallConditions(self)
+        log.task_completed()
 
     def update_imdb_id(self) -> None:
         timeout = self.app_config.request_connect_timeout, self.app_config.request_read_timeout
@@ -93,6 +94,19 @@ class Initializer:
             return True
         return False
 
+    def prevent_conflicting_config_settings(self) -> None:
+        # TODO
+        # make settings exclusive in GUI
+        if self.app_config.open_on_no_matches and self.app_config.always_open:
+            self.app_config.open_on_no_matches = False
+            io_toml.update_toml_key(FILE_PATHS.config, "download_manager.open_on_no_matches", False)
+        if (
+            self.app_config.subtitle_post_processing["move_best"]
+            and self.app_config.subtitle_post_processing["move_all"]
+        ):
+            self.app_config.subtitle_post_processing["move_best"] = False
+            io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.move_best", False)
+
 
 class SubsearchCore(Initializer):
     def __init__(self, pref_counter: float) -> None:
@@ -102,13 +116,17 @@ class SubsearchCore(Initializer):
             log.brackets("GUI")
             screen_manager.open_screen("search_options")
             log.stdout("Exiting GUI", level="debug")
+            self.prevent_conflicting_config_settings()
             return None
 
         if " " in VIDEO_FILE.filename:
             log.stdout(f"{VIDEO_FILE.filename} contains spaces, result may vary", level="warning")
 
         if not self.all_providers_disabled():
+            self.prevent_conflicting_config_settings()
             log.brackets("Search started")
+
+
 
     @decorators.call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -146,7 +164,6 @@ class SubsearchCore(Initializer):
             else:
                 s = self.accepted_subtitles.pop(index_position)
                 self.rejected_subtitles.append(s)
-        self.refresh_call_conditions_attrs()
         log.task_completed()
 
     def _handle_subsource_subtitle(self, index_position: int, subtitle: Subtitle) -> None:
@@ -166,22 +183,26 @@ class SubsearchCore(Initializer):
         subtitles = self.rejected_subtitles + self.accepted_subtitles
         screen_manager.open_screen("download_manager", subtitles=subtitles)
         self.manually_accepted_subtitles = download_manager.DownloadManager.downloaded_subtitle
+        self.downloaded_subtitles += len(self.manually_accepted_subtitles)
         log.task_completed()
+
+    @decorators.call_func
+    def subtitle_post_processing(self) -> None:
+        target = self.app_config.subtitle_post_processing["target_path"]
+        resolution = self.app_config.subtitle_post_processing["path_resolution"]
+        target_path = io_file_system.create_path_from_string(target, resolution)
+        self.downloaded_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir)
+        self.extracted_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
+        self.extract_files()
+        self.subtitle_rename()
+        self.subtitle_move_best(target_path)
+        self.subtitle_move_all(target_path)
 
     @decorators.call_func
     def extract_files(self) -> None:
         log.brackets("Extracting downloads")
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
         log.task_completed()
-
-    @decorators.call_func
-    def subtitle_post_processing(self):
-        target = self.app_config.subtitle_post_processing["target_path"]
-        resolution = self.app_config.subtitle_post_processing["path_resolution"]
-        target_path = io_file_system.create_path_from_string(target, resolution)
-        self.subtitle_rename()
-        self.subtitle_move_best(target_path)
-        self.subtitle_move_all(target_path)
 
     @decorators.call_func
     def subtitle_rename(self) -> None:
@@ -206,14 +227,13 @@ class SubsearchCore(Initializer):
     def summary_notification(self, elapsed) -> None:
         log.brackets("Summary toast")
         elapsed_summary = f"Finished in {elapsed} seconds"
-        tot_num_of_subtitles = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        all_downloaded = self.downloaded_subtitles + len(self.manually_accepted_subtitles)
-        matches_downloaded = f"Downloaded: {all_downloaded}/{tot_num_of_subtitles}"
-        if all_downloaded > 0:
+        number_of_results = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        matches_downloaded = f"Downloaded: {self.downloaded_subtitles}/{number_of_results}"
+        if self.downloaded_subtitles >= 1:
             msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
             log.stdout(matches_downloaded, hex_color="#a6e3a1")
             self.system_tray.display_toast(*msg)
-        elif all_downloaded == 0:
+        elif self.downloaded_subtitles == 0:
             msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
             log.stdout(matches_downloaded, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
@@ -248,14 +268,19 @@ class SubsearchCore(Initializer):
 class CallConditions:
 
     def __init__(self, cls: SubsearchCore) -> None:
-        self.app_config = cls.app_config
-        self.file_exist = cls.file_exist
-        self.release_data = cls.release_data
-        self.provider_urls = cls.provider_urls
-        self.language_data = cls.language_data
-        self.accepted_subtitles = cls.accepted_subtitles
-        self.rejected_subtitles = cls.rejected_subtitles
-        self.downloaded_subtitles = cls.downloaded_subtitles
+        self.cls = cls
+        self.refresh_parent_attrs()
+
+    def refresh_parent_attrs(self):
+        self.app_config = self.cls.app_config
+        self.file_exist = self.cls.file_exist
+        self.release_data = self.cls.release_data
+        self.provider_urls = self.cls.provider_urls
+        self.language_data = self.cls.language_data
+        self.accepted_subtitles = self.cls.accepted_subtitles
+        self.rejected_subtitles = self.cls.rejected_subtitles
+        self.downloaded_subtitle_archives = self.cls.downloaded_subtitle_archives
+        self.extracted_subtitle_archives = self.cls.extracted_subtitle_archives
 
     def check_language_compatibility(self, provider: str) -> bool:
         language = self.app_config.current_language
@@ -270,6 +295,7 @@ class CallConditions:
 
     def call_func(self, *args, **kwargs) -> bool:
         func_name = kwargs["func_name"]
+        self.refresh_parent_attrs()
         conditions: dict[str, list[bool]] = {
             "init_search": [self.file_exist],
             "opensubtitles": [
@@ -292,8 +318,7 @@ class CallConditions:
                 self.app_config.providers["subsource_site"],
             ],
             "download_files": [
-                len(self.accepted_subtitles) >= 1
-                and self.app_config.automatic_downloads
+                (len(self.accepted_subtitles) >= 1 and self.app_config.automatic_downloads)
                 or (
                     len(self.accepted_subtitles) >= 1
                     and not self.app_config.automatic_downloads
@@ -314,27 +339,24 @@ class CallConditions:
                     )
                 ),
             ],
-            "extract_files": [
-                len(self.accepted_subtitles) >= 1,
-            ],
             "subtitle_post_processing": [
                 self.file_exist,
             ],
+            "extract_files": [
+                self.downloaded_subtitle_archives >= 1,
+            ],
             "subtitle_rename": [
-                self.file_exist,
+                self.extracted_subtitle_archives >= 1,
                 self.app_config.subtitle_post_processing["rename"],
-                self.downloaded_subtitles >= 1,
             ],
             "subtitle_move_best": [
-                self.file_exist,
+                self.extracted_subtitle_archives >= 1,
                 self.app_config.subtitle_post_processing["move_best"],
-                self.downloaded_subtitles >= 1,
                 not self.app_config.subtitle_post_processing["move_all"],
             ],
             "subtitle_move_all": [
-                self.file_exist,
+                self.extracted_subtitle_archives >= 1,
                 self.app_config.subtitle_post_processing["move_all"],
-                self.downloaded_subtitles > 1,
             ],
             "summary_notification": [
                 self.file_exist,
