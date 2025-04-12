@@ -174,3 +174,4 @@ artifacts/*
 .GITHUB_OUTPUT
 .GITHUB_STEP_SUMMARY
 cspell.json
+cspell.config.yaml
