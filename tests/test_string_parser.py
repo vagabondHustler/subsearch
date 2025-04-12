@@ -70,7 +70,7 @@ def test_string_parser_bad_filename() -> None:
     assert release_data.group == "the foo bar 1080p web h264"
 
 
-def test_provider_urls_movie(monkeypatch):
+def test_provider_urls_movie(monkeypatch) -> None:
     monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_MOVIE)
     app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = globals_test.FAKE_VIDEO_FILE_MOVIE.filename
@@ -91,7 +91,7 @@ def test_provider_urls_movie(monkeypatch):
     assert provider_url.yifysubtitles == ""
 
 
-def test_provider_urls_series(monkeypatch):
+def test_provider_urls_series(monkeypatch) -> None:
     monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_SERIES)
     app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = globals_test.FAKE_VIDEO_FILE_SERIES.filename
@@ -112,10 +112,10 @@ def test_provider_urls_series(monkeypatch):
     assert provider_url.yifysubtitles == ""
 
 
-def test_imdb_movie():
+def test_imdb_movie() -> None:
     imdb = imdb_lookup.FindImdbID("Arctic", 2019, False)
     assert imdb.imdb_id == "tt6820256"
 
-def test_imdb_tvseries():
+def test_imdb_tvseries() -> None:
     imdb = imdb_lookup.FindImdbID("Breaking bad", 0, True)
     assert imdb.imdb_id == "tt0903747"

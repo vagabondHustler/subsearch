@@ -3,7 +3,7 @@ import inspect
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 import picologging as logging
 
@@ -12,8 +12,8 @@ from subsearch.globals.constants import APP_PATHS, FILE_PATHS
 from subsearch.globals.dataclasses import GenericDataClass
 
 
-def capture_call_info(func) -> Callable[..., None]:
-    def wrapper(*args, **kwargs):
+def capture_call_info(func: Callable[..., Any]) -> Callable[..., Any]:
+    def wrapper(*args, **kwargs) -> Any:
         frame = inspect.currentframe().f_back  # type: ignore
         current_time = datetime.now().time()
         call_time = current_time.strftime("%H:%M:%S.%f")[:-3]

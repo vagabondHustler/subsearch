@@ -75,7 +75,7 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
         self.deactivate_screen()
 
-    def get_btn(self, btns: dict, event_: Any, equals=True):
+    def get_btn(self, btns: dict, event_: Any, equals=True) -> tuple | None:
         for btn_key, btn_widget in btns.items():
             if event_.widget == btn_widget and equals:
                 return btn_key, btn_widget
@@ -145,6 +145,6 @@ def open_screen(tab_name: str, **kwargs) -> None:
     root.mainloop()
 
 
-def close_mainloop(event):
+def close_mainloop(event) -> None:
     if event.keysym == "Escape":
         root.destroy()

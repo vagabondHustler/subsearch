@@ -66,7 +66,7 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
     return new_file_path
 
 
-def move_all(src: Path, dst: Path, extension: str = ".srt"):
+def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
     for file in src.glob(f"*{extension}"):
         move_and_replace(file.absolute(), dst)
 
@@ -165,7 +165,7 @@ class MPCHashAlgorithm:
         return self.hash
 
 
-def download_response(msi_package_path: Path, response: requests.Response):
+def download_response(msi_package_path: Path, response: requests.Response) -> None:
     start_time = time.time()
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))

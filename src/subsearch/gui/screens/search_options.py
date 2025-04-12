@@ -204,14 +204,14 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
         apply_input.bind("<Leave>", self.leave_btn_apply_input)
         self.entry_path.bind("<Enter>", self.enter_entry_path)
 
-    def enter_entry_path(self, event):
+    def enter_entry_path(self, event) -> None:
         widget_ = event.widget
         path = widget_.get()
         old_path = path.replace("Invalid path: ", "")
         widget_.delete(0, tk.END)
         widget_.insert(tk.END, old_path)
 
-    def enter_btn_apply_input(self, event):
+    def enter_btn_apply_input(self, event) -> None:
         widget_ = event.widget
         path = self.verify_path()
         if self.entry_path.instate(["invalid"]):
@@ -224,7 +224,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
         widget_ = event.widget
         widget_.bind("<ButtonPress-1>", self.toogle_path_resolution)
 
-    def leave_btn_apply_input(self, event):
+    def leave_btn_apply_input(self, event) -> None:
         widget_ = event.widget
         path = self.verify_path()
         if self.entry_path.instate(["invalid"]):
@@ -237,7 +237,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
         widget_ = event.widget
         widget_.unbind("<ButtonPress-1>")
 
-    def update_config(self, event):
+    def update_config(self, event) -> None:
         target_path = self.entry_path.get()
         path_resolution = self.path_resolution.get().lower()
         io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.target_path", target_path)
@@ -252,7 +252,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
             self.entry_path.state(["!invalid"])
         return target_path
 
-    def on_invalid_state(self, path):
+    def on_invalid_state(self, path) -> None:
         invalid_path = path.replace("Invalid path: ", "")
         self.entry_path.delete(0, tk.END)
         self.entry_path.insert(tk.END, f"Invalid path: {invalid_path}")
@@ -310,7 +310,7 @@ class SearchThreshold(tk.Frame):
         self.slider.bind("<Enter>", self.enter_button)
         self.slider.bind("<Leave>", self.leave_button)
 
-    def get_value(self):
+    def get_value(self) -> int:
         return self.current_value.get()
 
     def set_value(self, event) -> None:

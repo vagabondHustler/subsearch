@@ -72,7 +72,7 @@ def find_group(string: str) -> str:
     return group
 
 
-def find_title(filename: str, year: int, series: bool):
+def find_title(filename: str, year: int, series: bool) -> str:
     if year != 0000:
         title = find_title_by_year(filename)
     elif series and year == 0000:
@@ -145,7 +145,7 @@ class CreateProviderUrls:
             return f"searchonlytvseries-on/season-{self.release_data.season}/episode-{self.release_data.episode}/moviename-{self.release_data.title}"
         return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
 
-    def subtitle_type_logic(self):
+    def subtitle_type_logic(self) -> tuple[bool, bool, bool]:
         hi_all_parts = (
             self.app_config.hearing_impaired
             and not self.app_config.non_hearing_impaired
@@ -220,7 +220,7 @@ def mk_lst(release: str) -> list[str]:
     return new
 
 
-def make_equal_size(lst1, lst2):
+def make_equal_size(lst1, lst2) -> tuple:
     if len(lst1) == len(lst2):
         return lst1, lst2
     elif len(lst1) > len(lst2):
@@ -234,7 +234,7 @@ def make_equal_size(lst1, lst2):
     return lst_big, filled_list
 
 
-def fill_shorter_list(big_lst, small_lst, difference):
+def fill_shorter_list(big_lst, small_lst, difference) -> Any:
     if big_lst > small_lst:
         for _i in range(difference):
             small_lst.append(None)
