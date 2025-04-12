@@ -1,6 +1,7 @@
 import shutil
 import struct
 import time
+from typing import Iterable, Optional
 import zipfile
 from io import BufferedReader
 from pathlib import Path
@@ -65,7 +66,7 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
     return new_file_path
 
 
-def move_all(src: Path, dst: Path, extension: str = ".srt"):
+def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
     for file in src.glob(f"*{extension}"):
         move_and_replace(file.absolute(), dst)
 
@@ -120,6 +121,14 @@ def get_file_hash(file_path: Path) -> str:
     return hash_algorithm.get_hash()
 
 
+def count_files_in_directory(path: Path, extensions: Optional[Iterable[str]] = None) -> int:
+    extensions = {ext.lower() for ext in extensions} if extensions else None
+    file_count = sum(
+        1 for file in path.iterdir() if file.is_file() and (extensions is None or file.suffix.lower() in extensions)
+    )
+    return file_count
+
+
 class MPCHashAlgorithm:
     def __init__(self, file_path: Path, **kwargs) -> None:
         file_size = file_path.stat().st_size
@@ -156,7 +165,7 @@ class MPCHashAlgorithm:
         return self.hash
 
 
-def download_response(msi_package_path: Path, response: requests.Response):
+def download_response(msi_package_path: Path, response: requests.Response) -> None:
     start_time = time.time()
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))

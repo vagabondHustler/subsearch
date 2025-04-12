@@ -54,7 +54,7 @@ def run_installer(msi_package_path: Path) -> None:
     subprocess.Popen(command, shell=True, creationflags=subprocess.DETACHED_PROCESS)
 
 
-def download_and_update():
+def download_and_update() -> None:
     log.brackets("Updating Application")
     latest_version = get_latest_version()
     latest_msi = get_latest_msi_url(latest_version)

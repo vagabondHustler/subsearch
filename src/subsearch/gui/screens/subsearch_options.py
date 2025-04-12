@@ -16,7 +16,7 @@ def _handle_file_extensions_check_btn(cls, parent_key) -> None:
     [instance.update_state() for instance in FileExtensions.instances]
 
 
-def _handle_other_check_btn(cls, value, child_key):
+def _handle_other_check_btn(cls, value, child_key) -> None:
     for check_button, tuple_value in cls.checkbuttons.items():
         key = tuple_value[0]
         if key != child_key:
@@ -80,7 +80,7 @@ class FileExtensions(ttk.Labelframe):
     def update_registry(self) -> None:
         io_winreg.write_all_valuex()
 
-    def update_state(self):
+    def update_state(self) -> None:
         for key in self.checkbuttons.keys():
             if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
                 key.state(["!disabled"])
@@ -153,7 +153,7 @@ class SubsearchOption(ttk.Labelframe):
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
-    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]):
+    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]) -> None:
         parent_key, child_key = key_pair[0], key_pair[1]
         if btn["text"] != self.subsearch_options[parent_key][1]:
             return None
@@ -197,9 +197,6 @@ class DownloadManagerOptions(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            always_open = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.always_open")
-            if key == "download_manager.automatic_downloads" and not always_open:
-                check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
             self.checkbuttons[check_btn] = key, boolean
@@ -222,16 +219,6 @@ class DownloadManagerOptions(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
-        keys = [("download_manager.always_open", "download_manager.automatic_downloads")]
-        for key_pair in keys:
-            self.disable_check_btn_children(btn, value, key_pair)
-
-    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]):
-        parent_key, child_key = key_pair[0], key_pair[1]
-        if btn["text"] != self.download_manager_options[parent_key][1]:
-            return None
-        _handle_other_check_btn(self, value, child_key)
-
 
 class AdvancedUser(ttk.Labelframe):
     def __init__(self, parent) -> None:
@@ -308,7 +295,7 @@ class AdvancedUser(ttk.Labelframe):
         btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
 
 
-    def update_config(self, event):
+    def update_config(self, event) -> None:
         for field, values in self.entry_fields.items():
             value = field.get()
             key = values[0]

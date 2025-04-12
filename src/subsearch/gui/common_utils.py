@@ -9,7 +9,7 @@ class WindowPosition(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
 
-    def set(self, **kwargs):
+    def set(self, **kwargs) -> str:
         w = kwargs.get("w", cfg.size.width)
         h = kwargs.get("h", cfg.size.height)
         ws_value_offset = kwargs.get("ws_value_offset", 0)
@@ -23,7 +23,7 @@ class WindowPosition(tk.Frame):
 
 
 class ToolTip(tk.Toplevel):
-    def __init__(self, parent, widget, *text_strings, **kwargs):
+    def __init__(self, parent, widget, *text_strings, **kwargs) -> None:
         self.parent = parent
         self.widget = widget
         self.text = text_strings
@@ -68,7 +68,7 @@ class ToolTip(tk.Toplevel):
         self.destroy()
 
 
-def configure_root(root):
+def configure_root(root) -> None:
     if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.default_bg)
