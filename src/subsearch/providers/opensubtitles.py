@@ -33,7 +33,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
-    def with_hash(self, url: str, subtitle_name: str):
+    def with_hash(self, url: str, subtitle_name: str) -> None:
         tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
             return None
