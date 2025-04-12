@@ -191,9 +191,9 @@ class SubsearchCore(Initializer):
         target = self.app_config.subtitle_post_processing["target_path"]
         resolution = self.app_config.subtitle_post_processing["path_resolution"]
         target_path = io_file_system.create_path_from_string(target, resolution)
-        self.downloaded_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir)
-        self.extracted_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
+        self.downloaded_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.tmp_dir)
         self.extract_files()
+        self.extracted_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
         self.subtitle_rename()
         self.subtitle_move_best(target_path)
         self.subtitle_move_all(target_path)
@@ -209,6 +209,7 @@ class SubsearchCore(Initializer):
         log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
+        
         log.task_completed()
 
     @decorators.call_func
@@ -271,7 +272,7 @@ class CallConditions:
         self.cls = cls
         self.refresh_parent_attrs()
 
-    def refresh_parent_attrs(self):
+    def refresh_parent_attrs(self) -> None:
         self.app_config = self.cls.app_config
         self.file_exist = self.cls.file_exist
         self.release_data = self.cls.release_data
