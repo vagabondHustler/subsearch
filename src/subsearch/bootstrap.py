@@ -17,7 +17,7 @@ from subsearch.globals.dataclasses import (
 
 
 def get_app_paths() -> AppPaths:
-    app_home = Path(__file__).resolve().parent.parent
+    app_home = Path(__file__).resolve().parent
     return AppPaths(
         home=app_home,
         data=app_home / "data",
@@ -32,7 +32,7 @@ def get_app_paths() -> AppPaths:
 
 
 def get_file_paths() -> FilePaths:
-    app_home = Path(__file__).resolve().parent.parent
+    app_home = Path(__file__).resolve().parent
     return FilePaths(
         log=Path.home() / "AppData" / "Local" / "Subsearch" / "log.log",
         config=Path.home() / "AppData" / "Local" / "Subsearch" / "config.toml",
@@ -196,13 +196,16 @@ def get_config_conflict_map() -> dict[str, list[str]]:
     return paths
 
 
-def get_registry_conflict_map() -> list[str]:
+def get_disable_state_map() -> dict[str, list[str]]:
     exts = get_config_ext_paths()
-    paths = ["gui.context_menu_icon", *exts]
+    paths = {
+        "gui.context_menu": ["gui.context_menu_icon", *exts],
+        "gui.system_tray": ["gui.summary_notification"],
+    }
     return paths
 
 
 def get_registry_options_map() -> list[str]:
     exts = get_config_ext_paths()
-    paths = ["gui.context_menu", *get_registry_conflict_map()]
+    paths = ["gui.context_menu", "gui.context_menu_icon", *exts]
     return paths

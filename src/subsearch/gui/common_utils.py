@@ -6,11 +6,12 @@ from subsearch.globals.constants import (
     APP_PATHS,
     CONFIG_CONFLICT_MAP,
     FILE_PATHS,
-    REGISTRY_CONFLICT_MAP,
+    DISABLE_STATE_MAP,
     REGISTRY_OPTIONS_MAP,
 )
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, io_winreg
+from subsearch.globals import log
 
 Anchor = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"]
 
@@ -52,14 +53,15 @@ class ConflictManager:
 
     @staticmethod
     def update_dependent_widgets(key: str) -> None:
-        if key == REGISTRY_OPTIONS_MAP[0]:  # "gui.context_menu"
+        if key in DISABLE_STATE_MAP:
             is_enabled = ConfigManager.get(key)
-            RegistryManager._handle_dependent_key(is_enabled)
+            ConflictManager._handle_dependent_key(key, is_enabled)
 
-    def _handle_dependent_key(is_enabled: bool) -> None:
-        for dependent_key in REGISTRY_CONFLICT_MAP:
-            if dependent_key in CheckbuttonWidgets.widgets:
-                RegistryManager._update_checkbox_state()
+    def _handle_dependent_key(key, is_enabled: bool) -> None:
+        dependent_keys = DISABLE_STATE_MAP[key]
+        for _key in dependent_keys:
+            if _key in CheckbuttonWidgets.widgets:
+                ConflictManager._update_checkbutton_state(is_enabled, _key)
 
     def _update_checkbutton_state(is_enabled: bool, dependent_key: str) -> None:
         checkbutton, _ = CheckbuttonWidgets.widgets[dependent_key]
@@ -95,13 +97,16 @@ class CheckbuttonWidgets:
 
     def _on_toggle(self, key: str) -> None:
         value = CheckbuttonWidgets.widgets[key][1].get()
+        log.stdout(f"Updated {key} to {value}")
         ConfigManager.set(key, value)
 
         if ConflictManager.has_conflict(key, value):
             ConflictManager.resolve(key)
+            log.stdout(f"Resolved exclusive option(s)")
 
         ConflictManager.update_dependent_widgets(key)
         if key in REGISTRY_OPTIONS_MAP:
+            log.stdout(f"Windows registry updated")
             RegistryManager.sync_context_menu()
 
     def _initialize_widget_states(self) -> None:

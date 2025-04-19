@@ -1,5 +1,6 @@
 import argparse
 from argparse import ArgumentParser, Namespace
+
 from tools.github_actions.globals import (
     EXE_FREEZE_PATH,
     EXE_INSTALLED_PATH,
@@ -147,8 +148,7 @@ def _parser_changelog(subparsers: ArgumentParser) -> ArgumentParser:
     return subparser
 
 
-def _init_error_handle(args: Namespace, parser: ArgumentParser) -> None:
-    ...
+def _init_error_handle(args: Namespace, parser: ArgumentParser) -> None: ...
 
 
 def _binaries_error_handle(args: Namespace, parser: ArgumentParser) -> None:
@@ -156,16 +156,13 @@ def _binaries_error_handle(args: Namespace, parser: ArgumentParser) -> None:
         parser.error(f"--get-hash requires specifying one of {FILE_PATHS}.")
 
 
-def _json_error_handle(args: Namespace, parser: ArgumentParser) -> None:
-    ...
+def _json_error_handle(args: Namespace, parser: ArgumentParser) -> None: ...
 
 
-def _python_error_handle(args: Namespace, parser: ArgumentParser) -> None:
-    ...
+def _python_error_handle(args: Namespace, parser: ArgumentParser) -> None: ...
 
 
-def _changelog_error_handle(args: Namespace, parser: ArgumentParser) -> None:
-    ...
+def _changelog_error_handle(args: Namespace, parser: ArgumentParser) -> None: ...
 
 
 def _init_parse(args: Namespace) -> None:
