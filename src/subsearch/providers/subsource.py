@@ -46,7 +46,8 @@ class SubsourceApi:
         return response
 
     def response_status_ok(self, response: requests.Response) -> bool:
-        log.stdout(f"{response.url} status_code: {response.status_code} {response.reason}")
+        _response = f"{response.url} status_code: {response.status_code} {response.reason}"
+        log.stdout(_response, print_allowd=False)
         if response.status_code != 200:
             return False
         return True

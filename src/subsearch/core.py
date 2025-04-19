@@ -361,5 +361,10 @@ class CallConditions:
             ],
             "clean_up": [self.file_exist],
         }
+        is_call_func = self.all_conditions_true(conditions[func_name])
+        self._log_func_skip(func_name, is_call_func)
+        return is_call_func
 
-        return self.all_conditions_true(conditions[func_name])
+    def _log_func_skip(self, func_name: str, is_call_func: bool):
+        if not is_call_func:
+            log.stdout(f"{func_name}: Skipped", print_allowed=False)

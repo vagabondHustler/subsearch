@@ -1,24 +1,14 @@
 import tkinter as tk
 import webbrowser
-from tkinter import BooleanVar, ttk
+from tkinter import ttk
 from typing import Any
 
-from subsearch.globals import decorators
+
 from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
 from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_toml, io_winreg, string_parser, update
-
-
-def _handle_other_check_btn(cls, value, child_key) -> None:
-    for check_button, tuple_value in cls.checkbuttons.items():
-        key = tuple_value[0]
-        if key != child_key:
-            continue
-        elif value.get():
-            check_button.state(["disabled"])
-        elif not value.get():
-            check_button.state(["!disabled"])
+from subsearch.utils import io_toml, string_parser, update
+from subsearch.globals import log
 
 
 class FileExtensions(ttk.Labelframe):
@@ -143,11 +133,13 @@ class AdvancedUser(ttk.Labelframe):
             value = field.get()
             key = values[0]
             io_toml.update_toml_key(FILE_PATHS.config, key, int(value))
+            log.stdout(f"Updated {key} to {value}")
 
     def verify_field(self, field: ttk.Entry) -> str:
         user_input = field.get()
         if not string_parser.valid_api_request_input(user_input):
             field.state(["invalid"])
+            log.stdout(f"Invalid input by user")
         else:
             field.state(["!invalid"])
         return user_input
@@ -209,14 +201,17 @@ class CheckForUpdates(ttk.Labelframe):
             btn.bind("<ButtonRelease-1>", self.search_button)
 
     def search_button(self, event) -> None:
+        log.stdout(f"Searching for new updates")
         new_repo_avail, repo_is_prerelease = update.is_new_version_avail()
         latest_version = update.get_latest_version()
         if new_repo_avail:
+            log.stdout(f"Newer version found")
             self.var_latest.set(f"Latest version: \t\t{latest_version}")
             self.btn_search.state(["disabled"])
             self.btn_visit_release_page.state(["!disabled"])
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
             if DEVICE_INFO.mode == "executable":
+                log.stdout(f"Enable download & install")
                 self.btn_update_install.state(["!disabled"])
                 self.btn_update_install.bind("<ButtonRelease-1>", self.download_and_update)
             else:
@@ -231,6 +226,7 @@ class CheckForUpdates(ttk.Labelframe):
         if not new_repo_avail:
             self.var_latest.set(f"Latest version: \t\t{latest_version}")
             self.var_misc.set(f"Latest version already installed")
+            log.stdout(f"Latest version already installed")
 
     def visit_repository_button(self, event) -> None:
         webbrowser.open(f"https://github.com/vagabondHustler/subsearch/releases")

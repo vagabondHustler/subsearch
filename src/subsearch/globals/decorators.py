@@ -10,30 +10,50 @@ from subsearch.utils import io_toml
 enable_system_tray: bool
 
 
-def apply_mutex(func: Callable) -> Callable:
-    def inner(*args, **kwargs) -> Any:
-        try:
-            if not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance"):
-                return func()
-        except FileNotFoundError:
-            pass
-        except KeyError:
-            pass
-        except TypeError:
-            pass
-        kernel32 = ctypes.WinDLL("kernel32")
-        mutex = kernel32.CreateMutexW(None, False, GUID)
-        last_error = kernel32.GetLastError()
+class SingleInstanceManager:
+    def __init__(self, guid: str):
+        self.guid = guid
+        self._kernel32 = None
 
-        if last_error == 183:
-            raise exceptions.MultipleInstancesError(GUID)
-        try:
-            kernel32.WaitForSingleObject(mutex, -1)
-            return func(*args, **kwargs)
-        finally:
-            kernel32.ReleaseMutex(mutex)
+    @property
+    def kernel32(self) -> ctypes.WinDLL:
+        if self._kernel32 is None:
+            self._kernel32 = ctypes.WinDLL("kernel32")
+        return self._kernel32
 
-    return inner
+    def is_multi_instance_allowed(self) -> bool:
+        try:
+            return not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance")
+        except (FileNotFoundError, KeyError, TypeError):
+            return False
+
+    def _acquire_mutex(self):
+        mutex = self.kernel32.CreateMutexW(None, False, self.guid)
+        if self.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+            raise exceptions.MultipleInstancesError(self.guid)
+        self.kernel32.WaitForSingleObject(mutex, -1)
+        return mutex
+
+    def _release_mutex(self, mutex):
+        self.kernel32.ReleaseMutex(mutex)
+
+    def apply_mutex(self, func: Callable) -> Callable:
+        def wrapper(*args, **kwargs) -> Any:
+            if self.is_multi_instance_allowed():
+                return func(*args, **kwargs)
+
+            mutex = self._acquire_mutex()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                self._release_mutex(mutex)
+
+        return wrapper
+
+
+def apply_mutex(func: Callable[..., Any]) -> Callable[..., Any]:
+    manager = SingleInstanceManager(guid=GUID)
+    return manager.apply_mutex(func)
 
 
 def check_option_disabled(func) -> Callable[..., Any]:
@@ -72,3 +92,8 @@ def except_hook(func, excepthook_) -> Callable[..., Any]:
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def optional_hook(func):
+    """Decorator to mark methods as optional hooks (no-op by default)."""
+    return func

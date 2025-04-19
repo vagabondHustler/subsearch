@@ -3,15 +3,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 import pytest
 import toml
 
 from subsearch.globals import constants
-from subsearch.utils import io_app
-
-
-
+from subsearch import bootstrap
 
 
 @pytest.fixture(scope="session")
@@ -37,9 +33,7 @@ def tests_path() -> Path:
 
 @pytest.fixture
 def fake_language_data_file(tmp_path) -> Any:
-    fake_data = {
-        "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}
-    }
+    fake_data = {"english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}}
 
     fake_file = tmp_path / "fake_language_datag.toml"
     with fake_file.open("w") as f:
@@ -49,7 +43,7 @@ def fake_language_data_file(tmp_path) -> Any:
 
 @pytest.fixture
 def fake_config_file(tmp_path) -> Any:
-    fake_data = io_app.get_default_app_config()
+    fake_data = bootstrap.get_default_app_config()
     fake_file = tmp_path / "fake_subsearch_config.toml"
     with fake_file.open("w") as f:
         toml.dump(fake_data, f)
@@ -66,12 +60,12 @@ def fake_log_file(tmp_path) -> Any:
 
 @pytest.fixture(autouse=True)
 def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None:
-    io_app.DEVICE_INFO = io_app.get_system_info()
-    io_app.VIDEO_FILE = io_app.get_video_file_data()
-    io_app.APP_PATHS = io_app.get_app_paths()
-    io_app.FILE_PATHS = io_app.get_file_paths()
-    io_app.SUPPORTED_FILE_EXT = io_app.get_supported_file_ext()
-    io_app.SUPPORTED_PROVIDERS = io_app.get_supported_providers()
+    bootstrap.DEVICE_INFO = bootstrap.get_system_info()
+    bootstrap.VIDEO_FILE = bootstrap.get_video_file_data()
+    bootstrap.APP_PATHS = bootstrap.get_app_paths()
+    bootstrap.FILE_PATHS = bootstrap.get_file_paths()
+    bootstrap.FILE_EXTENSIONS = bootstrap.get_file_extensions()
+    bootstrap.SUPPORTED_PROVIDERS = bootstrap.get_subtitle_providers()
     constants.FILE_PATHS.config = fake_config_file
     constants.FILE_PATHS.language_data = fake_language_data_file
     constants.FILE_PATHS.log = fake_log_file
@@ -79,4 +73,4 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 
 @pytest.fixture(autouse=True)
 def reset_constants() -> None:
-    importlib.reload(io_app)
+    importlib.reload(bootstrap)
