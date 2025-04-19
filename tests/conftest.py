@@ -70,8 +70,8 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
     io_app.VIDEO_FILE = io_app.get_video_file_data()
     io_app.APP_PATHS = io_app.get_app_paths()
     io_app.FILE_PATHS = io_app.get_file_paths()
-    io_app.SUPPORTED_FILE_EXT = io_app.get_supported_file_ext()
-    io_app.SUPPORTED_PROVIDERS = io_app.get_supported_providers()
+    io_app.FILE_EXTENSIONS = io_app.get_file_extensions()
+    io_app.SUBTITLE_PROVIDERS = io_app.get_subtitle_providers()
     constants.FILE_PATHS.config = fake_config_file
     constants.FILE_PATHS.language_data = fake_language_data_file
     constants.FILE_PATHS.log = fake_log_file

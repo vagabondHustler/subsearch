@@ -1,7 +1,7 @@
 import ctypes
 import time
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 from subsearch.globals import decorators, log, thread_handle
 from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
@@ -95,8 +95,6 @@ class Initializer:
         return False
 
     def prevent_conflicting_config_settings(self) -> None:
-        # TODO
-        # make settings exclusive in GUI
         if self.app_config.open_on_no_matches and self.app_config.always_open:
             self.app_config.open_on_no_matches = False
             io_toml.update_toml_key(FILE_PATHS.config, "download_manager.open_on_no_matches", False)
@@ -125,8 +123,6 @@ class SubsearchCore(Initializer):
         if not self.all_providers_disabled():
             self.prevent_conflicting_config_settings()
             log.brackets("Search started")
-
-
 
     @decorators.call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -209,7 +205,7 @@ class SubsearchCore(Initializer):
         log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        
+
         log.task_completed()
 
     @decorators.call_func
@@ -268,7 +264,7 @@ class SubsearchCore(Initializer):
 
 class CallConditions:
 
-    def __init__(self, cls: SubsearchCore) -> None:
+    def __init__(self, cls: Initializer | SubsearchCore) -> None:
         self.cls = cls
         self.refresh_parent_attrs()
 
@@ -297,7 +293,7 @@ class CallConditions:
     def call_func(self, *args, **kwargs) -> bool:
         func_name = kwargs["func_name"]
         self.refresh_parent_attrs()
-        conditions: dict[str, list[bool]] = {
+        conditions: dict[str, list[Any]] = {
             "init_search": [self.file_exist],
             "opensubtitles": [
                 self.file_exist,

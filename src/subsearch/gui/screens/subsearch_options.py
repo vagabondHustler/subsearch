@@ -10,12 +10,6 @@ from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, io_winreg, string_parser, update
 
 
-def _handle_file_extensions_check_btn(cls, parent_key) -> None:
-    if "context_menu" not in parent_key:
-        return None
-    [instance.update_state() for instance in FileExtensions.instances]
-
-
 def _handle_other_check_btn(cls, value, child_key) -> None:
     for check_button, tuple_value in cls.checkbuttons.items():
         key = tuple_value[0]
@@ -33,67 +27,18 @@ class FileExtensions(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="File Exstensions", padding=10)
-        FileExtensions.instances.append(self)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.file_extensions = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
-
-        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
-
-        frame = None
-        for enum, (key, value) in enumerate(self.file_extensions.items()):
-            if enum % 4 == 0:
-                frame = ttk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="n")
-
-            boolean = tk.BooleanVar()
-            boolean.set(value)
-            check_btn = ttk.Checkbutton(frame, text=key, onvalue=True, offvalue=False, variable=boolean)
-            if not io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
-                check_btn.state(["disabled"])
-
-            check_btn.pack(padx=4, pady=4, ipadx=10)
-            self.checkbuttons[check_btn] = key, boolean
-            check_btn.bind("<Enter>", self.enter_button)
-        setattr(FileExtensions, "instance_cbtn", self.checkbuttons)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_ext)
-
-    @decorators.check_option_disabled
-    def toggle_ext(self, event) -> None:
-        btn = event.widget
-        key = self.checkbuttons[btn][0]
-        value = self.checkbuttons[btn][1]
-        if value.get():
-            self.data["file_extensions"][key] = False
-        elif not value.get():
-            self.data["file_extensions"][key] = True
-        io_toml.dump_toml_data(FILE_PATHS.config, self.data)
-
-        self.update_registry()
-
-    def update_registry(self) -> None:
-        io_winreg.write_all_valuex()
-
-    def update_state(self) -> None:
-        for key in self.checkbuttons.keys():
-            if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
-                key.state(["!disabled"])
-            else:
-                key.state(["disabled"])
+        parent_key = "file_extensions"
+        keys = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
+        config_keys: dict[str, Any] = {f"{parent_key}.{key}": f".{key}" for key in keys}
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=4)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=10)
 
 
 class SubsearchOption(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subsearch Options", padding=10)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.subsearch_options: dict[str, Any] = {
+        config_keys: dict[str, Any] = {
             "gui.context_menu": "Context menu",
             "gui.context_menu_icon": "Context menu icon",
             "gui.system_tray": "System tray icon",
@@ -101,124 +46,22 @@ class SubsearchOption(ttk.Labelframe):
             "gui.show_terminal": "Terminal while searching",
             "misc.single_instance": "Single instance",
         }
-        for name, description in self.subsearch_options.items():
-            self.subsearch_options[name] = [
-                io_toml.load_toml_value(FILE_PATHS.config, name),
-                description,
-            ]
-
-        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
-        frame = None
-
-        for enum, (key, value) in enumerate(self.subsearch_options.items()):
-            if enum % 2 == 0:
-                frame = ttk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="n")
-
-            boolean = tk.BooleanVar()
-            boolean.set(value[0])
-            check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            context_menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
-            system_tray = io_toml.load_toml_value(FILE_PATHS.config, "gui.system_tray")
-            if key == "gui.context_menu_icon" and not context_menu:
-                check_btn.state(["disabled"])
-            if key == "gui.show_terminal" and DEVICE_INFO.mode == "executable":
-                check_btn.state(["disabled"])
-            if key == "gui.summary_notification" and not system_tray:
-                check_btn.state(["disabled"])
-            check_btn.pack(padx=4, pady=4, ipadx=40)
-
-            self.checkbuttons[check_btn] = key, boolean
-            check_btn.bind("<Enter>", self.enter_button)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_btn)
-
-    @decorators.check_option_disabled
-    def toggle_btn(self, event) -> None:
-        btn = event.widget
-        key = self.checkbuttons[btn][0]
-        value = self.checkbuttons[btn][1]
-        if value.get():
-            io_toml.update_toml_key(FILE_PATHS.config, key, False)
-        elif not value.get():
-            io_toml.update_toml_key(FILE_PATHS.config, key, True)
-        self.update_registry(btn)
-        keys = [("gui.context_menu", "gui.context_menu_icon"), ("gui.system_tray", "gui.summary_notification")]
-        for key_pair in keys:
-            self.disable_check_btn_children(btn, value, key_pair)
-
-    def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]) -> None:
-        parent_key, child_key = key_pair[0], key_pair[1]
-        if btn["text"] != self.subsearch_options[parent_key][1]:
-            return None
-        _handle_file_extensions_check_btn(self, parent_key)
-        _handle_other_check_btn(self, value, child_key)
-
-    def update_registry(self, btn) -> None:
-        if btn["text"] != self.subsearch_options["gui.context_menu"][1]:
-            return None
-        menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
-        if menu:
-            io_winreg.add_context_menu()
-        else:
-            io_winreg.del_context_menu()
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=2)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=40)
 
 
 class DownloadManagerOptions(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Download manager options", padding=10)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.download_manager_options: dict[str, Any] = {
-            "download_manager.open_on_no_matches": "Open on no matches found",
+        config_keys: dict[str, Any] = {
+            "download_manager.open_on_no_matches": "Open on no matches",
             "download_manager.always_open": "Always open",
             "download_manager.automatic_downloads": "Automatic downloads",
         }
-        for name, description in self.download_manager_options.items():
-            self.download_manager_options[name] = [
-                io_toml.load_toml_value(FILE_PATHS.config, name),
-                description,
-            ]
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=1)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=20)
 
-        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
-        frame = None
-
-        for enum, (key, value) in enumerate(self.download_manager_options.items()):
-            if enum % 1 == 0:
-                frame = ttk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="n")
-
-            boolean = tk.BooleanVar()
-            boolean.set(value[0])
-            check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            check_btn.pack(padx=4, pady=4, ipadx=40)
-
-            self.checkbuttons[check_btn] = key, boolean
-            check_btn.bind("<Enter>", self.enter_button)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_btn)
-
-    @decorators.check_option_disabled
-    def toggle_btn(self, event) -> None:
-        btn = event.widget
-        key = self.checkbuttons[btn][0]
-        value = self.checkbuttons[btn][1]
-        if value.get():
-            io_toml.update_toml_key(FILE_PATHS.config, key, False)
-        elif not value.get():
-            io_toml.update_toml_key(FILE_PATHS.config, key, True)
 
 class AdvancedUser(ttk.Labelframe):
     def __init__(self, parent) -> None:
@@ -288,12 +131,12 @@ class AdvancedUser(ttk.Labelframe):
         if field_ok:
             btn.bind("<ButtonPress-1>", self.update_config)
 
-    def leave_btn_apply_input(self, event) -> None:
+    def leave_btn_apply_input(self, event: tk.Event) -> None:
         btn = event.widget
-        self.tip.hide()
-        self.tip_present = False
+        if self.tip_present and self.tip:
+            self.tip.hide()
+            self.tip_present = False
         btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
-
 
     def update_config(self, event) -> None:
         for field, values in self.entry_fields.items():

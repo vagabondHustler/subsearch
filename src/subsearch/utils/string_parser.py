@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from num2words import num2words
+from num2words import num2words  # type: ignore
 
 from subsearch.globals import log
 from subsearch.globals.constants import VIDEO_FILE
@@ -256,11 +256,11 @@ def valid_path(input_str, path_resolution) -> bool:
         return False
     if path_resolution == "relative":
         pattern = r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$"
-    elif path_resolution == "absolute":
+    else:
         pattern = r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$"
     return bool(re.match(pattern, input_str))
 
 
-def valid_api_request_input(input: int) -> bool:
+def valid_api_request_input(input: str) -> bool:
     pattern = r"[0-9]"
     return bool(re.match(pattern, input))

@@ -1,5 +1,5 @@
 import re
-from tkinter import Tk
+from tkinter import Tk, messagebox
 
 from subsearch.globals.constants import APP_PATHS
 
@@ -18,6 +18,16 @@ def get_sprites() -> dict:
             data[key] = values
 
     return data
+
+
+def show_instance_error(root) -> None:
+    root.withdraw()
+    error_msg = (
+        "Another instance of the application is already running."
+        "Please close any other instances of the application before launching a new one."
+    )
+    messagebox.showerror(*error_msg)
+    root.destroy()
 
 
 root = Tk(className="Subsearch")

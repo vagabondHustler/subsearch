@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
+from typing import Any
 
 from subsearch.globals import log
 from subsearch.globals.constants import FILE_PATHS
@@ -8,168 +9,50 @@ from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, string_parser
 
 
+def show_instance_error(root):
+    root.withdraw()
+    messagebox.showerror("Application Already Running", "Another instance of the application is already running.")
+    root.destroy()
+
+
 class Providers(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle providers", padding=10)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.chekboxes = {}
-        self.last_key = ""
-
-        self.provider_options: dict = {
-            "opensubtitles_site": "Opensubtitles",
-            "opensubtitles_hash": "Opensubtitles with hash",
-            "yifysubtitles_site": "Yifysubtitles",
-            "subsource_site": "Subsource",
+        config_keys: dict[str, Any] = {
+            "providers.opensubtitles_site": "Opensubtitles",
+            "providers.opensubtitles_hash": "Opensubtitles with hash",
+            "providers.yifysubtitles_site": "Yifysubtitles",
+            "providers.subsource_site": "Subsource",
         }
-        for name, description in self.provider_options.items():
-            self.provider_options[name] = [
-                io_toml.load_toml_value(FILE_PATHS.config, "providers")[name],
-                description,
-            ]
-
-        frame = None
-        for enum, (key, value) in enumerate(self.provider_options.items()):
-            if enum % 4 == 0:
-                frame = tk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="nw", expand=True)
-            boolean = tk.BooleanVar()
-            boolean.set(value[0])
-            btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            btn.pack(padx=4, pady=4, ipadx=20)
-            self.chekboxes[btn] = key, boolean
-            if self.data["providers"][key] is True:
-                btn.configure(state="normal")
-
-            btn.bind("<Enter>", self.enter_button)
-            btn.bind("<Leave>", self.leave_button)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def leave_button(self, event) -> None:
-        btn = event.widget
-        self.chekboxes[btn][0]
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_types)
-
-    def toggle_types(self, event) -> None:
-        btn = event.widget
-        key = self.chekboxes[btn][0]
-        value = self.chekboxes[btn][1]
-        if value.get() is True:
-            self.data["providers"][key] = False
-        elif value.get() is False:
-            self.data["providers"][key] = True
-        io_toml.dump_toml_data(FILE_PATHS.config, self.data)
-
-    def toggle_providers(self, event) -> None:
-        btn = event.widget
-        key = btn["text"].replace(" ", "_").lower()
-        if self.data["providers"][key] is True:
-            self.data["providers"][key] = False
-            btn.configure(fg=cfg.color.red)
-        elif self.data["providers"][key] is False:
-            self.data["providers"][key] = True
-            btn.configure(fg=cfg.color.green)
-        io_toml.dump_toml_data(FILE_PATHS.config, self.data)
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=4)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=20)
 
 
 class SubtitleFilters(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle filters", padding=10)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.subtitle_options: dict = {
+        config_keys: dict[str, Any] = {
             "subtitle_filters.hearing_impaired": "Hearing impaird",
             "subtitle_filters.non_hearing_impaired": "non-Hearing impaired",
             "subtitle_filters.only_foreign_parts": "Foreign parts only",
         }
-
-        for name, description in self.subtitle_options.items():
-            self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]
-        frame = None
-        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
-        for enum, (key, value) in enumerate(self.subtitle_options.items()):
-            bool_value = value[0]
-            description = value[1]
-            if enum % 5 == 0:
-                frame = ttk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="nw", expand=True)
-
-            boolean = tk.BooleanVar()
-            boolean.set(bool_value)
-            check_btn = ttk.Checkbutton(frame, text=description, onvalue=True, offvalue=False, variable=boolean)
-            check_btn.pack(anchor="nw", padx=4, pady=4, ipadx=20)
-            self.checkbuttons[check_btn] = key, boolean
-            check_btn.bind("<Enter>", self.enter_button)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_types)
-
-    def toggle_types(self, event) -> None:
-        btn = event.widget
-        key = self.checkbuttons[btn][0]
-        value = self.checkbuttons[btn][1]
-        if value.get() is True:
-            io_toml.update_toml_key(FILE_PATHS.config, key, False)
-        elif value.get() is False:
-            io_toml.update_toml_key(FILE_PATHS.config, key, True)
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=5)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=20)
 
 
 class SubtitlePostProcessing(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle post processing", padding=10)
-        self.data = io_toml.load_toml_data(FILE_PATHS.config)
-
-        self.subtitle_options: dict = {
+        config_keys: dict[str, Any] = {
             "subtitle_post_processing.rename": "Rename best subtitle",
             "subtitle_post_processing.move_best": "Move best subtitle",
             "subtitle_post_processing.move_all": "Move all subtitles",
         }
-        for name, description in self.subtitle_options.items():
-            self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]
-        frame = None
-        self.checkbuttons: dict[ttk.Checkbutton, tuple[str, tk.BooleanVar]] = {}
-        for enum, (key, value) in enumerate(self.subtitle_options.items()):
-            bool_value = value[0]
-            description = value[1]
-            if enum % 1 == 0:
-                frame = ttk.Frame(self)
-                frame.pack(side=tk.LEFT, anchor="n")
-
-            boolean = tk.BooleanVar()
-            boolean.set(bool_value)
-            check_btn = ttk.Checkbutton(frame, text=description, onvalue=True, offvalue=False, variable=boolean)
-            check_btn.pack(padx=4, pady=4, ipadx=20)
-            self.checkbuttons[check_btn] = key, boolean
-            check_btn.bind("<Enter>", self.enter_button)
-
-    def enter_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonPress-1>", self.press_button)
-
-    def press_button(self, event) -> None:
-        btn = event.widget
-        btn.bind("<ButtonRelease-1>", self.toggle_buttons)
-
-    def toggle_buttons(self, event) -> None:
-        btn = event.widget
-        key = self.checkbuttons[btn][0]
-        value = self.checkbuttons[btn][1]
-        if value.get() is True:
-            io_toml.update_toml_key(FILE_PATHS.config, key, False)
-        elif value.get() is False:
-            io_toml.update_toml_key(FILE_PATHS.config, key, True)
+        helper = common_utils.CheckbuttonWidgets(parent=self, config_keys=config_keys, columns=1)
+        helper.create(anchor="nw", padx=4, pady=4, ipadx=20)
 
 
 class SubtitlePostProcessingDirectory(ttk.Labelframe):
@@ -363,5 +246,3 @@ class SearchThreshold(tk.Frame):
             self.label_pct.configure(fg=cfg.color.red_brown)
         elif value in range(0, 25):
             self.label_pct.configure(fg=cfg.color.red)
-
-

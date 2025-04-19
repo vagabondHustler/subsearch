@@ -70,11 +70,6 @@ def del_registry_key(reg_path: str, key: str) -> None:
             winreg.DeleteKey(sk, key)
 
 
-def del_context_menu() -> None:
-    del_registry_key(REGISTRY_PATHS.subsearch, "command")
-    del_registry_key(REGISTRY_PATHS.shell, "Subsearch")
-
-
 def write_keys() -> None:
     registry_keys = [
         (REGISTRY_PATHS.classes, "*"),
@@ -122,3 +117,8 @@ def write_all_valuex() -> None:
 def add_context_menu() -> None:
     write_keys()
     write_all_valuex()
+
+
+def del_context_menu() -> None:
+    del_registry_key(REGISTRY_PATHS.subsearch, "command")
+    del_registry_key(REGISTRY_PATHS.shell, "Subsearch")

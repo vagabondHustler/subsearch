@@ -41,8 +41,8 @@ def get_file_paths() -> FilePaths:
 
 
 def get_default_app_config() -> dict[str, Any]:
-    file_extensions = dict.fromkeys(get_supported_file_ext(), True)
-    providers = dict.fromkeys(get_supported_providers(), True)
+    file_extensions = dict.fromkeys(get_file_extensions(), True)
+    providers = dict.fromkeys(get_subtitle_providers(), True)
     config = {
         "subtitle_filters": {
             "current_language": "english",
@@ -87,7 +87,7 @@ def get_default_app_config() -> dict[str, Any]:
 @no_type_check
 def get_video_file_data() -> VideoFile:
     file_exist = False
-    supported_exts = get_supported_file_ext()
+    supported_exts = get_file_extensions()
     file_name, file_hash, file_ext = "", "", ""
     file_path = Path("")
     file_directory = Path("")
@@ -130,7 +130,7 @@ def get_system_info() -> SystemInfo:
     return SystemInfo(platform_, mode, python, __version__)
 
 
-def get_supported_file_ext() -> list[str]:
+def get_file_extensions() -> list[str]:
     exts = [
         "avi",
         "mp4",
@@ -150,7 +150,7 @@ def get_supported_file_ext() -> list[str]:
     return exts
 
 
-def get_supported_providers() -> list[str]:
+def get_subtitle_providers() -> list[str]:
     providers = ["opensubtitles_site", "opensubtitles_hash", "yifysubtitles_site", "subsource_site"]
     return providers
 
@@ -176,3 +176,33 @@ def get_app_version() -> str:
 
 def get_guid() -> str:
     return str(__guid__)
+
+
+def get_config_ext_paths() -> list[str]:
+    _ = get_file_extensions()
+    exts = []
+    for ext in _:
+        exts.append(f"file_extensions.{ext}")
+    return exts
+
+
+def get_config_conflict_map() -> dict[str, list[str]]:
+    paths = {
+        "subtitle_post_processing.move_best": ["subtitle_post_processing.move_all"],
+        "subtitle_post_processing.move_all": ["subtitle_post_processing.move_best"],
+        "download_manager.open_on_no_matches": ["download_manager.always_open"],
+        "download_manager.always_open": ["download_manager.open_on_no_matches"],
+    }
+    return paths
+
+
+def get_registry_conflict_map() -> list[str]:
+    exts = get_config_ext_paths()
+    paths = ["gui.context_menu_icon", *exts]
+    return paths
+
+
+def get_registry_options_map() -> list[str]:
+    exts = get_config_ext_paths()
+    paths = ["gui.context_menu", *get_registry_conflict_map()]
+    return paths
