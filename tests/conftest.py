@@ -59,13 +59,13 @@ def fake_log_file(tmp_path) -> Any:
 
 
 @pytest.fixture(autouse=True)
-def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None:
-    bootstrap.DEVICE_INFO = bootstrap.get_system_info()
-    bootstrap.VIDEO_FILE = bootstrap.get_video_file_data()
-    bootstrap.APP_PATHS = bootstrap.get_app_paths()
-    bootstrap.FILE_PATHS = bootstrap.get_file_paths()
-    bootstrap.FILE_EXTENSIONS = bootstrap.get_file_extensions()
-    bootstrap.SUPPORTED_PROVIDERS = bootstrap.get_subtitle_providers()
+def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None
+    io_app.DEVICE_INFO = io_app.get_system_info()
+    io_app.VIDEO_FILE = io_app.get_video_file_data()
+    io_app.APP_PATHS = io_app.get_app_paths()
+    io_app.FILE_PATHS = io_app.get_file_paths()
+    io_app.FILE_EXTENSIONS = io_app.get_file_extensions()
+    io_app.SUBTITLE_PROVIDERS = io_app.get_subtitle_providers(
     constants.FILE_PATHS.config = fake_config_file
     constants.FILE_PATHS.language_data = fake_language_data_file
     constants.FILE_PATHS.log = fake_log_file
