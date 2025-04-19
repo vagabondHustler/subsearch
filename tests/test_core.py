@@ -2,7 +2,7 @@ import inspect
 
 import pytest
 
-from subsearch import CallConditions
+from subsearch.core import CallConditions
 from subsearch.globals.constants import FILE_PATHS
 from subsearch.utils import io_toml, string_parser
 from tests import globals_test
