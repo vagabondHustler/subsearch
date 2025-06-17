@@ -22,7 +22,7 @@
         "packaging==25.0",
         "pillow==11.2.1",
         "pystray==0.19.5",
-        "requests==2.32.3",
+        "requests==2.32.4",
         "selectolax==0.3.28",
         "toml==0.10.2",
     ]
