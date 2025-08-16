@@ -82,7 +82,7 @@
         "python-dotenv==1.1.0",
     ]
     tools = ["pyperclip==1.9.0"]
-    type = ["mypy==1.15.0"]
+    type = ["mypy==1.17.1"]
 
 
 [tool.pytest.ini_options]
