@@ -77,7 +77,7 @@
     lint = ["black==25.1.0", "isort==6.0.1"]
     tests = [
         "pytest-cov==6.2.1",
-        "pytest==8.3.5",
+        "pytest==8.4.1",
         "tox==4.28.4",
         "python-dotenv==1.1.1",
     ]
