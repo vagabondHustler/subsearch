@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Dependency Review"
         uses: actions/dependency-review-action@v4
@@ -35,7 +35,7 @@ jobs:
       tests: "${{ steps.filter.outputs.tests }}"
       tools: "${{ steps.filter.outputs.tools }}"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -57,7 +57,7 @@ jobs:
       matrix:
         python-version: ["3.12.*"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -77,7 +77,7 @@ jobs:
     if: ${{ needs.paths_filter.outputs.src == 'true' || needs.paths_filter.outputs.tests == 'true' || needs.paths_filter.outputs.tools == 'true'}}
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
