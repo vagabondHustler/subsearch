@@ -74,7 +74,7 @@
         "twine==6.1.0",
         "psutil==7.0.0",
     ]
-    lint = ["black==25.1.0", "isort==6.0.1"]
+    lint = ["black==25.9.0", "isort==6.0.1"]
     tests = [
         "pytest-cov==6.2.1",
         "pytest==8.4.1",
