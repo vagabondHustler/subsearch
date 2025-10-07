@@ -2,15 +2,18 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from theme import COLOR_MAP, COLOR_NAME, STYLE_MAP
+from subsearch.globals.constants import APP_PATHS, FILE_PATHS
+from subsearch.ui.theme import COLOR_MAP, COLOR_NAME, STYLE_MAP
 
 
 import dearpygui.dearpygui as dpg
 
 from enum import StrEnum
 
+from subsearch.utils import io_toml
 
-def make_dynamic_strenum(name: str, members: list[str]) -> type[StrEnum]:
+
+def make_dynamic_strenum(name: str, members: list[str]) -> StrEnum:
     """Create a StrEnum dynamically at runtime."""
     return StrEnum(name, {m.upper(): m for m in members})
 
@@ -18,10 +21,11 @@ def make_dynamic_strenum(name: str, members: list[str]) -> type[StrEnum]:
 class Screen(StrEnum):
     """Available application screens."""
 
-    HOME = "home"
-    SETTINGS = "settings"
-    PREFERENCES = "preferences"
-    LANGUAGE = "language"
+    SUBSEARCH = "subsearch"
+    SUBTITLE_LANGUAGE = "subtitle_language"
+    SUBTITLE_PREFRENCES = "subtitle_preferences"
+    DOWNLOAD_MANAGER = "download_manager"
+    ABOUT = "about"
 
 
 class Theme(StrEnum):
@@ -32,7 +36,7 @@ class Theme(StrEnum):
     AUTO = "auto"
 
 
-class Difficulty(StrEnum):
+class TestDifficulty(StrEnum):
     """Game difficulty levels."""
 
     EASY = "easy"
@@ -44,38 +48,19 @@ class Difficulty(StrEnum):
 class AppState:
     """Application state management."""
 
-    current_screen: Screen = Screen.HOME
-    selected_theme: Theme = Theme.LIGHT
-    selected_difficulty: Difficulty = Difficulty.MEDIUM
+    current_screen: Screen = Screen.SUBSEARCH
+    selected_difficulty: TestDifficulty = TestDifficulty.MEDIUM
     language_search: str = ""
+    selected_theme: Theme = Theme.LIGHT
 
-
-LANGUAGES = [
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Italian",
-    "Portuguese",
-    "Russian",
-    "Japanese",
-    "Chinese",
-    "Korean",
-    "Arabic",
-    "Hindi",
-    "Swedish",
-    "Norwegian",
-    "Danish",
-    "Finnish",
-    "Dutch",
-    "Polish",
-]
+LANGUAGES = io_toml.load_toml_data(FILE_PATHS.language_data)
 
 SCREEN_LABELS = {
-    Screen.HOME: "Home",
-    Screen.SETTINGS: "Settings",
-    Screen.PREFERENCES: "Preferences",
-    Screen.LANGUAGE: "Language",
+    Screen.SUBSEARCH: "Subsearch",
+    Screen.SUBTITLE_LANGUAGE: "Subtitle Language",
+    Screen.SUBTITLE_PREFRENCES: "Subtitle Preferences",
+    Screen.DOWNLOAD_MANAGER: "Download Manager",
+    Screen.ABOUT: "About",
 }
 
 
@@ -85,12 +70,11 @@ class ThemeBuilder:
     @staticmethod
     def create_global_theme() -> int:
         """Create the main application theme."""
-        s = "mvStyleVar_"
         with dpg.theme() as theme:
             with dpg.theme_component(dpg.mvAll):
                 for style_attr, rgba in STYLE_MAP.items():
                     dpg.add_theme_style(style_attr, *rgba)
-                
+
                 for color_attr, rgba in COLOR_MAP.items():
                     dpg.add_theme_color(color_attr, rgba)
         return theme
@@ -153,9 +137,9 @@ class ScreenManager:
         self.state.current_screen = screen
 
         for scr in Screen:
-            dpg.hide_item(f"{scr}_screen")
+            dpg.hide_item(scr)
 
-        dpg.show_item(f"{screen}_screen")
+        dpg.show_item(screen)
         dpg.set_value("content_area_text", SCREEN_LABELS[screen])
 
 
@@ -173,9 +157,9 @@ class SettingsManager:
 
     def on_difficulty_select(self, sender, app_data, user_data: str) -> None:
         """Handle difficulty selection."""
-        for difficulty in Difficulty:
+        for difficulty in TestDifficulty:
             dpg.set_value(f"difficulty_{difficulty}", difficulty == user_data)
-        self.state.selected_difficulty = Difficulty(user_data)
+        self.state.selected_difficulty = TestDifficulty(user_data)
 
 
 class LanguageManager:
@@ -187,17 +171,29 @@ class LanguageManager:
     def filter_languages(self, sender, app_data: str) -> None:
         """Filter language list based on search query."""
         self.state.language_search = app_data.lower()
-        for lang in LANGUAGES:
-            if self.state.language_search in lang.lower():
-                dpg.show_item(f"lang_{lang}")
+
+        for key, data in LANGUAGES.items():
+            language_name = data["name"]
+            tag = f"lang_{key}"
+
+            if self.state.language_search in language_name.lower():
+                dpg.show_item(tag)
             else:
-                dpg.hide_item(f"lang_{lang}")
+                dpg.hide_item(tag)
 
     def select_language(self, sender, app_data, user_data: str) -> None:
         """Handle language selection."""
-        dpg.set_value("selected_language_text", f"Selected Language: {user_data}")
-        for lang in LANGUAGES:
-            dpg.set_value(f"lang_{lang}", lang == user_data)
+        # user_data is the language key (e.g. "arabic")
+        selected_name = LANGUAGES[user_data]["name"]
+        self.state.language_search = selected_name  # or store key instead if you prefer
+
+        # Update text label
+        dpg.set_value("selected_language_text", f"Selected Language: {selected_name}")
+
+        # Update checkbox states
+        for key in LANGUAGES.keys():
+            dpg.set_value(f"lang_{key}", key == user_data)
+
 
 
 class UIBuilder:
@@ -237,9 +233,9 @@ class UIBuilder:
                 dpg.add_spacer(width=2)
                 dpg.add_text("Home", tag="content_area_text", color=(170, 178, 204, 255))
 
-    def create_home_screen(self) -> None:
+    def create_subsearch_screen(self) -> None:
         """Create the home screen with feature toggles and volume controls."""
-        with padded_child_window(tag="home_screen"):
+        with padded_child_window(tag="subsearch"):
             dpg.add_text("Feature Toggles:")
             dpg.add_checkbox(label="Enable Notifications", default_value=True)
             dpg.add_checkbox(label="Auto-save", default_value=False)
@@ -261,10 +257,7 @@ class UIBuilder:
                 max_value=100,
                 width=300,
             )
-
-    def create_settings_screen(self) -> None:
-        """Create the settings screen with theme and display options."""
-        with padded_child_window(tag="settings_screen"):
+            dpg.add_spacer(height=20)
             dpg.add_text("Theme Selection (Exclusive):")
             for theme in Theme:
                 dpg.add_checkbox(
@@ -276,65 +269,22 @@ class UIBuilder:
                 )
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Display Settings:")
-            dpg.add_slider_int(
-                label="Font Size",
-                default_value=14,
-                min_value=10,
-                max_value=24,
-                width=300,
-            )
-            dpg.add_slider_int(
-                label="UI Scale",
-                default_value=100,
-                min_value=75,
-                max_value=150,
-                width=300,
-            )
-
-            dpg.add_spacer(height=20)
-            dpg.add_checkbox(label="Fullscreen Mode", default_value=False)
-            dpg.add_checkbox(label="Show FPS Counter", default_value=False)
-
-    def create_preferences_screen(self) -> None:
-        """Create the preferences screen with difficulty and gameplay options."""
-        with padded_child_window(tag="preferences_screen"):
-            dpg.add_text("Difficulty Level (Exclusive):")
-            for difficulty in Difficulty:
+            for difficulty in TestDifficulty:
                 dpg.add_checkbox(
                     label=difficulty.title(),
                     tag=f"difficulty_{difficulty}",
-                    default_value=(difficulty == Difficulty.MEDIUM),
+                    default_value=(difficulty == TestDifficulty.MEDIUM),
                     callback=self.settings_manager.on_difficulty_select,
                     user_data=difficulty,
                 )
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Gameplay Options:")
-            dpg.add_checkbox(label="Enable Hints", default_value=True)
-            dpg.add_checkbox(label="Skip Tutorials", default_value=False)
-            dpg.add_checkbox(label="Inverted Controls", default_value=False)
 
-            dpg.add_spacer(height=20)
-            dpg.add_text("Sensitivity:")
-            dpg.add_slider_float(
-                label="Mouse Sensitivity",
-                default_value=50,
-                min_value=1,
-                max_value=100,
-                width=300,
-            )
-            dpg.add_slider_float(
-                label="Scroll Speed",
-                default_value=30,
-                min_value=5,
-                max_value=100,
-                width=300,
-            )
+    def create_subtitle_language_screen(self) -> None:
+        current_language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.current_language")
+        self.current_language = current_language  # store just the key (e.g. "english")
 
-    def create_language_screen(self) -> None:
-        """Create the language selection screen."""
-        with padded_child_window(tag="language_screen"):
+        with padded_child_window(tag="subtitle_language"):
             dpg.add_text("Search for a language:")
             dpg.add_input_text(label="Search", callback=self.language_manager.filter_languages, width=300)
 
@@ -342,18 +292,49 @@ class UIBuilder:
             dpg.add_separator()
             dpg.add_spacer(height=10)
 
-            dpg.add_text("Selected Language: English", tag="selected_language_text")
+            selected_name = LANGUAGES.get(current_language, {}).get("name", "Unknown")
+            dpg.add_text(f"Selected Language: {selected_name}", tag="selected_language_text")
             dpg.add_spacer(height=10)
 
-            with dpg.child_window(height=300, border=True):
-                for lang in LANGUAGES:
-                    dpg.add_checkbox(
-                        label=lang,
-                        tag=f"lang_{lang}",
-                        default_value=(lang == "English"),
-                        callback=self.language_manager.select_language,
-                        user_data=lang,
-                    )
+            with dpg.child_window(height=-1, border=True):
+                with dpg.table(header_row=False):
+                    dpg.add_table_column()
+                    dpg.add_table_column()
+
+                    langs = list(LANGUAGES.items())
+
+                    for i in range(0, len(langs), 2):
+                        with dpg.table_row():
+                            for j in range(2):
+                                if i + j < len(langs):
+                                    key, data = langs[i + j]
+                                    lang_name = data["name"]
+
+                                    dpg.add_checkbox(
+                                        label=lang_name,
+                                        tag=f"lang_{key}",
+                                        default_value=(key == self.current_language),
+                                        callback=self.language_manager.select_language,
+                                        user_data=key,
+                                    )
+                                else:
+                                    dpg.add_spacer()
+
+
+
+    def create_search_preferences_screen(self) -> None:
+        with padded_child_window(tag="subtitle_preferences"):
+            dpg.add_text("Providers to use:")
+            dpg.add_input_text(label="Search")
+
+    def create_download_manager_screen(self):
+        with padded_child_window(tag="download_manager"):
+            dpg.add_text("Manage downloads:")
+        ...
+
+    def create_about_screen(self):
+        with padded_child_window(tag="about"):
+            dpg.add_text("This is a app:")
 
     def create_content(self) -> None:
         """Create the main content area with all screens."""
@@ -368,24 +349,24 @@ class UIBuilder:
             no_scrollbar=False,
         ):
             dpg.bind_item_theme(dpg.last_item(), self.themes["content"])
-            self.create_home_screen()
-            self.create_settings_screen()
-            self.create_preferences_screen()
-            self.create_language_screen()
+            self.create_subsearch_screen()
+            self.create_subtitle_language_screen()
+            self.create_search_preferences_screen()
+            self.create_download_manager_screen()
+            self.create_about_screen()
 
-    def build_main_window(self) -> None:
+    def build_ui_core(self) -> None:
         """Build the main application window."""
-        with dpg.window(tag="main_window", label="Subsearch", width=900, height=600):
+        with dpg.window(tag="ui_core", label="Subsearch", width=900, height=600):
             with dpg.group(horizontal=True):
                 with menu_group():
                     self.create_menu()
 
                 with dpg.group():
                     self.create_content()
-                    # Hide non-home screens initially
                     for screen in Screen:
-                        if screen != Screen.HOME:
-                            dpg.hide_item(f"{screen}_screen")
+                        if screen != Screen.SUBSEARCH:
+                            dpg.hide_item(screen)
 
 
 class Application:
@@ -412,7 +393,7 @@ class Application:
 
         # Build UI
         self.ui_builder = UIBuilder(self.screen_manager, self.settings_manager, self.language_manager, self.themes)
-        self.ui_builder.build_main_window()
+        self.ui_builder.build_ui_core()
 
     def setup_font(self) -> None:
         """Load and setup the application font."""
@@ -425,10 +406,11 @@ class Application:
 
     def run(self) -> None:
         """Run the application."""
-        dpg.create_viewport(title="Subsearch", width=900, height=600)
+        app_icon = str(APP_PATHS.gui_assets / "subsearch.ico")
+        dpg.create_viewport(title="Subsearch", width=900, height=600, small_icon=app_icon, large_icon=app_icon)
         dpg.setup_dearpygui()
         dpg.show_viewport()
-        dpg.set_primary_window("main_window", True)
+        dpg.set_primary_window("ui_core", True)
 
         if self.font:
             dpg.bind_font(self.font)
