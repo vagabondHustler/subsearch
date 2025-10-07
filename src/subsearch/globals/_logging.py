@@ -1,11 +1,10 @@
 import dataclasses
 import inspect
+import logging as logging
 import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
-
-import logging as logging
 
 from subsearch.globals import metaclasses
 from subsearch.globals.constants import APP_PATHS, FILE_PATHS

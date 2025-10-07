@@ -2,14 +2,11 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from subsearch.globals.constants import APP_PATHS, FILE_PATHS
-from subsearch.ui.theme import COLOR_MAP, COLOR_NAME, STYLE_MAP
-
 
 import dearpygui.dearpygui as dpg
 
-from enum import StrEnum
-
+from subsearch.globals.constants import APP_PATHS, FILE_PATHS
+from subsearch.ui.theme import COLOR_MAP, COLOR_NAME, STYLE_MAP
 from subsearch.utils import io_toml
 
 
@@ -325,12 +322,12 @@ class UIBuilder:
             dpg.add_text("Providers to use:")
             dpg.add_input_text(label="Search")
 
-    def create_download_manager_screen(self):
+    def create_download_manager_screen(self) -> None:
         with padded_child_window(tag="download_manager"):
             dpg.add_text("Manage downloads:")
         ...
 
-    def create_about_screen(self):
+    def create_about_screen(self) -> None:
         with padded_child_window(tag="about"):
             dpg.add_text("This is a app:")
 

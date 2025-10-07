@@ -1,6 +1,5 @@
 import dearpygui.dearpygui as dpg
 
-
 COLOR_NAME: dict[str, list[int]] = {
     "rosewater": [245, 224, 220, 255],
     "flamingo": [242, 205, 205, 255],
