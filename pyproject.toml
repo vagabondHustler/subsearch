@@ -16,6 +16,7 @@
         "Topic :: Utilities",
     ]
     dependencies = [
+        "dearpygui==2.1.0",
         "cloudscraper==1.2.71",
         "num2words==0.5.14",
         "packaging==24.2",
