@@ -185,12 +185,11 @@ class LanguageManager:
         """Handle language selection."""
         # user_data is the language key (e.g. "arabic")
         selected_name = LANGUAGES[user_data]["name"]
-        self.state.language_search = selected_name  # or store key instead if you prefer
+        self.state.language_search = selected_name
 
-        # Update text label
+
         dpg.set_value("selected_language_text", f"Selected Language: {selected_name}")
 
-        # Update checkbox states
         for key in LANGUAGES.keys():
             dpg.set_value(f"lang_{key}", key == user_data)
 
@@ -198,7 +197,6 @@ class LanguageManager:
 
 class UIBuilder:
     """Build UI components."""
-
     def __init__(
         self,
         screen_manager: ScreenManager,
@@ -380,7 +378,6 @@ class Application:
 
         dpg.create_context()
 
-        # Create themes
         self.themes = {
             "global": ThemeBuilder.create_global_theme(),
             "content_area_text": ThemeBuilder.create_content_area_text_theme(),
@@ -388,10 +385,8 @@ class Application:
             "content": ThemeBuilder.create_content_theme(),
         }
 
-        # Setup font
         self.setup_font()
 
-        # Build UI
         self.ui_builder = UIBuilder(self.screen_manager, self.settings_manager, self.language_manager, self.themes)
         self.ui_builder.build_ui_core()
 
