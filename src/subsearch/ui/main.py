@@ -1,7 +1,9 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
+from itertools import zip_longest
 from pathlib import Path
+from typing import Any
 
 import dearpygui.dearpygui as dpg
 
@@ -77,7 +79,7 @@ class ThemeBuilder:
         return theme
 
     @staticmethod
-    def create_content_area_text_theme() -> int:
+    def create_content_bar_theme() -> int:
         """Create theme for content area text."""
         with dpg.theme() as theme:
             with dpg.theme_component(dpg.mvAll):
@@ -101,6 +103,14 @@ class ThemeBuilder:
                 dpg.add_theme_color(dpg.mvThemeCol_ChildBg, COLOR_NAME["base"])
                 dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 4, 4)
         return theme
+    
+    @staticmethod
+    def create_tooltip_theme() -> int:
+        """Create theme for content areas."""
+        with dpg.theme() as theme:
+            with dpg.theme_component(dpg.mvAll):
+                dpg.add_theme_style(dpg.mvStyleVar_WindowRounding, 4)
+        return theme
 
 
 @contextmanager
@@ -121,6 +131,11 @@ def menu_group(width: int = 200, height: int = -1, horizontal: bool = True):
         with dpg.child_window(width=width, height=height):
             yield grp
 
+@contextmanager
+def add_tooltip(cls, applies_to: str, text:str):
+    with dpg.tooltip(applies_to):
+        dpg.bind_item_theme(dpg.last_item(), cls.themes["tooltip"])
+        dpg.add_text(f" {text} ")
 
 class ScreenManager:
     """Manage screen navigation and state."""
@@ -137,7 +152,7 @@ class ScreenManager:
             dpg.hide_item(scr)
 
         dpg.show_item(screen)
-        dpg.set_value("content_area_text", SCREEN_LABELS[screen])
+        dpg.set_value("content_bar", SCREEN_LABELS[screen])
 
 
 class SettingsManager:
@@ -220,19 +235,19 @@ class UIBuilder:
                 height=30,
             )
 
-    def create_content_area_text(self) -> None:
+    def create_content_bar(self) -> None:
         """Create the content area title."""
         with dpg.child_window(width=200, height=20, border=False, no_scrollbar=True):
-            dpg.bind_item_theme(dpg.last_item(), self.themes["content_area_text"])
+            dpg.bind_item_theme(dpg.last_item(), self.themes["content_bar"])
             with dpg.group(horizontal=True):
                 dpg.add_spacer(width=2)
-                dpg.add_text("Home", tag="content_area_text", color=(170, 178, 204, 255))
+                dpg.add_text("Home", tag="content_bar", color=(170, 178, 204, 255))
 
     def create_subsearch_screen(self) -> None:
         """Create the home screen with feature toggles and volume controls."""
         with padded_child_window(tag="subsearch"):
             dpg.add_text("Feature Toggles:")
-            dpg.add_checkbox(label="Enable Notifications", default_value=True)
+            dpg.add_checkbox(label="Enable Notifications", default_value=True, tag='test')
             dpg.add_checkbox(label="Auto-save", default_value=False)
             dpg.add_checkbox(label="Show Tooltips", default_value=True)
 
@@ -274,8 +289,37 @@ class UIBuilder:
                 )
 
             dpg.add_spacer(height=20)
-
-    def create_subtitle_language_screen(self) -> None:
+            
+    def _create_language_columns(self, columns) -> None:
+        for _ in range(0, columns):
+            dpg.add_table_column()
+            
+    def _populate_language_table(self, all_languages: dict[str, Any], columns) -> None:
+        grouped = [all_languages[i::columns] for i in range(columns)]
+        for row_items in zip_longest(*grouped):
+            with dpg.table_row():
+                for pair in row_items:
+                    if pair is None:
+                        dpg.add_spacer()
+                        continue
+                    key, data = pair
+                    lang_name = data["name"]
+                    dpg.add_checkbox(
+                        label=lang_name,
+                        tag=f"lang_{key}",
+                        default_value=(key == self.current_language),
+                        callback=self.language_manager.select_language,
+                        user_data=key,
+                    )
+                    
+    def add_language_selection(self, columns: int) -> None:
+        all_languages = list(LANGUAGES.items())
+        with dpg.child_window(height=-1, border=True):
+            with dpg.table(header_row=False):
+                self._create_language_columns(columns)
+                self._populate_language_table(all_languages, columns)
+                
+    def create_subtitle_language_screen(self, columns: int) -> None:
         current_language = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.current_language")
         self.current_language = current_language  # store just the key (e.g. "english")
 
@@ -289,31 +333,12 @@ class UIBuilder:
 
             selected_name = LANGUAGES.get(current_language, {}).get("name", "Unknown")
             dpg.add_text(f"Selected Language: {selected_name}", tag="selected_language_text")
+            add_tooltip(self, "selected_language_text", "hello")
+            
             dpg.add_spacer(height=10)
+            self.add_language_selection(columns=3)
+            
 
-            with dpg.child_window(height=-1, border=True):
-                with dpg.table(header_row=False):
-                    dpg.add_table_column()
-                    dpg.add_table_column()
-
-                    langs = list(LANGUAGES.items())
-
-                    for i in range(0, len(langs), 2):
-                        with dpg.table_row():
-                            for j in range(2):
-                                if i + j < len(langs):
-                                    key, data = langs[i + j]
-                                    lang_name = data["name"]
-
-                                    dpg.add_checkbox(
-                                        label=lang_name,
-                                        tag=f"lang_{key}",
-                                        default_value=(key == self.current_language),
-                                        callback=self.language_manager.select_language,
-                                        user_data=key,
-                                    )
-                                else:
-                                    dpg.add_spacer()
 
 
 
@@ -334,7 +359,7 @@ class UIBuilder:
     def create_content(self) -> None:
         """Create the main content area with all screens."""
         with dpg.group(horizontal=True):
-            self.create_content_area_text()
+            self.create_content_bar()
 
         with dpg.child_window(
             tag="content_area",
@@ -345,7 +370,7 @@ class UIBuilder:
         ):
             dpg.bind_item_theme(dpg.last_item(), self.themes["content"])
             self.create_subsearch_screen()
-            self.create_subtitle_language_screen()
+            self.create_subtitle_language_screen(columns=3)
             self.create_search_preferences_screen()
             self.create_download_manager_screen()
             self.create_about_screen()
@@ -377,9 +402,10 @@ class Application:
 
         self.themes = {
             "global": ThemeBuilder.create_global_theme(),
-            "content_area_text": ThemeBuilder.create_content_area_text_theme(),
             "menu": ThemeBuilder.create_menu_theme(),
             "content": ThemeBuilder.create_content_theme(),
+            "content_bar": ThemeBuilder.create_content_bar_theme(),
+            "tooltip": ThemeBuilder.create_tooltip_theme()
         }
 
         self.setup_font()
