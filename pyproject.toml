@@ -41,7 +41,6 @@
         "opensubtitles",
         "subscene",
         "subsearch",
-        "subtitles",
         "yifysubtitles",
     ]
     license = {text = "MIT license"}
