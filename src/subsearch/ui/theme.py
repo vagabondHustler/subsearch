@@ -1,5 +1,8 @@
 import dearpygui.dearpygui as dpg
 
+
+# catppuccin mocha
+# refrence https://github.com/catppuccin/catppuccin
 COLOR_NAME: dict[str, list[int]] = {
     "rosewater": [245, 224, 220, 255],
     "flamingo": [242, 205, 205, 255],
