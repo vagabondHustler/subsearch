@@ -1,0 +1,101 @@
+[app.core]
+single_instance = {label="Single instance", type="checkbox"}
+show_terminal = {label="Show terminal", type="checkbox", special_rule=["mode_interpreter"]}
+system_tray = {label="System tray icon", type="checkbox"}
+summary_notification = {label="Summary notification", type="checkbox"}
+
+[app.context_menu]
+menu = {label="Context menu", type="checkbox"}
+icon = {label="Context menu icon", type="checkbox", dependent=["app.context_menu.menu"]}
+
+[app.context_menu.applies_to]
+avi = {label="AVI files", type="checkbox"}
+mp4 = {label="MP4 files", type="checkbox"}
+mkv = {label="MKV files", type="checkbox"}
+mpg = {label="MPG files", type="checkbox"}
+mpeg = {label="MPEG files", type="checkbox"}
+mov = {label="MOV files", type="checkbox"}
+rm = {label="RM files", type="checkbox"}
+vob = {label="VOB files", type="checkbox"}
+wmv = {label="WMV files", type="checkbox"}
+flv = {label="FLV files", type="checkbox"}
+3gp = {label="3GP files", type="checkbox"}
+3g2 = {label="3G2 files", type="checkbox"}
+swf = {label="SWF files", type="checkbox"}
+mswmm = {label="MSWMM files", type="checkbox"}
+
+[search.scrape_source]
+opensubtitles = {label="OpenSubtitles", type="checkbox"}
+yifysubtitles = {label="YIFY Subtitles", type="checkbox"}
+subsource = {label="SubSource", type="checkbox"}
+
+[search.subtitle_prefrence]
+current_language = {label="Subtitle language", type="text"}
+accept_threshold = {label="Minimum match accuracy", type="slider"}
+hearing_impaired = {label="Hearing-impaired subtitles", type="checkbox"}
+non_hearing_impaired = {label="Standard subtitles", type="checkbox"}
+only_foreign_parts = {label="Only foreign-language parts", type="checkbox"}
+
+[search.download_manager]
+automatic_downloads = {label="Automatic downloads", type="checkbox", mutual_exclusion=["search.download_manager.open_if.always"]}
+
+[search.download_manager.open_if]
+no_results = {label="Open if no results", type="checkbox", mutual_exclusion=["search.download_manager.open_if.always"]}
+always = {label="Always open download manager", type="checkbox", mutual_exclusion=["search.download_manager.open_if.no_results"]}
+
+[search.network]
+provider_max_downloads = {label="Max downloads per provider", type="input_int"}
+request_connect_timeout = {label="Connect timeout (s)", type="input_int"}
+request_read_timeout = {label="Read timeout (s)", type="input_int"}
+
+[downloaded_files.processing]
+rename = {label="Rename subtitle", type="checkbox"}
+target_path = {label="Target path", type="input_text"}
+
+[downloaded_files.processing.move_action]
+best = {label="Move best subtitle", type="checkbox", mutual_exclusion=["downloaded_files.processing.move_action.all"]}
+all = {label="Move all subtitles", type="checkbox", mutual_exclusion=["downloaded_files.processing.move_action.best"]}
+
+[downloaded_files.processing.path_resolution]
+relative = {label="Relative path", type="checkbox", mutual_exclusion=["downloaded_files.processing.path_resolution.absolute"]}
+absolute = {label="Absolute path", type="checkbox", mutual_exclusion=["downloaded_files.processing.path_resolution.relative"]}
+
+
+
+[tooltip.app.core]
+single_instance = "Allow only one instance of the app to run at a time."
+show_terminal = "Show the terminal window while the app runs."
+system_tray_icon = "Enable an icon in the system tray for quick access."
+summary_notification = "Get notified when subtitle search completes."
+
+[tooltip.app.context_menu]
+menu = "Add options to the file explorer context menu."
+icon = "Show icons in the context menu entries"
+
+[tooltip.search.subtitle_prefrence]
+current_language = "Subtitle language"
+accept_threshold = "Minimum match accuracy percentage required to download a subtitle."
+hearing_impaired = "Include hearing-impaired subtitles."
+non_hearing_impaired = "Include standard subtitles."
+only_foreign_parts = "Only include subtitles for foreign-language dialogue parts."
+
+[tooltip.search.download_manager]
+automatic_downloads = "Automatically download subtitles for detected movies."
+
+[tooltip.search.download_manager.open_if]
+no_results="Open the movie folder even if no subtitles were found."
+always="Always open the download manager, to manually download subtitles."
+
+[tooltip.search.network]
+provider_max_downloads = "Maximum number of subtitle matches to download per provider."
+request_connect_timeout = "Maximum time (in seconds) to wait when connecting to a provider."
+request_read_timeout = "Maximum time (in seconds) to wait for a response from a provider."
+
+[tooltip.downloaded_files.processing]
+rename = "Automatically renames the subtitle with the highest accuracy to exactly match the video filename."
+
+[tooltip.downloaded_files.processing.move_action]
+best  ="Move the subtitle with the higest accuracy to the target folder."
+all= "Move all subtitles to the target folder."
+target_path = "Destination folder where subtitle(s) will be moved to. Defaults to location of the video file"
+path_resolution = "Can be relative to the video file or a absolute path"
