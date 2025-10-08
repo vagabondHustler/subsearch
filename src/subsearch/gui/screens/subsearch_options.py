@@ -4,7 +4,7 @@ from tkinter import BooleanVar, ttk
 from typing import Any
 
 from subsearch.globals import decorators
-from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
+from subsearch.globals.constants import SYSTEM_INFO, FILE_PATHS, VERSION
 from subsearch.gui import common_utils
 from subsearch.gui.resources import config as cfg
 from subsearch.utils import io_toml, io_winreg, string_parser, update
@@ -122,7 +122,7 @@ class SubsearchOption(ttk.Labelframe):
             system_tray = io_toml.load_toml_value(FILE_PATHS.config, "gui.system_tray")
             if key == "gui.context_menu_icon" and not context_menu:
                 check_btn.state(["disabled"])
-            if key == "gui.show_terminal" and DEVICE_INFO.mode == "executable":
+            if key == "gui.show_terminal" and SYSTEM_INFO.mode == "executable":
                 check_btn.state(["disabled"])
             if key == "gui.summary_notification" and not system_tray:
                 check_btn.state(["disabled"])
@@ -220,6 +220,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
 
+
 class AdvancedUser(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
@@ -293,7 +294,6 @@ class AdvancedUser(ttk.Labelframe):
         self.tip.hide()
         self.tip_present = False
         btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
-
 
     def update_config(self, event) -> None:
         for field, values in self.entry_fields.items():
@@ -373,7 +373,7 @@ class CheckForUpdates(ttk.Labelframe):
             self.btn_search.state(["disabled"])
             self.btn_visit_release_page.state(["!disabled"])
             self.btn_visit_release_page.bind("<ButtonRelease-1>", self.visit_repository_button)
-            if DEVICE_INFO.mode == "executable":
+            if SYSTEM_INFO.mode == "executable":
                 self.btn_update_install.state(["!disabled"])
                 self.btn_update_install.bind("<ButtonRelease-1>", self.download_and_update)
             else:

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Callable
 
 from subsearch.globals import decorators, log, thread_handle
-from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.globals.constants import APP_PATHS, SYSTEM_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
@@ -37,7 +37,7 @@ class Initializer:
         self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
 
-        log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
+        log.dataclass(SYSTEM_INFO, level="debug", print_allowed=False)
         log.dataclass(self.app_config, level="debug", print_allowed=False)
 
         log.stdout("Initializing system tray icon", level="debug")
@@ -111,7 +111,7 @@ class Initializer:
 class SubsearchCore(Initializer):
     def __init__(self, pref_counter: float) -> None:
         Initializer.__init__(self, pref_counter)
-        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
+        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {SYSTEM_INFO.subsearch}")
         if not self.file_exist:
             log.brackets("GUI")
             screen_manager.open_screen("search_options")
@@ -125,8 +125,6 @@ class SubsearchCore(Initializer):
         if not self.all_providers_disabled():
             self.prevent_conflicting_config_settings()
             log.brackets("Search started")
-
-
 
     @decorators.call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -209,7 +207,7 @@ class SubsearchCore(Initializer):
         log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        
+
         log.task_completed()
 
     @decorators.call_func
@@ -257,7 +255,7 @@ class SubsearchCore(Initializer):
         log.stdout(f"Finished in {elapsed} seconds", hex_color="#f2cdcd")
         if not self.app_config.show_terminal:
             return None
-        if DEVICE_INFO.mode == "executable":
+        if SYSTEM_INFO.mode == "executable":
             return None
 
         try:

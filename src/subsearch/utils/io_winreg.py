@@ -6,7 +6,7 @@ from subsearch.globals import log
 from subsearch.globals.constants import (
     APP_PATHS,
     COMPUTER_NAME,
-    DEVICE_INFO,
+    SYSTEM_INFO,
     FILE_PATHS,
     REGISTRY_PATHS,
 )
@@ -32,9 +32,9 @@ class LaunchOptions:
         return python_executable[self.show_terminal]
 
     def get_parameter(self) -> str:
-        if DEVICE_INFO.mode == "executable":
+        if SYSTEM_INFO.mode == "executable":
             value = self._get_mode_executable()
-        elif DEVICE_INFO.mode == "interpreter":
+        elif SYSTEM_INFO.mode == "interpreter":
             value = self._get_mode_interpreter()
         return value
 
