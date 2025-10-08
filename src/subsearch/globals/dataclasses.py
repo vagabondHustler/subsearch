@@ -35,6 +35,7 @@ class FilePaths:
     log: Path
     config: Path
     language_data: Path
+    ui_config: Path
 
 
 @dataclass(order=True, slots=True)
