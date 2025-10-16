@@ -20,7 +20,7 @@
         "cloudscraper==1.2.71",
         "num2words==0.5.14",
         "packaging==25.0",
-        "pillow==11.3.0",
+        "pillow==12.0.0",
         "pystray==0.19.5",
         "requests==2.32.5",
         "selectolax==0.4.0",
