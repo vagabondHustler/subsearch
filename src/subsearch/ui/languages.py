@@ -1,0 +1,81 @@
+from dataclasses import dataclass, field
+from typing import Dict, List
+from subsearch.ui.keys import FieldKey
+
+
+@dataclass
+class Language:
+    name: str
+    iso_639_1: str
+    iso_639_2: str
+    provider_incompatibility: List[FieldKey] = field(default_factory=list)
+
+
+languages: Dict[str, Language] = {
+    "albanian": Language("Albanian", "sq", "alb", []),
+    "arabic": Language("Arabic", "ar", "ara", []),
+    "armenian": Language("Armenian", "hy", "arm", []),
+    "azerbaijani": Language("Azerbaijani", "az", "aze", []),
+    "basque": Language("Basque", "eu", "baq", []),
+    "belarusian": Language("Belarusian", "be", "bel", []),
+    "bosnian": Language("Bosnian", "bs", "bos", []),
+    "brazillian_portuguese": Language("Brazillian-Portuguese", "pt", "pob", []),
+    "bulgarian": Language("Bulgarian", "bg", "bul", []),
+    "bulgarian_english": Language("Bulgarian-English", "", "", [FieldKey.OS_SITE]),
+    "burmese": Language("Burmese", "my", "bur", []),
+    "cambodian_khmer": Language("Cambodian-Khmer", "km", "khm", []),
+    "catalan": Language("Catalan", "ca", "cat", []),
+    "chinese_bg_code": Language("Chinese-BG-Code", "", "zht", []),
+    "croatian": Language("Croatian", "hr", "hrv", []),
+    "czech": Language("Czech", "cs", "cze", []),
+    "danish": Language("Danish", "da", "dan", []),
+    "dutch": Language("Dutch", "nl", "dut", []),
+    "dutch_english": Language("Dutch-English", "", "", [FieldKey.OS_SITE]),
+    "english": Language("English", "en", "eng", []),
+    "english_german": Language("English-German", "", "", [FieldKey.OS_SITE]),
+    "esperanto": Language("Esperanto", "eo", "epo", []),
+    "estonian": Language("Estonian", "et", "est", []),
+    "finnish": Language("Finnish", "fi", "fin", []),
+    "french": Language("French", "fr", "fre", []),
+    "georgian": Language("Georgian", "ka", "geo", []),
+    "german": Language("German", "de", "ger", []),
+    "greenlandic": Language("Greenlandic", "kl", "kal", [FieldKey.OS_SITE]),
+    "hebrew": Language("Hebrew", "he", "heb", []),
+    "hindi": Language("Hindi", "hi", "hin", []),
+    "hungarian": Language("Hungarian", "hu", "hun", []),
+    "icelandic": Language("Icelandic", "is", "ice", []),
+    "indonesian": Language("Indonesian", "id", "ind", []),
+    "italian": Language("Italian", "it", "ita", []),
+    "japanese": Language("Japanese", "ja", "jpn", []),
+    "kannada": Language("Kannada", "kn", "kan", []),
+    "korean": Language("Korean", "ko", "kor", []),
+    "kurdish": Language("Kurdish", "ku", "kur", []),
+    "latvian": Language("Latvian", "lv", "lav", []),
+    "lithuanian": Language("Lithuanian", "lt", "lit", []),
+    "macedonian": Language("Macedonian", "mk", "mac", []),
+    "malayalam": Language("Malayalam", "ml", "mal", []),
+    "manipuri": Language("Manipuri", "mni", "mni", []),
+    "mongolian": Language("Mongolian", "mn", "mon", []),
+    "nepali": Language("Nepali", "ne", "nep", []),
+    "norwegian": Language("Norwegian", "no", "nor", []),
+    "pashto": Language("Pashto", "ps", "pus", [FieldKey.OS_SITE]),
+    "romanian": Language("Romanian", "ro", "rum", []),
+    "russian": Language("Russian", "ru", "rus", []),
+    "serbian": Language("Serbian", "sr", "scc", []),
+    "sinhala": Language("Sinhala", "si", "sin", []),
+    "slovak": Language("Slovak", "sk", "slo", []),
+    "slovenian": Language("Slovenian", "sl", "slv", []),
+    "somali": Language("Somali", "so", "som", []),
+    "spanish": Language("Spanish", "es", "spa", []),
+    "sundanese": Language("Sundanese", "su", "sun", []),
+    "swahili": Language("Swahili", "sw", "swa", []),
+    "swedish": Language("Swedish", "sv", "swe", []),
+    "tagalog": Language("Tagalog", "tl", "tgl", []),
+    "tamil": Language("Tamil", "ta", "tam", []),
+    "telugu": Language("Telugu", "te", "tel", []),
+    "thai": Language("Thai", "th", "tha", []),
+    "turkish": Language("Turkish", "tr", "tur", []),
+    "ukrainian": Language("Ukrainian", "uk", "ukr", []),
+    "urdu": Language("Urdu", "ur", "urd", []),
+    "vietnamese": Language("Vietnamese", "vi", "vie", []),
+}
