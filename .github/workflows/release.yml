@@ -194,7 +194,7 @@ jobs:
         with:
           python-version: "*"
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         id: download
         with:
           name: build_${{ env.ID }}
@@ -217,7 +217,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         id: download
         with:
           name: build_${{ env.ID }}
@@ -296,7 +296,7 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         id: download
         with:
           path: artifacts
@@ -335,7 +335,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         id: download
         with:
           path: artifacts
