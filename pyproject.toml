@@ -79,7 +79,7 @@
         "pytest-cov==7.0.0",
         "pytest==8.4.2",
         "tox==4.30.3",
-        "python-dotenv==1.1.1",
+        "python-dotenv==1.2.1",
     ]
     tools = ["pyperclip==1.11.0"]
     type = ["mypy==1.18.2"]
