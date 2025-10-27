@@ -173,7 +173,7 @@ jobs:
         run: ${{ env.CLI }} binaries --prepare-build-artifacts
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build_${{ env.ID }}
           path: artifacts
@@ -271,7 +271,7 @@ jobs:
           --hashes "${{ needs.build_binaries.outputs.msi_hash }};${{ needs.build_binaries.outputs.exe_hash }}"
 
       - name: Upload changelog artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: changelog_${{ env.ID }}
           path: artifacts
