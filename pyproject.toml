@@ -16,7 +16,6 @@
         "Topic :: Utilities",
     ]
     dependencies = [
-        "picologging==0.9.3",
         "cloudscraper==1.2.71",
         "num2words==0.5.14",
         "packaging==24.2",
@@ -41,7 +40,6 @@
         "opensubtitles",
         "subscene",
         "subsearch",
-        "subtitles",
         "yifysubtitles",
     ]
     license = {text = "MIT license"}
