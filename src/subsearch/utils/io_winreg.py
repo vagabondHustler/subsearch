@@ -122,3 +122,18 @@ def write_all_valuex() -> None:
 def add_context_menu() -> None:
     write_keys()
     write_all_valuex()
+
+
+def check_long_paths_enabled() -> bool:
+    value_name = "LongPathsEnabled"
+
+    try:
+        with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_LOCAL_MACHINE) as hkey:
+            with winreg.OpenKey(hkey, REGISTRY_PATHS.long_paths, 0, winreg.KEY_READ) as sk:
+                value, _ = winreg.QueryValueEx(sk, value_name)
+                return bool(value)
+    except FileNotFoundError:
+        return False
+    except Exception as e:
+        log.error(f"Failed to check long path status: {e}")
+        return False
