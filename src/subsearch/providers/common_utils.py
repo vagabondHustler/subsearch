@@ -101,6 +101,7 @@ class _PrepareSubtitleDownload:
 
     @property
     def _subtitle(self) -> Subtitle:
+        self.subtitle_name = self._sanitize_filename(self.subtitle_name)
         if self.download_url:
             subtitle = self._get_subtitle_no_request_data()
         elif self.request_data:
@@ -108,6 +109,15 @@ class _PrepareSubtitleDownload:
         else:
             raise Exception("Subtitle not corectlly populated")
         return subtitle
+
+    def _sanitize_filename(filename: str) -> str:
+        old_filename = filename
+        invalid_chars = '<>:"/\\|?*'
+        for char in invalid_chars:
+            filename = filename.replace(char, "_")
+        filename = filename.replace("'", "")
+        log.stdout(f"Sanitized {old_filename} to {filename}")
+        return filename
 
     def _get_subtitle_no_request_data(self) -> Subtitle:
         subtitle = Subtitle(

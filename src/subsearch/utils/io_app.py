@@ -162,6 +162,7 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
         shell=r"Software\Classes\*\shell",
         subsearch=r"Software\Classes\*\shell\Subsearch",
         subsearch_command=r"Software\Classes\*\shell\Subsearch\command",
+        long_paths=r"SYSTEM\CurrentControlSet\Control\FileSystem",
     )
     return registry_paths
 

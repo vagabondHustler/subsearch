@@ -119,6 +119,7 @@ class WindowsRegistryPaths:
     shell: str
     subsearch: str
     subsearch_command: str
+    long_paths: str
 
 
 class GenericDataClass(Protocol):

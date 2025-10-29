@@ -9,7 +9,7 @@ from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.utils import imdb_lookup, io_file_system, io_toml, string_parser
+from subsearch.utils import imdb_lookup, io_file_system, io_toml, string_parser, io_winreg
 
 
 class Initializer:
@@ -36,6 +36,9 @@ class Initializer:
         self.setup_file_system()
         self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
+        if not io_winreg.check_long_paths_enabled():
+            self._notify_user()
+            
 
         log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         log.dataclass(self.app_config, level="debug", print_allowed=False)
@@ -106,6 +109,10 @@ class Initializer:
         ):
             self.app_config.subtitle_post_processing["move_best"] = False
             io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.move_best", False)
+
+    def _notify_user() -> None:
+        log.stdout("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
+        log.stdout("https://github.com/vagabondHustler/Win32LongPaths")
 
 
 class SubsearchCore(Initializer):
