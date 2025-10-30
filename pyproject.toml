@@ -22,7 +22,7 @@
         "pillow==11.1.0",
         "pystray==0.19.5",
         "requests==2.32.4",
-        "selectolax==0.3.28",
+        "selectolax==0.4.0",
         "toml==0.10.2",
     ]
     description = "Subsearch"
