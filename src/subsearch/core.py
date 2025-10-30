@@ -38,7 +38,6 @@ class Initializer:
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         if not io_winreg.check_long_paths_enabled():
             self._notify_user()
-            
 
         log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
         log.dataclass(self.app_config, level="debug", print_allowed=False)
@@ -110,7 +109,7 @@ class Initializer:
             self.app_config.subtitle_post_processing["move_best"] = False
             io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.move_best", False)
 
-    def _notify_user() -> None:
+    def _notify_user(self) -> None:
         log.stdout("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
         log.stdout("https://github.com/vagabondHustler/Win32LongPaths")
 
@@ -132,8 +131,6 @@ class SubsearchCore(Initializer):
         if not self.all_providers_disabled():
             self.prevent_conflicting_config_settings()
             log.brackets("Search started")
-
-
 
     @decorators.call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -216,7 +213,7 @@ class SubsearchCore(Initializer):
         log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
         self.autoload_src = new_name
-        
+
         log.task_completed()
 
     @decorators.call_func
