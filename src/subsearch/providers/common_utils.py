@@ -110,7 +110,7 @@ class _PrepareSubtitleDownload:
             raise Exception("Subtitle not corectlly populated")
         return subtitle
 
-    def _sanitize_filename(filename: str) -> str:
+    def _sanitize_filename(self, filename: str) -> str:
         old_filename = filename
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
