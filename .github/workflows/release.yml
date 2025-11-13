@@ -51,7 +51,7 @@ jobs:
       last_stable_release: "${{ steps.last_stable_release.outputs.tags }}"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -97,7 +97,7 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -149,7 +149,7 @@ jobs:
       exe_hash: ${{ steps.hashes.outputs.exe_hash }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -186,7 +186,7 @@ jobs:
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -213,7 +213,7 @@ jobs:
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -244,7 +244,7 @@ jobs:
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -286,7 +286,7 @@ jobs:
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: crazy-max/ghaction-import-gpg@v6
         with:
@@ -331,7 +331,7 @@ jobs:
           git_commit_gpgsign: true
           git_config_global: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -362,7 +362,7 @@ jobs:
     runs-on: ${{ inputs.runs_on }}
     timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
 
@@ -395,7 +395,7 @@ jobs:
   #   timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
 
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v5
 
   #     - uses: crazy-max/ghaction-import-gpg@v6
   #       with:
