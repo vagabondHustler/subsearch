@@ -344,7 +344,7 @@ jobs:
         run: ls -R
         working-directory: ${{ steps.download.outputs.download-path }}
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: ${{ inputs.new_tags }}
           tag_name: ${{ inputs.new_tags }}
