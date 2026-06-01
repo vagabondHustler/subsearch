@@ -75,12 +75,13 @@ class ScreenManager(tk.Frame):
         self.activate_screen()
         self.deactivate_screen()
 
-    def get_btn(self, btns: dict, event_: Any, equals=True) -> tuple | None:
+    def get_btn(self, btns: dict, event_: Any, equals=True) -> tuple:
         for btn_key, btn_widget in btns.items():
             if event_.widget == btn_widget and equals:
                 return btn_key, btn_widget
             if event_.widget == btn_widget and not equals:
                 return btn_key, btn_widget
+        raise ValueError("No matching button found for event widget")
 
 
 class LanguageOptions(tk.Frame):

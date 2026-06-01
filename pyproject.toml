@@ -17,6 +17,7 @@
     ]
     dependencies = [
         "cloudscraper==1.2.71",
+        "imdbinfo==0.9.1",
         "num2words==0.5.14",
         "packaging==26.2",
         "pillow==12.2.0",

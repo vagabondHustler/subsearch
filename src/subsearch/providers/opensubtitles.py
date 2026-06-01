@@ -28,7 +28,12 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
         if self.is_opensubtitles_down(tree):
             return None
         for item in items:
-            download_url = item.css_first("enclosure").attributes["url"]
+            enclosure = item.css_first("enclosure")
+            if enclosure is None:
+                continue
+            download_url = enclosure.attributes["url"]
+            if download_url is None:
+                continue
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
             subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
@@ -39,10 +44,10 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             return None
         if self.is_opensubtitles_down(tree):
             return None
-        try:
-            sub_id = tree.css_first("#bt-dwl-bt").attributes["data-product-id"]
-        except AttributeError:
+        bt_dwl_bt = tree.css_first("#bt-dwl-bt")
+        if bt_dwl_bt is None:
             return None
+        sub_id = bt_dwl_bt.attributes["data-product-id"]
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
         self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 

@@ -31,7 +31,7 @@ class Initializer:
         self.release_data = string_parser.no_release_data()
         self.provider_urls = string_parser.CreateProviderUrls.no_urls()
         self.file_exist = VIDEO_FILE.file_exist
-        self.autoload_src = ""
+        self.autoload_src: Path = Path("")
 
         self.downloaded_subtitles: int = 0
         self.downloaded_subtitle_archives: int = 0
@@ -73,12 +73,10 @@ class Initializer:
         log.task_completed()
 
     def update_imdb_id(self) -> None:
-        timeout = self.app_config.request_connect_timeout, self.app_config.request_read_timeout
         find_id = imdb_lookup.FindImdbID(
             self.release_data.title,
             self.release_data.year,
             self.release_data.tvseries,
-            request_timeout=timeout,
         )
         self.release_data.imdb_id = find_id.imdb_id
 
@@ -168,9 +166,10 @@ class SubsearchCore(Initializer):
                 self.rejected_subtitles.append(subtitle)
                 continue
             if subtitle.provider_name == "subsource":
-                subtitle = self._handle_subsource_subtitle(subtitle)
-                if subtitle is None:
+                resolved = self._handle_subsource_subtitle(subtitle)
+                if resolved is None:
                     continue
+                subtitle = resolved
             sub_count = sum(self.api_calls_made.values(), 1)
             index_size = len(self.accepted_subtitles)
             io_file_system.download_subtitle(subtitle, sub_count, index_size)
@@ -283,96 +282,91 @@ class SubsearchCore(Initializer):
 
 class CallConditions:
 
-    def __init__(self, cls: SubsearchCore) -> None:
-        self.cls = cls
-        self.refresh_parent_attrs()
+    def __init__(self, initializer: "Initializer") -> None:
+        self.initializer = initializer
+        self.sync_state()
 
-    def refresh_parent_attrs(self) -> None:
-        self.app_config = self.cls.app_config
-        self.file_exist = self.cls.file_exist
-        self.release_data = self.cls.release_data
-        self.provider_urls = self.cls.provider_urls
-        self.language_data = self.cls.language_data
-        self.accepted_subtitles = self.cls.accepted_subtitles
-        self.rejected_subtitles = self.cls.rejected_subtitles
-        self.downloaded_subtitle_archives = self.cls.downloaded_subtitle_archives
-        self.extracted_subtitle_archives = self.cls.extracted_subtitle_archives
+    def sync_state(self) -> None:
+        self.app_config = self.initializer.app_config
+        self.file_exist = self.initializer.file_exist
+        self.release_data = self.initializer.release_data
+        self.provider_urls = self.initializer.provider_urls
+        self.language_data = self.initializer.language_data
+        self.accepted_subtitles = self.initializer.accepted_subtitles
+        self.rejected_subtitles = self.initializer.rejected_subtitles
+        self.downloaded_subtitle_archives = self.initializer.downloaded_subtitle_archives
+        self.extracted_subtitle_archives = self.initializer.extracted_subtitle_archives
 
-    def check_language_compatibility(self, provider: str) -> bool:
+    def language_supports_provider(self, provider: str) -> bool:
         language = self.app_config.current_language
-        if provider in self.language_data[language]:
-            return False
-        return True
+        incompatible_providers = self.language_data[language]["incompatibility"]
+        return provider not in incompatible_providers
 
-    def all_conditions_true(self, conditions: list[bool]) -> bool:
-        if False in conditions:
-            return False
-        return True
+    @property
+    def has_accepted(self) -> bool:
+        return len(self.accepted_subtitles) >= 1
 
-    def call_func(self, *args, **kwargs) -> bool:
-        func_name = kwargs["func_name"]
-        self.refresh_parent_attrs()
-        conditions: dict[str, list[bool]] = {
+    @property
+    def has_rejected(self) -> bool:
+        return len(self.rejected_subtitles) >= 1
+
+    @property
+    def should_download_files(self) -> bool:
+        if not self.has_accepted:
+            return False
+        if self.app_config.automatic_downloads:
+            return True
+        return not self.app_config.always_open and not self.app_config.open_on_no_matches
+
+    @property
+    def should_open_download_manager(self) -> bool:
+        open_no_matches = not self.has_accepted and self.has_rejected and self.app_config.open_on_no_matches
+        always_open = (self.has_accepted or self.has_rejected) and self.app_config.always_open
+        return open_no_matches or always_open
+
+    def all_conditions_true(self, conditions: "list[bool | Callable[[], bool]]") -> bool:
+        return all(condition() if callable(condition) else condition for condition in conditions)
+
+    def call_func(self, func_name: str) -> bool:
+        self.sync_state()
+        post_processing = self.app_config.subtitle_post_processing
+        conditions: dict[str, list[bool | Callable[[], bool]]] = {
             "init_search": [self.file_exist],
             "opensubtitles": [
                 self.file_exist,
-                lambda: self.check_language_compatibility("opensubtitles"),
+                lambda: self.language_supports_provider("opensubtitles"),
                 self.app_config.providers["opensubtitles_hash"] or self.app_config.providers["opensubtitles_site"],
             ],
             "yifysubtitles": [
                 self.file_exist,
                 not self.app_config.only_foreign_parts,
-                lambda: self.check_language_compatibility("yifysubtitles"),
+                lambda: self.language_supports_provider("yifysubtitles"),
                 not self.release_data.tvseries,
-                not self.provider_urls.yifysubtitles == "",
+                self.provider_urls.yifysubtitles != "",
                 self.app_config.providers["yifysubtitles_site"],
             ],
             "subsource": [
                 self.file_exist,
                 not self.app_config.only_foreign_parts,
-                lambda: self.check_language_compatibility("subsource"),
+                lambda: self.language_supports_provider("subsource"),
                 self.app_config.providers["subsource_site"],
             ],
-            "download_files": [
-                (len(self.accepted_subtitles) >= 1 and self.app_config.automatic_downloads)
-                or (
-                    len(self.accepted_subtitles) >= 1
-                    and not self.app_config.automatic_downloads
-                    and not self.app_config.always_open
-                    and not self.app_config.open_on_no_matches
-                ),
-            ],
-            "download_manager": [
-                (
-                    (
-                        len(self.accepted_subtitles) == 0
-                        and len(self.rejected_subtitles) >= 1
-                        and self.app_config.open_on_no_matches
-                    )
-                    or (
-                        (len(self.accepted_subtitles) >= 1 or len(self.rejected_subtitles) >= 1)
-                        and self.app_config.always_open
-                    )
-                ),
-            ],
-            "subtitle_post_processing": [
-                self.file_exist,
-            ],
-            "extract_files": [
-                self.downloaded_subtitle_archives >= 1,
-            ],
+            "download_files": [self.should_download_files],
+            "download_manager": [self.should_open_download_manager],
+            "subtitle_post_processing": [self.file_exist],
+            "extract_files": [self.downloaded_subtitle_archives >= 1],
             "subtitle_rename": [
                 self.extracted_subtitle_archives >= 1,
-                self.app_config.subtitle_post_processing["rename"],
+                post_processing["rename"],
             ],
             "subtitle_move_best": [
                 self.extracted_subtitle_archives >= 1,
-                self.app_config.subtitle_post_processing["move_best"],
-                not self.app_config.subtitle_post_processing["move_all"],
+                post_processing["move_best"],
+                not post_processing["move_all"],
             ],
             "subtitle_move_all": [
                 self.extracted_subtitle_archives >= 1,
-                self.app_config.subtitle_post_processing["move_all"],
+                post_processing["move_all"],
             ],
             "summary_notification": [
                 self.file_exist,

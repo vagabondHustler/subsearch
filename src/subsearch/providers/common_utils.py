@@ -23,10 +23,10 @@ _thread_lock = threading.Lock()
 
 class ProviderDataContainer:
     def __init__(self, *args, **kwargs) -> None:
-        release_data: ReleaseData = kwargs.get("release_data")
-        app_config: AppConfig = kwargs.get("app_config")
-        provider_urls: ProviderUrls = kwargs.get("provider_urls")
-        language_data: LanguageData = kwargs.get("language_data")
+        release_data: ReleaseData = kwargs["release_data"]
+        app_config: AppConfig = kwargs["app_config"]
+        provider_urls: ProviderUrls = kwargs["provider_urls"]
+        language_data: LanguageData = kwargs["language_data"]
 
         self.app_config = app_config
         self.release_data = release_data
@@ -168,12 +168,13 @@ class ProviderHelper(ProviderDataContainer):
         self.provider_name = ""
         self.subtitle_name = ""
         self.download_url = ""
+        self.request_data: dict[str, Any] = {}
 
     def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
-        self.provider_name: str = args[0]
-        self.subtitle_name: str = args[1]
-        self.download_url: str = args[2]
-        self.request_data: dict[str, Any] = kwargs.get("request_data", {}) or args[3]
+        self.provider_name = args[0]
+        self.subtitle_name = args[1]
+        self.download_url = args[2]
+        self.request_data = kwargs.get("request_data", {}) or args[3]
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
@@ -231,13 +232,13 @@ def parse_scraper_response(response: Response) -> HTMLParser:
     return HTMLParser(response.text)
 
 
-def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser:
+def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser | None:
     scraper = get_cloudscraper()
     try:
         response = send_request(url, scraper, timeout=timeout, header=header)
     except exceptions.Timeout as e:
         log.stdout(e, level="warning", print_allowed=False)
-        return ""
+        return None
     return parse_scraper_response(response)
 
 

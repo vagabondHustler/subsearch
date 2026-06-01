@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from commitizen.cz.conventional_commits import ConventionalCommitsCz
+from commitizen.cz.conventional_commits.conventional_commits import ConventionalCommitsCz
 from jinja2 import FileSystemLoader
 
 REPO = "https://github.com/vagabondHustler/subsearch"

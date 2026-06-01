@@ -160,7 +160,7 @@ class Subsource(SubsourceParser):
     def find_release(self, imdb_id: str) -> dict[str, str]:
         response = self.api.search_movie(imdb_id)
         if not self.api.response_status_ok(response):
-            return ""
+            return {}
         data = self.parse_search_movie_response(response)
         return data
 
@@ -182,7 +182,7 @@ class Subsource(SubsourceParser):
 class GetDownloadUrl:
     def __init__(self) -> None:
         self._api = SubsourceApi()
-        self._response = None
+        self._response: requests.Response | None = None
 
     def get_url(self, item: Subtitle) -> str:
         self._response = self._api.get_sub(
@@ -193,6 +193,7 @@ class GetDownloadUrl:
         return ""
 
     def _parse_get_sub_response(self) -> str:
+        assert self._response is not None
         data = self._response.json()
         sub = data["sub"]
 

@@ -175,3 +175,4 @@ artifacts/*
 .GITHUB_STEP_SUMMARY
 cspell.json
 cspell.config.yaml
+CLAUDE.md

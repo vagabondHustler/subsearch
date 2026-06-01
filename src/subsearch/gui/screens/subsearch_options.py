@@ -13,7 +13,8 @@ from subsearch.utils import io_toml, io_winreg, string_parser, update
 def _handle_file_extensions_check_btn(cls, parent_key) -> None:
     if "context_menu" not in parent_key:
         return None
-    [instance.update_state() for instance in FileExtensions.instances]
+    for instance in FileExtensions.instances:
+        instance.update_state()
 
 
 def _handle_other_check_btn(cls, value, child_key) -> None:
@@ -227,7 +228,7 @@ class AdvancedUser(ttk.Labelframe):
         self.configure(text="Advanced user ( Requests / API )", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.tip_present = False
-        self.tip = None
+        self.tip: common_utils.ToolTip | None = None
         adv_user = self.data["advanced_user"]
         adv_default_values = [
             adv_user["api_call_limit"],
@@ -279,8 +280,8 @@ class AdvancedUser(ttk.Labelframe):
         self.tip = common_utils.ToolTip(btn, btn, *tip_text)
         self.tip.show()
         self.tip_present = True
+        field: ttk.Entry
         for field, values in self.entry_fields.items():
-            field: ttk.Entry
             user_input = self.verify_field(field)
             if field.instate(["invalid"]):
                 self.on_invalid_state(user_input)
@@ -291,7 +292,8 @@ class AdvancedUser(ttk.Labelframe):
 
     def leave_btn_apply_input(self, event) -> None:
         btn = event.widget
-        self.tip.hide()
+        if self.tip is not None:
+            self.tip.hide()
         self.tip_present = False
         btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
 

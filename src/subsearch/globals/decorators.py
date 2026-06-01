@@ -50,8 +50,8 @@ def call_func(func) -> Callable[..., Any]:
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        func_name = f"{func.__name__}"
-        if not args[0].call_conditions.call_func(func_name=func_name, *args, **kwargs):
+        instance = args[0]
+        if not instance.call_conditions.call_func(func.__name__):
             return None
         return func(*args, **kwargs)
 
