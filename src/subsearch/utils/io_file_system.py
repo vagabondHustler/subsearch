@@ -1,10 +1,10 @@
 import shutil
 import struct
 import time
-from typing import Iterable, Optional
 import zipfile
 from io import BufferedReader
 from pathlib import Path
+from typing import Iterable, Optional
 
 import requests
 

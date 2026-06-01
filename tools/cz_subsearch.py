@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from jinja2 import FileSystemLoader
-
 from commitizen.cz.conventional_commits import ConventionalCommitsCz
+from jinja2 import FileSystemLoader
 
 REPO = "https://github.com/vagabondHustler/subsearch"
 _TEMPLATE_DIR = Path(__file__).parent

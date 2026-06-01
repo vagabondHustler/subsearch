@@ -220,6 +220,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
 
+
 class AdvancedUser(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
@@ -293,7 +294,6 @@ class AdvancedUser(ttk.Labelframe):
         self.tip.hide()
         self.tip_present = False
         btn.bind("<ButtonPress-1>", self.enter_btn_apply_input)
-
 
     def update_config(self, event) -> None:
         for field, values in self.entry_fields.items():

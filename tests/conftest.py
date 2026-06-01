@@ -3,15 +3,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 import pytest
 import toml
 
 from subsearch.globals import constants
 from subsearch.utils import io_app
-
-
-
 
 
 @pytest.fixture(scope="session")
@@ -37,9 +33,7 @@ def tests_path() -> Path:
 
 @pytest.fixture
 def fake_language_data_file(tmp_path) -> Any:
-    fake_data = {
-        "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}
-    }
+    fake_data = {"english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}}
 
     fake_file = tmp_path / "fake_language_datag.toml"
     with fake_file.open("w") as f:

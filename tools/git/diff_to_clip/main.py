@@ -3,7 +3,6 @@ import subprocess
 
 import pyperclip
 
-
 # script with a prompt for chat gpt to help writing commit msgs 'cus I'm very lazy
 
 

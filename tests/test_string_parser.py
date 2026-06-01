@@ -116,6 +116,7 @@ def test_imdb_movie() -> None:
     imdb = imdb_lookup.FindImdbID("Arctic", 2019, False)
     assert imdb.imdb_id == "tt6820256"
 
+
 def test_imdb_tvseries() -> None:
     imdb = imdb_lookup.FindImdbID("Breaking bad", 0, True)
     assert imdb.imdb_id == "tt0903747"

@@ -9,7 +9,13 @@ from subsearch.globals.dataclasses import Subtitle
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.utils import imdb_lookup, io_file_system, io_toml, string_parser, io_winreg
+from subsearch.utils import (
+    imdb_lookup,
+    io_file_system,
+    io_toml,
+    io_winreg,
+    string_parser,
+)
 
 
 class Initializer:
