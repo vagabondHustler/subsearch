@@ -82,7 +82,7 @@ class DownloadManager(ttk.LabelFrame):
         _selection = self.sub_listbox.curselection()
         selection = _selection[0]
         subtitle = self.listbox_index[selection]
-        if subtitle in (self.downloaded_subtitle or self.failed_subtitle_downloads):
+        if subtitle in self.downloaded_subtitle + self.failed_subtitle_downloads:
             self.sub_listbox.bind("<ButtonPress-1>", self.mouse_b1_press)
             return
         if subtitle.provider_name == "subsource":

@@ -17,7 +17,6 @@ class SystemTray(metaclass=metaclasses.Singleton):
 
     @decorators.system_tray_conditions
     def display_toast(self, title: str, msg: str) -> None:
-        self.tray.title
         self.tray.notify(msg, title)
 
     @decorators.system_tray_conditions

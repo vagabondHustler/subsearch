@@ -135,5 +135,5 @@ def check_long_paths_enabled() -> bool:
     except FileNotFoundError:
         return False
     except Exception as e:
-        log.error(f"Failed to check long path status: {e}")
+        log.stdout(f"Failed to check long path status: {e}", level="error")
         return False

@@ -26,7 +26,7 @@ def find_year(string: str) -> int:
     if re_year:
         year = re_year[0]
         return int(year)
-    return 0000
+    return 0
 
 
 def find_title_by_year(string: str) -> str:
@@ -73,9 +73,9 @@ def find_group(string: str) -> str:
 
 
 def find_title(filename: str, year: int, series: bool) -> str:
-    if year != 0000:
+    if year != 0:
         title = find_title_by_year(filename)
-    elif series and year == 0000:
+    elif series and year == 0:
         title = find_title_by_show(filename)
     else:
         title = filename.rsplit("-", 1)[0]
@@ -230,14 +230,13 @@ def make_equal_size(lst1, lst2) -> tuple:
 
     num_big, num_small = sorted((len(lst1), len(lst2)), reverse=True)
     difference = num_big - num_small
-    filled_list = fill_shorter_list(lst_big, lst_small, difference)
+    filled_list = fill_shorter_list(lst_small, difference)
     return lst_big, filled_list
 
 
-def fill_shorter_list(big_lst, small_lst, difference) -> Any:
-    if big_lst > small_lst:
-        for _i in range(difference):
-            small_lst.append(None)
+def fill_shorter_list(small_lst, difference) -> Any:
+    for _ in range(difference):
+        small_lst.append(None)
     return small_lst
 
 
@@ -254,13 +253,16 @@ def fix_filename(input_string) -> str:
 def valid_path(input_str, path_resolution) -> bool:
     if input_str == "":
         return False
-    if path_resolution == "relative":
-        pattern = r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$"
-    elif path_resolution == "absolute":
-        pattern = r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$"
+    patterns = {
+        "relative": r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$",
+        "absolute": r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$",
+    }
+    pattern = patterns.get(path_resolution)
+    if pattern is None:
+        return False
     return bool(re.match(pattern, input_str))
 
 
-def valid_api_request_input(input: int) -> bool:
-    pattern = r"[0-9]"
+def valid_api_request_input(input: str) -> bool:
+    pattern = r"^\d+$"
     return bool(re.match(pattern, input))

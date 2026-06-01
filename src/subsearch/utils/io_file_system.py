@@ -16,6 +16,7 @@ from subsearch.utils import string_parser
 
 
 def create_path_from_string(string: str, path_resolution: str) -> Path:
+    path = VIDEO_FILE.file_directory
     if path_resolution == "relative":
         if string == ".":
             path = VIDEO_FILE.file_directory
@@ -96,12 +97,10 @@ def directory_is_empty(directory: Path) -> bool:
 
 def del_directory_content(directory: Path) -> None:
     for item in directory.iterdir():
-        if not item.is_file():
-            return None
         log.file_system_action(action_type="remove", src=item)
         if item.is_file():
             item.unlink()
-        if item.is_dir():
+        elif item.is_dir():
             shutil.rmtree(item)
 
 
@@ -175,9 +174,10 @@ def download_response(msi_package_path: Path, response: requests.Response) -> No
         for chunk in response.iter_content(chunk_size=128):
             msi_file.write(chunk)
             downloaded_size += len(chunk)
-            progress_percentage = (downloaded_size / total_size) * 100
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= 0.5:
-                log.stdout(f"Downloading {progress_percentage:.2f}%")
-                start_time = time.time()
+            if total_size > 0:
+                progress_percentage = (downloaded_size / total_size) * 100
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= 0.5:
+                    log.stdout(f"Downloading {progress_percentage:.2f}%")
+                    start_time = time.time()
         log.stdout(f"Download complete.")

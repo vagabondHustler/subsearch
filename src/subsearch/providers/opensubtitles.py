@@ -44,7 +44,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
         except AttributeError:
             return None
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
-        self.prepare_subtitle(self.provider_name, subtitle_name, download_url)
+        self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
@@ -53,7 +53,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self, flag: str) -> None:
-        flags = {"hash": self.search_site, "site": self.search_hash}
+        flags = {"hash": self.search_hash, "site": self.search_site}
         flags[flag]()
 
     def search_hash(self) -> None:
