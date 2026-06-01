@@ -186,6 +186,10 @@ class GetDownloadUrl:
         self._response: requests.Response | None = None
 
     def get_url(self, item: Subtitle) -> str:
+        if item.download_url:
+            return item.download_url
+        if not self._keys_exsist(item.request_data, ["movie", "lang", "id"]):
+            return ""
         self._response = self._api.get_sub(
             item.request_data["movie"], item.request_data["lang"], item.request_data["id"]
         )
