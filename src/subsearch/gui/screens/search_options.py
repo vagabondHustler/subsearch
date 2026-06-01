@@ -162,6 +162,11 @@ class SubtitlePostProcessing(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_buttons)
 
+    mutually_exclusive_keys = {
+        "subtitle_post_processing.move_best",
+        "subtitle_post_processing.move_all",
+    }
+
     def toggle_buttons(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
@@ -170,6 +175,14 @@ class SubtitlePostProcessing(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif value.get() is False:
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
+            if key in self.mutually_exclusive_keys:
+                self.uncheck_mutually_exclusive(key)
+
+    def uncheck_mutually_exclusive(self, enabled_key) -> None:
+        for other_key, other_boolean in self.checkbuttons.values():
+            if other_key in self.mutually_exclusive_keys and other_key != enabled_key:
+                other_boolean.set(False)
+                io_toml.update_toml_key(FILE_PATHS.config, other_key, False)
 
 
 class SubtitlePostProcessingDirectory(ttk.Labelframe):

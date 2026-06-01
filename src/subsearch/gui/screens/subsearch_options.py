@@ -225,6 +225,11 @@ class DownloadManagerOptions(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_btn)
 
+    mutually_exclusive_keys = {
+        "download_manager.open_on_no_matches",
+        "download_manager.always_open",
+    }
+
     @gui_decorators.check_option_disabled
     def toggle_btn(self, event) -> None:
         btn = event.widget
@@ -234,6 +239,14 @@ class DownloadManagerOptions(ttk.Labelframe):
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
+            if key in self.mutually_exclusive_keys:
+                self.uncheck_mutually_exclusive(key)
+
+    def uncheck_mutually_exclusive(self, enabled_key) -> None:
+        for other_key, other_boolean in self.checkbuttons.values():
+            if other_key in self.mutually_exclusive_keys and other_key != enabled_key:
+                other_boolean.set(False)
+                io_toml.update_toml_key(FILE_PATHS.config, other_key, False)
 
 
 class AdvancedUser(ttk.Labelframe):
