@@ -1,6 +1,10 @@
 name: Schedule
 run-name: Schedule
 
+# Weekly maintenance (Sundays 03:00 UTC):
+#   stale   mark and close inactive issues/PRs
+#   codeql  run CodeQL security analysis on the Python source
+
 on:
   schedule:
     - cron: '0 3 * * 0'
