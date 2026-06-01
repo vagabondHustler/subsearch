@@ -72,13 +72,13 @@ def test_conditions_download_files(fake_cls: FakeSubsearchCore) -> None:
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_config.always_open = False
-    fake_cls.app_config.open_on_no_matches = False
+    fake_cls.app_config.always_open_manager = False
+    fake_cls.app_config.open_manager_on_no_matches = False
     fake_cls.app_config.automatic_downloads = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_config.always_open = True
+    fake_cls.app_config.always_open_manager = True
     fake_cls.app_config.automatic_downloads = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
@@ -86,16 +86,16 @@ def test_conditions_download_files(fake_cls: FakeSubsearchCore) -> None:
 def test_conditions_download_manager(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.accepted_subtitles = []
     fake_cls.rejected_subtitles = ["subtitle1"]
-    fake_cls.app_config.open_on_no_matches = True
-    fake_cls.app_config.always_open = False
+    fake_cls.app_config.open_manager_on_no_matches = True
+    fake_cls.app_config.always_open_manager = False
     fake_cls.app_config.automatic_downloads = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
-    fake_cls.app_config.open_on_no_matches = False
+    fake_cls.app_config.open_manager_on_no_matches = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
-    fake_cls.app_config.open_on_no_matches = False
-    fake_cls.app_config.always_open = True
+    fake_cls.app_config.open_manager_on_no_matches = False
+    fake_cls.app_config.always_open_manager = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
     fake_cls.accepted_subtitles = ["subtitle1"]
@@ -121,48 +121,48 @@ def test_conditions_extract_files(fake_cls: FakeSubsearchCore) -> None:
 
 def test_conditions_subtitle_rename(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.extracted_subtitle_archives = 2
-    fake_cls.app_config.subtitle_post_processing["rename"] = True
+    fake_cls.app_config.post_processing["rename"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
-    fake_cls.app_config.subtitle_post_processing["rename"] = False
+    fake_cls.app_config.post_processing["rename"] = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
 
 def test_conditions_subtitle_move_best(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.extracted_subtitle_archives = 1
-    fake_cls.app_config.subtitle_post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_best"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
     fake_cls.extracted_subtitle_archives = 1
-    fake_cls.app_config.subtitle_post_processing["move_best"] = True
-    fake_cls.app_config.subtitle_post_processing["move_all"] = True
+    fake_cls.app_config.post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_all"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
     fake_cls.extracted_subtitle_archives = 1
-    fake_cls.app_config.subtitle_post_processing["move_all"] = False
-    fake_cls.app_config.subtitle_post_processing["move_best"] = False
+    fake_cls.app_config.post_processing["move_all"] = False
+    fake_cls.app_config.post_processing["move_best"] = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
     fake_cls.extracted_subtitle_archives = 0
-    fake_cls.app_config.subtitle_post_processing["move_all"] = True
+    fake_cls.app_config.post_processing["move_all"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
     fake_cls.extracted_subtitle_archives = 0
-    fake_cls.app_config.subtitle_post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_best"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
     fake_cls.extracted_subtitle_archives = 0
-    fake_cls.app_config.subtitle_post_processing["move_best"] = True
-    fake_cls.app_config.subtitle_post_processing["open_on_no_matches"] = True
+    fake_cls.app_config.post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["open_on_no_matches"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
 
 def test_conditions_subtitle_move_all(fake_cls: FakeSubsearchCore) -> None:
     fake_cls.extracted_subtitle_archives = 1
-    fake_cls.app_config.subtitle_post_processing["move_all"] = True
+    fake_cls.app_config.post_processing["move_all"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
-    fake_cls.app_config.subtitle_post_processing["move_all"] = False
+    fake_cls.app_config.post_processing["move_all"] = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
 

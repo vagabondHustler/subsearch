@@ -69,7 +69,7 @@ class ToolTip(tk.Toplevel):
 
 
 def configure_root(root) -> None:
-    if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
+    if io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu"):
         io_winreg.add_context_menu()
     root.configure(background=cfg.color.default_bg)
     root.iconbitmap(APP_PATHS.gui_assets / "subsearch.ico")

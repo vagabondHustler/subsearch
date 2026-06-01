@@ -44,38 +44,42 @@ def get_default_app_config() -> dict[str, Any]:
     file_extensions = dict.fromkeys(get_supported_file_ext(), True)
     providers = dict.fromkeys(get_supported_providers(), True)
     config = {
-        "subtitle_filters": {
-            "current_language": "english",
+        "language": {
+            "selected": "english",
+        },
+        "search": {
             "accept_threshold": 90,
             "hearing_impaired": True,
             "non_hearing_impaired": True,
             "only_foreign_parts": False,
+            "providers": providers,
         },
-        "gui": {
+        "shell_integration": {
             "context_menu": True,
             "context_menu_icon": True,
+            "file_extensions": file_extensions,
+        },
+        "notifications": {
             "system_tray": True,
             "summary_notification": False,
-            "show_terminal": False,
         },
-        "subtitle_post_processing": {
+        "download": {
+            "automatic": True,
+            "always_open_manager": False,
+            "open_manager_on_no_matches": True,
+        },
+        "post_processing": {
             "rename": True,
             "move_best": True,
             "move_all": False,
             "target_path": ".",
             "path_resolution": "relative",
         },
-        "file_extensions": file_extensions,
-        "providers": providers,
-        "download_manager": {
-            "open_on_no_matches": True,
-            "always_open": False,
-            "automatic_downloads": True,
-        },
-        "misc": {
+        "application": {
+            "show_terminal": False,
             "single_instance": True,
         },
-        "advanced_user": {
+        "network": {
             "api_call_limit": 4,
             "request_connect_timeout": 4,
             "request_read_timeout": 5,

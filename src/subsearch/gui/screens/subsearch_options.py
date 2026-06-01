@@ -36,7 +36,7 @@ class FileExtensions(ttk.Labelframe):
         self.configure(text="File Exstensions", padding=10)
         FileExtensions.instances.append(self)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
-        self.file_extensions = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
+        self.file_extensions = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.file_extensions")
 
         self.checkbuttons: dict[ttk.Checkbutton, tuple[str, BooleanVar]] = {}
 
@@ -49,7 +49,7 @@ class FileExtensions(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value)
             check_btn = ttk.Checkbutton(frame, text=key, onvalue=True, offvalue=False, variable=boolean)
-            if not io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
+            if not io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu"):
                 check_btn.state(["disabled"])
 
             check_btn.pack(padx=4, pady=4, ipadx=10)
@@ -71,9 +71,9 @@ class FileExtensions(ttk.Labelframe):
         key = self.checkbuttons[btn][0]
         value = self.checkbuttons[btn][1]
         if value.get():
-            self.data["file_extensions"][key] = False
+            self.data["shell_integration"]["file_extensions"][key] = False
         elif not value.get():
-            self.data["file_extensions"][key] = True
+            self.data["shell_integration"]["file_extensions"][key] = True
         io_toml.dump_toml_data(FILE_PATHS.config, self.data)
 
         self.update_registry()
@@ -83,7 +83,7 @@ class FileExtensions(ttk.Labelframe):
 
     def update_state(self) -> None:
         for key in self.checkbuttons.keys():
-            if io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu"):
+            if io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu"):
                 key.state(["!disabled"])
             else:
                 key.state(["disabled"])
@@ -95,12 +95,12 @@ class SubsearchOption(ttk.Labelframe):
         self.configure(text="Subsearch Options", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.subsearch_options: dict[str, Any] = {
-            "gui.context_menu": "Context menu",
-            "gui.context_menu_icon": "Context menu icon",
-            "gui.system_tray": "System tray icon",
-            "gui.summary_notification": "Notification when done",
-            "gui.show_terminal": "Terminal while searching",
-            "misc.single_instance": "Single instance",
+            "shell_integration.context_menu": "Context menu",
+            "shell_integration.context_menu_icon": "Context menu icon",
+            "notifications.system_tray": "System tray icon",
+            "notifications.summary_notification": "Notification when done",
+            "application.show_terminal": "Terminal while searching",
+            "application.single_instance": "Single instance",
         }
         for name, description in self.subsearch_options.items():
             self.subsearch_options[name] = [
@@ -119,13 +119,13 @@ class SubsearchOption(ttk.Labelframe):
             boolean = tk.BooleanVar()
             boolean.set(value[0])
             check_btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
-            context_menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
-            system_tray = io_toml.load_toml_value(FILE_PATHS.config, "gui.system_tray")
-            if key == "gui.context_menu_icon" and not context_menu:
+            context_menu = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu")
+            system_tray = io_toml.load_toml_value(FILE_PATHS.config, "notifications.system_tray")
+            if key == "shell_integration.context_menu_icon" and not context_menu:
                 check_btn.state(["disabled"])
-            if key == "gui.show_terminal" and DEVICE_INFO.mode == "executable":
+            if key == "application.show_terminal" and DEVICE_INFO.mode == "executable":
                 check_btn.state(["disabled"])
-            if key == "gui.summary_notification" and not system_tray:
+            if key == "notifications.summary_notification" and not system_tray:
                 check_btn.state(["disabled"])
             check_btn.pack(padx=4, pady=4, ipadx=40)
 
@@ -150,7 +150,10 @@ class SubsearchOption(ttk.Labelframe):
         elif not value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, True)
         self.update_registry(btn)
-        keys = [("gui.context_menu", "gui.context_menu_icon"), ("gui.system_tray", "gui.summary_notification")]
+        keys = [
+            ("shell_integration.context_menu", "shell_integration.context_menu_icon"),
+            ("notifications.system_tray", "notifications.summary_notification"),
+        ]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
 
@@ -162,9 +165,9 @@ class SubsearchOption(ttk.Labelframe):
         _handle_other_check_btn(self, value, child_key)
 
     def update_registry(self, btn) -> None:
-        if btn["text"] != self.subsearch_options["gui.context_menu"][1]:
+        if btn["text"] != self.subsearch_options["shell_integration.context_menu"][1]:
             return None
-        menu = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu")
+        menu = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu")
         if menu:
             io_winreg.add_context_menu()
         else:
@@ -177,9 +180,9 @@ class DownloadManagerOptions(ttk.Labelframe):
         self.configure(text="Download manager options", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.download_manager_options: dict[str, Any] = {
-            "download_manager.open_on_no_matches": "Open on no matches found",
-            "download_manager.always_open": "Always open",
-            "download_manager.automatic_downloads": "Automatic downloads",
+            "download.open_manager_on_no_matches": "Open on no matches found",
+            "download.always_open_manager": "Always open",
+            "download.automatic": "Automatic downloads",
         }
         for name, description in self.download_manager_options.items():
             self.download_manager_options[name] = [
@@ -212,8 +215,8 @@ class DownloadManagerOptions(ttk.Labelframe):
         btn.bind("<ButtonRelease-1>", self.toggle_btn)
 
     mutually_exclusive_keys = {
-        "download_manager.open_on_no_matches",
-        "download_manager.always_open",
+        "download.open_manager_on_no_matches",
+        "download.always_open_manager",
     }
 
     @gui_decorators.check_option_disabled
@@ -242,7 +245,7 @@ class AdvancedUser(ttk.Labelframe):
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.tip_present = False
         self.tip: widgets.ToolTip | None = None
-        adv_user = self.data["advanced_user"]
+        adv_user = self.data["network"]
         adv_default_values = [
             adv_user["api_call_limit"],
             adv_user["request_connect_timeout"],
@@ -250,9 +253,9 @@ class AdvancedUser(ttk.Labelframe):
         ]
 
         self.adv_user_options: dict = {
-            "advanced_user.api_call_limit": "API call limit",
-            "advanced_user.request_connect_timeout": "Request connection timeout",
-            "advanced_user.request_read_timeout": "Request read timeout",
+            "network.api_call_limit": "API call limit",
+            "network.request_connect_timeout": "Request connection timeout",
+            "network.request_read_timeout": "Request read timeout",
         }
         for name, description in self.adv_user_options.items():
             self.adv_user_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]

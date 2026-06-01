@@ -51,22 +51,22 @@ class VideoFile:
 
 @dataclass(order=True, slots=True)
 class AppConfig:
-    current_language: str
+    selected_language: str
     accept_threshold: int
     hearing_impaired: bool
     non_hearing_impaired: bool
     only_foreign_parts: bool
+    providers: dict[str, bool]
     context_menu: bool
     context_menu_icon: bool
+    file_extensions: dict[str, bool]
     system_tray: bool
     summary_notification: bool
-    show_terminal: bool
-    subtitle_post_processing: dict[str, Any]
-    file_extensions: dict[str, bool]
-    providers: dict[str, bool]
-    open_on_no_matches: bool
-    always_open: bool
     automatic_downloads: bool
+    always_open_manager: bool
+    open_manager_on_no_matches: bool
+    post_processing: dict[str, Any]
+    show_terminal: bool
     single_instance: bool
     api_call_limit: int
     request_connect_timeout: int

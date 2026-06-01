@@ -106,15 +106,15 @@ class Initializer:
     def prevent_conflicting_config_settings(self) -> None:
         # TODO
         # make settings exclusive in GUI
-        if self.app_config.open_on_no_matches and self.app_config.always_open:
-            self.app_config.open_on_no_matches = False
-            io_toml.update_toml_key(FILE_PATHS.config, "download_manager.open_on_no_matches", False)
+        if self.app_config.open_manager_on_no_matches and self.app_config.always_open_manager:
+            self.app_config.open_manager_on_no_matches = False
+            io_toml.update_toml_key(FILE_PATHS.config, "download.open_manager_on_no_matches", False)
         if (
-            self.app_config.subtitle_post_processing["move_best"]
-            and self.app_config.subtitle_post_processing["move_all"]
+            self.app_config.post_processing["move_best"]
+            and self.app_config.post_processing["move_all"]
         ):
-            self.app_config.subtitle_post_processing["move_best"] = False
-            io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.move_best", False)
+            self.app_config.post_processing["move_best"] = False
+            io_toml.update_toml_key(FILE_PATHS.config, "post_processing.move_best", False)
 
     def _notify_user(self) -> None:
         log.stdout("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
@@ -211,8 +211,8 @@ class SubsearchCore(Initializer):
 
     @call_func
     def subtitle_post_processing(self) -> None:
-        target = self.app_config.subtitle_post_processing["target_path"]
-        resolution = self.app_config.subtitle_post_processing["path_resolution"]
+        target = self.app_config.post_processing["target_path"]
+        resolution = self.app_config.post_processing["path_resolution"]
         target_path = io_file_system.create_path_from_string(target, resolution)
         self.downloaded_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.tmp_dir)
         self.extract_files()
@@ -307,7 +307,7 @@ class CallConditions:
         self.extracted_subtitle_archives = self.initializer.extracted_subtitle_archives
 
     def language_supports_provider(self, provider: str) -> bool:
-        language = self.app_config.current_language
+        language = self.app_config.selected_language
         incompatible_providers = self.language_data[language]["incompatibility"]
         return provider not in incompatible_providers
 
@@ -325,12 +325,12 @@ class CallConditions:
             return False
         if self.app_config.automatic_downloads:
             return True
-        return not self.app_config.always_open and not self.app_config.open_on_no_matches
+        return not self.app_config.always_open_manager and not self.app_config.open_manager_on_no_matches
 
     @property
     def should_open_download_manager(self) -> bool:
-        open_no_matches = not self.has_accepted and self.has_rejected and self.app_config.open_on_no_matches
-        always_open = (self.has_accepted or self.has_rejected) and self.app_config.always_open
+        open_no_matches = not self.has_accepted and self.has_rejected and self.app_config.open_manager_on_no_matches
+        always_open = (self.has_accepted or self.has_rejected) and self.app_config.always_open_manager
         return open_no_matches or always_open
 
     def all_conditions_true(self, conditions: "list[bool | Callable[[], bool]]") -> bool:
@@ -338,7 +338,7 @@ class CallConditions:
 
     def call_func(self, func_name: str) -> bool:
         self.sync_state()
-        post_processing = self.app_config.subtitle_post_processing
+        post_processing = self.app_config.post_processing
         conditions: dict[str, list[bool | Callable[[], bool]]] = {
             "init_search": [self.file_exist],
             "opensubtitles": [

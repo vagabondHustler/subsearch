@@ -15,7 +15,7 @@ from subsearch.io import io_toml
 
 class LaunchOptions:
     def __init__(self) -> None:
-        self.show_terminal = io_toml.load_toml_value(FILE_PATHS.config, "gui.show_terminal")
+        self.show_terminal = io_toml.load_toml_value(FILE_PATHS.config, "application.show_terminal")
         self.python_path = Path(sys.executable).parent
         self.console_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
         self.working_directory = f"import os; os.chdir(r'{APP_PATHS.home}');"
@@ -44,7 +44,7 @@ def get_command_value() -> str:
 
 
 def get_icon_value() -> str:
-    show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "gui.context_menu_icon")
+    show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu_icon")
     if show_icon:
         return str(APP_PATHS.gui_assets / "subsearch.ico")
     else:
@@ -52,7 +52,7 @@ def get_icon_value() -> str:
 
 
 def get_appliesto_value() -> str:
-    file_ext = io_toml.load_toml_value(FILE_PATHS.config, "file_extensions")
+    file_ext = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.file_extensions")
     value = ""
     for ext, v in zip(file_ext.keys(), file_ext.values()):
         if v is True:

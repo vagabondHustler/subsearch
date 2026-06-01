@@ -10,7 +10,7 @@ from subsearch.runtime.constants import FILE_PATHS, GUID
 def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
         try:
-            if not io_toml.load_toml_value(FILE_PATHS.config, "misc.single_instance"):
+            if not io_toml.load_toml_value(FILE_PATHS.config, "application.single_instance"):
                 return func()
         except FileNotFoundError:
             pass

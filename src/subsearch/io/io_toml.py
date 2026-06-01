@@ -100,13 +100,25 @@ def resolve_on_integrity_failure() -> None:
 def get_app_config(toml_file_path: Path) -> AppConfig:
     data = load_toml_data(toml_file_path)
     user_data = AppConfig(
-        **data["subtitle_filters"],
-        **data["gui"],
-        subtitle_post_processing=data["subtitle_post_processing"],
-        file_extensions=data["file_extensions"],
-        providers=data["providers"],
-        **data["download_manager"],
-        **data["misc"],
-        **data["advanced_user"],
+        selected_language=data["language"]["selected"],
+        accept_threshold=data["search"]["accept_threshold"],
+        hearing_impaired=data["search"]["hearing_impaired"],
+        non_hearing_impaired=data["search"]["non_hearing_impaired"],
+        only_foreign_parts=data["search"]["only_foreign_parts"],
+        providers=data["search"]["providers"],
+        context_menu=data["shell_integration"]["context_menu"],
+        context_menu_icon=data["shell_integration"]["context_menu_icon"],
+        file_extensions=data["shell_integration"]["file_extensions"],
+        system_tray=data["notifications"]["system_tray"],
+        summary_notification=data["notifications"]["summary_notification"],
+        automatic_downloads=data["download"]["automatic"],
+        always_open_manager=data["download"]["always_open_manager"],
+        open_manager_on_no_matches=data["download"]["open_manager_on_no_matches"],
+        post_processing=data["post_processing"],
+        show_terminal=data["application"]["show_terminal"],
+        single_instance=data["application"]["single_instance"],
+        api_call_limit=data["network"]["api_call_limit"],
+        request_connect_timeout=data["network"]["request_connect_timeout"],
+        request_read_timeout=data["network"]["request_read_timeout"],
     )
     return user_data

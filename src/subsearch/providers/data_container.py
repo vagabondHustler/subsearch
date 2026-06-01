@@ -40,11 +40,11 @@ class ProviderDataContainer:
         self.imdb_id = release_data.imdb_id
 
         # user parameters
-        self.current_language = app_config.current_language
+        self.current_language = app_config.selected_language
         self.hearing_impaired = app_config.hearing_impaired
         self.non_hearing_impaired = app_config.non_hearing_impaired
         self.accept_threshold = app_config.accept_threshold
-        self.open_on_no_matches = app_config.open_on_no_matches
+        self.open_on_no_matches = app_config.open_manager_on_no_matches
         self.api_call_limit = app_config.api_call_limit
         self.request_connect_timeout = app_config.request_connect_timeout
         self.request_read_timeout = app_config.request_read_timeout

@@ -61,8 +61,8 @@ class DownloadManager(ttk.LabelFrame):
             self.nothing_label.place(x=cfg.size.height // 2, y=cfg.size.width // 4, anchor="center")
 
     def fill_listbox(self) -> None:
-        accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
-        automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download_manager.automatic_downloads")
+        accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "search.accept_threshold")
+        automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download.automatic")
         self.listbox_index: dict[int, Subtitle] = {}
         for enum, subtitle in enumerate(self.subtitles):
             self.sub_listbox.insert(tk.END, f"{subtitle.precentage_result}% {subtitle.subtitle_name}\n")

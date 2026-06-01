@@ -24,7 +24,7 @@ class Providers(ttk.Labelframe):
         }
         for name, description in self.provider_options.items():
             self.provider_options[name] = [
-                io_toml.load_toml_value(FILE_PATHS.config, "providers")[name],
+                io_toml.load_toml_value(FILE_PATHS.config, "search.providers")[name],
                 description,
             ]
 
@@ -38,7 +38,7 @@ class Providers(ttk.Labelframe):
             btn = ttk.Checkbutton(frame, text=value[1], onvalue=True, offvalue=False, variable=boolean)
             btn.pack(padx=4, pady=4, ipadx=20)
             self.chekboxes[btn] = key, boolean
-            if self.data["providers"][key] is True:
+            if self.data["search"]["providers"][key] is True:
                 btn.configure(state="normal")
 
             btn.bind("<Enter>", self.enter_button)
@@ -61,19 +61,19 @@ class Providers(ttk.Labelframe):
         key = self.chekboxes[btn][0]
         value = self.chekboxes[btn][1]
         if value.get() is True:
-            self.data["providers"][key] = False
+            self.data["search"]["providers"][key] = False
         elif value.get() is False:
-            self.data["providers"][key] = True
+            self.data["search"]["providers"][key] = True
         io_toml.dump_toml_data(FILE_PATHS.config, self.data)
 
     def toggle_providers(self, event) -> None:
         btn = event.widget
         key = btn["text"].replace(" ", "_").lower()
-        if self.data["providers"][key] is True:
-            self.data["providers"][key] = False
+        if self.data["search"]["providers"][key] is True:
+            self.data["search"]["providers"][key] = False
             btn.configure(fg=cfg.color.red)
-        elif self.data["providers"][key] is False:
-            self.data["providers"][key] = True
+        elif self.data["search"]["providers"][key] is False:
+            self.data["search"]["providers"][key] = True
             btn.configure(fg=cfg.color.green)
         io_toml.dump_toml_data(FILE_PATHS.config, self.data)
 
@@ -84,9 +84,9 @@ class SubtitleFilters(ttk.Labelframe):
         self.configure(text="Subtitle filters", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.subtitle_options: dict = {
-            "subtitle_filters.hearing_impaired": "Hearing impaird",
-            "subtitle_filters.non_hearing_impaired": "non-Hearing impaired",
-            "subtitle_filters.only_foreign_parts": "Foreign parts only",
+            "search.hearing_impaired": "Hearing impaird",
+            "search.non_hearing_impaired": "non-Hearing impaired",
+            "search.only_foreign_parts": "Foreign parts only",
         }
 
         for name, description in self.subtitle_options.items():
@@ -132,9 +132,9 @@ class SubtitlePostProcessing(ttk.Labelframe):
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
 
         self.subtitle_options: dict = {
-            "subtitle_post_processing.rename": "Rename best subtitle",
-            "subtitle_post_processing.move_best": "Move best subtitle",
-            "subtitle_post_processing.move_all": "Move all subtitles",
+            "post_processing.rename": "Rename best subtitle",
+            "post_processing.move_best": "Move best subtitle",
+            "post_processing.move_all": "Move all subtitles",
         }
         for name, description in self.subtitle_options.items():
             self.subtitle_options[name] = [io_toml.load_toml_value(FILE_PATHS.config, name), description]
@@ -163,8 +163,8 @@ class SubtitlePostProcessing(ttk.Labelframe):
         btn.bind("<ButtonRelease-1>", self.toggle_buttons)
 
     mutually_exclusive_keys = {
-        "subtitle_post_processing.move_best",
-        "subtitle_post_processing.move_all",
+        "post_processing.move_best",
+        "post_processing.move_all",
     }
 
     def toggle_buttons(self, event) -> None:
@@ -189,7 +189,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
     def __init__(self, parent) -> None:
         ttk.Labelframe.__init__(self, parent)
         self.configure(text="Subtitle move destination", padding=10)
-        self.target_path = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_post_processing.target_path")
+        self.target_path = io_toml.load_toml_value(FILE_PATHS.config, "post_processing.target_path")
         self.path_resolution = tk.StringVar()
         self._get_path_resolution()
 
@@ -253,8 +253,8 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
     def update_config(self, event) -> None:
         target_path = self.entry_path.get()
         path_resolution = self.path_resolution.get().lower()
-        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.target_path", target_path)
-        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_post_processing.path_resolution", path_resolution)
+        io_toml.update_toml_key(FILE_PATHS.config, "post_processing.target_path", target_path)
+        io_toml.update_toml_key(FILE_PATHS.config, "post_processing.path_resolution", path_resolution)
 
     def verify_path(self) -> str:
         target_path = self.entry_path.get()
@@ -281,7 +281,7 @@ class SubtitlePostProcessingDirectory(ttk.Labelframe):
             self.path_resolution.set(relative.capitalize())
 
     def _get_path_resolution(self) -> None:
-        path_resolution: str = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_post_processing.path_resolution")
+        path_resolution: str = io_toml.load_toml_value(FILE_PATHS.config, "post_processing.path_resolution")
         self.path_resolution.set(path_resolution.capitalize())
 
 
@@ -289,7 +289,7 @@ class SearchThreshold(tk.Frame):
     def __init__(self, parent) -> None:
         tk.Frame.__init__(self, parent)
         self.configure(bg=cfg.color.default_bg)
-        self.pct_threashold = io_toml.load_toml_value(FILE_PATHS.config, "subtitle_filters.accept_threshold")
+        self.pct_threashold = io_toml.load_toml_value(FILE_PATHS.config, "search.accept_threshold")
         self.current_value = tk.IntVar()
         self.current_value.set(self.pct_threashold)
         self.pct_value = tk.StringVar()
@@ -364,7 +364,7 @@ class SearchThreshold(tk.Frame):
 
     def update_config(self) -> None:
         value = self.current_value.get()
-        io_toml.update_toml_key(FILE_PATHS.config, "subtitle_filters.accept_threshold", value)
+        io_toml.update_toml_key(FILE_PATHS.config, "search.accept_threshold", value)
 
     def set_label_color(self) -> None:
         value = self.current_value.get()
