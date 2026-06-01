@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.gui import widgets
 from subsearch.gui.resources import config as cfg

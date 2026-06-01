@@ -7,7 +7,7 @@ import cloudscraper
 import requests
 from packaging.version import Version
 
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
 from subsearch.io import io_file_system
 

@@ -6,7 +6,7 @@ from typing import Any, Callable
 from subsearch import threading_utils
 from subsearch.decorators import gui as gui_decorators
 from subsearch.decorators.orchestration import call_func
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.gui import screen_manager, system_tray

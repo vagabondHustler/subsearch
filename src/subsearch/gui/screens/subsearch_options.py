@@ -101,8 +101,12 @@ class SubsearchOption(ttk.Labelframe):
             "gui.summary_notification": "Notification when done",
             "gui.show_terminal": "Terminal while searching",
             "misc.single_instance": "Single instance",
+            "misc.long_paths_enabled": "Enable long paths",
         }
         for name, description in self.subsearch_options.items():
+            if name == "misc.long_paths_enabled":
+                self.subsearch_options[name] = [io_winreg.check_long_paths_enabled(), description]
+                continue
             self.subsearch_options[name] = [
                 io_toml.load_toml_value(FILE_PATHS.config, name),
                 description,
@@ -145,6 +149,9 @@ class SubsearchOption(ttk.Labelframe):
         btn = event.widget
         key = self.checkbuttons[btn][0]
         value = self.checkbuttons[btn][1]
+        if key == "misc.long_paths_enabled":
+            self.toggle_long_paths(value)
+            return None
         if value.get():
             io_toml.update_toml_key(FILE_PATHS.config, key, False)
         elif not value.get():
@@ -153,6 +160,13 @@ class SubsearchOption(ttk.Labelframe):
         keys = [("gui.context_menu", "gui.context_menu_icon"), ("gui.system_tray", "gui.summary_notification")]
         for key_pair in keys:
             self.disable_check_btn_children(btn, value, key_pair)
+
+    def toggle_long_paths(self, value: BooleanVar) -> None:
+        desired_state = value.get()
+        if io_winreg.set_long_paths_enabled(desired_state):
+            io_toml.update_toml_key(FILE_PATHS.config, "misc.long_paths_enabled", desired_state)
+            return None
+        value.set(not desired_state)
 
     def disable_check_btn_children(self, btn: Any, value: BooleanVar, key_pair: tuple[str, str]) -> None:
         parent_key, child_key = key_pair[0], key_pair[1]

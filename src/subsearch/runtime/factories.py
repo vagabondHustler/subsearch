@@ -74,6 +74,7 @@ def get_default_app_config() -> dict[str, Any]:
         },
         "misc": {
             "single_instance": True,
+            "long_paths_enabled": False,
         },
         "advanced_user": {
             "api_call_limit": 4,

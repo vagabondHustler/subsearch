@@ -3,7 +3,7 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.model import (
     AppConfig,

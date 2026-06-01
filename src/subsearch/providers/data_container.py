@@ -2,7 +2,7 @@ import threading
 from typing import Any
 
 from subsearch.io import string_parser
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.model import (
     AppConfig,
     LanguageData,

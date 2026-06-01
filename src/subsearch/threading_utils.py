@@ -1,7 +1,7 @@
 import threading
 from typing import Any
 
-from subsearch.logging import log
+from subsearch._logging import log
 
 
 class CreateThread(threading.Thread):

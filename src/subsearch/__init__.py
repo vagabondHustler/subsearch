@@ -9,7 +9,6 @@ PREF_COUNTER = time.perf_counter()
 PACKAGE_PATH = Path(__file__).resolve().parent.as_posix()
 HOME_PATH = Path(PACKAGE_PATH).parent.as_posix()
 sys.path.append(HOME_PATH)
-sys.path.append(PACKAGE_PATH)
 
 
 class Subsearch:

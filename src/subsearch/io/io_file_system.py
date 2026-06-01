@@ -8,7 +8,7 @@ from typing import Iterable, Optional
 
 import requests
 
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.model import Subtitle
 from subsearch.io.http import get_cloudscraper

@@ -4,7 +4,7 @@ from typing import Any, Union
 
 import toml
 
-from subsearch.logging import log
+from subsearch._logging import log
 from subsearch.runtime.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.model import AppConfig
 
