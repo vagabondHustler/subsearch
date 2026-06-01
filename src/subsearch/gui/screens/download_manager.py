@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch.globals import log
-from subsearch.globals.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.globals.dataclasses import Subtitle
-from subsearch.gui import common_utils
+from subsearch.logging import log
+from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
+from subsearch.model import Subtitle
+from subsearch.gui import widgets
 from subsearch.gui.resources import config as cfg
 from subsearch.providers import subsource
-from subsearch.utils import io_file_system, io_toml, string_parser
+from subsearch.io import io_file_system, io_toml, string_parser
 
 
 class DownloadManager(ttk.LabelFrame):

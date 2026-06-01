@@ -6,9 +6,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from subsearch.globals import metaclasses
-from subsearch.globals.constants import APP_PATHS, FILE_PATHS
-from subsearch.globals.dataclasses import GenericDataClass
+from subsearch import metaclasses
+from subsearch.model import GenericDataClass
+from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
 
 
 def capture_call_info(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -165,3 +165,6 @@ class Logger(metaclass=metaclasses.Singleton):
     @capture_call_info
     def task_completed(self, **kwargs) -> None:
         self("Tasks completed", level="info", hex_color="#89b4fa", **kwargs)
+
+
+log = Logger()

@@ -4,9 +4,9 @@ from typing import Any, Union
 
 import toml
 
-from subsearch.globals import log
-from subsearch.globals.constants import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.globals.dataclasses import AppConfig
+from subsearch.logging import log
+from subsearch.runtime.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.model import AppConfig
 
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:

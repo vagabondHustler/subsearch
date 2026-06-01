@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, no_type_check
 
 from subsearch.data import __guid__, __version__
-from subsearch.globals.dataclasses import (
+from subsearch.model import (
     AppPaths,
     FilePaths,
     SystemInfo,
@@ -25,7 +25,7 @@ def get_app_paths() -> AppPaths:
         gui_assets=app_home / "gui" / "resources" / "assets",
         gui_styles=app_home / "gui" / "resources" / "styles",
         providers=app_home / "providers",
-        utils=app_home / "utils",
+        io=app_home / "io",
         tmp_dir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
         appdata_subsearch=Path.home() / "AppData" / "Local" / "Subsearch",
     )

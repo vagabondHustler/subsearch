@@ -3,11 +3,11 @@ import webbrowser
 from tkinter import BooleanVar, ttk
 from typing import Any
 
-from subsearch.globals import decorators
-from subsearch.globals.constants import DEVICE_INFO, FILE_PATHS, VERSION
-from subsearch.gui import common_utils
+from subsearch.decorators import gui as gui_decorators
+from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION
+from subsearch.gui import widgets
 from subsearch.gui.resources import config as cfg
-from subsearch.utils import io_toml, io_winreg, string_parser, update
+from subsearch.io import io_toml, io_winreg, string_parser, update
 
 
 def _handle_file_extensions_check_btn(cls, parent_key) -> None:
@@ -65,7 +65,7 @@ class FileExtensions(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_ext)
 
-    @decorators.check_option_disabled
+    @gui_decorators.check_option_disabled
     def toggle_ext(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
@@ -140,7 +140,7 @@ class SubsearchOption(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_btn)
 
-    @decorators.check_option_disabled
+    @gui_decorators.check_option_disabled
     def toggle_btn(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
@@ -211,7 +211,7 @@ class DownloadManagerOptions(ttk.Labelframe):
         btn = event.widget
         btn.bind("<ButtonRelease-1>", self.toggle_btn)
 
-    @decorators.check_option_disabled
+    @gui_decorators.check_option_disabled
     def toggle_btn(self, event) -> None:
         btn = event.widget
         key = self.checkbuttons[btn][0]
@@ -228,7 +228,7 @@ class AdvancedUser(ttk.Labelframe):
         self.configure(text="Advanced user ( Requests / API )", padding=10)
         self.data = io_toml.load_toml_data(FILE_PATHS.config)
         self.tip_present = False
-        self.tip: common_utils.ToolTip | None = None
+        self.tip: widgets.ToolTip | None = None
         adv_user = self.data["advanced_user"]
         adv_default_values = [
             adv_user["api_call_limit"],
@@ -277,7 +277,7 @@ class AdvancedUser(ttk.Labelframe):
             "If you don't know what these values do, don't touch them.",
             "Sending too many requests can get your IP banned.",
         )
-        self.tip = common_utils.ToolTip(btn, btn, *tip_text)
+        self.tip = widgets.ToolTip(btn, btn, *tip_text)
         self.tip.show()
         self.tip_present = True
         field: ttk.Entry

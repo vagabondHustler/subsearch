@@ -1,23 +1,17 @@
 import threading
 from typing import Any
 
-import cloudscraper
-from cloudscraper import CloudScraper
-from requests import Response, exceptions
-from selectolax.parser import HTMLParser
-
-from subsearch.globals import log
-from subsearch.globals.constants import VIDEO_FILE
-from subsearch.globals.dataclasses import (
+from subsearch.io import string_parser
+from subsearch.logging import log
+from subsearch.model import (
     AppConfig,
     LanguageData,
     ProviderUrls,
     ReleaseData,
     Subtitle,
 )
-from subsearch.utils import string_parser
+from subsearch.runtime.constants import VIDEO_FILE
 
-api_calls_made: dict[str, int] = {}
 _thread_lock = threading.Lock()
 
 
@@ -216,32 +210,3 @@ class ProviderHelper(ProviderDataContainer):
         if precentage_result >= self.accept_threshold:
             return True
         return False
-
-
-def get_cloudscraper() -> CloudScraper:
-    return cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
-
-
-def send_request(url: str, scraper: CloudScraper, timeout: tuple[int, int], header=None) -> Response:
-    if header is None:
-        return scraper.get(url, timeout=timeout)
-    return scraper.get(url, timeout=timeout, headers=header)
-
-
-def parse_scraper_response(response: Response) -> HTMLParser:
-    return HTMLParser(response.text)
-
-
-def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser | None:
-    scraper = get_cloudscraper()
-    try:
-        response = send_request(url, scraper, timeout=timeout, header=header)
-    except exceptions.Timeout as e:
-        log.stdout(e, level="warning", print_allowed=False)
-        return None
-    return parse_scraper_response(response)
-
-
-def sort_list_by_precentage_result(list_: list) -> list:
-    with _thread_lock:
-        return sorted(list_, key=lambda i: i.precentage_result, reverse=True)

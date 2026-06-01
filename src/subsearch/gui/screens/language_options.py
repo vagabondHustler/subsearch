@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import IntVar, ttk
 
-from subsearch.globals.constants import FILE_PATHS
-from subsearch.gui import common_utils
-from subsearch.utils import io_toml
+from subsearch.runtime.constants import FILE_PATHS
+from subsearch.gui import widgets
+from subsearch.io import io_toml
 
 
 class SelectLanguage(ttk.Labelframe):
@@ -47,7 +47,7 @@ class SelectLanguage(ttk.Labelframe):
         providers = ", ".join(([_i.title() for _i in self.languages[toml_key]["incompatibility"]]))
         if providers:
             tip_text = f"If enabled, '{providers}' will be automatically skipped."
-            self.tip = common_utils.ToolTip(btn, btn, tip_text)
+            self.tip = widgets.ToolTip(btn, btn, tip_text)
             self.tip.show()
             self.tip_present = True
         btn.bind("<ButtonPress-1>", self.press_button)

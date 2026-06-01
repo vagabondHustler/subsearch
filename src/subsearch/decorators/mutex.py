@@ -1,13 +1,10 @@
 import ctypes
-import functools
 import sys
 from typing import Any, Callable
 
-from subsearch.globals import exceptions
-from subsearch.globals.constants import FILE_PATHS, GUID
-from subsearch.utils import io_toml
-
-enable_system_tray: bool
+from subsearch import exceptions
+from subsearch.io import io_toml
+from subsearch.runtime.constants import FILE_PATHS, GUID
 
 
 def apply_mutex(func: Callable) -> Callable:
@@ -34,36 +31,6 @@ def apply_mutex(func: Callable) -> Callable:
             kernel32.ReleaseMutex(mutex)
 
     return inner
-
-
-def check_option_disabled(func) -> Callable[..., Any]:
-    def wrapper(self, event, *args, **kwargs) -> Any:
-        btn = event.widget
-        if btn.instate(["disabled"]):
-            return None
-        return func(self, event, *args, **kwargs)
-
-    return wrapper
-
-
-def call_func(func) -> Callable[..., Any]:
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Any:
-        instance = args[0]
-        if not instance.call_conditions.call_func(func.__name__):
-            return None
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def system_tray_conditions(func) -> Callable[..., Any]:
-    def wrapper(*args, **kwargs) -> Any:
-        if enable_system_tray:
-            return func(*args, **kwargs)
-
-    return wrapper
 
 
 def except_hook(func, excepthook_) -> Callable[..., Any]:

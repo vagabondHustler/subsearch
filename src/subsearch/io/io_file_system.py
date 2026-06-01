@@ -8,11 +8,11 @@ from typing import Iterable, Optional
 
 import requests
 
-from subsearch.globals import log
-from subsearch.globals.constants import VIDEO_FILE
-from subsearch.globals.dataclasses import Subtitle
-from subsearch.providers.common_utils import get_cloudscraper
-from subsearch.utils import string_parser
+from subsearch.logging import log
+from subsearch.runtime.constants import VIDEO_FILE
+from subsearch.model import Subtitle
+from subsearch.io.http import get_cloudscraper
+from subsearch.io import string_parser
 
 
 def create_path_from_string(string: str, path_resolution: str) -> Path:

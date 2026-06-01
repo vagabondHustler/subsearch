@@ -25,7 +25,7 @@ class AppPaths:
     gui_assets: Path
     gui_styles: Path
     providers: Path
-    utils: Path
+    io: Path
     tmp_dir: Path
     appdata_subsearch: Path
 

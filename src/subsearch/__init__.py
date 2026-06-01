@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 from subsearch import core
-from subsearch.globals import decorators
+from subsearch.decorators import mutex
 
 PREF_COUNTER = time.perf_counter()
 PACKAGE_PATH = Path(__file__).resolve().parent.as_posix()
@@ -31,7 +31,7 @@ class Subsearch:
         self.subsearch_core.core_on_exit()
 
 
-@decorators.apply_mutex
+@mutex.apply_mutex
 def main() -> None:
     subsearch = Subsearch()
     subsearch.start_app()

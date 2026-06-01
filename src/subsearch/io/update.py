@@ -7,9 +7,9 @@ import cloudscraper
 import requests
 from packaging.version import Version
 
-from subsearch.globals import log
-from subsearch.globals.constants import APP_PATHS, VERSION
-from subsearch.utils import io_file_system
+from subsearch.logging import log
+from subsearch.runtime.constants import APP_PATHS, VERSION
+from subsearch.io import io_file_system
 
 
 def find_semantic_version(version: str) -> str:

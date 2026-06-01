@@ -1,15 +1,16 @@
 from selectolax.parser import Node
 
-from subsearch.providers import common_utils
+from subsearch.io import http
+from subsearch.providers import data_container
 
 
-class YifySubtitlesScraper(common_utils.ProviderHelper):
+class YifySubtitlesScraper(data_container.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        common_utils.ProviderHelper.__init__(self, *args, **kwargs)
+        data_container.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
     def get_subtitles(self) -> None:
-        tree = common_utils.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
+        tree = http.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
         if not tree:
             return None
 

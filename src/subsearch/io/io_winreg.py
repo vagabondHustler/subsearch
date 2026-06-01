@@ -2,15 +2,15 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.globals import log
-from subsearch.globals.constants import (
+from subsearch.logging import log
+from subsearch.runtime.constants import (
     APP_PATHS,
     COMPUTER_NAME,
     DEVICE_INFO,
     FILE_PATHS,
     REGISTRY_PATHS,
 )
-from subsearch.utils import io_toml
+from subsearch.io import io_toml
 
 
 class LaunchOptions:

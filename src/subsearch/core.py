@@ -1,15 +1,18 @@
 import ctypes
 import time
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
-from subsearch.globals import decorators, log, thread_handle
-from subsearch.globals.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.globals.dataclasses import Subtitle
+from subsearch import threading_utils
+from subsearch.decorators import gui as gui_decorators
+from subsearch.decorators.orchestration import call_func
+from subsearch.logging import log
+from subsearch.model import Subtitle
+from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 from subsearch.gui import screen_manager, system_tray
 from subsearch.gui.screens import download_manager
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.utils import (
+from subsearch.io import (
     imdb_lookup,
     io_file_system,
     io_toml,
@@ -49,7 +52,7 @@ class Initializer:
         log.dataclass(self.app_config, level="debug", print_allowed=False)
 
         log.stdout("Initializing system tray icon", level="debug")
-        decorators.enable_system_tray = self.app_config.system_tray
+        gui_decorators.enable_system_tray = self.app_config.system_tray
         self.system_tray = system_tray.SystemTray()
         self.system_tray.start()
 
@@ -136,25 +139,31 @@ class SubsearchCore(Initializer):
             self.prevent_conflicting_config_settings()
             log.brackets("Search started")
 
-    @decorators.call_func
+    @call_func
     def init_search(self, *providers: Callable[..., None]) -> None:
-        thread_handle._create_threads(*providers)
+        threading_utils._create_threads(*providers)
         log.task_completed()
 
-    @decorators.call_func
+    def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
+        search_provider = provider(**self.search_kwargs)
+        search_provider.start_search(flag=flag)
+        self.accepted_subtitles.extend(search_provider.accepted_subtitles)
+        self.rejected_subtitles.extend(search_provider.rejected_subtitles)
+
+    @call_func
     def opensubtitles(self) -> None:
-        thread_handle._start_search(self, provider=opensubtitles.OpenSubtitles, flag="hash")
-        thread_handle._start_search(self, provider=opensubtitles.OpenSubtitles, flag="site")
+        self._start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
+        self._start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
-    @decorators.call_func
+    @call_func
     def yifysubtitles(self) -> None:
-        thread_handle._start_search(self, provider=yifysubtitles.YifiSubtitles, flag="site")
+        self._start_search(provider=yifysubtitles.YifiSubtitles, flag="site")
 
-    @decorators.call_func
+    @call_func
     def subsource(self) -> None:
-        thread_handle._start_search(self, provider=subsource.Subsource, flag="site")
+        self._start_search(provider=subsource.Subsource, flag="site")
 
-    @decorators.call_func
+    @call_func
     def download_files(self) -> None:
         log.brackets(f"Downloading subtitles")
         self.accepted_subtitles = sorted(self.accepted_subtitles, key=lambda i: i.precentage_result, reverse=True)
@@ -191,7 +200,7 @@ class SubsearchCore(Initializer):
         subtitle.request_data = {}
         return subtitle
 
-    @decorators.call_func
+    @call_func
     def download_manager(self) -> None:
         log.brackets(f"Download Manager")
         subtitles = self.rejected_subtitles + self.accepted_subtitles
@@ -200,7 +209,7 @@ class SubsearchCore(Initializer):
         self.downloaded_subtitles += len(self.manually_accepted_subtitles)
         log.task_completed()
 
-    @decorators.call_func
+    @call_func
     def subtitle_post_processing(self) -> None:
         target = self.app_config.subtitle_post_processing["target_path"]
         resolution = self.app_config.subtitle_post_processing["path_resolution"]
@@ -212,13 +221,13 @@ class SubsearchCore(Initializer):
         self.subtitle_move_best(target_path)
         self.subtitle_move_all(target_path)
 
-    @decorators.call_func
+    @call_func
     def extract_files(self) -> None:
         log.brackets("Extracting downloads")
         io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
         log.task_completed()
 
-    @decorators.call_func
+    @call_func
     def subtitle_rename(self) -> None:
         log.brackets("Renaming best match")
         new_name = io_file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
@@ -226,19 +235,19 @@ class SubsearchCore(Initializer):
 
         log.task_completed()
 
-    @decorators.call_func
+    @call_func
     def subtitle_move_best(self, target: Path) -> None:
         log.brackets("Move best match")
         io_file_system.move_and_replace(self.autoload_src, target)
         log.task_completed()
 
-    @decorators.call_func
+    @call_func
     def subtitle_move_all(self, target: Path) -> None:
         log.brackets("Move all")
         io_file_system.move_all(VIDEO_FILE.subs_dir, target)
         log.task_completed()
 
-    @decorators.call_func
+    @call_func
     def summary_notification(self, elapsed) -> None:
         log.brackets("Summary toast")
         elapsed_summary = f"Finished in {elapsed} seconds"
@@ -253,7 +262,7 @@ class SubsearchCore(Initializer):
             log.stdout(matches_downloaded, hex_color="#f38ba8")
             self.system_tray.display_toast(*msg)
 
-    @decorators.call_func
+    @call_func
     def clean_up(self) -> None:
         log.brackets("Cleaning up")
         io_file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")

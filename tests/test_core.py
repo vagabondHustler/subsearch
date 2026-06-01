@@ -3,17 +3,17 @@ import inspect
 import pytest
 
 from subsearch.core import CallConditions
-from subsearch.globals.constants import FILE_PATHS
-from subsearch.utils import io_toml, string_parser
-from tests import globals_test
+from subsearch.runtime.constants import FILE_PATHS
+from subsearch.io import io_toml, string_parser
+from tests import fixture_data
 
 
 class FakeSubsearchCore:
     def __init__(self, *args, **kwargs) -> None:
         self.file_exist = True
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
-        self.release_data = string_parser.get_release_data(globals_test.FAKE_VIDEO_FILE_MOVIE.filename)
-        self.provider_urls = globals_test.FAKE_PROVIDER_URLS
+        self.release_data = string_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+        self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
         self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
         self.accepted_subtitles: list[str] = []
         self.rejected_subtitles: list[str] = []

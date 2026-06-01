@@ -3,15 +3,15 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.globals import log
-from subsearch.globals.constants import VIDEO_FILE
-from subsearch.globals.dataclasses import (
+from subsearch.logging import log
+from subsearch.runtime.constants import VIDEO_FILE
+from subsearch.model import (
     AppConfig,
     LanguageData,
     ProviderUrls,
     ReleaseData,
 )
-from subsearch.utils import imdb_lookup
+from subsearch.io import imdb_lookup
 
 
 def remove_padded_zero(x: str) -> str:

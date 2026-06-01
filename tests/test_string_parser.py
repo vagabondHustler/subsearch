@@ -1,6 +1,6 @@
-from subsearch.globals.constants import FILE_PATHS
-from subsearch.utils import imdb_lookup, io_toml, string_parser
-from tests import globals_test
+from subsearch.runtime.constants import FILE_PATHS
+from subsearch.io import imdb_lookup, io_toml, string_parser
+from tests import fixture_data
 
 
 def test_str_parser_movie() -> None:
@@ -71,9 +71,9 @@ def test_string_parser_bad_filename() -> None:
 
 
 def test_provider_urls_movie(monkeypatch) -> None:
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_MOVIE)
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_MOVIE)
     app_config = io_toml.get_app_config(FILE_PATHS.config)
-    filename = globals_test.FAKE_VIDEO_FILE_MOVIE.filename
+    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
     create_provider_urls = string_parser.CreateProviderUrls(
@@ -92,9 +92,9 @@ def test_provider_urls_movie(monkeypatch) -> None:
 
 
 def test_provider_urls_series(monkeypatch) -> None:
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_SERIES)
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_SERIES)
     app_config = io_toml.get_app_config(FILE_PATHS.config)
-    filename = globals_test.FAKE_VIDEO_FILE_SERIES.filename
+    filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
     release_data = string_parser.get_release_data(filename)
     language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
     create_provider_urls = string_parser.CreateProviderUrls(

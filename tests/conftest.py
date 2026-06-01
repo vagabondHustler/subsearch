@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 import toml
 
-from subsearch.globals import constants
-from subsearch.utils import io_app
+from subsearch.runtime import constants
+from subsearch.runtime import factories
 
 
 @pytest.fixture(scope="session")
@@ -43,7 +43,7 @@ def fake_language_data_file(tmp_path) -> Any:
 
 @pytest.fixture
 def fake_config_file(tmp_path) -> Any:
-    fake_data = io_app.get_default_app_config()
+    fake_data = factories.get_default_app_config()
     fake_file = tmp_path / "fake_subsearch_config.toml"
     with fake_file.open("w") as f:
         toml.dump(fake_data, f)
@@ -67,4 +67,4 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 
 @pytest.fixture(autouse=True)
 def reset_constants() -> None:
-    importlib.reload(io_app)
+    importlib.reload(factories)

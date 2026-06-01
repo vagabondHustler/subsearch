@@ -3,9 +3,10 @@ from typing import Any
 import cloudscraper
 import requests
 
-from subsearch.globals import log
-from subsearch.globals.dataclasses import Subtitle
-from subsearch.providers import common_utils
+from subsearch.logging import log
+from subsearch.model import Subtitle
+from subsearch.io import http
+from subsearch.providers import data_container
 
 
 class SubsourceApi:
@@ -52,9 +53,9 @@ class SubsourceApi:
         return True
 
 
-class SubsourceParser(common_utils.ProviderHelper):
+class SubsourceParser(data_container.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        common_utils.ProviderHelper.__init__(self, *args, **kwargs)
+        data_container.ProviderHelper.__init__(self, *args, **kwargs)
         self.api = SubsourceApi()
         self.provider_name = ""
         self.api.provider_name = self.provider_name

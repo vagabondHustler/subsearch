@@ -1,8 +1,8 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch.globals import log
-from subsearch.gui import common_utils, resource_loader, root
+from subsearch.logging import log
+from subsearch.gui import widgets, resource_loader, root
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (
     download_manager,
@@ -132,7 +132,7 @@ class DownloadManager(tk.Frame):
 
 def open_screen(tab_name: str, **kwargs) -> None:
     root.bind("<KeyPress>", close_mainloop)
-    common_utils.configure_root(root)
+    widgets.configure_root(root)
     resource_loader.set_ttk_theme(root)
     screens = {
         "language_options": LanguageOptions(root),

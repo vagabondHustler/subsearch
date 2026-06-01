@@ -1,13 +1,14 @@
 import re
 from typing import Any
 
-from subsearch.globals import log
-from subsearch.providers import common_utils
+from subsearch.logging import log
+from subsearch.io import http
+from subsearch.providers import data_container
 
 
-class OpenSubtitlesScraper(common_utils.ProviderHelper):
+class OpenSubtitlesScraper(data_container.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        common_utils.ProviderHelper.__init__(self, *args, **kwargs)
+        data_container.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
     def is_opensubtitles_down(self, tree: Any) -> bool:
@@ -21,7 +22,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
         return False
 
     def get_subtitles(self, url: str) -> None:
-        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
             return None
         items = tree.css("item")
@@ -39,7 +40,7 @@ class OpenSubtitlesScraper(common_utils.ProviderHelper):
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
     def with_hash(self, url: str, subtitle_name: str) -> None:
-        tree = common_utils.request_parsed_response(url=url, timeout=self.request_timeout)
+        tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
             return None
         if self.is_opensubtitles_down(tree):
