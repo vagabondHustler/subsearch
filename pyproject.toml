@@ -11,7 +11,7 @@
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.14",
         "Topic :: Multimedia :: Video",
         "Topic :: Utilities",
     ]
@@ -45,7 +45,7 @@
     license = {text = "MIT license"}
     name = "Subsearch"
     readme = "README.md"
-    requires-python = ">=3.12"
+    requires-python = ">=3.14"
 
 [project.urls]
     repository = "https://github.com/vagabondHustler/subsearch"
@@ -79,7 +79,7 @@
         "tox==4.25.0",
         "python-dotenv==1.1.0",
     ]
-    tools = ["pyperclip==1.9.0"]
+    tools = ["pyperclip==1.9.0", "commitizen==4.8.3", "pre-commit==4.2.0"]
     type = ["mypy==1.15.0"]
 
 
@@ -89,6 +89,21 @@
     log_cli = true
     log_cli_level = 'DEBUG'
     testpaths = ["tests"]
+
+[project.entry-points."commitizen.plugin"]
+    SubsearchCz = "tools.cz_subsearch:SubsearchCz"
+
+[tool.commitizen]
+    name = "SubsearchCz"
+    template = "changelog_template.md.j2"
+    version = "2.47.7"
+    tag_format = "$version"
+    update_changelog_on_bump = false
+    annotated_tag = true
+    version_files = [
+        "src/subsearch/data/version.py:__version__",
+        ".github/configs/version_control.json:current_version",
+    ]
 
 [tool.black]
     line-length = 120
