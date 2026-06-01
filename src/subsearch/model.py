@@ -68,7 +68,6 @@ class AppConfig:
     always_open: bool
     automatic_downloads: bool
     single_instance: bool
-    long_paths_enabled: bool
     api_call_limit: int
     request_connect_timeout: int
     request_read_timeout: int

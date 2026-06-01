@@ -1,4 +1,3 @@
-import ctypes
 import sys
 import winreg
 from pathlib import Path
@@ -122,19 +121,6 @@ def write_all_valuex() -> None:
 def add_context_menu() -> None:
     write_keys()
     write_all_valuex()
-
-
-def set_long_paths_enabled(enabled: bool) -> bool:
-    value = "1" if enabled else "0"
-    parameters = (
-        f'add "HKLM\\{REGISTRY_PATHS.long_paths}" '
-        f'/v LongPathsEnabled /t REG_DWORD /d {value} /f'
-    )
-    result = ctypes.windll.shell32.ShellExecuteW(None, "runas", "reg.exe", parameters, None, 0)
-    if result <= 32:
-        log.stdout(f"Failed to update long path status; elevation declined or failed (code {result})", level="error")
-        return False
-    return check_long_paths_enabled() == enabled
 
 
 def check_long_paths_enabled() -> bool:
