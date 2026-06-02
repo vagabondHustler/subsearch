@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.io import http
 from subsearch.providers import data_container
 
@@ -58,12 +58,6 @@ class OpenSubtitles(OpenSubtitlesScraper):
         OpenSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, flag: str) -> None:
-        flags = {"hash": self.search_hash, "site": self.search_site}
-        flags[flag]()
-
-    def search_hash(self) -> None:
+    def start_search(self, *args, **kwargs) -> None:
         self.with_hash(self.url_opensubtitles_hash, self.release)
-
-    def search_site(self) -> None:
         self.get_subtitles(self.url_opensubtitles)

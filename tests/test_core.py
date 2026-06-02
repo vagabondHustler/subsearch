@@ -35,11 +35,10 @@ def fake_cls() -> FakeSubsearchCore:
 
 
 def test_conditions_opensubtitles(fake_cls: FakeSubsearchCore) -> None:
-    fake_cls.app_config.providers["opensubtitles_hash"] = False
+    fake_cls.app_config.providers["opensubtitles"] = True
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is True
 
-    fake_cls.app_config.providers["opensubtitles_hash"] = False
-    fake_cls.app_config.providers["opensubtitles_site"] = False
+    fake_cls.app_config.providers["opensubtitles"] = False
     assert fake_cls.call_conditions.call_func(fake_cls.func_name) is False
 
 

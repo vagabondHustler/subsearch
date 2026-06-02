@@ -95,8 +95,7 @@ class Initializer:
 
     def all_providers_disabled(self) -> bool:
         if (
-            self.app_config.providers["opensubtitles_site"] is False
-            and self.app_config.providers["opensubtitles_hash"] is False
+            self.app_config.providers["opensubtitles"] is False
             and self.app_config.providers["yifysubtitles_site"] is False
             and self.app_config.providers["subsource_site"] is False
         ):
@@ -152,7 +151,6 @@ class SubsearchCore(Initializer):
 
     @call_func
     def opensubtitles(self) -> None:
-        self._start_search(provider=opensubtitles.OpenSubtitles, flag="hash")
         self._start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
     @call_func
@@ -344,7 +342,7 @@ class CallConditions:
             "opensubtitles": [
                 self.file_exist,
                 lambda: self.language_supports_provider("opensubtitles"),
-                self.app_config.providers["opensubtitles_hash"] or self.app_config.providers["opensubtitles_site"],
+                self.app_config.providers["opensubtitles"],
             ],
             "yifysubtitles": [
                 self.file_exist,

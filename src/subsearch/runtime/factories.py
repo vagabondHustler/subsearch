@@ -155,7 +155,7 @@ def get_supported_file_ext() -> list[str]:
 
 
 def get_supported_providers() -> list[str]:
-    providers = ["opensubtitles_site", "opensubtitles_hash", "yifysubtitles_site", "subsource_site"]
+    providers = ["opensubtitles", "yifysubtitles_site", "subsource_site"]
     return providers
 
 
