@@ -2,7 +2,7 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import (
     APP_PATHS,
     COMPUTER_NAME,

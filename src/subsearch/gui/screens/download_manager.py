@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.model import Subtitle
 from subsearch.gui import widgets

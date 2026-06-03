@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import Any
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.gui import widgets, resource_loader, root
 from subsearch.gui.resources import config as cfg
 from subsearch.gui.screens import (

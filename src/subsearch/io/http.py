@@ -3,7 +3,7 @@ from cloudscraper import CloudScraper
 from requests import Response, exceptions
 from selectolax.parser import HTMLParser
 
-from subsearch._logging import log
+from subsearch.logger import log
 
 
 def get_cloudscraper() -> CloudScraper:

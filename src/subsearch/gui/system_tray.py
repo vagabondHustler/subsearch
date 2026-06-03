@@ -5,7 +5,7 @@ from PIL import Image
 
 from subsearch import metaclasses
 from subsearch.decorators import gui as gui_decorators
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
 
 
