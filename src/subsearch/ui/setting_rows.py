@@ -99,7 +99,7 @@ class HelpPopup(QFrame):
 
 
 class HelpButton(TransparentToolButton):
-    def __init__(self, explanation: str, parent: QWidget) -> None:
+    def __init__(self, explanation: str, parent: QWidget) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
         self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, TEXT_COLOR))
         self.setFixedSize(32, 32)

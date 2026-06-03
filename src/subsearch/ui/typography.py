@@ -20,8 +20,9 @@ def body_font() -> QFont:
 
 def apply_text_color(widget: QWidget) -> None:
     color = QColor(TEXT_COLOR)
-    if hasattr(widget, "setTextColor"):
-        widget.setTextColor(color, color)
+    set_text_color = getattr(widget, "setTextColor", None)
+    if set_text_color is not None:
+        set_text_color(color, color)
     else:
         widget_type = type(widget).__name__
         widget.setStyleSheet(

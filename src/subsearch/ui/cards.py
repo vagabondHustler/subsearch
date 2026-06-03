@@ -69,7 +69,7 @@ CARD_BORDER_RADIUS = 6.0
 
 
 class SettingsCard(HeaderCardWidget):
-    def __init__(self, title: str, parent: QWidget | None = None) -> None:
+    def __init__(self, title: str, parent: QWidget | None = None) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
         self.setTitle(title)
         apply_title_font(self.headerLabel)

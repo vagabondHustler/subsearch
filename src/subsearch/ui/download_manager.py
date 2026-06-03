@@ -60,7 +60,7 @@ SPINNER_DEGREES_PER_FRAME = 10
 
 
 class SubtitleCard(HeaderCardWidget):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
         description = SETTING_DESCRIPTIONS["download_manager.available_subtitles"]
         self.setTitle(description.title)

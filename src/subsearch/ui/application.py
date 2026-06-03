@@ -143,7 +143,7 @@ class SettingsWindow(FluentWindow):
         text_color = QColor(TEXT_COLOR)
         for navigation_item in panel.items.values():
             navigation_item.widget.setTextColor(text_color, text_color)
-            apply_body_font(navigation_item.widget.itemWidget)
+            apply_body_font(getattr(navigation_item.widget, "itemWidget"))
         enlarge_navigation_icons(panel)
 
     def closeEvent(self, e: QCloseEvent) -> None:

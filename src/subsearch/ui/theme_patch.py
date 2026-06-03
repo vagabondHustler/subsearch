@@ -15,7 +15,8 @@ _BRIGHTNESS_BY_VARIANT = {
 
 
 def _fixed_accent_color(self: ThemeColor) -> QColor:
-    hue, saturation, value, _ = QColor(ACCENT_COLOR).getHsvF()
+    accent = QColor(ACCENT_COLOR)
+    hue, saturation, value = accent.hueF(), accent.saturationF(), accent.valueF()
     value = min(value * _BRIGHTNESS_BY_VARIANT[self], 1.0)
     return QColor.fromHsvF(hue, saturation, value)
 

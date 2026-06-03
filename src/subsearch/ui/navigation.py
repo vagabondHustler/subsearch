@@ -67,7 +67,7 @@ def _paint_navigation_item_with_large_icon(item, _event) -> None:
 def enlarge_navigation_icons(panel: NavigationPanel) -> None:
     items = [panel.menuButton, panel.returnButton]
     for navigation_item in panel.items.values():
-        items.append(navigation_item.widget.itemWidget)
+        items.append(getattr(navigation_item.widget, "itemWidget"))
     for item in items:
-        item.paintEvent = lambda event, item=item: _paint_navigation_item_with_large_icon(item, event)
+        item.paintEvent = lambda e, item=item: _paint_navigation_item_with_large_icon(item, e)
         item.update()
