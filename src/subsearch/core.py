@@ -41,7 +41,7 @@ class Initializer:
 
         log.stdout("Verifing files and paths", level="debug")
         self.setup_file_system()
-        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+        self.language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         if not io_winreg.check_long_paths_enabled():
             self._notify_user()

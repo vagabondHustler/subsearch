@@ -75,7 +75,7 @@ def test_provider_urls_movie(monkeypatch) -> None:
     app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = string_parser.get_release_data(filename)
-    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+    language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
     create_provider_urls = string_parser.CreateProviderUrls(
         app_config,
         release_data,
@@ -96,7 +96,7 @@ def test_provider_urls_series(monkeypatch) -> None:
     app_config = io_toml.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
     release_data = string_parser.get_release_data(filename)
-    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+    language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
     create_provider_urls = string_parser.CreateProviderUrls(
         app_config,
         release_data,

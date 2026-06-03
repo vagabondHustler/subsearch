@@ -33,7 +33,7 @@ def tests_path() -> Path:
 
 @pytest.fixture
 def fake_language_data_file(tmp_path) -> Any:
-    fake_data = {"english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}}
+    fake_data = {"english": {"name": "English", "two_letter_code": "en", "three_letter_code": "eng", "incompatibility": []}}
 
     fake_file = tmp_path / "fake_language_datag.toml"
     with fake_file.open("w") as f:
@@ -61,7 +61,7 @@ def fake_log_file(tmp_path) -> Any:
 @pytest.fixture(autouse=True)
 def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None:
     constants.FILE_PATHS.config = fake_config_file
-    constants.FILE_PATHS.language_data = fake_language_data_file
+    constants.FILE_PATHS.subtitle_languages = fake_language_data_file
     constants.FILE_PATHS.log = fake_log_file
 
 

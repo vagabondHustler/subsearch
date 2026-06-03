@@ -1,397 +1,397 @@
 [albanian]
 name = "Albanian"
-alpha_1 = "sq"
-alpha_2b = "alb"
+two_letter_code ="sq"
+three_letter_code ="alb"
 incompatibility = []
 
 [arabic]
 name = "Arabic"
-alpha_1 = "ar"
-alpha_2b = "ara"
+two_letter_code ="ar"
+three_letter_code ="ara"
 incompatibility = []
 
 [armenian]
 name = "Armenian"
-alpha_1 = "hy"
-alpha_2b = "arm"
+two_letter_code ="hy"
+three_letter_code ="arm"
 incompatibility = []
 
 [azerbaijani]
 name = "Azerbaijani"
-alpha_1 = "az"
-alpha_2b = "aze"
+two_letter_code ="az"
+three_letter_code ="aze"
 incompatibility = []
 
 [basque]
 name = "Basque"
-alpha_1 = "eu"
-alpha_2b = "baq"
+two_letter_code ="eu"
+three_letter_code ="baq"
 incompatibility = []
 
 [belarusian]
 name = "Belarusian"
-alpha_1 = "be"
-alpha_2b = "bel"
+two_letter_code ="be"
+three_letter_code ="bel"
 incompatibility = []
 
 [bosnian]
 name = "Bosnian"
-alpha_1 = "bs"
-alpha_2b = "bos"
+two_letter_code ="bs"
+three_letter_code ="bos"
 incompatibility = []
 
 [brazillian_portuguese]
 name = "Brazillian-Portuguese"
-alpha_1 = "pt"
-alpha_2b = "pob"
+two_letter_code ="pt"
+three_letter_code ="pob"
 incompatibility = []
 
 [bulgarian]
 name = "Bulgarian"
-alpha_1 = "bg"
-alpha_2b = "bul"
+two_letter_code ="bg"
+three_letter_code ="bul"
 incompatibility = []
 
 [bulgarian_english]
 name = "Bulgarian-English"
-alpha_1 = ""
-alpha_2b = ""
+two_letter_code =""
+three_letter_code =""
 incompatibility = ["opensubtitles"]
 
 [burmese]
 name = "Burmese"
-alpha_1 = "my"
-alpha_2b = "bur"
+two_letter_code ="my"
+three_letter_code ="bur"
 incompatibility = []
 
 [cambodian_khmer]
 name = "Cambodian-Khmer"
-alpha_1 = "km"
-alpha_2b = "khm"
+two_letter_code ="km"
+three_letter_code ="khm"
 incompatibility = []
 
 [catalan]
 name = "Catalan"
-alpha_1 = "ca"
-alpha_2b = "cat"
+two_letter_code ="ca"
+three_letter_code ="cat"
 incompatibility = []
 
 [chinese_bg_code]
 name = "Chinese-BG-Code"
-alpha_1 = ""
-alpha_2b = "zht"
+two_letter_code =""
+three_letter_code ="zht"
 incompatibility = []
 
 [croatian]
 name = "Croatian"
-alpha_1 = "hr"
-alpha_2b = "hrv"
+two_letter_code ="hr"
+three_letter_code ="hrv"
 incompatibility = []
 
 [czech]
 name = "Czech"
-alpha_1 = "cs"
-alpha_2b = "cze"
+two_letter_code ="cs"
+three_letter_code ="cze"
 incompatibility = []
 
 [danish]
 name = "Danish"
-alpha_1 = "da"
-alpha_2b = "dan"
+two_letter_code ="da"
+three_letter_code ="dan"
 incompatibility = []
 
 [dutch]
 name = "Dutch"
-alpha_1 = "nl"
-alpha_2b = "dut"
+two_letter_code ="nl"
+three_letter_code ="dut"
 incompatibility = []
 
 [dutch_english]
 name = "Dutch-English"
-alpha_1 = ""
-alpha_2b = ""
+two_letter_code =""
+three_letter_code =""
 incompatibility = ["opensubtitles"]
 
 [english]
 name = "English"
-alpha_1 = "en"
-alpha_2b = "eng"
+two_letter_code ="en"
+three_letter_code ="eng"
 incompatibility = []
 
 [english_german]
 name = "English-German"
-alpha_1 = ""
-alpha_2b = ""
+two_letter_code =""
+three_letter_code =""
 incompatibility = ["opensubtitles"]
 
 [esperanto]
 name = "Esperanto"
-alpha_1 = "eo"
-alpha_2b = "epo"
+two_letter_code ="eo"
+three_letter_code ="epo"
 incompatibility = []
 
 [estonian]
 name = "Estonian"
-alpha_1 = "et"
-alpha_2b = "est"
+two_letter_code ="et"
+three_letter_code ="est"
 incompatibility = []
 
 [finnish]
 name = "Finnish"
-alpha_1 = "fi"
-alpha_2b = "fin"
+two_letter_code ="fi"
+three_letter_code ="fin"
 incompatibility = []
 
 [french]
 name = "French"
-alpha_1 = "fr"
-alpha_2b = "fre"
+two_letter_code ="fr"
+three_letter_code ="fre"
 incompatibility = []
 
 [georgian]
 name = "Georgian"
-alpha_1 = "ka"
-alpha_2b = "geo"
+two_letter_code ="ka"
+three_letter_code ="geo"
 incompatibility = []
 
 [german]
 name = "German"
-alpha_1 = "de"
-alpha_2b = "ger"
+two_letter_code ="de"
+three_letter_code ="ger"
 incompatibility = []
 
 [greenlandic]
 name = "Greenlandic"
-alpha_1 = "kl"
-alpha_2b = "kal"
+two_letter_code ="kl"
+three_letter_code ="kal"
 incompatibility = ["opensubtitles"]
 
 [hebrew]
 name = "Hebrew"
-alpha_1 = "he"
-alpha_2b = "heb"
+two_letter_code ="he"
+three_letter_code ="heb"
 incompatibility = []
 
 [hindi]
 name = "Hindi"
-alpha_1 = "hi"
-alpha_2b = "hin"
+two_letter_code ="hi"
+three_letter_code ="hin"
 incompatibility = []
 
 [hungarian]
 name = "Hungarian"
-alpha_1 = "hu"
-alpha_2b = "hun"
+two_letter_code ="hu"
+three_letter_code ="hun"
 incompatibility = []
 
 [icelandic]
 name = "Icelandic"
-alpha_1 = "is"
-alpha_2b = "ice"
+two_letter_code ="is"
+three_letter_code ="ice"
 incompatibility = []
 
 [indonesian]
 name = "Indonesian"
-alpha_1 = "id"
-alpha_2b = "ind"
+two_letter_code ="id"
+three_letter_code ="ind"
 incompatibility = []
 
 [italian]
 name = "Italian"
-alpha_1 = "it"
-alpha_2b = "ita"
+two_letter_code ="it"
+three_letter_code ="ita"
 incompatibility = []
 
 [japanese]
 name = "Japanese"
-alpha_1 = "ja"
-alpha_2b = "jpn"
+two_letter_code ="ja"
+three_letter_code ="jpn"
 incompatibility = []
 
 [kannada]
 name = "Kannada"
-alpha_1 = "kn"
-alpha_2b = "kan"
+two_letter_code ="kn"
+three_letter_code ="kan"
 incompatibility = []
 
 [korean]
 name = "Korean"
-alpha_1 = "ko"
-alpha_2b = "kor"
+two_letter_code ="ko"
+three_letter_code ="kor"
 incompatibility = []
 
 [kurdish]
 name = "Kurdish"
-alpha_1 = "ku"
-alpha_2b = "kur"
+two_letter_code ="ku"
+three_letter_code ="kur"
 incompatibility = []
 
 [latvian]
 name = "Latvian"
-alpha_1 = "lv"
-alpha_2b = "lav"
+two_letter_code ="lv"
+three_letter_code ="lav"
 incompatibility = []
 
 [lithuanian]
 name = "Lithuanian"
-alpha_1 = "lt"
-alpha_2b = "lit"
+two_letter_code ="lt"
+three_letter_code ="lit"
 incompatibility = []
 
 [macedonian]
 name = "Macedonian"
-alpha_1 = "mk"
-alpha_2b = "mac"
+two_letter_code ="mk"
+three_letter_code ="mac"
 incompatibility = []
 
 [malayalam]
 name = "Malayalam"
-alpha_1 = "ml"
-alpha_2b = "mal"
+two_letter_code ="ml"
+three_letter_code ="mal"
 incompatibility = []
 
 [manipuri]
 name = "Manipuri"
-alpha_1 = "mni"
-alpha_2b = "mni"
+two_letter_code ="mni"
+three_letter_code ="mni"
 incompatibility = []
 
 [mongolian]
 name = "Mongolian"
-alpha_1 = "mn"
-alpha_2b = "mon"
+two_letter_code ="mn"
+three_letter_code ="mon"
 incompatibility = []
 
 [nepali]
 name = "Nepali"
-alpha_1 = "ne"
-alpha_2b = "nep"
+two_letter_code ="ne"
+three_letter_code ="nep"
 incompatibility = []
 
 [norwegian]
 name = "Norwegian"
-alpha_1 = "no"
-alpha_2b = "nor"
+two_letter_code ="no"
+three_letter_code ="nor"
 incompatibility = []
 
 [pashto]
 name = "Pashto"
-alpha_1 = "ps"
-alpha_2b = "pus"
+two_letter_code ="ps"
+three_letter_code ="pus"
 incompatibility = ["opensubtitles"]
 
 
 [romanian]
 name = "Romanian"
-alpha_1 = "ro"
-alpha_2b = "rum"
+two_letter_code ="ro"
+three_letter_code ="rum"
 incompatibility = []
 
 [russian]
 name = "Russian"
-alpha_1 = "ru"
-alpha_2b = "rus"
+two_letter_code ="ru"
+three_letter_code ="rus"
 incompatibility = []
 
 [serbian]
 name = "Serbian"
-alpha_1 = "sr"
-alpha_2b = "scc"
+two_letter_code ="sr"
+three_letter_code ="scc"
 incompatibility = []
 
 [sinhala]
 name = "Sinhala"
-alpha_1 = "si"
-alpha_2b = "sin"
+two_letter_code ="si"
+three_letter_code ="sin"
 incompatibility = []
 
 [slovak]
 name = "Slovak"
-alpha_1 = "sk"
-alpha_2b = "slo"
+two_letter_code ="sk"
+three_letter_code ="slo"
 incompatibility = []
 
 [slovenian]
 name = "Slovenian"
-alpha_1 = "sl"
-alpha_2b = "slv"
+two_letter_code ="sl"
+three_letter_code ="slv"
 incompatibility = []
 
 [somali]
 name = "Somali"
-alpha_1 = "so"
-alpha_2b = "som"
+two_letter_code ="so"
+three_letter_code ="som"
 incompatibility = []
 
 [spanish]
 name = "Spanish"
-alpha_1 = "es"
-alpha_2b = "spa"
+two_letter_code ="es"
+three_letter_code ="spa"
 incompatibility = []
 
 [sundanese]
 name = "Sundanese"
-alpha_1 = "su"
-alpha_2b = "sun"
+two_letter_code ="su"
+three_letter_code ="sun"
 incompatibility = []
 
 [swahili]
 name = "Swahili"
-alpha_1 = "sw"
-alpha_2b = "swa"
+two_letter_code ="sw"
+three_letter_code ="swa"
 incompatibility = []
 
 [swedish]
 name = "Swedish"
-alpha_1 = "sv"
-alpha_2b = "swe"
+two_letter_code ="sv"
+three_letter_code ="swe"
 incompatibility = []
 
 [tagalog]
 name = "Tagalog"
-alpha_1 = "tl"
-alpha_2b = "tgl"
+two_letter_code ="tl"
+three_letter_code ="tgl"
 incompatibility = []
 
 [tamil]
 name = "Tamil"
-alpha_1 = "ta"
-alpha_2b = "tam"
+two_letter_code ="ta"
+three_letter_code ="tam"
 incompatibility = []
 
 [telugu]
 name = "Telugu"
-alpha_1 = "te"
-alpha_2b = "tel"
+two_letter_code ="te"
+three_letter_code ="tel"
 incompatibility = []
 
 [thai]
 name = "Thai"
-alpha_1 = "th"
-alpha_2b = "tha"
+two_letter_code ="th"
+three_letter_code ="tha"
 incompatibility = []
 
 [turkish]
 name = "Turkish"
-alpha_1 = "tr"
-alpha_2b = "tur"
+two_letter_code ="tr"
+three_letter_code ="tur"
 incompatibility = []
 
 [ukrainian]
 name = "Ukrainian"
-alpha_1 = "uk"
-alpha_2b = "ukr"
+two_letter_code ="uk"
+three_letter_code ="ukr"
 incompatibility = []
 
 [urdu]
 name = "Urdu"
-alpha_1 = "ur"
-alpha_2b = "urd"
+two_letter_code ="ur"
+three_letter_code ="urd"
 incompatibility = []
 
 [vietnamese]
 name = "Vietnamese"
-alpha_1 = "vi"
-alpha_2b = "vie"
+two_letter_code ="vi"
+three_letter_code ="vie"
 incompatibility = []
 

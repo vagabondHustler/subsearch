@@ -6,8 +6,8 @@ from typing import Any, ClassVar, Protocol
 @dataclass(order=True)
 class LanguageData:
     name: str
-    alpha_1: str
-    alpha_2b: str
+    two_letter_code: str
+    three_letter_code: str
     incompatibility: list[str]
 
 
@@ -32,7 +32,7 @@ class AppPaths:
 class FilePaths:
     log: Path
     config: Path
-    language_data: Path
+    subtitle_languages: Path
 
 
 @dataclass(order=True, slots=True)

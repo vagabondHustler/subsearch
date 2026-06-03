@@ -14,7 +14,7 @@ class FakeSubsearchCore:
         self.app_config = io_toml.get_app_config(FILE_PATHS.config)
         self.release_data = string_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
-        self.language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+        self.language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
         self.accepted_subtitles: list[str] = []
         self.rejected_subtitles: list[str] = []
         self.downloaded_subtitle_archives = 0

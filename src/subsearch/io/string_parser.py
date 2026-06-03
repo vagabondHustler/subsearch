@@ -130,16 +130,16 @@ class CreateProviderUrls:
         return ""
 
     def _opensubtitles_subtitle_type(self) -> str:
-        alpha_2b = self.current_language_data.alpha_2b
+        three_letter_code = self.current_language_data.three_letter_code
         hearing_imparied, hearing_imparied_foreign_parts, foreign_parts = self.subtitle_type_logic()
         if hearing_imparied:
-            return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on"
+            return f"en/search/sublanguageid-{three_letter_code}/hearingimpaired-on"
         elif foreign_parts:
-            return f"en/search/sublanguageid-{alpha_2b}/foreignpartsonly-on"
+            return f"en/search/sublanguageid-{three_letter_code}/foreignpartsonly-on"
         elif hearing_imparied_foreign_parts:
-            return f"en/search/sublanguageid-{alpha_2b}/hearingimpaired-on/foreignpartsonly-on"
+            return f"en/search/sublanguageid-{three_letter_code}/hearingimpaired-on/foreignpartsonly-on"
         else:
-            return f"en/search/sublanguageid-{alpha_2b}"
+            return f"en/search/sublanguageid-{three_letter_code}"
 
     def _opensubtitles_search_parameter(self) -> str:
         if self.release_data.tvseries:

@@ -34,7 +34,7 @@ def get_file_paths() -> FilePaths:
     return FilePaths(
         log=Path.home() / "AppData" / "Local" / "Subsearch" / "log.log",
         config=Path.home() / "AppData" / "Local" / "Subsearch" / "config.toml",
-        language_data=app_home / "data" / "language_data.toml",
+        subtitle_languages=app_home / "data" / "subtitle_languages.toml",
     )
 
 
