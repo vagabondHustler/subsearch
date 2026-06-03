@@ -11,13 +11,15 @@ from qfluentwidgets import (
 from subsearch.io import update
 from subsearch.logger import log
 from subsearch.runtime.constants import VERSION
-from subsearch.ui.cards import SettingsCard
-from subsearch.ui.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.typography import DISABLED_TEXT_COLOR, TEXT_COLOR, apply_caption_font
+from subsearch.ui.cards.cards import SettingsCard
+from subsearch.ui.cards.changelog_popup import ChangelogButton
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.theme.typography import DISABLED_TEXT_COLOR, TEXT_COLOR, apply_caption_font
 
 IDLE_STATUS = "Check for updates to see if a newer version is available."
 BUTTON_ICON_SIZE = 24
 BUTTON_SIZE = 32
+BUTTON_GROUP_GAP = 16
 INSTALLER_HANDOFF_DELAY_MS = 1500
 
 
@@ -82,21 +84,25 @@ class UpdateCard(SettingsCard):
         text_column.addWidget(self.status_label)
 
         self.install_button, self.install_column = self._build_labelled_button(
-            LucideIcon.PACKAGE_OPEN, "Install"
+            LucideIcon.ARROW_DOWN_TO_LINE, "Install"
         )
         self.install_button.clicked.connect(self._download_and_install)
         self._set_install_enabled(False)
 
         self.check_button, self.check_column = self._build_labelled_button(
-            LucideIcon.PACKAGE_SEARCH, "Search"
+            LucideIcon.REFRESH_CW_DOT, "Search"
         )
         self.check_button.clicked.connect(self._check_for_update)
+
+        self.changelog_button, self.changelog_column = self._build_changelog_button()
 
         content_row = QHBoxLayout()
         content_row.setContentsMargins(16, 8, 16, 4)
         content_row.setSpacing(8)
         content_row.addLayout(text_column, stretch=1)
         content_row.addWidget(self.check_column, alignment=Qt.AlignmentFlag.AlignVCenter)
+        content_row.addSpacing(BUTTON_GROUP_GAP)
+        content_row.addWidget(self.changelog_column, alignment=Qt.AlignmentFlag.AlignVCenter)
         content_row.addWidget(self.install_column, alignment=Qt.AlignmentFlag.AlignVCenter)
         self.body_layout.addLayout(content_row)
 
@@ -126,9 +132,25 @@ class UpdateCard(SettingsCard):
         column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
         return button, column_widget
 
+    def _build_changelog_button(self) -> tuple[ChangelogButton, QWidget]:
+        button = ChangelogButton(self)
+        button.setFixedSize(BUTTON_SIZE, BUTTON_SIZE)
+        button.setIconSize(QSize(BUTTON_ICON_SIZE, BUTTON_ICON_SIZE))
+
+        caption_label = CaptionLabel("Changelog", self)
+        apply_caption_font(caption_label)
+
+        column_widget = QWidget(self)
+        column = QVBoxLayout(column_widget)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.setSpacing(0)
+        column.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        return button, column_widget
+
     def _set_install_enabled(self, enabled: bool) -> None:
         color = TEXT_COLOR if enabled else DISABLED_TEXT_COLOR
-        self.install_button.setIcon(lucide_qicon(LucideIcon.PACKAGE_OPEN, color))
+        self.install_button.setIcon(lucide_qicon(LucideIcon.ARROW_DOWN_TO_LINE, color))
         self.install_button.setEnabled(enabled)
 
     def _run_in_thread(self, worker: UpdateWorker) -> None:
@@ -162,6 +184,7 @@ class UpdateCard(SettingsCard):
         self._latest_version = availability.latest_version
         self.latest_version_label.setText(f"Latest version  {availability.latest_version}")
         self.latest_version_label.show()
+        self.changelog_button.set_changelog(availability.changelog)
         if availability.update_available:
             prerelease = " (pre-release)" if availability.is_prerelease else ""
             self.status_label.setText(f"A new version is available{prerelease}.")

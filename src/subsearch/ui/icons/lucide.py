@@ -7,7 +7,7 @@ from PySide6.QtXml import QDomDocument
 from qfluentwidgets import FluentIconBase, Theme, getIconColor
 from qfluentwidgets.common.icon import SvgIconEngine, drawSvgIcon
 
-from subsearch.ui.icons_data import ICON_SOURCES
+from subsearch.ui.icons.icons_data import ICON_SOURCES
 
 STROKE_TAGS = ("path", "circle", "line", "polyline", "polygon", "rect")
 
@@ -29,6 +29,7 @@ class LucideIcon(FluentIconBase, Enum):
     MONITOR_COG = "monitor-cog"
     FOLDER_DOWN = "folder-down"
     FOLDER_OPEN = "folder-open"
+    FOLDER_SEARCH = "folder-search"
     SETTINGS = "settings"
     LIGHTBULB = "lightbulb"
     CIRCLE_CHECK_BIG = "circle-check-big"
@@ -38,6 +39,13 @@ class LucideIcon(FluentIconBase, Enum):
     CIRCLE = "circle"
     CIRCLE_X = "circle-x"
     CIRCLE_DOT_DASHED = "circle-dot-dashed"
+    ARROW_DOWN_TO_LINE = "arrow-down-to-line"
+    REFRESH_CW = "refresh-cw"
+    REFRESH_CW_DOT = "refresh-cw-dot"
+    LIST_TREE = "list-tree"
+    LIST = "list"
+    BUG = "bug"
+    SCROLL_TEXT = "scroll-text"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

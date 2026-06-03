@@ -20,6 +20,7 @@ class UpdateAvailability:
     latest_version: str
     update_available: bool
     is_prerelease: bool
+    changelog: str
 
 
 def find_semantic_version(version: str) -> str:
@@ -43,6 +44,18 @@ def get_latest_version() -> str:
     return find_semantic_version(version_github)
 
 
+def get_release_changelog(latest_version: str) -> str:
+    url = f"https://api.github.com/repos/vagabondHustler/subsearch/releases/tags/{latest_version}"
+    try:
+        response = requests.get(url, headers={"Accept": "application/vnd.github+json"})
+        if response.status_code != 200:
+            return ""
+        return response.json().get("body", "").strip()
+    except requests.RequestException as error:
+        log.stdout(str(error), level="error")
+        return ""
+
+
 def check_for_update() -> UpdateAvailability:
     latest_version = get_latest_version()
     update_available = Version(VERSION) < Version(latest_version)
@@ -52,6 +65,7 @@ def check_for_update() -> UpdateAvailability:
         latest_version=latest_version,
         update_available=update_available,
         is_prerelease=is_prerelease,
+        changelog=get_release_changelog(latest_version),
     )
 
 

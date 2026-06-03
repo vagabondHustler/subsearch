@@ -10,16 +10,16 @@ from qfluentwidgets import (
     HeaderCardWidget,
     LineEdit,
     MessageBox,
-    Slider,
     TransparentToolButton,
 )
 
 from subsearch.io import io_toml, io_winreg, string_parser
 from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS
-from subsearch.ui.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.separators import make_fading_separator
-from subsearch.ui.setting_rows import (
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.theme.separators import make_fading_separator
+from subsearch.ui.widgets.slider import CircleDotSlider
+from subsearch.ui.widgets.setting_rows import (
     HelpButton,
     SearchableComboBoxRow,
     SpinBoxRow,
@@ -27,7 +27,7 @@ from subsearch.ui.setting_rows import (
     read_value,
     write_value,
 )
-from subsearch.ui.typography import (
+from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
@@ -147,11 +147,11 @@ class SearchThresholdCard(SettingsCard):
         value_row.addStretch(1)
         self.body_layout.addLayout(value_row)
 
-        self.slider = Slider(Qt.Orientation.Horizontal, self)
+        self.slider = CircleDotSlider(Qt.Orientation.Horizontal, self)
         self.slider.setRange(0, 100)
         self.slider.setValue(int(read_value("search.accept_threshold")))
         slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(16, 0, 16, 10)
+        slider_row.setContentsMargins(48, 0, 48, 10)
         slider_row.addWidget(self.slider)
         self.body_layout.addLayout(slider_row)
 

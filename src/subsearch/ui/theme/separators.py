@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QWidget
 
-SEPARATOR_DARK = "44, 44, 44"
-SEPARATOR_LIGHT = "70, 70, 70"
+SEPARATOR_DARK = "32, 32, 32"
+SEPARATOR_LIGHT = "52, 53, 55"
 SEPARATOR_INSET = 24
 
 

@@ -15,7 +15,7 @@ from qfluentwidgets import (
 
 from subsearch.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS
-from subsearch.ui.cards import (
+from subsearch.ui.cards.cards import (
     ApplicationCard,
     DownloadManagerCard,
     FileExtensionsCard,
@@ -28,19 +28,22 @@ from subsearch.ui.cards import (
     ShellIntegrationCard,
     SubtitleFiltersCard,
 )
-from subsearch.ui.download_manager import DownloadManagerInterface
-from subsearch.ui.lucide import LucideIcon
-from subsearch.ui.update_card import UpdateCard
+from subsearch.ui.cards.bug_report_card import BugReportCard
+from subsearch.ui.cards.download_manager import DownloadManagerInterface
+from subsearch.ui.icons.lucide import LucideIcon
+from subsearch.ui.cards.update_card import UpdateCard
 from subsearch.ui.navigation import enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
-from subsearch.ui.theme_patch import force_fixed_accent_color
-from subsearch.ui.typography import apply_body_font
+from subsearch.ui.theme.theme_patch import force_fixed_accent_color
+from subsearch.ui.theme.typography import apply_body_font
 
 TEXT_COLOR = "#c8c8c7"
 ACCENT_COLOR = "#c8c8c7"
 GITHUB_URL = "https://github.com/vagabondHustler/subsearch"
 NAVIGATION_EXPAND_WIDTH = 242
 NAVIGATION_TOP_MARGIN = 8
+NAVIGATION_EDGE_MARGIN = 5
+CONTENT_GAP_ABOVE_GITHUB = 2
 
 
 class SettingsInterface(SingleDirectionScrollArea):
@@ -104,6 +107,7 @@ class SettingsWindow(FluentWindow):
                 ApplicationCard(),
                 NetworkCard(),
                 UpdateCard(),
+                BugReportCard(),
             ],
         )
 
@@ -127,13 +131,24 @@ class SettingsWindow(FluentWindow):
         self.navigationInterface.addItem(
             routeKey="github",
             icon=LucideIcon.HEART_HANDSHAKE,
-            text="GitHub",
+            text="Go to repository",
             onClick=lambda: webbrowser.open(GITHUB_URL),
             selectable=False,
             position=NavigationItemPosition.BOTTOM,
         )
 
         self._configure_navigation()
+        self._align_content_above_github()
+
+    def _align_content_above_github(self) -> None:
+        panel = self.navigationInterface.panel
+        github_item = panel.items["github"].widget
+        panel_bottom_margin = panel.vBoxLayout.contentsMargins().bottom()
+        bottom_margin = panel_bottom_margin + github_item.sizeHint().height() + CONTENT_GAP_ABOVE_GITHUB
+        margins = self.widgetLayout.contentsMargins()
+        self.widgetLayout.setContentsMargins(
+            margins.left(), margins.top(), NAVIGATION_EDGE_MARGIN, bottom_margin
+        )
 
     def _clear_title_bar(self) -> None:
         getattr(self.titleBar, "iconLabel").hide()
