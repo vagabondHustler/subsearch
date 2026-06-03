@@ -1,7 +1,7 @@
 import threading
 from typing import Any
 
-from subsearch._logging import log
+from subsearch.logger import log
 
 
 class CreateThread(threading.Thread):
@@ -43,5 +43,5 @@ def _create_threads(*tasks) -> None:
         task_thread.start()
         threads.append(task_thread)
 
-    for t in threads:
-        t.join()
+    for thread in threads:
+        thread.join()
