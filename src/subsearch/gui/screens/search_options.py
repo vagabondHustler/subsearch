@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.gui import widgets
 from subsearch.gui.resources import config as cfg
@@ -17,8 +17,7 @@ class Providers(ttk.Labelframe):
         self.last_key = ""
 
         self.provider_options: dict = {
-            "opensubtitles_site": "Opensubtitles",
-            "opensubtitles_hash": "Opensubtitles with hash",
+            "opensubtitles": "Opensubtitles",
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
         }
