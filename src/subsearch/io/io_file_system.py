@@ -4,11 +4,11 @@ import time
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 import requests
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.model import Subtitle
 from subsearch.io.http import get_cloudscraper
@@ -168,7 +168,11 @@ class MPCHashAlgorithm:
         return self.hash
 
 
-def download_response(msi_package_path: Path, response: requests.Response) -> None:
+def download_response(
+    msi_package_path: Path,
+    response: requests.Response,
+    on_progress: Callable[[float], None] | None = None,
+) -> None:
     start_time = time.time()
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))
@@ -180,8 +184,12 @@ def download_response(msi_package_path: Path, response: requests.Response) -> No
             downloaded_size += len(chunk)
             if total_size > 0:
                 progress_percentage = (downloaded_size / total_size) * 100
+                if on_progress is not None:
+                    on_progress(progress_percentage)
                 elapsed_time = time.time() - start_time
                 if elapsed_time >= 0.5:
                     log.stdout(f"Downloading {progress_percentage:.2f}%")
                     start_time = time.time()
+        if on_progress is not None:
+            on_progress(100.0)
         log.stdout(f"Download complete.")

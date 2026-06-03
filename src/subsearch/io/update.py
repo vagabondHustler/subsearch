@@ -1,15 +1,25 @@
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 import cloudscraper
 import requests
 from packaging.version import Version
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
 from subsearch.io import io_file_system
+
+
+@dataclass(frozen=True, slots=True)
+class UpdateAvailability:
+    current_version: str
+    latest_version: str
+    update_available: bool
+    is_prerelease: bool
 
 
 def find_semantic_version(version: str) -> str:
@@ -33,16 +43,21 @@ def get_latest_version() -> str:
     return find_semantic_version(version_github)
 
 
+def check_for_update() -> UpdateAvailability:
+    latest_version = get_latest_version()
+    update_available = Version(VERSION) < Version(latest_version)
+    is_prerelease = update_available and Version(latest_version).is_prerelease
+    return UpdateAvailability(
+        current_version=VERSION,
+        latest_version=latest_version,
+        update_available=update_available,
+        is_prerelease=is_prerelease,
+    )
+
+
 def is_new_version_avail() -> tuple[bool, bool]:
-    new_repo_avail, repo_is_prerelease = False, False
-    released_version = get_latest_version()
-
-    if Version(VERSION) < Version(released_version):
-        if Version(released_version).is_prerelease:
-            repo_is_prerelease = True
-        new_repo_avail = True
-
-    return new_repo_avail, repo_is_prerelease
+    availability = check_for_update()
+    return availability.update_available, availability.is_prerelease
 
 
 def get_latest_msi_url(latest_version: str = "") -> str:
@@ -54,26 +69,31 @@ def run_installer(msi_package_path: Path) -> None:
     subprocess.Popen(command, shell=True, creationflags=subprocess.DETACHED_PROCESS)
 
 
-def download_and_update() -> None:
-    log.brackets("Updating Application")
-    latest_version = get_latest_version()
-    latest_msi = get_latest_msi_url(latest_version)
-    if Version(VERSION) > Version(latest_version):
-        log.stdout(f"No new version available")
-        return None
-
-    log.stdout(f"New version available")
+def download_installer(
+    latest_version: str, on_progress: Callable[[float], None] | None = None
+) -> Path:
     if not APP_PATHS.tmp_dir.exists():
         APP_PATHS.tmp_dir.mkdir(parents=True, exist_ok=True)
     msi_package_path = APP_PATHS.tmp_dir / f"Subsearch-{latest_version}-win64.msi"
-    response = requests.get(latest_msi, stream=True)
-    if response.status_code == 200:
-        io_file_system.download_response(msi_package_path, response)
-        msg = f"MSI file downloaded to: {msi_package_path}"
-        log.stdout(f"MSI file downloaded to: {msi_package_path}")
-    else:
-        msg = f"Failed to download MSI file. HTTP Status Code: {response.status_code}"
-        log.stdout(msg, level="error")
+    response = requests.get(get_latest_msi_url(latest_version), stream=True)
+    if response.status_code != 200:
+        log.stdout(
+            f"Failed to download MSI file. HTTP Status Code: {response.status_code}", level="error"
+        )
         raise Exception(response.status_code)
+    io_file_system.download_response(msi_package_path, response, on_progress)
+    log.stdout(f"MSI file downloaded to: {msi_package_path}")
+    return msi_package_path
+
+
+def download_and_update() -> None:
+    log.brackets("Updating Application")
+    availability = check_for_update()
+    if not availability.update_available:
+        log.stdout("No new version available")
+        return None
+
+    log.stdout("New version available")
+    msi_package_path = download_installer(availability.latest_version)
     run_installer(msi_package_path)
     sys.exit()
