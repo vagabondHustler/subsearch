@@ -4,7 +4,7 @@ from cx_Freeze import Executable, setup
 from cx_Freeze.command.bdist_msi import PyDialog
 from cx_Freeze.command.bdist_msi import bdist_msi as _BdistMsi
 
-from subsearch.data import __guid__
+from subsearch.guid import __guid__
 
 APP_NAME = "Subsearch"
 ICON = "src/subsearch/gui/resources/assets/subsearch.ico"

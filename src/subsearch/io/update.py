@@ -32,7 +32,7 @@ def find_semantic_version(version: str) -> str:
 
 def scrape_github() -> str:
     scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
-    url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/data/version.py"
+    url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/version.py"
     source = scraper.get(url)
     scontent = source.content
     file_content = str(scontent)

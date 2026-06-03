@@ -6,7 +6,8 @@ from itertools import product
 from pathlib import Path
 from typing import Any, no_type_check
 
-from subsearch.data import __guid__, __version__
+from subsearch.guid import __guid__
+from subsearch.version import __version__
 from subsearch.model import (
     AppPaths,
     FilePaths,
