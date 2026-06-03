@@ -3,14 +3,13 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from subsearch import threading_utils
+from subsearch import threading_utils, ui
 from subsearch.decorators import gui as gui_decorators
 from subsearch.decorators.orchestration import call_func
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.gui import screen_manager, system_tray
-from subsearch.gui.screens import download_manager
+from subsearch.gui import system_tray
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.io import (
     imdb_lookup,
@@ -126,7 +125,7 @@ class SubsearchCore(Initializer):
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.file_exist:
             log.brackets("GUI")
-            screen_manager.open_screen("search_options")
+            ui.open_settings_window()
             log.stdout("Exiting GUI", level="debug")
             self.prevent_conflicting_config_settings()
             return None
@@ -202,8 +201,7 @@ class SubsearchCore(Initializer):
     def download_manager(self) -> None:
         log.brackets(f"Download Manager")
         subtitles = self.rejected_subtitles + self.accepted_subtitles
-        screen_manager.open_screen("download_manager", subtitles=subtitles)
-        self.manually_accepted_subtitles = download_manager.DownloadManager.downloaded_subtitle
+        self.manually_accepted_subtitles = ui.open_settings_window(subtitles)
         self.downloaded_subtitles += len(self.manually_accepted_subtitles)
         log.task_completed()
 
@@ -211,7 +209,8 @@ class SubsearchCore(Initializer):
     def subtitle_post_processing(self) -> None:
         target = self.app_config.post_processing["target_path"]
         resolution = self.app_config.post_processing["path_resolution"]
-        target_path = io_file_system.create_path_from_string(target, resolution)
+        create_missing_folder = self.app_config.post_processing["create_missing_folder"]
+        target_path = io_file_system.create_path_from_string(target, resolution, create_missing_folder)
         self.downloaded_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.tmp_dir)
         self.extract_files()
         self.extracted_subtitle_archives = io_file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
