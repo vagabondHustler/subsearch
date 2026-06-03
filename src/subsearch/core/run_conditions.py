@@ -1,6 +1,6 @@
 from typing import Callable
 
-from subsearch.bootstrap import Bootstrap
+from subsearch.core.bootstrap import Bootstrap
 
 
 class RunConditions:

@@ -3,10 +3,10 @@ from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
-from subsearch.logger import log
+from subsearch.runtime.logger import log
 from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
-from subsearch.model import Subtitle
+from subsearch.runtime.model import Subtitle
 from subsearch.providers import subsource
 from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
 from subsearch.ui.cards.cards import (

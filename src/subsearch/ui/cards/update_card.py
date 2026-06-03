@@ -9,7 +9,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import update
-from subsearch.logger import log
+from subsearch.runtime.logger import log
 from subsearch.runtime.constants import VERSION
 from subsearch.ui.cards.cards import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton

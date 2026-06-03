@@ -6,8 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from subsearch import metaclasses
-from subsearch.model import GenericDataClass
+from subsearch.runtime import metaclasses
+from subsearch.runtime.model import GenericDataClass
 from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
 
 

@@ -3,8 +3,8 @@ from typing import Any
 import cloudscraper
 import requests
 
-from subsearch.logger import log
-from subsearch.model import Subtitle
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import Subtitle
 from subsearch.io import http
 from subsearch.providers import provider_helper
 

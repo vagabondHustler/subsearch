@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
-from subsearch.logger import log
-from subsearch.model import Subtitle
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import Subtitle
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 

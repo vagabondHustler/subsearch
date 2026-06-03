@@ -3,14 +3,15 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from subsearch import threading_utils, ui
-from subsearch.bootstrap import Bootstrap
+from subsearch import ui
+from subsearch.core.bootstrap import Bootstrap
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system
-from subsearch.logger import log
-from subsearch.model import Subtitle
+from subsearch.runtime import threading_utils
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import Subtitle
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.run_conditions import RunConditions
+from subsearch.core.run_conditions import RunConditions
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 
 

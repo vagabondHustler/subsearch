@@ -2,8 +2,8 @@ import threading
 from typing import Any
 
 from subsearch.parsing import release_parser
-from subsearch.logger import log
-from subsearch.model import (
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import (
     AppConfig,
     LanguageData,
     ProviderUrls,

@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from subsearch.logger import log
+from subsearch.runtime.logger import log
 from subsearch.io import http
 from subsearch.providers import provider_helper
 

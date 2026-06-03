@@ -8,9 +8,9 @@ from typing import Callable, Iterable, Optional
 
 import requests
 
-from subsearch.logger import log
+from subsearch.runtime.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.model import Subtitle
+from subsearch.runtime.model import Subtitle
 from subsearch.io.http import get_cloudscraper
 from subsearch.parsing import release_parser
 

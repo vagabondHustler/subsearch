@@ -13,7 +13,7 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
-from subsearch.model import Subtitle
+from subsearch.runtime.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS
 from subsearch.ui.cards.cards import (
     ApplicationCard,

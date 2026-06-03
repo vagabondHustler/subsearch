@@ -2,7 +2,7 @@ import inspect
 
 import pytest
 
-from subsearch.run_conditions import RunConditions
+from subsearch.core.run_conditions import RunConditions
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser

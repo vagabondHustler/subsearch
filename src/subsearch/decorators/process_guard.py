@@ -1,7 +1,7 @@
 import ctypes
 from typing import Any, Callable
 
-from subsearch import exceptions
+from subsearch.runtime import exceptions
 from subsearch.io import toml_file
 from subsearch.runtime.constants import FILE_PATHS, GUID
 

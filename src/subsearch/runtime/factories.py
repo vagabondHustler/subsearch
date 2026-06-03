@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, no_type_check
 
 from subsearch.runtime.version import __version__
-from subsearch.model import (
+from subsearch.runtime.model import (
     AppPaths,
     FilePaths,
     SystemInfo,

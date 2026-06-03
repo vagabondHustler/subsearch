@@ -2,8 +2,8 @@ from PySide6.QtCore import QEventLoop
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QSystemTrayIcon
 
-from subsearch import metaclasses
-from subsearch.logger import log
+from subsearch.runtime import metaclasses
+from subsearch.runtime.logger import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
 from subsearch.ui.qt_application import get_application
 
