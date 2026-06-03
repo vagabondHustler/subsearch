@@ -5,6 +5,15 @@ def push_with_tags(branch: str) -> None:
     subprocess.run(["git", "push", "origin", f"HEAD:{branch}", "--follow-tags"], check=True)
 
 
+def commit_all(message: str) -> None:
+    subprocess.run(["git", "add", "--all"], check=True)
+    subprocess.run(["git", "commit", "--message", message], check=True)
+
+
+def push(branch: str) -> None:
+    subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)
+
+
 def fetch(branch: str, with_tags: bool = False) -> None:
     command = ["git", "fetch", "origin", branch]
     if with_tags:
