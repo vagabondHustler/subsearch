@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil
 
 from subsearch.data.version import __version__
-from tools.github_actions.globals import (
+from tools.github_actions.constants import (
     ARTIFACTS_PATH,
     CONFIG_TOML_PATH,
     EXE_FREEZE_PATH,
@@ -18,11 +18,10 @@ from tools.github_actions.globals import (
     STYLE_SEPARATOR,
     msi_freeze_path,
 )
-from tools.github_actions.handlers import github_actions, log
+from tools.github_actions.handlers import log, step_summary
 
 
 def msi_artifact_path() -> Path:
-    """Return the msi that prepare_build_artifacts moved into ./artifacts."""
     candidates = sorted(ARTIFACTS_PATH.glob("*.msi"))
     if not candidates:
         raise FileNotFoundError(f"No .msi found in {ARTIFACTS_PATH}")
@@ -48,7 +47,7 @@ def list_files_in_directory(directory: Path) -> None:
 
 
 def is_process_running(process_name: str) -> bool:
-    return any(p.info["name"].lower() == process_name.lower() for p in psutil.process_iter(["pid", "name"]))
+    return any((process.info["name"] or "").lower() == process_name.lower() for process in psutil.process_iter(["pid", "name"]))
 
 
 def wait_for_process(process_name: str, test_length: int) -> int:
@@ -61,7 +60,7 @@ def wait_for_process(process_name: str, test_length: int) -> int:
 
 def end_process(process_name: str) -> None:
     for process in psutil.process_iter(["pid", "name"]):
-        if process.info["name"].lower() == process_name.lower():
+        if (process.info["name"] or "").lower() == process_name.lower():
             log.verbose_print(f"Terminating {process_name}")
             process.terminate()
 
@@ -131,10 +130,10 @@ def _emoji_row(state: tuple[bool, bool, bool, bool]) -> str:
 
 
 def create_markdown_table_header() -> None:
-    github_actions.set_step_summary(
+    step_summary.set_step_summary(
         "| Test Stage | Exe exists | Log exists | Config exists | Registry key exists | Test result | Expected result |"
     )
-    github_actions.set_step_summary("|---|---|---|---|---|---|---|")
+    step_summary.set_step_summary("|---|---|---|---|---|---|---|")
 
 
 def add_markdown_table_result(name: str) -> None:
@@ -144,7 +143,7 @@ def add_markdown_table_result(name: str) -> None:
     result = "Test passed" if passed else "Test failed"
     exe, log_, cfg, key = (_emoji(f) for f in state)
 
-    github_actions.set_step_summary(
+    step_summary.set_step_summary(
         f"| {name.capitalize()} test | {exe} | {log_} | {cfg} | {key} | {result} | {_emoji_row(expected)} |"
     )
     print("")
@@ -180,20 +179,18 @@ def prepare_build_artifacts() -> None:
 
 
 def write_to_hashes() -> None:
-    """Hash the freshly built binaries, write hashes.sha256, and emit a
-    `<suffix>_hash=<value>` step output plus a step-summary table for each."""
     log.verbose_print("Collecting hashes")
     ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
-    github_actions.set_step_summary("| File | SHA256 |")
-    github_actions.set_step_summary("|------|--------|")
+    step_summary.set_step_summary("| File | SHA256 |")
+    step_summary.set_step_summary("|------|--------|")
 
     lines = []
     for file_path in (msi_freeze_path(), EXE_FREEZE_PATH):
         sha256 = calculate_sha256(file_path)
         suffix = file_path.suffix[1:]
         log.verbose_print(f"Setting new Github Action output: {suffix}_hash={sha256}")
-        github_actions.set_step_output(f"{suffix}_hash", sha256)
-        github_actions.set_step_summary(f"| {file_path.name} | {sha256} |")
+        step_summary.set_step_output(f"{suffix}_hash", sha256)
+        step_summary.set_step_summary(f"| {file_path.name} | {sha256} |")
         lines.append(f"{sha256} *{file_path.name}\n")
 
     log.verbose_print(f"Writing to {HASHES_PATH.name}")

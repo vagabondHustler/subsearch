@@ -1,20 +1,11 @@
 name: Release
 run-name: Release ${{ github.ref_name }}
 
-# Release pipeline, triggered by every push to dev:
-#   init          version-bump from conventional commits (commitizen); gates the rest
-#   build_binaries  build the msi/exe, hash them, upload as an artifact
-#   test_binaries   install/run/uninstall the msi and check the expected files
-#   upload_binaries scan the binaries on VirusTotal
-#   changelog       render the changelog and append VirusTotal/compare links
-#   open_main_pr    open the dev -> main release PR
-#   publish_github  create the GitHub release with binaries + changelog
-#   publish_pypi    build and upload the wheel/sdist to PyPI
 
 on:
   push:
     branches:
-      - dev
+      - main
 
 permissions:
   contents: write
@@ -25,29 +16,20 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CLI: python -m tools.github_actions.cli.commands
-  PYTHON_VERSION: "3.14"
   ARTIFACT_RETENTION_DAYS: 7
-  HASHES_NAME: "hashes.sha256"
-  CHANGELOG_NAME: "changelog.md"
 
 jobs:
-  # Bump the version from conventional commits and push the tagged release
-  # commit. Skips the run triggered by our own bump commit to avoid a loop.
-  # Every later job is gated on outputs.bumped.
   init:
     name: Version control
     if: ${{ !startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: windows-latest
     timeout-minutes: 10
     outputs:
-      bumped: ${{ steps.bump.outputs.bumped }}
-      current_tags: ${{ steps.bump.outputs.current }}
-      previous_tags: ${{ steps.bump.outputs.previous }}
-      # last_stable_release is the tag we are releasing from, i.e. the previous tag.
-      last_stable_release: ${{ steps.bump.outputs.previous }}
-      msi_name: ${{ steps.names.outputs.msi_name }}
-      id: ${{ steps.names.outputs.id }}
+      bumped: ${{ steps.run.outputs.bumped }}
+      current_tag: ${{ steps.run.outputs.current_tag }}
+      previous_tag: ${{ steps.run.outputs.previous_tag }}
+      msi_name: ${{ steps.run.outputs.msi_name }}
+      artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
       - uses: crazy-max/ghaction-import-gpg@v6
         with:
@@ -65,48 +47,17 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .python-version
 
-      # commitizen plus an editable --no-deps install so the SubsearchCz plugin
-      # named in [tool.commitizen] is registered (via entry points) without
-      # pulling in the full app runtime dependencies.
       - name: Install commitizen
         run: |
           python -m pip install --upgrade pip commitizen
           python -m pip install -e . --no-deps
 
-      - name: Bump version from conventional commits
-        id: bump
-        run: |
-          $previous = cz version --project
-          # cz bump exits non-zero ("NoneIncrementError") when no commits warrant
-          # a release; treat that as a no-op rather than a failure. It creates the
-          # signed commit and annotated tag itself (git is gpg-configured above).
-          cz bump --yes
-          if ($LASTEXITCODE -ne 0) { Write-Host "No version bump required."; $LASTEXITCODE = 0 }
-          $current = cz version --project
-          "previous=$previous" >> $env:GITHUB_OUTPUT
-          "current=$current" >> $env:GITHUB_OUTPUT
-          if ($previous -ne $current) {
-            "bumped=true" >> $env:GITHUB_OUTPUT
-          } else {
-            "bumped=false" >> $env:GITHUB_OUTPUT
-          }
+      - name: Bump version, tag, and push
+        id: run
+        run: python -m tools.github_actions.jobs.init
 
-      - name: Build artifact names
-        id: names
-        if: ${{ steps.bump.outputs.bumped == 'true' }}
-        run: |
-          $v = "${{ steps.bump.outputs.current }}"
-          "msi_name=Subsearch-$v-win64.msi" >> $env:GITHUB_OUTPUT
-          "id=${v}_${{ github.ref_name }}_${{ github.run_id }}" >> $env:GITHUB_OUTPUT
-
-      - name: Push release commit and tag
-        if: ${{ steps.bump.outputs.bumped == 'true' }}
-        run: git push origin HEAD:${{ github.ref_name }} --follow-tags
-
-  # Build the msi/exe, hash them into hashes.sha256, and upload everything as a
-  # single build_<id> artifact consumed by the later jobs.
   build_binaries:
     name: Build binaries
     needs: init
@@ -114,8 +65,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     outputs:
-      msi_hash: ${{ steps.hashes.outputs.msi_hash }}
-      exe_hash: ${{ steps.hashes.outputs.exe_hash }}
+      msi_hash: ${{ steps.run.outputs.msi_hash }}
+      exe_hash: ${{ steps.run.outputs.exe_hash }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -123,7 +74,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .python-version
 
       - name: Build binaries
         run: |
@@ -132,26 +83,22 @@ jobs:
           pip install -e .[build]
           python -m tools.build bdist_msi
 
-      - name: Create hashes file and set outputs
-        id: hashes
-        run: ${{ env.CLI }} binaries --write-hash # emits msi_hash / exe_hash
-
-      - name: Prepare artifacts
-        run: ${{ env.CLI }} binaries --prepare-build-artifacts
+      - name: Hash and collect artifacts
+        id: run
+        run: python -m tools.github_actions.jobs.build_binaries
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build_${{ needs.init.outputs.id }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
           if-no-files-found: error
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-  # Install, run, and uninstall the built msi, checking the expected files and
-  # registry key at each stage.
   test_binaries:
     name: Test binaries
     needs: [init, build_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -161,14 +108,13 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .python-version
 
       - uses: actions/download-artifact@v4
         with:
-          name: build_${{ needs.init.outputs.id }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
 
-      # test_binaries imports subsearch.data.version and uses psutil.
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip psutil
@@ -176,10 +122,10 @@ jobs:
 
       - run: python -m tools.github_actions.jobs.test_binaries
 
-  # Submit the binaries to VirusTotal for scanning.
   upload_binaries:
     name: Upload binaries to virustotal
     needs: [init, build_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -189,7 +135,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: build_${{ needs.init.outputs.id }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
 
       - uses: crazy-max/ghaction-virustotal@v4
@@ -202,77 +148,48 @@ jobs:
             artifacts/Subsearch.exe
             artifacts/${{ needs.init.outputs.msi_name }}
 
-  # Render the changelog from conventional commits, then append VirusTotal and
-  # full-changelog compare links, and upload it as the changelog_<id> artifact.
   changelog:
     name: Changelog
     needs: [init, build_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .python-version
 
-      # commitizen plus an editable --no-deps install registers the SubsearchCz
-      # plugin (tools/cz_subsearch.py) that builds the changelog from
-      # conventional commits: emoji sections with per-commit links.
-      - name: Install commitizen plugin
+      - name: Install commitizen
         run: |
           python -m pip install --upgrade pip commitizen
           python -m pip install -e . --no-deps
 
-      - name: Build changelog from conventional commits
-        run: |
-          mkdir "artifacts"
-          git fetch origin ${{ github.ref_name }} --tags
-          cz changelog ${{ needs.init.outputs.current_tags }} --file-name artifacts/${{ env.CHANGELOG_NAME }}
-
-      - name: Append VirusTotal and compare links
-        run: >
-          ${{ env.CLI }} changelog
-          --tags "${{ needs.init.outputs.current_tags }};${{ needs.init.outputs.last_stable_release }}"
-          --file-names "${{ needs.init.outputs.msi_name }};Subsearch.exe"
-          --hashes "${{ needs.build_binaries.outputs.msi_hash }};${{ needs.build_binaries.outputs.exe_hash }}"
+      - name: Render changelog and append links
+        run: python -m tools.github_actions.jobs.changelog
+        env:
+          CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
+          PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
+          MSI_NAME: ${{ needs.init.outputs.msi_name }}
+          MSI_HASH: ${{ needs.build_binaries.outputs.msi_hash }}
+          EXE_HASH: ${{ needs.build_binaries.outputs.exe_hash }}
 
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v4
         with:
-          name: changelog_${{ needs.init.outputs.id }}
+          name: changelog_${{ needs.init.outputs.artifact_id }}
           path: artifacts
           if-no-files-found: error
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-  # Open the dev -> main release PR for a manual merge.
-  open_main_pr:
-    name: Open pull request to main
-    needs: [init, test_binaries, changelog]
-    runs-on: windows-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Open PR (manual merge)
-        run: |
-          $changelogTitle = "Release ${{ needs.init.outputs.current_tags }}"
-          $changelogBody = Get-Content -Raw "artifacts\changelog_${{ needs.init.outputs.id }}\${{ env.CHANGELOG_NAME }}"
-          git fetch --all
-          gh pr create -B main -H dev -t "$changelogTitle" -b "$changelogBody" -l "release"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Create the GitHub release with the binaries, hashes, and changelog.
   publish_github:
     name: Publish to github
     needs: [init, test_binaries, changelog]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -286,19 +203,19 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: ${{ needs.init.outputs.current_tags }}
-          tag_name: ${{ needs.init.outputs.current_tags }}
-          body_path: artifacts/changelog_${{ needs.init.outputs.id }}/${{ env.CHANGELOG_NAME }}
+          name: ${{ needs.init.outputs.current_tag }}
+          tag_name: ${{ needs.init.outputs.current_tag }}
+          body_path: artifacts/changelog_${{ needs.init.outputs.artifact_id }}/changelog.md
           token: ${{ secrets.ACTIONS_TOKEN }}
           prerelease: false
           files: |
-            artifacts/build_${{ needs.init.outputs.id }}/${{ env.HASHES_NAME }}
-            artifacts/build_${{ needs.init.outputs.id }}/${{ needs.init.outputs.msi_name }}
+            artifacts/build_${{ needs.init.outputs.artifact_id }}/hashes.sha256
+            artifacts/build_${{ needs.init.outputs.artifact_id }}/${{ needs.init.outputs.msi_name }}
 
-  # Build and upload the wheel and source distribution to PyPI.
   publish_pypi:
     name: Publish to pypi
     needs: [init, test_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -308,13 +225,12 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: .python-version
 
-      - name: Install requirements
+      - name: Install build and twine
         run: |
           git fetch origin ${{ github.ref_name }}
-          python -m pip install --upgrade --disable-pip-version-check pip
-          python -m pip install --upgrade build twine
+          python -m pip install --upgrade --disable-pip-version-check pip build twine
 
       - name: Build wheel and source distributions
         run: python -m build
@@ -323,3 +239,22 @@ jobs:
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: twine upload --verbose -u '__token__' dist/*
+
+  sync_dev:
+    name: Fast-forward dev to main
+    needs: [init, publish_github, publish_pypi]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - run: python -m tools.github_actions.jobs.sync_dev
