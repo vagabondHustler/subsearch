@@ -54,7 +54,8 @@ def get_executable() -> list[Executable]:
 def get_options() -> dict[str, Any]:
     data = _get_data_table()
     bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": data}
-    build_exe = {"excludes": [*_libs_to_exclude]}
+    license_files = [("LICENSE", "LICENSE"), ("THIRD-PARTY-LICENSES.md", "THIRD-PARTY-LICENSES.md")]
+    build_exe = {"excludes": [*_libs_to_exclude], "include_files": license_files}
     options = {"build_exe": build_exe, "bdist_msi": bdist_msi}
     return options
 

@@ -19,6 +19,7 @@
 - [Clone from github](#clone)
 - [Install from MSI Package](#msi)
 - [Acknowledgements](#thanks)
+- [License](#license)
 
 #### FAQ Table of Contents
 
@@ -111,3 +112,13 @@ The following repositories provided templates, scripts, inspiration, themes, etc
 - [zavoloklom/material-design-iconic-font](https://github.com/zavoloklom/material-design-iconic-font) // icons
 - [rdbende/Sun-Valley-ttk-theme](https://github.com/rdbende/Sun-Valley-ttk-theme) // base theme
 - [TransparentLC](https://github.com/TransparentLC) // spritesheet_generator.js
+
+## License<a name = "license"></a>
+
+Subsearch is licensed under the GNU General Public License v3.0 (or later);
+see `LICENSE` for the full text.
+
+The distributed application bundles third-party components, listed in
+`THIRD-PARTY-LICENSES.md`. Notably it uses PySide6 (Qt for Python) under the
+LGPL v3, and PySide6-Fluent-Widgets under the GPL v3 — the latter is why
+Subsearch as a whole is distributed under the GPL v3.

@@ -6,7 +6,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, TransparentToolButton
 
-from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION
+from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
 from subsearch.ui.cards.cards import SettingsCard
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_caption_font
@@ -16,25 +16,31 @@ BUTTON_SIZE = 32
 ICON_SPACING = 48
 
 ISSUE_TEMPLATE_URL = "https://github.com/vagabondHustler/subsearch/issues/new"
+THIRD_PARTY_LICENSES_URL = "https://github.com/vagabondHustler/subsearch/blob/main/THIRD-PARTY-LICENSES.md"
+
+
+NO_VIDEO_FILE = "none (running in configure mode, no video file was opened)"
+
+
+def media_filename() -> str:
+    if VIDEO_FILE.file_exist:
+        return f"{VIDEO_FILE.filename}{VIDEO_FILE.file_extension}"
+    return NO_VIDEO_FILE
 
 
 def build_prefilled_issue_body() -> str:
-    ran_from = "executable" if DEVICE_INFO.mode == "executable" else "source"
     template = (
-        "**Describe the bug**\n"
-        "A clear and concise description of what the bug is.\n\n"
-        "**To Reproduce**\n"
-        "Steps to reproduce the behavior:\n\n"
-        "**Expected behavior**\n"
-        "A clear and concise description of what you expected to happen.\n\n"
-        "**Desktop (please complete the following information):**\n"
-        f" - OS: {DEVICE_INFO.platform}\n"
-        f" - Python version: {DEVICE_INFO.python}\n"
-        f" - Ran from: {ran_from}\n"
-        " - media filename: \n"
-        f" - Version: {VERSION}\n\n"
-        "**Additional context**\n"
-        "Add any other context about the problem here.\n"
+        "#### Description:\n\n"
+        "A clear description of the issue and when it occurs.\n\n"
+        "#### Steps to reproduce:\n\n"
+        "The steps required to trigger the behaviour.\n\n"
+        "#### Environment:\n\n"
+        f"- OS: {DEVICE_INFO.platform}\n"
+        f"- Python version: {DEVICE_INFO.python}\n"
+        f"- Filename: {media_filename()}\n"
+        f"- App version: {VERSION}\n\n"
+        "#### Additional context:\n\n"
+        "Any other details, logs, or screenshots that may help.\n"
     )
     return template
 
@@ -55,6 +61,10 @@ def open_log_directory() -> None:
     QDesktopServices.openUrl(QUrl.fromLocalFile(str(FILE_PATHS.log.parent)))
 
 
+def open_third_party_licenses() -> None:
+    webbrowser.open(THIRD_PARTY_LICENSES_URL)
+
+
 class BugReportCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Bug report", parent)
@@ -69,12 +79,18 @@ class BugReportCard(SettingsCard):
         )
         log_button.clicked.connect(open_log_directory)
 
+        licenses_button, licenses_column = self._build_labelled_button(
+            LucideIcon.SCROLL_TEXT, "View licenses"
+        )
+        licenses_button.clicked.connect(open_third_party_licenses)
+
         content_row = QHBoxLayout()
         content_row.setContentsMargins(16, 8, 16, 4)
         content_row.setSpacing(ICON_SPACING)
         content_row.addStretch(1)
         content_row.addWidget(report_column, alignment=Qt.AlignmentFlag.AlignVCenter)
         content_row.addWidget(log_column, alignment=Qt.AlignmentFlag.AlignVCenter)
+        content_row.addWidget(licenses_column, alignment=Qt.AlignmentFlag.AlignVCenter)
         content_row.addStretch(1)
         self.body_layout.addLayout(content_row)
 
