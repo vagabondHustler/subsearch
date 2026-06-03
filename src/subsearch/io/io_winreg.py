@@ -46,7 +46,7 @@ def get_command_value() -> str:
 def get_icon_value() -> str:
     show_icon: str = io_toml.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu_icon")
     if show_icon:
-        return str(APP_PATHS.gui_assets / "subsearch.ico")
+        return str(APP_PATHS.ui_assets / "subsearch.ico")
     else:
         return ""
 

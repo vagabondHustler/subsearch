@@ -2,8 +2,8 @@ import sys
 import webbrowser
 
 from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
-from PySide6.QtGui import QCloseEvent, QColor, QFont, QIcon
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+from PySide6.QtGui import QCloseEvent, QColor, QIcon
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import (
     FluentWindow,
     NavigationItemPosition,
@@ -32,6 +32,7 @@ from subsearch.ui.download_manager import DownloadManagerInterface
 from subsearch.ui.lucide import LucideIcon
 from subsearch.ui.update_card import UpdateCard
 from subsearch.ui.navigation import enlarge_navigation_icons
+from subsearch.ui.qt_application import get_application
 from subsearch.ui.theme_patch import force_fixed_accent_color
 from subsearch.ui.typography import apply_body_font
 
@@ -67,7 +68,7 @@ class SettingsWindow(FluentWindow):
     def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
         super().__init__()
         self.setWindowTitle(f"Subsearch {VERSION}")
-        self.setWindowIcon(QIcon(str(APP_PATHS.gui_assets / "subsearch.ico")))
+        self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.resize(900, 760)
         self.setMicaEffectEnabled(True)
         self._align_title_bar_with_navigation()
@@ -161,16 +162,7 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
 
 def open_settings_window(subtitles: list[Subtitle] | None = None) -> list[Subtitle]:
     qInstallMessageHandler(_suppress_point_size_warning)
-    QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
-    application = QApplication.instance()
-    if not isinstance(application, QApplication):
-        application = QApplication(sys.argv)
-    application_font = QFont("Segoe UI")
-    application_font.setPixelSize(12)
-    application_font.setWeight(QFont.Weight.DemiBold)
-    application.setFont(application_font)
+    application = get_application()
     setTheme(Theme.DARK)
     setThemeColor(ACCENT_COLOR)
     force_fixed_accent_color()

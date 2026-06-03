@@ -4,12 +4,11 @@ from pathlib import Path
 from typing import Any, Callable
 
 from subsearch import threading_utils, ui
-from subsearch.decorators import gui as gui_decorators
+from subsearch.ui.system_tray import SystemTray
 from subsearch.decorators.orchestration import call_func
 from subsearch.logger import log
 from subsearch.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
-from subsearch.gui import system_tray
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.io import (
     imdb_lookup,
@@ -51,8 +50,7 @@ class Initializer:
         log.dataclass(self.app_config, level="debug", print_allowed=False)
 
         log.stdout("Initializing system tray icon", level="debug")
-        gui_decorators.enable_system_tray = self.app_config.system_tray
-        self.system_tray = system_tray.SystemTray()
+        self.system_tray = SystemTray(enabled=self.app_config.system_tray)
         self.system_tray.start()
 
         if self.file_exist:

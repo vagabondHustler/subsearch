@@ -21,9 +21,7 @@ class ProviderAlphaCodeData:
 class AppPaths:
     home: Path
     data: Path
-    gui: Path
-    gui_assets: Path
-    gui_styles: Path
+    ui_assets: Path
     providers: Path
     io: Path
     tmp_dir: Path

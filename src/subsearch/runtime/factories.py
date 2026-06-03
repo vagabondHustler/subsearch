@@ -21,9 +21,7 @@ def get_app_paths() -> AppPaths:
     return AppPaths(
         home=app_home,
         data=app_home / "data",
-        gui=app_home / "gui",
-        gui_assets=app_home / "gui" / "resources" / "assets",
-        gui_styles=app_home / "gui" / "resources" / "styles",
+        ui_assets=app_home / "ui" / "assets",
         providers=app_home / "providers",
         io=app_home / "io",
         tmp_dir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
