@@ -7,16 +7,14 @@ from PySide6.QtXml import QDomDocument
 from qfluentwidgets import FluentIconBase, Theme, getIconColor
 from qfluentwidgets.common.icon import SvgIconEngine, drawSvgIcon
 
-from subsearch.runtime.constants import APP_PATHS
+from subsearch.ui.icons_data import ICON_SOURCES
 
-ICON_DIRECTORY = APP_PATHS.gui.parent / "ui" / "icons"
 STROKE_TAGS = ("path", "circle", "line", "polyline", "polygon", "rect")
 
 
-def _recolored_svg(icon_path: str, color: str) -> bytes:
+def _recolored_svg(svg_source: str, color: str) -> bytes:
     dom = QDomDocument()
-    with open(icon_path, "r", encoding="utf-8") as svg_file:
-        dom.setContent(svg_file.read())
+    dom.setContent(svg_source)
     root = dom.documentElement()
     root.setAttribute("stroke", color)
     for tag in STROKE_TAGS:
@@ -27,37 +25,33 @@ def _recolored_svg(icon_path: str, color: str) -> bytes:
 
 
 class LucideIcon(FluentIconBase, Enum):
-    SUBSEARCH = "subsearch"
     TEXT_SEARCH = "text-search"
     MONITOR_COG = "monitor-cog"
     FOLDER_DOWN = "folder-down"
     FOLDER_OPEN = "folder-open"
     SETTINGS = "settings"
-    INFO = "info"
-    CIRCLE_QUESTION_MARK = "circle-question-mark"
     LIGHTBULB = "lightbulb"
-    SAVE = "save"
     CIRCLE_CHECK_BIG = "circle-check-big"
     HEART_HANDSHAKE = "heart-handshake"
-    ELLIPSIS = "ellipsis"
     PACKAGE_SEARCH = "package-search"
-    PACKAGE_PLUS = "package-plus"
     PACKAGE_OPEN = "package-open"
     CIRCLE = "circle"
     CIRCLE_X = "circle-x"
     CIRCLE_DOT_DASHED = "circle-dot-dashed"
-    LOADER = "loader"
+
+    def source(self) -> str:
+        return ICON_SOURCES[self.value]
 
     def path(self, theme: Theme = Theme.AUTO) -> str:
-        return str(ICON_DIRECTORY / f"{self.value}.svg")
+        return self.value
 
     def icon(self, theme: Theme = Theme.AUTO, color: QColor | None = None) -> QIcon:
         stroke_color = QColor(color).name() if color else getIconColor(theme)
-        return QIcon(SvgIconEngine(_recolored_svg(self.path(), stroke_color).decode()))
+        return QIcon(SvgIconEngine(_recolored_svg(self.source(), stroke_color).decode()))
 
     def render(self, painter, rect, theme=Theme.AUTO, indexes=None, **attributes) -> None:
         stroke_color = attributes.get("fill") or attributes.get("stroke") or getIconColor(theme)
-        drawSvgIcon(_recolored_svg(self.path(), stroke_color), painter, rect)
+        drawSvgIcon(_recolored_svg(self.source(), stroke_color), painter, rect)
 
 
 def lucide_qicon(icon: LucideIcon, color: str) -> QIcon:
@@ -65,7 +59,7 @@ def lucide_qicon(icon: LucideIcon, color: str) -> QIcon:
 
 
 def lucide_rotated_qicon(icon: LucideIcon, color: str, angle: float, size: int = 32) -> QIcon:
-    renderer = QSvgRenderer(_recolored_svg(icon.path(), QColor(color).name()))
+    renderer = QSvgRenderer(_recolored_svg(icon.source(), QColor(color).name()))
     pixmap = QPixmap(QSize(size, size))
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)

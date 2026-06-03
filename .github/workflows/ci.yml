@@ -48,6 +48,7 @@ jobs:
           filters: |
             src:
               - "src/**"
+              - "assets/**"
 
   # Run the test suite via tox.
   tox:
