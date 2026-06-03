@@ -14,7 +14,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.model import Subtitle
-from subsearch.runtime.constants import APP_PATHS, VERSION
+from subsearch.runtime.constants import APP_PATHS
 from subsearch.ui.cards import (
     ApplicationCard,
     DownloadManagerCard,
@@ -40,9 +40,7 @@ TEXT_COLOR = "#c8c8c7"
 ACCENT_COLOR = "#c8c8c7"
 GITHUB_URL = "https://github.com/vagabondHustler/subsearch"
 NAVIGATION_EXPAND_WIDTH = 242
-TITLE_BAR_HEIGHT = 48
-NAVIGATION_ICON_LEFT = 14
-NAVIGATION_ICON_TEXT_GAP = 12
+NAVIGATION_TOP_MARGIN = 8
 
 
 class SettingsInterface(SingleDirectionScrollArea):
@@ -67,11 +65,11 @@ class SettingsInterface(SingleDirectionScrollArea):
 class SettingsWindow(FluentWindow):
     def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
         super().__init__()
-        self.setWindowTitle(f"Subsearch {VERSION}")
+        self.setWindowTitle("Subsearch")
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.resize(900, 760)
         self.setMicaEffectEnabled(True)
-        self._align_title_bar_with_navigation()
+        self._clear_title_bar()
 
         file_extensions_card = FileExtensionsCard()
 
@@ -112,6 +110,13 @@ class SettingsWindow(FluentWindow):
         self.download_manager_interface = DownloadManagerInterface(subtitles)
         download_manager_interface = self.download_manager_interface
 
+        self.navigationInterface.addItem(
+            routeKey="header",
+            icon=self.windowIcon(),
+            text="Subsearch",
+            selectable=False,
+        )
+
         self.addSubInterface(search_interface, LucideIcon.TEXT_SEARCH, "Search", isTransparent=True)
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
         self.addSubInterface(
@@ -130,9 +135,9 @@ class SettingsWindow(FluentWindow):
 
         self._configure_navigation()
 
-    def _align_title_bar_with_navigation(self) -> None:
-        self.titleBar.hBoxLayout.setContentsMargins(NAVIGATION_ICON_LEFT, 0, 0, 0)
-        self.titleBar.hBoxLayout.setSpacing(NAVIGATION_ICON_TEXT_GAP)
+    def _clear_title_bar(self) -> None:
+        getattr(self.titleBar, "iconLabel").hide()
+        getattr(self.titleBar, "titleLabel").hide()
 
     def _configure_navigation(self) -> None:
         panel = self.navigationInterface.panel
@@ -140,11 +145,12 @@ class SettingsWindow(FluentWindow):
         self.navigationInterface.setMenuButtonVisible(False)
         self.navigationInterface.setReturnButtonVisible(False)
         panel.setCollapsible(False)
-        panel.vBoxLayout.setContentsMargins(0, TITLE_BAR_HEIGHT, 0, 5)
+        panel.vBoxLayout.setContentsMargins(0, NAVIGATION_TOP_MARGIN, 0, 5)
         text_color = QColor(TEXT_COLOR)
         for navigation_item in panel.items.values():
             navigation_item.widget.setTextColor(text_color, text_color)
             apply_body_font(getattr(navigation_item.widget, "itemWidget"))
+        panel.items["header"].widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         enlarge_navigation_icons(panel)
 
     def closeEvent(self, e: QCloseEvent) -> None:
