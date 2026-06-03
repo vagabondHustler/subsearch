@@ -74,6 +74,7 @@ def get_default_app_config() -> dict[str, Any]:
             "move_all": False,
             "target_path": ".",
             "path_resolution": "relative",
+            "create_missing_folder": True,
         },
         "application": {
             "show_terminal": False,

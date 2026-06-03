@@ -15,7 +15,7 @@ from subsearch.io.http import get_cloudscraper
 from subsearch.io import string_parser
 
 
-def create_path_from_string(string: str, path_resolution: str) -> Path:
+def create_path_from_string(string: str, path_resolution: str, create_missing_folder: bool = True) -> Path:
     path = VIDEO_FILE.file_directory
     if path_resolution == "relative":
         if string == ".":
@@ -28,6 +28,10 @@ def create_path_from_string(string: str, path_resolution: str) -> Path:
             path = VIDEO_FILE.file_directory.parent.joinpath(string[3:])
     elif path_resolution == "absolute":
         path = Path(string)
+
+    if not path.is_dir() and not create_missing_folder:
+        log.stdout(f"Destination folder {path} does not exist, moving to {VIDEO_FILE.file_directory} instead", level="warning")
+        return VIDEO_FILE.file_directory
 
     path.mkdir(parents=True, exist_ok=True)
     return path

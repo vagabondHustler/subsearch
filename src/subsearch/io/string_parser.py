@@ -1,9 +1,10 @@
 import re
+from pathlib import Path
 from typing import Any
 
 from num2words import num2words
 
-from subsearch._logging import log
+from subsearch.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.model import (
     AppConfig,
@@ -260,7 +261,19 @@ def valid_path(input_str, path_resolution) -> bool:
     pattern = patterns.get(path_resolution)
     if pattern is None:
         return False
-    return bool(re.match(pattern, input_str))
+    if not re.match(pattern, input_str):
+        return False
+    if path_resolution == "absolute":
+        return drive_exists(input_str)
+    return True
+
+
+def drive_exists(input_str: str) -> bool:
+    return Path(f"{input_str[0]}:\\").exists()
+
+
+def detect_path_resolution(input_str: str) -> str:
+    return "absolute" if re.match(r"^[a-zA-Z]:\\", input_str) else "relative"
 
 
 def valid_api_request_input(input: str) -> bool:
