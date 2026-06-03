@@ -28,9 +28,9 @@ from qfluentwidgets.components.widgets.line_edit import CompleterMenu
 
 from subsearch.io import io_toml
 from subsearch.runtime.constants import FILE_PATHS
-from subsearch.ui.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.typography import (
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
     CAPTION_FONT_SIZE,
     TEXT_COLOR,

@@ -4,8 +4,8 @@ from qfluentwidgets import NavigationPanel
 from qfluentwidgets.common.color import autoFallbackThemeColor
 from qfluentwidgets.common.icon import drawIcon, isDarkTheme
 
-from subsearch.ui.lucide import LucideIcon
-from subsearch.ui.typography import TEXT_COLOR
+from subsearch.ui.icons.lucide import LucideIcon
+from subsearch.ui.theme.typography import TEXT_COLOR
 
 ICON_SIZE = 24
 NAVIGATION_ITEM_HEIGHT = 36

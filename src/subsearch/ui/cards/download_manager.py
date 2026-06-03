@@ -8,17 +8,17 @@ from subsearch.io import io_file_system, io_toml, string_parser
 from subsearch.model import Subtitle
 from subsearch.providers import subsource
 from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
-from subsearch.ui.cards import (
+from subsearch.ui.cards.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,
     CARD_FILL_COLOR,
     CARD_PANEL_OPACITY,
 )
-from subsearch.ui.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
-from subsearch.ui.separators import make_fading_separator
-from subsearch.ui.setting_rows import HelpButton
-from subsearch.ui.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font, apply_title_font
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
+from subsearch.ui.theme.separators import make_fading_separator
+from subsearch.ui.widgets.setting_rows import HelpButton
+from subsearch.ui.theme.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font, apply_title_font
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
