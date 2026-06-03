@@ -11,7 +11,7 @@ from packaging.version import Version
 
 from subsearch.logger import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
-from subsearch.io import io_file_system
+from subsearch.io import file_system
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,7 +32,7 @@ def find_semantic_version(version: str) -> str:
 
 def scrape_github() -> str:
     scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
-    url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/version.py"
+    url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/runtime/version.py"
     source = scraper.get(url)
     scontent = source.content
     file_content = str(scontent)
@@ -95,7 +95,7 @@ def download_installer(
             f"Failed to download MSI file. HTTP Status Code: {response.status_code}", level="error"
         )
         raise Exception(response.status_code)
-    io_file_system.download_response(msi_package_path, response, on_progress)
+    file_system.download_response(msi_package_path, response, on_progress)
     log.stdout(f"MSI file downloaded to: {msi_package_path}")
     return msi_package_path
 

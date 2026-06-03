@@ -1,13 +1,11 @@
 import platform
-import socket
 import sys
 import tempfile
 from itertools import product
 from pathlib import Path
 from typing import Any, no_type_check
 
-from subsearch.guid import __guid__
-from subsearch.version import __version__
+from subsearch.runtime.version import __version__
 from subsearch.model import (
     AppPaths,
     FilePaths,
@@ -15,6 +13,7 @@ from subsearch.model import (
     VideoFile,
     WindowsRegistryPaths,
 )
+from subsearch.runtime.static_values import get_supported_file_ext, get_supported_providers
 
 
 def get_app_paths() -> AppPaths:
@@ -25,6 +24,7 @@ def get_app_paths() -> AppPaths:
         ui_assets=app_home / "ui" / "assets",
         providers=app_home / "providers",
         io=app_home / "io",
+        parsing=app_home / "parsing",
         tmp_dir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
         appdata_subsearch=Path.home() / "AppData" / "Local" / "Subsearch",
     )
@@ -134,31 +134,6 @@ def get_system_info() -> SystemInfo:
     return SystemInfo(platform_, mode, python, __version__)
 
 
-def get_supported_file_ext() -> list[str]:
-    exts = [
-        "avi",
-        "mp4",
-        "mkv",
-        "mpg",
-        "mpeg",
-        "mov",
-        "rm",
-        "vob",
-        "wmv",
-        "flv",
-        "3gp",
-        "3g2",
-        "swf",
-        "mswmm",
-    ]
-    return exts
-
-
-def get_supported_providers() -> list[str]:
-    providers = ["opensubtitles", "yifysubtitles_site", "subsource_site"]
-    return providers
-
-
 def get_windows_registry_paths() -> WindowsRegistryPaths:
     registry_paths = WindowsRegistryPaths(
         classes=r"Software\Classes",
@@ -169,15 +144,3 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
         long_paths=r"SYSTEM\CurrentControlSet\Control\FileSystem",
     )
     return registry_paths
-
-
-def get_computer_name() -> str:
-    return socket.gethostname()
-
-
-def get_app_version() -> str:
-    return str(__version__)
-
-
-def get_guid() -> str:
-    return str(__guid__)

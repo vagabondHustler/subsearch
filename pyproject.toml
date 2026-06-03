@@ -65,7 +65,7 @@
     where = ["src"]
 
 [tool.setuptools.dynamic]
-    version = {attr = "subsearch.version.__version__"}
+    version = {attr = "subsearch.runtime.version.__version__"}
 
 [project.optional-dependencies]
     build = [
@@ -103,7 +103,7 @@
     update_changelog_on_bump = false
     annotated_tag = true
     version_files = [
-        "src/subsearch/version.py:__version__",
+        "src/subsearch/runtime/version.py:__version__",
     ]
 
 [tool.black]

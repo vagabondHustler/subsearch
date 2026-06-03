@@ -7,7 +7,7 @@ from pathlib import Path
 
 import psutil
 
-from subsearch.version import __version__
+from subsearch.runtime.version import __version__
 from tools.github_actions.constants import (
     ARTIFACTS_PATH,
     CONFIG_TOML_PATH,
