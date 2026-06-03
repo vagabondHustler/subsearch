@@ -2,7 +2,7 @@ import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
 
-class FindImdbID:
+class ImdbIdLookup:
     title: str
     year: int
     tvseries: bool

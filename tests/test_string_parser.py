@@ -1,5 +1,6 @@
 from subsearch.runtime.constants import FILE_PATHS
-from subsearch.io import imdb_lookup, io_toml, string_parser
+from subsearch.io import toml_file
+from subsearch.parsing import imdb_lookup, release_parser
 from tests import fixture_data
 
 
@@ -10,12 +11,12 @@ def test_str_parser_movie() -> None:
     show_720p = "the.foo.bar.s01e01.720p.web.h264-foobar"
     no_match = "then.fooing.baring.2022.720p.webby.h265-f00bar"
 
-    pct0 = string_parser.calculate_match(movie_1080p, movie_720p)
-    pct1 = string_parser.calculate_match(show_1080p, show_720p)
-    pct2 = string_parser.calculate_match(movie_1080p, show_1080p)
-    pct3 = string_parser.calculate_match(show_1080p, movie_1080p)
-    pct4 = string_parser.calculate_match(movie_1080p, movie_1080p)
-    pct5 = string_parser.calculate_match(movie_1080p, no_match)
+    pct0 = release_parser.calculate_match(movie_1080p, movie_720p)
+    pct1 = release_parser.calculate_match(show_1080p, show_720p)
+    pct2 = release_parser.calculate_match(movie_1080p, show_1080p)
+    pct3 = release_parser.calculate_match(show_1080p, movie_1080p)
+    pct4 = release_parser.calculate_match(movie_1080p, movie_1080p)
+    pct5 = release_parser.calculate_match(movie_1080p, no_match)
 
     assert pct0 == 100
     assert pct1 == 100
@@ -27,7 +28,7 @@ def test_str_parser_movie() -> None:
 
 def test_string_parser_movie() -> None:
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    release_data = string_parser.get_release_data(filename)
+    release_data = release_parser.get_release_data(filename)
 
     assert release_data.title == "the foo bar"
     assert release_data.year == 2021
@@ -42,7 +43,7 @@ def test_string_parser_movie() -> None:
 
 def test_string_parser_show() -> None:
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    release_data = string_parser.get_release_data(filename)
+    release_data = release_parser.get_release_data(filename)
 
     assert release_data.title == "the foo bar"
     assert release_data.year == 0
@@ -57,7 +58,7 @@ def test_string_parser_show() -> None:
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    release_data = string_parser.get_release_data(filename)
+    release_data = release_parser.get_release_data(filename)
 
     assert release_data.title == "the foo bar 1080p web h264"
     assert release_data.year == 0
@@ -71,12 +72,12 @@ def test_string_parser_bad_filename() -> None:
 
 
 def test_provider_urls_movie(monkeypatch) -> None:
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_MOVIE)
-    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    monkeypatch.setattr(release_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_MOVIE)
+    app_config = toml_file.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
-    release_data = string_parser.get_release_data(filename)
-    language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
-    create_provider_urls = string_parser.CreateProviderUrls(
+    release_data = release_parser.get_release_data(filename)
+    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    create_provider_urls = release_parser.CreateProviderUrls(
         app_config,
         release_data,
         language_data,
@@ -92,12 +93,12 @@ def test_provider_urls_movie(monkeypatch) -> None:
 
 
 def test_provider_urls_series(monkeypatch) -> None:
-    monkeypatch.setattr(string_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_SERIES)
-    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    monkeypatch.setattr(release_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_SERIES)
+    app_config = toml_file.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
-    release_data = string_parser.get_release_data(filename)
-    language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
-    create_provider_urls = string_parser.CreateProviderUrls(
+    release_data = release_parser.get_release_data(filename)
+    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    create_provider_urls = release_parser.CreateProviderUrls(
         app_config,
         release_data,
         language_data,
@@ -113,10 +114,10 @@ def test_provider_urls_series(monkeypatch) -> None:
 
 
 def test_imdb_movie() -> None:
-    imdb = imdb_lookup.FindImdbID("Arctic", 2019, False)
+    imdb = imdb_lookup.ImdbIdLookup("Arctic", 2019, False)
     assert imdb.imdb_id == "tt6820256"
 
 
 def test_imdb_tvseries() -> None:
-    imdb = imdb_lookup.FindImdbID("Breaking bad", 0, True)
+    imdb = imdb_lookup.ImdbIdLookup("Breaking bad", 0, True)
     assert imdb.imdb_id == "tt0903747"

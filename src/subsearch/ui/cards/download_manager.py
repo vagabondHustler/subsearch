@@ -4,7 +4,8 @@ from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
 from subsearch.logger import log
-from subsearch.io import io_file_system, io_toml, string_parser
+from subsearch.io import file_system, toml_file
+from subsearch.parsing import release_parser
 from subsearch.model import Subtitle
 from subsearch.providers import subsource
 from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
@@ -126,8 +127,8 @@ class DownloadManagerInterface(QWidget):
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         card.viewLayout.addWidget(self.list_widget, stretch=1)
         self.items_by_subtitle: dict[int, Subtitle] = {}
-        accept_threshold = io_toml.load_toml_value(FILE_PATHS.config, "search.accept_threshold")
-        automatic_downloads = io_toml.load_toml_value(FILE_PATHS.config, "download.automatic")
+        accept_threshold = toml_file.load_toml_value(FILE_PATHS.config, "search.accept_threshold")
+        automatic_downloads = toml_file.load_toml_value(FILE_PATHS.config, "download.automatic")
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
             item.setFont(self._list_font())
@@ -171,10 +172,10 @@ class DownloadManagerInterface(QWidget):
 
     def _download(self, item: QListWidgetItem, subtitle: Subtitle) -> None:
         try:
-            if string_parser.valid_filename(subtitle.subtitle_name):
-                subtitle.subtitle_name = string_parser.fix_filename(subtitle.subtitle_name)
-            io_file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
-            io_file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+            if release_parser.valid_filename(subtitle.subtitle_name):
+                subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
+            file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
+            file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
             zip_archive = (
                 VIDEO_FILE.tmp_dir
                 / f"{subtitle.provider_name}_{subtitle.subtitle_name}_{self.download_number}.zip"

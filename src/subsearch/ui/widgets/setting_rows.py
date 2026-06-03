@@ -26,7 +26,7 @@ from qfluentwidgets import (
 )
 from qfluentwidgets.components.widgets.line_edit import CompleterMenu
 
-from subsearch.io import io_toml
+from subsearch.io import toml_file
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
@@ -300,11 +300,11 @@ class SettingRow(QFrame):
 
 
 def read_value(config_key: str):
-    return io_toml.load_toml_value(FILE_PATHS.config, config_key)
+    return toml_file.load_toml_value(FILE_PATHS.config, config_key)
 
 
 def write_value(config_key: str, value) -> None:
-    io_toml.update_toml_key(FILE_PATHS.config, config_key, value)
+    toml_file.update_toml_key(FILE_PATHS.config, config_key, value)
 
 
 class SwitchRow(SettingRow):

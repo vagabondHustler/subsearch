@@ -1,12 +1,12 @@
 from selectolax.parser import Node
 
 from subsearch.io import http
-from subsearch.providers import data_container
+from subsearch.providers import provider_helper
 
 
-class YifySubtitlesScraper(data_container.ProviderHelper):
+class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        data_container.ProviderHelper.__init__(self, *args, **kwargs)
+        provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
     def get_subtitles(self) -> None:

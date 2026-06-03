@@ -3,12 +3,12 @@ from typing import Any
 
 from subsearch.logger import log
 from subsearch.io import http
-from subsearch.providers import data_container
+from subsearch.providers import provider_helper
 
 
-class OpenSubtitlesScraper(data_container.ProviderHelper):
+class OpenSubtitlesScraper(provider_helper.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        data_container.ProviderHelper.__init__(self, *args, **kwargs)
+        provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
     def is_opensubtitles_down(self, tree: Any) -> bool:

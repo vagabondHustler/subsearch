@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.io import io_file_system, io_winreg
+from subsearch.io import file_system, windows_registry
 
 CWD = Path(Path.cwd()) / "tests" / "resources"
 SUBS = Path(CWD) / "subs"
@@ -18,7 +18,7 @@ def test_video_file_False() -> None:
 
 
 def test_get_hash() -> None:
-    hash0 = io_file_system.get_file_hash(CWD / "fake.test.movie.2022.1080p-group.mkv")
-    hash1 = io_file_system.get_file_hash(CWD / "fake.none.hash.movie.mkv")
+    hash0 = file_system.get_file_hash(CWD / "fake.test.movie.2022.1080p-group.mkv")
+    hash1 = file_system.get_file_hash(CWD / "fake.none.hash.movie.mkv")
     assert hash0 == "43a17047da7e960e"
     assert hash1 == ""

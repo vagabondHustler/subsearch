@@ -4,7 +4,7 @@ from typing import Any
 from subsearch.logger import log
 
 
-class CreateThread(threading.Thread):
+class WorkerThread(threading.Thread):
     def __init__(self, *args, **kwargs) -> None:
         self._target = None
         self._args = ()
@@ -35,11 +35,11 @@ class CreateThread(threading.Thread):
         return self.return_value
 
 
-def _create_threads(*tasks) -> None:
+def run_in_threads(*tasks) -> None:
     threads = []
     for target in tasks:
         name = f"{target.__name__.lower()}"
-        task_thread = CreateThread(target=target, name=name)
+        task_thread = WorkerThread(target=target, name=name)
         task_thread.start()
         threads.append(task_thread)
 

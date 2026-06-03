@@ -4,6 +4,7 @@ from requests import Response, exceptions
 from selectolax.parser import HTMLParser
 
 from subsearch.logger import log
+from subsearch.parsing.html_parser import parse_html_response
 
 
 def get_cloudscraper() -> CloudScraper:
@@ -16,10 +17,6 @@ def send_request(url: str, scraper: CloudScraper, timeout: tuple[int, int], head
     return scraper.get(url, timeout=timeout, headers=header)
 
 
-def parse_scraper_response(response: Response) -> HTMLParser:
-    return HTMLParser(response.text)
-
-
 def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser | None:
     scraper = get_cloudscraper()
     try:
@@ -27,4 +24,4 @@ def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> 
     except exceptions.Timeout as e:
         log.stdout(e, level="warning", print_allowed=False)
         return None
-    return parse_scraper_response(response)
+    return parse_html_response(response)

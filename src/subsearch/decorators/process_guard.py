@@ -1,16 +1,15 @@
 import ctypes
-import sys
 from typing import Any, Callable
 
 from subsearch import exceptions
-from subsearch.io import io_toml
+from subsearch.io import toml_file
 from subsearch.runtime.constants import FILE_PATHS, GUID
 
 
 def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
         try:
-            if not io_toml.load_toml_value(FILE_PATHS.config, "application.single_instance"):
+            if not toml_file.load_toml_value(FILE_PATHS.config, "application.single_instance"):
                 return func()
         except FileNotFoundError:
             pass
@@ -31,11 +30,3 @@ def apply_mutex(func: Callable) -> Callable:
             kernel32.ReleaseMutex(mutex)
 
     return inner
-
-
-def except_hook(func, excepthook_) -> Callable[..., Any]:
-    def wrapper(*args, **kwargs) -> Any:
-        sys.excepthook = excepthook_
-        return func(*args, **kwargs)
-
-    return wrapper

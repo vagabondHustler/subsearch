@@ -24,6 +24,7 @@ class AppPaths:
     ui_assets: Path
     providers: Path
     io: Path
+    parsing: Path
     tmp_dir: Path
     appdata_subsearch: Path
 

@@ -2,12 +2,12 @@ import functools
 from typing import Any, Callable
 
 
-def call_func(func) -> Callable[..., Any]:
+def run_if_conditions_met(func) -> Callable[..., Any]:
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         instance = args[0]
-        if not instance.call_conditions.call_func(func.__name__):
+        if not instance.call_conditions.conditions_met(func.__name__):
             return None
         return func(*args, **kwargs)
 

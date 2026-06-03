@@ -1,7 +1,7 @@
 import threading
 from typing import Any
 
-from subsearch.io import string_parser
+from subsearch.parsing import release_parser
 from subsearch.logger import log
 from subsearch.model import (
     AppConfig,
@@ -61,10 +61,10 @@ class ProviderDataContainer:
         self.ok_season_episode_pattern = self._ok_season_episode_pattern()
 
     def _season_no_padding(self) -> str:
-        return string_parser.remove_padded_zero(self.release_data.season)
+        return release_parser.remove_padded_zero(self.release_data.season)
 
     def _episode_no_padding(self) -> str:
-        return string_parser.remove_padded_zero(self.release_data.episode)
+        return release_parser.remove_padded_zero(self.release_data.episode)
 
     def _ok_season_episode_pattern(self) -> list[str]:
         season_episode_pattern_0 = [
@@ -139,7 +139,7 @@ class _PrepareSubtitleDownload:
         self.populate_correct_subtitle_list()
 
     def set_percentage_result(self) -> None:
-        self.precentage_result = string_parser.calculate_match(self.subtitle_name, self.release_name)
+        self.precentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
 
     def log_subtitle_match(self) -> None:
         log.subtitle_match(

@@ -12,7 +12,7 @@ from subsearch.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.model import Subtitle
 from subsearch.io.http import get_cloudscraper
-from subsearch.io import string_parser
+from subsearch.parsing import release_parser
 
 
 def create_path_from_string(string: str, path_resolution: str, create_missing_folder: bool = True) -> Path:
@@ -60,7 +60,7 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
 def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
     best_match = (0, Path("."))
     for file in VIDEO_FILE.subs_dir.glob(f"*{extension}"):
-        value = string_parser.calculate_match(file.name, release_name)
+        value = release_parser.calculate_match(file.name, release_name)
         if value >= best_match[0]:
             best_match = value, file
 

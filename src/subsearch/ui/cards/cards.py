@@ -13,7 +13,8 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
-from subsearch.io import io_toml, io_winreg, string_parser
+from subsearch.io import toml_file, windows_registry
+from subsearch.parsing import release_parser
 from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
@@ -108,7 +109,7 @@ class SettingsCard(HeaderCardWidget):
 class LanguageCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Language", parent)
-        languages = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
+        languages = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
         labelled_values = {data["name"]: key for key, data in languages.items()}
         aliases_by_label = {
             data["name"]: [code for code in (data["two_letter_code"], data["three_letter_code"]) if code]
@@ -181,7 +182,7 @@ class ProvidersCard(SettingsCard):
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
         }
-        self._language_data = io_toml.load_toml_data(FILE_PATHS.subtitle_languages)
+        self._language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
         providers = read_value("search.providers")
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS["search.providers"].explanation)
 
@@ -316,12 +317,12 @@ class PostProcessingCard(SettingsCard):
 
     def _path_is_valid(self) -> bool:
         target_path = self.path_edit.text()
-        path_resolution = string_parser.detect_path_resolution(target_path)
-        return string_parser.valid_path(target_path, path_resolution)
+        path_resolution = release_parser.detect_path_resolution(target_path)
+        return release_parser.valid_path(target_path, path_resolution)
 
     def _persist_path(self) -> None:
         target_path = self.path_edit.text()
-        path_resolution = string_parser.detect_path_resolution(target_path)
+        path_resolution = release_parser.detect_path_resolution(target_path)
         self._set_path_error(False)
         write_value("post_processing.target_path", target_path)
         write_value("post_processing.path_resolution", path_resolution)
@@ -354,8 +355,8 @@ class PostProcessingCard(SettingsCard):
         return True
 
     def _on_path_text_changed(self, target_path: str) -> None:
-        path_resolution = string_parser.detect_path_resolution(target_path)
-        self._set_path_error(not string_parser.valid_path(target_path, path_resolution))
+        path_resolution = release_parser.detect_path_resolution(target_path)
+        self._set_path_error(not release_parser.valid_path(target_path, path_resolution))
 
 
 class FileExtensionsCard(SettingsCard):
@@ -389,7 +390,7 @@ class FileExtensionsCard(SettingsCard):
         file_extensions[extension] = checked
         write_value("shell_integration.file_extensions", file_extensions)
         if read_value("shell_integration.context_menu"):
-            io_winreg.write_all_valuex()
+            windows_registry.write_all_valuex()
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
@@ -411,14 +412,14 @@ class ShellIntegrationCard(SettingsCard):
 
     def _on_context_menu_toggled(self, enabled: bool) -> None:
         if enabled:
-            io_winreg.add_context_menu()
+            windows_registry.add_context_menu()
         else:
-            io_winreg.del_context_menu()
+            windows_registry.del_context_menu()
         self._apply_context_menu_state(enabled)
 
     def _on_context_menu_icon_toggled(self) -> None:
         if read_value("shell_integration.context_menu"):
-            io_winreg.write_all_valuex()
+            windows_registry.write_all_valuex()
 
     def _apply_context_menu_state(self, enabled: bool) -> None:
         self.context_menu_icon.set_enabled(enabled)

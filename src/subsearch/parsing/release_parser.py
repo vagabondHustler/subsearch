@@ -12,7 +12,6 @@ from subsearch.model import (
     ProviderUrls,
     ReleaseData,
 )
-from subsearch.io import imdb_lookup
 
 
 def remove_padded_zero(x: str) -> str:

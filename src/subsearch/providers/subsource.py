@@ -6,7 +6,7 @@ import requests
 from subsearch.logger import log
 from subsearch.model import Subtitle
 from subsearch.io import http
-from subsearch.providers import data_container
+from subsearch.providers import provider_helper
 
 
 class SubsourceApi:
@@ -53,9 +53,9 @@ class SubsourceApi:
         return True
 
 
-class SubsourceParser(data_container.ProviderHelper):
+class SubsourceParser(provider_helper.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
-        data_container.ProviderHelper.__init__(self, *args, **kwargs)
+        provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.api = SubsourceApi()
         self.provider_name = ""
         self.api.provider_name = self.provider_name
