@@ -22,6 +22,7 @@ from subsearch.ui.cards.cards import (
     DownloadManagerCard,
     FileExtensionsCard,
     LanguageCard,
+    BugReportCard,
     NetworkCard,
     NotificationsCard,
     PostProcessingCard,
@@ -30,11 +31,10 @@ from subsearch.ui.cards.cards import (
     SearchThresholdCard,
     ShellIntegrationCard,
     SubtitleFiltersCard,
+    UpdateCard,
 )
-from subsearch.ui.cards.bug_report_card import BugReportCard
 from subsearch.ui.cards.download_manager import DownloadManagerInterface
 from subsearch.ui.icons.lucide import LucideIcon
-from subsearch.ui.cards.update_card import UpdateCard
 from subsearch.ui.navigation import enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
 from subsearch.ui.theme.theme_patch import force_fixed_accent_color

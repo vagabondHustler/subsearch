@@ -18,18 +18,22 @@ def body_font() -> QFont:
     return font
 
 
+def set_three_state_text_color(widget: QWidget) -> None:
+    widget_type = type(widget).__name__
+    widget.setStyleSheet(
+        f"{widget_type} {{ color: {TEXT_COLOR}; }}"
+        f"{widget_type}:disabled {{ color: {DISABLED_TEXT_COLOR}; }}"
+        f'{widget_type}[error="true"] {{ color: {ERROR_TEXT_COLOR}; }}'
+    )
+
+
 def apply_text_color(widget: QWidget) -> None:
     color = QColor(TEXT_COLOR)
     set_text_color = getattr(widget, "setTextColor", None)
     if set_text_color is not None:
         set_text_color(color, color)
     else:
-        widget_type = type(widget).__name__
-        widget.setStyleSheet(
-            f"{widget_type} {{ color: {TEXT_COLOR}; }}"
-            f"{widget_type}:disabled {{ color: {DISABLED_TEXT_COLOR}; }}"
-            f'{widget_type}[error="true"] {{ color: {ERROR_TEXT_COLOR}; }}'
-        )
+        set_three_state_text_color(widget)
 
 
 def apply_body_font(widget: QWidget) -> None:
