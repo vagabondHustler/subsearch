@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import lru_cache
 
 from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
@@ -12,6 +13,7 @@ from subsearch.ui.icons.icons_data import ICON_SOURCES
 STROKE_TAGS = ("path", "circle", "line", "polyline", "polygon", "rect")
 
 
+@lru_cache(maxsize=None)
 def _recolored_svg(svg_source: str, color: str) -> bytes:
     dom = QDomDocument()
     dom.setContent(svg_source)
@@ -70,6 +72,7 @@ class LucideIcon(FluentIconBase, Enum):
         drawSvgIcon(_recolored_svg(self.source(), stroke_color), painter, rect)
 
 
+@lru_cache(maxsize=None)
 def lucide_qicon(icon: LucideIcon, color: str) -> QIcon:
     return icon.icon(color=QColor(color))
 
