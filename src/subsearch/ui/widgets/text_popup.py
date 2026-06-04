@@ -8,6 +8,7 @@ POPUP_MIN_WIDTH = 580
 POPUP_MAX_WIDTH = 1100
 POPUP_MAX_HEIGHT = 420
 CONTENT_MARGIN = 20
+HIDE_GRACE_MS = 300
 
 class MarkdownPopup(QFrame):
     def __init__(self, anchor: QWidget) -> None:
@@ -35,9 +36,11 @@ class MarkdownPopup(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 8)
         layout.addWidget(self._browser)
+
         self._hide_timer = QTimer(self)
         self._hide_timer.setSingleShot(True)
-        self._hide_timer.timeout.connect(self._hide_if_outside)
+        self._hide_timer.setInterval(HIDE_GRACE_MS)
+        self._hide_timer.timeout.connect(self.hide)
 
     def set_markdown(self, markdown: str) -> None:
         self._browser.setMarkdown(markdown)
@@ -73,35 +76,21 @@ class MarkdownPopup(QFrame):
         self.move(QPoint(x, y))
         self.show()
         self.raise_()
+        self._update_hide_timer()
 
-    def _cursor_outside_popup_and_anchor(self) -> bool:
+    def _cursor_over_popup_or_button(self) -> bool:
         cursor_position = QCursor.pos()
+        if self.geometry().contains(cursor_position):
+            return True
+        button_top_left = self._anchor.mapToGlobal(QPoint(0, 0))
+        return self._anchor.rect().translated(button_top_left).contains(cursor_position)
 
-        over_popup = self.geometry().contains(cursor_position)
-
-        anchor_top_left = self._anchor.mapToGlobal(QPoint(0, 0))
-        over_anchor = self._anchor.rect().translated(anchor_top_left).contains(cursor_position)
-
-        return not over_popup and not over_anchor
-
-    def _hide_if_outside(self) -> None:
-        if self._cursor_outside_popup_and_anchor():
-            self.hide()
-
-    def _schedule_hide_check(self) -> None:
-        if self._cursor_outside_popup_and_anchor():
-            self._hide_timer.start(300)
-        else:
+    def _update_hide_timer(self) -> None:
+        if self._cursor_over_popup_or_button():
             self._hide_timer.stop()
+        elif not self._hide_timer.isActive():
+            self._hide_timer.start()
 
     def mouseMoveEvent(self, event) -> None:
-        self._schedule_hide_check()
+        self._update_hide_timer()
         super().mouseMoveEvent(event)
-
-    def leaveEvent(self, event) -> None:
-        self._schedule_hide_check()
-        super().leaveEvent(event)
-
-    def enterEvent(self, event) -> None:
-        self._hide_timer.stop()
-        super().enterEvent(event)
