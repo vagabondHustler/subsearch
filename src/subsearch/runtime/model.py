@@ -1,4 +1,5 @@
 from dataclasses import Field, dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
@@ -12,9 +13,9 @@ class LanguageData:
 
 
 @dataclass(order=True, slots=True)
-class ProviderAlphaCodeData:
+class ProviderLetterCodeData:
     provider: str
-    alpha_code: str
+    letter_code: str
 
 
 @dataclass(order=True, slots=True)
@@ -70,6 +71,7 @@ class AppConfig:
     api_call_limit: int
     request_connect_timeout: int
     request_read_timeout: int
+    diagnostics: dict[str, Any]
 
 
 @dataclass(order=True, slots=True)
@@ -101,6 +103,19 @@ class Subtitle:
     subtitle_name: str
     download_url: str
     request_data: dict[str, Any]
+
+
+class ProviderHealth(Enum):
+    OK = "ok"
+    NO_RESPONSE = "no_response"
+    STRUCTURE_INVALID = "structure_invalid"
+
+
+@dataclass(order=True, slots=True)
+class ProviderResult:
+    provider_name: str
+    health: ProviderHealth
+    subtitles_found: int
 
 
 @dataclass(order=True, frozen=True)

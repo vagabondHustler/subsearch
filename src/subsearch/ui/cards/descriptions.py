@@ -27,8 +27,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "search.non_hearing_impaired": SettingDescription(
         "Non-hearing impaired",
-        "Include normal subtitles that show only the spoken words, without the extra notes for "
-        "the hard of hearing.",
+        "Include normal subtitles that show only the spoken words, without the extra notes for the hard of hearing.",
     ),
     "search.only_foreign_parts": SettingDescription(
         "Foreign parts only",
@@ -48,8 +47,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "shell_integration.context_menu_icon": SettingDescription(
         "Context menu icon",
-        "Show the Subsearch icon next to its entry in the right-click menu. Needs the context "
-        "menu turned on.",
+        "Show the Subsearch icon next to its entry in the right-click menu. Needs the context menu turned on.",
     ),
     "shell_integration.file_extensions": SettingDescription(
         "File extensions",
@@ -115,8 +113,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "post_processing.create_missing_folder": SettingDescription(
         "Create missing folder",
-        "Create the destination folder automatically if it doesn't exist yet, instead of asking "
-        "first.",
+        "Create the destination folder automatically if it doesn't exist yet, instead of asking first.",
     ),
     "application.show_terminal": SettingDescription(
         "Show terminal while searching",
@@ -140,5 +137,23 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     "network.request_read_timeout": SettingDescription(
         "Read timeout",
         "Once connected, how many seconds to wait for a site to send its reply before giving up.",
+    ),
+    "diagnostics.enabled": SettingDescription(
+        "Provider health checks",
+        "When a subtitle site appears to be broken, Subsearch can run local health "
+        "checks, log the results, and notify you. These checks only notify you; "
+        "nothing is uploaded or sent to the developer. Disable this to skip the checks.",
+    ),
+    "diagnostics.run_when": SettingDescription(
+        "When to check",
+        "Choose when health checks run: in the background after a normal search "
+        "finishes (recommended, with no impact on search speed), or once when "
+        "Subsearch starts.",
+    ),
+    "diagnostics.interval_days": SettingDescription(
+        "Days between checks",
+        "How long a site can go without a successful result before Subsearch tests "
+        "it. Sites that continue to return results are not checked. Sites that "
+        "have not returned a result for this many days are tested automatically.",
     ),
 }

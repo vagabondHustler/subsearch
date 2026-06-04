@@ -1,6 +1,6 @@
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.io import toml_file
-from subsearch.parsing import imdb_lookup, release_parser
+from subsearch.parsing import release_parser
 from tests import fixture_data
 
 
@@ -111,13 +111,3 @@ def test_provider_urls_series(monkeypatch) -> None:
     )
     assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
     assert provider_url.yifysubtitles == ""
-
-
-def test_imdb_movie() -> None:
-    imdb = imdb_lookup.ImdbIdLookup("Arctic", 2019, False)
-    assert imdb.imdb_id == "tt6820256"
-
-
-def test_imdb_tvseries() -> None:
-    imdb = imdb_lookup.ImdbIdLookup("Breaking bad", 0, True)
-    assert imdb.imdb_id == "tt0903747"

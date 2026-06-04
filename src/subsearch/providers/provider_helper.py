@@ -6,6 +6,8 @@ from subsearch.runtime.logger import log
 from subsearch.runtime.model import (
     AppConfig,
     LanguageData,
+    ProviderHealth,
+    ProviderResult,
     ProviderUrls,
     ReleaseData,
     Subtitle,
@@ -13,6 +15,14 @@ from subsearch.runtime.model import (
 from subsearch.runtime.constants import VIDEO_FILE
 
 _thread_lock = threading.Lock()
+
+
+def combine_provider_health(*healths: ProviderHealth) -> ProviderHealth:
+    if ProviderHealth.STRUCTURE_INVALID in healths:
+        return ProviderHealth.STRUCTURE_INVALID
+    if all(health is ProviderHealth.NO_RESPONSE for health in healths):
+        return ProviderHealth.NO_RESPONSE
+    return ProviderHealth.OK
 
 
 class ProviderDataContainer:
@@ -163,6 +173,11 @@ class ProviderHelper(ProviderDataContainer):
         self.subtitle_name = ""
         self.download_url = ""
         self.request_data: dict[str, Any] = {}
+        self.reported_health: list[ProviderResult] = []
+
+    def report_health(self, health: ProviderHealth, subtitles_found: int) -> None:
+        result = ProviderResult(self.provider_name, health, subtitles_found)
+        self.reported_health.append(result)
 
     def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
         self.provider_name = args[0]

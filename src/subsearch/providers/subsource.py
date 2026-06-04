@@ -4,7 +4,8 @@ import cloudscraper
 import requests
 
 from subsearch.runtime.logger import log
-from subsearch.runtime.model import Subtitle
+from subsearch.runtime.model import ProviderHealth, Subtitle
+from subsearch.runtime.exceptions import ProviderResponseUnrecognized
 from subsearch.io import http
 from subsearch.providers import provider_helper
 
@@ -62,6 +63,8 @@ class SubsourceParser(provider_helper.ProviderHelper):
 
     def parse_search_movie_response(self, response: requests.Response) -> dict[str, Any]:
         data = response.json()
+        if "found" not in data:
+            raise ProviderResponseUnrecognized("searchMovie response missing 'found'")
         found_items = data["found"]
         parsed_response = {}
         if len(found_items) == 0:
@@ -77,6 +80,8 @@ class SubsourceParser(provider_helper.ProviderHelper):
 
     def parse_get_movie_response(self, response: requests.Response) -> None:
         data = response.json()
+        if "subs" not in data:
+            raise ProviderResponseUnrecognized("getMovie response missing 'subs'")
         for sub in data["subs"]:
             if self.skip_get_movie_item(sub):
                 continue
@@ -155,19 +160,23 @@ class Subsource(SubsourceParser):
 
     def start_search(self, *args, **kwargs) -> None:
         self.api.call_limit = 5  # default, requests made in quick succession
-        release_results = self.find_release(self.imdb_id)
-        self.find_subtitles(release_results)
-
-    def find_release(self, imdb_id: str) -> dict[str, str]:
-        response = self.api.search_movie(imdb_id)
-        if not self.api.response_status_ok(response):
-            return {}
-        data = self.parse_search_movie_response(response)
-        return data
-
-    def find_subtitles(self, request_data: dict[str, str]) -> None:
-        if not request_data:
+        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        try:
+            health = self._search_and_collect()
+        except Exception as error:
+            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
+        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.report_health(health, subtitles_after - subtitles_before)
+
+    def _search_and_collect(self) -> ProviderHealth:
+        response = self.api.search_movie(self.imdb_id)
+        if not self.api.response_status_ok(response):
+            return ProviderHealth.NO_RESPONSE
+        request_data = self.parse_search_movie_response(response)
+        if not request_data:
+            return ProviderHealth.OK
 
         if self.tvseries:
             response = self.api.get_tvseries(self.current_language, request_data["link_name"], request_data["season"])
@@ -175,9 +184,10 @@ class Subsource(SubsourceParser):
             response = self.api.get_movie(self.current_language, request_data["link_name"])
 
         if not self.api.response_status_ok(response):
-            return None
+            return ProviderHealth.NO_RESPONSE
 
         self.parse_get_movie_response(response)
+        return ProviderHealth.OK
 
 
 class GetDownloadUrl:

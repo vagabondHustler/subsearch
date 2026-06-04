@@ -4,7 +4,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ICON_SOURCE_DIRECTORY = REPO_ROOT / "assets" / "icons"
-ICON_MODULE = REPO_ROOT / "src" / "subsearch" / "ui" / "icons_data.py"
+ICON_MODULE = REPO_ROOT / "src" / "subsearch" / "ui" / "icons" / "icons_data.py"
 
 GENERATED_HEADER = "# AUTO-GENERATED — edit assets/icons/*.svg and run tools/bundle_icons.py"
 

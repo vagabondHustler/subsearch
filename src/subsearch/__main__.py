@@ -8,6 +8,7 @@ class Subsearch:
         self.pipeline = SearchPipeline(PREF_COUNTER)
 
     def start_app(self) -> None:
+        self.pipeline.run_diagnostics_on_launch()
         self.pipeline.init_search(
             self.pipeline.opensubtitles,
             self.pipeline.yifysubtitles,
@@ -16,6 +17,7 @@ class Subsearch:
         self.pipeline.download_files()
         self.pipeline.download_manager()
         self.pipeline.subtitle_post_processing()
+        self.pipeline.run_provider_diagnostics()
         self.pipeline.clean_up()
 
     def exit_app(self) -> None:

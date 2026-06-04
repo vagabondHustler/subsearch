@@ -13,7 +13,11 @@ from subsearch.runtime.model import (
     VideoFile,
     WindowsRegistryPaths,
 )
-from subsearch.runtime.static_values import get_supported_file_ext, get_supported_providers
+from subsearch.runtime.static_values import (
+    get_health_tracked_providers,
+    get_supported_file_ext,
+    get_supported_providers,
+)
 
 
 def get_app_paths() -> AppPaths:
@@ -42,6 +46,9 @@ def get_file_paths() -> FilePaths:
 def get_default_app_config() -> dict[str, Any]:
     file_extensions = dict.fromkeys(get_supported_file_ext(), True)
     providers = dict.fromkeys(get_supported_providers(), True)
+    provider_health = {
+        provider: {"last_known_good": "", "last_attempt": ""} for provider in get_health_tracked_providers()
+    }
     config = {
         "language": {
             "selected": "english",
@@ -83,6 +90,12 @@ def get_default_app_config() -> dict[str, Any]:
             "api_call_limit": 4,
             "request_connect_timeout": 4,
             "request_read_timeout": 5,
+        },
+        "diagnostics": {
+            "enabled": True,
+            "run_when": "after_search",
+            "interval_days": 3,
+            "provider_health": provider_health,
         },
     }
     return config

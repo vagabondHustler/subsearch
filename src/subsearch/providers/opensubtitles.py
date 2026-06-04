@@ -2,8 +2,10 @@ import re
 from typing import Any
 
 from subsearch.runtime.logger import log
+from subsearch.runtime.model import ProviderHealth
 from subsearch.io import http
 from subsearch.providers import provider_helper
+from subsearch.providers.provider_helper import combine_provider_health
 
 
 class OpenSubtitlesScraper(provider_helper.ProviderHelper):
@@ -12,23 +14,41 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
         self.provider_name = ""
 
     def is_opensubtitles_down(self, tree: Any) -> bool:
-        is_offline = tree.css_matches("pre")
-        if is_offline is False:
+        outage_text = self._outage_text(tree)
+        if not outage_text:
             return False
-        offline_text = tree.css_first("pre").text()
-        if offline_text.startswith("Site will be online soon"):
-            log.stdout(f"opensubtitles is down: {offline_text}", level="error")
-            return True
-        return False
+        log.stdout(f"opensubtitles is down: {outage_text}", level="error")
+        return True
 
-    def get_subtitles(self, url: str) -> None:
+    def _outage_text(self, tree: Any) -> str:
+        if tree.css_matches("pre"):
+            pre_text = tree.css_first("pre").text()
+            if pre_text.startswith("Site will be online soon"):
+                return pre_text
+        body = tree.css_first("body")
+        body_text = body.text() if body is not None else ""
+        if "CANNOT CONNECT TO DB" in body_text or "problem with network connection to database" in body_text:
+            return body_text.strip().splitlines()[0]
+        return ""
+
+    def classify_response(self, tree: Any) -> ProviderHealth:
+        if self.is_opensubtitles_down(tree):
+            return ProviderHealth.NO_RESPONSE
+        if tree.css_first("channel") is None:
+            return ProviderHealth.STRUCTURE_INVALID
+        return ProviderHealth.OK
+
+    def response_is_well_formed(self, tree: Any) -> bool:
+        return self.classify_response(tree) is ProviderHealth.OK
+
+    def get_subtitles(self, url: str) -> ProviderHealth:
         tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
-            return None
-        items = tree.css("item")
-        if self.is_opensubtitles_down(tree):
-            return None
-        for item in items:
+            return ProviderHealth.NO_RESPONSE
+        classification = self.classify_response(tree)
+        if classification is not ProviderHealth.OK:
+            return classification
+        for item in tree.css("item"):
             enclosure = item.css_first("enclosure")
             if enclosure is None:
                 continue
@@ -38,19 +58,21 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
             subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
+        return ProviderHealth.OK
 
-    def with_hash(self, url: str, subtitle_name: str) -> None:
+    def with_hash(self, url: str, subtitle_name: str) -> ProviderHealth:
         tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
-            return None
+            return ProviderHealth.NO_RESPONSE
         if self.is_opensubtitles_down(tree):
-            return None
+            return ProviderHealth.NO_RESPONSE
         bt_dwl_bt = tree.css_first("#bt-dwl-bt")
         if bt_dwl_bt is None:
-            return None
+            return ProviderHealth.OK
         sub_id = bt_dwl_bt.attributes["data-product-id"]
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
         self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
+        return ProviderHealth.OK
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
@@ -59,5 +81,16 @@ class OpenSubtitles(OpenSubtitlesScraper):
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self, *args, **kwargs) -> None:
-        self.with_hash(self.url_opensubtitles_hash, self.release)
-        self.get_subtitles(self.url_opensubtitles)
+        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        try:
+            hash_health = self.with_hash(self.url_opensubtitles_hash, self.release)
+            site_health = self.get_subtitles(self.url_opensubtitles)
+        except Exception as error:
+            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
+            return None
+        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.report_health(
+            combine_provider_health(hash_health, site_health),
+            subtitles_after - subtitles_before,
+        )

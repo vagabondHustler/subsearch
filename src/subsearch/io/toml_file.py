@@ -179,6 +179,7 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         api_call_limit=data["network"]["api_call_limit"],
         request_connect_timeout=data["network"]["request_connect_timeout"],
         request_read_timeout=data["network"]["request_read_timeout"],
+        diagnostics=data["diagnostics"],
     )
 
 

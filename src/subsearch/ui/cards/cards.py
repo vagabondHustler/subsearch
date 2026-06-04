@@ -21,6 +21,7 @@ from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.widgets.slider import CircleDotSlider
 from subsearch.ui.widgets.setting_rows import (
+    ComboBoxRow,
     HelpButton,
     SearchableComboBoxRow,
     SpinBoxRow,
@@ -70,7 +71,9 @@ CARD_BORDER_RADIUS = 6.0
 
 
 class SettingsCard(HeaderCardWidget):
-    def __init__(self, title: str, parent: QWidget | None = None) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
+    def __init__(  # pyright: ignore[reportIncompatibleVariableOverride]
+        self, title: str, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.setTitle(title)
         apply_title_font(self.headerLabel)
@@ -478,3 +481,23 @@ class NetworkCard(SettingsCard):
         self.add_row(SpinBoxRow("network.api_call_limit", 1, 99))
         self.add_row(SpinBoxRow("network.request_connect_timeout", 1, 99))
         self.add_row(SpinBoxRow("network.request_read_timeout", 1, 99))
+
+
+class ProviderHealthCard(SettingsCard):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__("Provider health", parent)
+        self.enabled = SwitchRow("diagnostics.enabled")
+        self.run_when = ComboBoxRow(
+            "diagnostics.run_when",
+            {"After search": "after_search", "On launch": "on_launch"},
+        )
+        self.interval = SpinBoxRow("diagnostics.interval_days", 1, 24)
+        self.add_row(self.enabled)
+        self.add_row(self.run_when)
+        self.add_row(self.interval)
+        self.enabled.toggled.connect(self._apply_enabled_state)
+        self._apply_enabled_state(self.enabled.switch.isChecked())
+
+    def _apply_enabled_state(self, enabled: bool) -> None:
+        self.run_when.setEnabled(enabled)
+        self.interval.setEnabled(enabled)

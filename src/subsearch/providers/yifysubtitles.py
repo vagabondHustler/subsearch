@@ -1,5 +1,9 @@
+from typing import Any
+
 from selectolax.parser import Node
 
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import ProviderHealth
 from subsearch.io import http
 from subsearch.providers import provider_helper
 
@@ -9,16 +13,22 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
-    def get_subtitles(self) -> None:
+    def response_is_well_formed(self, tree: Any) -> bool:
+        return tree.css_first("table") is not None
+
+    def get_subtitles(self) -> ProviderHealth:
         tree = http.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
         if not tree:
-            return None
+            return ProviderHealth.NO_RESPONSE
+        if not self.response_is_well_formed(tree):
+            return ProviderHealth.STRUCTURE_INVALID
 
         product = tree.select("tr")
         for item in product.matches[1:]:  # type: ignore
             if self.skip_item(item):
                 continue
             self.parse_item(item)
+        return ProviderHealth.OK
 
     def parse_item(self, item) -> None:
         node = item.css_first("a")
@@ -45,4 +55,12 @@ class YifiSubtitles(YifySubtitlesScraper):
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self, *args, **kwargs) -> None:
-        self.get_subtitles()
+        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        try:
+            health = self.get_subtitles()
+        except Exception as error:
+            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
+            return None
+        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.report_health(health, subtitles_after - subtitles_before)

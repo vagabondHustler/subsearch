@@ -7,9 +7,9 @@ from subsearch import ui
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system
-from subsearch.runtime import threading_utils
+from subsearch.runtime import parallel_tasks
 from subsearch.runtime.logger import log
-from subsearch.runtime.model import Subtitle
+from subsearch.runtime.model import ProviderHealth, ProviderResult, Subtitle
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.core.run_conditions import RunConditions
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
@@ -38,14 +38,52 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
-        threading_utils.run_in_threads(*providers)
+        parallel_tasks.run_in_threads(*providers)
         log.task_completed()
+
+    def run_diagnostics_on_launch(self) -> None:
+        diagnostics_config = self.bootstrap.app_config.diagnostics
+        if not diagnostics_config["enabled"] or diagnostics_config["run_when"] != "on_launch":
+            return None
+        self._run_due_diagnostics()
+
+    def run_provider_diagnostics(self) -> None:
+        if not self.bootstrap.app_config.diagnostics["enabled"]:
+            return None
+        from subsearch import diagnostics
+
+        diagnostics.record_health_reports(self.bootstrap.health_reports)
+        self.bootstrap.resync_app_config()
+        if self.bootstrap.app_config.diagnostics["run_when"] != "after_search":
+            return None
+        self._run_due_diagnostics()
+
+    def _run_due_diagnostics(self) -> None:
+        from subsearch import diagnostics
+
+        due_providers = diagnostics.providers_due_for_diagnostic(self.bootstrap.app_config)
+        if not due_providers:
+            return None
+        log.brackets("Provider diagnostics")
+        reports = diagnostics.diagnose_providers(due_providers)
+        diagnostics.record_health_reports(reports)
+        self._notify_unhealthy_providers(reports)
+        log.task_completed()
+
+    def _notify_unhealthy_providers(self, reports: list[ProviderResult]) -> None:
+        unhealthy = [report.provider_name for report in reports if report.health is not ProviderHealth.OK]
+        if not unhealthy:
+            return None
+        message = ", ".join(unhealthy)
+        log.stdout(f"Provider health check flagged: {message}", level="warning", hex_color="#f9e2af")
+        self.bootstrap.system_tray.display_toast("Provider health", f"May have changed: {message}")
 
     def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
         search_provider = provider(**self.bootstrap.search_kwargs)
         search_provider.start_search(flag=flag)
         self.bootstrap.accepted_subtitles.extend(search_provider.accepted_subtitles)
         self.bootstrap.rejected_subtitles.extend(search_provider.rejected_subtitles)
+        self.bootstrap.health_reports.extend(search_provider.reported_health)
 
     @run_if_conditions_met
     def opensubtitles(self) -> None:
@@ -143,9 +181,19 @@ class SearchPipeline:
         file_system.move_all(VIDEO_FILE.subs_dir, target)
         log.task_completed()
 
+    def _log_provider_health_warnings(self) -> None:
+        for report in self.bootstrap.health_reports:
+            if report.health is ProviderHealth.STRUCTURE_INVALID:
+                log.stdout(
+                    f"{report.provider_name} may have changed — unrecognized response",
+                    level="warning",
+                    hex_color="#f9e2af",
+                )
+
     @run_if_conditions_met
     def summary_notification(self, elapsed) -> None:
         log.brackets("Summary toast")
+        self._log_provider_health_warnings()
         elapsed_summary = f"Finished in {elapsed} seconds"
         number_of_results = len(self.bootstrap.accepted_subtitles) + len(self.bootstrap.rejected_subtitles)
         matches_downloaded = f"Downloaded: {self.bootstrap.downloaded_subtitles}/{number_of_results}"

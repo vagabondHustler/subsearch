@@ -16,6 +16,11 @@ class ProviderNotImplemented(ProviderError):
         super().__init__(message)
 
 
+class ProviderResponseUnrecognized(ProviderError):
+    def __init__(self, message: str = "Provider response did not match the expected structure") -> None:
+        super().__init__(message)
+
+
 class MultipleInstancesError(Error):
     def __init__(self, mutex_name: str) -> None:
         error_type = f"Multiple instances of the application are running."

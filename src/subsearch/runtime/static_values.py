@@ -29,6 +29,10 @@ def get_supported_providers() -> list[str]:
     return providers
 
 
+def get_health_tracked_providers() -> list[str]:
+    return ["imdb", "opensubtitles", "yifisubtitles", "subsource"]
+
+
 def get_computer_name() -> str:
     return socket.gethostname()
 

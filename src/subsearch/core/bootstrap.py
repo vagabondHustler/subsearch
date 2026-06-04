@@ -2,7 +2,7 @@ from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
 from subsearch.runtime.logger import log
-from subsearch.runtime.model import Subtitle
+from subsearch.runtime.model import ProviderResult, Subtitle
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
 
@@ -17,6 +17,7 @@ class Bootstrap:
         self.accepted_subtitles: list[Subtitle] = []
         self.rejected_subtitles: list[Subtitle] = []
         self.manually_accepted_subtitles: list[Subtitle] = []
+        self.health_reports: list[ProviderResult] = []
         self.release_data = release_parser.no_release_data()
         self.provider_urls = release_parser.CreateProviderUrls.no_urls()
         self.file_exist = VIDEO_FILE.file_exist
@@ -68,6 +69,8 @@ class Bootstrap:
             self.release_data.tvseries,
         )
         self.release_data.imdb_id = find_id.imdb_id
+        found_subtitles = 1 if find_id.imdb_id else 0
+        self.health_reports.append(ProviderResult("imdb", find_id.health, found_subtitles))
 
     def setup_file_system(self) -> None:
         file_system.create_directory(APP_PATHS.tmp_dir)

@@ -1,22 +1,27 @@
 import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
+from subsearch.runtime.model import ProviderHealth
+
 
 class ImdbIdLookup:
     title: str
     year: int
     tvseries: bool
     imdb_id: str
+    health: ProviderHealth
 
     def __init__(self, title: str, year: int, tvseries: bool) -> None:
         self.title = title.lower()
         self.year = year
         self.tvseries = tvseries
         self.imdb_id = ""
+        self.health = ProviderHealth.OK
 
         try:
             search_result = imdbinfo.search_title(title)
         except ImdbinfoError:
+            self.health = ProviderHealth.STRUCTURE_INVALID
             return None
         if not search_result:
             return None

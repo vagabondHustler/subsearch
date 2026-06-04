@@ -24,6 +24,7 @@ from subsearch.ui.cards.cards import (
     NetworkCard,
     NotificationsCard,
     PostProcessingCard,
+    ProviderHealthCard,
     ProvidersCard,
     SearchThresholdCard,
     ShellIntegrationCard,
@@ -107,6 +108,7 @@ class SettingsWindow(FluentWindow):
             [
                 ApplicationCard(),
                 NetworkCard(),
+                ProviderHealthCard(),
                 UpdateCard(),
                 BugReportCard(),
             ],
