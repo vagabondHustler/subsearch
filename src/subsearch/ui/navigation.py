@@ -3,6 +3,7 @@ from PySide6.QtGui import QColor, QCursor, QPainter
 from qfluentwidgets import NavigationPanel
 from qfluentwidgets.common.color import autoFallbackThemeColor
 from qfluentwidgets.common.icon import drawIcon, isDarkTheme
+from qfluentwidgets.components.navigation.navigation_widget import NavigationPushButton
 
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.theme.typography import TEXT_COLOR
@@ -11,57 +12,69 @@ ICON_SIZE = 24
 NAVIGATION_ITEM_HEIGHT = 36
 
 
-def _paint_navigation_item_with_large_icon(item, _event) -> None:
-    painter = QPainter(item)
-    try:
-        painter.setRenderHints(
-            QPainter.RenderHint.Antialiasing
-            | QPainter.RenderHint.TextAntialiasing
-            | QPainter.RenderHint.SmoothPixmapTransform
+class LargeIconNavigationItemMixin(NavigationPushButton):
+    def paintEvent(self, e) -> None:
+        painter = QPainter(self)
+        try:
+            painter.setRenderHints(
+                QPainter.RenderHint.Antialiasing
+                | QPainter.RenderHint.TextAntialiasing
+                | QPainter.RenderHint.SmoothPixmapTransform
+            )
+            painter.setPen(Qt.PenStyle.NoPen)
+
+            if self.isPressed:
+                painter.setOpacity(0.7)
+            if not self.isEnabled():
+                painter.setOpacity(0.4)
+
+            background = 255 if isDarkTheme() else 0
+            margins = self._margins()
+            padding_left, padding_right = margins.left(), margins.right()
+            global_rect = QRect(self.mapToGlobal(QPoint()), self.size())
+
+            if self._canDrawIndicator():
+                painter.setBrush(QColor(background, background, background, 6 if self.isEnter else 10))
+                painter.drawRoundedRect(self.rect(), 5, 5)
+                painter.setBrush(autoFallbackThemeColor(self.lightIndicatorColor, self.darkIndicatorColor))
+                painter.drawRoundedRect(self.indicatorRect(), 1.5, 1.5)
+            elif (
+                (self.isEnter and global_rect.contains(QCursor.pos())) or self.isAboutSelected
+            ) and self.isEnabled():
+                painter.setBrush(QColor(background, background, background, 6 if self.isAboutSelected else 10))
+                painter.drawRoundedRect(self.rect(), 5, 5)
+
+            icon_top = (NAVIGATION_ITEM_HEIGHT - ICON_SIZE) / 2
+            icon_rect = QRectF(7.5 + padding_left, icon_top, ICON_SIZE, ICON_SIZE)
+            if isinstance(self._icon, LucideIcon):
+                self._icon.render(painter, icon_rect, stroke=TEXT_COLOR)
+            else:
+                drawIcon(self._icon, painter, icon_rect)
+
+            if self.isCompacted:
+                return
+
+            painter.setFont(self.font())
+            painter.setPen(self.textColor())
+            text_left = 44 + padding_left if not self.icon().isNull() else padding_left + 16
+            painter.drawText(
+                QRectF(text_left, 0, self.width() - 13 - text_left - padding_right, self.height()),
+                Qt.AlignmentFlag.AlignVCenter,
+                self.text(),
+            )
+        finally:
+            painter.end()
+
+
+_large_icon_subclass_cache: dict[type, type] = {}
+
+
+def _large_icon_subclass(item_class: type) -> type:
+    if item_class not in _large_icon_subclass_cache:
+        _large_icon_subclass_cache[item_class] = type(
+            f"LargeIcon{item_class.__name__}", (LargeIconNavigationItemMixin, item_class), {}
         )
-        painter.setPen(Qt.PenStyle.NoPen)
-
-        if item.isPressed:
-            painter.setOpacity(0.7)
-        if not item.isEnabled():
-            painter.setOpacity(0.4)
-
-        background = 255 if isDarkTheme() else 0
-        margins = item._margins()
-        padding_left, padding_right = margins.left(), margins.right()
-        global_rect = QRect(item.mapToGlobal(QPoint()), item.size())
-
-        if item._canDrawIndicator():
-            painter.setBrush(QColor(background, background, background, 6 if item.isEnter else 10))
-            painter.drawRoundedRect(item.rect(), 5, 5)
-            painter.setBrush(autoFallbackThemeColor(item.lightIndicatorColor, item.darkIndicatorColor))
-            painter.drawRoundedRect(item.indicatorRect(), 1.5, 1.5)
-        elif (
-            (item.isEnter and global_rect.contains(QCursor.pos())) or item.isAboutSelected
-        ) and item.isEnabled():
-            painter.setBrush(QColor(background, background, background, 6 if item.isAboutSelected else 10))
-            painter.drawRoundedRect(item.rect(), 5, 5)
-
-        icon_top = (NAVIGATION_ITEM_HEIGHT - ICON_SIZE) / 2
-        icon_rect = QRectF(7.5 + padding_left, icon_top, ICON_SIZE, ICON_SIZE)
-        if isinstance(item._icon, LucideIcon):
-            item._icon.render(painter, icon_rect, stroke=TEXT_COLOR)
-        else:
-            drawIcon(item._icon, painter, icon_rect)
-
-        if item.isCompacted:
-            return
-
-        painter.setFont(item.font())
-        painter.setPen(item.textColor())
-        text_left = 44 + padding_left if not item.icon().isNull() else padding_left + 16
-        painter.drawText(
-            QRectF(text_left, 0, item.width() - 13 - text_left - padding_right, item.height()),
-            Qt.AlignmentFlag.AlignVCenter,
-            item.text(),
-        )
-    finally:
-        painter.end()
+    return _large_icon_subclass_cache[item_class]
 
 
 def enlarge_navigation_icons(panel: NavigationPanel) -> None:
@@ -69,5 +82,5 @@ def enlarge_navigation_icons(panel: NavigationPanel) -> None:
     for navigation_item in panel.items.values():
         items.append(getattr(navigation_item.widget, "itemWidget"))
     for item in items:
-        item.paintEvent = lambda e, item=item: _paint_navigation_item_with_large_icon(item, e)
+        item.__class__ = _large_icon_subclass(type(item))
         item.update()
