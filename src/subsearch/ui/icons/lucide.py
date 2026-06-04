@@ -2,7 +2,7 @@ from enum import Enum
 from functools import lru_cache
 
 from PySide6.QtCore import QRectF, QSize, Qt
-from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap, QTransform
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtXml import QDomDocument
 from qfluentwidgets import FluentIconBase, Theme, getIconColor
@@ -77,16 +77,21 @@ def lucide_qicon(icon: LucideIcon, color: str) -> QIcon:
     return icon.icon(color=QColor(color))
 
 
-def lucide_rotated_qicon(icon: LucideIcon, color: str, angle: float, size: int = 32) -> QIcon:
+@lru_cache(maxsize=None)
+def _upright_pixmap(icon: LucideIcon, color: str, size: int) -> QPixmap:
     renderer = QSvgRenderer(_recolored_svg(icon.source(), QColor(color).name()))
     pixmap = QPixmap(QSize(size, size))
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    center = size / 2
-    painter.translate(center, center)
-    painter.rotate(angle)
-    painter.translate(-center, -center)
     renderer.render(painter, QRectF(0, 0, size, size))
     painter.end()
-    return QIcon(pixmap)
+    return pixmap
+
+
+@lru_cache(maxsize=None)
+def lucide_rotated_qicon(icon: LucideIcon, color: str, angle: float, size: int = 32) -> QIcon:
+    rotated = _upright_pixmap(icon, color, size).transformed(
+        QTransform().rotate(angle), Qt.TransformationMode.SmoothTransformation
+    )
+    return QIcon(rotated)
