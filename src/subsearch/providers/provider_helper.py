@@ -101,6 +101,7 @@ class _PrepareSubtitleDownload:
         self.release_name = VIDEO_FILE.filename
         self.accept_threshold = master.accept_threshold
         self.request_data = master.request_data
+        self.download_headers = master.download_headers
         self.master = master
 
     @property
@@ -130,6 +131,7 @@ class _PrepareSubtitleDownload:
             subtitle_name=self.subtitle_name.lower(),
             download_url=self.download_url,
             request_data={},
+            download_headers=self.download_headers,
         )
         return subtitle
 
@@ -173,6 +175,7 @@ class ProviderHelper(ProviderDataContainer):
         self.subtitle_name = ""
         self.download_url = ""
         self.request_data: dict[str, Any] = {}
+        self.download_headers: dict[str, str] = {}
         self.reported_health: list[ProviderResult] = []
 
     def report_health(self, health: ProviderHealth, subtitles_found: int) -> None:
@@ -184,6 +187,7 @@ class ProviderHelper(ProviderDataContainer):
         self.subtitle_name = args[1]
         self.download_url = args[2]
         self.request_data = kwargs.get("request_data", {}) or args[3]
+        self.download_headers = kwargs.get("download_headers", {})
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
@@ -195,9 +199,18 @@ class ProviderHelper(ProviderDataContainer):
         with _thread_lock:
             return _PrepareSubtitleDownload.rejected_subtitles
 
-    def prepare_subtitle(self, provider_name: str, subtitle_name: str, download_url: str, request_data: dict) -> None:
+    def prepare_subtitle(
+        self,
+        provider_name: str,
+        subtitle_name: str,
+        download_url: str,
+        request_data: dict,
+        download_headers: dict[str, str] | None = None,
+    ) -> None:
         with _thread_lock:
-            self._set_subtitle_cls_vars(provider_name, subtitle_name, download_url, request_data)
+            self._set_subtitle_cls_vars(
+                provider_name, subtitle_name, download_url, request_data, download_headers=download_headers or {}
+            )
             prepare = _PrepareSubtitleDownload(self)
             prepare.prepare_subtitle()
 

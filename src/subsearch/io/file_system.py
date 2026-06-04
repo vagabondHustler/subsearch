@@ -11,7 +11,7 @@ import requests
 from subsearch.runtime.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.runtime.model import Subtitle
-from subsearch.io.http import get_cloudscraper
+from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 
 
@@ -39,12 +39,12 @@ def create_path_from_string(string: str, path_resolution: str, create_missing_fo
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
     log.stdout(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
-    scraper = get_cloudscraper()
-    r = scraper.get(subtitle.download_url, stream=True)
+    session = get_session()
+    response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = VIDEO_FILE.tmp_dir / file_name
     with open(download_path, "wb") as fd:
-        for chunk in r.iter_content(chunk_size=1024):
+        for chunk in response.iter_content(chunk_size=1024):
             fd.write(chunk)
 
 

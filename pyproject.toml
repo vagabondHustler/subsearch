@@ -17,7 +17,7 @@
         "Topic :: Utilities",
     ]
     dependencies = [
-        "cloudscraper==1.2.71",
+        "curl_cffi==0.15.0",
         "imdbinfo==0.9.1",
         "num2words==0.5.14",
         "packaging==26.2",

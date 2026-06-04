@@ -1,4 +1,4 @@
-from requests import Response
+from curl_cffi.requests import Response
 from selectolax.parser import HTMLParser
 
 

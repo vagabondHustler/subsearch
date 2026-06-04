@@ -1,4 +1,4 @@
-from dataclasses import Field, dataclass
+from dataclasses import Field, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
@@ -72,6 +72,7 @@ class AppConfig:
     request_connect_timeout: int
     request_read_timeout: int
     diagnostics: dict[str, Any]
+    subsource_api_key: str
 
 
 @dataclass(order=True, slots=True)
@@ -103,6 +104,7 @@ class Subtitle:
     subtitle_name: str
     download_url: str
     request_data: dict[str, Any]
+    download_headers: dict[str, str] = field(default_factory=dict)
 
 
 class ProviderHealth(Enum):

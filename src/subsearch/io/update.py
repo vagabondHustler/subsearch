@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-import cloudscraper
 import requests
 from packaging.version import Version
 
 from subsearch.runtime.logger import log
 from subsearch.runtime.constants import APP_PATHS, VERSION
 from subsearch.io import file_system
+from subsearch.io.http import get_session
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,9 +31,9 @@ def find_semantic_version(version: str) -> str:
 
 
 def scrape_github() -> str:
-    scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+    session = get_session()
     url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/runtime/version.py"
-    source = scraper.get(url)
+    source = session.get(url)
     scontent = source.content
     file_content = str(scontent)
     return file_content

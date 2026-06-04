@@ -100,7 +100,7 @@ def test_providers_due_when_known_good_is_old() -> None:
     }
     config["diagnostics"]["provider_health"]["subsource"] = {
         "last_known_good": "2026-05-01",
-        "last_attempt": "2026-06-01",
+        "last_attempt": "2026-05-02",
     }
     app_config = toml_file.get_app_config_from_data(config)
     due = diagnostics.providers_due_for_diagnostic(app_config)

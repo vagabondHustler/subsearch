@@ -1,26 +1,25 @@
-import cloudscraper
-from cloudscraper import CloudScraper
-from requests import Response, exceptions
+from curl_cffi import requests
+from curl_cffi.requests import Response, exceptions
 from selectolax.parser import HTMLParser
 
 from subsearch.runtime.logger import log
 from subsearch.parsing.html_parser import parse_html_response
 
 
-def get_cloudscraper() -> CloudScraper:
-    return cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "android", "desktop": False})
+def get_session() -> requests.Session:
+    return requests.Session(impersonate="chrome")
 
 
-def send_request(url: str, scraper: CloudScraper, timeout: tuple[int, int], header=None) -> Response:
+def send_request(url: str, session: requests.Session, timeout: tuple[int, int], header=None) -> Response:
     if header is None:
-        return scraper.get(url, timeout=timeout)
-    return scraper.get(url, timeout=timeout, headers=header)
+        return session.get(url, timeout=timeout)
+    return session.get(url, timeout=timeout, headers=header)
 
 
 def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser | None:
-    scraper = get_cloudscraper()
+    session = get_session()
     try:
-        response = send_request(url, scraper, timeout=timeout, header=header)
+        response = send_request(url, session, timeout=timeout, header=header)
     except exceptions.Timeout as e:
         log.stdout(e, level="warning", print_allowed=False)
         return None
