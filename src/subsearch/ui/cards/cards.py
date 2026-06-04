@@ -113,6 +113,12 @@ class SettingsCard(HeaderCardWidget):
         painter.setPen(CARD_BORDER_COLOR)
         painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), CARD_BORDER_RADIUS, CARD_BORDER_RADIUS)
 
+    def enterEvent(self, e) -> None:
+        pass
+
+    def leaveEvent(self, e) -> None:
+        pass
+
     def _replace_header_separator(self) -> None:
         index = self.vBoxLayout.indexOf(self.separator)
         self.separator.hide()
