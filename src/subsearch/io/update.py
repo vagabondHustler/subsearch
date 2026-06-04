@@ -23,20 +23,25 @@ class UpdateAvailability:
     changelog: str
 
 
+class VersionUnavailable(Exception): ...
+
+
 def find_semantic_version(version: str) -> str:
     # semantic expression https://regex101.com/r/M4qItH/
     pattern = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'
-    version_semantic = "".join(re.findall(pattern, version)[0])
-    return version_semantic
+    matches = re.findall(pattern, version)
+    if not matches:
+        raise VersionUnavailable("Could not find a version in the latest release source")
+    return "".join(matches[0])
 
 
 def scrape_github() -> str:
     session = get_session()
     url = "https://raw.githubusercontent.com/vagabondHustler/subsearch/main/src/subsearch/runtime/version.py"
     source = session.get(url)
-    scontent = source.content
-    file_content = str(scontent)
-    return file_content
+    if source.status_code != 200:
+        raise VersionUnavailable(f"Could not fetch the latest version (HTTP {source.status_code})")
+    return source.text
 
 
 def get_latest_version() -> str:
