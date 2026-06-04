@@ -176,5 +176,7 @@ artifacts/*
 .GITHUB_STEP_SUMMARY
 cspell.json
 cspell.config.yaml
-CLAUDE.md
 mock_download_manager.py
+CLAUDE.md
+memory/**
+.claude/**
