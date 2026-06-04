@@ -12,6 +12,6 @@ def run_in_threads(*tasks: Callable[..., None]) -> None:
             exception = future.exception()
             if exception:
                 msg = f"\nError occurred in thread {name}\n\tTraceback (most recent call last):\n\t\t{exception}"
-                log.stdout(msg, level="error", print_allowed=False)
+                log.error(msg, to_console=False)
                 raise exception
-            log.stdout(f"Thread {name} finished", level="debug", print_allowed=False)
+            log.debug(f"Thread {name} finished", to_console=False)

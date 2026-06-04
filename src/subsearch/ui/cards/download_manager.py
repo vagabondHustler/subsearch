@@ -188,7 +188,7 @@ class DownloadManagerInterface(QWidget):
             self.download_index_size += 1
             self.downloaded.append(subtitle)
         except Exception as error:
-            log.stdout(str(error), level="error")
+            log.error(str(error))
             self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
             self.failed.append(subtitle)
 

@@ -1,170 +1,84 @@
-import dataclasses
-import inspect
 import logging
-import threading
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Optional
 
-from subsearch.runtime import metaclasses
-from subsearch.runtime.model import GenericDataClass
+from subsearch.runtime import log_events, metaclasses
 from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
+from subsearch.runtime.model import GenericDataClass
+
+LEVELS = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+}
+
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
 
 
-def capture_call_info(func: Callable[..., Any]) -> Callable[..., Any]:
-    def wrapper(*args, **kwargs) -> Any:
-        frame = inspect.currentframe().f_back  # type: ignore
-        current_time = datetime.now().time()
-        call_time = current_time.strftime("%H:%M:%S.%f")[:-3]
-        kwargs["call_module"] = frame.f_globals["__name__"].split(".")[-1]  # type: ignore
-        kwargs["call_lineno"] = frame.f_lineno  # type: ignore
-        kwargs["call_ct"] = call_time
-        return func(*args, **kwargs)
-
-    return wrapper
+def _ansi_color(hex_color: str) -> str:
+    red, green, blue = int(hex_color[1:3], 16), int(hex_color[3:5], 16), int(hex_color[5:7], 16)
+    return f"\033[38;2;{red};{green};{blue}m"
 
 
-class ANSIEscapeSequences:
-    """
-    ANSI escape sequences for text colors
-    """
-
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
+def paint(message: str, hex_color: str, bold: bool = False) -> str:
+    bold_code = ANSI_BOLD if bold else ""
+    return f"{bold_code}{_ansi_color(hex_color)}{message}{ANSI_RESET}"
 
 
-class _Logging(metaclass=metaclasses.Singleton):
-    def __init__(self, *args, **kwargs) -> None:
-        self.logger_name = kwargs.get("logger_name", "subsearch")
-        if not APP_PATHS.appdata_subsearch.exists():
-            APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
-        self.log_file_path = kwargs.get("debug_log_file", FILE_PATHS.log)
-        self._debug_logger = self.create_logger()
-        self._lock = threading.Lock()
-        self._ansi = ANSIEscapeSequences
-
-    def create_logger(self) -> logging.Logger:
-        logger = logging.getLogger(self.logger_name)
-        logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(self.log_file_path, mode="w")
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("%(message)s", datefmt="%H:%M:%S")
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        return logger
-
-    def log(self, message: str, **kwargs) -> None:
-        with self._lock:
-            self._log(message, **kwargs)
-            self._print(message, **kwargs)
-
-    def _log(self, message: str, **kwargs) -> None:
-        level = kwargs.get("level", "info")
-        log_methods = {
-            "debug": self._debug_logger.debug,
-            "info": self._debug_logger.info,
-            "warning": self._debug_logger.warning,
-            "error": self._debug_logger.error,
-            "critical": self._debug_logger.critical,
-        }
-        module = kwargs.get("call_module")
-        lineno = kwargs.get("call_lineno")
-        time = kwargs.get("call_ct")
-        log_msg = f"{level.upper()} {module}:{lineno} {time}: {message}"
-        log_methods[level](log_msg)
-
-    def _print(self, message, **kwargs) -> None:
-        print_allowed = kwargs.get("print_allowed", True)
-        hex_color = kwargs.get("hex_color", "#")
-        style = kwargs.get("style", "")
-
-        if not print_allowed:
-            pass
-        elif hex_color == "#" and len(hex_color) == 1:
-            print(message)
-        elif hex_color.startswith("#") and len(hex_color[1:]) == 6:
-            self._color_print(message, hex_color, style)
-
-    def _hex_to_ansi(self, hex_color: str) -> str:
-        r, g, b = int(hex_color[1:3], 16), int(hex_color[3:5], 16), int(hex_color[5:7], 16)
-        return f"\033[38;2;{r};{g};{b}m"
-
-    def _color_print(self, message: str, hex_color: str, style: str) -> None:
-        color_code = self._hex_to_ansi(hex_color)
-        style_code = getattr(self._ansi, style.upper()) if style != "" else ""
-        print(f"{style_code}{color_code}{message}{self._ansi.RESET}")
+def _build_file_logger() -> logging.Logger:
+    APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger("subsearch")
+    logger.setLevel(logging.DEBUG)
+    file_handler = logging.FileHandler(FILE_PATHS.log, mode="w")
+    file_handler.setFormatter(
+        logging.Formatter(
+            "%(levelname)s %(module)s:%(lineno)d %(asctime)s.%(msecs)03d: %(message)s", datefmt="%H:%M:%S"
+        )
+    )
+    logger.addHandler(file_handler)
+    return logger
 
 
 class Logger(metaclass=metaclasses.Singleton):
     def __init__(self) -> None:
-        self._logger = _Logging()
+        self._file_logger = _build_file_logger()
 
-    def __call__(self, message: str, **kwargs) -> None:
-        self.log(message, **kwargs)
+    def write(
+        self,
+        message: str,
+        level: str = "info",
+        to_console: bool = True,
+        color: Optional[str] = None,
+        bold: bool = False,
+    ) -> None:
+        self._file_logger.log(LEVELS[level], message, stacklevel=3)
+        if to_console:
+            print(paint(message, color, bold) if color else message)
 
-    def log(self, message: str, **kwargs) -> None:
-        end_new_line = kwargs.get("end_new_line", False)
-        self._logger.log(message, **kwargs)
-        if end_new_line:
-            self._logger.log("", **kwargs)
+    def debug(self, message: str, to_console: bool = True) -> None:
+        self.write(message, "debug", to_console)
 
-    @capture_call_info
-    def stdout(self, message: str, **kwargs) -> None:
-        self(message, **kwargs)
+    def info(self, message: str, to_console: bool = True, color: Optional[str] = None) -> None:
+        self.write(message, "info", to_console, color)
 
-    @capture_call_info
-    def brackets(self, message: str, **kwargs) -> None:
-        self(f"--- [{message}] ---", hex_color="#fab387", style="bold", **kwargs)
+    def warning(self, message: str, to_console: bool = True, color: Optional[str] = None) -> None:
+        self.write(message, "warning", to_console, color)
 
-    @capture_call_info
-    def subtitle_match(self, provider: str, subtitle_name: str, result: int, threshold: int, **kwargs) -> None:
-        if result >= threshold:
-            self(f"{provider:<14}{result:>3}% {subtitle_name}", hex_color="#a6e3a1", **kwargs)
-        else:
-            self(f"{provider:<14}{result:>3}% {subtitle_name}", **kwargs)
+    def error(self, message: str, to_console: bool = True, color: Optional[str] = None) -> None:
+        self.write(message, "error", to_console, color)
 
-    @capture_call_info
-    def file_system_action(self, action_type: str, src: Path, dst: Optional[Path] = None, **kwargs) -> None:
-        if src.is_file():
-            type_ = "file"
-        elif src.is_dir():
-            type_ = "directory"
-        else:
-            type_ = "item"
+    def critical(self, message: str, to_console: bool = True) -> None:
+        self.write(message, "critical", to_console)
 
-        __src = src.relative_to(src.parent.parent) if src else None
-        __dst = dst.relative_to(dst.parent.parent) if dst else None
+    def event(self, event_key: str, level: str = "info", to_console: bool = True, **values: object) -> None:
+        text, color, bold = log_events.render(event_key, **values)
+        self.write(text, level, to_console, color, bold)
 
-        action_messages = {
-            "remove": rf"Removing {type_}: ...\{__src}",
-            "rename": rf"Renaming {type_}: ...\{__src} -> ...\{__dst}",
-            "move": rf"Moving {type_}: ...\{__src} -> ...\{__dst}",
-            "extract": rf"Extracting archive: ...\{__src} -> ...\{__dst}",
-        }
-
-        message = action_messages.get(action_type)
-
-        if not message:
-            raise ValueError("Invalid action type")
-
-        self(message, **kwargs)
-
-    @capture_call_info
-    def dataclass(self, instance: GenericDataClass, **kwargs) -> None:
-        if not dataclasses.is_dataclass(instance):
-            raise ValueError("Input is not a dataclass instance.")
-        instance_name = f"--- [{instance.__class__.__name__}] ---"
-        self(instance_name, hex_color="#fab387", style="bold", **kwargs)
-        for field in dataclasses.fields(instance):
-            key = field.name
-            value = getattr(instance, key)
-            padding = " " * (30 - len(key))
-            self(f"{key}:{padding}{value}", **kwargs)
-
-    @capture_call_info
-    def task_completed(self, **kwargs) -> None:
-        self("Tasks completed", level="info", hex_color="#89b4fa", **kwargs)
+    def dataclass(self, instance: GenericDataClass, level: str = "info", to_console: bool = True) -> None:
+        for line in log_events.dataclass_lines(instance):
+            self.write(line, level, to_console)
 
 
 log = Logger()

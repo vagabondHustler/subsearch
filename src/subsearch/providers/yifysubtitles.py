@@ -59,7 +59,7 @@ class YifiSubtitles(YifySubtitlesScraper):
         try:
             health = self.get_subtitles()
         except Exception as error:
-            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            log.error(f"{self.provider_name} response was unrecognized: {error}")
             self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)

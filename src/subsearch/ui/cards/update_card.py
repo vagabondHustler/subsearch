@@ -36,7 +36,7 @@ class UpdateCheckWorker(UpdateWorker):
         try:
             self.finished.emit(update.check_for_update())
         except Exception as error:
-            log.stdout(str(error), level="error")
+            log.error(str(error))
             self.failed.emit(str(error))
 
 
@@ -54,7 +54,7 @@ class UpdateInstallWorker(UpdateWorker):
             msi_package_path = update.download_installer(self.latest_version, self.progress.emit)
             self.finished.emit(str(msi_package_path))
         except Exception as error:
-            log.stdout(str(error), level="error")
+            log.error(str(error))
             self.failed.emit(str(error))
 
 

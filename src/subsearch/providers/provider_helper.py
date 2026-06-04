@@ -121,7 +121,7 @@ class _PrepareSubtitleDownload:
         for char in invalid_chars:
             filename = filename.replace(char, "_")
         filename = filename.replace("'", "")
-        log.stdout(f"Sanitized {old_filename} to {filename}")
+        log.info(f"Sanitized {old_filename} to {filename}")
         return filename
 
     def _get_subtitle_no_request_data(self) -> Subtitle:
@@ -154,11 +154,12 @@ class _PrepareSubtitleDownload:
         self.precentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
 
     def log_subtitle_match(self) -> None:
-        log.subtitle_match(
-            self.provider_name,
-            self.subtitle_name,
-            self.precentage_result,
-            self.accept_threshold,
+        log.event(
+            "subtitle_match",
+            provider=self.provider_name,
+            subtitle_name=self.subtitle_name,
+            percentage=self.precentage_result,
+            threshold=self.accept_threshold,
         )
 
     def populate_correct_subtitle_list(self) -> None:

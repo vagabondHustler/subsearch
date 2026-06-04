@@ -119,7 +119,7 @@ def main() -> int:
     unhealthy = [report for report in reports if _provider_is_unhealthy(report)]
     for report in reports:
         status = "unhealthy" if _provider_is_unhealthy(report) else "healthy"
-        log.stdout(f"{report.provider_name}: {status} ({report.health.value}, found {report.subtitles_found})")
+        log.info(f"{report.provider_name}: {status} ({report.health.value}, found {report.subtitles_found})")
     return 1 if unhealthy else 0
 
 

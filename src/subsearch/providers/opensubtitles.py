@@ -17,7 +17,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
         outage_text = self._outage_text(tree)
         if not outage_text:
             return False
-        log.stdout(f"opensubtitles is down: {outage_text}", level="error")
+        log.error(f"opensubtitles is down: {outage_text}")
         return True
 
     def _outage_text(self, tree: Any) -> str:
@@ -86,7 +86,7 @@ class OpenSubtitles(OpenSubtitlesScraper):
             hash_health = self.with_hash(self.url_opensubtitles_hash, self.release)
             site_health = self.get_subtitles(self.url_opensubtitles)
         except Exception as error:
-            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            log.error(f"{self.provider_name} response was unrecognized: {error}")
             self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)

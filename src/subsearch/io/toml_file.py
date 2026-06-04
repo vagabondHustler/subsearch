@@ -66,17 +66,17 @@ def del_toml_key(toml_file_path: Path, key: str) -> None:
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    log.stdout(f"Reparing config", level="debug")
+    log.debug(f"Reparing config")
     toml_data = load_toml_data(toml_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
-        log.stdout(f"Removing obsolete key {key}", level="debug")
+        log.debug(f"Removing obsolete key {key}")
         delete_nested_value(toml_data, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        log.stdout(f"Adding missing key {key}", level="debug")
+        log.debug(f"Adding missing key {key}")
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         set_nested_value(toml_data, key, value)
@@ -116,7 +116,7 @@ def remove_stale_backup_file() -> None:
 
 
 def reset_to_default_config() -> None:
-    log.stdout(f"Creating default config at {FILE_PATHS.config}", level="debug")
+    log.debug(f"Creating default config at {FILE_PATHS.config}")
     FILE_PATHS.config.unlink(missing_ok=True)
     dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
@@ -142,18 +142,18 @@ def resolve_on_integrity_failure() -> None:
     try:
         config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.config))
     except Exception:
-        log.stdout(f"Config is unreadable", level="debug")
+        log.debug(f"Config is unreadable")
         reset_to_default_config()
         return None
     if valid_config(valid_config_keys, config_keys):
-        log.stdout(f"Config is valid", level="debug")
+        log.debug(f"Config is valid")
         return None
     try:
-        log.stdout(f"Config not valid", level="debug")
+        log.debug(f"Config not valid")
         repair_toml_config(FILE_PATHS.config, valid_config_keys, config_keys)
-        log.stdout(f"Repair succeeded", level="debug")
+        log.debug(f"Repair succeeded")
     except Exception:
-        log.stdout(f"Repair faild", level="debug")
+        log.debug(f"Repair faild")
         reset_to_default_config()
 
 
@@ -234,7 +234,7 @@ def restore_last_known_good_config() -> None:
     backup_file_path = FILE_PATHS.config.with_suffix(f"{FILE_PATHS.config.suffix}.bak")
     if not backup_file_path.exists():
         return None
-    log.stdout(f"Restoring last known good config from {backup_file_path}", level="debug")
+    log.debug(f"Restoring last known good config from {backup_file_path}")
     os.replace(backup_file_path, FILE_PATHS.config)
 
 

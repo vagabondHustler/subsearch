@@ -10,7 +10,7 @@ from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDE
 class Bootstrap:
     def __init__(self, pref_counter: float) -> None:
         self.start = pref_counter
-        log.brackets("Initializing")
+        log.event("banner", title="Initializing")
 
         self.api_calls_made: dict[str, int] = {}
         self.ran_download_tab = False
@@ -28,17 +28,17 @@ class Bootstrap:
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
 
-        log.stdout("Verifing files and paths", level="debug")
+        log.debug("Verifing files and paths")
         self.setup_file_system()
         self.language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
         self.app_config = toml_file.get_config_session().snapshot()
         if not windows_registry.check_long_paths_enabled():
             self._notify_user()
 
-        log.dataclass(DEVICE_INFO, level="debug", print_allowed=False)
-        log.dataclass(self.app_config, level="debug", print_allowed=False)
+        log.dataclass(DEVICE_INFO, level="debug", to_console=False)
+        log.dataclass(self.app_config, level="debug", to_console=False)
 
-        log.stdout("Initializing system tray icon", level="debug")
+        log.debug("Initializing system tray icon")
         from subsearch.ui.system_tray import SystemTray
 
         self.system_tray = SystemTray(enabled=self.app_config.system_tray)
@@ -46,21 +46,21 @@ class Bootstrap:
 
         if self.file_exist:
             VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path)
-            log.dataclass(VIDEO_FILE, level="debug", print_allowed=False)
+            log.dataclass(VIDEO_FILE, level="debug", to_console=False)
             file_system.create_directory(VIDEO_FILE.file_directory)
             self.release_data = release_parser.get_release_data(VIDEO_FILE.filename)
             self.update_imdb_id()
-            log.dataclass(self.release_data, level="debug", print_allowed=False)
+            log.dataclass(self.release_data, level="debug", to_console=False)
             provider_urls = release_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)
             self.provider_urls = provider_urls.retrieve_urls()
-            log.dataclass(self.provider_urls, level="debug", print_allowed=False)
+            log.dataclass(self.provider_urls, level="debug", to_console=False)
             self.search_kwargs = dict(
                 release_data=self.release_data,
                 app_config=self.app_config,
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
             )
-        log.task_completed()
+        log.event("task_completed")
 
     def update_imdb_id(self) -> None:
         find_id = imdb_lookup.ImdbIdLookup(
@@ -108,5 +108,5 @@ class Bootstrap:
         self.resync_app_config()
 
     def _notify_user(self) -> None:
-        log.stdout("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
-        log.stdout("https://github.com/vagabondHustler/Win32LongPaths")
+        log.info("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
+        log.info("https://github.com/vagabondHustler/Win32LongPaths")

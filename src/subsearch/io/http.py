@@ -21,6 +21,6 @@ def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> 
     try:
         response = send_request(url, session, timeout=timeout, header=header)
     except exceptions.Timeout as e:
-        log.stdout(e, level="warning", print_allowed=False)
+        log.warning(str(e), to_console=False)
         return None
     return parse_html_response(response)

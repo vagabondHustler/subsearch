@@ -57,7 +57,7 @@ def get_release_changelog(latest_version: str) -> str:
             return ""
         return response.json().get("body", "").strip()
     except requests.RequestException as error:
-        log.stdout(str(error), level="error")
+        log.error(str(error))
         return ""
 
 
@@ -96,23 +96,21 @@ def download_installer(
     msi_package_path = APP_PATHS.tmp_dir / f"Subsearch-{latest_version}-win64.msi"
     response = requests.get(get_latest_msi_url(latest_version), stream=True)
     if response.status_code != 200:
-        log.stdout(
-            f"Failed to download MSI file. HTTP Status Code: {response.status_code}", level="error"
-        )
+        log.error(f"Failed to download MSI file. HTTP Status Code: {response.status_code}")
         raise Exception(response.status_code)
     file_system.download_response(msi_package_path, response, on_progress)
-    log.stdout(f"MSI file downloaded to: {msi_package_path}")
+    log.info(f"MSI file downloaded to: {msi_package_path}")
     return msi_package_path
 
 
 def download_and_update() -> None:
-    log.brackets("Updating Application")
+    log.event("banner", title="Updating Application")
     availability = check_for_update()
     if not availability.update_available:
-        log.stdout("No new version available")
+        log.info("No new version available")
         return None
 
-    log.stdout("New version available")
+    log.info("New version available")
     msi_package_path = download_installer(availability.latest_version)
     run_installer(msi_package_path)
     sys.exit()

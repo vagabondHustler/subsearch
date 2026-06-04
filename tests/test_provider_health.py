@@ -7,7 +7,7 @@ from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers import opensubtitles, yifysubtitles
 from subsearch.providers.provider_helper import combine_provider_health
-from subsearch import diagnostics
+from subsearch.providers import provider_diagnostics as diagnostics
 from tests import fixture_data
 
 

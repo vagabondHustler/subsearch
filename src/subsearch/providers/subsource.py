@@ -35,7 +35,7 @@ class SubsourceApi:
         return {"X-API-Key": self.api_key}
 
     def response_status_ok(self, response: Response) -> bool:
-        log.stdout(f"{response.url} status_code: {response.status_code} {response.reason}")
+        log.info(f"{response.url} status_code: {response.status_code} {response.reason}")
         return response.status_code == 200
 
 
@@ -47,10 +47,7 @@ class Subsource(provider_helper.ProviderHelper):
 
     def start_search(self, *args, **kwargs) -> None:
         if not self.api_key:
-            log.stdout(
-                f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.",
-                level="warning",
-            )
+            log.warning(f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.")
             self.report_health(ProviderHealth.NO_RESPONSE, 0)
             raise MissingApiKey(self.provider_name)
 
@@ -58,7 +55,7 @@ class Subsource(provider_helper.ProviderHelper):
         try:
             health = self._search_and_collect()
         except Exception as error:
-            log.stdout(f"{self.provider_name} response was unrecognized: {error}", level="error")
+            log.error(f"{self.provider_name} response was unrecognized: {error}")
             self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)

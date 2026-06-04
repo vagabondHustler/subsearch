@@ -30,7 +30,7 @@ def create_path_from_string(string: str, path_resolution: str, create_missing_fo
         path = Path(string)
 
     if not path.is_dir() and not create_missing_folder:
-        log.stdout(f"Destination folder {path} does not exist, moving to {VIDEO_FILE.file_directory} instead", level="warning")
+        log.warning(f"Destination folder {path} does not exist, moving to {VIDEO_FILE.file_directory} instead")
         return VIDEO_FILE.file_directory
 
     path.mkdir(parents=True, exist_ok=True)
@@ -38,7 +38,7 @@ def create_path_from_string(string: str, path_resolution: str, create_missing_fo
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
-    log.stdout(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
+    log.info(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
@@ -51,7 +51,7 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
         filename = src / file
-        log.file_system_action(action_type="extract", src=file, dst=dst)
+        log.event("extract", src=file, dst=dst)
         zip_ref = zipfile.ZipFile(filename)
         zip_ref.extractall(dst)
         zip_ref.close()
@@ -66,7 +66,7 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
 
     old_file_path = best_match[1]
     new_file_path = old_file_path.with_name(f"{release_name}{extension}")
-    log.file_system_action(action_type="rename", src=old_file_path, dst=new_file_path)
+    log.event("rename", src=old_file_path, dst=new_file_path)
     old_file_path.rename(new_file_path)
     return new_file_path
 
@@ -78,18 +78,18 @@ def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:
     source_file.replace(destination_directory / source_file.name)
-    log.file_system_action(action_type="move", src=source_file, dst=destination_directory)
+    log.event("move", src=source_file, dst=destination_directory)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
     for file in Path(cwd).glob(f"*{extension}"):
-        log.file_system_action(action_type="remove", src=file)
+        log.event("remove", src=file)
         file_path = Path(cwd) / file
         file_path.unlink()
 
 
 def del_directory(directory: Path) -> None:
-    log.file_system_action(action_type="remove", src=directory)
+    log.event("remove", src=directory)
     shutil.rmtree(directory)
 
 
@@ -101,7 +101,7 @@ def directory_is_empty(directory: Path) -> bool:
 
 def del_directory_content(directory: Path) -> None:
     for item in directory.iterdir():
-        log.file_system_action(action_type="remove", src=item)
+        log.event("remove", src=item)
         if item.is_file():
             item.unlink()
         elif item.is_dir():
@@ -111,12 +111,12 @@ def del_directory_content(directory: Path) -> None:
 def create_directory(path: Path) -> None:
     if path.exists():
         return None
-    log.stdout(f"Creating {path}", level="debug")
+    log.debug(f"Creating {path}")
     path.mkdir(parents=True, exist_ok=True)
 
 
 def get_file_hash(file_path: Path) -> str:
-    log.stdout("Calculating hash of video file", level="debug")
+    log.debug("Calculating hash of video file")
     if not file_path:
         return ""
 
@@ -153,7 +153,7 @@ class MPCHashAlgorithm:
 
     def valid_file_size(self) -> bool:
         if self.file_size < self.chunk_size * 2:
-            log.stdout(f"Invalid file size, {self.file_size} bytes", level="warning")
+            log.warning(f"Invalid file size, {self.file_size} bytes")
             return False
         return True
 
@@ -177,8 +177,8 @@ def download_response(
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))
         downloaded_size = 0
-        log.stdout(f"Download started for {msi_package_path.name}")
-        log.stdout(f"Downloading 0%")
+        log.info(f"Download started for {msi_package_path.name}")
+        log.info(f"Downloading 0%")
         for chunk in response.iter_content(chunk_size=128):
             msi_file.write(chunk)
             downloaded_size += len(chunk)
@@ -188,8 +188,8 @@ def download_response(
                     on_progress(progress_percentage)
                 elapsed_time = time.time() - start_time
                 if elapsed_time >= 0.5:
-                    log.stdout(f"Downloading {progress_percentage:.2f}%")
+                    log.info(f"Downloading {progress_percentage:.2f}%")
                     start_time = time.time()
         if on_progress is not None:
             on_progress(100.0)
-        log.stdout(f"Download complete.")
+        log.info(f"Download complete.")
