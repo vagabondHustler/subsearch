@@ -163,4 +163,13 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "subsource.net and copy your key from the API section. The key is stored "
         "only on this computer and is never shared.",
     ),
+    "credentials.subsource_request_limits": SettingDescription(
+        "Request limits",
+        "Each API key is limited to a request limit of 60 per min, 1800 per hour and 7200 per day.",
+    ),
+    "credentials.subsource_getting_api_key": SettingDescription(
+        "Getting an API Key",
+        'Create a key from your SubSource profile: open your dashboard, go to "My Profile", '
+        "and generate one. You can regenerate it any time. Keep it secret.",
+    ),
 }

@@ -48,6 +48,12 @@ class LucideIcon(FluentIconBase, Enum):
     LIST = "list"
     BUG = "bug"
     SCROLL_TEXT = "scroll-text"
+    EYE = "eye"
+    EYE_OFF = "eye-off"
+    INFO = "info"
+    EXTERNAL_LINK = "external-link"
+    KEY_ROUND = "key-round"
+    HISTORY = "history"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

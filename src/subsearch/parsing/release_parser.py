@@ -278,3 +278,8 @@ def detect_path_resolution(input_str: str) -> str:
 def valid_api_request_input(input: str) -> bool:
     pattern = r"^\d+$"
     return bool(re.match(pattern, input))
+
+
+def valid_subsource_api_key(api_key: str) -> bool:
+    pattern = r"^sk_[0-9a-f]+$"
+    return bool(re.match(pattern, api_key))

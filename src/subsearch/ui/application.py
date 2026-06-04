@@ -17,6 +17,7 @@ from subsearch.io import toml_file
 from subsearch.runtime.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS
 from subsearch.ui.cards.cards import (
+    ApiCard,
     ApplicationCard,
     DownloadManagerCard,
     FileExtensionsCard,
@@ -114,6 +115,13 @@ class SettingsWindow(FluentWindow):
             ],
         )
 
+        api_interface = SettingsInterface(
+            "apiInterface",
+            [
+                ApiCard(),
+            ],
+        )
+
         self.download_manager_interface = DownloadManagerInterface(subtitles)
         download_manager_interface = self.download_manager_interface
 
@@ -130,6 +138,7 @@ class SettingsWindow(FluentWindow):
             download_manager_interface, LucideIcon.FOLDER_DOWN, "Download manager", isTransparent=True
         )
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
+        self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
 
         self.navigationInterface.addItem(
             routeKey="github",
