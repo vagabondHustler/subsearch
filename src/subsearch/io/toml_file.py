@@ -180,6 +180,7 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         request_connect_timeout=data["network"]["request_connect_timeout"],
         request_read_timeout=data["network"]["request_read_timeout"],
         diagnostics=data["diagnostics"],
+        subsource_api_key=data["credentials"]["subsource_api_key"],
     )
 
 

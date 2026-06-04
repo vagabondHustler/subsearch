@@ -97,6 +97,9 @@ def get_default_app_config() -> dict[str, Any]:
             "interval_days": 3,
             "provider_health": provider_health,
         },
+        "credentials": {
+            "subsource_api_key": "",
+        },
     }
     return config
 

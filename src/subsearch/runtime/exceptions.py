@@ -21,6 +21,11 @@ class ProviderResponseUnrecognized(ProviderError):
         super().__init__(message)
 
 
+class MissingApiKey(ProviderError):
+    def __init__(self, provider_name: str) -> None:
+        super().__init__(f"No API key configured for {provider_name}")
+
+
 class MultipleInstancesError(Error):
     def __init__(self, mutex_name: str) -> None:
         error_type = f"Multiple instances of the application are running."

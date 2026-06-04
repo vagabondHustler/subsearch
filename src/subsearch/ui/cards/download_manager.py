@@ -7,7 +7,6 @@ from subsearch.runtime.logger import log
 from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
 from subsearch.runtime.model import Subtitle
-from subsearch.providers import subsource
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.ui.cards.cards import (
     CARD_BORDER_COLOR,
@@ -159,14 +158,10 @@ class DownloadManagerInterface(QWidget):
         subtitle = self.items_by_subtitle[row]
         if subtitle in self.downloaded or subtitle in self.failed:
             return
-        if subtitle.provider_name == "subsource":
-            download_url = subsource.GetDownloadUrl().get_url(subtitle)
-            if not download_url:
-                self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
-                self.failed.append(subtitle)
-                return
-            subtitle.download_url = download_url
-            subtitle.request_data = {}
+        if not subtitle.download_url:
+            self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
+            self.failed.append(subtitle)
+            return
         self._set_status(item, subtitle, DOWNLOADING_ICON, DOWNLOADING_COLOR)
         self._download(item, subtitle)
 

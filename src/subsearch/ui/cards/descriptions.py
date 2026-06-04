@@ -156,4 +156,11 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "it. Sites that continue to return results are not checked. Sites that "
         "have not returned a result for this many days are tested automatically.",
     ),
+    "credentials.subsource_api_key": SettingDescription(
+        "Subsource API key",
+        "Your personal Subsource API key. Subsource needs this key to search and "
+        "download; without it Subsearch skips Subsource. Create a free account at "
+        "subsource.net and copy your key from the API section. The key is stored "
+        "only on this computer and is never shared.",
+    ),
 }

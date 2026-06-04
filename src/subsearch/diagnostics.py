@@ -5,6 +5,7 @@ from subsearch.io import toml_file
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.runtime.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.exceptions import MissingApiKey
 from subsearch.runtime.logger import log
 from subsearch.runtime.model import AppConfig, ProviderHealth, ProviderResult
 
@@ -68,7 +69,10 @@ def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
         if provider_class is None:
             continue
         provider = provider_class(**search_kwargs)
-        provider.start_search(flag="site")
+        try:
+            provider.start_search(flag="site")
+        except MissingApiKey:
+            pass
         reports.extend(provider.reported_health)
     return reports
 
