@@ -68,3 +68,12 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 @pytest.fixture(autouse=True)
 def reset_constants() -> None:
     importlib.reload(factories)
+
+
+@pytest.fixture(autouse=True)
+def reset_config_session() -> Any:
+    from subsearch.io import toml_file
+
+    toml_file.reset_config_session()
+    yield
+    toml_file.reset_config_session()

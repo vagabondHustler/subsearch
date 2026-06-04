@@ -25,6 +25,7 @@ class SearchPipeline:
             log.brackets("GUI")
             ui.open_settings_window()
             log.stdout("Exiting GUI", level="debug")
+            self.bootstrap.resync_app_config()
             self.bootstrap.prevent_conflicting_config_settings()
             return None
 
@@ -100,6 +101,7 @@ class SearchPipeline:
         log.brackets(f"Download Manager")
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         self.bootstrap.manually_accepted_subtitles = ui.open_settings_window(subtitles)
+        self.bootstrap.resync_app_config()
         self.bootstrap.downloaded_subtitles += len(self.bootstrap.manually_accepted_subtitles)
         log.task_completed()
 

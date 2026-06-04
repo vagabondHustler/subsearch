@@ -30,7 +30,7 @@ class Bootstrap:
         log.stdout("Verifing files and paths", level="debug")
         self.setup_file_system()
         self.language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-        self.app_config = toml_file.get_app_config(FILE_PATHS.config)
+        self.app_config = toml_file.get_config_session().snapshot()
         if not windows_registry.check_long_paths_enabled():
             self._notify_user()
 
@@ -87,18 +87,22 @@ class Bootstrap:
             return True
         return False
 
+    def resync_app_config(self) -> None:
+        self.app_config = toml_file.get_config_session().snapshot()
+
     def prevent_conflicting_config_settings(self) -> None:
         # TODO
         # make settings exclusive in GUI
+        session = toml_file.get_config_session()
         if self.app_config.open_manager_on_no_matches and self.app_config.always_open_manager:
-            self.app_config.open_manager_on_no_matches = False
-            toml_file.update_toml_key(FILE_PATHS.config, "download.open_manager_on_no_matches", False)
+            session.write("download.open_manager_on_no_matches", False)
         if (
             self.app_config.post_processing["move_best"]
             and self.app_config.post_processing["move_all"]
         ):
-            self.app_config.post_processing["move_best"] = False
-            toml_file.update_toml_key(FILE_PATHS.config, "post_processing.move_best", False)
+            session.write("post_processing.move_best", False)
+        session.commit()
+        self.resync_app_config()
 
     def _notify_user(self) -> None:
         log.stdout("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")

@@ -13,6 +13,7 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
+from subsearch.io import toml_file
 from subsearch.runtime.model import Subtitle
 from subsearch.runtime.constants import APP_PATHS
 from subsearch.ui.cards.cards import (
@@ -170,6 +171,7 @@ class SettingsWindow(FluentWindow):
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if self.post_processing_card.commit_path_or_revert():
+            toml_file.get_config_session().commit()
             super().closeEvent(e)
         else:
             e.ignore()

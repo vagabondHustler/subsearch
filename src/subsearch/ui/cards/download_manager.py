@@ -8,7 +8,7 @@ from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
 from subsearch.runtime.model import Subtitle
 from subsearch.providers import subsource
-from subsearch.runtime.constants import FILE_PATHS, VIDEO_FILE
+from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.ui.cards.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,
@@ -127,8 +127,8 @@ class DownloadManagerInterface(QWidget):
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         card.viewLayout.addWidget(self.list_widget, stretch=1)
         self.items_by_subtitle: dict[int, Subtitle] = {}
-        accept_threshold = toml_file.load_toml_value(FILE_PATHS.config, "search.accept_threshold")
-        automatic_downloads = toml_file.load_toml_value(FILE_PATHS.config, "download.automatic")
+        accept_threshold = toml_file.get_config_session().read("search.accept_threshold")
+        automatic_downloads = toml_file.get_config_session().read("download.automatic")
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
             item.setFont(self._list_font())
@@ -171,6 +171,7 @@ class DownloadManagerInterface(QWidget):
         self._download(item, subtitle)
 
     def _download(self, item: QListWidgetItem, subtitle: Subtitle) -> None:
+        toml_file.get_config_session().commit()
         try:
             if release_parser.valid_filename(subtitle.subtitle_name):
                 subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
