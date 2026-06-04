@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import lru_cache
 
-from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtCore import QByteArray, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap, QTransform
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtXml import QDomDocument
@@ -69,7 +69,7 @@ class LucideIcon(FluentIconBase, Enum):
 
     def render(self, painter, rect, theme=Theme.AUTO, indexes=None, **attributes) -> None:
         stroke_color = attributes.get("fill") or attributes.get("stroke") or getIconColor(theme)
-        drawSvgIcon(_recolored_svg(self.source(), stroke_color), painter, rect)
+        drawSvgIcon(QByteArray(_recolored_svg(self.source(), stroke_color)), painter, rect)
 
 
 @lru_cache(maxsize=None)
@@ -79,7 +79,7 @@ def lucide_qicon(icon: LucideIcon, color: str) -> QIcon:
 
 @lru_cache(maxsize=None)
 def _upright_pixmap(icon: LucideIcon, color: str, size: int) -> QPixmap:
-    renderer = QSvgRenderer(_recolored_svg(icon.source(), QColor(color).name()))
+    renderer = QSvgRenderer(QByteArray(_recolored_svg(icon.source(), QColor(color).name())))
     pixmap = QPixmap(QSize(size, size))
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
