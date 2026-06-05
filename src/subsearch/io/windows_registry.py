@@ -11,6 +11,7 @@ from subsearch.runtime.constants import (
     REGISTRY_PATHS,
 )
 from subsearch.io import toml_file
+from subsearch.io.toml_file import diagnostics_enabled
 
 
 class LaunchOptions:
@@ -64,12 +65,15 @@ def get_appliesto_value() -> str:
 
 
 def del_registry_key(reg_path: str, key: str) -> None:
+    if diagnostics_enabled():
+        log.debug(f"Deleting registry key: {reg_path}\\{key}")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, reg_path, 0, winreg.KEY_WRITE) as sk:
             winreg.DeleteKey(sk, key)
 
 
 def del_context_menu() -> None:
+    log.info("Removing Subsearch context menu from registry")
     del_registry_key(REGISTRY_PATHS.subsearch, "command")
     del_registry_key(REGISTRY_PATHS.shell, "Subsearch")
 
@@ -83,12 +87,16 @@ def write_keys() -> None:
     ]
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         for key, sub_key in registry_keys:
+            if diagnostics_enabled():
+                log.debug(f"Creating registry key: {key}\\{sub_key}")
             with winreg.OpenKey(hkey, key, 0, winreg.KEY_WRITE) as sk:
                 winreg.CreateKey(sk, sub_key)
 
 
 def set_write_valuex(sub_key: str, value_name: str, value: str) -> None:
     try:
+        if diagnostics_enabled():
+            log.debug(f"Setting registry value: {sub_key} [{value_name or '(default)'}] = {value!r}")
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
             with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
                 winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
@@ -119,6 +127,7 @@ def write_all_valuex() -> None:
 
 
 def add_context_menu() -> None:
+    log.info("Adding Subsearch context menu to registry")
     write_keys()
     write_all_valuex()
 
@@ -130,8 +139,12 @@ def check_long_paths_enabled() -> bool:
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_LOCAL_MACHINE) as hkey:
             with winreg.OpenKey(hkey, REGISTRY_PATHS.long_paths, 0, winreg.KEY_READ) as sk:
                 value, _ = winreg.QueryValueEx(sk, value_name)
-                return bool(value)
+                enabled = bool(value)
+                if not enabled:
+                    log.warning("Win32 long paths are not enabled — long file names may fail")
+                return enabled
     except FileNotFoundError:
+        log.warning("Win32 long paths registry key not found — assuming disabled")
         return False
     except Exception as e:
         log.error(f"Failed to check long path status: {e}")

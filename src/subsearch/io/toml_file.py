@@ -12,6 +12,8 @@ from subsearch.runtime.model import AppConfig
 
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
+    if diagnostics_enabled():
+        log.debug(f"Loading TOML: {toml_file_path}")
     with open(toml_file_path, "r") as f:
         return toml.load(f)
 
@@ -25,11 +27,17 @@ def load_toml_value(toml_file_path: Path, key: str) -> Any:
 
 def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
     temp_file_path = toml_file_path.with_suffix(f"{toml_file_path.suffix}.tmp")
-    with open(temp_file_path, "w") as file:
-        toml.dump(toml_data, file)
-        file.flush()
-        os.fsync(file.fileno())
-    os.replace(temp_file_path, toml_file_path)
+    try:
+        with open(temp_file_path, "w") as file:
+            toml.dump(toml_data, file)
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temp_file_path, toml_file_path)
+        if diagnostics_enabled():
+            log.debug(f"Wrote config to {toml_file_path}")
+    except Exception as e:
+        log.error(f"Failed to write config to {toml_file_path}: {e}")
+        raise
 
 
 def set_nested_value(toml_data: dict, key: str, value: Any | None) -> None:
@@ -66,17 +74,17 @@ def del_toml_key(toml_file_path: Path, key: str) -> None:
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    log.debug(f"Reparing config")
+    log.warning("Config schema mismatch — repairing")
     toml_data = load_toml_data(toml_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
-        log.debug(f"Removing obsolete key {key}")
+        log.info(f"Removing obsolete config key: {key}")
         delete_nested_value(toml_data, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        log.debug(f"Adding missing key {key}")
+        log.info(f"Adding missing config key: {key}")
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         set_nested_value(toml_data, key, value)
@@ -116,7 +124,7 @@ def remove_stale_backup_file() -> None:
 
 
 def reset_to_default_config() -> None:
-    log.debug(f"Creating default config at {FILE_PATHS.config}")
+    log.warning(f"Resetting config to defaults at {FILE_PATHS.config}")
     FILE_PATHS.config.unlink(missing_ok=True)
     dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
@@ -132,6 +140,7 @@ def config_is_readable() -> bool:
 def resolve_on_integrity_failure() -> None:
     remove_stale_temp_file()
     if not FILE_PATHS.config.exists() or not config_is_readable():
+        log.warning("Config missing or unreadable — attempting restore from backup")
         restore_last_known_good_config()
     else:
         remove_stale_backup_file()
@@ -142,18 +151,18 @@ def resolve_on_integrity_failure() -> None:
     try:
         config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.config))
     except Exception:
-        log.debug(f"Config is unreadable")
+        log.warning("Config is unreadable after restore — resetting to defaults")
         reset_to_default_config()
         return None
     if valid_config(valid_config_keys, config_keys):
-        log.debug(f"Config is valid")
+        if diagnostics_enabled():
+            log.debug("Config integrity check passed")
         return None
     try:
-        log.debug(f"Config not valid")
         repair_toml_config(FILE_PATHS.config, valid_config_keys, config_keys)
-        log.debug(f"Repair succeeded")
+        log.info("Config repair succeeded")
     except Exception:
-        log.debug(f"Repair faild")
+        log.error("Config repair failed — resetting to defaults")
         reset_to_default_config()
 
 
@@ -218,11 +227,14 @@ class ConfigSession:
         if not self.has_uncommitted_changes:
             return None
         dump_toml_data(self.toml_file_path, self.in_memory_data)
+        if diagnostics_enabled():
+            log.debug(f"Config session committed to {self.toml_file_path}")
         self.has_uncommitted_changes = False
         self.backup_file_path.unlink(missing_ok=True)
         self.last_known_good_backed_up = False
 
     def revert(self) -> None:
+        log.warning("Reverting uncommitted config changes")
         self.in_memory_data = load_toml_data(self.toml_file_path)
         self.has_uncommitted_changes = False
 
@@ -230,11 +242,17 @@ class ConfigSession:
 _active_config_session: ConfigSession | None = None
 
 
+def diagnostics_enabled() -> bool:
+    if _active_config_session is None:
+        return False
+    return bool(_active_config_session.read("diagnostics.enabled"))
+
+
 def restore_last_known_good_config() -> None:
     backup_file_path = FILE_PATHS.config.with_suffix(f"{FILE_PATHS.config.suffix}.bak")
     if not backup_file_path.exists():
         return None
-    log.debug(f"Restoring last known good config from {backup_file_path}")
+    log.info(f"Restoring last known good config from {backup_file_path}")
     os.replace(backup_file_path, FILE_PATHS.config)
 
 
