@@ -13,7 +13,6 @@ import socket
 import subprocess
 import sys
 import time
-import winreg
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -267,6 +266,8 @@ class Binaries:
         self.end_process(process_name)
 
     def registry_key_exists(self) -> bool:
+        import winreg  # Windows-only; imported lazily so this module loads on the Linux CI runner.
+
         try:
             with winreg.ConnectRegistry(socket.gethostname(), winreg.HKEY_CURRENT_USER) as hkey:
                 winreg.OpenKey(hkey, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_WRITE)
