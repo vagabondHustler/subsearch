@@ -1,34 +1,27 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
+about: Report a bug
+title: ''
 labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+#### Description:
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+A clear description of the issue and when it occurs.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+#### Steps to reproduce:
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+The steps required to trigger the behaviour.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. window 10]
- - Python version [e.g python311]
- - Ran from [e.g source, pypi]
- - media filename: [e.g foo.bar.the.movie.2022.1080p-foobar.mkv.]
- - Version [e.g. 22]
+#### Environment:
 
-**Additional context**
-Add any other context about the problem here.
+- OS: <platform>
+- Python version: <python>
+- Filename: <filename.extension>
+- App version: <version>
+
+#### Additional context:
+
+Any other details, logs, or screenshots that may help.
