@@ -11,7 +11,7 @@ from tests import fixture_data
 
 class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
-        self.file_exist = True
+        self.file_exists = True
         self.app_config = toml_file.get_app_config(FILE_PATHS.config)
         self.release_data = release_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS

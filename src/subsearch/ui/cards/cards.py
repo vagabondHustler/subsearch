@@ -17,7 +17,7 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
-from subsearch.io import toml_file, update, windows_registry
+from subsearch.io import app_updater, toml_file, windows_registry
 from subsearch.runtime.logger import log
 from subsearch.parsing import release_parser
 from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
@@ -717,7 +717,7 @@ NO_VIDEO_FILE = "none (running in configure mode, no video file was opened)"
 
 
 def _media_filename() -> str:
-    if VIDEO_FILE.file_exist:
+    if VIDEO_FILE.file_exists:
         return f"{VIDEO_FILE.filename}{VIDEO_FILE.file_extension}"
     return NO_VIDEO_FILE
 
@@ -801,7 +801,7 @@ class UpdateCheckWorker(UpdateWorker):
 
     def run(self) -> None:
         try:
-            self.finished.emit(update.check_for_update())
+            self.finished.emit(app_updater.check_for_update())
         except Exception as error:
             log.error(str(error))
             self.failed.emit(str(error))
@@ -818,7 +818,7 @@ class UpdateInstallWorker(UpdateWorker):
 
     def run(self) -> None:
         try:
-            msi_package_path = update.download_installer(self.latest_version, self.progress.emit)
+            msi_package_path = app_updater.download_installer(self.latest_version, self.progress.emit)
             self.finished.emit(str(msi_package_path))
         except Exception as error:
             log.error(str(error))
@@ -939,7 +939,7 @@ class UpdateCard(SettingsCard):
         worker.failed.connect(self._on_check_failed)
         self._run_in_thread(worker)
 
-    def _on_check_finished(self, availability: update.UpdateAvailability) -> None:
+    def _on_check_finished(self, availability: app_updater.UpdateAvailability) -> None:
         self._finish_thread()
         self.check_button.setEnabled(True)
         self._latest_version = availability.latest_version
@@ -977,7 +977,7 @@ class UpdateCard(SettingsCard):
         self._finish_thread()
         self.progress_bar.hide()
         self.status_label.setText("Launching the installer, closing Subsearch…")
-        update.run_installer(Path(msi_package_path))
+        app_updater.run_installer(Path(msi_package_path))
         QTimer.singleShot(INSTALLER_HANDOFF_DELAY_MS, QApplication.quit)
 
     def _on_install_failed(self, message: str) -> None:

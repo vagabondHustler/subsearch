@@ -27,4 +27,4 @@ jobs:
           pip install .
 
       - name: Run provider diagnostics
-        run: python -m subsearch.diagnostics
+        run: python -m subsearch.providers.diagnostics

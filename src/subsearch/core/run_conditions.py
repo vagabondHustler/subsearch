@@ -10,7 +10,7 @@ class RunConditions:
 
     def sync_state(self) -> None:
         self.app_config = self.bootstrap.app_config
-        self.file_exist = self.bootstrap.file_exist
+        self.file_exists = self.bootstrap.file_exists
         self.release_data = self.bootstrap.release_data
         self.provider_urls = self.bootstrap.provider_urls
         self.language_data = self.bootstrap.language_data
@@ -53,14 +53,14 @@ class RunConditions:
         self.sync_state()
         post_processing = self.app_config.post_processing
         conditions: dict[str, list[bool | Callable[[], bool]]] = {
-            "init_search": [self.file_exist],
+            "init_search": [self.file_exists],
             "opensubtitles": [
-                self.file_exist,
+                self.file_exists,
                 lambda: self.language_supports_provider("opensubtitles"),
                 self.app_config.providers["opensubtitles"],
             ],
             "yifysubtitles": [
-                self.file_exist,
+                self.file_exists,
                 not self.app_config.only_foreign_parts,
                 lambda: self.language_supports_provider("yifysubtitles"),
                 not self.release_data.tvseries,
@@ -68,14 +68,14 @@ class RunConditions:
                 self.app_config.providers["yifysubtitles_site"],
             ],
             "subsource": [
-                self.file_exist,
+                self.file_exists,
                 not self.app_config.only_foreign_parts,
                 lambda: self.language_supports_provider("subsource"),
                 self.app_config.providers["subsource_site"],
             ],
             "download_files": [self.should_download_files],
             "download_manager": [self.should_open_download_manager],
-            "subtitle_post_processing": [self.file_exist],
+            "subtitle_post_processing": [self.file_exists],
             "extract_files": [self.downloaded_subtitle_archives >= 1],
             "subtitle_rename": [
                 self.extracted_subtitle_archives >= 1,
@@ -91,10 +91,10 @@ class RunConditions:
                 post_processing["move_all"],
             ],
             "summary_notification": [
-                self.file_exist,
+                self.file_exists,
                 self.app_config.summary_notification,
             ],
-            "clean_up": [self.file_exist],
+            "clean_up": [self.file_exists],
         }
 
         return self.all_conditions_true(conditions[func_name])

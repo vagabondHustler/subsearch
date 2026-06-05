@@ -4,21 +4,15 @@ from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
 
-@dataclass(order=True)
-class LanguageData:
+@dataclass(slots=True)
+class Language:
     name: str
     two_letter_code: str
     three_letter_code: str
     incompatibility: list[str]
 
 
-@dataclass(order=True, slots=True)
-class ProviderLetterCodeData:
-    provider: str
-    letter_code: str
-
-
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class AppPaths:
     home: Path
     data: Path
@@ -30,16 +24,16 @@ class AppPaths:
     appdata_subsearch: Path
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class FilePaths:
     log: Path
     config: Path
     subtitle_languages: Path
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class VideoFile:
-    file_exist: bool
+    file_exists: bool
     filename: str
     file_hash: str
     file_extension: str
@@ -49,7 +43,7 @@ class VideoFile:
     tmp_dir: Path
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class AppConfig:
     selected_language: str
     accept_threshold: int
@@ -75,8 +69,8 @@ class AppConfig:
     subsource_api_key: str
 
 
-@dataclass(order=True, slots=True)
-class ReleaseData:
+@dataclass(slots=True)
+class ReleaseInfo:
     title: str
     year: int
     season: str
@@ -89,7 +83,7 @@ class ReleaseData:
     imdb_id: str
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class ProviderUrls:
     opensubtitles: str
     opensubtitles_hash: str
@@ -97,9 +91,9 @@ class ProviderUrls:
     subsource: str
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class Subtitle:
-    precentage_result: int
+    percentage_result: int
     provider_name: str
     subtitle_name: str
     download_url: str
@@ -113,14 +107,14 @@ class ProviderHealth(Enum):
     STRUCTURE_INVALID = "structure_invalid"
 
 
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class ProviderResult:
     provider_name: str
     health: ProviderHealth
     subtitles_found: int
 
 
-@dataclass(order=True, frozen=True)
+@dataclass(slots=True, frozen=True)
 class SystemInfo:
     platform: str
     mode: str
@@ -128,7 +122,7 @@ class SystemInfo:
     subsearch: str
 
 
-@dataclass(order=True, slots=True, frozen=True)
+@dataclass(slots=True, frozen=True)
 class WindowsRegistryPaths:
     classes: str
     asterisk: str
@@ -138,12 +132,12 @@ class WindowsRegistryPaths:
     long_paths: str
 
 
-class GenericDataClass(Protocol):
-    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
-
-
-@dataclass(order=True, slots=True)
+@dataclass(slots=True)
 class ProviderApiLimit:
     opensubtitles: int
     yifysubtitles: int
     subsource: int
+
+
+class DataclassInstance(Protocol):
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]

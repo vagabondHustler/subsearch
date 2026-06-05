@@ -106,7 +106,7 @@ def get_default_app_config() -> dict[str, Any]:
 
 @no_type_check
 def get_video_file_data() -> VideoFile:
-    file_exist = False
+    file_exists = False
     supported_exts = get_supported_file_ext()
     file_name, file_hash, file_ext = "", "", ""
     file_path = Path("")
@@ -121,12 +121,12 @@ def get_video_file_data() -> VideoFile:
             subs_dir = file_directory / "subs"
             file_name = file_path.stem
             file_ext = file_path.suffix
-            file_exist = True
+            file_exists = True
             file_hash = ""
             break
 
     video_file = VideoFile(
-        file_exist=file_exist,
+        file_exists=file_exists,
         filename=file_name,
         file_hash=file_hash,
         file_extension=file_ext,

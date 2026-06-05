@@ -8,7 +8,7 @@ SUBS = Path(CWD) / "subs"
 
 
 def test_video_file_False() -> None:
-    assert VIDEO_FILE.file_exist == False
+    assert VIDEO_FILE.file_exists == False
     assert VIDEO_FILE.filename == ""
     assert VIDEO_FILE.file_extension == ""
     assert VIDEO_FILE.file_path == Path(".")

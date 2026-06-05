@@ -22,7 +22,7 @@ class SearchPipeline:
         self.call_conditions = RunConditions(self.bootstrap)
 
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
-        if not self.bootstrap.file_exist:
+        if not self.bootstrap.file_exists:
             log.event("banner", title="GUI")
             ui.open_settings_window()
             log.debug("Exiting GUI")
@@ -51,7 +51,7 @@ class SearchPipeline:
     def run_provider_diagnostics(self) -> None:
         if not self.bootstrap.app_config.diagnostics["enabled"]:
             return None
-        from subsearch.providers import provider_diagnostics as diagnostics
+        from subsearch.providers import diagnostics as diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
@@ -60,7 +60,7 @@ class SearchPipeline:
         self._run_due_diagnostics()
 
     def _run_due_diagnostics(self) -> None:
-        from subsearch.providers import provider_diagnostics as diagnostics
+        from subsearch.providers import diagnostics as diagnostics
 
         due_providers = diagnostics.providers_due_for_diagnostic(self.bootstrap.app_config)
         if not due_providers:
@@ -110,7 +110,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def download_files(self) -> None:
         log.event("banner", title=f"Downloading subtitles")
-        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda i: i.precentage_result, reverse=True)
+        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda i: i.percentage_result, reverse=True)
         keep: list[Subtitle] = []
         for subtitle in accepted:
             if subtitle.provider_name not in self.bootstrap.api_calls_made:

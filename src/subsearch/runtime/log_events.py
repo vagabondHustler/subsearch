@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from subsearch.runtime.model import GenericDataClass
+from subsearch.runtime.model import DataclassInstance
 
 BANNER_COLOR = "#fab387"
 MATCH_COLOR = "#a6e3a1"
@@ -62,7 +62,7 @@ def _shorten(path: Optional[Path]) -> Optional[Path]:
     return path.relative_to(path.parent.parent) if path else None
 
 
-def dataclass_lines(instance: GenericDataClass) -> list[str]:
+def dataclass_lines(instance: DataclassInstance) -> list[str]:
     if not dataclasses.is_dataclass(instance):
         raise ValueError("Input is not a dataclass instance.")
     lines = [LOG_EVENTS["banner"].template.format(title=instance.__class__.__name__)]

@@ -99,7 +99,7 @@ class DownloadManagerInterface(QWidget):
         super().__init__()
         self.setObjectName("downloadManagerInterface")
         self.subtitles = sorted(
-            subtitles or [], key=lambda subtitle: subtitle.precentage_result, reverse=True
+            subtitles or [], key=lambda subtitle: subtitle.percentage_result, reverse=True
         )
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
@@ -142,7 +142,7 @@ class DownloadManagerInterface(QWidget):
             item.setForeground(QColor(PENDING_COLOR))
             self.list_widget.addItem(item)
             self.items_by_subtitle[self.list_widget.row(item)] = subtitle
-            if subtitle.precentage_result == accept_threshold and not automatic_downloads:
+            if subtitle.percentage_result == accept_threshold and not automatic_downloads:
                 self.downloaded.append(subtitle)
                 self.download_number += 1
                 self._set_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
@@ -157,7 +157,7 @@ class DownloadManagerInterface(QWidget):
 
     @staticmethod
     def _row_text(subtitle: Subtitle) -> str:
-        return f"{subtitle.precentage_result}%  {subtitle.subtitle_name}"
+        return f"{subtitle.percentage_result}%  {subtitle.subtitle_name}"
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
         row = self.list_widget.row(item)

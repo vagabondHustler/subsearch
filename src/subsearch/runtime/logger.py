@@ -3,7 +3,7 @@ from typing import Optional
 
 from subsearch.runtime import log_events, metaclasses
 from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
-from subsearch.runtime.model import GenericDataClass
+from subsearch.runtime.model import DataclassInstance
 
 LEVELS = {
     "debug": logging.DEBUG,
@@ -76,7 +76,7 @@ class Logger(metaclass=metaclasses.Singleton):
         text, color, bold = log_events.render(event_key, **values)
         self.write(text, level, to_console, color, bold)
 
-    def dataclass(self, instance: GenericDataClass, level: str = "info", to_console: bool = True) -> None:
+    def dataclass(self, instance: DataclassInstance, level: str = "info", to_console: bool = True) -> None:
         for line in log_events.dataclass_lines(instance):
             self.write(line, level, to_console)
 

@@ -5,11 +5,11 @@ from subsearch.parsing import release_parser
 from subsearch.runtime.logger import log
 from subsearch.runtime.model import (
     AppConfig,
-    LanguageData,
+    Language,
     ProviderHealth,
     ProviderResult,
     ProviderUrls,
-    ReleaseData,
+    ReleaseInfo,
     Subtitle,
 )
 from subsearch.runtime.constants import VIDEO_FILE
@@ -27,10 +27,10 @@ def combine_provider_health(*healths: ProviderHealth) -> ProviderHealth:
 
 class ProviderDataContainer:
     def __init__(self, *args, **kwargs) -> None:
-        release_data: ReleaseData = kwargs["release_data"]
+        release_data: ReleaseInfo = kwargs["release_data"]
         app_config: AppConfig = kwargs["app_config"]
         provider_urls: ProviderUrls = kwargs["provider_urls"]
-        language_data: LanguageData = kwargs["language_data"]
+        language_data: Language = kwargs["language_data"]
 
         self.app_config = app_config
         self.release_data = release_data
@@ -96,7 +96,7 @@ class _PrepareSubtitleDownload:
     def __init__(self, master: "ProviderHelper", *args, **kwargs) -> None:
         self.provider_name = master.provider_name
         self.subtitle_name = master.subtitle_name
-        self.precentage_result = 0
+        self.percentage_result = 0
         self.download_url = master.download_url
         self.release_name = VIDEO_FILE.filename
         self.accept_threshold = master.accept_threshold
@@ -126,7 +126,7 @@ class _PrepareSubtitleDownload:
 
     def _get_subtitle_no_request_data(self) -> Subtitle:
         subtitle = Subtitle(
-            precentage_result=self.precentage_result,
+            percentage_result=self.percentage_result,
             provider_name=self.provider_name,
             subtitle_name=self.subtitle_name.lower(),
             download_url=self.download_url,
@@ -137,7 +137,7 @@ class _PrepareSubtitleDownload:
 
     def _get_subtitle_with_download_url(self) -> Subtitle:
         subtitle = Subtitle(
-            precentage_result=self.precentage_result,
+            percentage_result=self.percentage_result,
             provider_name=self.provider_name,
             subtitle_name=self.subtitle_name.lower(),
             download_url="",
@@ -151,19 +151,19 @@ class _PrepareSubtitleDownload:
         self.populate_correct_subtitle_list()
 
     def set_percentage_result(self) -> None:
-        self.precentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
+        self.percentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
 
     def log_subtitle_match(self) -> None:
         log.event(
             "subtitle_match",
             provider=self.provider_name,
             subtitle_name=self.subtitle_name,
-            percentage=self.precentage_result,
+            percentage=self.percentage_result,
             threshold=self.accept_threshold,
         )
 
     def populate_correct_subtitle_list(self) -> None:
-        if self.master.threshold_met(self.precentage_result):
+        if self.master.threshold_met(self.percentage_result):
             return _PrepareSubtitleDownload.accepted_subtitles.append(self._subtitle)
         return _PrepareSubtitleDownload.rejected_subtitles.append(self._subtitle)
 
@@ -235,7 +235,7 @@ class ProviderHelper(ProviderDataContainer):
                 return False
         return True
 
-    def threshold_met(self, precentage_result: int) -> bool:
-        if precentage_result >= self.accept_threshold:
+    def threshold_met(self, percentage_result: int) -> bool:
+        if percentage_result >= self.accept_threshold:
             return True
         return False

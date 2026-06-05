@@ -20,7 +20,7 @@ class Bootstrap:
         self.health_reports: list[ProviderResult] = []
         self.release_data = release_parser.no_release_data()
         self.provider_urls = release_parser.CreateProviderUrls.no_urls()
-        self.file_exist = VIDEO_FILE.file_exist
+        self.file_exists = VIDEO_FILE.file_exists
         self.autoload_src: Path = Path("")
 
         self.downloaded_subtitles: int = 0
@@ -44,7 +44,7 @@ class Bootstrap:
         self.system_tray = SystemTray(enabled=self.app_config.system_tray)
         self.system_tray.start()
 
-        if self.file_exist:
+        if self.file_exists:
             VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path)
             log.dataclass(VIDEO_FILE, level="debug", to_console=False)
             file_system.create_directory(VIDEO_FILE.file_directory)
@@ -77,7 +77,7 @@ class Bootstrap:
         file_system.create_directory(APP_PATHS.appdata_subsearch)
         toml_file.resolve_on_integrity_failure()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        if self.file_exist:
+        if self.file_exists:
             file_system.create_directory(VIDEO_FILE.subs_dir)
             file_system.create_directory(VIDEO_FILE.tmp_dir)
 

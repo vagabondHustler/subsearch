@@ -8,9 +8,9 @@ from subsearch.runtime.logger import log
 from subsearch.runtime.constants import VIDEO_FILE
 from subsearch.runtime.model import (
     AppConfig,
-    LanguageData,
+    Language,
     ProviderUrls,
-    ReleaseData,
+    ReleaseInfo,
 )
 
 
@@ -83,11 +83,11 @@ def find_title(filename: str, year: int, series: bool) -> str:
 
 
 class CreateProviderUrls:
-    def __init__(self, app_config: AppConfig, release_data: ReleaseData, language_data: dict[str, Any]) -> None:
+    def __init__(self, app_config: AppConfig, release_data: ReleaseInfo, language_data: dict[str, Any]) -> None:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
-        self.current_language_data: LanguageData = LanguageData(**language_data[app_config.selected_language])
+        self.current_language_data: Language = Language(**language_data[app_config.selected_language])
 
     def retrieve_urls(self) -> ProviderUrls:
         urls = ProviderUrls(
@@ -164,7 +164,7 @@ class CreateProviderUrls:
         return hi_all_parts, hi_foreign_parts, non_hi_foreign_parts
 
 
-def get_release_data(filename: str) -> ReleaseData:
+def get_release_data(filename: str) -> ReleaseInfo:
     if not filename:
         return no_release_data()
     release = filename.lower()
@@ -176,7 +176,7 @@ def get_release_data(filename: str) -> ReleaseData:
     group = find_group(release)
     imdb_id = ""
 
-    parameters = ReleaseData(
+    parameters = ReleaseInfo(
         title,
         year,
         season,
@@ -191,8 +191,8 @@ def get_release_data(filename: str) -> ReleaseData:
     return parameters
 
 
-def no_release_data() -> ReleaseData:
-    return ReleaseData("", 0, "", "", "", "", False, "", "", "")
+def no_release_data() -> ReleaseInfo:
+    return ReleaseInfo("", 0, "", "", "", "", False, "", "", "")
 
 
 def calculate_match(from_user: str, from_website: str) -> int:
