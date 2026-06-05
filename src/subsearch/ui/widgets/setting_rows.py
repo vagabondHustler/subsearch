@@ -218,6 +218,7 @@ class SearchableComboBox(EditableComboBox):
         self._filter_proxy.setFilterFixedString(self.text())
         if self._completerMenu is None:
             self.setCompleterMenu(CompleterMenu(self))
+            style_dropdown_menu(self._completerMenu, "completerListWidget")
         self.completer().setCompletionPrefix("")
         changed = self._completerMenu.setCompletion(
             self.completer().completionModel(), self.completer().completionColumn()

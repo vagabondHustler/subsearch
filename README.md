@@ -56,13 +56,17 @@ Subsearch is an automated subtitle downloader and extractor with support for man
 <details>
 <summary>Screenshots of the interface</summary>
 
-![prtsc_language](https://github.com/vagabondHustler/subsearch/blob/main/assets/language_options.png?raw=true)
+![search](https://github.com/vagabondHustler/subsearch/blob/main/assets/search.png?raw=true)
 
-![prtsc_search](https://github.com/vagabondHustler/subsearch/blob/main/assets/search_filters.png?raw=true)
+![integration](https://github.com/vagabondHustler/subsearch/blob/main/assets/integration.png?raw=true)
 
-![prtsc_settings](https://github.com/vagabondHustler/subsearch/blob/main/assets/subsearch_options.png?raw=true)
+![api](https://github.com/vagabondHustler/subsearch/blob/main/assets/api.png?raw=true)
 
-![prtsc_download](https://github.com/vagabondHustler/subsearch/blob/main/assets/download_manager.png?raw=true)
+![application](https://github.com/vagabondHustler/subsearch/blob/main/assets/application.png?raw=true)
+
+![download_manager](https://github.com/vagabondHustler/subsearch/blob/main/assets/download_manager.png?raw=true)
+
+![about](https://github.com/vagabondHustler/subsearch/blob/main/assets/about.png?raw=true)
 
 </details>
 
@@ -85,7 +89,7 @@ Subsearch is an automated subtitle downloader and extractor with support for man
 
 Requires windows 10/11, probably works on 8.
 
-- Download the windows installer "Subsearch-x.x.x-win64.msi" from [here](https://github.com/vagabondHustler/subsearch/releases).
+- Download the windows installer from the [Subsearch releases page](https://github.com/vagabondHustler/subsearch/releases).
 - Run the installer.
 - If you receive a PUA message, click "More info" → "Run anyway".
 - Run Subsearch at least once for all the context menu options to appear
@@ -103,7 +107,7 @@ Requires windows 10/11, probably works on 8.
 
 </details>
 
-More about potentially unwanted applications (PUA) can be found [here](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e) on Microsoft's support page.
+More about potentially unwanted applications (PUA) can be found on [Microsoft's support page](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e).
 
 ## Acknowledgements<a name = "thanks"></a>
 
