@@ -62,12 +62,33 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) 
             fd.write(chunk)
 
 
+_SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
+_MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB — generous for any subtitle archive
+
+
+def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path) -> None:
+    total_uncompressed = sum(info.file_size for info in archive.infolist())
+    if total_uncompressed > _MAX_UNCOMPRESSED_BYTES:
+        log.warning(f"Archive uncompressed size {total_uncompressed} exceeds limit, skipping")
+        return
+
+    dst_resolved = dst.resolve()
+    for member in archive.infolist():
+        member_path = (dst / member.filename).resolve()
+        if not str(member_path).startswith(str(dst_resolved)):
+            log.warning(f"Skipping unsafe path in archive: {member.filename}")
+            continue
+        if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
+            continue
+        archive.extract(member, dst)
+
+
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
         log.event("extract", src=file, dst=dst)
         try:
             with zipfile.ZipFile(file) as archive:
-                archive.extractall(dst)
+                _safe_extract_archive(archive, dst)
         except (zipfile.BadZipFile, OSError):
             log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
