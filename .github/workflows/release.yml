@@ -56,7 +56,7 @@ jobs:
 
       - name: Bump version, tag, and push
         id: run
-        run: python -m tools.github_actions.jobs.init
+        run: python .github/workflows/automation/workflows.py init
 
   build_binaries:
     name: Build binaries
@@ -81,11 +81,11 @@ jobs:
           git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
           pip install -e .[build]
-          python -m tools.build bdist_msi
+          python .github/workflows/automation/workflows.py make_msi
 
       - name: Hash and collect artifacts
         id: run
-        run: python -m tools.github_actions.jobs.build_binaries
+        run: python .github/workflows/automation/workflows.py build_binaries
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -120,7 +120,7 @@ jobs:
           python -m pip install --upgrade pip psutil
           python -m pip install -e . --no-deps
 
-      - run: python -m tools.github_actions.jobs.test_binaries
+      - run: python .github/workflows/automation/workflows.py test_binaries
 
   upload_binaries:
     name: Upload binaries to virustotal
@@ -170,7 +170,7 @@ jobs:
           python -m pip install -e . --no-deps
 
       - name: Render changelog and append links
-        run: python -m tools.github_actions.jobs.changelog
+        run: python .github/workflows/automation/workflows.py changelog
         env:
           CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
           PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
@@ -257,4 +257,4 @@ jobs:
         with:
           python-version-file: .python-version
 
-      - run: python -m tools.github_actions.jobs.sync_dev
+      - run: python .github/workflows/automation/workflows.py sync_dev
