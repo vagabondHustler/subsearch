@@ -24,12 +24,12 @@ def record_health_reports(reports: list[ProviderResult]) -> None:
     for report in reports:
         key = f"diagnostics.provider_health.{report.provider_name}.failed_attempts"
         if report.health is ProviderHealth.OK and report.subtitles_found > 0:
-            log.debug(f"[diagnostics] {report.provider_name}: healthy — resetting failed_attempts to 0")
+            log.debug(f"{report.provider_name}: healthy — resetting failed_attempts to 0")
             session.write(key, 0)
         else:
             current = session.read(key) or 0
             updated = current + 1
-            log.warning(f"[diagnostics] {report.provider_name}: unhealthy ({report.health.value}, found {report.subtitles_found}) — failed_attempts {current} -> {updated}")
+            log.warning(f"{report.provider_name}: unhealthy ({report.health.value}, found {report.subtitles_found}) — failed_attempts {current} -> {updated}")
             session.write(key, updated)
     session.commit()
 
@@ -43,24 +43,24 @@ def providers_due_for_diagnostic(app_config: AppConfig) -> list[str]:
         if health["failed_attempts"] >= threshold
     ]
     if due:
-        log.info(f"[diagnostics] Providers due for diagnostic (threshold={threshold}): {', '.join(due)}")
+        log.info(f"Providers due for diagnostic (threshold={threshold}): {', '.join(due)}")
     return due
 
 
 def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
-    log.info(f"[diagnostics] Running diagnostics for: {', '.join(provider_names)}")
+    log.info(f"Running diagnostics for: {', '.join(provider_names)}")
     search_kwargs = _known_good_search_kwargs()
     reports = [_diagnose_imdb(search_kwargs)] if "imdb" in provider_names else []
     for provider_name in provider_names:
         provider_class = PROVIDER_CLASSES.get(provider_name)
         if provider_class is None:
             continue
-        log.debug(f"[diagnostics] Probing {provider_name}")
+        log.debug(f"Probing {provider_name}")
         provider = provider_class(**search_kwargs)
         try:
             provider.start_search(flag="site")
         except MissingApiKey:
-            log.warning(f"[diagnostics] {provider_name}: skipped — missing API key")
+            log.warning(f"{provider_name}: skipped — missing API key")
         reports.extend(provider.reported_health)
     return reports
 

@@ -3,10 +3,10 @@ from typing import Any
 from curl_cffi import requests as curl_requests
 from curl_cffi.requests import Response
 
+from subsearch.providers import provider_helper
+from subsearch.runtime.exceptions import MissingApiKey, ProviderResponseUnrecognized
 from subsearch.runtime.logger import log
 from subsearch.runtime.model import ProviderHealth
-from subsearch.runtime.exceptions import MissingApiKey, ProviderResponseUnrecognized
-from subsearch.providers import provider_helper
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 
@@ -59,6 +59,7 @@ class Subsource(provider_helper.ProviderHelper):
             self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.log_provider_skips()
         self.report_health(health, subtitles_after - subtitles_before)
 
     def _search_and_collect(self) -> ProviderHealth:
@@ -94,7 +95,10 @@ class Subsource(provider_helper.ProviderHelper):
         if "data" not in data:
             raise ProviderResponseUnrecognized("subtitles response missing 'data'")
         for subtitle in data["data"]:
-            if self._skip_subtitle(subtitle):
+            reason = self._skip_reason(subtitle)
+            if reason:
+                name = ", ".join(subtitle.get("releaseInfo", []) or [str(subtitle.get("subtitleId", ""))])
+                self.record_filtered_out(self.provider_name, name, reason)
                 continue
             download_url = api.download_url(subtitle["subtitleId"])
             download_headers = api.auth_headers()
@@ -117,12 +121,12 @@ class Subsource(provider_helper.ProviderHelper):
             return True
         return False
 
-    def _skip_subtitle(self, subtitle: dict[str, Any]) -> bool:
+    def _skip_reason(self, subtitle: dict[str, Any]) -> str:
         keys = ["subtitleId", "releaseInfo", "language", "hearingImpaired"]
         if not self.keys_exsist(subtitle, keys):
-            return True
+            return "malformed"
         if not self.subtitle_hi_match(subtitle["hearingImpaired"]):
-            return True
+            return "hi"
         if not self.subtitle_language_match(subtitle["language"]):
-            return True
-        return False
+            return "language"
+        return ""

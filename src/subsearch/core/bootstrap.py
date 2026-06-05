@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderResult, Subtitle
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import ProviderResult, Subtitle
 
 
 class Bootstrap:
@@ -23,7 +23,6 @@ class Bootstrap:
         self.file_exists = VIDEO_FILE.file_exists
         self.autoload_src: Path = Path("")
 
-        self.downloaded_subtitles: int = 0
         self.downloaded_subtitle_archives: int = 0
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
@@ -99,10 +98,7 @@ class Bootstrap:
         session = toml_file.get_config_session()
         if self.app_config.open_manager_on_no_matches and self.app_config.always_open_manager:
             session.write("download.open_manager_on_no_matches", False)
-        if (
-            self.app_config.post_processing["move_best"]
-            and self.app_config.post_processing["move_all"]
-        ):
+        if self.app_config.post_processing["move_best"] and self.app_config.post_processing["move_all"]:
             session.write("post_processing.move_best", False)
         session.commit()
         self.resync_app_config()

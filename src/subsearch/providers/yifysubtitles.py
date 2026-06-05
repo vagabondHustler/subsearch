@@ -2,10 +2,10 @@ from typing import Any
 
 from selectolax.parser import Node
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderHealth
 from subsearch.io import http
 from subsearch.providers import provider_helper
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import ProviderHealth
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
@@ -25,10 +25,16 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
 
         product = tree.select("tr")
         for item in product.matches[1:]:  # type: ignore
-            if self.skip_item(item):
+            reason = self.skip_reason(item)
+            if reason:
+                self.record_filtered_out(self.provider_name, self._item_name(item), reason)
                 continue
             self.parse_item(item)
         return ProviderHealth.OK
+
+    def _item_name(self, item: Node) -> str:
+        node = item.css_first("a")
+        return node.text().strip() if node else ""
 
     def parse_item(self, item) -> None:
         node = item.css_first("a")
@@ -39,14 +45,14 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         for subtitle_name in titles:
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
-    def skip_item(self, item: Node) -> bool:
+    def skip_reason(self, item: Node) -> str:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
         subtitle_hi = item.css_matches("span.hi-subtitle")
         if subtitle_language.lower() != self.current_language.lower():  # type: ignore
-            return True
+            return "language"
         if not self.subtitle_hi_match(subtitle_hi):
-            return True
-        return False
+            return "hi"
+        return ""
 
 
 class YifiSubtitles(YifySubtitlesScraper):
@@ -63,4 +69,5 @@ class YifiSubtitles(YifySubtitlesScraper):
             self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
             return None
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.log_provider_skips()
         self.report_health(health, subtitles_after - subtitles_before)

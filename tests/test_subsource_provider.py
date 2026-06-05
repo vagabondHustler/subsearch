@@ -1,11 +1,11 @@
 import pytest
 
+from subsearch.io import toml_file
+from subsearch.parsing import release_parser
+from subsearch.providers.subsource import API_BASE_URL, Subsource, SubsourceApi
 from subsearch.runtime.constants import FILE_PATHS
 from subsearch.runtime.exceptions import MissingApiKey
 from subsearch.runtime.model import ProviderHealth
-from subsearch.io import toml_file
-from subsearch.parsing import release_parser
-from subsearch.providers.subsource import Subsource, SubsourceApi, API_BASE_URL
 from tests import fixture_data
 
 
@@ -45,18 +45,18 @@ def test_missing_key_raises_and_reports_no_response() -> None:
 def test_skip_subtitle_rejects_wrong_language() -> None:
     provider = _build_subsource(api_key="sk_test")
     subtitle = {"subtitleId": 1, "releaseInfo": ["x"], "language": "spanish", "hearingImpaired": False}
-    assert provider._skip_subtitle(subtitle) is True
+    assert provider._skip_reason(subtitle) == "language"
 
 
 def test_skip_subtitle_accepts_matching() -> None:
     provider = _build_subsource(api_key="sk_test")
     subtitle = {"subtitleId": 1, "releaseInfo": ["x"], "language": "english", "hearingImpaired": False}
-    assert provider._skip_subtitle(subtitle) is False
+    assert provider._skip_reason(subtitle) == ""
 
 
 def test_skip_subtitle_missing_keys_is_skipped() -> None:
     provider = _build_subsource(api_key="sk_test")
-    assert provider._skip_subtitle({"subtitleId": 1}) is True
+    assert provider._skip_reason({"subtitleId": 1}) == "malformed"
 
 
 def test_skip_movie_rejects_wrong_title() -> None:

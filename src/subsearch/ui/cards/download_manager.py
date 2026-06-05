@@ -3,11 +3,11 @@ from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
-from subsearch.runtime.logger import log
 from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
-from subsearch.runtime.model import Subtitle
 from subsearch.runtime.constants import VIDEO_FILE
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import Subtitle, SubtitleStatus
 from subsearch.ui.cards.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,
@@ -17,8 +17,13 @@ from subsearch.ui.cards.cards import (
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
 from subsearch.ui.theme.separators import make_fading_separator
+from subsearch.ui.theme.typography import (
+    BODY_FONT_SIZE,
+    SEMI_BOLD,
+    apply_body_font,
+    apply_title_font,
+)
 from subsearch.ui.widgets.setting_rows import HelpButton
-from subsearch.ui.theme.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font, apply_title_font
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
@@ -98,9 +103,7 @@ class DownloadManagerInterface(QWidget):
     def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
         super().__init__()
         self.setObjectName("downloadManagerInterface")
-        self.subtitles = sorted(
-            subtitles or [], key=lambda subtitle: subtitle.percentage_result, reverse=True
-        )
+        self.subtitles = sorted(subtitles or [], key=lambda subtitle: subtitle.percentage_result, reverse=True)
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
         self.download_number = 1
@@ -144,6 +147,7 @@ class DownloadManagerInterface(QWidget):
             self.items_by_subtitle[self.list_widget.row(item)] = subtitle
             if subtitle.percentage_result == accept_threshold and not automatic_downloads:
                 self.downloaded.append(subtitle)
+                subtitle.status = SubtitleStatus.MANUALLY_DOWNLOADED
                 self.download_number += 1
                 self._set_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
         self.list_widget.itemClicked.connect(self._on_item_clicked)
@@ -166,6 +170,7 @@ class DownloadManagerInterface(QWidget):
             return
         if not subtitle.download_url:
             self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
+            subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
             self.failed.append(subtitle)
             return
         self._set_status(item, subtitle, DOWNLOADING_ICON, DOWNLOADING_COLOR)
@@ -179,22 +184,21 @@ class DownloadManagerInterface(QWidget):
             file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
             file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
             zip_archive = (
-                VIDEO_FILE.tmp_dir
-                / f"{subtitle.provider_name}_{subtitle.subtitle_name}_{self.download_number}.zip"
+                VIDEO_FILE.tmp_dir / f"{subtitle.provider_name}_{subtitle.subtitle_name}_{self.download_number}.zip"
             )
             zip_archive.unlink()
             self._set_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
+            subtitle.status = SubtitleStatus.MANUALLY_DOWNLOADED
             self.download_number += 1
             self.download_index_size += 1
             self.downloaded.append(subtitle)
         except Exception as error:
             log.error(str(error))
             self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
+            subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
             self.failed.append(subtitle)
 
-    def _set_status(
-        self, item: QListWidgetItem, subtitle: Subtitle, icon: LucideIcon, color: str
-    ) -> None:
+    def _set_status(self, item: QListWidgetItem, subtitle: Subtitle, icon: LucideIcon, color: str) -> None:
         if icon is DOWNLOADING_ICON:
             self._start_spinning(item, color)
         else:

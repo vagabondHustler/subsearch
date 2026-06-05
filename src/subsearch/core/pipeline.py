@@ -5,15 +5,15 @@ from typing import Any, Callable
 
 from subsearch import ui
 from subsearch.core.bootstrap import Bootstrap
+from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system
-from subsearch.runtime import parallel_tasks
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderHealth, ProviderResult, Subtitle
-from subsearch.runtime.exceptions import MissingApiKey
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.core.run_conditions import RunConditions
+from subsearch.runtime import parallel_tasks
 from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.exceptions import MissingApiKey
+from subsearch.runtime.logger import log
+from subsearch.runtime.model import ProviderHealth, ProviderResult, SubtitleStatus
 
 
 class SearchPipeline:
@@ -45,6 +45,7 @@ class SearchPipeline:
     def run_provider_diagnostics(self) -> None:
         if not self.bootstrap.app_config.diagnostics["enabled"]:
             return None
+        log.event("banner", title="Provider Healthcheck")
         from subsearch.providers import diagnostics as diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
@@ -103,20 +104,16 @@ class SearchPipeline:
     def download_files(self) -> None:
         log.event("banner", title=f"Downloading subtitles")
         accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda i: i.percentage_result, reverse=True)
-        keep: list[Subtitle] = []
         for subtitle in accepted:
             if subtitle.provider_name not in self.bootstrap.api_calls_made:
                 self.bootstrap.api_calls_made[subtitle.provider_name] = 0
             if self.bootstrap.api_calls_made[subtitle.provider_name] == self.bootstrap.app_config.api_call_limit:
-                self.bootstrap.rejected_subtitles.append(subtitle)
                 continue
             sub_count = sum(self.bootstrap.api_calls_made.values(), 1)
             index_size = len(accepted)
             file_system.download_subtitle(subtitle, sub_count, index_size)
-            self.bootstrap.downloaded_subtitles += 1
+            subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
             self.bootstrap.api_calls_made[subtitle.provider_name] += 1
-            keep.append(subtitle)
-        self.bootstrap.accepted_subtitles = keep
         log.event("task_completed")
 
     @run_if_conditions_met
@@ -125,7 +122,6 @@ class SearchPipeline:
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         self.bootstrap.manually_accepted_subtitles = ui.open_settings_window(subtitles)
         self.bootstrap.resync_app_config()
-        self.bootstrap.downloaded_subtitles += len(self.bootstrap.manually_accepted_subtitles)
         log.event("task_completed")
 
     @run_if_conditions_met
@@ -176,13 +172,18 @@ class SearchPipeline:
         log.event("banner", title="Summary toast")
         self._log_provider_health_warnings()
         elapsed_summary = f"Finished in {elapsed} seconds"
-        number_of_results = len(self.bootstrap.accepted_subtitles) + len(self.bootstrap.rejected_subtitles)
-        matches_downloaded = f"Downloaded: {self.bootstrap.downloaded_subtitles}/{number_of_results}"
-        if self.bootstrap.downloaded_subtitles >= 1:
+        evaluated = self.bootstrap.accepted_subtitles + self.bootstrap.rejected_subtitles
+        downloaded = {
+            id(subtitle): subtitle
+            for subtitle in evaluated
+            if subtitle.status in (SubtitleStatus.AUTO_DOWNLOADED, SubtitleStatus.MANUALLY_DOWNLOADED)
+        }
+        matches_downloaded = f"Downloaded: {len(downloaded)}/{len(evaluated)}"
+        if downloaded:
             msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
             log.info(matches_downloaded, color="#a6e3a1")
             self.bootstrap.system_tray.display_toast(*msg)
-        elif self.bootstrap.downloaded_subtitles == 0:
+        else:
             msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
             log.info(matches_downloaded, color="#f38ba8")
             self.bootstrap.system_tray.display_toast(*msg)

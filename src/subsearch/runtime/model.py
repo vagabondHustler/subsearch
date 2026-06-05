@@ -91,6 +91,15 @@ class ProviderUrls:
     subsource: str
 
 
+class SubtitleStatus(Enum):
+    FILTERED_OUT = "filtered_out"
+    BELOW_THRESHOLD = "below_threshold"
+    ACCEPTED = "accepted"
+    AUTO_DOWNLOADED = "auto_downloaded"
+    MANUALLY_DOWNLOADED = "manually_downloaded"
+    DOWNLOAD_FAILED = "download_failed"
+
+
 @dataclass(slots=True)
 class Subtitle:
     percentage_result: int
@@ -99,6 +108,7 @@ class Subtitle:
     download_url: str
     request_data: dict[str, Any]
     download_headers: dict[str, str] = field(default_factory=dict)
+    status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
 
 
 class ProviderHealth(Enum):

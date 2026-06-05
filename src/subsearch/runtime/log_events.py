@@ -22,6 +22,8 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "banner": LogEvent("--- [{title}] ---", BANNER_COLOR, bold=True),
     "task_completed": LogEvent("Tasks completed", DONE_COLOR),
     "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", MATCH_COLOR),
+    "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}  (below {threshold}%)"),
+    "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
     "remove": LogEvent(r"Removing {kind}: ...\{src}"),
     "rename": LogEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}"),
     "move": LogEvent(r"Moving {kind}: ...\{src} -> ...\{dst}"),
