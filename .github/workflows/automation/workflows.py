@@ -10,7 +10,9 @@ from operations import (
     CHANGELOG_NAME,
     CWD_PATH,
     EXE_NAME,
-    Binaries,
+    ArtifactHasher,
+    BinaryTester,
+    BinaryTestReport,
     Build,
     Changelog,
     Commitizen,
@@ -56,26 +58,26 @@ class MakeMsi:
 
 class BuildBinaries:
     def run(self) -> None:
-        binaries = Binaries(StepSummary())
-        binaries.write_to_hashes()
-        binaries.prepare_build_artifacts()
+        hasher = ArtifactHasher(StepSummary())
+        hasher.write_to_hashes()
+        hasher.prepare_build_artifacts()
 
 
 class TestBinaries:
     def run(self) -> None:
-        binaries = Binaries(StepSummary())
-        binaries.create_markdown_table_header()
-        self._run_msi(binaries, "install")
-        self._run_exe(binaries)
-        self._run_msi(binaries, "uninstall")
+        tester = BinaryTester()
+        report = BinaryTestReport(StepSummary())
+        self._run_msi(tester, report, "install")
+        self._run_exe(tester, report)
+        self._run_msi(tester, report, "uninstall")
 
-    def _run_msi(self, binaries: Binaries, flag: str) -> None:
-        binaries.test_msi_package(flag, binaries.msi_artifact_path())
-        binaries.add_markdown_table_result(flag)
+    def _run_msi(self, tester: BinaryTester, report: BinaryTestReport, flag: str) -> None:
+        tester.test_msi_package(flag, tester.msi_artifact_path())
+        report.add_stage_card(flag)
 
-    def _run_exe(self, binaries: Binaries) -> None:
-        binaries.test_executable(30)
-        binaries.add_markdown_table_result("executable")
+    def _run_exe(self, tester: BinaryTester, report: BinaryTestReport) -> None:
+        tester.test_executable(30)
+        report.add_stage_card("executable")
 
 
 class BuildChangelog:
@@ -127,7 +129,7 @@ class Prepare:
 
         with open(ARTIFACTS_PATH / CHANGELOG_NAME, "a") as changelog_file:
             comparison = changelog.compare_link(previous_tag=current_version, current_tag=predicted_version)
-            changelog_file.write(f"###### {comparison}")
+            changelog_file.write(f"###### Full changelog: {comparison}")
 
 
 class OpenMainPullRequest:

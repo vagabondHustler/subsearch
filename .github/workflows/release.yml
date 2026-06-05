@@ -117,7 +117,7 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          python -m pip install --upgrade pip psutil
+          python -m pip install --upgrade pip psutil pywin32
           python -m pip install -e . --no-deps
 
       - run: python .github/workflows/automation/workflows.py test_binaries
