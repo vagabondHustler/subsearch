@@ -1,22 +1,16 @@
-To  streamline the process, please follow the guidelines below.
+# Contributing
 
-#### Suggesting a Feature:
+## Suggesting a Feature
 
-- Check the code on GitHub to ensure that the feature isn't already available.
-- Consider whether the feature is necessary in the library or could be explained in a separate example.
-- Check existing issues, both open and closed, to avoid suggesting a feature that has already been suggested.
+Check existing issues (open and closed) before suggesting. Describe the problem it solves and why it belongs in the core app.
 
-#### Filing a Bug Report:
+## Filing a Bug Report
 
-- Provide a detailed description of the bug.
-- List the steps you've taken so far and any solutions you've tried.
+Include a description of the bug, steps to reproduce, and what you tried.
 
-#### Submitting a Pull Request:
+## Submitting a Pull Request
 
-- Run the project's pre-commit hooks before submitting; they enforce the code style (black, isort) and commit format (commitizen).
-- Include comments where necessary and a clear description of what your example is expected to do.
-- Submit only one or two examples/feature per pull-request.
-- Do not include any license information in your examples; this repository is GPL v3 licensed.
-- Do not submit multiple variations of the same example; demonstrate one thing concisely.
-
-Thank you for taking the time to read and follow these guidelines.
+- Run pre-commit hooks before submitting (enforces black, isort, commitizen).
+- Keep PRs focused — one feature or fix per PR.
+- Write a clear description of what the change does and why.
+- Do not include license headers; the project is GPL v3.
