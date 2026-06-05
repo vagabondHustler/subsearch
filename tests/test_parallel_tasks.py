@@ -1,8 +1,6 @@
 import threading
 import time
 
-import pytest
-
 from subsearch.runtime import parallel_tasks
 
 
@@ -36,12 +34,15 @@ def test_tasks_run_concurrently_not_serially() -> None:
     assert elapsed < 2
 
 
-def test_worker_exception_propagates() -> None:
+def test_worker_exception_is_logged_without_aborting_siblings() -> None:
+    completed = []
+
     def fine() -> None:
-        pass
+        completed.append("fine")
 
     def boom() -> None:
         raise ValueError("kaboom")
 
-    with pytest.raises(ValueError, match="kaboom"):
-        parallel_tasks.run_in_threads(fine, boom)
+    parallel_tasks.run_in_threads(fine, boom)
+
+    assert completed == ["fine"]

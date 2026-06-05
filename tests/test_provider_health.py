@@ -92,16 +92,11 @@ def test_yifysubtitles_missing_table_is_structure_invalid() -> None:
     assert scraper.response_is_well_formed(tree) is False
 
 
-def test_providers_due_when_known_good_is_old() -> None:
+def test_providers_due_when_failed_attempts_reach_threshold() -> None:
     config = get_default_app_config()
-    config["diagnostics"]["provider_health"]["opensubtitles"] = {
-        "last_known_good": "2026-01-01",
-        "last_attempt": "2026-05-01",
-    }
-    config["diagnostics"]["provider_health"]["subsource"] = {
-        "last_known_good": "2026-05-01",
-        "last_attempt": "2026-05-02",
-    }
+    threshold = config["diagnostics"]["failed_attempts_threshold"]
+    config["diagnostics"]["provider_health"]["opensubtitles"]["failed_attempts"] = threshold
+    config["diagnostics"]["provider_health"]["subsource"]["failed_attempts"] = threshold - 1
     app_config = toml_file.get_app_config_from_data(config)
     due = diagnostics.providers_due_for_diagnostic(app_config)
     assert "opensubtitles" in due
