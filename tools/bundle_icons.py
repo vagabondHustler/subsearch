@@ -1,3 +1,13 @@
+"""
+Bundle the Lucide SVG icons into a generated Python module.
+
+Run with: python tools/bundle_icons.py  (use --check to verify it's up to date)
+
+Reads every assets/icons/*.svg and writes their source into
+src/subsearch/ui/icons/icons_data.py so the app ships icons without filesystem
+lookups. Re-run after editing the SVGs.
+"""
+
 import json
 import sys
 from pathlib import Path

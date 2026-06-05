@@ -1,3 +1,11 @@
+"""
+Custom commitizen plugin for subsearch's changelog and version bumps.
+
+Registered as the SubsearchCz provider via [tool.commitizen] in pyproject.toml;
+not run directly. Renders conventional commits into emoji-sectioned changelog
+entries with per-commit links for the GitHub release body.
+"""
+
 from pathlib import Path
 
 from commitizen.cz.conventional_commits.conventional_commits import ConventionalCommitsCz
