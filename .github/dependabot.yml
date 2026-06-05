@@ -7,7 +7,7 @@ updates:
     open-pull-requests-limit: 10
     target-branch: "dev"
     labels:
-      - "dependency"
+      - "build"
 
   - package-ecosystem: "github-actions"
     directory: "/"

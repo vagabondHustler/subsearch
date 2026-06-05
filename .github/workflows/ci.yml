@@ -8,7 +8,7 @@ on:
 
 jobs:
   dependency_review:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,24 +16,11 @@ jobs:
       - name: "Dependency Review"
         uses: actions/dependency-review-action@v4
 
-  pr_labeler:
-    runs-on: windows-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Auto label
-        uses: TimonVS/pr-labeler-action@v5
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          configuration-path: .github/configs/labeler.yml
 
   paths_filter:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     outputs:
       src: "${{ steps.filter.outputs.src }}"
-      tests: "${{ steps.filter.outputs.tests }}"
-      tools: "${{ steps.filter.outputs.tools }}"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,25 +31,18 @@ jobs:
           filters: |
             src:
               - "src/**"
-            tests:
-              - "tests/**"
-            tools:
-              - "tools/**"
+              - "assets/**"
 
   tox:
     needs: paths_filter
     if: ${{ needs.paths_filter.outputs.src == 'true' }}
     runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.12.*"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: .python-version
 
       - name: Install dependencies
         run: |
@@ -72,42 +52,19 @@ jobs:
       - name: Run tests
         run: tox
 
+
   lint:
     needs: paths_filter
-    if: ${{ needs.paths_filter.outputs.src == 'true' || needs.paths_filter.outputs.tests == 'true' || needs.paths_filter.outputs.tools == 'true'}}
+    if: ${{ needs.paths_filter.outputs.src == 'true' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+      - uses: actions/setup-python@v5
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
+          python-version-file: .python-version
 
-      - name: Lint codebase
+      - name: Run pre-commit hooks
         run: |
-          pip install black isort
-          isort ./src ./tests ./tools --profile 'black'
-          black ./src ./tests ./tools -l 125
-
-      - name: Check for changes
-        id: git_status
-        run: |
-          $gitStatus = git status --porcelain
-          if ($gitStatus) {
-              $changes="true"
-          } else {
-              $changes="false"
-          }
-
-      - name: Commit and push
-        if: ${{ steps.git_status.outputs.changes == 'true' }}
-        run: |
-          git add -A
-          git commit -S -m "Reformat codebase with black & isort"
-          git fetch origin main
-          git push origin HEAD:main
+          python -m pip install --upgrade pip pre-commit
+          pre-commit run --all-files --show-diff-on-failure

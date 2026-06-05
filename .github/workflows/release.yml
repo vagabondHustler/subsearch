@@ -1,93 +1,35 @@
 name: Release
-run-name: Release ${{ inputs.new_tags }}
+run-name: Release ${{ github.ref_name }}
+
 
 on:
-  workflow_dispatch:
-    inputs:
-      new_tags:
-        description: "Release version."
-        type: string
-        required: true
-      python_version:
-        description: "Python version to use when building binaries."
-        type: string
-        required: false
-        default: "3.12"
-      artifact_retention_days:
-        description: "Number of days to retain build artifacts in GitHub Actions."
-        type: number
-        required: false
-        default: 7
-      timeout_minutes:
-        description: "Timeout in minutes for jobs in GitHub Actions."
-        type: number
-        required: false
-        default: 10
-      runs_on:
-        description: "GitHub Actions runner environment for jobs in the workflow."
-        type: string
-        required: false
-        default: windows-latest
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
-  CLI: python -m tools.github_actions.cli.commands
-  NEW_VERSION: ${{ inputs.new_tags }}
-  ID: "${{ inputs.new_tags }}_${{ github.ref_name }}_${{ github.run_id }}"
-  VERSION_CONTROL_PATH: ".github/configs/version_control.json"
-  VERSION_PY_PATH: "src/subsearch/data/version.py"
-  MSI_NAME: "Subsearch-${{ inputs.new_tags }}-win64.msi"
-  EXE_NAME: "Subsearch.exe"
-  HASHES_NAME: "hashes.sha256"
-  CHANGELOG_NAME: "changelog.md"
+  ARTIFACT_RETENTION_DAYS: 7
 
 jobs:
   init:
-    name: Initializing environments
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}} # fromJson because https://github.com/orgs/community/discussions/55332#discussioncomment-5887877
-    outputs:
-      current_tags: "${{ steps.current_tags.outputs.tags }}"
-      previous_tags: "${{ steps.previous_tags.outputs.tags }}"
-      last_stable_release: "${{ steps.last_stable_release.outputs.tags }}"
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "*"
-
-      - name: Validate that the tags are new
-        run: git tag ${{ inputs.new_tags }}
-
-      - name: Validate inputs
-        id: valid_inputs
-        run: >
-          ${{ env.CLI }} init 
-          --validate-inputs 
-          "new_tags=${{ inputs.new_tags }};
-          python_version=${{ inputs.python_version }};
-          checkout_branch=${{ github.ref_name }}"
-
-      - name: Current tags
-        id: current_tags
-        run: ${{ env.CLI }} json --read current_version # tags=value
-
-      - name: Previous stable tags
-        id: last_stable_release
-        run: ${{ env.CLI }} json --read last_stable_release # tags=value
-
-      - name: Previous tags
-        id: previous_tags
-        run: ${{ env.CLI }} json --read previous_version # tags=value
-
-  version_control:
     name: Version control
-    needs: init
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && !startsWith(github.event.head_commit.message, 'chore(license):') }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    outputs:
+      bumped: ${{ steps.run.outputs.bumped }}
+      current_tag: ${{ steps.run.outputs.current_tag }}
+      previous_tag: ${{ steps.run.outputs.previous_tag }}
+      msi_name: ${{ steps.run.outputs.msi_name }}
+      artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
       - uses: crazy-max/ghaction-import-gpg@v6
         with:
@@ -100,54 +42,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "*"
+          python-version-file: .python-version
 
-      - name: Get previous version
-        id: version
-        run: ${{ env.CLI}} python --read-string # version=value
-
-      - name: Create new tags
-        if: ${{ !contains(inputs.new_tags, 'dev') }}
-        run: git tag -a ${{ inputs.new_tags }} -m "Release ${{ inputs.new_tags }}"
-
-      - name: Bump subsearch version
-        run: ${{ env.CLI}} python --write-string ${{ inputs.new_tags }}
-
-      - name: Bump current version
-        run: ${{ env.CLI }} json -w current_version ${{ inputs.new_tags }}
-
-      - name: Bump previous version
-        run: ${{ env.CLI }} json -w previous_version ${{ needs.init.outputs.current_tags }}
-
-      - name: Bump last stable release
-        if: ${{ !contains(inputs.new_tags, 'dev')  }}
-        run: ${{ env.CLI }} json -w last_stable_release ${{ inputs.new_tags }}
-
-      - name: Push commits
+      - name: Install commitizen
         run: |
-          git status
-          git fetch origin ${{ github.ref_name }}
-          git add ${{ env.VERSION_PY_PATH }} ${{ env.VERSION_CONTROL_PATH }} 
-          git commit -S -m "Bump version to ${{ inputs.new_tags }}"
-          git push origin HEAD:${{ github.ref_name }}
+          python -m pip install --upgrade pip commitizen
+          python -m pip install -e . --no-deps
 
-      - name: Push tags
-        if: ${{ !contains(inputs.new_tags, 'dev')  }}
-        run: |
-          git push origin --tags
+      - name: Bump version, tag, and push
+        id: run
+        run: python .github/workflows/automation/workflows.py init
 
   build_binaries:
     name: Build binaries
-    needs: [init, version_control]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+    needs: init
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     outputs:
-      msi_hash: ${{ steps.hashes.outputs.msi_hash }}
-      exe_hash: ${{ steps.hashes.outputs.exe_hash }}
-
+      msi_hash: ${{ steps.run.outputs.msi_hash }}
+      exe_hash: ${{ steps.run.outputs.exe_hash }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -155,36 +74,33 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ inputs.python_version }}
+          python-version-file: .python-version
 
       - name: Build binaries
-        id: build
         run: |
           git fetch origin ${{ github.ref_name }}
           python -m pip install --upgrade pip
           pip install -e .[build]
-          python -m tools.build bdist_msi
+          python .github/workflows/automation/workflows.py make_msi
 
-      - name: Create hashes file and set outputs
-        id: hashes
-        run: ${{ env.CLI }} binaries --write-hash # suffix_hash=value
-
-      - name: Prepare artifacts
-        run: ${{ env.CLI }} binaries --prepare-build-artifacts
+      - name: Hash and collect artifacts
+        id: run
+        run: python .github/workflows/automation/workflows.py build_binaries
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build_${{ env.ID }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
           if-no-files-found: error
-          retention-days: ${{ inputs.artifact_retention_days }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   test_binaries:
     name: Test binaries
-    needs: [init, version_control, build_binaries]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+    needs: [init, build_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -192,40 +108,35 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "*"
+          python-version-file: .python-version
 
       - uses: actions/download-artifact@v4
-        id: download
         with:
-          name: build_${{ env.ID }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ${{ steps.download.outputs.download-path }}
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip psutil pywin32
+          python -m pip install -e . --no-deps
 
-      - run: python -m tools.github_actions.jobs.test_binaries
+      - run: python .github/workflows/automation/workflows.py test_binaries
 
   upload_binaries:
     name: Upload binaries to virustotal
-    if: ${{  !contains(inputs.new_tags, 'dev') }}
     needs: [init, build_binaries]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
 
       - uses: actions/download-artifact@v4
-        id: download
         with:
-          name: build_${{ env.ID }}
+          name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
-
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ${{ steps.download.outputs.download-path }}
 
       - uses: crazy-max/ghaction-virustotal@v4
         with:
@@ -234,133 +145,79 @@ jobs:
           update_release_body: false
           request_rate: 4
           files: |
-            artifacts/${{ env.EXE_NAME }}
-            artifacts/${{ env.MSI_NAME }}
+            artifacts/Subsearch.exe
+            artifacts/${{ needs.init.outputs.msi_name }}
 
   changelog:
     name: Changelog
-    if: ${{ !contains(inputs.new_tags, 'dev') }}
     needs: [init, build_binaries]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
-      - name: Build
-        id: build
-        uses: mikepenz/release-changelog-builder-action@v5
+      - uses: actions/setup-python@v5
         with:
-          fromTag: ${{ needs.init.outputs.last_stable_release }}
-          toTag: ${{ inputs.new_tags }}
-          configuration: .github/configs/changelog_builder.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          python-version-file: .python-version
 
-      - name: Create markdown
+      - name: Install commitizen
         run: |
-          mkdir "artifacts"
-          echo "${{ steps.build.outputs.changelog }}" > artifacts/${{ env.CHANGELOG_NAME }}
+          python -m pip install --upgrade pip commitizen
+          python -m pip install -e . --no-deps
 
-      - name: Update
-        run: >
-          ${{ env.CLI }} changelog
-          --tags "${{ inputs.new_tags }};${{ needs.init.outputs.last_stable_release }}"
-          --file-names "${{ env.MSI_NAME }};${{ env.EXE_NAME }}"
-          --hashes "${{ needs.build_binaries.outputs.msi_hash }};${{ needs.build_binaries.outputs.exe_hash }}"
+      - name: Render changelog and append links
+        run: python .github/workflows/automation/workflows.py changelog
+        env:
+          CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
+          PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
+          MSI_NAME: ${{ needs.init.outputs.msi_name }}
+          MSI_HASH: ${{ needs.build_binaries.outputs.msi_hash }}
+          EXE_HASH: ${{ needs.build_binaries.outputs.exe_hash }}
 
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v4
         with:
-          name: changelog_${{ env.ID }}
+          name: changelog_${{ needs.init.outputs.artifact_id }}
           path: artifacts
           if-no-files-found: error
-          retention-days: ${{ inputs.artifact_retention_days }}
-
-  update_main:
-    name: Create pull request and update main
-    if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [init, test_binaries, changelog]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-
-      - uses: actions/download-artifact@v4
-        id: download
-        with:
-          path: artifacts
-
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ${{ steps.download.outputs.download-path }}
-
-      - name: Create PR
-        run: |
-          $changelogTitle = "Release ${{ inputs.new_tags }}"
-          $changelogBody = Get-Content -Raw "artifacts\changelog_${{ env.ID }}\${{ env.CHANGELOG_NAME }}"
-          git fetch --all
-          gh pr create -B main -H dev -t "$changelogTitle" -b "$changelogBody" -l "release"
-          gh pr merge -m
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
   publish_github:
     name: Publish to github
-    if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [init, test_binaries, changelog, update_main]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes)}}
+    needs: [init, test_binaries, changelog]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
-      - uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
 
       - uses: actions/download-artifact@v4
-        id: download
         with:
           path: artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ${{ steps.download.outputs.download-path }}
-
       - uses: softprops/action-gh-release@v2
         with:
-          name: ${{ inputs.new_tags }}
-          tag_name: ${{ inputs.new_tags }}
-          body_path: artifacts/changelog_${{ env.ID }}/${{ env.CHANGELOG_NAME }}
+          name: ${{ needs.init.outputs.current_tag }}
+          tag_name: ${{ needs.init.outputs.current_tag }}
+          body_path: artifacts/changelog_${{ needs.init.outputs.artifact_id }}/changelog.md
           token: ${{ secrets.ACTIONS_TOKEN }}
-          prerelease: ${{ contains(inputs.new_tags, 'dev') }}
+          prerelease: false
           files: |
-            artifacts/build_${{ env.ID }}/${{ env.HASHES_NAME }}
-            artifacts/build_${{ env.ID }}/${{ env.MSI_NAME }}
+            artifacts/build_${{ needs.init.outputs.artifact_id }}/hashes.sha256
+            artifacts/build_${{ needs.init.outputs.artifact_id }}/${{ needs.init.outputs.msi_name }}
 
   publish_pypi:
     name: Publish to pypi
-    if: ${{ !contains(inputs.new_tags, 'dev') }}
-    needs: [version_control, test_binaries, update_main]
-    runs-on: ${{ inputs.runs_on }}
-    timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+    needs: [init, test_binaries]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -368,49 +225,36 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ inputs.python_version }}
+          python-version-file: .python-version
 
-      - name: Install requirements
+      - name: Install build and twine
         run: |
           git fetch origin ${{ github.ref_name }}
-          python -m pip install --upgrade --disable-pip-version-check pip
-          python -m pip install --upgrade build twine
+          python -m pip install --upgrade --disable-pip-version-check pip build twine
 
       - name: Build wheel and source distributions
-        run: |
-          python -m build
+        run: python -m build
 
       - name: Upload to pypi
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          twine upload --verbose -u '__token__' dist/*
+        run: twine upload --verbose -u '__token__' dist/*
 
+  sync_dev:
+    name: Fast-forward dev to main
+    needs: [init, publish_github, publish_pypi]
+    if: ${{ needs.init.outputs.bumped == 'true' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-  # sync_dev:
-  #   name: Synchronize dev with main
-  #   if: ${{ !contains(inputs.new_tags, 'dev') }}
-  #   needs: [init, publish_pypi, publish_github]
-  #   runs-on: ${{ inputs.runs_on }}
-  #   timeout-minutes: ${{ fromJSON(inputs.timeout_minutes) }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - uses: crazy-max/ghaction-import-gpg@v6
-  #       with:
-  #         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-  #         passphrase: ${{ secrets.GPG_PASSPHRASE }}
-  #         git_user_signingkey: true
-  #         git_commit_gpgsign: true
-  #         git_config_global: true
-
-
-  #     - name: Synchronize dev with main
-  #       run: |
-  #         git fetch --all
-  #         git checkout dev
-  #         git rebase main
-  #         git push origin dev --force-with-lease
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: python .github/workflows/automation/workflows.py sync_dev
