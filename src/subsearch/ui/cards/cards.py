@@ -570,8 +570,16 @@ class MaskedApiKeyLineEdit(LineEdit):
     def api_key_changed(self) -> None: ...
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if event.matches(QKeySequence.StandardKey.Paste) or event.matches(QKeySequence.StandardKey.Copy):
-            event.ignore()
+        if event.matches(QKeySequence.StandardKey.Paste):
+            text = QApplication.clipboard().text()
+            if text:
+                self._set_api_key(self._api_key + text)
+            return
+        if event.matches(QKeySequence.StandardKey.Copy):
+            QApplication.clipboard().setText(self._api_key if self._revealed else mask_api_key(self._api_key))
+            return
+        if event.matches(QKeySequence.StandardKey.SelectAll):
+            self.selectAll()
             return
         if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
             self._set_api_key(self._api_key[:-1])
