@@ -739,7 +739,7 @@ def _build_prefilled_issue_body() -> str:
 
 
 def _open_bug_report() -> None:
-    query = urlencode({"template": "bug_report.md", "title": "[BUG]", "labels": "bug", "body": _build_prefilled_issue_body()})
+    query = urlencode({"template": "bug_report.md", "title": "", "labels": "bug", "body": _build_prefilled_issue_body()})
     webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
 
 
