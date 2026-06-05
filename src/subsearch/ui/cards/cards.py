@@ -25,7 +25,8 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import app_updater, toml_file, windows_registry
-from subsearch.parsing import log_sanitizer, release_parser
+from subsearch.parsing import release_parser
+from subsearch.runtime import log_sanitizer
 from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
 from subsearch.runtime.logger import log
 from subsearch.ui.cards.changelog_popup import ChangelogButton
@@ -756,29 +757,8 @@ def _open_bug_report() -> None:
     webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
 
 
-def _report_bug_with_log() -> None:
-    QDesktopServices.openUrl(QUrl.fromLocalFile(str(FILE_PATHS.log.parent)))
-
-    sanitized_log = log_sanitizer.read_sanitized_log()
-
-    body = (
-        f"{_build_prefilled_issue_body()}\n"
-        "### Sanitized Log\n"
-        "```\n"
-        f"{sanitized_log}\n"
-        "```\n"
-        f"_Attach the log file `{FILE_PATHS.log.name}` opened in the file browser._\n"
-    )
-
-    query = urlencode(
-        {
-            "template": "bug_report.md",
-            "title": "",
-            "labels": "bug",
-            "body": body,
-        }
-    )
-    webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
+def _copy_sanitized_log_to_clipboard() -> None:
+    QApplication.clipboard().setText(log_sanitizer.read_sanitized_crash_sessions())
 
 
 def _open_security_advisory() -> None:
@@ -803,7 +783,7 @@ class ResourcesCard(SettingsCard):
 
         actions = [
             (LucideIcon.BUG, "Report bug", _open_bug_report),
-            (LucideIcon.BUG_FILE, "Report bug with log", _report_bug_with_log),
+            (LucideIcon.BUG_FILE, "Copy sanitized log", _copy_sanitized_log_to_clipboard),
             (LucideIcon.SHIELD, "Report vulnerability", _open_security_advisory),
             (LucideIcon.FOLDER_SEARCH, "Open log location", _open_log_directory),
             (LucideIcon.SCROLL_TEXT, "View licenses", _open_third_party_licenses),
