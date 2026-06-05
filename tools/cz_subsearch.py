@@ -38,6 +38,10 @@ class SubsearchCz(ConventionalCommitsCz):
         "test": "⚙️ Other:",
     }
     change_type_order = [
+        # commitizen tags breaking changes with the literal "BREAKING CHANGE"
+        # type, which isn't mapped to an emoji section. Listing it first keeps it
+        # at the top of each release; omitting it sorts it to the bottom.
+        "BREAKING CHANGE",
         "✨ Features:",
         "🐛 Fixes:",
         "📚 Docs:",
