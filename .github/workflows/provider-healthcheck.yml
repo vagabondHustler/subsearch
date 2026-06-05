@@ -1,14 +1,14 @@
 name: Provider health check
 run-name: Provider health check
 
-#   Every 2 months (1st, 03:00 UTC) and on demand:
+#   Monthly (1st, 03:00 UTC) and on demand:
 #   hits each subtitle provider with a known-good title and fails if one
 #   returns nothing or an unrecognized response — an early warning that a
 #   provider changed its site or API before users are affected.
 
 on:
   schedule:
-    - cron: '0 3 1 */2 *'
+    - cron: '0 3 1 * *'
   workflow_dispatch:
 
 jobs:
