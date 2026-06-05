@@ -1,5 +1,7 @@
 import dataclasses
+import re
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -29,6 +31,11 @@ LOG_EVENTS: dict[str, LogEvent] = {
 
 
 FILESYSTEM_EVENTS = {"remove", "rename", "move", "extract"}
+
+
+def session_header() -> str:
+    started_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return f"\x1c\n{started_at}\n"
 
 
 def render(event_key: str, **values: Any) -> tuple[str, Optional[str], bool]:
@@ -62,12 +69,24 @@ def _shorten(path: Optional[Path]) -> Optional[Path]:
     return path.relative_to(path.parent.parent) if path else None
 
 
+SECRET_FIELDS = {"subsource_api_key"}
+
+
+def _secret_status(value: object) -> str:
+    api_key = str(value)
+    if not api_key:
+        return "<not set>"
+    return "<valid key>" if re.match(r"^sk_[0-9a-f]+$", api_key) else "<invalid key>"
+
+
 def dataclass_lines(instance: DataclassInstance) -> list[str]:
     if not dataclasses.is_dataclass(instance):
         raise ValueError("Input is not a dataclass instance.")
     lines = [LOG_EVENTS["banner"].template.format(title=instance.__class__.__name__)]
     for field in dataclasses.fields(instance):
         value = getattr(instance, field.name)
+        if field.name in SECRET_FIELDS:
+            value = _secret_status(value)
         padding = " " * (30 - len(field.name))
         lines.append(f"{field.name}:{padding}{value}")
     return lines

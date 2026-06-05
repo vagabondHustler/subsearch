@@ -1,9 +1,12 @@
 import logging
+from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 from subsearch.runtime import log_events, metaclasses
 from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
 from subsearch.runtime.model import DataclassInstance
+
+LOG_MAX_BYTES = 1_000_000
 
 LEVELS = {
     "debug": logging.DEBUG,
@@ -30,15 +33,24 @@ def paint(message: str, hex_color: str, bold: bool = False) -> str:
 def _build_file_logger() -> logging.Logger:
     APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
     logger = logging.getLogger("subsearch")
+    logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
-    file_handler = logging.FileHandler(FILE_PATHS.log, mode="w")
+    file_handler = RotatingFileHandler(
+        FILE_PATHS.log, mode="a", maxBytes=LOG_MAX_BYTES, encoding="utf-8"
+    )
     file_handler.setFormatter(
         logging.Formatter(
             "%(levelname)s %(module)s:%(lineno)d %(asctime)s.%(msecs)03d: %(message)s", datefmt="%H:%M:%S"
         )
     )
     logger.addHandler(file_handler)
+    _write_session_header(file_handler)
     return logger
+
+
+def _write_session_header(handler: RotatingFileHandler) -> None:
+    handler.stream.write(log_events.session_header())
+    handler.flush()
 
 
 class Logger(metaclass=metaclasses.Singleton):
