@@ -1,5 +1,4 @@
 import sys
-import webbrowser
 
 from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
 from PySide6.QtGui import QCloseEvent, QColor, QIcon
@@ -22,7 +21,7 @@ from subsearch.ui.cards.cards import (
     DownloadManagerCard,
     FileExtensionsCard,
     LanguageCard,
-    BugReportCard,
+    ResourcesCard,
     NetworkCard,
     NotificationsCard,
     PostProcessingCard,
@@ -42,11 +41,8 @@ from subsearch.ui.theme.typography import apply_body_font
 
 TEXT_COLOR = "#c8c8c7"
 ACCENT_COLOR = "#c8c8c7"
-GITHUB_URL = "https://github.com/vagabondHustler/subsearch"
 NAVIGATION_EXPAND_WIDTH = 242
 NAVIGATION_TOP_MARGIN = 8
-NAVIGATION_EDGE_MARGIN = 5
-CONTENT_GAP_ABOVE_GITHUB = 2
 
 
 class SettingsInterface(SingleDirectionScrollArea):
@@ -110,8 +106,6 @@ class SettingsWindow(FluentWindow):
                 ApplicationCard(),
                 NetworkCard(),
                 ProviderHealthCard(),
-                UpdateCard(),
-                BugReportCard(),
             ],
         )
 
@@ -119,6 +113,14 @@ class SettingsWindow(FluentWindow):
             "apiInterface",
             [
                 ApiCard(),
+            ],
+        )
+
+        about_interface = SettingsInterface(
+            "aboutInterface",
+            [
+                UpdateCard(),
+                ResourcesCard(),
             ],
         )
 
@@ -139,28 +141,15 @@ class SettingsWindow(FluentWindow):
         )
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
         self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
-
-        self.navigationInterface.addItem(
-            routeKey="github",
-            icon=LucideIcon.HEART_HANDSHAKE,
-            text="Go to repository",
-            onClick=lambda: webbrowser.open(GITHUB_URL),
-            selectable=False,
+        self.addSubInterface(
+            about_interface,
+            LucideIcon.HEART_HANDSHAKE,
+            "About",
+            isTransparent=True,
             position=NavigationItemPosition.BOTTOM,
         )
 
         self._configure_navigation()
-        self._align_content_above_github()
-
-    def _align_content_above_github(self) -> None:
-        panel = self.navigationInterface.panel
-        github_item = panel.items["github"].widget
-        panel_bottom_margin = panel.vBoxLayout.contentsMargins().bottom()
-        bottom_margin = panel_bottom_margin + github_item.sizeHint().height() + CONTENT_GAP_ABOVE_GITHUB
-        margins = self.widgetLayout.contentsMargins()
-        self.widgetLayout.setContentsMargins(
-            margins.left(), margins.top(), NAVIGATION_EDGE_MARGIN, bottom_margin
-        )
 
     def _clear_title_bar(self) -> None:
         getattr(self.titleBar, "iconLabel").hide()

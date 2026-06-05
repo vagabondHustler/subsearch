@@ -47,7 +47,9 @@ class LucideIcon(FluentIconBase, Enum):
     EYE = "eye"
     EYE_OFF = "eye-off"
     EXTERNAL_LINK = "external-link"
+    GITHUB = "github"
     KEY_ROUND = "key-round"
+    SHIELD = "shield"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]
