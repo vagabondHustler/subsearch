@@ -116,12 +116,13 @@ class _PrepareSubtitleDownload:
         return subtitle
 
     def _sanitize_filename(self, filename: str) -> str:
-        old_filename = filename
+        original = filename
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
             filename = filename.replace(char, "_")
         filename = filename.replace("'", "")
-        log.info(f"Sanitized {old_filename} to {filename}")
+        if filename != original:
+            log.info(f"Filename sanitized: {original!r} -> {filename!r}")
         return filename
 
     def _get_subtitle_no_request_data(self) -> Subtitle:
