@@ -216,6 +216,29 @@ class OpenMainPullRequest:
         return number or None
 
 
+class DryRunInit:
+    def run(self) -> None:
+        ref_name = os.environ["GITHUB_REF_NAME"]
+        run_id = os.environ["GITHUB_RUN_ID"]
+
+        commitizen = Commitizen()
+        step_summary = StepSummary()
+
+        previous_version = commitizen.current_version()
+        predicted_version = commitizen.predicted_next_version()
+
+        if predicted_version is None:
+            step_summary.set_output("bumped", "false")
+            return
+
+        identifier = operations.artifact_id(predicted_version, ref_name, run_id)
+        step_summary.set_output("bumped", "true")
+        step_summary.set_output("current_tag", predicted_version)
+        step_summary.set_output("previous_tag", previous_version)
+        step_summary.set_output("msi_name", operations.msi_name(predicted_version))
+        step_summary.set_output("artifact_id", identifier)
+
+
 class SyncDev:
     def run(self) -> None:
         release_branch = os.environ["GITHUB_REF_NAME"]
@@ -239,6 +262,7 @@ class UpdateLicenseYear:
 
 JOBS = {
     "init": Init,
+    "dry_run_init": DryRunInit,
     "make_msi": MakeMsi,
     "build_binaries": BuildBinaries,
     "test_binaries": TestBinaries,
