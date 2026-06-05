@@ -1,6 +1,7 @@
 import shutil
 import struct
 import time
+import traceback
 import zipfile
 from io import BufferedReader
 from pathlib import Path
@@ -37,24 +38,38 @@ def create_path_from_string(string: str, path_resolution: str, create_missing_fo
     return path
 
 
+ZIP_MAGIC_BYTES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
+
+
+def is_zip_payload(chunk: bytes) -> bool:
+    return chunk.startswith(ZIP_MAGIC_BYTES)
+
+
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
     log.info(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = VIDEO_FILE.tmp_dir / file_name
+    chunks = response.iter_content(chunk_size=1024)
+    first_chunk = next(chunks, b"")
+    if not is_zip_payload(first_chunk):
+        log.warning(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip, skipping download")
+        return
     with open(download_path, "wb") as fd:
-        for chunk in response.iter_content(chunk_size=1024):
+        fd.write(first_chunk)
+        for chunk in chunks:
             fd.write(chunk)
 
 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
     for file in src.glob(f"*{extension}"):
-        filename = src / file
         log.event("extract", src=file, dst=dst)
-        zip_ref = zipfile.ZipFile(filename)
-        zip_ref.extractall(dst)
-        zip_ref.close()
+        try:
+            with zipfile.ZipFile(file) as archive:
+                archive.extractall(dst)
+        except (zipfile.BadZipFile, OSError):
+            log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
 
 def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
