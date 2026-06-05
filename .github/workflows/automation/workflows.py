@@ -134,6 +134,7 @@ class OpenMainPullRequest:
     RELEASE_LABEL = "release"
     SOURCE_BRANCH = "dev"
     TARGET_BRANCH = "main"
+    OWNER = "vagabondHustler"
 
     def run(self) -> None:
         import subprocess
@@ -144,7 +145,23 @@ class OpenMainPullRequest:
 
         pull_request_number = self._existing_pull_request_number()
         if pull_request_number:
-            subprocess.run(["gh", "pr", "edit", pull_request_number, "--title", title, "--body", body], check=True)
+            subprocess.run(
+                [
+                    "gh",
+                    "pr",
+                    "edit",
+                    pull_request_number,
+                    "--title",
+                    title,
+                    "--body",
+                    body,
+                    "--add-assignee",
+                    self.OWNER,
+                    "--add-reviewer",
+                    self.OWNER,
+                ],
+                check=True,
+            )
             return
 
         subprocess.run(
@@ -162,6 +179,10 @@ class OpenMainPullRequest:
                 body,
                 "--label",
                 self.RELEASE_LABEL,
+                "--assignee",
+                self.OWNER,
+                "--reviewer",
+                self.OWNER,
             ],
             check=True,
         )
