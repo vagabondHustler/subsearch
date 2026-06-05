@@ -150,7 +150,7 @@ class SettingsCard(HeaderCardWidget):
 class LanguageCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Language", parent)
-        languages = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+        languages = toml_file.load_language_data()
         labelled_values = {data["name"]: key for key, data in languages.items()}
         aliases_by_label = {
             data["name"]: [code for code in (data["two_letter_code"], data["three_letter_code"]) if code]
@@ -223,7 +223,7 @@ class ProvidersCard(SettingsCard):
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
         }
-        self._language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+        self._language_data = toml_file.load_language_data()
         providers = read_value("search.providers")
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS["search.providers"].explanation)
 

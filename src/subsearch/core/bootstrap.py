@@ -2,7 +2,7 @@ from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
-from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, FILE_PATHS, VIDEO_FILE
+from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logger import log
 from subsearch.runtime.model import ProviderResult, Subtitle
 
@@ -29,7 +29,7 @@ class Bootstrap:
 
         log.debug("Verifing files and paths")
         self.setup_file_system()
-        self.language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+        self.language_data = toml_file.load_language_data()
         self.app_config = toml_file.get_config_session().snapshot()
         if not windows_registry.check_long_paths_enabled():
             self._notify_user()

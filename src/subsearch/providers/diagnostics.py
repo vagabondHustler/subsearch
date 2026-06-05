@@ -81,7 +81,7 @@ def _diagnose_imdb(search_kwargs: dict) -> ProviderResult:
 
 def _known_good_search_kwargs() -> dict:
     app_config = _load_app_config()
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = toml_file.load_language_data()
     release_data = release_parser.get_release_data(KNOWN_GOOD_RELEASE)
     lookup = imdb_lookup.ImdbIdLookup(release_data.title, release_data.year, release_data.tvseries)
     release_data.imdb_id = lookup.imdb_id

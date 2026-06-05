@@ -6,8 +6,8 @@ from typing import Any
 
 import toml
 
-from subsearch.runtime.logger import log
 from subsearch.runtime.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.logger import log
 from subsearch.runtime.model import AppConfig
 
 
@@ -16,6 +16,15 @@ def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
         log.debug(f"Loading TOML: {toml_file_path}")
     with open(toml_file_path, "r") as f:
         return toml.load(f)
+
+
+@functools.lru_cache(maxsize=None)
+def _load_language_data_cached(toml_file_path: Path) -> dict[str, Any]:
+    return load_toml_data(toml_file_path)
+
+
+def load_language_data() -> dict[str, Any]:
+    return _load_language_data_cached(FILE_PATHS.subtitle_languages)
 
 
 def load_toml_value(toml_file_path: Path, key: str) -> Any:
