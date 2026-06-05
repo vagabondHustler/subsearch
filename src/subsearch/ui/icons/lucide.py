@@ -43,6 +43,7 @@ class LucideIcon(FluentIconBase, Enum):
     REFRESH_CW_DOT = "refresh-cw-dot"
     LIST = "list"
     BUG = "bug"
+    BUG_FILE = "bug-file"
     SCROLL_TEXT = "scroll-text"
     EYE = "eye"
     EYE_OFF = "eye-off"

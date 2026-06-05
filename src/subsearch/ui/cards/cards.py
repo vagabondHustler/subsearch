@@ -5,7 +5,14 @@ from urllib.parse import urlencode
 
 from PySide6.QtCore import QObject, QSize, Qt, QThread, QTimer, QUrl, Signal
 from PySide6.QtGui import QColor, QDesktopServices, QKeyEvent, QKeySequence, QPainter
-from PySide6.QtWidgets import QApplication, QFileDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+)
 from qfluentwidgets import (
     BodyLabel,
     CaptionLabel,
@@ -18,14 +25,20 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import app_updater, toml_file, windows_registry
-from subsearch.runtime.logger import log
-from subsearch.parsing import release_parser
+from subsearch.parsing import log_sanitizer, release_parser
 from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
+from subsearch.runtime.logger import log
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.separators import make_fading_separator
-from subsearch.ui.widgets.slider import CircleDotSlider
+from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
+    TEXT_COLOR,
+    apply_body_font,
+    apply_caption_font,
+    apply_title_font,
+)
 from subsearch.ui.widgets.setting_rows import (
     HelpButton,
     SearchableComboBoxRow,
@@ -34,13 +47,7 @@ from subsearch.ui.widgets.setting_rows import (
     read_value,
     write_value,
 )
-from subsearch.ui.theme.typography import (
-    DISABLED_TEXT_COLOR,
-    TEXT_COLOR,
-    apply_body_font,
-    apply_caption_font,
-    apply_title_font,
-)
+from subsearch.ui.widgets.slider import CircleDotSlider
 
 EXTENSION_GRID_ROWS = 3
 PROVIDER_GRID_COLUMNS = 3
@@ -735,7 +742,34 @@ def _build_prefilled_issue_body() -> str:
 
 
 def _open_bug_report() -> None:
-    query = urlencode({"template": "bug_report.md", "title": "", "labels": "bug", "body": _build_prefilled_issue_body()})
+    query = urlencode(
+        {"template": "bug_report.md", "title": "", "labels": "bug", "body": _build_prefilled_issue_body()}
+    )
+    webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
+
+
+def _report_bug_with_log() -> None:
+    QDesktopServices.openUrl(QUrl.fromLocalFile(str(FILE_PATHS.log.parent)))
+
+    sanitized_log = log_sanitizer.read_sanitized_log()
+
+    body = (
+        f"{_build_prefilled_issue_body()}\n"
+        "### Sanitized Log\n"
+        "```\n"
+        f"{sanitized_log}\n"
+        "```\n"
+        f"_Attach the log file `{FILE_PATHS.log.name}` opened in the file browser._\n"
+    )
+
+    query = urlencode(
+        {
+            "template": "bug_report.md",
+            "title": "",
+            "labels": "bug",
+            "body": body,
+        }
+    )
     webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
 
 
@@ -761,6 +795,7 @@ class ResourcesCard(SettingsCard):
 
         actions = [
             (LucideIcon.BUG, "Report bug", _open_bug_report),
+            (LucideIcon.BUG_FILE, "Report bug with log", _report_bug_with_log),
             (LucideIcon.SHIELD, "Report vulnerability", _open_security_advisory),
             (LucideIcon.FOLDER_SEARCH, "Open log location", _open_log_directory),
             (LucideIcon.SCROLL_TEXT, "View licenses", _open_third_party_licenses),
@@ -775,7 +810,12 @@ class ResourcesCard(SettingsCard):
         for index, (icon, caption, on_click) in enumerate(actions):
             row = index // RESOURCES_GRID_COLUMNS
             column = index % RESOURCES_GRID_COLUMNS
-            grid.addWidget(self._build_labelled_action(icon, caption, on_click), row, column, alignment=Qt.AlignmentFlag.AlignHCenter)
+            grid.addWidget(
+                self._build_labelled_action(icon, caption, on_click),
+                row,
+                column,
+                alignment=Qt.AlignmentFlag.AlignHCenter,
+            )
         self.body_layout.addLayout(grid)
 
     def _build_labelled_action(self, icon: LucideIcon, caption: str, on_click: Callable[[], None]) -> QWidget:
