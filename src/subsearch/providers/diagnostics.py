@@ -1,5 +1,4 @@
 import sys
-from datetime import date
 
 from subsearch.io import toml_file
 from subsearch.parsing import imdb_lookup, release_parser
@@ -18,47 +17,28 @@ PROVIDER_CLASSES = {
 }
 
 
-def record_provider_attempt(provider_name: str) -> None:
-    _write_provider_date(provider_name, "last_attempt")
-
-
-def record_provider_known_good(provider_name: str) -> None:
-    _write_provider_date(provider_name, "last_known_good")
-
-
-def _write_provider_date(provider_name: str, field: str) -> None:
-    session = toml_file.get_config_session()
-    session.write(f"diagnostics.provider_health.{provider_name}.{field}", date.today().isoformat())
-    session.commit()
-
-
 def record_health_reports(reports: list[ProviderResult]) -> None:
     if not FILE_PATHS.config.exists():
         return None
+    session = toml_file.get_config_session()
     for report in reports:
-        record_provider_attempt(report.provider_name)
+        key = f"diagnostics.provider_health.{report.provider_name}.failed_attempts"
         if report.health is ProviderHealth.OK and report.subtitles_found > 0:
-            record_provider_known_good(report.provider_name)
+            session.write(key, 0)
+        else:
+            current = session.read(key) or 0
+            session.write(key, current + 1)
+    session.commit()
 
 
 def providers_due_for_diagnostic(app_config: AppConfig) -> list[str]:
-    interval_days = app_config.diagnostics["interval_days"]
+    threshold = app_config.diagnostics["failed_attempts_threshold"]
     provider_health = app_config.diagnostics["provider_health"]
-    due = []
-    for provider_name, dates in provider_health.items():
-        if _days_between(dates["last_known_good"], dates["last_attempt"]) >= interval_days:
-            due.append(provider_name)
-    return due
-
-
-def _days_between(earlier: str, later: str) -> int:
-    if not later:
-        return 0
-
-    later_date = date.fromisoformat(later)
-    earlier_date = date.fromisoformat(earlier) if earlier else date.min
-
-    return (later_date - earlier_date).days
+    return [
+        provider_name
+        for provider_name, health in provider_health.items()
+        if health["failed_attempts"] >= threshold
+    ]
 
 
 def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:

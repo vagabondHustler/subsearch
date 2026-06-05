@@ -34,7 +34,7 @@ from subsearch.ui.cards.cards import (
 )
 from subsearch.ui.cards.download_manager import DownloadManagerInterface
 from subsearch.ui.icons.lucide import LucideIcon
-from subsearch.ui.navigation import enlarge_navigation_icons
+from subsearch.ui.navigation import NAVIGATION_ITEM_HEIGHT, enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
 from subsearch.ui.theme.theme_patch import force_fixed_accent_color
 from subsearch.ui.theme.typography import apply_body_font
@@ -136,11 +136,11 @@ class SettingsWindow(FluentWindow):
 
         self.addSubInterface(search_interface, LucideIcon.TEXT_SEARCH, "Search", isTransparent=True)
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
+        self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
+        self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
         self.addSubInterface(
             download_manager_interface, LucideIcon.FOLDER_DOWN, "Download manager", isTransparent=True
         )
-        self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
-        self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
         self.addSubInterface(
             about_interface,
             LucideIcon.HEART_HANDSHAKE,
@@ -167,7 +167,16 @@ class SettingsWindow(FluentWindow):
             navigation_item.widget.setTextColor(text_color, text_color)
             apply_body_font(getattr(navigation_item.widget, "itemWidget"))
         panel.items["header"].widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._insert_navigation_spacer(panel, before_route_key="downloadManagerInterface")
         enlarge_navigation_icons(panel)
+
+    def _insert_navigation_spacer(self, panel, before_route_key: str) -> None:
+        target_widget = panel.items[before_route_key].widget
+        layout_index = panel.topLayout.indexOf(target_widget)
+        spacer = QWidget(panel)
+        spacer.setFixedHeight(NAVIGATION_ITEM_HEIGHT)
+        spacer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        panel.topLayout.insertWidget(layout_index, spacer, 0, Qt.AlignmentFlag.AlignTop)
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if self.post_processing_card.commit_path_or_revert():

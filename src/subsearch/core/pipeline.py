@@ -42,12 +42,6 @@ class SearchPipeline:
         parallel_tasks.run_in_threads(*providers)
         log.event("task_completed")
 
-    def run_diagnostics_on_launch(self) -> None:
-        diagnostics_config = self.bootstrap.app_config.diagnostics
-        if not diagnostics_config["enabled"] or diagnostics_config["run_when"] != "on_launch":
-            return None
-        self._run_due_diagnostics()
-
     def run_provider_diagnostics(self) -> None:
         if not self.bootstrap.app_config.diagnostics["enabled"]:
             return None
@@ -55,8 +49,6 @@ class SearchPipeline:
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
-        if self.bootstrap.app_config.diagnostics["run_when"] != "after_search":
-            return None
         self._run_due_diagnostics()
 
     def _run_due_diagnostics(self) -> None:

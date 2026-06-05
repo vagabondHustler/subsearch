@@ -8,7 +8,6 @@ class Subsearch:
         self.pipeline = SearchPipeline(PREF_COUNTER)
 
     def start_app(self) -> None:
-        self.pipeline.run_diagnostics_on_launch()
         self.pipeline.init_search(
             self.pipeline.opensubtitles,
             self.pipeline.yifysubtitles,

@@ -138,23 +138,22 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Read timeout",
         "Once connected, how many seconds to wait for a site to send its reply before giving up.",
     ),
+    "diagnostics.header": SettingDescription(
+        "Provider health",
+        "Health checks run locally and nothing is sent anywhere automatically. "
+        "If a provider looks broken, reporting it to the developer is entirely up to you.",
+    ),
     "diagnostics.enabled": SettingDescription(
         "Provider health checks",
-        "When a subtitle site appears to be broken, Subsearch can run local health "
-        "checks, log the results, and notify you. These checks only notify you; "
-        "nothing is uploaded or sent to the developer. Disable this to skip the checks.",
+        "Runs a test search after the failed-attempts threshold is reached to confirm "
+        "whether the provider is actually broken. Notifies you with the result. "
+        "Disable to skip checks entirely.",
     ),
-    "diagnostics.run_when": SettingDescription(
-        "When to check",
-        "Choose when health checks run: in the background after a normal search "
-        "finishes (recommended, with no impact on search speed), or once when "
-        "Subsearch starts.",
-    ),
-    "diagnostics.interval_days": SettingDescription(
-        "Days between checks",
-        "How long a site can go without a successful result before Subsearch tests "
-        "it. Sites that continue to return results are not checked. Sites that "
-        "have not returned a result for this many days are tested automatically.",
+    "diagnostics.failed_attempts_threshold": SettingDescription(
+        "Failed attempts before check",
+        "How many consecutive searches without a result trigger a health check for "
+        "that provider. Providers that keep returning results are never checked. "
+        "The counter resets to zero as soon as the provider returns a result again.",
     ),
     "credentials.subsource_api_key": SettingDescription(
         "Subsource API key",

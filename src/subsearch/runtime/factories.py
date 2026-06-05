@@ -47,7 +47,7 @@ def get_default_app_config() -> dict[str, Any]:
     file_extensions = dict.fromkeys(get_supported_file_ext(), True)
     providers = dict.fromkeys(get_supported_providers(), True)
     provider_health = {
-        provider: {"last_known_good": "", "last_attempt": ""} for provider in get_health_tracked_providers()
+        provider: {"failed_attempts": 0} for provider in get_health_tracked_providers()
     }
     config = {
         "language": {
@@ -93,8 +93,7 @@ def get_default_app_config() -> dict[str, Any]:
         },
         "diagnostics": {
             "enabled": True,
-            "run_when": "after_search",
-            "interval_days": 3,
+            "failed_attempts_threshold": 3,
             "provider_health": provider_health,
         },
         "credentials": {

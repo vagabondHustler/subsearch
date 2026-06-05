@@ -27,7 +27,6 @@ from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.widgets.slider import CircleDotSlider
 from subsearch.ui.widgets.setting_rows import (
-    ComboBoxRow,
     HelpButton,
     SearchableComboBoxRow,
     SpinBoxRow,
@@ -517,21 +516,16 @@ class NetworkCard(SettingsCard):
 class ProviderHealthCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Provider health", parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["diagnostics.header"].explanation)
         self.enabled = SwitchRow("diagnostics.enabled")
-        self.run_when = ComboBoxRow(
-            "diagnostics.run_when",
-            {"After search": "after_search", "On launch": "on_launch"},
-        )
-        self.interval = SpinBoxRow("diagnostics.interval_days", 1, 24)
+        self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", 1, 99)
         self.add_row(self.enabled)
-        self.add_row(self.run_when)
-        self.add_row(self.interval)
+        self.add_row(self.failed_attempts)
         self.enabled.toggled.connect(self._apply_enabled_state)
         self._apply_enabled_state(self.enabled.switch.isChecked())
 
     def _apply_enabled_state(self, enabled: bool) -> None:
-        self.run_when.setEnabled(enabled)
-        self.interval.setEnabled(enabled)
+        self.failed_attempts.setEnabled(enabled)
 
 
 class MaskedApiKeyLineEdit(LineEdit):
