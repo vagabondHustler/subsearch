@@ -451,7 +451,6 @@ class Build:
         "unittest",
         "xml",
         "xmlrpc",
-        "asyncio",
         "chardet",
     ]
 
