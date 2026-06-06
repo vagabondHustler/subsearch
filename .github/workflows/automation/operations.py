@@ -442,7 +442,6 @@ class Build:
     """Freeze the app into an exe and package it as a Windows msi via cx_Freeze."""
 
     _LIBS_TO_EXCLUDE = [
-        "concurrent",
         "lib2to3",
         "multiprocessing",
         "distutils",
