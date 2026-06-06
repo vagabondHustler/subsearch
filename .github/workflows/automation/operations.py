@@ -467,7 +467,7 @@ class Build:
         return [
             Executable(
                 "src/subsearch/__main__.py",
-                base="Win32GUI",
+                base="gui",
                 target_name=APP_NAME,
                 icon=ICON,
                 shortcut_name="Subsearch",
