@@ -100,6 +100,7 @@
     template = "changelog_template.md.j2"
     version = "2.47.7"
     tag_format = "$version"
+    ignored_tag_pattern = ".*[^0-9.].*"
     update_changelog_on_bump = false
     annotated_tag = true
     version_files = [

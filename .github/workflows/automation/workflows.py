@@ -52,8 +52,16 @@ class Init:
 
 
 class MakeMsi:
+    _VERSION_FILE = CWD_PATH / "src" / "subsearch" / "runtime" / "version.py"
+
     def run(self) -> None:
+        dry_run_version = os.environ.get("DRY_RUN_VERSION")
+        if dry_run_version:
+            self._patch_version(dry_run_version)
         Build().make_msi()
+
+    def _patch_version(self, version: str) -> None:
+        self._VERSION_FILE.write_text(f'__version__ = "{version}"\n')
 
 
 class BuildBinaries:
