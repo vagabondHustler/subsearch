@@ -38,7 +38,7 @@ HASHES_PATH = ARTIFACTS_PATH / HASHES_NAME
 
 
 APP_NAME = "Subsearch"
-ICON = str(CWD_PATH / "src/subsearch/gui/resources/assets/subsearch.ico")
+ICON = str(CWD_PATH / "src" / "subsearch" / "ui" / "assets" / "subsearch.ico")
 
 
 def msi_name(version: str) -> str:
