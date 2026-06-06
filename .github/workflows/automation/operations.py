@@ -484,7 +484,12 @@ class Build:
     def _options(self) -> dict:
         from subsearch.runtime.guid import __guid__
 
-        bdist_msi = {"upgrade_code": f"{__guid__}", "install_icon": ICON, "data": self._data_table()}
+        bdist_msi = {
+            "upgrade_code": f"{__guid__}",
+            "install_icon": ICON,
+            "data": self._data_table(),
+            "launch_on_finish": True,
+        }
         license_files = [("LICENSE", "LICENSE"), ("THIRD-PARTY-LICENSES.md", "THIRD-PARTY-LICENSES.md")]
         build_exe = {"excludes": [*self._LIBS_TO_EXCLUDE], "include_files": license_files}
         return {"build_exe": build_exe, "bdist_msi": bdist_msi}
