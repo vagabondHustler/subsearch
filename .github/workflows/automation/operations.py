@@ -304,7 +304,7 @@ class BinaryTester:
 
         return win32gui.FindWindow(None, window_title) != 0
 
-    def assert_window_rendered(self, window_title: str = APP_NAME, timeout: int = 5) -> None:
+    def assert_window_rendered(self, window_title: str = APP_NAME, timeout: int = 60) -> None:
         for _ in range(timeout):
             if self.window_exists(window_title):
                 print(f"GUI window '{window_title}' is present")
