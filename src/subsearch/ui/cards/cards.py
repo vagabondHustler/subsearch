@@ -59,7 +59,9 @@ REVEAL_BUTTON_SIZE = 32
 LINK_BUTTON_ICON_SIZE = 24
 LINK_BUTTON_SIZE = 32
 LINK_BUTTON_SPACING = 48
-API_KEY_CONFIG_KEY = "credentials.subsource_api_key"
+API_KEY_CONFIG_KEY = "credentials.subsource.api_key"
+API_KEY_CONFIG_KEY_EXISTS = "credentials.subsource.api_key_exists"
+API_KEY_DESCRIPTION_KEY = "credentials.subsource_api_key"
 REQUEST_LIMITS_KEY = "credentials.subsource_request_limits"
 GETTING_API_KEY_KEY = "credentials.subsource_getting_api_key"
 PROFILE_URL = "https://subsource.net/dashboard/profile"
@@ -602,9 +604,10 @@ class MaskedApiKeyLineEdit(LineEdit):
 
 
 class ApiKeyField(QWidget):
-    def __init__(self, config_key: str, parent: QWidget | None = None) -> None:
+    def __init__(self, config_key: str, config_key_exists: str, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.config_key = config_key
+        self.config_key_exists = config_key_exists
         api_key = str(read_value(config_key))
 
         self.line_edit = MaskedApiKeyLineEdit(api_key, self)
@@ -638,6 +641,7 @@ class ApiKeyField(QWidget):
     def _on_api_key_changed(self) -> None:
         api_key = self.line_edit.api_key
         write_value(self.config_key, api_key)
+        write_value(self.config_key_exists, bool(api_key))
         self._apply_validation_state(api_key)
 
     def _apply_validation_state(self, api_key: str) -> None:
@@ -648,7 +652,7 @@ class ApiKeyField(QWidget):
 class ApiCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Subsource", parent)
-        self.add_header_help(SETTING_DESCRIPTIONS[API_KEY_CONFIG_KEY].explanation)
+        self.add_header_help(SETTING_DESCRIPTIONS[API_KEY_DESCRIPTION_KEY].explanation)
 
         title_label = BodyLabel("API key", self)
         apply_body_font(title_label)
@@ -657,7 +661,7 @@ class ApiCard(SettingsCard):
         title_row.addWidget(title_label)
         self.body_layout.addLayout(title_row)
 
-        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, self))
+        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, API_KEY_CONFIG_KEY_EXISTS, self))
         self.body_layout.addWidget(self._build_request_limits())
         self.body_layout.addWidget(self._build_getting_started())
 

@@ -42,9 +42,8 @@ class SearchPipeline:
         parallel_tasks.run_in_threads(*providers)
         log.event("task_completed")
 
+    @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
-        if not self.bootstrap.app_config.diagnostics["enabled"]:
-            return None
         log.event("banner", title="Provider Healthcheck")
         from subsearch.providers import diagnostics as diagnostics
 

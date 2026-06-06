@@ -27,7 +27,7 @@ class Bootstrap:
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
 
-        log.debug("Verifing files and paths")
+        log.debug("Verifying files and paths")
         self.setup_file_system()
         self.language_data = toml_file.load_language_data()
         self.app_config = toml_file.get_config_session().snapshot()

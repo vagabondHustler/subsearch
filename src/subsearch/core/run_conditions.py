@@ -94,6 +94,7 @@ class RunConditions:
                 self.file_exists,
                 self.app_config.summary_notification,
             ],
+            "run_provider_diagnostics": [self.file_exists, self.app_config.diagnostics["enabled"]],
             "clean_up": [self.file_exists],
         }
 

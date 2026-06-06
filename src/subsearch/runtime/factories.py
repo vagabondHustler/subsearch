@@ -46,9 +46,7 @@ def get_file_paths() -> FilePaths:
 def get_default_app_config() -> dict[str, Any]:
     file_extensions = dict.fromkeys(get_supported_file_ext(), True)
     providers = dict.fromkeys(get_supported_providers(), True)
-    provider_health = {
-        provider: {"failed_attempts": 0} for provider in get_health_tracked_providers()
-    }
+    provider_health = {provider: {"failed_attempts": 0} for provider in get_health_tracked_providers()}
     config = {
         "language": {
             "selected": "english",
@@ -97,7 +95,10 @@ def get_default_app_config() -> dict[str, Any]:
             "provider_health": provider_health,
         },
         "credentials": {
-            "subsource_api_key": "",
+            "subsource": {
+                "api_key_exists": False,
+                "api_key": "",
+            },
         },
     }
     return config

@@ -137,7 +137,9 @@ class Commitizen:
         return None
 
     def render_changelog_for_tag(self, tag: str, file_name: Path) -> None:
-        subprocess.run([*self._COMMAND, "changelog", tag, "--file-name", str(file_name)], check=True)
+        completed = subprocess.run([*self._COMMAND, "changelog", tag, "--file-name", str(file_name)])
+        if completed.returncode != 0:
+            self.render_unreleased_changelog(tag, file_name)
 
     def render_unreleased_changelog(self, unreleased_version: str, file_name: Path) -> None:
         subprocess.run(
@@ -237,11 +239,15 @@ class BinaryTester:
             raise FileNotFoundError(f"No .msi found in {ARTIFACTS_PATH}")
         return candidates[0]
 
-    def test_msi_package(self, name: str, msi_package_path: Path) -> None:
-        from subsearch.runtime.version import __version__
+    def _installed_version(self) -> str:
+        version_file = CWD_PATH / "src" / "subsearch" / "runtime" / "version.py"
+        namespace: dict[str, str] = {}
+        exec(version_file.read_text(encoding="utf-8"), namespace)
+        return namespace["__version__"]
 
+    def test_msi_package(self, name: str, msi_package_path: Path) -> None:
         installer_action = {"install": "/i", "uninstall": "/x"}[name]
-        print(f"MSI Package is {name}ing Subsearch {__version__}")
+        print(f"MSI Package is {name}ing Subsearch {self._installed_version()}")
         subprocess.run(["msiexec.exe", installer_action, str(msi_package_path), "/norestart", "/quiet"], check=True)
         print(f"{name.capitalize()} completed")
 

@@ -7,13 +7,11 @@ from pathlib import Path
 from subsearch.runtime.constants import COMPUTER_NAME, FILE_PATHS, GUID
 from subsearch.runtime.model import DataclassInstance
 
-REDACTED = "[redacted]"
+REDACTED = "[REDACTED]"
 
 IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 EMAIL_PATTERN = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 API_KEY_PATTERN = re.compile(r"\bsk_[A-Za-z0-9_-]+", re.IGNORECASE)
-
-SECRET_FIELDS = {"subsource_api_key"}
 
 
 def _username_candidates() -> list[str]:
@@ -33,11 +31,8 @@ def sanitize(text: str) -> str:
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
 
 
-def _secret_field_status(value: object) -> str:
-    api_key = str(value)
-    if not api_key:
-        return "<not set>"
-    return "<valid key>" if re.match(r"^sk_[0-9a-f]+$", api_key) else "<invalid key>"
+def _handle_api_keys(value: str) -> str:
+    return API_KEY_PATTERN.sub(REDACTED, value)
 
 
 def dataclass_lines(instance: DataclassInstance, banner_template: str) -> list[str]:
@@ -46,8 +41,8 @@ def dataclass_lines(instance: DataclassInstance, banner_template: str) -> list[s
     lines = [banner_template.format(title=instance.__class__.__name__)]
     for field in dataclasses.fields(instance):
         value = getattr(instance, field.name)
-        if field.name in SECRET_FIELDS:
-            value = _secret_field_status(value)
+        if isinstance(value, str):
+            value = _handle_api_keys(value)
         padding = " " * (30 - len(field.name))
         lines.append(f"{field.name}:{padding}{value}")
     return lines

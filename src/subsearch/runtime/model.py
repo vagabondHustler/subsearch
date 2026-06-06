@@ -66,6 +66,7 @@ class AppConfig:
     request_connect_timeout: int
     request_read_timeout: int
     diagnostics: dict[str, Any]
+    subsource_api_key_exists: bool
     subsource_api_key: str
 
 
