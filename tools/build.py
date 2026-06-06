@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from cx_Freeze import Executable, setup
@@ -7,7 +8,7 @@ from cx_Freeze.command.bdist_msi import bdist_msi as _BdistMsi
 from subsearch.data import __guid__
 
 APP_NAME = "Subsearch"
-ICON = "src/subsearch/gui/resources/assets/subsearch.ico"
+ICON = str(Path(__file__).parent.parent / "src/subsearch/gui/resources/assets/subsearch.ico")
 _libs_to_exclude = [
     "concurrent",
     "lib2to3",
