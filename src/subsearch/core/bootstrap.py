@@ -43,6 +43,11 @@ class Bootstrap:
         self.system_tray = SystemTray(enabled=self.app_config.system_tray)
         self.system_tray.start()
 
+        if self.gui_may_open:
+            from subsearch.ui import warmup
+
+            warmup.start_warmup()
+
         if self.file_exists:
             VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path)
             log.dataclass(VIDEO_FILE, level="debug", to_console=False)
@@ -79,6 +84,10 @@ class Bootstrap:
         if self.file_exists:
             file_system.create_directory(VIDEO_FILE.subs_dir)
             file_system.create_directory(VIDEO_FILE.tmp_dir)
+
+    @property
+    def gui_may_open(self) -> bool:
+        return not self.file_exists or self.app_config.always_open_manager or self.app_config.open_manager_on_no_matches
 
     def all_providers_disabled(self) -> bool:
         if (

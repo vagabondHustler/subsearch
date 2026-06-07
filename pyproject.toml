@@ -10,7 +10,6 @@
     classifiers = [
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 3.14",
         "Topic :: Multimedia :: Video",
@@ -44,7 +43,8 @@
         "subsearch",
         "yifysubtitles",
     ]
-    license = {text = "GPL-3.0-or-later"}
+    license = "GPL-3.0-or-later"
+    license-files = ["LICENSE", "THIRD-PARTYY-LICENSES.md"]
     name = "Subsearch"
     readme = "README.md"
     requires-python = ">=3.14"

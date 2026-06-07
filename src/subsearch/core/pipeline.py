@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from subsearch import ui
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
@@ -11,9 +10,13 @@ from subsearch.io import file_system
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.runtime.config import parallel_tasks
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
-from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import ProviderHealth, ProviderResult, SubtitleStatus
+from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.models.model import (
+    ProviderHealth,
+    ProviderResult,
+    SubtitleStatus,
+)
 
 
 class SearchPipeline:
@@ -24,7 +27,9 @@ class SearchPipeline:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
         if not self.bootstrap.file_exists:
             log.event("banner", title="GUI")
-            ui.open_settings_window()
+            from subsearch.ui.application import open_settings_window
+
+            open_settings_window()
             log.debug("Exiting GUI")
             self.bootstrap.resync_app_config()
             self.bootstrap.prevent_conflicting_config_settings()
@@ -119,7 +124,9 @@ class SearchPipeline:
     def download_manager(self) -> None:
         log.event("banner", title=f"Download Manager")
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
-        self.bootstrap.manually_accepted_subtitles = ui.open_settings_window(subtitles)
+        from subsearch.ui.application import open_settings_window
+
+        self.bootstrap.manually_accepted_subtitles = open_settings_window(subtitles)
         self.bootstrap.resync_app_config()
         log.event("task_completed")
 

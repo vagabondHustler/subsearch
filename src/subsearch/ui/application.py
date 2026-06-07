@@ -13,20 +13,21 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import toml_file
-from subsearch.runtime.models.model import Subtitle
 from subsearch.runtime.config.constants import APP_PATHS
+from subsearch.runtime.models.model import Subtitle
+from subsearch.ui import warmup
 from subsearch.ui.cards.cards import (
     ApiCard,
     ApplicationCard,
     DownloadManagerCard,
     FileExtensionsCard,
     LanguageCard,
-    ResourcesCard,
     NetworkCard,
     NotificationsCard,
     PostProcessingCard,
     ProviderHealthCard,
     ProvidersCard,
+    ResourcesCard,
     SearchThresholdCard,
     ShellIntegrationCard,
     SubtitleFiltersCard,
@@ -138,9 +139,7 @@ class SettingsWindow(FluentWindow):
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
         self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
-        self.addSubInterface(
-            download_manager_interface, LucideIcon.FOLDER_DOWN, "Download manager", isTransparent=True
-        )
+        self.addSubInterface(download_manager_interface, LucideIcon.FOLDER_DOWN, "Download manager", isTransparent=True)
         self.addSubInterface(
             about_interface,
             LucideIcon.HEART_HANDSHAKE,
@@ -193,6 +192,7 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
 
 
 def open_settings_window(subtitles: list[Subtitle] | None = None) -> list[Subtitle]:
+    warmup.await_warmup()
     qInstallMessageHandler(_suppress_point_size_warning)
     application = get_application()
     setTheme(Theme.DARK)
