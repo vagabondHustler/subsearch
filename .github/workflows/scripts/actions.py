@@ -482,6 +482,7 @@ class Build:
         "requests",
         "selectolax",
         "toml",
+        "urllib3",
         "urllib3_future",
         "qh3",
         "jh2",
