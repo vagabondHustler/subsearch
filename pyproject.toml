@@ -1,6 +1,6 @@
 [build-system]
     build-backend = "setuptools.build_meta"
-    requires = ["setuptools>=65.5", "wheel"]
+    requires = ["setuptools>=82.0"]
 
 [project]
     authors = [
@@ -65,7 +65,7 @@
     where = ["src"]
 
 [tool.setuptools.dynamic]
-    version = {attr = "subsearch.runtime.version.__version__"}
+    version = {attr = "subsearch.runtime.config.version.__version__"}
 
 [project.optional-dependencies]
     build = [
