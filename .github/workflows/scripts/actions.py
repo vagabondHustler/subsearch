@@ -441,7 +441,6 @@ class Build:
 
     _INCLUDES = [
         "selectolax.lexbor",
-        "selectolax.modest",
         "selectolax.parser",
     ]
     _PACKAGES_TO_EXCLUDE = [
@@ -456,6 +455,8 @@ class Build:
         "xmlrpc",
         "sqlite3",
         "curses",
+        "email",
+        "html",
     ]
 
     def _data_table(self) -> dict:
@@ -484,6 +485,13 @@ class Build:
             )
         ]
 
+    def _selectolax_namespace_packages(self) -> list[tuple[str, str]]:
+        # selectolax's modest namespace package has no __init__.py, so cx_Freeze drops it; copy it back in.
+        import selectolax
+
+        selectolax_root = Path(selectolax.__file__).parent
+        return [(str(selectolax_root / "modest"), "lib/selectolax/modest")]
+
     def _options(self) -> dict:
         from subsearch.runtime.config.guid import __guid__
 
@@ -495,7 +503,7 @@ class Build:
         }
         license_files = [("LICENSE", "LICENSE"), ("THIRD-PARTY-LICENSES.md", "THIRD-PARTY-LICENSES.md")]
         build_exe = {
-            "include_files": license_files,
+            "include_files": license_files + self._selectolax_namespace_packages(),
             "includes": self._INCLUDES,
             "packages": self._PACKAGES_TO_INCLUDE,
             "excludes": self._PACKAGES_TO_EXCLUDE,
