@@ -1,5 +1,7 @@
 import logging
+import traceback
 from logging.handlers import RotatingFileHandler
+from types import TracebackType
 from typing import Optional
 
 from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
@@ -36,9 +38,7 @@ def _build_file_logger() -> logging.Logger:
     logger = logging.getLogger("subsearch")
     logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
-    file_handler = RotatingFileHandler(
-        FILE_PATHS.log, mode="a", maxBytes=LOG_MAX_BYTES, encoding="utf-8"
-    )
+    file_handler = RotatingFileHandler(FILE_PATHS.log, mode="a", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
     file_handler.setFormatter(
         logging.Formatter(
             "%(levelname)s %(module)s:%(lineno)d %(asctime)s.%(msecs)03d: %(message)s", datefmt="%H:%M:%S"
@@ -93,6 +93,16 @@ class Logger(metaclass=Singleton):
     def dataclass(self, instance: DataclassInstance, level: str = "info", to_console: bool = True) -> None:
         for line in log_events.dataclass_lines(instance):
             self.write(line, level, to_console)
+
+    def uncaught_exception(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        exc_traceback: Optional[TracebackType],
+        origin: str = "main thread",
+    ) -> None:
+        formatted = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        self.write(f"Uncaught exception on {origin}\n{formatted}", "critical", to_console=False)
 
 
 log = Logger()
