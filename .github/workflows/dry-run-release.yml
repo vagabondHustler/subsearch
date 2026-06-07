@@ -52,7 +52,7 @@ jobs:
 
       - name: Set fake version outputs (no bump, no push)
         id: run
-        run: python .github/workflows/automation/workflows.py dry_run_init
+        run: python .github/workflows/scripts/jobs.py dry_run_init
 
   build_binaries:
     name: Build binaries
@@ -77,11 +77,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .[build]
-          python .github/workflows/automation/workflows.py make_msi
+          python .github/workflows/scripts/jobs.py make_msi
 
       - name: Hash and collect artifacts
         id: run
-        run: python .github/workflows/automation/workflows.py build_binaries
+        run: python .github/workflows/scripts/jobs.py build_binaries
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -116,7 +116,7 @@ jobs:
           python -m pip install --upgrade pip psutil pywin32 toml
           python -m pip install -e . --no-deps
 
-      - run: python .github/workflows/automation/workflows.py test_binaries
+      - run: python .github/workflows/scripts/jobs.py test_binaries
 
   changelog:
     name: Changelog
@@ -139,7 +139,7 @@ jobs:
           python -m pip install -e . --no-deps
 
       - name: Render changelog and append links
-        run: python .github/workflows/automation/workflows.py changelog
+        run: python .github/workflows/scripts/jobs.py changelog
         env:
           CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
           PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}

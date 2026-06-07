@@ -1,11 +1,3 @@
-"""Reusable operations for the release/maintenance workflows.
-
-Run by file path (`python .github/workflows/automation/workflows.py <name>`) rather
-than as a `-m` module, because `.github` cannot be a Python package. Anything that
-needs the repo root on sys.path relies on the workflow's working directory being the
-checkout root, which GitHub Actions guarantees.
-"""
-
 import hashlib
 import os
 import re
@@ -447,6 +439,11 @@ class Build:
         "cryptography",
     ]
 
+    _INCLUDES = [
+        "selectolax.lexbor",
+        "selectolax.modest",
+        "selectolax.parser",
+    ]
     _PACKAGES_TO_EXCLUDE = [
         "tkinter",
         "unittest",
@@ -456,8 +453,6 @@ class Build:
         "distutils",
         "setuptools",
         "pip",
-        "email",
-        "html",
         "xmlrpc",
         "sqlite3",
         "curses",
@@ -490,7 +485,7 @@ class Build:
         ]
 
     def _options(self) -> dict:
-        from subsearch.runtime.guid import __guid__
+        from subsearch.runtime.config.guid import __guid__
 
         bdist_msi = {
             "upgrade_code": f"{__guid__}",
@@ -500,28 +495,14 @@ class Build:
         }
         license_files = [("LICENSE", "LICENSE"), ("THIRD-PARTY-LICENSES.md", "THIRD-PARTY-LICENSES.md")]
         build_exe = {
-            "include_files": license_files + self._selectolax_extension_files(),
+            "include_files": license_files,
+            "includes": self._INCLUDES,
             "packages": self._PACKAGES_TO_INCLUDE,
             "excludes": self._PACKAGES_TO_EXCLUDE,
         }
         return {"build_exe": build_exe, "bdist_msi": bdist_msi}
 
-    def _selectolax_extension_files(self) -> list:
-        # selectolax ships compiled lexbor/parser extensions next to .pxi-only lexbor/ and
-        # modest/ directories. cx_Freeze's finder treats those directories as the modules and
-        # drops the .pyd files, so `from . import lexbor, modest, parser` fails at runtime.
-        # Copy the compiled extensions in explicitly so the frozen lib/selectolax/ matches.
-        import selectolax
-
-        package_directory = Path(selectolax.__file__).parent
-        return [
-            (str(extension), f"lib/selectolax/{extension.name}")
-            for extension in package_directory.glob("*.pyd")
-        ]
-
     def make_msi(self) -> None:
-        # cx_Freeze's setup() reads the command from sys.argv, so set it explicitly
-        # rather than depending on how this script was invoked.
         from cx_Freeze import setup
 
         print(f"Freezing {APP_NAME} into an exe and packaging it as a Windows msi")

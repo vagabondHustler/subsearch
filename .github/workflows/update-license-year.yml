@@ -39,4 +39,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Renew year and sync dev
-        run: python .github/workflows/automation/workflows.py update_license_year
+        run: python .github/workflows/scripts/jobs.py update_license_year

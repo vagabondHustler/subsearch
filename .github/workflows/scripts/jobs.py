@@ -1,11 +1,12 @@
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-import operations
-from operations import (
+import actions
+from actions import (
     ARTIFACTS_PATH,
     CHANGELOG_NAME,
     CWD_PATH,
@@ -42,10 +43,10 @@ class Init:
         if not bumped:
             return
 
-        identifier = operations.artifact_id(current_version, ref_name, run_id)
+        identifier = actions.artifact_id(current_version, ref_name, run_id)
         step_summary.set_output("current_tag", current_version)
         step_summary.set_output("previous_tag", previous_version)
-        step_summary.set_output("msi_name", operations.msi_name(current_version))
+        step_summary.set_output("msi_name", actions.msi_name(current_version))
         step_summary.set_output("artifact_id", identifier)
 
         Git().push_with_tags(ref_name)
@@ -75,17 +76,12 @@ class TestBinaries:
     def run(self) -> None:
         tester = BinaryTester()
         report = BinaryTestReport(StepSummary())
-        self._run_msi(tester, report, "install")
-        self._run_exe(tester, report)
-        self._run_msi(tester, report, "uninstall")
-
-    def _run_msi(self, tester: BinaryTester, report: BinaryTestReport, flag: str) -> None:
-        tester.test_msi_package(flag, tester.msi_artifact_path())
-        report.add_stage_card(flag)
-
-    def _run_exe(self, tester: BinaryTester, report: BinaryTestReport) -> None:
+        tester.test_msi_package("install", tester.msi_artifact_path())
+        report.add_stage_card("install")
         tester.test_executable(30)
         report.add_stage_card("executable")
+        tester.test_msi_package("uninstall", tester.msi_artifact_path())
+        report.add_stage_card("uninstall")
 
 
 class BuildChangelog:
@@ -134,9 +130,11 @@ class Prepare:
         ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
         Git().fetch(ref_name, with_tags=True)
         commitizen.render_unreleased_changelog(predicted_version, ARTIFACTS_PATH / CHANGELOG_NAME)
+        self._append_comparison_link(changelog, current_version, predicted_version)
 
+    def _append_comparison_link(self, changelog: Changelog, previous_version: str, next_version: str) -> None:
+        comparison = changelog.compare_link(previous_tag=previous_version, current_tag=next_version)
         with open(ARTIFACTS_PATH / CHANGELOG_NAME, "a") as changelog_file:
-            comparison = changelog.compare_link(previous_tag=current_version, current_tag=predicted_version)
             changelog_file.write(f"###### Full changelog: {comparison}")
 
 
@@ -147,8 +145,6 @@ class OpenMainPullRequest:
     OWNER = "vagabondHustler"
 
     def run(self) -> None:
-        import subprocess
-
         predicted_version = os.environ["PREDICTED_VERSION"]
         title = f"Release {predicted_version}"
         body = (ARTIFACTS_PATH / CHANGELOG_NAME).read_text()
@@ -198,8 +194,6 @@ class OpenMainPullRequest:
         )
 
     def _existing_pull_request_number(self) -> str | None:
-        import subprocess
-
         completed = subprocess.run(
             [
                 "gh",
@@ -239,11 +233,11 @@ class DryRunInit:
             step_summary.set_output("bumped", "false")
             return
 
-        identifier = operations.artifact_id(predicted_version, ref_name, run_id)
+        identifier = actions.artifact_id(predicted_version, ref_name, run_id)
         step_summary.set_output("bumped", "true")
         step_summary.set_output("current_tag", predicted_version)
         step_summary.set_output("previous_tag", previous_version)
-        step_summary.set_output("msi_name", operations.msi_name(predicted_version))
+        step_summary.set_output("msi_name", actions.msi_name(predicted_version))
         step_summary.set_output("artifact_id", identifier)
 
 
@@ -285,7 +279,7 @@ JOBS = {
 def main() -> None:
     if len(sys.argv) != 2 or sys.argv[1] not in JOBS:
         available = ", ".join(sorted(JOBS))
-        raise SystemExit(f"usage: workflows.py <job>\navailable jobs: {available}")
+        raise SystemExit(f"usage: jobs.py <job>\navailable jobs: {available}")
     JOBS[sys.argv[1]]().run()
 
 

@@ -37,11 +37,11 @@ jobs:
 
       - name: Render preview changelog
         id: preview
-        run: python .github/workflows/automation/workflows.py prepare
+        run: python .github/workflows/scripts/jobs.py prepare
 
       - name: Open or update the release pull request
         if: ${{ steps.preview.outputs.releasable == 'true' }}
-        run: python .github/workflows/automation/workflows.py open_main_pr
+        run: python .github/workflows/scripts/jobs.py open_main_pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PREDICTED_VERSION: ${{ steps.preview.outputs.predicted_version }}
