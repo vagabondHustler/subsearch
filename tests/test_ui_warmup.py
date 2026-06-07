@@ -33,12 +33,14 @@ def test_start_warmup_is_idempotent():
 
 def test_warmup_thread_is_daemon():
     warmup.start_warmup()
+    assert warmup._warmup_thread is not None
     assert warmup._warmup_thread.daemon is True
 
 
 def test_await_warmup_joins_the_thread():
     warmup.start_warmup()
     warmup.await_warmup()
+    assert warmup._warmup_thread is not None
     assert warmup._warmup_thread.is_alive() is False
 
 

@@ -1,6 +1,9 @@
+from typing import cast
+
 import pytest
 
 from subsearch.core.bootstrap import Bootstrap
+from subsearch.runtime.models.model import AppConfig
 
 
 class FakeAppConfig:
@@ -12,7 +15,7 @@ class FakeAppConfig:
 def make_bootstrap(file_exists: bool, always_open_manager: bool, open_manager_on_no_matches: bool) -> Bootstrap:
     bootstrap = Bootstrap.__new__(Bootstrap)
     bootstrap.file_exists = file_exists
-    bootstrap.app_config = FakeAppConfig(always_open_manager, open_manager_on_no_matches)
+    bootstrap.app_config = cast(AppConfig, FakeAppConfig(always_open_manager, open_manager_on_no_matches))
     return bootstrap
 
 
