@@ -33,10 +33,9 @@ class LaunchOptions:
         return python_executable[self.show_terminal]
 
     def get_parameter(self) -> str:
-        value = "interpreter"
         if DEVICE_INFO.mode == "executable":
-            value = self._get_mode_executable()
-        return value
+            return self._get_mode_executable()
+        return self._get_mode_interpreter()
 
 
 def get_command_value() -> str:
