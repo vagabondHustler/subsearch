@@ -15,6 +15,7 @@ from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.models.model import (
     ProviderHealth,
     ProviderResult,
+    Subtitle,
     SubtitleStatus,
 )
 
@@ -23,24 +24,32 @@ class SearchPipeline:
     def __init__(self, pref_counter: float) -> None:
         self.bootstrap = Bootstrap(pref_counter)
         self.call_conditions = RunConditions(self.bootstrap)
-
-        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
-        if not self.bootstrap.file_exists:
-            log.event("banner", title="GUI")
-            from subsearch.ui.application import open_settings_window
-
-            open_settings_window()
-            log.debug("Exiting GUI")
-            self.bootstrap.resync_app_config()
-            self.bootstrap.prevent_conflicting_config_settings()
+        self._set_console_title()
+        if self._open_settings_on_missing_file():
             return None
-
-        if " " in VIDEO_FILE.filename:
-            log.warning(f"{VIDEO_FILE.filename} contains spaces, result may vary")
-
+        self._warn_if_filename_has_spaces()
         if not self.bootstrap.all_providers_disabled():
             self.bootstrap.prevent_conflicting_config_settings()
             log.event("banner", title="Search started")
+
+    def _set_console_title(self) -> None:
+        ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
+
+    def _open_settings_on_missing_file(self) -> bool:
+        if self.bootstrap.file_exists:
+            return False
+        log.event("banner", title="GUI")
+        from subsearch.ui.application import open_settings_window
+
+        open_settings_window()
+        log.debug("Exiting GUI")
+        self.bootstrap.resync_app_config()
+        self.bootstrap.prevent_conflicting_config_settings()
+        return True
+
+    def _warn_if_filename_has_spaces(self) -> None:
+        if " " in VIDEO_FILE.filename:
+            log.warning(f"{VIDEO_FILE.filename} contains spaces, result may vary")
 
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -50,14 +59,14 @@ class SearchPipeline:
     @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
         log.event("banner", title="Provider Healthcheck")
-        from subsearch.providers import diagnostics as diagnostics
+        from subsearch.providers import diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
         self._run_due_diagnostics()
 
     def _run_due_diagnostics(self) -> None:
-        from subsearch.providers import diagnostics as diagnostics
+        from subsearch.providers import diagnostics
 
         due_providers = diagnostics.providers_due_for_diagnostic(self.bootstrap.app_config)
         if not due_providers:
@@ -89,7 +98,7 @@ class SearchPipeline:
     def _notify_missing_api_key(self, provider_name: str) -> None:
         self.bootstrap.system_tray.display_toast(
             f"{provider_name} skipped",
-            "Add your Subsource API key in settings to search Subsource.",
+            f"Add your {provider_name} API key in settings to search {provider_name}.",
         )
 
     @run_if_conditions_met
@@ -104,25 +113,30 @@ class SearchPipeline:
     def subsource(self) -> None:
         self._start_search(provider=subsource.Subsource, flag="site")
 
+    def _provider_at_api_call_limit(self, provider_name: str) -> bool:
+        if provider_name not in self.bootstrap.api_calls_made:
+            self.bootstrap.api_calls_made[provider_name] = 0
+        return self.bootstrap.api_calls_made[provider_name] == self.bootstrap.app_config.api_call_limit
+
+    def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
+        subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
+        file_system.download_subtitle(subtitle, subtitle_number, total_count)
+        subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
+        self.bootstrap.api_calls_made[subtitle.provider_name] += 1
+
     @run_if_conditions_met
     def download_files(self) -> None:
-        log.event("banner", title=f"Downloading subtitles")
-        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda i: i.percentage_result, reverse=True)
+        log.event("banner", title="Downloading subtitles")
+        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.percentage_result, reverse=True)
         for subtitle in accepted:
-            if subtitle.provider_name not in self.bootstrap.api_calls_made:
-                self.bootstrap.api_calls_made[subtitle.provider_name] = 0
-            if self.bootstrap.api_calls_made[subtitle.provider_name] == self.bootstrap.app_config.api_call_limit:
+            if self._provider_at_api_call_limit(subtitle.provider_name):
                 continue
-            sub_count = sum(self.bootstrap.api_calls_made.values(), 1)
-            index_size = len(accepted)
-            file_system.download_subtitle(subtitle, sub_count, index_size)
-            subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
-            self.bootstrap.api_calls_made[subtitle.provider_name] += 1
+            self._download_accepted_subtitle(subtitle, len(accepted))
         log.event("task_completed")
 
     @run_if_conditions_met
     def download_manager(self) -> None:
-        log.event("banner", title=f"Download Manager")
+        log.event("banner", title="Download Manager")
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.application import open_settings_window
 
@@ -130,12 +144,15 @@ class SearchPipeline:
         self.bootstrap.resync_app_config()
         log.event("task_completed")
 
-    @run_if_conditions_met
-    def subtitle_post_processing(self) -> None:
+    def _resolve_post_processing_target(self) -> Path:
         target = self.bootstrap.app_config.post_processing["target_path"]
         resolution = self.bootstrap.app_config.post_processing["path_resolution"]
         create_missing_folder = self.bootstrap.app_config.post_processing["create_missing_folder"]
-        target_path = file_system.create_path_from_string(target, resolution, create_missing_folder)
+        return file_system.create_path_from_string(target, resolution, create_missing_folder)
+
+    @run_if_conditions_met
+    def subtitle_post_processing(self) -> None:
+        target_path = self._resolve_post_processing_target()
         self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(VIDEO_FILE.tmp_dir)
         self.extract_files()
         self.bootstrap.extracted_subtitle_archives = file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
@@ -173,26 +190,29 @@ class SearchPipeline:
             if report.health is ProviderHealth.STRUCTURE_INVALID:
                 log.warning(f"{report.provider_name} may have changed — unrecognized response", color="#f9e2af")
 
-    @run_if_conditions_met
-    def summary_notification(self, elapsed) -> None:
-        log.event("banner", title="Summary toast")
-        self._log_provider_health_warnings()
-        elapsed_summary = f"Finished in {elapsed} seconds"
+    def _count_downloaded_subtitles(self) -> tuple[int, int]:
         evaluated = self.bootstrap.accepted_subtitles + self.bootstrap.rejected_subtitles
-        downloaded = {
-            id(subtitle): subtitle
+        downloaded = sum(
+            1
             for subtitle in evaluated
             if subtitle.status in (SubtitleStatus.AUTO_DOWNLOADED, SubtitleStatus.MANUALLY_DOWNLOADED)
-        }
-        matches_downloaded = f"Downloaded: {len(downloaded)}/{len(evaluated)}"
-        if downloaded:
-            msg = "Search Succeeded", f"{matches_downloaded}\n{elapsed_summary}"
-            log.info(matches_downloaded, color="#a6e3a1")
-            self.bootstrap.system_tray.display_toast(*msg)
-        else:
-            msg = "Search Failed", f"{matches_downloaded}\n{elapsed_summary}"
-            log.info(matches_downloaded, color="#f38ba8")
-            self.bootstrap.system_tray.display_toast(*msg)
+        )
+        return downloaded, len(evaluated)
+
+    def _dispatch_summary_toast(self, matches_downloaded: str, elapsed_summary: str, succeeded: bool) -> None:
+        title = "Search Succeeded" if succeeded else "Search Failed"
+        color = "#a6e3a1" if succeeded else "#f38ba8"
+        log.info(matches_downloaded, color=color)
+        self.bootstrap.system_tray.display_toast(title, f"{matches_downloaded}\n{elapsed_summary}")
+
+    @run_if_conditions_met
+    def summary_notification(self, elapsed: float) -> None:
+        log.event("banner", title="Summary toast")
+        self._log_provider_health_warnings()
+        downloaded_count, total_count = self._count_downloaded_subtitles()
+        matches_downloaded = f"Downloaded: {downloaded_count}/{total_count}"
+        elapsed_summary = f"Finished in {elapsed} seconds"
+        self._dispatch_summary_toast(matches_downloaded, elapsed_summary, succeeded=downloaded_count > 0)
 
     @run_if_conditions_met
     def clean_up(self) -> None:
@@ -204,18 +224,20 @@ class SearchPipeline:
             file_system.del_directory(VIDEO_FILE.subs_dir)
         log.event("task_completed")
 
+    def _wait_for_terminal_input(self) -> None:
+        if not self.bootstrap.app_config.show_terminal:
+            return None
+        if DEVICE_INFO.mode == "executable":
+            return None
+        try:
+            input("Enter to exit")
+        except KeyboardInterrupt:
+            pass
+
     def on_exit(self) -> None:
         log.event("banner", title="Exit")
         elapsed = time.perf_counter() - self.bootstrap.start
         self.summary_notification(elapsed)
         self.bootstrap.system_tray.stop()
         log.info(f"Finished in {elapsed} seconds", color="#f2cdcd")
-        if not self.bootstrap.app_config.show_terminal:
-            return None
-        if DEVICE_INFO.mode == "executable":
-            return None
-
-        try:
-            input("Enter to exit")
-        except KeyboardInterrupt:
-            pass
+        self._wait_for_terminal_input()
