@@ -2,15 +2,12 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Protocol
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 import actions
 from actions import (
-    ARTIFACTS_PATH,
-    CHANGELOG_NAME,
-    CWD_PATH,
-    EXE_NAME,
     ArtifactHasher,
     BinaryTester,
     BinaryTestReport,
@@ -21,8 +18,9 @@ from actions import (
     LicenseYear,
     StepSummary,
 )
+from config import CHANGELOG_NAME, EXE_NAME, Paths
 
-LICENSE_PATH = CWD_PATH / "LICENSE"
+LICENSE_PATH = Paths.working_directory / "LICENSE"
 
 
 class Init:
@@ -53,7 +51,7 @@ class Init:
 
 
 class MakeMsi:
-    _VERSION_FILE = CWD_PATH / "src" / "subsearch" / "runtime" / "config" /"version.py"
+    _VERSION_FILE = Paths.working_directory / "src" / "subsearch" / "runtime" / "config" /"version.py"
 
     def run(self) -> None:
         dry_run_version = os.environ.get("DRY_RUN_VERSION")
@@ -85,21 +83,26 @@ class TestBinaries:
 
 
 class BuildChangelog:
-    def run(self) -> None:
-        ref_name = os.environ["GITHUB_REF_NAME"]
-        current_tag = os.environ["CURRENT_TAG"]
-        previous_tag = os.environ["PREVIOUS_TAG"]
-        msi_name = os.environ["MSI_NAME"]
-        msi_hash = os.environ["MSI_HASH"]
-        exe_hash = os.environ["EXE_HASH"]
+    def _read_env(self) -> tuple[str, str, str, str, str, str]:
+        return (
+            os.environ["GITHUB_REF_NAME"],
+            os.environ["CURRENT_TAG"],
+            os.environ["PREVIOUS_TAG"],
+            os.environ["MSI_NAME"],
+            os.environ["MSI_HASH"],
+            os.environ["EXE_HASH"],
+        )
 
+    def _generate_changelog(self, commitizen: Commitizen, ref_name: str, current_tag: str) -> None:
+        Paths.artifacts.mkdir(parents=True, exist_ok=True)
+        Git().fetch(ref_name, with_tags=True)
+        commitizen.render_changelog_for_tag(current_tag, Paths.artifacts / CHANGELOG_NAME)
+
+    def run(self) -> None:
+        ref_name, current_tag, previous_tag, msi_name, msi_hash, exe_hash = self._read_env()
         commitizen = Commitizen()
         changelog = Changelog(StepSummary())
-
-        ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
-        Git().fetch(ref_name, with_tags=True)
-        commitizen.render_changelog_for_tag(current_tag, ARTIFACTS_PATH / CHANGELOG_NAME)
-
+        self._generate_changelog(commitizen, ref_name, current_tag)
         changelog.append_release_links(
             current_tag=current_tag,
             previous_tag=previous_tag,
@@ -111,32 +114,39 @@ class BuildChangelog:
 
 
 class Prepare:
-    def run(self) -> None:
-        ref_name = os.environ["GITHUB_REF_NAME"]
-
-        commitizen = Commitizen()
-        changelog = Changelog(StepSummary())
-        step_summary = StepSummary()
-
+    def _resolve_versions(self, commitizen: Commitizen, step_summary: StepSummary) -> tuple[str, str] | None:
         predicted_version = commitizen.predicted_next_version()
         step_summary.set_output("releasable", "true" if predicted_version else "false")
-
         if predicted_version is None:
-            return
-
+            return None
         current_version = commitizen.current_version()
         step_summary.set_output("predicted_version", predicted_version)
-        step_summary.card(f"Preparing release Subsearch {predicted_version} ({current_version} → {predicted_version})")
+        return current_version, predicted_version
 
-        ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
+    def _generate_changelog(self, commitizen: Commitizen, ref_name: str, predicted_version: str) -> None:
+        Paths.artifacts.mkdir(parents=True, exist_ok=True)
         Git().fetch(ref_name, with_tags=True)
-        commitizen.render_unreleased_changelog(predicted_version, ARTIFACTS_PATH / CHANGELOG_NAME)
-        self._append_comparison_link(changelog, current_version, predicted_version)
+        commitizen.render_unreleased_changelog(predicted_version, Paths.artifacts / CHANGELOG_NAME)
 
     def _append_comparison_link(self, changelog: Changelog, previous_version: str, next_version: str) -> None:
         comparison = changelog.compare_link(previous_tag=previous_version, current_tag=next_version)
-        with open(ARTIFACTS_PATH / CHANGELOG_NAME, "a") as changelog_file:
+        with open(Paths.artifacts / CHANGELOG_NAME, "a") as changelog_file:
             changelog_file.write(f"###### Full changelog: {comparison}")
+
+    def run(self) -> None:
+        ref_name = os.environ["GITHUB_REF_NAME"]
+        commitizen = Commitizen()
+        step_summary = StepSummary()
+        changelog = Changelog(step_summary)
+
+        versions = self._resolve_versions(commitizen, step_summary)
+        if versions is None:
+            return
+
+        current_version, predicted_version = versions
+        step_summary.card(f"Preparing release Subsearch {predicted_version} ({current_version} → {predicted_version})")
+        self._generate_changelog(commitizen, ref_name, predicted_version)
+        self._append_comparison_link(changelog, current_version, predicted_version)
 
 
 class OpenMainPullRequest:
@@ -145,78 +155,41 @@ class OpenMainPullRequest:
     TARGET_BRANCH = "main"
     OWNER = "vagabondHustler"
 
-    def run(self) -> None:
+    def _read_pr_content(self) -> tuple[str, str]:
         predicted_version = os.environ["PREDICTED_VERSION"]
         title = f"Release {predicted_version}"
-        body = (ARTIFACTS_PATH / CHANGELOG_NAME).read_text()
+        body = (Paths.artifacts / CHANGELOG_NAME).read_text()
+        return title, body
 
-        pull_request_number = self._existing_pull_request_number()
-        if pull_request_number:
-            subprocess.run(
-                [
-                    "gh",
-                    "pr",
-                    "edit",
-                    pull_request_number,
-                    "--title",
-                    title,
-                    "--body",
-                    body,
-                    "--add-assignee",
-                    self.OWNER,
-                    "--add-reviewer",
-                    self.OWNER,
-                ],
-                check=True,
-            )
-            return
-
+    def _edit_pull_request(self, number: str, title: str, body: str) -> None:
         subprocess.run(
-            [
-                "gh",
-                "pr",
-                "create",
-                "--base",
-                self.TARGET_BRANCH,
-                "--head",
-                self.SOURCE_BRANCH,
-                "--title",
-                title,
-                "--body",
-                body,
-                "--label",
-                self.RELEASE_LABEL,
-                "--assignee",
-                self.OWNER,
-                "--reviewer",
-                self.OWNER,
-            ],
+            ["gh", "pr", "edit", number, "--title", title, "--body", body, "--add-assignee", self.OWNER, "--add-reviewer", self.OWNER],
+            check=True,
+        )
+
+    def _create_pull_request(self, title: str, body: str) -> None:
+        subprocess.run(
+            ["gh", "pr", "create", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--title", title, "--body", body, "--label", self.RELEASE_LABEL, "--assignee", self.OWNER, "--reviewer", self.OWNER],
             check=True,
         )
 
     def _existing_pull_request_number(self) -> str | None:
         completed = subprocess.run(
-            [
-                "gh",
-                "pr",
-                "list",
-                "--base",
-                self.TARGET_BRANCH,
-                "--head",
-                self.SOURCE_BRANCH,
-                "--state",
-                "open",
-                "--json",
-                "number",
-                "--jq",
-                ".[0].number",
-            ],
+            ["gh", "pr", "list", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--state", "open", "--json", "number", "--jq", ".[0].number"],
             check=True,
             capture_output=True,
             text=True,
         )
         number = completed.stdout.strip()
         return number or None
+
+    def run(self) -> None:
+        title, body = self._read_pr_content()
+        existing_number = self._existing_pull_request_number()
+        if existing_number:
+            self._edit_pull_request(existing_number, title, body)
+        else:
+            self._create_pull_request(title, body)
 
 
 class DryRunInit:
@@ -264,7 +237,11 @@ class UpdateLicenseYear:
         git.fast_forward_branch(source_branch=release_branch, target_branch="dev")
 
 
-JOBS = {
+class _Job(Protocol):
+    def run(self) -> None: ...
+
+
+JOBS: dict[str, type[_Job]] = {
     "init": Init,
     "dry_run_init": DryRunInit,
     "make_msi": MakeMsi,
