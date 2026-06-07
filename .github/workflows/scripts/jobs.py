@@ -126,6 +126,7 @@ class Prepare:
 
         current_version = commitizen.current_version()
         step_summary.set_output("predicted_version", predicted_version)
+        step_summary.card(f"Preparing release Subsearch {predicted_version} ({current_version} → {predicted_version})")
 
         ARTIFACTS_PATH.mkdir(parents=True, exist_ok=True)
         Git().fetch(ref_name, with_tags=True)
@@ -239,6 +240,7 @@ class DryRunInit:
         step_summary.set_output("previous_tag", previous_version)
         step_summary.set_output("msi_name", actions.msi_name(predicted_version))
         step_summary.set_output("artifact_id", identifier)
+        step_summary.card(f"Dry run of Subsearch {predicted_version} ({previous_version} → {predicted_version})")
 
 
 class SyncDev:

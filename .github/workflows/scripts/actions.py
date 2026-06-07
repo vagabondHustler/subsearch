@@ -227,15 +227,13 @@ class BinaryTester:
             raise FileNotFoundError(f"No .msi found in {ARTIFACTS_PATH}")
         return candidates[0]
 
-    def _installed_version(self) -> str:
-        version_file = CWD_PATH / "src" / "subsearch" / "runtime" /  "config" / "version.py"
-        namespace: dict[str, str] = {}
-        exec(version_file.read_text(encoding="utf-8"), namespace)
-        return namespace["__version__"]
+    def _version_from_msi(self, msi_package_path: Path) -> str:
+        match = re.search(r"Subsearch-(.+)-win64\.msi", msi_package_path.name)
+        return match.group(1) if match else "unknown"
 
     def test_msi_package(self, name: str, msi_package_path: Path) -> None:
         installer_action = {"install": "/i", "uninstall": "/x"}[name]
-        print(f"MSI Package is {name}ing Subsearch {self._installed_version()}")
+        print(f"MSI Package is {name}ing Subsearch {self._version_from_msi(msi_package_path)}")
         subprocess.run(["msiexec.exe", installer_action, str(msi_package_path), "/norestart", "/quiet"], check=True)
         print(f"{name.capitalize()} completed")
 
