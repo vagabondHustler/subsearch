@@ -31,6 +31,7 @@ LOG_LOG_PATH = HOME_PATH / "AppData" / "Local" / "Subsearch" / "log.log"
 CONFIG_TOML_PATH = HOME_PATH / "AppData" / "Local" / "Subsearch" / "config.toml"
 
 CWD_PATH = Path.cwd()
+PYPROJECT_PATH = CWD_PATH / "pyproject.toml"
 ARTIFACTS_PATH = CWD_PATH / "artifacts"
 DIST_PATH = CWD_PATH / "dist"
 EXE_FREEZE_PATH = CWD_PATH / "build" / f"exe.win-amd64-{sys.version_info[0]}.{sys.version_info[1]}" / EXE_NAME
@@ -57,9 +58,6 @@ def msi_freeze_path() -> Path:
 
 
 class StepSummary:
-    """Append GitHub Actions step-summary cards: titled sections with a status,
-    rendered as markdown that GitHub displays at the top of each job."""
-
     CHECK, CROSS = ":heavy_check_mark:", ":x:"
 
     def set_output(self, name: str, value: str) -> None:
@@ -85,8 +83,8 @@ class StepSummary:
         for label, value in items:
             self.add_summary(f"- **{label}:** {value}")
 
-    def emoji(self, flag: bool) -> str:
-        return self.CHECK if flag else self.CROSS
+    def emoji(self, condition: bool) -> str:
+        return self.CHECK if condition else self.CROSS
 
 
 class Git:
@@ -118,8 +116,8 @@ class Commitizen:
     _TAG_TO_CREATE_PREFIX = "tag to create:"
 
     def current_version(self) -> str:
-        completed = subprocess.run([*self._COMMAND, "version", "--project"], check=True, capture_output=True, text=True)
-        return completed.stdout.strip()
+        result = subprocess.run([*self._COMMAND, "version", "--project"], check=True, capture_output=True, text=True)
+        return result.stdout.strip()
 
     def bump_version(self) -> None:
         # cz bump exits non-zero with NoneIncrementError when no commits warrant a
@@ -128,10 +126,10 @@ class Commitizen:
         subprocess.run([*self._COMMAND, "bump", "--yes"])
 
     def predicted_next_version(self) -> str | None:
-        completed = subprocess.run([*self._COMMAND, "bump", "--dry-run", "--yes"], capture_output=True, text=True)
-        if completed.returncode != 0:
+        result = subprocess.run([*self._COMMAND, "bump", "--dry-run", "--yes"], capture_output=True, text=True)
+        if result.returncode != 0:
             return None
-        for line in completed.stdout.splitlines():
+        for line in result.stdout.splitlines():
             if line.strip().startswith(self._TAG_TO_CREATE_PREFIX):
                 return line.split(self._TAG_TO_CREATE_PREFIX, 1)[1].strip()
         return None
@@ -167,22 +165,22 @@ class Changelog:
         exe_name: str,
         exe_hash: str,
     ) -> None:
-        msi_analysis = self.virustotal_link(msi_name, msi_hash)
-        exe_analysis = self.virustotal_link(exe_name, exe_hash)
-        changelog_comparison = self.compare_link(previous_tag, current_tag)
+        msi_virustotal_link = self.virustotal_link(msi_name, msi_hash)
+        exe_virustotal_link = self.virustotal_link(exe_name, exe_hash)
+        comparison_link = self.compare_link(previous_tag, current_tag)
 
         self._step_summary.card(f"Release {current_tag}")
         self._step_summary.fields(
             [
-                ("MSI", msi_analysis),
-                ("Exe", exe_analysis),
-                ("Changelog", changelog_comparison),
+                ("MSI", msi_virustotal_link),
+                ("Exe", exe_virustotal_link),
+                ("Changelog", comparison_link),
             ]
         )
 
         footer = (
-            f"###### VirusTotal: {msi_analysis}<p>VirusTotal: {exe_analysis}"
-            f"<p>Full changelog: {changelog_comparison}"
+            f"###### VirusTotal: {msi_virustotal_link}<p>VirusTotal: {exe_virustotal_link}"
+            f"<p>Full changelog: {comparison_link}"
         )
         with open(ARTIFACTS_PATH / CHANGELOG_NAME, "a") as changelog_file:
             changelog_file.write(footer)
@@ -223,16 +221,14 @@ def registry_key_exists() -> bool:
     import winreg  # Windows-only; imported lazily so this module loads on the Linux CI runner.
 
     try:
-        with winreg.ConnectRegistry(socket.gethostname(), winreg.HKEY_CURRENT_USER) as hkey:
-            winreg.OpenKey(hkey, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_WRITE)
+        with winreg.ConnectRegistry(socket.gethostname(), winreg.HKEY_CURRENT_USER) as registry_root:
+            winreg.OpenKey(registry_root, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_WRITE)
             return True
     except FileNotFoundError:
         return False
 
 
 class BinaryTester:
-    """Install, run, and uninstall the built binary to prove it works end to end."""
-
     def msi_artifact_path(self) -> Path:
         candidates = sorted(ARTIFACTS_PATH.glob("*.msi"))
         if not candidates:
@@ -352,8 +348,6 @@ class BinaryTester:
 
 
 class BinaryTestReport:
-    """Render the per-stage install/run/uninstall results as a step-summary card per stage."""
-
     _PROBES = ("Exe", "Log", "Config", "Registry key")
 
     # Per stage, the expected presence of (exe, log, config, registry key).
@@ -375,8 +369,8 @@ class BinaryTestReport:
         passed = actual == expected
 
         rows = [
-            (probe, self._step_summary.emoji(is_present), self._step_summary.emoji(should_exist))
-            for probe, is_present, should_exist in zip(self._PROBES, actual, expected)
+            (probe, self._step_summary.emoji(probe_found), self._step_summary.emoji(probe_expected))
+            for probe, probe_found, probe_expected in zip(self._PROBES, actual, expected)
         ]
         self._step_summary.card(f"{name.capitalize()} test", passed=passed)
         self._step_summary.table(("Probe", "Found", "Expected"), rows)
@@ -388,26 +382,23 @@ class BinaryTestReport:
             raise RuntimeError(f"{name} test failed")
 
     def _log_stage(self, name: str, actual: tuple[bool, bool, bool, bool], passed: bool) -> None:
-        print("")
         print(", ".join(f"{probe}: {present}" for probe, present in zip(self._PROBES, actual)))
         print(f"{name.capitalize()} test {'passed' if passed else 'failed'}")
         print(STYLE_SEPARATOR)
 
 
 class ArtifactHasher:
-    """Collect the frozen msi/exe into ./artifacts and record their sha256 hashes."""
-
     def __init__(self, step_summary: StepSummary) -> None:
         self._step_summary = step_summary
 
     def calculate_sha256(self, file_path: Path) -> str:
         if not file_path.is_file():
             raise FileNotFoundError(f"No file found at {file_path}")
-        sha256_hash = hashlib.sha256()
+        hasher = hashlib.sha256()
         with open(file_path, "rb") as file:
-            for byte_block in iter(lambda: file.read(4096), b""):
-                sha256_hash.update(byte_block)
-        return sha256_hash.hexdigest()
+            for chunk in iter(lambda: file.read(4096), b""):
+                hasher.update(chunk)
+        return hasher.hexdigest()
 
     def prepare_build_artifacts(self) -> None:
         print("Collecting files")
@@ -439,18 +430,37 @@ class ArtifactHasher:
 
 
 class Build:
-    """Freeze the app into an exe and package it as a Windows msi via cx_Freeze."""
+    _PACKAGES_TO_INCLUDE = [
+        "curl_cffi",
+        "imdbinfo",
+        "num2words",
+        "packaging",
+        "PySide6",
+        "qfluentwidgets",
+        "requests",
+        "selectolax",
+        "toml",
+        "urllib3_future",
+        "qh3",
+        "jh2",
+        "wassima",
+        "cryptography",
+    ]
 
-    _LIBS_TO_EXCLUDE = [
-        "lib2to3",
-        "multiprocessing",
-        "distutils",
-        "tcl8",
-        "test",
+    _PACKAGES_TO_EXCLUDE = [
+        "tkinter",
         "unittest",
-        "xml",
+        "test",
+        "pydoc_data",
+        "lib2to3",
+        "distutils",
+        "setuptools",
+        "pip",
+        "email",
+        "html",
         "xmlrpc",
-        "chardet",
+        "sqlite3",
+        "curses",
     ]
 
     def _data_table(self) -> dict:
@@ -489,13 +499,39 @@ class Build:
             "launch_on_finish": True,
         }
         license_files = [("LICENSE", "LICENSE"), ("THIRD-PARTY-LICENSES.md", "THIRD-PARTY-LICENSES.md")]
-        build_exe = {"excludes": [*self._LIBS_TO_EXCLUDE], "include_files": license_files}
+        build_exe = {
+            "include_files": license_files + self._selectolax_extension_files(),
+            "packages": self._PACKAGES_TO_INCLUDE,
+            "excludes": self._PACKAGES_TO_EXCLUDE,
+        }
         return {"build_exe": build_exe, "bdist_msi": bdist_msi}
+
+    def _selectolax_extension_files(self) -> list:
+        # selectolax ships compiled lexbor/parser extensions next to .pxi-only lexbor/ and
+        # modest/ directories. cx_Freeze's finder treats those directories as the modules and
+        # drops the .pyd files, so `from . import lexbor, modest, parser` fails at runtime.
+        # Copy the compiled extensions in explicitly so the frozen lib/selectolax/ matches.
+        import selectolax
+
+        package_directory = Path(selectolax.__file__).parent
+        return [
+            (str(extension), f"lib/selectolax/{extension.name}")
+            for extension in package_directory.glob("*.pyd")
+        ]
 
     def make_msi(self) -> None:
         # cx_Freeze's setup() reads the command from sys.argv, so set it explicitly
         # rather than depending on how this script was invoked.
         from cx_Freeze import setup
 
+        print(f"Freezing {APP_NAME} into an exe and packaging it as a Windows msi")
+        print(f"Including {len(self._PACKAGES_TO_INCLUDE)} packages, excluding {len(self._PACKAGES_TO_EXCLUDE)}")
+
         sys.argv = [sys.argv[0], "bdist_msi"]
         setup(options=self._options(), executables=self._executables())
+
+        frozen_msi = msi_freeze_path()
+        frozen_exe = EXE_FREEZE_PATH
+        print(f"Created exe at {frozen_exe.as_posix()}")
+        print(f"Created msi at {frozen_msi.as_posix()}")
+        print(STYLE_SEPARATOR)
