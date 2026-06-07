@@ -80,17 +80,10 @@ class OpenSubtitles(OpenSubtitlesScraper):
         OpenSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
+    def _do_search(self) -> ProviderHealth:
+        hash_health = self.with_hash(self.url_opensubtitles_hash, self.release)
+        site_health = self.get_subtitles(self.url_opensubtitles)
+        return combine_provider_health(hash_health, site_health)
+
     def start_search(self, *args, **kwargs) -> None:
-        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        try:
-            hash_health = self.with_hash(self.url_opensubtitles_hash, self.release)
-            site_health = self.get_subtitles(self.url_opensubtitles)
-        except Exception as error:
-            log.error(f"{self.provider_name} response was unrecognized: {error}")
-            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
-            return None
-        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        self.report_health(
-            combine_provider_health(hash_health, site_health),
-            subtitles_after - subtitles_before,
-        )
+        self.run_search(self._do_search)

@@ -50,17 +50,7 @@ class Subsource(provider_helper.ProviderHelper):
             log.warning(f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.")
             self.report_health(ProviderHealth.NO_RESPONSE, 0)
             raise MissingApiKey(self.provider_name)
-
-        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        try:
-            health = self._search_and_collect()
-        except Exception as error:
-            log.error(f"{self.provider_name} response was unrecognized: {error}")
-            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
-            return None
-        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        self.log_provider_skips()
-        self.report_health(health, subtitles_after - subtitles_before)
+        self.run_search(self._search_and_collect)
 
     def _search_and_collect(self) -> ProviderHealth:
         api = SubsourceApi(self.api_key)
@@ -113,7 +103,7 @@ class Subsource(provider_helper.ProviderHelper):
 
     def _skip_movie(self, movie: dict[str, Any]) -> bool:
         keys = ["movieId", "type", "title"]
-        if not self.keys_exsist(movie, keys):
+        if not self.keys_exist(movie, keys):
             return True
         if movie["title"].lower() != self.title:
             return True
@@ -123,7 +113,7 @@ class Subsource(provider_helper.ProviderHelper):
 
     def _skip_reason(self, subtitle: dict[str, Any]) -> str:
         keys = ["subtitleId", "releaseInfo", "language", "hearingImpaired"]
-        if not self.keys_exsist(subtitle, keys):
+        if not self.keys_exist(subtitle, keys):
             return "malformed"
         if not self.subtitle_hi_match(subtitle["hearingImpaired"]):
             return "hi"

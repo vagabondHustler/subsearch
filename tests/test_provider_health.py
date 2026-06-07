@@ -81,13 +81,13 @@ def test_opensubtitles_valid_rss_is_ok() -> None:
 
 
 def test_yifysubtitles_well_formed_with_table() -> None:
-    scraper = yifysubtitles.YifiSubtitles(**_search_kwargs())
+    scraper = yifysubtitles.YifySubtitles(**_search_kwargs())
     tree = HTMLParser("<html><table><tr></tr></table></html>")
     assert scraper.response_is_well_formed(tree) is True
 
 
 def test_yifysubtitles_missing_table_is_structure_invalid() -> None:
-    scraper = yifysubtitles.YifiSubtitles(**_search_kwargs())
+    scraper = yifysubtitles.YifySubtitles(**_search_kwargs())
     tree = HTMLParser("<html><body>redesigned page</body></html>")
     assert scraper.response_is_well_formed(tree) is False
 

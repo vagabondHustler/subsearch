@@ -4,7 +4,6 @@ from selectolax.lexbor import LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import ProviderHealth
 
 
@@ -55,19 +54,10 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         return ""
 
 
-class YifiSubtitles(YifySubtitlesScraper):
+class YifySubtitles(YifySubtitlesScraper):
     def __init__(self, *args, **kwargs) -> None:
         YifySubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
     def start_search(self, *args, **kwargs) -> None:
-        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        try:
-            health = self.get_subtitles()
-        except Exception as error:
-            log.error(f"{self.provider_name} response was unrecognized: {error}")
-            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
-            return None
-        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
-        self.log_provider_skips()
-        self.report_health(health, subtitles_after - subtitles_before)
+        self.run_search(self.get_subtitles)

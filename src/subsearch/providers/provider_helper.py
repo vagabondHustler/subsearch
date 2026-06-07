@@ -1,4 +1,5 @@
 import threading
+from collections.abc import Callable
 from typing import Any
 
 from subsearch.parsing import release_parser
@@ -38,7 +39,6 @@ class ProviderDataContainer:
         self.provider_urls = provider_urls
         self.language_data = language_data
 
-        # file parameters
         self.title = release_data.title
         self.year = release_data.year
         self.season = release_data.season
@@ -50,7 +50,6 @@ class ProviderDataContainer:
         self.group = release_data.group
         self.imdb_id = release_data.imdb_id
 
-        # user parameters
         self.current_language = app_config.selected_language
         self.hearing_impaired = app_config.hearing_impaired
         self.non_hearing_impaired = app_config.non_hearing_impaired
@@ -60,7 +59,7 @@ class ProviderDataContainer:
         self.request_connect_timeout = app_config.request_connect_timeout
         self.request_read_timeout = app_config.request_read_timeout
         self.request_timeout = (self.request_connect_timeout, self.request_read_timeout)
-        # provider url data
+
         self.url_opensubtitles = provider_urls.opensubtitles
         self.url_opensubtitles_hash = provider_urls.opensubtitles_hash
         self.url_yifysubtitles = provider_urls.yifysubtitles
@@ -90,10 +89,10 @@ class ProviderDataContainer:
         return season_episode_pattern_0 + season_episode_pattern_1
 
 
-class _PrepareSubtitleDownload:
-    accepted_subtitles: list[Subtitle] = []
-    rejected_subtitles: list[Subtitle] = []
-    filtered_subtitles: list[Subtitle] = []
+class SubtitleCollector:
+    _shared_accepted: list[Subtitle] = []
+    _shared_rejected: list[Subtitle] = []
+    _shared_filtered: list[Subtitle] = []
 
     def __init__(self, master: "ProviderHelper", *args, **kwargs) -> None:
         self.provider_name = master.provider_name
@@ -110,9 +109,9 @@ class _PrepareSubtitleDownload:
     def _subtitle(self) -> Subtitle:
         self.subtitle_name = self._sanitize_filename(self.subtitle_name)
         if self.download_url:
-            subtitle = self._get_subtitle_no_request_data()
+            subtitle = self._build_subtitle_from_url()
         elif self.request_data:
-            subtitle = self._get_subtitle_with_download_url()
+            subtitle = self._build_subtitle_from_request_data()
         else:
             raise Exception("Subtitle not corectlly populated")
         return subtitle
@@ -127,8 +126,8 @@ class _PrepareSubtitleDownload:
             log.info(f"Filename sanitized: {original!r} -> {filename!r}")
         return filename
 
-    def _get_subtitle_no_request_data(self) -> Subtitle:
-        subtitle = Subtitle(
+    def _build_subtitle_from_url(self) -> Subtitle:
+        return Subtitle(
             percentage_result=self.percentage_result,
             provider_name=self.provider_name,
             subtitle_name=self.subtitle_name.lower(),
@@ -137,10 +136,9 @@ class _PrepareSubtitleDownload:
             download_headers=self.download_headers,
             status=self._status,
         )
-        return subtitle
 
-    def _get_subtitle_with_download_url(self) -> Subtitle:
-        subtitle = Subtitle(
+    def _build_subtitle_from_request_data(self) -> Subtitle:
+        return Subtitle(
             percentage_result=self.percentage_result,
             provider_name=self.provider_name,
             subtitle_name=self.subtitle_name.lower(),
@@ -148,7 +146,6 @@ class _PrepareSubtitleDownload:
             request_data=self.request_data,
             status=self._status,
         )
-        return subtitle
 
     @property
     def _status(self) -> SubtitleStatus:
@@ -172,7 +169,7 @@ class _PrepareSubtitleDownload:
                 percentage=self.percentage_result,
                 threshold=self.accept_threshold,
             )
-            return _PrepareSubtitleDownload.accepted_subtitles.append(self._subtitle)
+            return SubtitleCollector._shared_accepted.append(self._subtitle)
         log.event(
             "subtitle_rejected",
             provider=self.provider_name,
@@ -180,7 +177,7 @@ class _PrepareSubtitleDownload:
             percentage=self.percentage_result,
             threshold=self.accept_threshold,
         )
-        return _PrepareSubtitleDownload.rejected_subtitles.append(self._subtitle)
+        return SubtitleCollector._shared_rejected.append(self._subtitle)
 
 
 class ProviderHelper(ProviderDataContainer):
@@ -206,7 +203,7 @@ class ProviderHelper(ProviderDataContainer):
         breakdown = ", ".join(f"{reason}: {count}" for reason, count in self.skip_counts.items())
         log.event("provider_skips", provider=self.provider_name, total=total, breakdown=breakdown)
 
-    def _set_subtitle_cls_vars(self, *args, **kwargs) -> None:
+    def _set_subtitle_state(self, *args, **kwargs) -> None:
         self.provider_name = args[0]
         self.subtitle_name = args[1]
         self.download_url = args[2]
@@ -216,17 +213,17 @@ class ProviderHelper(ProviderDataContainer):
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
         with _thread_lock:
-            return _PrepareSubtitleDownload.accepted_subtitles
+            return SubtitleCollector._shared_accepted
 
     @property
     def rejected_subtitles(self) -> list[Subtitle]:
         with _thread_lock:
-            return _PrepareSubtitleDownload.rejected_subtitles
+            return SubtitleCollector._shared_rejected
 
     @property
     def filtered_subtitles(self) -> list[Subtitle]:
         with _thread_lock:
-            return _PrepareSubtitleDownload.filtered_subtitles
+            return SubtitleCollector._shared_filtered
 
     def record_filtered_out(self, provider_name: str, subtitle_name: str, reason: str) -> None:
         with _thread_lock:
@@ -238,7 +235,7 @@ class ProviderHelper(ProviderDataContainer):
                 request_data={},
                 status=SubtitleStatus.FILTERED_OUT,
             )
-            _PrepareSubtitleDownload.filtered_subtitles.append(subtitle)
+            SubtitleCollector._shared_filtered.append(subtitle)
             self.skip_counts[reason] = self.skip_counts.get(reason, 0) + 1
 
     def prepare_subtitle(
@@ -250,11 +247,26 @@ class ProviderHelper(ProviderDataContainer):
         download_headers: dict[str, str] | None = None,
     ) -> None:
         with _thread_lock:
-            self._set_subtitle_cls_vars(
+            self._set_subtitle_state(
                 provider_name, subtitle_name, download_url, request_data, download_headers=download_headers or {}
             )
-            prepare = _PrepareSubtitleDownload(self)
-            prepare.prepare_subtitle()
+            collector = SubtitleCollector(self)
+            collector.prepare_subtitle()
+
+    def start_search(self, *args, **kwargs) -> None:
+        raise NotImplementedError
+
+    def run_search(self, search_fn: Callable[[], ProviderHealth]) -> None:
+        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        try:
+            health = search_fn()
+        except Exception as error:
+            log.error(f"{self.provider_name} response was unrecognized: {error}")
+            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
+            return
+        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        self.log_provider_skips()
+        self.report_health(health, subtitles_after - subtitles_before)
 
     def subtitle_hi_match(self, hi: bool) -> bool:
         if self.hearing_impaired and self.non_hearing_impaired:
@@ -270,7 +282,7 @@ class ProviderHelper(ProviderDataContainer):
             return False
         return True
 
-    def keys_exsist(self, dict_: dict[str, Any], keys: list[str]) -> bool:
+    def keys_exist(self, dict_: dict[str, Any], keys: list[str]) -> bool:
         for key in keys:
             if key not in dict_:
                 return False

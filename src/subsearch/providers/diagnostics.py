@@ -12,7 +12,7 @@ KNOWN_GOOD_RELEASE = "The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv"
 
 PROVIDER_CLASSES = {
     "opensubtitles": opensubtitles.OpenSubtitles,
-    "yifisubtitles": yifysubtitles.YifiSubtitles,
+    "yifysubtitles": yifysubtitles.YifySubtitles,
     "subsource": subsource.Subsource,
 }
 
