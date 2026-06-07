@@ -1,0 +1,10 @@
+name: Install commitizen
+description: Install commitizen and the package in editable mode
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        python -m pip install --upgrade pip commitizen
+        python -m pip install -e . --no-deps
+      shell: pwsh

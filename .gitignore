@@ -180,3 +180,4 @@ mock_download_manager.py
 CLAUDE.md
 memory/**
 .claude/**
+.github/workflows/release_v2.yml
