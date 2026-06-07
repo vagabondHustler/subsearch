@@ -14,33 +14,35 @@ from subsearch.io import toml_file
 from subsearch.io.toml_file import diagnostics_enabled
 
 
-class LaunchOptions:
-    def __init__(self) -> None:
-        self.show_terminal = toml_file.load_toml_value(FILE_PATHS.config, "application.show_terminal")
-        self.python_path = Path(sys.executable).parent
-        self.console_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
-        self.working_directory = f"import os; os.chdir(r'{APP_PATHS.home}');"
-        self.import_subsearch = "import subsearch; subsearch.main()"
+class PythonExecutable:
+    def __init__(self, show_terminal: bool) -> None:
+        python_dir = Path(sys.executable).parent
+        self.path = python_dir / ("python.exe" if show_terminal else "pythonw.exe")
 
-    def _get_mode_executable(self) -> str:
+
+class RegistryLaunchCommand:
+    def __init__(self) -> None:
+        show_terminal = toml_file.load_toml_value(FILE_PATHS.config, "application.show_terminal")
+        self._mode = DEVICE_INFO.mode
+        self._python_executable = PythonExecutable(show_terminal)
+
+    def _executable_mode_command(self) -> str:
         return f'"{sys.argv[0]}" "%1"'
 
-    def _get_mode_interpreter(self) -> str:
-        python_executable = {
-            True: f'{self.python_path}\\python.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
-            False: f'{self.python_path}\\pythonw.exe -c "{self.console_title} {self.working_directory} {self.import_subsearch}" "%1"',
-        }
-        return python_executable[self.show_terminal]
+    def _interpreter_mode_command(self) -> str:
+        console_title = "import ctypes; ctypes.windll.kernel32.SetConsoleTitleW('subsearch');"
+        working_directory = f"import os; os.chdir(r'{APP_PATHS.home}');"
+        import_subsearch = "import subsearch; subsearch.main()"
+        return f'{self._python_executable.path} -c "{console_title} {working_directory} {import_subsearch}" "%1"'
 
-    def get_parameter(self) -> str:
-        if DEVICE_INFO.mode == "executable":
-            return self._get_mode_executable()
-        return self._get_mode_interpreter()
+    def build(self) -> str:
+        if self._mode == "executable":
+            return self._executable_mode_command()
+        return self._interpreter_mode_command()
 
 
 def get_command_value() -> str:
-    launch_options = LaunchOptions()
-    return launch_options.get_parameter()
+    return RegistryLaunchCommand().build()
 
 
 def get_icon_value() -> str:
@@ -52,15 +54,9 @@ def get_icon_value() -> str:
 
 
 def get_appliesto_value() -> str:
-    file_ext = toml_file.load_toml_value(FILE_PATHS.config, "shell_integration.file_extensions")
-    value = ""
-    for ext, v in zip(file_ext.keys(), file_ext.values()):
-        if v is True:
-            value += "".join(f'".{ext}" OR ')
-    if value.endswith(" OR "):  # remove last OR
-        value = value[:-4]
-
-    return value
+    file_extensions = toml_file.load_toml_value(FILE_PATHS.config, "shell_integration.file_extensions")
+    enabled_extensions = [f'".{ext}"' for ext, enabled in file_extensions.items() if enabled]
+    return " OR ".join(enabled_extensions)
 
 
 def del_registry_key(reg_path: str, key: str) -> None:
@@ -92,7 +88,7 @@ def write_keys() -> None:
                 winreg.CreateKey(sk, sub_key)
 
 
-def set_write_valuex(sub_key: str, value_name: str, value: str) -> None:
+def write_registry_value(sub_key: str, value_name: str, value: str) -> None:
     try:
         if diagnostics_enabled():
             log.debug(f"Setting registry value: {sub_key} [{value_name or '(default)'}] = {value!r}")
@@ -103,7 +99,7 @@ def set_write_valuex(sub_key: str, value_name: str, value: str) -> None:
         pass
 
 
-def write_valuex(key: str) -> None:
+def write_registry_value_by_key(key: str) -> None:
     key_map = {
         "subsearch": {"key_type": REGISTRY_PATHS.subsearch, "value_name": "", "value": "Subsearch"},
         "icon": {"key_type": REGISTRY_PATHS.subsearch, "value_name": "Icon", "value": get_icon_value()},
@@ -116,19 +112,19 @@ def write_valuex(key: str) -> None:
         key_type = key_map[key]["key_type"]
         value_name = key_map[key]["value_name"]
         value = key_map[key]["value"]
-        set_write_valuex(key_type, value_name, value)
+        write_registry_value(key_type, value_name, value)
 
 
-def write_all_valuex() -> None:
+def write_all_registry_values() -> None:
     items = ["subsearch", "icon", "appliesto", "command"]
-    for i in items:
-        write_valuex(i)
+    for item in items:
+        write_registry_value_by_key(item)
 
 
 def add_context_menu() -> None:
     log.info("Adding Subsearch context menu to registry")
     write_keys()
-    write_all_valuex()
+    write_all_registry_values()
 
 
 def check_long_paths_enabled() -> bool:

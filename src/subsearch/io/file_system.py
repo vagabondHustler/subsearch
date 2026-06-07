@@ -38,11 +38,11 @@ def create_path_from_string(string: str, path_resolution: str, create_missing_fo
     return path
 
 
-ZIP_MAGIC_BYTES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
+_ZIP_MAGIC_BYTES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
 
 
 def is_zip_payload(chunk: bytes) -> bool:
-    return chunk.startswith(ZIP_MAGIC_BYTES)
+    return chunk.startswith(_ZIP_MAGIC_BYTES)
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
@@ -93,18 +93,25 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
             log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
 
-def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
+def find_best_subtitle_match(release_name: str, extension: str = ".srt") -> Path:
     best_match = (0, Path("."))
     for file in VIDEO_FILE.subs_dir.glob(f"*{extension}"):
         value = release_parser.calculate_match(file.name, release_name)
         if value >= best_match[0]:
             best_match = value, file
+    return best_match[1]
 
-    old_file_path = best_match[1]
-    new_file_path = old_file_path.with_name(f"{release_name}{extension}")
-    log.event("rename", src=old_file_path, dst=new_file_path)
-    old_file_path.rename(new_file_path)
+
+def rename_subtitle_to_release(file_path: Path, release_name: str, extension: str = ".srt") -> Path:
+    new_file_path = file_path.with_name(f"{release_name}{extension}")
+    log.event("rename", src=file_path, dst=new_file_path)
+    file_path.rename(new_file_path)
     return new_file_path
+
+
+def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
+    matched_file = find_best_subtitle_match(release_name, extension)
+    return rename_subtitle_to_release(matched_file, release_name, extension)
 
 
 def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
@@ -120,8 +127,7 @@ def move_and_replace(source_file: Path, destination_directory: Path) -> None:
 def del_file_type(cwd: Path, extension: str) -> None:
     for file in Path(cwd).glob(f"*{extension}"):
         log.event("remove", src=file)
-        file_path = Path(cwd) / file
-        file_path.unlink()
+        file.unlink()
 
 
 def del_directory(directory: Path) -> None:
@@ -153,7 +159,7 @@ def create_directory(path: Path) -> None:
 
 def get_file_hash(file_path: Path) -> str:
     log.debug("Calculating hash of video file")
-    if not file_path:
+    if not file_path.exists():
         return ""
 
     hash_algorithm = MPCHashAlgorithm(file_path)

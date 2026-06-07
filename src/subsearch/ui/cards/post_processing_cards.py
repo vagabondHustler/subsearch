@@ -189,7 +189,7 @@ class FileExtensionsCard(SettingsCard):
         file_extensions[extension] = checked
         write_value("shell_integration.file_extensions", file_extensions)
         if read_value("shell_integration.context_menu"):
-            windows_registry.write_all_valuex()
+            windows_registry.write_all_registry_values()
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
@@ -218,7 +218,7 @@ class ShellIntegrationCard(SettingsCard):
 
     def _on_context_menu_icon_toggled(self) -> None:
         if read_value("shell_integration.context_menu"):
-            windows_registry.write_all_valuex()
+            windows_registry.write_all_registry_values()
 
     def _apply_context_menu_state(self, enabled: bool) -> None:
         self.context_menu_icon.set_enabled(enabled)

@@ -13,6 +13,8 @@ from subsearch.runtime.config.constants import APP_PATHS, VERSION
 from subsearch.io import file_system
 from subsearch.io.http import get_session
 
+_VERSION_PATTERN = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'
+
 REPOSITORY = "vagabondHustler/subsearch"
 LATEST_VERSION_SOURCE = f"https://raw.githubusercontent.com/{REPOSITORY}/main/src/subsearch/runtime/version.py"
 RELEASE_API = f"https://api.github.com/repos/{REPOSITORY}/releases/tags"
@@ -51,9 +53,7 @@ def fetch_latest_version() -> str:
 
 
 def parse_version(version_source: str) -> str:
-    # semantic expression https://regex101.com/r/M4qItH/
-    pattern = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'
-    matches = re.findall(pattern, version_source)
+    matches = re.findall(_VERSION_PATTERN, version_source)
     if not matches:
         raise VersionUnavailable("Could not find a version in the latest release source")
     return "".join(matches[0])
