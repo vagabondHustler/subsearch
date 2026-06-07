@@ -1,4 +1,4 @@
-from subsearch.runtime.constants import FILE_PATHS
+from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from tests import fixture_data

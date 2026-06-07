@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from subsearch.runtime import factories
+from subsearch.runtime.config import factories
 
 
 def test_app_paths() -> None:

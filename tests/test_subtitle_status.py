@@ -2,8 +2,8 @@ from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers import provider_helper
 from subsearch.providers.provider_helper import _PrepareSubtitleDownload
-from subsearch.runtime.constants import FILE_PATHS
-from subsearch.runtime.model import Subtitle, SubtitleStatus
+from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.models.model import Subtitle, SubtitleStatus
 from tests import fixture_data
 
 

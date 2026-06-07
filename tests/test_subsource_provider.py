@@ -3,9 +3,9 @@ import pytest
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers.subsource import API_BASE_URL, Subsource, SubsourceApi
-from subsearch.runtime.constants import FILE_PATHS
-from subsearch.runtime.exceptions import MissingApiKey
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.models.model import ProviderHealth
 from tests import fixture_data
 
 

@@ -1,7 +1,7 @@
 import toml
 
 from subsearch.io import toml_file
-from subsearch.runtime import constants, factories
+from subsearch.runtime.config import constants, factories
 
 
 def write_config(path, data):

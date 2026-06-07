@@ -3,7 +3,7 @@ import pytest
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.io import toml_file
 from subsearch.io.toml_file import AppConfig
-from subsearch.runtime.constants import FILE_PATHS
+from subsearch.runtime.config.constants import FILE_PATHS
 
 
 class MinimalBootstrap:

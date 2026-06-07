@@ -1,7 +1,7 @@
 import threading
 import time
 
-from subsearch.runtime import parallel_tasks
+from subsearch.runtime.config import parallel_tasks
 
 
 def test_runs_every_task() -> None:

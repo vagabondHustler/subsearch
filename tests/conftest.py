@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 import toml
 
-from subsearch.runtime import constants
-from subsearch.runtime import factories
+from subsearch.runtime.config import constants
+from subsearch.runtime.config import factories
 
 
 @pytest.fixture(scope="session")

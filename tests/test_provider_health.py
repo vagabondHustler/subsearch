@@ -1,8 +1,8 @@
 from selectolax.parser import HTMLParser
 
-from subsearch.runtime.constants import FILE_PATHS
-from subsearch.runtime.factories import get_default_app_config
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config.factories import get_default_app_config
+from subsearch.runtime.models.model import ProviderHealth
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers import opensubtitles, yifysubtitles

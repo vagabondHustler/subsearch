@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from subsearch.runtime.model import ProviderUrls, VideoFile
+from subsearch.runtime.models.model import ProviderUrls, VideoFile
 
 FAKE_VIDEO_FILE_MOVIE = VideoFile(
     file_exists=True,
