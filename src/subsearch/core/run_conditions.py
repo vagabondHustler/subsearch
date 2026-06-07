@@ -49,7 +49,7 @@ class RunConditions:
     def all_conditions_true(self, conditions: "list[bool | Callable[[], bool]]") -> bool:
         return all(condition() if callable(condition) else condition for condition in conditions)
 
-    def conditions_met(self, func_name: str) -> bool:
+    def conditions_met(self, pipeline_step: str) -> bool:
         self.sync_state()
         post_processing = self.app_config.post_processing
         conditions: dict[str, list[bool | Callable[[], bool]]] = {
@@ -98,4 +98,4 @@ class RunConditions:
             "clean_up": [self.file_exists],
         }
 
-        return self.all_conditions_true(conditions[func_name])
+        return self.all_conditions_true(conditions[pipeline_step])
