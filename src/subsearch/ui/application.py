@@ -16,7 +16,7 @@ from subsearch.io import toml_file
 from subsearch.runtime.config.constants import APP_PATHS
 from subsearch.runtime.models.model import Subtitle
 from subsearch.ui import warmup
-from subsearch.ui.cards.cards import (
+from subsearch.ui.cards import (
     ApiCard,
     ApplicationCard,
     DownloadManagerCard,
@@ -37,11 +37,9 @@ from subsearch.ui.cards.download_manager import DownloadManagerInterface
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.navigation import NAVIGATION_ITEM_HEIGHT, enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
-from subsearch.ui.theme.theme_patch import force_fixed_accent_color
-from subsearch.ui.theme.typography import apply_body_font
+from subsearch.ui.theme.theme_patch import ACCENT_COLOR, force_fixed_accent_color
+from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
-TEXT_COLOR = "#c8c8c7"
-ACCENT_COLOR = "#c8c8c7"
 NAVIGATION_EXPAND_WIDTH = 242
 NAVIGATION_TOP_MARGIN = 8
 

@@ -1,0 +1,225 @@
+from pathlib import Path
+
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtWidgets import QFileDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
+from qfluentwidgets import CaptionLabel, CheckBox, LineEdit, MessageBox, TransparentToolButton
+
+from subsearch.io import windows_registry
+from subsearch.parsing import release_parser
+from subsearch.ui.cards.base import SettingsCard, build_section_header
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_caption_font
+from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow, read_value, write_value
+
+EXTENSION_GRID_ROWS = 3
+
+DEFAULT_TARGET_PATH = "."
+DEFAULT_PATH_RESOLUTION = "relative"
+DESTINATION_PATH_EXAMPLES = (
+    "Where moved subtitles are placed.\n\n"
+    "Relative — taken from the video's own folder:\n"
+    "    subs\n"
+    "    ..\\Subtitles\n\n"
+    "Absolute — a fixed path on disk:\n"
+    "    C:\\Users\\You\\Subtitles\n"
+    "    D:\\Media\\Subs"
+)
+
+
+class PostProcessingCard(SettingsCard):
+    mutually_exclusive_keys = {"post_processing.move_best", "post_processing.move_all"}
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__("Subtitle post-processing", parent)
+        self.add_row(SwitchRow("post_processing.rename"))
+        self.move_best = SwitchRow("post_processing.move_best")
+        self.move_all = SwitchRow("post_processing.move_all")
+        self.add_row(self.move_best)
+        self.add_row(self.move_all)
+        self.move_best.toggled.connect(self._on_move_toggled)
+        self.move_all.toggled.connect(self._on_move_toggled)
+
+        self._build_destination()
+        self._update_destination_enabled()
+
+    def _on_move_toggled(self, checked: bool) -> None:
+        toggled_row = self.sender()
+        other_row = self.move_all if toggled_row is self.move_best else self.move_best
+        self._enforce_mutual_exclusivity(other_row, checked)
+        self._update_destination_enabled()
+
+    def _enforce_mutual_exclusivity(self, other_row: SwitchRow, enabled: bool) -> None:
+        if enabled and other_row.switch.isChecked():
+            other_row.set_checked_silently(False)
+
+    def _update_destination_enabled(self) -> None:
+        moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()
+        self.destination.setEnabled(moving_enabled)
+
+    def _build_destination(self) -> None:
+        self.destination = QWidget(self)
+        destination_layout = QVBoxLayout(self.destination)
+        destination_layout.setContentsMargins(0, 0, 0, 0)
+        destination_layout.addLayout(build_section_header("post_processing.target_path", self))
+
+        self.path_edit = LineEdit(self)
+        self.path_edit.setText(str(read_value("post_processing.target_path")))
+        self.path_edit.setClearButtonEnabled(True)
+        apply_body_font(self.path_edit)
+        self.path_edit.textChanged.connect(self._on_path_text_changed)
+        self.path_edit.editingFinished.connect(self._save_path_if_valid)
+        help_button = HelpButton(DESTINATION_PATH_EXAMPLES, self)
+        path_row = QHBoxLayout()
+        path_row.setContentsMargins(16, 0, 16, 10)
+        path_row.addWidget(self.path_edit, stretch=1)
+        path_row.addWidget(self._build_browse_button())
+        path_row.addWidget(help_button)
+        destination_layout.addLayout(path_row)
+
+        destination_layout.addWidget(SwitchRow("post_processing.create_missing_folder", self))
+        self.body_layout.addWidget(self.destination)
+
+    def _build_browse_button(self) -> QWidget:
+        browse_button = TransparentToolButton(lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), self)
+        browse_button.setFixedSize(32, 32)
+        browse_button.setIconSize(QSize(24, 24))
+        browse_button.clicked.connect(self._browse_for_folder)
+        caption = CaptionLabel("Browse", self)
+        apply_caption_font(caption)
+        caption.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        container = QWidget(self)
+        container_layout = QVBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+        container_layout.addWidget(browse_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        container_layout.addWidget(caption)
+        return container
+
+    def _browse_for_folder(self) -> None:
+        selected_folder = QFileDialog.getExistingDirectory(
+            self.window(),
+            "Select destination folder",
+            self.path_edit.text(),
+        )
+        if not selected_folder:
+            return
+        self.path_edit.setText(str(Path(selected_folder)))
+        self._save_path_if_valid()
+
+    def _apply_path_error_style(self, is_error: bool) -> None:
+        self.path_edit.setError(is_error)
+        self.path_edit.setProperty("error", "true" if is_error else "false")
+        self.path_edit.style().unpolish(self.path_edit)
+        self.path_edit.style().polish(self.path_edit)
+
+    def _path_is_valid(self) -> bool:
+        target_path = self.path_edit.text()
+        path_resolution = release_parser.detect_path_resolution(target_path)
+        return release_parser.valid_path(target_path, path_resolution)
+
+    def _persist_path(self) -> None:
+        target_path = self.path_edit.text()
+        path_resolution = release_parser.detect_path_resolution(target_path)
+        self._apply_path_error_style(False)
+        write_value("post_processing.target_path", target_path)
+        write_value("post_processing.path_resolution", path_resolution)
+
+    def _save_path_if_valid(self) -> None:
+        if self._path_is_valid():
+            self._persist_path()
+
+    def commit_path_or_revert(self) -> bool:
+        if self._path_is_valid():
+            self._persist_path()
+            return True
+        return self._prompt_invalid_path_on_exit()
+
+    def _prompt_invalid_path_on_exit(self) -> bool:
+        confirmation = MessageBox(
+            "Destination folder is not valid",
+            f'The destination folder\n\n"{self.path_edit.text()}"\n\nis not valid. '
+            f'Exit anyway and reset it to the default ("{DEFAULT_TARGET_PATH}"), '
+            "or stay and fix it?",
+            self.window(),
+        )
+        confirmation.yesButton.setText("Reset and exit")
+        confirmation.cancelButton.setText("Stay and fix")
+        if not confirmation.exec():
+            return False
+        self.path_edit.setText(DEFAULT_TARGET_PATH)
+        write_value("post_processing.target_path", DEFAULT_TARGET_PATH)
+        write_value("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION)
+        return True
+
+    def _on_path_text_changed(self, target_path: str) -> None:
+        path_resolution = release_parser.detect_path_resolution(target_path)
+        self._apply_path_error_style(not release_parser.valid_path(target_path, path_resolution))
+
+
+class FileExtensionsCard(SettingsCard):
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__("File extensions", parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["shell_integration.file_extensions"].explanation)
+
+        file_extensions = read_value("shell_integration.file_extensions")
+        self.check_boxes: dict[str, CheckBox] = {}
+        grid = QGridLayout()
+        grid.setContentsMargins(48, 0, 48, 10)
+        grid.setHorizontalSpacing(24)
+        grid.setVerticalSpacing(12)
+        column_count = -(-len(file_extensions) // EXTENSION_GRID_ROWS)
+        for column in range(column_count):
+            grid.setColumnStretch(column, 1)
+        for index, (extension, enabled) in enumerate(file_extensions.items()):
+            row = index % EXTENSION_GRID_ROWS
+            column = index // EXTENSION_GRID_ROWS
+            check_box = CheckBox(extension, self)
+            apply_body_font(check_box)
+            check_box.setChecked(bool(enabled))
+            check_box.toggled.connect(lambda checked, ext=extension: self._on_extension_toggled(ext, checked))
+            grid.addWidget(check_box, row, column, alignment=Qt.AlignmentFlag.AlignLeft)
+            self.check_boxes[extension] = check_box
+
+        self.body_layout.addLayout(grid)
+
+    def _on_extension_toggled(self, extension: str, checked: bool) -> None:
+        file_extensions = read_value("shell_integration.file_extensions")
+        file_extensions[extension] = checked
+        write_value("shell_integration.file_extensions", file_extensions)
+        if read_value("shell_integration.context_menu"):
+            windows_registry.write_all_valuex()
+
+    def set_enabled(self, enabled: bool) -> None:
+        for check_box in self.check_boxes.values():
+            check_box.setEnabled(enabled)
+
+
+class ShellIntegrationCard(SettingsCard):
+    def __init__(self, file_extensions_card: FileExtensionsCard, parent: QWidget | None = None) -> None:
+        super().__init__("Shell integration", parent)
+        self.file_extensions_card = file_extensions_card
+
+        self.context_menu = SwitchRow("shell_integration.context_menu")
+        self.context_menu_icon = SwitchRow("shell_integration.context_menu_icon")
+        self.add_row(self.context_menu)
+        self.add_row(self.context_menu_icon)
+        self.context_menu.toggled.connect(self._on_context_menu_toggled)
+        self.context_menu_icon.toggled.connect(self._on_context_menu_icon_toggled)
+        self._apply_context_menu_state(self.context_menu.switch.isChecked())
+
+    def _on_context_menu_toggled(self, enabled: bool) -> None:
+        if enabled:
+            windows_registry.add_context_menu()
+        else:
+            windows_registry.del_context_menu()
+        self._apply_context_menu_state(enabled)
+
+    def _on_context_menu_icon_toggled(self) -> None:
+        if read_value("shell_integration.context_menu"):
+            windows_registry.write_all_valuex()
+
+    def _apply_context_menu_state(self, enabled: bool) -> None:
+        self.context_menu_icon.set_enabled(enabled)
+        self.file_extensions_card.set_enabled(enabled)

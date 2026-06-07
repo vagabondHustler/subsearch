@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from PySide6.QtCore import (
     QPoint,
     QSize,
@@ -148,7 +150,12 @@ class BodyFontComboBox(ComboBox):
 SEARCH_TERMS_ROLE = Qt.ItemDataRole.UserRole + 1
 
 
-def rank_match(terms: list[str], query: str) -> tuple[int, int]:
+class MatchRank(NamedTuple):
+    tier: int
+    label_length: int
+
+
+def rank_match(terms: list[str], query: str) -> MatchRank:
     query_lower = query.lower()
     best_tier = 3
     for term in terms:
@@ -159,7 +166,7 @@ def rank_match(terms: list[str], query: str) -> tuple[int, int]:
             best_tier = min(best_tier, 1)
         elif query_lower in term_lower:
             best_tier = min(best_tier, 2)
-    return best_tier, len(terms[0])
+    return MatchRank(best_tier, len(terms[0]))
 
 
 def best_matching_label(search_terms_by_label: dict[str, list[str]], query: str) -> str | None:
@@ -169,7 +176,7 @@ def best_matching_label(search_terms_by_label: dict[str, list[str]], query: str)
         search_terms_by_label,
         key=lambda label: rank_match(search_terms_by_label[label], query),
     )
-    if rank_match(search_terms_by_label[ranked], query)[0] == 3:
+    if rank_match(search_terms_by_label[ranked], query).tier == 3:
         return None
     return ranked
 
@@ -226,9 +233,9 @@ class SearchableComboBox(EditableComboBox):
         self._completerMenu.setMaxVisibleItems(self.completer().maxVisibleItems())
         if changed:
             self._completerMenu.popup()
-        self._highlight_enter_target()
+        self._highlight_best_completion()
 
-    def _highlight_enter_target(self) -> None:
+    def _highlight_best_completion(self) -> None:
         match = best_matching_label(self._search_terms_by_label, self.text())
         view = self._completerMenu.view
         if match is None:

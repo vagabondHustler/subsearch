@@ -8,7 +8,7 @@ from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import Subtitle, SubtitleStatus
-from subsearch.ui.cards.cards import (
+from subsearch.ui.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,
     CARD_FILL_COLOR,
@@ -81,12 +81,6 @@ class SubtitleCard(HeaderCardWidget):
         painter.setBrush(CARD_FILL_COLOR)
         painter.setPen(CARD_BORDER_COLOR)
         painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), CARD_BORDER_RADIUS, CARD_BORDER_RADIUS)
-
-    def enterEvent(self, e) -> None:
-        pass
-
-    def leaveEvent(self, e) -> None:
-        pass
 
     def _replace_header_separator(self) -> None:
         index = self.vBoxLayout.indexOf(self.separator)
