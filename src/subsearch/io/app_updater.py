@@ -8,8 +8,8 @@ from typing import Callable
 import requests
 from packaging.version import Version
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.constants import APP_PATHS, VERSION
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config.constants import APP_PATHS, VERSION
 from subsearch.io import file_system
 from subsearch.io.http import get_session
 

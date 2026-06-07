@@ -1,8 +1,8 @@
 from curl_cffi import requests
 from curl_cffi.requests import Response, exceptions
-from selectolax.parser import HTMLParser
+from selectolax.lexbor import LexborHTMLParser
 
-from subsearch.runtime.logger import log
+from subsearch.runtime.logging.logger import log
 from subsearch.parsing.html_parser import parse_html_response
 
 
@@ -16,7 +16,7 @@ def send_request(url: str, session: requests.Session, timeout: tuple[int, int], 
     return session.get(url, timeout=timeout, headers=header)
 
 
-def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> HTMLParser | None:
+def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> LexborHTMLParser | None:
     session = get_session()
     try:
         response = send_request(url, session, timeout=timeout, header=header)

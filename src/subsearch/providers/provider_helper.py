@@ -2,9 +2,9 @@ import threading
 from typing import Any
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import (
+from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import (
     AppConfig,
     Language,
     ProviderHealth,

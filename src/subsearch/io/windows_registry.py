@@ -2,8 +2,8 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.constants import (
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config.constants import (
     APP_PATHS,
     COMPUTER_NAME,
     DEVICE_INFO,

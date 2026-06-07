@@ -5,9 +5,9 @@ from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
 from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
-from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import Subtitle, SubtitleStatus
+from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import Subtitle, SubtitleStatus
 from subsearch.ui.cards.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,

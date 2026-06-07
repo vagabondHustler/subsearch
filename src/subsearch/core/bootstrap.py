@@ -2,9 +2,9 @@ from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
-from subsearch.runtime.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderResult, Subtitle
+from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import ProviderResult, Subtitle
 
 
 class Bootstrap:

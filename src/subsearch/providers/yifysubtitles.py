@@ -1,11 +1,11 @@
 from typing import Any
 
-from selectolax.parser import Node
+from selectolax.lexbor import LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import ProviderHealth
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
@@ -32,7 +32,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
             self.parse_item(item)
         return ProviderHealth.OK
 
-    def _item_name(self, item: Node) -> str:
+    def _item_name(self, item: LexborNode) -> str:
         node = item.css_first("a")
         return node.text().strip() if node else ""
 
@@ -45,7 +45,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         for subtitle_name in titles:
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
-    def skip_reason(self, item: Node) -> str:
+    def skip_reason(self, item: LexborNode) -> str:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
         subtitle_hi = item.css_matches("span.hi-subtitle")
         if subtitle_language.lower() != self.current_language.lower():  # type: ignore

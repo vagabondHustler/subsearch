@@ -13,8 +13,8 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import toml_file
-from subsearch.runtime.model import Subtitle
-from subsearch.runtime.constants import APP_PATHS
+from subsearch.runtime.models.model import Subtitle
+from subsearch.runtime.config.constants import APP_PATHS
 from subsearch.ui.cards.cards import (
     ApiCard,
     ApplicationCard,

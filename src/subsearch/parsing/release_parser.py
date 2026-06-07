@@ -4,9 +4,9 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.runtime.model import (
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.models.model import (
     AppConfig,
     Language,
     ProviderUrls,

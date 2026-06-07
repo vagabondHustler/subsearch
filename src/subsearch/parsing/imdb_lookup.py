@@ -1,7 +1,7 @@
 import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderHealth
 
 
 class ImdbIdLookup:

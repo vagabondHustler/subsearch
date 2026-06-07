@@ -1,8 +1,8 @@
 import re
 from typing import Any
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import ProviderHealth
 from subsearch.io import http
 from subsearch.providers import provider_helper
 from subsearch.providers.provider_helper import combine_provider_health

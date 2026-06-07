@@ -1,6 +1,6 @@
 from curl_cffi.requests import Response
-from selectolax.parser import HTMLParser
+from selectolax.lexbor import LexborHTMLParser
 
 
-def parse_html_response(response: Response) -> HTMLParser:
-    return HTMLParser(response.text)
+def parse_html_response(response: Response) -> LexborHTMLParser:
+    return LexborHTMLParser(response.text)

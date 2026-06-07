@@ -26,9 +26,9 @@ from qfluentwidgets import (
 
 from subsearch.io import app_updater, toml_file, windows_registry
 from subsearch.parsing import release_parser
-from subsearch.runtime import log_sanitizer
-from subsearch.runtime.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
-from subsearch.runtime.logger import log
+from subsearch.runtime.logging import log_sanitizer
+from subsearch.runtime.config.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
+from subsearch.runtime.logging.logger import log
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon

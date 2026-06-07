@@ -9,9 +9,9 @@ from typing import Callable, Iterable, Optional
 
 import requests
 
-from subsearch.runtime.logger import log
-from subsearch.runtime.constants import VIDEO_FILE
-from subsearch.runtime.model import Subtitle
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.models.model import Subtitle
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 

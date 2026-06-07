@@ -6,9 +6,9 @@ from typing import Any
 
 import toml
 
-from subsearch.runtime.constants import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import AppConfig
+from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import AppConfig
 
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:

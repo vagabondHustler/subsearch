@@ -4,9 +4,9 @@ from curl_cffi import requests as curl_requests
 from curl_cffi.requests import Response
 
 from subsearch.providers import provider_helper
-from subsearch.runtime.exceptions import MissingApiKey, ProviderResponseUnrecognized
-from subsearch.runtime.logger import log
-from subsearch.runtime.model import ProviderHealth
+from subsearch.runtime.models.exceptions import MissingApiKey, ProviderResponseUnrecognized
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import ProviderHealth
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 
