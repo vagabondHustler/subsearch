@@ -53,12 +53,12 @@ class StepSummary:
     CHECK, CROSS = ":heavy_check_mark:", ":x:"
 
     def set_output(self, name: str, value: str) -> None:
-        with open(os.environ["GITHUB_OUTPUT"], "a") as github_output:
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
             print(f"{name}={value}", file=github_output)
 
     def add_summary(self, text: str) -> None:
         markdown = str(text).replace("%25", "%").replace("%0D", "\r").replace("%0A", "\n")
-        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as github_step_summary:
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as github_step_summary:
             github_step_summary.write(f"{markdown}\n")
 
     def card(self, title: str, passed: bool | None = None) -> None:
@@ -322,7 +322,7 @@ class BinaryTester:
 
     def _print_file_content(self, file_path: Path) -> None:
         try:
-            print(file_path.read_text())
+            print(file_path.read_text(encoding="utf-8", errors="replace"))
         except OSError as error:
             print(f"Could not read {file_path}: {error}")
 
