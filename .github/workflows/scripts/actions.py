@@ -287,18 +287,41 @@ class BinaryTester:
                     print(f"{process_name} did not terminate within 10s; killing")
                     process.kill()
 
-    def window_exists(self, window_title: str) -> bool:
+    def visible_window_owned_by(self, pids: set[int]) -> bool:
         import win32gui
+        import win32process
 
-        return win32gui.FindWindow(None, window_title) != 0
+        found = False
 
-    def assert_window_rendered(self, window_title: str = APP_NAME, timeout: int = 60) -> None:
+        def visit(handle: int, _) -> bool:
+            nonlocal found
+            if not win32gui.IsWindowVisible(handle):
+                return True
+            _, owner_pid = win32process.GetWindowThreadProcessId(handle)
+            if owner_pid in pids:
+                found = True
+                return False
+            return True
+
+        win32gui.EnumWindows(visit, None)
+        return found
+
+    def process_tree_pids(self, process_name: str) -> set[int]:
+        import psutil
+
+        pids: set[int] = set()
+        for process in psutil.process_iter(["pid", "name"]):
+            if (process.info["name"] or "").lower() == process_name.lower():
+                pids.add(process.info["pid"])
+        return pids
+
+    def assert_window_rendered(self, process_name: str = EXE_INSTALLED_PATH.name, timeout: int = 60) -> None:
         for _ in range(timeout):
-            if self.window_exists(window_title):
-                print(f"GUI window '{window_title}' is present")
+            if self.visible_window_owned_by(self.process_tree_pids(process_name)):
+                print(f"A visible GUI window for '{process_name}' is present")
                 return
             time.sleep(1)
-        raise RuntimeError(f"GUI window '{window_title}' did not appear within {timeout} seconds")
+        raise RuntimeError(f"No visible GUI window for '{process_name}' appeared within {timeout} seconds")
 
     def _print_file_content(self, file_path: Path) -> None:
         try:
