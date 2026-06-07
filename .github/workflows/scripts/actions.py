@@ -228,7 +228,7 @@ class BinaryTester:
         return candidates[0]
 
     def _installed_version(self) -> str:
-        version_file = CWD_PATH / "src" / "subsearch" / "runtime" / "version.py"
+        version_file = CWD_PATH / "src" / "subsearch" / "runtime" /  "config" / "version.py"
         namespace: dict[str, str] = {}
         exec(version_file.read_text(encoding="utf-8"), namespace)
         return namespace["__version__"]

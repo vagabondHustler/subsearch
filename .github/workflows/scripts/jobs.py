@@ -53,7 +53,7 @@ class Init:
 
 
 class MakeMsi:
-    _VERSION_FILE = CWD_PATH / "src" / "subsearch" / "runtime" / "version.py"
+    _VERSION_FILE = CWD_PATH / "src" / "subsearch" / "runtime" / "config" /"version.py"
 
     def run(self) -> None:
         dry_run_version = os.environ.get("DRY_RUN_VERSION")

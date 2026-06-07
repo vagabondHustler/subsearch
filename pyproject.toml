@@ -104,7 +104,7 @@
     update_changelog_on_bump = false
     annotated_tag = true
     version_files = [
-        "src/subsearch/runtime/version.py:__version__",
+        "src/subsearch/runtime/config/version.py:__version__",
     ]
 
 [tool.black]
