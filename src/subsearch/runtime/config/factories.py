@@ -1,53 +1,52 @@
 import platform
 import sys
 import tempfile
-from itertools import product
 from pathlib import Path
-from typing import Any, no_type_check
+from typing import Any
 
-from subsearch.runtime.version import __version__
-from subsearch.runtime.model import (
+from subsearch.runtime.config.version import __version__
+from subsearch.runtime.config.static_values import (
+    HEALTH_TRACKED_PROVIDERS,
+    SUPPORTED_FILE_EXTENSIONS,
+    SUPPORTED_PROVIDERS,
+)
+from subsearch.runtime.models.model import (
     AppPaths,
     FilePaths,
     SystemInfo,
     VideoFile,
     WindowsRegistryPaths,
 )
-from subsearch.runtime.static_values import (
-    get_health_tracked_providers,
-    get_supported_file_ext,
-    get_supported_providers,
-)
+
+_APP_HOME = Path(__file__).resolve().parent.parent.parent
 
 
 def get_app_paths() -> AppPaths:
-    app_home = Path(__file__).resolve().parent.parent
     return AppPaths(
-        home=app_home,
-        data=app_home / "data",
-        ui_assets=app_home / "ui" / "assets",
-        providers=app_home / "providers",
-        io=app_home / "io",
-        parsing=app_home / "parsing",
-        tmp_dir=Path(tempfile.gettempdir()) / f"tmp_subsearch",
+        home=_APP_HOME,
+        data=_APP_HOME / "data",
+        ui_assets=_APP_HOME / "ui" / "assets",
+        providers=_APP_HOME / "providers",
+        io=_APP_HOME / "io",
+        parsing=_APP_HOME / "parsing",
+        tmp_dir=Path(tempfile.gettempdir()) / "tmp_subsearch",
         appdata_subsearch=Path.home() / "AppData" / "Local" / "Subsearch",
     )
 
 
 def get_file_paths() -> FilePaths:
-    app_home = Path(__file__).resolve().parent.parent
     return FilePaths(
         log=Path.home() / "AppData" / "Local" / "Subsearch" / "log.log",
         config=Path.home() / "AppData" / "Local" / "Subsearch" / "config.toml",
-        subtitle_languages=app_home / "data" / "subtitle_languages.toml",
+        subtitle_languages=_APP_HOME / "data" / "subtitle_languages.toml",
     )
 
 
 def get_default_app_config() -> dict[str, Any]:
-    file_extensions = dict.fromkeys(get_supported_file_ext(), True)
-    providers = dict.fromkeys(get_supported_providers(), True)
-    provider_health = {provider: {"failed_attempts": 0} for provider in get_health_tracked_providers()}
-    config = {
+    file_extensions = dict.fromkeys(SUPPORTED_FILE_EXTENSIONS, True)
+    providers = dict.fromkeys(SUPPORTED_PROVIDERS, True)
+    provider_health = {provider: {"failed_attempts": 0} for provider in HEALTH_TRACKED_PROVIDERS}
+    return {
         "language": {
             "selected": "english",
         },
@@ -101,57 +100,59 @@ def get_default_app_config() -> dict[str, Any]:
             },
         },
     }
-    return config
 
 
-@no_type_check
-def get_video_file_data() -> VideoFile:
-    file_exists = False
-    supported_exts = get_supported_file_ext()
-    file_name, file_hash, file_ext = "", "", ""
-    file_path = Path("")
-    file_directory = Path("")
-    subs_dir = Path("")
-    tmp_dir = Path("")
-    for i in product(supported_exts, sys.argv):
-        if i[1].endswith(i[0]) and str(i[1])[i[1].rfind("\\") :].startswith("\\"):
-            file_path = Path(i[1])
-            file_directory = file_path.parent
-            tmp_dir = file_directory / "tmp_subsearch"
-            subs_dir = file_directory / "subs"
-            file_name = file_path.stem
-            file_ext = file_path.suffix
-            file_exists = True
-            file_hash = ""
-            break
+def _find_video_file(argument: str, supported_extensions: list[str]) -> Path | None:
+    argument_path = Path(argument)
+    extension = argument_path.suffix.lstrip(".")
+    if extension in supported_extensions and "\\" in argument:
+        return argument_path
+    return None
 
-    video_file = VideoFile(
-        file_exists=file_exists,
-        filename=file_name,
-        file_hash=file_hash,
-        file_extension=file_ext,
+
+def _build_video_file(file_path: Path) -> VideoFile:
+    return VideoFile(
+        file_exists=True,
+        filename=file_path.stem,
+        file_hash="",
+        file_extension=file_path.suffix,
         file_path=file_path,
-        file_directory=file_directory,
-        subs_dir=subs_dir,
-        tmp_dir=tmp_dir,
+        file_directory=file_path.parent,
+        subs_dir=file_path.parent / "subs",
+        tmp_dir=file_path.parent / "tmp_subsearch",
     )
-    return video_file
+
+
+def get_video_file_data() -> VideoFile:
+    for argument in sys.argv:
+        file_path = _find_video_file(argument, SUPPORTED_FILE_EXTENSIONS)
+        if file_path is not None:
+            return _build_video_file(file_path)
+    return VideoFile(
+        file_exists=False,
+        filename="",
+        file_hash="",
+        file_extension="",
+        file_path=Path(""),
+        file_directory=Path(""),
+        subs_dir=Path(""),
+        tmp_dir=Path(""),
+    )
 
 
 def get_system_info() -> SystemInfo:
     if getattr(sys, "frozen", False):
         mode = "executable"
-        python = ""
+        python_version = ""
     else:
-        python = platform.python_version()
+        python_version = platform.python_version()
         mode = "interpreter"
-    platform_ = platform.platform().lower()
-
-    return SystemInfo(platform_, mode, python, __version__)
+    platform_description = platform.platform().lower()
+    return SystemInfo(platform_description, mode, python_version, __version__)
 
 
 def get_windows_registry_paths() -> WindowsRegistryPaths:
-    registry_paths = WindowsRegistryPaths(
+    return WindowsRegistryPaths(
         classes=r"Software\Classes",
         asterisk=r"Software\Classes\*",
         shell=r"Software\Classes\*\shell",
@@ -159,4 +160,3 @@ def get_windows_registry_paths() -> WindowsRegistryPaths:
         subsearch_command=r"Software\Classes\*\shell\Subsearch\command",
         long_paths=r"SYSTEM\CurrentControlSet\Control\FileSystem",
     )
-    return registry_paths

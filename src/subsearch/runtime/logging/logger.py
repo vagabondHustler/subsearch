@@ -2,9 +2,10 @@ import logging
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
-from subsearch.runtime import log_events, metaclasses
-from subsearch.runtime.constants import APP_PATHS, FILE_PATHS
-from subsearch.runtime.model import DataclassInstance
+from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
+from subsearch.runtime.config.metaclasses import Singleton
+from subsearch.runtime.logging import log_events
+from subsearch.runtime.models.model import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
 
@@ -49,11 +50,12 @@ def _build_file_logger() -> logging.Logger:
 
 
 def _write_session_header(handler: RotatingFileHandler) -> None:
-    handler.stream.write(log_events.session_header())
-    handler.flush()
+    if handler.stream is not None:
+        handler.stream.write(log_events.session_header())
+        handler.flush()
 
 
-class Logger(metaclass=metaclasses.Singleton):
+class Logger(metaclass=Singleton):
     def __init__(self) -> None:
         self._file_logger = _build_file_logger()
 

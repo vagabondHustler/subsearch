@@ -28,8 +28,10 @@ class MissingApiKey(ProviderError):
 
 class MultipleInstancesError(Error):
     def __init__(self, mutex_name: str) -> None:
-        error_type = f"Multiple instances of the application are running."
-        error_msg = f"Unable to acquire mutex '{mutex_name}' because it's already locked. Please close any other instances of the application before launching a new one."
-        additional_info = "If you need to run multiple instances, you can adjust your app settings to allow this, but be aware that it's not recommended'."
-        message = f"{error_type}\n{error_msg}\n{additional_info}"
-        super().__init__(message)
+        super().__init__(
+            f"Multiple instances of the application are running. "
+            f"Unable to acquire mutex '{mutex_name}' because it's already locked. "
+            f"Please close any other instances of the application before launching a new one. "
+            f"If you need to run multiple instances, you can adjust your app settings to allow this, "
+            f"but be aware that it's not recommended."
+        )

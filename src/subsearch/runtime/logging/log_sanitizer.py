@@ -4,8 +4,8 @@ import os
 import re
 from pathlib import Path
 
-from subsearch.runtime.constants import COMPUTER_NAME, FILE_PATHS, GUID
-from subsearch.runtime.model import DataclassInstance
+from subsearch.runtime.config.constants import COMPUTER_NAME, FILE_PATHS, GUID
+from subsearch.runtime.models.model import DataclassInstance
 
 REDACTED = "[REDACTED]"
 
@@ -31,20 +31,16 @@ def sanitize(text: str) -> str:
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
 
 
-def _handle_api_keys(value: str) -> str:
-    return API_KEY_PATTERN.sub(REDACTED, value)
-
-
 def dataclass_lines(instance: DataclassInstance, banner_template: str) -> list[str]:
     if not dataclasses.is_dataclass(instance):
         raise ValueError("Input is not a dataclass instance.")
     lines = [banner_template.format(title=instance.__class__.__name__)]
-    for field in dataclasses.fields(instance):
-        value = getattr(instance, field.name)
+    for dataclass_field in dataclasses.fields(instance):
+        value = getattr(instance, dataclass_field.name)
         if isinstance(value, str):
-            value = _handle_api_keys(value)
-        padding = " " * (30 - len(field.name))
-        lines.append(f"{field.name}:{padding}{value}")
+            value = API_KEY_PATTERN.sub(REDACTED, value)
+        padding = " " * (30 - len(dataclass_field.name))
+        lines.append(f"{dataclass_field.name}:{padding}{value}")
     return lines
 
 

@@ -3,8 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from subsearch.runtime import log_sanitizer
-from subsearch.runtime.model import DataclassInstance
+from subsearch.runtime.logging import log_sanitizer
+from subsearch.runtime.models.model import DataclassInstance
 
 BANNER_COLOR = "#fab387"
 MATCH_COLOR = "#a6e3a1"

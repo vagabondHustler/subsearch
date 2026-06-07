@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable
 
 from subsearch.io.toml_file import diagnostics_enabled
-from subsearch.runtime.logger import log
+from subsearch.runtime.logging.logger import log
 
 
 def run_in_threads(*tasks: Callable[..., None]) -> None:
@@ -16,8 +16,8 @@ def run_in_threads(*tasks: Callable[..., None]) -> None:
             name = futures[future]
             exception = future.exception()
             if exception:
-                tb = "".join(traceback.format_exception(exception))
-                log.error(f"\nError occurred in thread {name}\n{tb}", to_console=False)
+                traceback_text = "".join(traceback.format_exception(exception))
+                log.error(f"\nError occurred in thread {name}\n{traceback_text}", to_console=False)
                 continue
             if diagnostics_enabled():
                 log.debug(f"Thread {name} finished", to_console=False)
