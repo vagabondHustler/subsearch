@@ -23,11 +23,12 @@ concurrency:
 
 env:
   ARTIFACT_RETENTION_DAYS: 3
+  JOBS: python .github/workflows/scripts/jobs.py
 
 jobs:
   init:
     name: Version control (dry run)
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     outputs:
       bumped: ${{ steps.run.outputs.bumped }}
@@ -54,12 +55,12 @@ jobs:
 
       - name: Set fake version outputs (no bump, no push)
         id: run
-        run: python .github/workflows/scripts/jobs.py dry_run_init
+        run: ${{ env.JOBS }} dry_run_init
 
   build_binaries:
     name: Build binaries
     needs: init
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     outputs:
       msi_hash: ${{ steps.run.outputs.msi_hash }}
@@ -81,11 +82,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .[build]
-          python .github/workflows/scripts/jobs.py make_msi
+          ${{ env.JOBS }} make_msi
 
       - name: Hash and collect artifacts
         id: run
-        run: python .github/workflows/scripts/jobs.py build_binaries
+        run: ${{ env.JOBS }} build_binaries
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -99,7 +100,7 @@ jobs:
     name: Test binaries
     needs: [init, build_binaries]
     if: ${{ inputs.skip_binary_tests == 'false' }}
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -122,12 +123,12 @@ jobs:
           python -m pip install --upgrade pip psutil pywin32 toml
           python -m pip install -e . --no-deps
 
-      - run: python .github/workflows/scripts/jobs.py test_binaries
+      - run: ${{ env.JOBS }} test_binaries
 
   changelog:
     name: Changelog
     needs: [init, build_binaries]
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -147,7 +148,7 @@ jobs:
           python -m pip install -e . --no-deps
 
       - name: Render changelog and append links
-        run: python .github/workflows/scripts/jobs.py changelog
+        run: ${{ env.JOBS }} changelog
         env:
           CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
           PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
