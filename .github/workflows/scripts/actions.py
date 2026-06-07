@@ -300,7 +300,6 @@ class BinaryTester:
             _, owner_pid = win32process.GetWindowThreadProcessId(handle)
             if owner_pid in pids:
                 found = True
-                return False
             return True
 
         win32gui.EnumWindows(visit, None)
