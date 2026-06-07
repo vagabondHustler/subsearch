@@ -98,7 +98,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def yifysubtitles(self) -> None:
-        self._start_search(provider=yifysubtitles.YifiSubtitles, flag="site")
+        self._start_search(provider=yifysubtitles.YifySubtitles, flag="site")
 
     @run_if_conditions_met
     def subsource(self) -> None:
