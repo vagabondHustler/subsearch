@@ -73,7 +73,16 @@ class MaskedApiKeyLineEdit(LineEdit):
         if event.matches(QKeySequence.StandardKey.Paste):
             text = QApplication.clipboard().text()
             if text:
-                self._set_api_key(self._api_key + text)
+                selected_text = self.selectedText()
+                if selected_text:
+                    self._set_api_key(text)
+                else:
+                    self._set_api_key(self._api_key + text)
+            return
+        if event.matches(QKeySequence.StandardKey.Cut):
+            if self._revealed:
+                QApplication.clipboard().setText(self._api_key)
+                self._set_api_key("")
             return
         if event.matches(QKeySequence.StandardKey.Copy):
             QApplication.clipboard().setText(self._api_key if self._revealed else mask_api_key(self._api_key))
