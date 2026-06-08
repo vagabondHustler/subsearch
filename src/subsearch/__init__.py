@@ -19,6 +19,7 @@ def _route_uncaught_to_log(exc_type, exc_value, exc_traceback) -> None:
 def _route_uncaught_thread_to_log(args: threading.ExceptHookArgs) -> None:
     thread_name = args.thread.name if args.thread else "unknown"
     log.uncaught_exception(args.exc_type, args.exc_value, args.exc_traceback, origin=f"thread {thread_name}")
+    threading.__excepthook__(args)
 
 
 sys.excepthook = _route_uncaught_to_log
