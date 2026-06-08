@@ -170,7 +170,6 @@ class SubtitleCollector:
                 provider=self.provider_name,
                 subtitle_name=self.subtitle_name,
                 percentage=self.percentage_result,
-                threshold=self.accept_threshold,
             )
             return SubtitleCollector._shared_accepted.append(self._subtitle)
         log.event(
@@ -178,7 +177,6 @@ class SubtitleCollector:
             provider=self.provider_name,
             subtitle_name=self.subtitle_name,
             percentage=self.percentage_result,
-            threshold=self.accept_threshold,
         )
         return SubtitleCollector._shared_rejected.append(self._subtitle)
 
