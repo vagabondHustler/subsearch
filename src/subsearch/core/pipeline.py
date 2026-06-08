@@ -58,12 +58,13 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
-        log.event("banner", title="Provider Healthcheck")
+        log.event("banner", title="Provider diagnostics")
         from subsearch.providers import diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
         self._run_due_diagnostics()
+        log.event("task_completed")
 
     def _run_due_diagnostics(self) -> None:
         from subsearch.providers import diagnostics
@@ -71,7 +72,6 @@ class SearchPipeline:
         due_providers = diagnostics.providers_due_for_diagnostic(self.bootstrap.app_config)
         if not due_providers:
             return None
-        log.event("banner", title="Provider diagnostics")
         reports = diagnostics.diagnose_providers(due_providers)
         diagnostics.record_health_reports(reports)
         self._notify_unhealthy_providers(reports)
@@ -127,7 +127,9 @@ class SearchPipeline:
     @run_if_conditions_met
     def download_files(self) -> None:
         log.event("banner", title="Downloading subtitles")
-        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.percentage_result, reverse=True)
+        accepted = sorted(
+            self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.percentage_result, reverse=True
+        )
         for subtitle in accepted:
             if self._provider_at_api_call_limit(subtitle.provider_name):
                 continue
