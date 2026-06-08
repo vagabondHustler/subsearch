@@ -1,8 +1,4 @@
-{# Commitizen can emit more than one `tree` entry for a single release build
-   (e.g. when an unreleased range spans a version boundary), and each entry
-   carries its own `changes` dict. Rendering per entry would repeat section
-   headings like "🐛 Fixes:". Merge every entry's changes into one mapping
-   first so each section heading appears exactly once. #}
+{# merge all tree entries first so each section heading appears exactly once #}
 {% set merged = {} %}
 {% for entry in tree %}
 {% for change_key, changes in entry.changes.items() %}
