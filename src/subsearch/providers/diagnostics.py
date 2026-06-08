@@ -4,9 +4,13 @@ from subsearch.io import toml_file
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppConfig, ProviderDiagnosticStatus, ProviderResult
+from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.models.model import (
+    AppConfig,
+    ProviderDiagnosticStatus,
+    ProviderResult,
+)
 
 KNOWN_GOOD_RELEASE = "The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv"
 

@@ -2,16 +2,38 @@ from pathlib import Path
 
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtGui import QEnterEvent, QMouseEvent
-from PySide6.QtWidgets import QFileDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
-from qfluentwidgets import BodyLabel, CaptionLabel, CheckBox, LineEdit, MessageBox, TransparentToolButton
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+)
+from qfluentwidgets import (
+    BodyLabel,
+    CaptionLabel,
+    CheckBox,
+    LineEdit,
+    MessageBox,
+    TransparentToolButton,
+)
 
 from subsearch.io import windows_registry
 from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard, build_section_header
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_caption_font
-from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow, read_value, write_value
+from subsearch.ui.theme.typography import (
+    TEXT_COLOR,
+    apply_body_font,
+    apply_caption_font,
+)
+from subsearch.ui.widgets.setting_rows import (
+    HelpButton,
+    SwitchRow,
+    read_value,
+    write_value,
+)
 
 
 class _ButtonProxyLabel(BodyLabel):

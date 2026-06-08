@@ -51,7 +51,7 @@ class Init:
 
 
 class MakeMsi:
-    _VERSION_FILE = Paths.working_directory / "src" / "subsearch" / "runtime" / "config" /"version.py"
+    _VERSION_FILE = Paths.working_directory / "src" / "subsearch" / "runtime" / "config" / "version.py"
 
     def run(self) -> None:
         dry_run_version = os.environ.get("DRY_RUN_VERSION")
@@ -130,8 +130,13 @@ class Prepare:
 
     def _append_comparison_link(self, changelog: Changelog, previous_version: str, next_version: str) -> None:
         from datetime import datetime
+
         comparison = changelog.compare_link(previous_tag=previous_version, current_tag=next_version)
-        username = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True).stdout.strip() or os.environ.get("GITHUB_ACTOR") or "unknown"
+        username = (
+            subprocess.run(["git", "config", "user.name"], capture_output=True, text=True).stdout.strip()
+            or os.environ.get("GITHUB_ACTOR")
+            or "unknown"
+        )
         timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")
         with open(Paths.artifacts / CHANGELOG_NAME, "a") as changelog_file:
             changelog_file.write(f"###### Full changelog: {comparison}\n")
@@ -167,19 +172,64 @@ class OpenMainPullRequest:
 
     def _edit_pull_request(self, number: str, title: str, body: str) -> None:
         subprocess.run(
-            ["gh", "pr", "edit", number, "--title", title, "--body", body, "--add-assignee", self.OWNER, "--add-reviewer", self.OWNER],
+            [
+                "gh",
+                "pr",
+                "edit",
+                number,
+                "--title",
+                title,
+                "--body",
+                body,
+                "--add-assignee",
+                self.OWNER,
+                "--add-reviewer",
+                self.OWNER,
+            ],
             check=True,
         )
 
     def _create_pull_request(self, title: str, body: str) -> None:
         subprocess.run(
-            ["gh", "pr", "create", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--title", title, "--body", body, "--label", self.RELEASE_LABEL, "--assignee", self.OWNER, "--reviewer", self.OWNER],
+            [
+                "gh",
+                "pr",
+                "create",
+                "--base",
+                self.TARGET_BRANCH,
+                "--head",
+                self.SOURCE_BRANCH,
+                "--title",
+                title,
+                "--body",
+                body,
+                "--label",
+                self.RELEASE_LABEL,
+                "--assignee",
+                self.OWNER,
+                "--reviewer",
+                self.OWNER,
+            ],
             check=True,
         )
 
     def _existing_pull_request_number(self) -> str | None:
         completed = subprocess.run(
-            ["gh", "pr", "list", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--state", "open", "--json", "number", "--jq", ".[0].number"],
+            [
+                "gh",
+                "pr",
+                "list",
+                "--base",
+                self.TARGET_BRANCH,
+                "--head",
+                self.SOURCE_BRANCH,
+                "--state",
+                "open",
+                "--json",
+                "number",
+                "--jq",
+                ".[0].number",
+            ],
             check=True,
             capture_output=True,
             text=True,

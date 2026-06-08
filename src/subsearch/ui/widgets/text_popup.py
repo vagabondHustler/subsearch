@@ -1,6 +1,7 @@
 from PySide6.QtCore import QPoint, Qt, QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QApplication, QFrame, QTextBrowser, QVBoxLayout, QWidget
+
 from subsearch.ui.theme.typography import CAPTION_FONT_SIZE, TEXT_COLOR, body_font
 
 POPUP_GAP = 6
@@ -9,6 +10,7 @@ POPUP_MAX_WIDTH = 1100
 POPUP_MAX_HEIGHT = 420
 CONTENT_MARGIN = 20
 HIDE_GRACE_MS = 300
+
 
 class MarkdownPopup(QFrame):
     def __init__(self, anchor: QWidget) -> None:

@@ -2,8 +2,8 @@ from curl_cffi import requests
 from curl_cffi.requests import Response, exceptions
 from selectolax.lexbor import LexborHTMLParser
 
-from subsearch.runtime.logging.logger import log
 from subsearch.parsing.html_parser import parse_html_response
+from subsearch.runtime.logging.logger import log
 
 
 def get_session() -> requests.Session:

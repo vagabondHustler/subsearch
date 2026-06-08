@@ -3,9 +3,9 @@ import inspect
 import pytest
 
 from subsearch.core.run_conditions import RunConditions
-from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
+from subsearch.runtime.config.constants import FILE_PATHS
 from tests import fixture_data
 
 

@@ -1,10 +1,10 @@
 import ctypes
 from typing import Any, Callable
 
-from subsearch.runtime.models import exceptions
 from subsearch.io import toml_file
 from subsearch.runtime.config.constants import GUID
 from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models import exceptions
 
 
 def apply_mutex(func: Callable) -> Callable:

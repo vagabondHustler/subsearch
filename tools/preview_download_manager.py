@@ -23,8 +23,8 @@ from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import FluentWindow, Theme, setTheme, setThemeColor
 
-from subsearch.runtime.models.model import Subtitle
 from subsearch.runtime.config.constants import APP_PATHS
+from subsearch.runtime.models.model import Subtitle
 from subsearch.ui.cards import download_manager as dm
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.navigation import enlarge_navigation_icons

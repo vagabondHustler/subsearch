@@ -54,11 +54,7 @@ class HelpPopup(QFrame):
         self.setWindowFlags(Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         self.setStyleSheet(
-            "HelpPopup {"
-            " background-color: #2b2b2b;"
-            " border: 1px solid #454545;"
-            " border-radius: 6px;"
-            " }"
+            "HelpPopup {" " background-color: #2b2b2b;" " border: 1px solid #454545;" " border-radius: 6px;" " }"
         )
 
         caption_font = body_font()
@@ -100,7 +96,9 @@ class HelpPopup(QFrame):
 
 
 class HelpButton(TransparentToolButton):
-    def __init__(self, explanation: str, parent: QWidget) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
+    def __init__(
+        self, explanation: str, parent: QWidget
+    ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
         self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, TEXT_COLOR))
         self.setFixedSize(32, 32)
@@ -130,9 +128,7 @@ def style_dropdown_menu(menu, object_name: str) -> None:
     menu.view.setFont(font)
     for action in menu.actions():
         action.setFont(font)
-    menu.view.setStyleSheet(
-        f"#{object_name} {{ color: {TEXT_COLOR}; font-size: {BODY_FONT_SIZE}px; }}"
-    )
+    menu.view.setStyleSheet(f"#{object_name} {{ color: {TEXT_COLOR}; font-size: {BODY_FONT_SIZE}px; }}")
 
 
 class BodyFontComboBox(ComboBox):
@@ -199,9 +195,7 @@ class SearchableComboBox(EditableComboBox):
 
     def setItems(self, labels: list[str], aliases_by_label: dict[str, list[str]] | None = None) -> None:
         aliases_by_label = aliases_by_label or {}
-        self._search_terms_by_label = {
-            label: [label, *aliases_by_label.get(label, [])] for label in labels
-        }
+        self._search_terms_by_label = {label: [label, *aliases_by_label.get(label, [])] for label in labels}
         self.addItems(labels)
 
         model = QStandardItemModel(self)
@@ -341,9 +335,7 @@ class SwitchRow(SettingRow):
 
 
 class SpinBoxRow(SettingRow):
-    def __init__(
-        self, config_key: str, minimum: int, maximum: int, parent: QWidget | None = None
-    ) -> None:
+    def __init__(self, config_key: str, minimum: int, maximum: int, parent: QWidget | None = None) -> None:
         self.spin_box = SpinBox()
         apply_body_font(self.spin_box)
         self.spin_box.setRange(minimum, maximum)

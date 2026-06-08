@@ -21,8 +21,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "search.hearing_impaired": SettingDescription(
         "Hearing impaired",
-        "Include subtitles that also describe sounds and note who is speaking, "
-        "in addition to the dialogue.",
+        "Include subtitles that also describe sounds and note who is speaking, " "in addition to the dialogue.",
     ),
     "search.non_hearing_impaired": SettingDescription(
         "Non-hearing impaired",
@@ -30,8 +29,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "search.only_foreign_parts": SettingDescription(
         "Foreign parts only",
-        "Only look for subtitles that translate the foreign-language sections of a video, "
-        "not the whole thing.",
+        "Only look for subtitles that translate the foreign-language sections of a video, " "not the whole thing.",
     ),
     "search.providers": SettingDescription(
         "Subtitle providers",
@@ -48,8 +46,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "shell_integration.file_extensions": SettingDescription(
         "File extensions",
-        "Which video file types show the Subsearch entry when right-clicked. "
-        "Needs the context menu turned on.",
+        "Which video file types show the Subsearch entry when right-clicked. " "Needs the context menu turned on.",
     ),
     "notifications.system_tray": SettingDescription(
         "System tray icon",
@@ -144,8 +141,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "credentials.subsource_api_key": SettingDescription(
         "Subsource API key",
-        "Your Subsource API key. Without it, Subsearch skips Subsource entirely. "
-        "Stored only on this computer.",
+        "Your Subsource API key. Without it, Subsearch skips Subsource entirely. " "Stored only on this computer.",
     ),
     "credentials.subsource_request_limits": SettingDescription(
         "Request limits",
@@ -153,7 +149,6 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "credentials.subsource_getting_api_key": SettingDescription(
         "Getting an API key",
-        'Go to your Subsource profile, open "My Profile", and generate a key. '
-        "Keep it secret.",
+        'Go to your Subsource profile, open "My Profile", and generate a key. ' "Keep it secret.",
     ),
 }

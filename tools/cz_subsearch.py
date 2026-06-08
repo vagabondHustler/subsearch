@@ -1,11 +1,12 @@
 from pathlib import Path
 
-from commitizen.cz.conventional_commits.conventional_commits import ConventionalCommitsCz
+from commitizen.cz.conventional_commits.conventional_commits import (
+    ConventionalCommitsCz,
+)
 from jinja2 import FileSystemLoader
 
 REPO = "https://github.com/vagabondHustler/subsearch"
 _TEMPLATE_DIR = Path(__file__).parent
-
 
 
 class SubsearchCz(ConventionalCommitsCz):
@@ -30,6 +31,7 @@ class SubsearchCz(ConventionalCommitsCz):
         "📚 Docs:",
         "⚙️ Other:",
     ]
+
     def changelog_message_builder_hook(self, message: dict, commit) -> dict:  # type: ignore[override]
         sha = commit.rev
         message["message"] += f" - [{sha[:7]}]({REPO}/commit/{sha})"

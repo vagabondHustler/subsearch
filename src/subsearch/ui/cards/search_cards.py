@@ -5,8 +5,17 @@ from qfluentwidgets import CaptionLabel, CheckBox
 from subsearch.io import toml_file
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.theme.typography import DISABLED_TEXT_COLOR, TEXT_COLOR, apply_body_font
-from subsearch.ui.widgets.setting_rows import SearchableComboBoxRow, SwitchRow, read_value, write_value
+from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
+    TEXT_COLOR,
+    apply_body_font,
+)
+from subsearch.ui.widgets.setting_rows import (
+    SearchableComboBoxRow,
+    SwitchRow,
+    read_value,
+    write_value,
+)
 from subsearch.ui.widgets.slider import CircleDotSlider
 
 PROVIDER_GRID_COLUMNS = 3

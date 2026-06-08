@@ -8,10 +8,10 @@ from typing import Callable
 import requests
 from packaging.version import Version
 
-from subsearch.runtime.logging.logger import log
-from subsearch.runtime.config.constants import APP_PATHS, VERSION
 from subsearch.io import file_system
 from subsearch.io.http import get_session
+from subsearch.runtime.config.constants import APP_PATHS, VERSION
+from subsearch.runtime.logging.logger import log
 
 # matches version strings like "1.2.3" or "1.2.3a4" from lines of the form __version__ = "..."
 _VERSION_PATTERN = r'(?<=__version__ = ")(\d+\.\d+\.\d+[a-zA-Z]*\d*).*?(?=")'

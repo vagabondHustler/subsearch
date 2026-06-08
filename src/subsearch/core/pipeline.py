@@ -78,7 +78,9 @@ class SearchPipeline:
         log.event("task_completed")
 
     def _notify_unhealthy_providers(self, reports: list[ProviderResult]) -> None:
-        unhealthy = [report.provider_name for report in reports if report.diagnostic_status is not ProviderDiagnosticStatus.OK]
+        unhealthy = [
+            report.provider_name for report in reports if report.diagnostic_status is not ProviderDiagnosticStatus.OK
+        ]
         if not unhealthy:
             return None
         message = ", ".join(unhealthy)

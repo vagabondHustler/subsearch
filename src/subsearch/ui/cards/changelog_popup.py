@@ -2,8 +2,8 @@ from PySide6.QtWidgets import QWidget
 from qfluentwidgets import TransparentToolButton
 
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.widgets.text_popup import MarkdownPopup
 from subsearch.ui.theme.typography import DISABLED_TEXT_COLOR, TEXT_COLOR
+from subsearch.ui.widgets.text_popup import MarkdownPopup
 
 EMPTY_CHANGELOG_MESSAGE = "Check for updates to load the changelog."
 

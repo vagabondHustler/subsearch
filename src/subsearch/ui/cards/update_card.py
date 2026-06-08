@@ -10,7 +10,11 @@ from subsearch.runtime.logging.logger import log
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme.typography import DISABLED_TEXT_COLOR, TEXT_COLOR, apply_caption_font
+from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
+    TEXT_COLOR,
+    apply_caption_font,
+)
 
 UPDATE_IDLE_STATUS = "Check for updates to see if a newer version is available."
 UPDATE_BUTTON_ICON_SIZE = 24

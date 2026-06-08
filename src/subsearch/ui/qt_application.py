@@ -13,9 +13,7 @@ def get_application() -> QApplication:
     if isinstance(existing, QApplication):
         return existing
 
-    QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     application = QApplication(sys.argv)
     application_font = QFont(APPLICATION_FONT_FAMILY)
     application_font.setPixelSize(APPLICATION_FONT_PIXEL_SIZE)

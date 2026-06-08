@@ -3,8 +3,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QSystemTrayIcon
 
 from subsearch.runtime.config import metaclasses
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.config.constants import APP_PATHS, VERSION
+from subsearch.runtime.logging.logger import log
 from subsearch.ui.qt_application import get_application
 
 TOAST_DURATION_MS = 5000

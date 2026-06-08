@@ -7,7 +7,12 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QApplication, QGridLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, TransparentToolButton
 
-from subsearch.runtime.config.constants import DEVICE_INFO, FILE_PATHS, VERSION, VIDEO_FILE
+from subsearch.runtime.config.constants import (
+    DEVICE_INFO,
+    FILE_PATHS,
+    VERSION,
+    VIDEO_FILE,
+)
 from subsearch.runtime.logging import log_sanitizer
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon

@@ -2,7 +2,8 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.runtime.logging.logger import log
+from subsearch.io import toml_file
+from subsearch.io.toml_file import diagnostics_enabled
 from subsearch.runtime.config.constants import (
     APP_PATHS,
     COMPUTER_NAME,
@@ -10,8 +11,7 @@ from subsearch.runtime.config.constants import (
     FILE_PATHS,
     REGISTRY_PATHS,
 )
-from subsearch.io import toml_file
-from subsearch.io.toml_file import diagnostics_enabled
+from subsearch.runtime.logging.logger import log
 
 
 class PythonExecutable:

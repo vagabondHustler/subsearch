@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.io import file_system, windows_registry
+from subsearch.runtime.config.constants import VIDEO_FILE
 
 CWD = Path(Path.cwd()) / "tests" / "resources"
 SUBS = Path(CWD) / "subs"

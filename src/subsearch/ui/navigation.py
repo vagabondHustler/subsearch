@@ -36,9 +36,7 @@ def _paint_navigation_item_with_large_icon(item, _event) -> None:
             painter.drawRoundedRect(item.rect(), 5, 5)
             painter.setBrush(autoFallbackThemeColor(item.lightIndicatorColor, item.darkIndicatorColor))
             painter.drawRoundedRect(item.indicatorRect(), 1.5, 1.5)
-        elif (
-            (item.isEnter and global_rect.contains(QCursor.pos())) or item.isAboutSelected
-        ) and item.isEnabled():
+        elif ((item.isEnter and global_rect.contains(QCursor.pos())) or item.isAboutSelected) and item.isEnabled():
             painter.setBrush(QColor(background, background, background, 6 if item.isAboutSelected else 10))
             painter.drawRoundedRect(item.rect(), 5, 5)
 

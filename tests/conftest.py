@@ -6,8 +6,7 @@ from typing import Any
 import pytest
 import toml
 
-from subsearch.runtime.config import constants
-from subsearch.runtime.config import factories
+from subsearch.runtime.config import constants, factories
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +32,9 @@ def tests_path() -> Path:
 
 @pytest.fixture
 def fake_language_data_file(tmp_path) -> Any:
-    fake_data = {"english": {"name": "English", "two_letter_code": "en", "three_letter_code": "eng", "incompatibility": []}}
+    fake_data = {
+        "english": {"name": "English", "two_letter_code": "en", "three_letter_code": "eng", "incompatibility": []}
+    }
 
     fake_file = tmp_path / "fake_language_datag.toml"
     with fake_file.open("w") as f:

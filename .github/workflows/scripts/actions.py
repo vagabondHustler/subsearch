@@ -381,7 +381,12 @@ class BinaryTestReport:
         self._step_summary = step_summary
 
     def _current_state(self) -> tuple[bool, bool, bool, bool]:
-        return Paths.installed_executable.is_file(), Paths.log_file.is_file(), Paths.config_file.is_file(), registry_key_exists()
+        return (
+            Paths.installed_executable.is_file(),
+            Paths.log_file.is_file(),
+            Paths.config_file.is_file(),
+            registry_key_exists(),
+        )
 
     def _assert_stage_passed(self, name: str, passed: bool) -> None:
         if not passed:

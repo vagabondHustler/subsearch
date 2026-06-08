@@ -27,7 +27,10 @@ class Bootstrap:
         self.user_downloaded_files = False
 
         log.debug(f"sys.argv: {sys.argv}", to_console=False)
-        log.debug(f"Video file {'found' if self.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}", to_console=False)
+        log.debug(
+            f"Video file {'found' if self.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}",
+            to_console=False,
+        )
         log.debug("Verifying files and paths")
         self.setup_file_system()
         self.language_data = toml_file.load_language_data()

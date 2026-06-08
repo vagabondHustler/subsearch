@@ -1,6 +1,6 @@
 from subsearch import PREF_COUNTER
-from subsearch.decorators import process_guard
 from subsearch.core.pipeline import SearchPipeline
+from subsearch.decorators import process_guard
 
 
 class Subsearch:
