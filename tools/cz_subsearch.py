@@ -1,5 +1,5 @@
+import os
 import subprocess
-from datetime import datetime
 from pathlib import Path
 
 from commitizen.cz.conventional_commits.conventional_commits import ConventionalCommitsCz
@@ -11,7 +11,7 @@ _TEMPLATE_DIR = Path(__file__).parent
 
 def _git_user() -> str:
     result = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
-    return result.stdout.strip() or "unknown"
+    return result.stdout.strip() or os.environ.get("GITHUB_ACTOR") or "unknown"
 
 
 class SubsearchCz(ConventionalCommitsCz):
@@ -49,9 +49,3 @@ class SubsearchCz(ConventionalCommitsCz):
         username = _git_user()
         message["message"] += f" - [{username}@{sha[:7]}]({REPO}/commit/{sha})"
         return message
-
-    def changelog_hook(self, full_changelog: str, _release_tag: str | None) -> str:  # type: ignore[override]
-        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")
-        username = _git_user()
-        footer = f"\n###### _last edited {timestamp} by @{username}_\n"
-        return full_changelog + footer

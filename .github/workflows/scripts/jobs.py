@@ -129,9 +129,13 @@ class Prepare:
         commitizen.render_unreleased_changelog(predicted_version, Paths.artifacts / CHANGELOG_NAME)
 
     def _append_comparison_link(self, changelog: Changelog, previous_version: str, next_version: str) -> None:
+        from datetime import datetime
         comparison = changelog.compare_link(previous_tag=previous_version, current_tag=next_version)
+        username = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True).stdout.strip() or os.environ.get("GITHUB_ACTOR") or "unknown"
+        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")
         with open(Paths.artifacts / CHANGELOG_NAME, "a") as changelog_file:
-            changelog_file.write(f"###### Full changelog: {comparison}")
+            changelog_file.write(f"###### Full changelog: {comparison}\n")
+            changelog_file.write(f"###### _last edited {timestamp} by @{username}_\n")
 
     def run(self) -> None:
         ref_name = os.environ["GITHUB_REF_NAME"]
