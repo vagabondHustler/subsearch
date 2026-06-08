@@ -13,7 +13,7 @@ from subsearch.runtime.models.model import AppConfig
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
     if diagnostics_enabled():
-        log.debug(f"Loading TOML: {toml_file_path}")
+        log.debug(f"Read persistent config: {toml_file_path.name}")
     with open(toml_file_path, "r") as f:
         return toml.load(f)
 
@@ -43,9 +43,9 @@ def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
             os.fsync(file.fileno())
         os.replace(temp_file_path, toml_file_path)
         if diagnostics_enabled():
-            log.debug(f"Wrote config to {toml_file_path}")
+            log.debug(f"Wrote config: {toml_file_path.name}")
     except Exception as e:
-        log.error(f"Failed to write config to {toml_file_path}: {e}")
+        log.error(f"Failed to write config to {toml_file_path.name}: {e}")
         raise
 
 
@@ -225,6 +225,8 @@ class ConfigSession:
         self.back_up_last_known_good()
         set_nested_value(self.in_memory_data, key, value)
         self.has_uncommitted_changes = True
+        if diagnostics_enabled():
+            log.debug(f"In-memory config change: {key} = {value!r}")
 
     def back_up_last_known_good(self) -> None:
         if self.last_known_good_backed_up:

@@ -5,7 +5,7 @@ from subsearch.parsing import release_parser
 from subsearch.providers.subsource import API_BASE_URL, Subsource, SubsourceApi
 from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.runtime.models.exceptions import MissingApiKey
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 from tests import fixture_data
 
 
@@ -39,7 +39,7 @@ def test_missing_key_raises_and_reports_no_response() -> None:
     provider = _build_subsource(api_key="")
     with pytest.raises(MissingApiKey):
         provider.start_search(flag="site")
-    assert provider.reported_health[0].health is ProviderHealth.NO_RESPONSE
+    assert provider.reported_health[0].diagnostic_status is ProviderDiagnosticStatus.NO_RESPONSE
 
 
 def test_skip_subtitle_rejects_wrong_language() -> None:

@@ -2,10 +2,10 @@ import re
 from typing import Any
 
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.providers.provider_helper import combine_provider_health
+from subsearch.providers.provider_helper import combine_provider_diagnostic_status
 
 
 class OpenSubtitlesScraper(provider_helper.ProviderHelper):
@@ -31,22 +31,22 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
             return body_text.strip().splitlines()[0]
         return ""
 
-    def classify_response(self, tree: Any) -> ProviderHealth:
+    def classify_response(self, tree: Any) -> ProviderDiagnosticStatus:
         if self.is_opensubtitles_down(tree):
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
         if tree.css_first("channel") is None:
-            return ProviderHealth.STRUCTURE_INVALID
-        return ProviderHealth.OK
+            return ProviderDiagnosticStatus.STRUCTURE_INVALID
+        return ProviderDiagnosticStatus.OK
 
     def response_is_well_formed(self, tree: Any) -> bool:
-        return self.classify_response(tree) is ProviderHealth.OK
+        return self.classify_response(tree) is ProviderDiagnosticStatus.OK
 
-    def get_subtitles(self, url: str) -> ProviderHealth:
+    def get_subtitles(self, url: str) -> ProviderDiagnosticStatus:
         tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
         classification = self.classify_response(tree)
-        if classification is not ProviderHealth.OK:
+        if classification is not ProviderDiagnosticStatus.OK:
             return classification
         for item in tree.css("item"):
             enclosure = item.css_first("enclosure")
@@ -58,21 +58,21 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
             subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
-        return ProviderHealth.OK
+        return ProviderDiagnosticStatus.OK
 
-    def with_hash(self, url: str, subtitle_name: str) -> ProviderHealth:
+    def with_hash(self, url: str, subtitle_name: str) -> ProviderDiagnosticStatus:
         tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
         if not tree:
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
         if self.is_opensubtitles_down(tree):
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
         bt_dwl_bt = tree.css_first("#bt-dwl-bt")
         if bt_dwl_bt is None:
-            return ProviderHealth.OK
+            return ProviderDiagnosticStatus.OK
         sub_id = bt_dwl_bt.attributes["data-product-id"]
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
         self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
-        return ProviderHealth.OK
+        return ProviderDiagnosticStatus.OK
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
@@ -80,10 +80,10 @@ class OpenSubtitles(OpenSubtitlesScraper):
         OpenSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def _do_search(self) -> ProviderHealth:
+    def _do_search(self) -> ProviderDiagnosticStatus:
         hash_health = self.with_hash(self.url_opensubtitles_hash, self.release)
         site_health = self.get_subtitles(self.url_opensubtitles)
-        return combine_provider_health(hash_health, site_health)
+        return combine_provider_diagnostic_status(hash_health, site_health)
 
     def start_search(self, *args, **kwargs) -> None:
         self.run_search(self._do_search)

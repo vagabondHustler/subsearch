@@ -6,7 +6,7 @@ from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppConfig, ProviderHealth, ProviderResult
+from subsearch.runtime.models.model import AppConfig, ProviderDiagnosticStatus, ProviderResult
 
 KNOWN_GOOD_RELEASE = "The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv"
 
@@ -22,24 +22,24 @@ def record_health_reports(reports: list[ProviderResult]) -> None:
         return None
     session = toml_file.get_config_session()
     for report in reports:
-        key = f"diagnostics.provider_health.{report.provider_name}.failed_attempts"
-        if report.health is ProviderHealth.OK and report.subtitles_found > 0:
+        key = f"diagnostics.provider_diagnostics.{report.provider_name}.failed_attempts"
+        if report.diagnostic_status is ProviderDiagnosticStatus.OK and report.subtitles_found > 0:
             log.debug(f"{report.provider_name}: healthy — resetting failed_attempts to 0")
             session.write(key, 0)
         else:
             current = session.read(key) or 0
             updated = current + 1
-            log.warning(f"{report.provider_name}: unhealthy ({report.health.value}, found {report.subtitles_found}) — failed_attempts {current} -> {updated}")
+            log.warning(f"{report.provider_name}: unhealthy ({report.diagnostic_status.value}, found {report.subtitles_found}) — failed_attempts {current} -> {updated}")
             session.write(key, updated)
     session.commit()
 
 
 def providers_due_for_diagnostic(app_config: AppConfig) -> list[str]:
     threshold = app_config.diagnostics["failed_attempts_threshold"]
-    provider_health = app_config.diagnostics["provider_health"]
+    provider_diagnostics = app_config.diagnostics["provider_diagnostics"]
     due = [
         provider_name
-        for provider_name, health in provider_health.items()
+        for provider_name, health in provider_diagnostics.items()
         if health["failed_attempts"] >= threshold
     ]
     if due:
@@ -76,7 +76,7 @@ def _load_app_config() -> AppConfig:
 def _diagnose_imdb(search_kwargs: dict) -> ProviderResult:
     release_data = search_kwargs["release_data"]
     lookup = imdb_lookup.ImdbIdLookup(release_data.title, release_data.year, release_data.tvseries)
-    return ProviderResult("imdb", lookup.health, 1 if lookup.imdb_id else 0)
+    return ProviderResult("imdb", lookup.diagnostic_status, 1 if lookup.imdb_id else 0)
 
 
 def _known_good_search_kwargs() -> dict:
@@ -95,7 +95,7 @@ def _known_good_search_kwargs() -> dict:
 
 
 def _provider_is_unhealthy(report: ProviderResult) -> bool:
-    return report.health is not ProviderHealth.OK or report.subtitles_found == 0
+    return report.diagnostic_status is not ProviderDiagnosticStatus.OK or report.subtitles_found == 0
 
 
 def run_all_providers() -> list[ProviderResult]:
@@ -107,7 +107,7 @@ def main() -> int:
     unhealthy = [report for report in reports if _provider_is_unhealthy(report)]
     for report in reports:
         status = "unhealthy" if _provider_is_unhealthy(report) else "healthy"
-        log.info(f"{report.provider_name}: {status} ({report.health.value}, found {report.subtitles_found})")
+        log.info(f"{report.provider_name}: {status} ({report.diagnostic_status.value}, found {report.subtitles_found})")
     return 1 if unhealthy else 0
 
 

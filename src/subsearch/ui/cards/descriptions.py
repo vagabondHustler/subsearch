@@ -139,12 +139,12 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Once connected, how many seconds to wait for a site to send its reply before giving up.",
     ),
     "diagnostics.header": SettingDescription(
-        "Provider health",
+        "Provider diagnostics",
         "Health checks run locally and nothing is sent anywhere automatically. "
         "If a provider looks broken, reporting it to the developer is entirely up to you.",
     ),
     "diagnostics.enabled": SettingDescription(
-        "Provider health checks",
+        "Provider diagnostics checks",
         "Runs a test search after the failed-attempts threshold is reached to confirm "
         "whether the provider is actually broken. Notifies you with the result. "
         "Disable to skip checks entirely.",

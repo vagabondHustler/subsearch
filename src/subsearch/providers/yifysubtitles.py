@@ -4,7 +4,7 @@ from selectolax.lexbor import LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
@@ -15,12 +15,12 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def response_is_well_formed(self, tree: Any) -> bool:
         return tree.css_first("table") is not None
 
-    def get_subtitles(self) -> ProviderHealth:
+    def get_subtitles(self) -> ProviderDiagnosticStatus:
         tree = http.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
         if not tree:
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
         if not self.response_is_well_formed(tree):
-            return ProviderHealth.STRUCTURE_INVALID
+            return ProviderDiagnosticStatus.STRUCTURE_INVALID
 
         product = tree.select("tr")
         for item in product.matches[1:]:  # type: ignore
@@ -29,7 +29,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
                 self.record_filtered_out(self.provider_name, self._item_name(item), reason)
                 continue
             self.parse_item(item)
-        return ProviderHealth.OK
+        return ProviderDiagnosticStatus.OK
 
     def _item_name(self, item: LexborNode) -> str:
         node = item.css_first("a")

@@ -24,7 +24,7 @@ from subsearch.ui.cards.system_cards import (
     DownloadManagerCard,
     NetworkCard,
     NotificationsCard,
-    ProviderHealthCard,
+    ProviderDiagnosticsCard,
 )
 from subsearch.ui.cards.update_card import UpdateCard
 
@@ -48,6 +48,6 @@ __all__ = [
     "DownloadManagerCard",
     "NetworkCard",
     "NotificationsCard",
-    "ProviderHealthCard",
+    "ProviderDiagnosticsCard",
     "UpdateCard",
 ]

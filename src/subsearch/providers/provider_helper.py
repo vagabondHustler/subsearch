@@ -8,7 +8,7 @@ from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     AppConfig,
     Language,
-    ProviderHealth,
+    ProviderDiagnosticStatus,
     ProviderResult,
     ProviderUrls,
     ReleaseInfo,
@@ -19,12 +19,12 @@ from subsearch.runtime.models.model import (
 _thread_lock = threading.Lock()
 
 
-def combine_provider_health(*healths: ProviderHealth) -> ProviderHealth:
-    if ProviderHealth.STRUCTURE_INVALID in healths:
-        return ProviderHealth.STRUCTURE_INVALID
-    if all(health is ProviderHealth.NO_RESPONSE for health in healths):
-        return ProviderHealth.NO_RESPONSE
-    return ProviderHealth.OK
+def combine_provider_diagnostic_status(*healths: ProviderDiagnosticStatus) -> ProviderDiagnosticStatus:
+    if ProviderDiagnosticStatus.STRUCTURE_INVALID in healths:
+        return ProviderDiagnosticStatus.STRUCTURE_INVALID
+    if all(health is ProviderDiagnosticStatus.NO_RESPONSE for health in healths):
+        return ProviderDiagnosticStatus.NO_RESPONSE
+    return ProviderDiagnosticStatus.OK
 
 
 class ProviderDataContainer:
@@ -192,8 +192,8 @@ class ProviderHelper(ProviderDataContainer):
         self.reported_health: list[ProviderResult] = []
         self.skip_counts: dict[str, int] = {}
 
-    def report_health(self, health: ProviderHealth, subtitles_found: int) -> None:
-        result = ProviderResult(self.provider_name, health, subtitles_found)
+    def report_diagnostic_status(self, diagnostic_status: ProviderDiagnosticStatus, subtitles_found: int) -> None:
+        result = ProviderResult(self.provider_name, diagnostic_status, subtitles_found)
         self.reported_health.append(result)
 
     def log_provider_skips(self) -> None:
@@ -256,17 +256,17 @@ class ProviderHelper(ProviderDataContainer):
     def start_search(self, *args, **kwargs) -> None:
         raise NotImplementedError
 
-    def run_search(self, search_fn: Callable[[], ProviderHealth]) -> None:
+    def run_search(self, search_fn: Callable[[], ProviderDiagnosticStatus]) -> None:
         subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
         try:
             health = search_fn()
         except Exception as error:
             log.error(f"{self.provider_name} response was unrecognized: {error}")
-            self.report_health(ProviderHealth.STRUCTURE_INVALID, 0)
+            self.report_diagnostic_status(ProviderDiagnosticStatus.STRUCTURE_INVALID, 0)
             return
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
         self.log_provider_skips()
-        self.report_health(health, subtitles_after - subtitles_before)
+        self.report_diagnostic_status(health, subtitles_after - subtitles_before)
 
     def subtitle_hi_match(self, hi: bool) -> bool:
         if self.hearing_impaired and self.non_hearing_impaired:

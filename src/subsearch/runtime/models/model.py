@@ -112,7 +112,7 @@ class Subtitle:
     status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
 
 
-class ProviderHealth(Enum):
+class ProviderDiagnosticStatus(Enum):
     OK = "ok"
     NO_RESPONSE = "no_response"
     STRUCTURE_INVALID = "structure_invalid"
@@ -121,7 +121,7 @@ class ProviderHealth(Enum):
 @dataclass(slots=True)
 class ProviderResult:
     provider_name: str
-    health: ProviderHealth
+    diagnostic_status: ProviderDiagnosticStatus
     subtitles_found: int
 
 

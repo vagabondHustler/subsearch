@@ -66,9 +66,9 @@ class NetworkCard(SettingsCard):
         self.add_row(SpinBoxRow("network.request_read_timeout", 1, 99))
 
 
-class ProviderHealthCard(SettingsCard):
+class ProviderDiagnosticsCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__("Provider health", parent)
+        super().__init__("Provider diagnostics", parent)
         self.add_header_help(SETTING_DESCRIPTIONS["diagnostics.header"].explanation)
         self.enabled = SwitchRow("diagnostics.enabled")
         self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", 1, 99)

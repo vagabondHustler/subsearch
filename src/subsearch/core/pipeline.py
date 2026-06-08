@@ -13,7 +13,7 @@ from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FIL
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.models.model import (
-    ProviderHealth,
+    ProviderDiagnosticStatus,
     ProviderResult,
     Subtitle,
     SubtitleStatus,
@@ -78,12 +78,12 @@ class SearchPipeline:
         log.event("task_completed")
 
     def _notify_unhealthy_providers(self, reports: list[ProviderResult]) -> None:
-        unhealthy = [report.provider_name for report in reports if report.health is not ProviderHealth.OK]
+        unhealthy = [report.provider_name for report in reports if report.diagnostic_status is not ProviderDiagnosticStatus.OK]
         if not unhealthy:
             return None
         message = ", ".join(unhealthy)
-        log.warning(f"Provider health check flagged: {message}", color="#f9e2af")
-        self.bootstrap.system_tray.display_toast("Provider health", f"May have changed: {message}")
+        log.warning(f"Provider diagnostics flagged: {message}", color="#f9e2af")
+        self.bootstrap.system_tray.display_toast("Provider diagnostics", f"May have changed: {message}")
 
     def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
         search_provider = provider(**self.bootstrap.search_kwargs)
@@ -187,9 +187,9 @@ class SearchPipeline:
         file_system.move_all(VIDEO_FILE.subs_dir, target)
         log.event("task_completed")
 
-    def _log_provider_health_warnings(self) -> None:
+    def _log_provider_diagnostics_warnings(self) -> None:
         for report in self.bootstrap.health_reports:
-            if report.health is ProviderHealth.STRUCTURE_INVALID:
+            if report.diagnostic_status is ProviderDiagnosticStatus.STRUCTURE_INVALID:
                 log.warning(f"{report.provider_name} may have changed — unrecognized response", color="#f9e2af")
 
     def _count_downloaded_subtitles(self) -> tuple[int, int]:
@@ -210,7 +210,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def summary_notification(self, elapsed: float) -> None:
         log.event("banner", title="Summary toast")
-        self._log_provider_health_warnings()
+        self._log_provider_diagnostics_warnings()
         downloaded_count, total_count = self._count_downloaded_subtitles()
         matches_downloaded = f"Downloaded: {downloaded_count}/{total_count}"
         elapsed_summary = f"Finished in {elapsed} seconds"

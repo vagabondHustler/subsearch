@@ -14,7 +14,7 @@ from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_cap
 from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow, read_value, write_value
 
 class _ButtonProxyLabel(BodyLabel):
-    def __init__(self, text: str, button: TransparentToolButton, parent: QWidget | None = None) -> None:
+    def __init__(self, text: str, button: TransparentToolButton, parent: QWidget | None = None) -> None:  # type: ignore[override]
         super().__init__(parent)
         self.setText(text)
         self._button = button
@@ -237,9 +237,7 @@ class FileExtensionsCard(SettingsCard):
     def _on_extension_toggled(self, extension: str, checked: bool) -> None:
         file_extensions = read_value("shell_integration.file_extensions")
         file_extensions[extension] = checked
-        write_value("shell_integration.file_extensions", file_extensions)
-        if read_value("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("appliesto")
+        self._persist_file_extensions(file_extensions)
 
     def _invert_selection(self) -> None:
         file_extensions = read_value("shell_integration.file_extensions")
@@ -249,6 +247,9 @@ class FileExtensionsCard(SettingsCard):
             check_box.setChecked(inverted)
             check_box.blockSignals(False)
             file_extensions[extension] = inverted
+        self._persist_file_extensions(file_extensions)
+
+    def _persist_file_extensions(self, file_extensions: dict) -> None:
         write_value("shell_integration.file_extensions", file_extensions)
         if read_value("shell_integration.context_menu"):
             windows_registry.write_registry_value_by_key("appliesto")

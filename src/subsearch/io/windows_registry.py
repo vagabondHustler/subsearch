@@ -61,7 +61,7 @@ def get_appliesto_value() -> str:
 
 def del_registry_key(reg_path: str, key: str) -> None:
     if diagnostics_enabled():
-        log.debug(f"Deleting registry key: {reg_path}\\{key}")
+        log.debug(f"Deleting registry key: {key}")
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         with winreg.OpenKey(hkey, reg_path, 0, winreg.KEY_WRITE) as sk:
             winreg.DeleteKey(sk, key)
@@ -91,7 +91,7 @@ def write_keys() -> None:
 def write_registry_value(sub_key: str, value_name: str, value: str) -> None:
     try:
         if diagnostics_enabled():
-            log.debug(f"Setting registry value: {sub_key} [{value_name or '(default)'}] = {value!r}")
+            log.debug(f"Wrote registry entry: [{value_name or '(default)'}] = {value!r}")
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
             with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
                 winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)

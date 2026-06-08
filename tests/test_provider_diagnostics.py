@@ -2,11 +2,11 @@ from selectolax.parser import HTMLParser
 
 from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.runtime.config.factories import get_default_app_config
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers import opensubtitles, yifysubtitles
-from subsearch.providers.provider_helper import combine_provider_health
+from subsearch.providers.provider_helper import combine_provider_diagnostic_status
 from subsearch.providers import diagnostics as diagnostics
 from tests import fixture_data
 
@@ -23,19 +23,19 @@ def _search_kwargs() -> dict:
     )
 
 
-def test_combine_provider_health_prioritizes_structure_invalid() -> None:
-    combined = combine_provider_health(ProviderHealth.OK, ProviderHealth.STRUCTURE_INVALID)
-    assert combined is ProviderHealth.STRUCTURE_INVALID
+def test_combine_provider_diagnostic_status_prioritizes_structure_invalid() -> None:
+    combined = combine_provider_diagnostic_status(ProviderDiagnosticStatus.OK, ProviderDiagnosticStatus.STRUCTURE_INVALID)
+    assert combined is ProviderDiagnosticStatus.STRUCTURE_INVALID
 
 
-def test_combine_provider_health_all_no_response() -> None:
-    combined = combine_provider_health(ProviderHealth.NO_RESPONSE, ProviderHealth.NO_RESPONSE)
-    assert combined is ProviderHealth.NO_RESPONSE
+def test_combine_provider_diagnostic_status_all_no_response() -> None:
+    combined = combine_provider_diagnostic_status(ProviderDiagnosticStatus.NO_RESPONSE, ProviderDiagnosticStatus.NO_RESPONSE)
+    assert combined is ProviderDiagnosticStatus.NO_RESPONSE
 
 
-def test_combine_provider_health_defaults_to_ok() -> None:
-    combined = combine_provider_health(ProviderHealth.OK, ProviderHealth.NO_RESPONSE)
-    assert combined is ProviderHealth.OK
+def test_combine_provider_diagnostic_status_defaults_to_ok() -> None:
+    combined = combine_provider_diagnostic_status(ProviderDiagnosticStatus.OK, ProviderDiagnosticStatus.NO_RESPONSE)
+    assert combined is ProviderDiagnosticStatus.OK
 
 
 def test_opensubtitles_well_formed_with_channel() -> None:
@@ -59,25 +59,25 @@ def test_opensubtitles_missing_channel_is_structure_invalid() -> None:
 def test_opensubtitles_maintenance_page_is_no_response() -> None:
     scraper = opensubtitles.OpenSubtitles(**_search_kwargs())
     tree = HTMLParser("<pre>Site will be online soon</pre>")
-    assert scraper.classify_response(tree) is ProviderHealth.NO_RESPONSE
+    assert scraper.classify_response(tree) is ProviderDiagnosticStatus.NO_RESPONSE
 
 
 def test_opensubtitles_database_outage_is_no_response() -> None:
     scraper = opensubtitles.OpenSubtitles(**_search_kwargs())
     tree = HTMLParser("<html><body>CANNOT CONNECT TO DB: error</body></html>")
-    assert scraper.classify_response(tree) is ProviderHealth.NO_RESPONSE
+    assert scraper.classify_response(tree) is ProviderDiagnosticStatus.NO_RESPONSE
 
 
 def test_opensubtitles_unrecognized_page_is_structure_invalid() -> None:
     scraper = opensubtitles.OpenSubtitles(**_search_kwargs())
     tree = HTMLParser("<html><body>a brand new layout</body></html>")
-    assert scraper.classify_response(tree) is ProviderHealth.STRUCTURE_INVALID
+    assert scraper.classify_response(tree) is ProviderDiagnosticStatus.STRUCTURE_INVALID
 
 
 def test_opensubtitles_valid_rss_is_ok() -> None:
     scraper = opensubtitles.OpenSubtitles(**_search_kwargs())
     tree = HTMLParser("<rss><channel><item></item></channel></rss>")
-    assert scraper.classify_response(tree) is ProviderHealth.OK
+    assert scraper.classify_response(tree) is ProviderDiagnosticStatus.OK
 
 
 def test_yifysubtitles_well_formed_with_table() -> None:
@@ -95,8 +95,8 @@ def test_yifysubtitles_missing_table_is_structure_invalid() -> None:
 def test_providers_due_when_failed_attempts_reach_threshold() -> None:
     config = get_default_app_config()
     threshold = config["diagnostics"]["failed_attempts_threshold"]
-    config["diagnostics"]["provider_health"]["opensubtitles"]["failed_attempts"] = threshold
-    config["diagnostics"]["provider_health"]["subsource"]["failed_attempts"] = threshold - 1
+    config["diagnostics"]["provider_diagnostics"]["opensubtitles"]["failed_attempts"] = threshold
+    config["diagnostics"]["provider_diagnostics"]["subsource"]["failed_attempts"] = threshold - 1
     app_config = toml_file.get_app_config_from_data(config)
     due = diagnostics.providers_due_for_diagnostic(app_config)
     assert "opensubtitles" in due

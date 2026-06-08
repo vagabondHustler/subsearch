@@ -1,7 +1,7 @@
 import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 
 
 class ImdbIdLookup:
@@ -9,19 +9,19 @@ class ImdbIdLookup:
     year: int
     tvseries: bool
     imdb_id: str
-    health: ProviderHealth
+    diagnostic_status: ProviderDiagnosticStatus
 
     def __init__(self, title: str, year: int, tvseries: bool) -> None:
         self.title = title.lower()
         self.year = year
         self.tvseries = tvseries
         self.imdb_id = ""
-        self.health = ProviderHealth.OK
+        self.diagnostic_status = ProviderDiagnosticStatus.OK
 
         try:
             search_result = imdbinfo.search_title(title)
         except ImdbinfoError:
-            self.health = ProviderHealth.STRUCTURE_INVALID
+            self.diagnostic_status = ProviderDiagnosticStatus.STRUCTURE_INVALID
             return None
         if not search_result:
             return None

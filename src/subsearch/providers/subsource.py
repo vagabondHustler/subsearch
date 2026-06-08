@@ -6,7 +6,7 @@ from curl_cffi.requests import Response
 from subsearch.providers import provider_helper
 from subsearch.runtime.models.exceptions import MissingApiKey, ProviderResponseUnrecognized
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import ProviderHealth
+from subsearch.runtime.models.model import ProviderDiagnosticStatus
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 
@@ -48,27 +48,27 @@ class Subsource(provider_helper.ProviderHelper):
     def start_search(self, *args, **kwargs) -> None:
         if not self.api_key:
             log.warning(f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.")
-            self.report_health(ProviderHealth.NO_RESPONSE, 0)
+            self.report_diagnostic_status(ProviderDiagnosticStatus.NO_RESPONSE, 0)
             raise MissingApiKey(self.provider_name)
         self.run_search(self._search_and_collect)
 
-    def _search_and_collect(self) -> ProviderHealth:
+    def _search_and_collect(self) -> ProviderDiagnosticStatus:
         api = SubsourceApi(self.api_key)
         content_type = "series" if self.tvseries else "movie"
         search_response = api.search_by_imdb(self.imdb_id, content_type)
         if not api.response_status_ok(search_response):
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
 
         movie_id = self._matching_movie_id(search_response)
         if movie_id is None:
-            return ProviderHealth.OK
+            return ProviderDiagnosticStatus.OK
 
         subtitles_response = api.list_subtitles(movie_id, self.current_language)
         if not api.response_status_ok(subtitles_response):
-            return ProviderHealth.NO_RESPONSE
+            return ProviderDiagnosticStatus.NO_RESPONSE
 
         self._collect_subtitles(api, subtitles_response)
-        return ProviderHealth.OK
+        return ProviderDiagnosticStatus.OK
 
     def _matching_movie_id(self, response: Response) -> int | None:
         data = response.json()

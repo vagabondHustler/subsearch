@@ -74,7 +74,7 @@ class Bootstrap:
         )
         self.release_data.imdb_id = find_id.imdb_id
         found_subtitles = 1 if find_id.imdb_id else 0
-        self.health_reports.append(ProviderResult("imdb", find_id.health, found_subtitles))
+        self.health_reports.append(ProviderResult("imdb", find_id.diagnostic_status, found_subtitles))
 
     def setup_file_system(self) -> None:
         file_system.create_directory(APP_PATHS.tmp_dir)
