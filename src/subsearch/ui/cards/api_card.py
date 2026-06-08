@@ -9,7 +9,11 @@ from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_caption_font
+from subsearch.ui.theme.typography import (
+    TEXT_COLOR,
+    apply_body_font,
+    apply_caption_font,
+)
 from subsearch.ui.widgets.setting_rows import read_value, write_value
 
 VISIBLE_PREFIX_LENGTH = 4
@@ -73,9 +77,10 @@ class MaskedApiKeyLineEdit(LineEdit):
         if event.matches(QKeySequence.StandardKey.Paste):
             text = QApplication.clipboard().text()
             if text:
-                selected_text = self.selectedText()
-                if selected_text:
-                    self._set_api_key(text)
+                if self.hasSelectedText():
+                    start = self.selectionStart()
+                    end = start + len(self.selectedText())
+                    self._set_api_key(self._api_key[:start] + text + self._api_key[end:])
                 else:
                     self._set_api_key(self._api_key + text)
             return
