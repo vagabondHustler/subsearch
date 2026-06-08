@@ -20,7 +20,7 @@ Subsearch is a Windows subtitle downloader that integrates with the right-click 
 - Right-click any media file to trigger a search
 - 70+ languages supported
 - Filters: hearing-impaired, non-HI, foreign parts only
-- Configurable via a GUI — providers, language, filters, and more
+- Configurable via a GUI 
 - Available as an MSI installer, PyPI package, or source
 
 Links: [Supported languages](https://github.com/vagabondHustler/subsearch/discussions/558) · [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md) · [Security](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
@@ -79,4 +79,4 @@ Use `pip install -e .[build,lint,tests,tools,type]` to include optional dev depe
 
 Subsearch is licensed under the GNU General Public License v3.0 (or later); see `LICENSE` for the full text.
 
-The distributed application bundles third-party components listed in `THIRD-PARTY-LICENSES.md`. Notably PySide6 (Qt for Python) under LGPL v3 and PySide6-Fluent-Widgets under GPL v3 — the latter is why Subsearch as a whole is distributed under GPL v3.
+The distributed application bundles third-party components listed in `THIRD-PARTY-LICENSES.md`. Notably PySide6 (Qt for Python) under LGPL v3 and PySide6-Fluent-Widgets under GPL v3, the latter is why Subsearch as a whole is distributed under GPL v3.

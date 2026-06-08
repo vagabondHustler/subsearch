@@ -3,7 +3,7 @@ run-name: Provider diagnostics
 
 #   Monthly (1st, 03:00 UTC) and on demand:
 #   hits each subtitle provider with a known-good title and fails if one
-#   returns nothing or an unrecognized response — an early warning that a
+#   returns nothing or an unrecognized response, an early warning that a
 #   provider changed its site or API before users are affected.
 
 on:

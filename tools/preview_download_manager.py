@@ -108,7 +108,7 @@ def stub_network_and_filesystem(interface: dm.DownloadManagerInterface) -> None:
 class MockWindow(FluentWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Download Manager — mock")
+        self.setWindowTitle("Download Manager , mock")
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.resize(760, 680)
         self.setMicaEffectEnabled(True)

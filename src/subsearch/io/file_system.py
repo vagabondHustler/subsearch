@@ -63,7 +63,7 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) 
 
 
 _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
-_MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB — generous for any subtitle archive
+_MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB , generous for any subtitle archive
 
 
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path) -> None:
@@ -89,7 +89,7 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
         try:
             with zipfile.ZipFile(file) as archive:
                 _safe_extract_archive(archive, dst)
-        except (zipfile.BadZipFile, OSError):
+        except zipfile.BadZipFile, OSError:
             log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
 

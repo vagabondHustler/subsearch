@@ -13,6 +13,7 @@ from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_caption_font
 from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow, read_value, write_value
 
+
 class _ButtonProxyLabel(BodyLabel):
     def __init__(self, text: str, button: TransparentToolButton, parent: QWidget | None = None) -> None:  # type: ignore[override]
         super().__init__(parent)
@@ -39,10 +40,10 @@ DEFAULT_TARGET_PATH = "."
 DEFAULT_PATH_RESOLUTION = "relative"
 DESTINATION_PATH_EXAMPLES = (
     "Where moved subtitles are placed.\n\n"
-    "Relative — taken from the video's own folder:\n"
+    "Relative , taken from the video's own folder:\n"
     "    subs\n"
     "    ..\\Subtitles\n\n"
-    "Absolute — a fixed path on disk:\n"
+    "Absolute , a fixed path on disk:\n"
     "    C:\\Users\\You\\Subtitles\n"
     "    D:\\Media\\Subs"
 )

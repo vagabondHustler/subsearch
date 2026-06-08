@@ -190,7 +190,7 @@ class SearchPipeline:
     def _log_provider_diagnostics_warnings(self) -> None:
         for report in self.bootstrap.health_reports:
             if report.diagnostic_status is ProviderDiagnosticStatus.STRUCTURE_INVALID:
-                log.warning(f"{report.provider_name} may have changed — unrecognized response", color="#f9e2af")
+                log.warning(f"{report.provider_name} may have changed, unrecognized response", color="#f9e2af")
 
     def _count_downloaded_subtitles(self) -> tuple[int, int]:
         evaluated = self.bootstrap.accepted_subtitles + self.bootstrap.rejected_subtitles

@@ -134,10 +134,10 @@ def check_long_paths_enabled() -> bool:
                 value, _ = winreg.QueryValueEx(sk, value_name)
                 enabled = bool(value)
                 if not enabled:
-                    log.warning("Win32 long paths are not enabled — long file names may fail")
+                    log.warning("Win32 long paths are not enabled , long file names may fail")
                 return enabled
     except FileNotFoundError:
-        log.warning("Win32 long paths registry key not found — assuming disabled")
+        log.warning("Win32 long paths registry key not found , assuming disabled")
         return False
     except Exception as e:
         log.error(f"Failed to check long path status: {e}")
