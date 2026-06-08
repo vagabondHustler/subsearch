@@ -109,10 +109,10 @@ def test_provider_urls_movie(monkeypatch) -> None:
 
     assert (
         provider_url.opensubtitles
-        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+        == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"]
     )
-    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
-    assert provider_url.yifysubtitles == ""
+    assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
+    assert provider_url.yifysubtitles == []
 
 
 def test_provider_urls_series(monkeypatch) -> None:
@@ -130,7 +130,7 @@ def test_provider_urls_series(monkeypatch) -> None:
 
     assert (
         provider_url.opensubtitles
-        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+        == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"]
     )
-    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
-    assert provider_url.yifysubtitles == ""
+    assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
+    assert provider_url.yifysubtitles == []

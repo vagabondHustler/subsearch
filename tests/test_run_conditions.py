@@ -46,13 +46,13 @@ def test_conditions_opensubtitles(fake_cls: FakeBootstrap) -> None:
 def test_conditions_yifysubtitles(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.only_foreign_parts = True
     fake_cls.release_data.tvseries = True
-    fake_cls.provider_urls.yifysubtitles = ""
+    fake_cls.provider_urls.yifysubtitles = []
     fake_cls.app_config.providers["yifysubtitles_site"] = True
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
     fake_cls.app_config.only_foreign_parts = False
     fake_cls.release_data.tvseries = False
-    fake_cls.provider_urls.yifysubtitles = "fake_url"
+    fake_cls.provider_urls.yifysubtitles = ["fake_url"]
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
 

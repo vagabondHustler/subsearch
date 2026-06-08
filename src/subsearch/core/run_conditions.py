@@ -73,7 +73,7 @@ class RunConditions:
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_yifysubtitles", lambda: self.language_supports_provider("yifysubtitles")),
                 ("not_tvseries", not self.release_data.tvseries),
-                ("url_not_empty", self.provider_urls.yifysubtitles != ""),
+                ("url_not_empty", len(self.provider_urls.yifysubtitles) > 0),
                 ("provider_enabled", self.app_config.providers["yifysubtitles_site"]),
             ],
             "subsource": [
