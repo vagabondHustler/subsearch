@@ -71,7 +71,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
             return ProviderDiagnosticStatus.OK
         sub_id = bt_dwl_bt.attributes["data-product-id"]
         download_url = f"https://dl.opensubtitles.org/en/download/sub/{sub_id}"
-        self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
+        self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {}, percentage_override=100)
         return ProviderDiagnosticStatus.OK
 
 
