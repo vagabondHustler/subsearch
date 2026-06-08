@@ -6,7 +6,7 @@ from typing import Optional
 
 from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
 from subsearch.runtime.config.metaclasses import Singleton
-from subsearch.runtime.logging import log_events
+from subsearch.runtime.logging import log_events, log_sanitizer
 from subsearch.runtime.models.model import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
@@ -67,9 +67,10 @@ class Logger(metaclass=Singleton):
         color: Optional[str] = None,
         bold: bool = False,
     ) -> None:
-        self._file_logger.log(LEVELS[level], message, stacklevel=3)
+        safe_message = log_sanitizer.sanitize(message)
+        self._file_logger.log(LEVELS[level], safe_message, stacklevel=3)
         if to_console:
-            print(paint(message, color, bold) if color else message)
+            print(paint(safe_message, color, bold) if color else safe_message)
 
     def debug(self, message: str, to_console: bool = True) -> None:
         self.write(message, "debug", to_console)

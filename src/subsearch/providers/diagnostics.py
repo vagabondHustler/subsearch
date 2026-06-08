@@ -24,12 +24,14 @@ def record_health_reports(reports: list[ProviderResult]) -> None:
     for report in reports:
         key = f"diagnostics.provider_diagnostics.{report.provider_name}.failed_attempts"
         if report.diagnostic_status is ProviderDiagnosticStatus.OK and report.subtitles_found > 0:
-            log.debug(f"{report.provider_name}: healthy — resetting failed_attempts to 0")
+            log.debug(f"{report.provider_name}: healthy , resetting failed_attempts to 0")
             session.write(key, 0)
         else:
             current = session.read(key) or 0
             updated = current + 1
-            log.warning(f"{report.provider_name}: unhealthy ({report.diagnostic_status.value}, found {report.subtitles_found}) — failed_attempts {current} -> {updated}")
+            log.warning(
+                f"{report.provider_name}: unhealthy ({report.diagnostic_status.value}, found {report.subtitles_found}) , failed_attempts {current} -> {updated}"
+            )
             session.write(key, updated)
     session.commit()
 
@@ -60,7 +62,7 @@ def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
         try:
             provider.start_search(flag="site")
         except MissingApiKey:
-            log.warning(f"{provider_name}: skipped — missing API key")
+            log.warning(f"{provider_name}: skipped , missing API key")
         reports.extend(provider.reported_health)
     return reports
 
@@ -68,7 +70,6 @@ def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
 def _load_app_config() -> AppConfig:
     if not FILE_PATHS.config.exists():
         return toml_file.get_app_config_from_data(DEFAULT_CONFIG)
-    toml_file.resolve_on_integrity_failure()
     toml_file.reset_config_session()
     return toml_file.get_config_session().snapshot()
 

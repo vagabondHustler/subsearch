@@ -8,12 +8,12 @@ import toml
 
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.logging.logger import log
+from subsearch.runtime.logging import log_sanitizer
 from subsearch.runtime.models.model import AppConfig
 
 
 def load_toml_data(toml_file_path: Path) -> dict[str, Any]:
-    if diagnostics_enabled():
-        log.debug(f"Read persistent config: {toml_file_path.name}")
+    log.debug(f"Read toml file from {toml_file_path.name}")
     with open(toml_file_path, "r") as f:
         return toml.load(f)
 
@@ -42,8 +42,8 @@ def dump_toml_data(toml_file_path: Path, toml_data: dict) -> None:
             file.flush()
             os.fsync(file.fileno())
         os.replace(temp_file_path, toml_file_path)
-        if diagnostics_enabled():
-            log.debug(f"Wrote config: {toml_file_path.name}")
+
+        log.debug(f"Wrote config to {toml_file_path.name}")
     except Exception as e:
         log.error(f"Failed to write config to {toml_file_path.name}: {e}")
         raise
@@ -83,17 +83,17 @@ def del_toml_key(toml_file_path: Path, key: str) -> None:
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    log.warning("Config schema mismatch — repairing")
+    log.warning("Config schema mismatch , repairing")
     toml_data = load_toml_data(toml_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
-        log.info(f"Removing obsolete config key: {key}")
+        log.info(f"Removing obsolete config key {key}")
         delete_nested_value(toml_data, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        log.info(f"Adding missing config key: {key}")
+        log.info(f"Adding missing config key {key}")
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         set_nested_value(toml_data, key, value)
@@ -138,41 +138,38 @@ def reset_to_default_config() -> None:
     dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
 
-def config_is_readable() -> bool:
-    try:
-        load_toml_data(FILE_PATHS.config)
-        return True
-    except Exception:
-        return False
-
-
-def resolve_on_integrity_failure() -> None:
+def resolve_on_integrity_failure() -> dict[str, Any]:
     remove_stale_temp_file()
-    if not FILE_PATHS.config.exists() or not config_is_readable():
-        log.warning("Config missing or unreadable — attempting restore from backup")
-        restore_last_known_good_config()
-    else:
-        remove_stale_backup_file()
-    if not FILE_PATHS.config.exists():
-        reset_to_default_config()
-        return None
     valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
     try:
-        config_keys = get_keys_recursively(load_toml_data(FILE_PATHS.config))
+        toml_data = load_toml_data(FILE_PATHS.config)
+        config_keys = get_keys_recursively(toml_data)
     except Exception:
-        log.warning("Config is unreadable after restore — resetting to defaults")
-        reset_to_default_config()
-        return None
+        log.warning("Config missing or unreadable , attempting restore from backup")
+        restore_last_known_good_config()
+        remove_stale_backup_file()
+        if not FILE_PATHS.config.exists():
+            reset_to_default_config()
+            return load_toml_data(FILE_PATHS.config)
+        try:
+            toml_data = load_toml_data(FILE_PATHS.config)
+            config_keys = get_keys_recursively(toml_data)
+        except Exception:
+            log.warning("Config is unreadable after restore , resetting to defaults")
+            reset_to_default_config()
+            return load_toml_data(FILE_PATHS.config)
+    else:
+        remove_stale_backup_file()
     if valid_config(valid_config_keys, config_keys):
-        if diagnostics_enabled():
-            log.debug("Config integrity check passed")
-        return None
+        log.debug("Config integrity check passed")
+        return toml_data
     try:
         repair_toml_config(FILE_PATHS.config, valid_config_keys, config_keys)
         log.info("Config repair succeeded")
     except Exception:
-        log.error("Config repair failed — resetting to defaults")
+        log.error("Config repair failed , resetting to defaults")
         reset_to_default_config()
+    return load_toml_data(FILE_PATHS.config)
 
 
 def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
@@ -208,10 +205,10 @@ def get_app_config(toml_file_path: Path) -> AppConfig:
 
 
 class ConfigSession:
-    def __init__(self, toml_file_path: Path) -> None:
+    def __init__(self, toml_file_path: Path, initial_data: dict[str, Any]) -> None:
         self.toml_file_path = toml_file_path
         self.backup_file_path = toml_file_path.with_suffix(f"{toml_file_path.suffix}.bak")
-        self.in_memory_data = load_toml_data(toml_file_path)
+        self.in_memory_data = initial_data
         self.has_uncommitted_changes = False
         self.last_known_good_backed_up = False
 
@@ -225,8 +222,9 @@ class ConfigSession:
         self.back_up_last_known_good()
         set_nested_value(self.in_memory_data, key, value)
         self.has_uncommitted_changes = True
-        if diagnostics_enabled():
-            log.debug(f"In-memory config change: {key} = {value!r}")
+
+        sanitized_value = log_sanitizer.sanitize(repr(value))
+        log.debug(f"In-memory config change: {key} = {sanitized_value}")
 
     def back_up_last_known_good(self) -> None:
         if self.last_known_good_backed_up:
@@ -239,8 +237,8 @@ class ConfigSession:
         if not self.has_uncommitted_changes:
             return None
         dump_toml_data(self.toml_file_path, self.in_memory_data)
-        if diagnostics_enabled():
-            log.debug(f"Config session committed to {self.toml_file_path}")
+
+        log.debug(f"Config session committed to {self.toml_file_path}")
         self.has_uncommitted_changes = False
         self.backup_file_path.unlink(missing_ok=True)
         self.last_known_good_backed_up = False
@@ -271,7 +269,8 @@ def restore_last_known_good_config() -> None:
 def get_config_session() -> ConfigSession:
     global _active_config_session
     if _active_config_session is None:
-        _active_config_session = ConfigSession(FILE_PATHS.config)
+        toml_data = resolve_on_integrity_failure()
+        _active_config_session = ConfigSession(FILE_PATHS.config, toml_data)
     return _active_config_session
 
 
