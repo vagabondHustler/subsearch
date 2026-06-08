@@ -1,4 +1,5 @@
 import re
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
@@ -195,49 +196,70 @@ def no_release_data() -> ReleaseInfo:
     return ReleaseInfo("", 0, "", "", "", "", False, "", "", "")
 
 
+_STRIPPED_TOKENS: frozenset[str] = frozenset(
+    [
+        "720p", "1080p", "1440p", "2160p", "4k", "2k",
+        "h264", "h265", "x264", "x265", "hevc", "avc",
+        "mkv", "mp4", "avi",
+    ]
+)
+
+_SOURCE_TOKENS: frozenset[str] = frozenset(
+    ["web", "webrip", "webdl", "bluray", "bdrip", "hdtv", "dvdrip", "hdrip"]
+)
+
+_YEAR_PATTERN: re.Pattern[str] = re.compile(r"^\d{4}$")
+_SEASON_EPISODE_PATTERN: re.Pattern[str] = re.compile(r"^s\d+e\d+$")
+
+
+def _normalize_tokens(filename: str) -> dict:
+    group = filename.rsplit("-", 1)[-1].lower()
+    raw_tokens = re.split(r"[.\-]", filename.lower())
+    year: str | None = None
+    season_episode: str | None = None
+    source: str | None = None
+    title: list[str] = []
+
+    for token in raw_tokens:
+        if token in _STRIPPED_TOKENS:
+            continue
+        if _YEAR_PATTERN.match(token):
+            year = token
+            continue
+        if _SEASON_EPISODE_PATTERN.match(token):
+            season_episode = token
+            continue
+        if token in _SOURCE_TOKENS:
+            source = token
+            continue
+        title.append(token)
+
+    return {"title": title, "year": year, "season_episode": season_episode, "group": group, "source": source}
+
+
 def calculate_match(from_user: str, from_website: str) -> int:
-    max_percentage = 100
-    _from_user: list[str] = mk_lst(from_user)
-    _from_website: list[str] = mk_lst(from_website)
-    lst1, lst2 = make_equal_size(_from_user, _from_website)
-    not_matching = list(set(lst1) - set(lst2))
-    not_matching_value = len(not_matching)
-    number_of_items = len(lst1)
-    percentage_to_remove = round(not_matching_value / number_of_items * max_percentage)
-    pct = round(max_percentage - percentage_to_remove)
+    tokens_a = _normalize_tokens(from_user)
+    tokens_b = _normalize_tokens(from_website)
 
-    return pct
+    if tokens_a == tokens_b:
+        return 100
 
+    title_score = round(SequenceMatcher(None, tokens_a["title"], tokens_b["title"]).ratio() * 100)
+    group_score = 100 if tokens_a["group"] == tokens_b["group"] else 0
+    source_score = 100 if tokens_a["source"] == tokens_b["source"] else 0
+    base = (title_score * 60 + group_score * 30 + source_score * 10) // 100
 
-def mk_lst(release: str) -> list[str]:
-    new: list[str] = []
-    qualities = ["720p", "1080p", "1440p", "2160p"]
-    temp = release.split(".")
+    multiplier = 1.0
+    if tokens_a["year"] is not None and tokens_b["year"] is not None and tokens_a["year"] != tokens_b["year"]:
+        multiplier *= 0.1
+    if (
+        tokens_a["season_episode"] is not None
+        and tokens_b["season_episode"] is not None
+        and tokens_a["season_episode"] != tokens_b["season_episode"]
+    ):
+        multiplier *= 0.1
 
-    for item in temp:
-        if item not in qualities:
-            new.append(item.lower())
-    return new
-
-
-def make_equal_size(lst1, lst2) -> tuple:
-    if len(lst1) == len(lst2):
-        return lst1, lst2
-    elif len(lst1) > len(lst2):
-        lst_big, lst_small = lst1, lst2
-    else:
-        lst_big, lst_small = lst2, lst1
-
-    num_big, num_small = sorted((len(lst1), len(lst2)), reverse=True)
-    difference = num_big - num_small
-    filled_list = fill_shorter_list(lst_small, difference)
-    return lst_big, filled_list
-
-
-def fill_shorter_list(small_lst, difference) -> Any:
-    for _ in range(difference):
-        small_lst.append(None)
-    return small_lst
+    return round(base * multiplier)
 
 
 def valid_filename(input_string) -> bool:
