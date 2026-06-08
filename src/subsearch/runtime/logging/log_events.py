@@ -22,7 +22,7 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "banner": LogEvent("--- [{title}] ---", BANNER_COLOR, bold=True),
     "task_completed": LogEvent("Tasks completed", DONE_COLOR),
     "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", MATCH_COLOR),
-    "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}  (below {threshold}%)"),
+    "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}"),
     "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
     "remove": LogEvent(r"Removing {kind}: ...\{src}"),
     "rename": LogEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}"),
@@ -44,12 +44,7 @@ def render(event_key: str, **values: Any) -> tuple[str, Optional[str], bool]:
     if event_key in FILESYSTEM_EVENTS:
         values = _filesystem_values(values)
     text = event.template.format(**values)
-    color = _match_color(values) if event_key == "subtitle_match" else event.color
-    return text, color, event.bold
-
-
-def _match_color(values: dict[str, Any]) -> Optional[str]:
-    return MATCH_COLOR if values["percentage"] >= values["threshold"] else None
+    return text, event.color, event.bold
 
 
 def _filesystem_values(values: dict[str, Any]) -> dict[str, Any]:
