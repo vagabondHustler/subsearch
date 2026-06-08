@@ -22,15 +22,24 @@ def _username_candidates() -> list[str]:
     return sorted({name for name in candidates if name}, key=len, reverse=True)
 
 
+def _identity_patterns() -> list[re.Pattern[str]]:
+    names = _username_candidates()
+    if COMPUTER_NAME:
+        names.append(COMPUTER_NAME)
+    # matches a username or computer name as a whole word; backslashes count as word boundaries so paths still match
+    return [re.compile(rf"\b{re.escape(name)}\b", re.IGNORECASE) for name in names]
+
+
+_IDENTITY_PATTERNS = _identity_patterns()
+
+
 def sanitize(text: str) -> str:
     text = API_KEY_PATTERN.sub(REDACTED, text)
     text = EMAIL_PATTERN.sub(REDACTED, text)
     if GUID:
         text = text.replace(GUID, REDACTED)
-    if COMPUTER_NAME:
-        text = re.sub(re.escape(COMPUTER_NAME), REDACTED, text, flags=re.IGNORECASE)
-    for username in _username_candidates():
-        text = re.sub(re.escape(username), REDACTED, text, flags=re.IGNORECASE)
+    for pattern in _IDENTITY_PATTERNS:
+        text = pattern.sub(REDACTED, text)
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
 
 
