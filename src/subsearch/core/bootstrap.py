@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
@@ -10,8 +11,6 @@ from subsearch.runtime.models.model import ProviderResult, Subtitle
 class Bootstrap:
     def __init__(self, pref_counter: float) -> None:
         self.start = pref_counter
-        log.event("banner", title="Initializing")
-
         self.api_calls_made: dict[str, int] = {}
         self.ran_download_tab = False
         self.accepted_subtitles: list[Subtitle] = []
@@ -27,6 +26,8 @@ class Bootstrap:
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
 
+        log.debug(f"sys.argv: {sys.argv}", to_console=False)
+        log.debug(f"Video file {'found' if self.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}", to_console=False)
         log.debug("Verifying files and paths")
         self.setup_file_system()
         self.language_data = toml_file.load_language_data()
@@ -44,6 +45,7 @@ class Bootstrap:
         self.system_tray.start()
 
         if self.gui_may_open:
+            log.debug("GUI warmup triggered", to_console=False)
             from subsearch.ui import warmup
 
             warmup.start_warmup()
@@ -79,7 +81,6 @@ class Bootstrap:
     def setup_file_system(self) -> None:
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
-        toml_file.resolve_on_integrity_failure()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         if self.file_exists:
             file_system.create_directory(VIDEO_FILE.subs_dir)

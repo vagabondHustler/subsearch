@@ -3,13 +3,18 @@ from typing import Any, Callable
 
 from subsearch.runtime.models import exceptions
 from subsearch.io import toml_file
-from subsearch.runtime.config.constants import FILE_PATHS, GUID
+from subsearch.runtime.config.constants import GUID
+from subsearch.runtime.logging.logger import log
 
 
 def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
+        log.event("banner", title="Initializing")
         try:
-            if not toml_file.load_toml_value(FILE_PATHS.config, "application.single_instance"):
+            single_instance = toml_file.get_config_session().read("application.single_instance")
+            log.debug(f"Single-instance enforcement: {single_instance}", to_console=False)
+            if not single_instance:
+                log.debug("Single-instance disabled, skipping mutex", to_console=False)
                 return func()
         except FileNotFoundError:
             pass
@@ -25,8 +30,10 @@ def apply_mutex(func: Callable) -> Callable:
             raise exceptions.MultipleInstancesError(GUID)
         try:
             kernel32.WaitForSingleObject(mutex, -1)
+            log.debug(f"Mutex acquired: {GUID}", to_console=False)
             return func(*args, **kwargs)
         finally:
             kernel32.ReleaseMutex(mutex)
+            log.debug(f"Mutex released: {GUID}", to_console=False)
 
     return inner
