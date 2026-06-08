@@ -1,11 +1,5 @@
-"""
-Custom commitizen plugin for subsearch's changelog and version bumps.
-
-Registered as the SubsearchCz provider via [tool.commitizen] in pyproject.toml;
-not run directly. Renders conventional commits into emoji-sectioned changelog
-entries with per-commit links for the GitHub release body.
-"""
-
+import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from commitizen.cz.conventional_commits.conventional_commits import ConventionalCommitsCz
@@ -15,11 +9,12 @@ REPO = "https://github.com/vagabondHustler/subsearch"
 _TEMPLATE_DIR = Path(__file__).parent
 
 
-class SubsearchCz(ConventionalCommitsCz):
-    """Conventional-commits changelog with subsearch's emoji sections and
-    per-commit links. Sections mirror the old changelog_builder.json so the
-    GitHub release body keeps the same shape, minus PR references."""
+def _git_user() -> str:
+    result = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
+    return result.stdout.strip() or "unknown"
 
+
+class SubsearchCz(ConventionalCommitsCz):
     # The custom template (named via [tool.commitizen] template in
     # pyproject.toml) renders these as h4 headings, so the titles themselves
     # carry no leading '#'. Overriding the loader to this package's own
@@ -36,12 +31,10 @@ class SubsearchCz(ConventionalCommitsCz):
         "refactor": "⚙️ Other:",
         "style": "⚙️ Other:",
         "test": "⚙️ Other:",
+        "BREAKING CHANGE": "‼️ Breaking changes:",
     }
     change_type_order = [
-        # commitizen tags breaking changes with the literal "BREAKING CHANGE"
-        # type, which isn't mapped to an emoji section. Listing it first keeps it
-        # at the top of each release; omitting it sorts it to the bottom.
-        "BREAKING CHANGE",
+        "‼️ Breaking changes:",
         "✨ Features:",
         "🐛 Fixes:",
         "📚 Docs:",
@@ -53,5 +46,12 @@ class SubsearchCz(ConventionalCommitsCz):
     # plain callable attribute, hence the override ignore.
     def changelog_message_builder_hook(self, message: dict, commit) -> dict:  # type: ignore[override]
         sha = commit.rev
-        message["message"] += f" - [{sha[:7]}]({REPO}/commit/{sha})"
+        username = _git_user()
+        message["message"] += f" - [{username}@{sha[:7]}]({REPO}/commit/{sha})"
         return message
+
+    def changelog_hook(self, full_changelog: str, _release_tag: str | None) -> str:  # type: ignore[override]
+        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")
+        username = _git_user()
+        footer = f"\n###### _last edited {timestamp} by @{username}_\n"
+        return full_changelog + footer
