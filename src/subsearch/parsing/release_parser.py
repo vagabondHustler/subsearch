@@ -87,7 +87,7 @@ def find_title(filename: str, year: int, series: bool) -> str:
     return title
 
 
-_YIFY_MIRRORS: list[str] = [
+_YIFYSUBTITLES_MIRRORS: list[str] = [
     "https://yifysubtitles.ch",
     "https://yifysubtitles.mx",
     "https://yifysubtitles.org",
@@ -135,7 +135,7 @@ class CreateProviderUrls:
     def yifysubtitles(self) -> list[str]:
         if self.release_data.tvseries or not self.release_data.imdb_id:
             return []
-        return [f"{mirror}/movie-imdb/{self.release_data.imdb_id}" for mirror in _YIFY_MIRRORS]
+        return [f"{mirror}/movie-imdb/{self.release_data.imdb_id}" for mirror in _YIFYSUBTITLES_MIRRORS]
 
     def _opensubtitles_subtitle_type(self) -> str:
         three_letter_code = self.current_language_data.three_letter_code
