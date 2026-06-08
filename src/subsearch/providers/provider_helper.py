@@ -153,12 +153,15 @@ class SubtitleCollector:
             return SubtitleStatus.ACCEPTED
         return SubtitleStatus.BELOW_THRESHOLD
 
-    def prepare_subtitle(self) -> None:
-        self.set_percentage_result()
+    def prepare_subtitle(self, percentage_override: int | None = None) -> None:
+        self.set_percentage_result(percentage_override)
         self.populate_correct_subtitle_list()
 
-    def set_percentage_result(self) -> None:
-        self.percentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
+    def set_percentage_result(self, percentage_override: int | None = None) -> None:
+        if percentage_override is not None:
+            self.percentage_result = percentage_override
+        else:
+            self.percentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
 
     def populate_correct_subtitle_list(self) -> None:
         if self.master.threshold_met(self.percentage_result):
@@ -245,13 +248,14 @@ class ProviderHelper(ProviderDataContainer):
         download_url: str,
         request_data: dict,
         download_headers: dict[str, str] | None = None,
+        percentage_override: int | None = None,
     ) -> None:
         with _thread_lock:
             self._set_subtitle_state(
                 provider_name, subtitle_name, download_url, request_data, download_headers=download_headers or {}
             )
             collector = SubtitleCollector(self)
-            collector.prepare_subtitle()
+            collector.prepare_subtitle(percentage_override)
 
     def start_search(self, *args, **kwargs) -> None:
         raise NotImplementedError
