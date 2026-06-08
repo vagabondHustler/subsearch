@@ -11,19 +11,42 @@ def test_str_parser_movie() -> None:
     show_720p = "the.foo.bar.s01e01.720p.web.h264-foobar"
     no_match = "then.fooing.baring.2022.720p.webby.h265-f00bar"
 
-    pct0 = release_parser.calculate_match(movie_1080p, movie_720p)
-    pct1 = release_parser.calculate_match(show_1080p, show_720p)
-    pct2 = release_parser.calculate_match(movie_1080p, show_1080p)
-    pct3 = release_parser.calculate_match(show_1080p, movie_1080p)
-    pct4 = release_parser.calculate_match(movie_1080p, movie_1080p)
-    pct5 = release_parser.calculate_match(movie_1080p, no_match)
+    # resolution-only difference normalises to exact match
+    assert release_parser.calculate_match(movie_1080p, movie_720p) == 100
+    assert release_parser.calculate_match(show_1080p, show_720p) == 100
+    # identical input
+    assert release_parser.calculate_match(movie_1080p, movie_1080p) == 100
+    # movie vs show: same title/group/source, one side missing year or SE — no penalty
+    assert release_parser.calculate_match(movie_1080p, show_1080p) == 100
+    assert release_parser.calculate_match(show_1080p, movie_1080p) == 100
+    # completely different titles, groups, and years
+    assert release_parser.calculate_match(movie_1080p, no_match) == 0
 
-    assert pct0 == 100
-    assert pct1 == 100
-    assert pct2 == 83
-    assert pct3 == 83
-    assert pct4 == 100
-    assert pct5 == 0
+
+def test_str_parser_year_mismatch_collapses_score() -> None:
+    movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
+    movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
+    assert release_parser.calculate_match(movie_2021, movie_1993) <= 10
+
+
+def test_str_parser_season_episode_mismatch_collapses_score() -> None:
+    show_s01e01 = "the.foo.bar.s01e01.1080p.web.h264-foobar"
+    show_s01e02 = "the.foo.bar.s01e02.1080p.web.h264-foobar"
+    assert release_parser.calculate_match(show_s01e01, show_s01e02) <= 10
+
+
+def test_str_parser_group_boosts_score() -> None:
+    same_group = "the.foo.bar.2021.1080p.web.h264-foobar"
+    diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
+    score_same = release_parser.calculate_match(same_group, same_group)
+    score_diff = release_parser.calculate_match(same_group, diff_group)
+    assert score_same > score_diff
+
+
+def test_str_parser_4k_stripped_like_2160p() -> None:
+    release_2160p = "the.foo.bar.2021.2160p.web.h264-foobar"
+    release_4k = "the.foo.bar.2021.4k.web.h264-foobar"
+    assert release_parser.calculate_match(release_2160p, release_4k) == 100
 
 
 def test_string_parser_movie() -> None:
