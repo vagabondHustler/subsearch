@@ -1,6 +1,6 @@
-from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
+from subsearch.runtime.config.constants import FILE_PATHS
 from tests import fixture_data
 
 
@@ -41,6 +41,42 @@ def test_str_parser_group_boosts_score() -> None:
     score_same = release_parser.calculate_match(same_group, same_group)
     score_diff = release_parser.calculate_match(same_group, diff_group)
     assert score_same > score_diff
+
+
+def test_str_parser_default_weights_match_passed_defaults() -> None:
+    same_group = "the.foo.bar.2021.1080p.web.h264-foobar"
+    diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
+    assert release_parser.calculate_match(same_group, diff_group) == release_parser.calculate_match(
+        same_group, diff_group, release_parser.DEFAULT_MATCH_WEIGHTS
+    )
+
+
+def test_str_parser_title_dominant_weights_raise_group_mismatch_score() -> None:
+    base_release = "the.foo.bar.2021.1080p.web.h264-foobar"
+    diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
+    title_dominant = {
+        "title": 90,
+        "group": 5,
+        "source": 5,
+        "year_mismatch_multiplier": 0.1,
+        "season_episode_mismatch_multiplier": 0.1,
+    }
+    default_score = release_parser.calculate_match(base_release, diff_group)
+    title_dominant_score = release_parser.calculate_match(base_release, diff_group, title_dominant)
+    assert title_dominant_score > default_score
+
+
+def test_str_parser_custom_year_multiplier_softens_penalty() -> None:
+    movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
+    movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
+    lenient = {
+        "title": 60,
+        "group": 30,
+        "source": 10,
+        "year_mismatch_multiplier": 1.0,
+        "season_episode_mismatch_multiplier": 0.1,
+    }
+    assert release_parser.calculate_match(movie_2021, movie_1993, lenient) == 100
 
 
 def test_str_parser_4k_stripped_like_2160p() -> None:
@@ -107,10 +143,9 @@ def test_provider_urls_movie(monkeypatch) -> None:
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert (
-        provider_url.opensubtitles
-        == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"]
-    )
+    assert provider_url.opensubtitles == [
+        "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    ]
     assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
     assert provider_url.yifysubtitles == []
 
@@ -128,9 +163,8 @@ def test_provider_urls_series(monkeypatch) -> None:
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert (
-        provider_url.opensubtitles
-        == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"]
-    )
+    assert provider_url.opensubtitles == [
+        "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    ]
     assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
     assert provider_url.yifysubtitles == []

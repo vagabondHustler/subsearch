@@ -51,6 +51,7 @@ class AppConfig:
     non_hearing_impaired: bool
     only_foreign_parts: bool
     providers: dict[str, bool]
+    match_weights: dict[str, float]
     context_menu: bool
     context_menu_icon: bool
     file_extensions: dict[str, bool]

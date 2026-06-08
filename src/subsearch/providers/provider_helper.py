@@ -101,6 +101,7 @@ class SubtitleCollector:
         self.download_url = master.download_url
         self.release_name = VIDEO_FILE.filename
         self.accept_threshold = master.accept_threshold
+        self.match_weights = master.app_config.match_weights
         self.request_data = master.request_data
         self.download_headers = master.download_headers
         self.master = master
@@ -161,7 +162,9 @@ class SubtitleCollector:
         if percentage_override is not None:
             self.percentage_result = percentage_override
         else:
-            self.percentage_result = release_parser.calculate_match(self.subtitle_name, self.release_name)
+            self.percentage_result = release_parser.calculate_match(
+                self.subtitle_name, self.release_name, self.match_weights
+            )
 
     def populate_correct_subtitle_list(self) -> None:
         if self.master.threshold_met(self.percentage_result):

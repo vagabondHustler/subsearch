@@ -7,8 +7,8 @@ from typing import Any
 import toml
 
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.logging import log_sanitizer
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import AppConfig
 
 
@@ -180,6 +180,7 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         non_hearing_impaired=data["search"]["non_hearing_impaired"],
         only_foreign_parts=data["search"]["only_foreign_parts"],
         providers=data["search"]["providers"],
+        match_weights=data["search"]["match_weights"],
         context_menu=data["shell_integration"]["context_menu"],
         context_menu_icon=data["shell_integration"]["context_menu_icon"],
         file_extensions=data["shell_integration"]["file_extensions"],

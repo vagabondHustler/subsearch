@@ -5,8 +5,8 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     AppConfig,
     Language,
@@ -206,15 +206,25 @@ def no_release_data() -> ReleaseInfo:
 
 _STRIPPED_TOKENS: frozenset[str] = frozenset(
     [
-        "720p", "1080p", "1440p", "2160p", "4k", "2k",
-        "h264", "h265", "x264", "x265", "hevc", "avc",
-        "mkv", "mp4", "avi",
+        "720p",
+        "1080p",
+        "1440p",
+        "2160p",
+        "4k",
+        "2k",
+        "h264",
+        "h265",
+        "x264",
+        "x265",
+        "hevc",
+        "avc",
+        "mkv",
+        "mp4",
+        "avi",
     ]
 )
 
-_SOURCE_TOKENS: frozenset[str] = frozenset(
-    ["web", "webrip", "webdl", "bluray", "bdrip", "hdtv", "dvdrip", "hdrip"]
-)
+_SOURCE_TOKENS: frozenset[str] = frozenset(["web", "webrip", "webdl", "bluray", "bdrip", "hdtv", "dvdrip", "hdrip"])
 
 # matches exactly 4 digits e.g. "2023" matches, "20231" does not
 _YEAR_PATTERN: re.Pattern[str] = re.compile(r"^\d{4}$")
@@ -248,7 +258,17 @@ def _normalize_tokens(filename: str) -> dict:
     return {"title": title, "year": year, "season_episode": season_episode, "group": group, "source": source}
 
 
-def calculate_match(from_user: str, from_website: str) -> int:
+DEFAULT_MATCH_WEIGHTS: dict[str, float] = {
+    "title": 60,
+    "group": 30,
+    "source": 10,
+    "year_mismatch_multiplier": 0.1,
+    "season_episode_mismatch_multiplier": 0.1,
+}
+
+
+def calculate_match(from_user: str, from_website: str, weights: dict[str, float] | None = None) -> int:
+    weights = weights or DEFAULT_MATCH_WEIGHTS
     tokens_a = _normalize_tokens(from_user)
     tokens_b = _normalize_tokens(from_website)
 
@@ -258,17 +278,17 @@ def calculate_match(from_user: str, from_website: str) -> int:
     title_score = round(SequenceMatcher(None, tokens_a["title"], tokens_b["title"]).ratio() * 100)
     group_score = 100 if tokens_a["group"] == tokens_b["group"] else 0
     source_score = 100 if tokens_a["source"] == tokens_b["source"] else 0
-    base = (title_score * 60 + group_score * 30 + source_score * 10) // 100
+    base = (title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]) // 100
 
     multiplier = 1.0
     if tokens_a["year"] is not None and tokens_b["year"] is not None and tokens_a["year"] != tokens_b["year"]:
-        multiplier *= 0.1
+        multiplier *= weights["year_mismatch_multiplier"]
     if (
         tokens_a["season_episode"] is not None
         and tokens_b["season_episode"] is not None
         and tokens_a["season_episode"] != tokens_b["season_episode"]
     ):
-        multiplier *= 0.1
+        multiplier *= weights["season_episode_mismatch_multiplier"]
 
     return round(base * multiplier)
 

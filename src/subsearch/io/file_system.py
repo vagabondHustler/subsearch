@@ -9,11 +9,12 @@ from typing import Callable, Iterable, Optional
 
 import requests
 
-from subsearch.runtime.logging.logger import log
-from subsearch.runtime.config.constants import VIDEO_FILE
-from subsearch.runtime.models.model import Subtitle
+from subsearch.io import toml_file
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
+from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import Subtitle
 
 
 def create_path_from_string(string: str, path_resolution: str, create_missing_folder: bool = True) -> Path:
@@ -94,9 +95,10 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
 
 
 def find_best_subtitle_match(release_name: str, extension: str = ".srt") -> Path:
+    weights = toml_file.get_config_session().read("search.match_weights")
     best_match = (0, Path("."))
     for file in VIDEO_FILE.subs_dir.glob(f"*{extension}"):
-        value = release_parser.calculate_match(file.name, release_name)
+        value = release_parser.calculate_match(file.name, release_name, weights)
         if value >= best_match[0]:
             best_match = value, file
     return best_match[1]
