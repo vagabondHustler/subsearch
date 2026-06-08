@@ -44,7 +44,7 @@
         "yifysubtitles",
     ]
     license = "GPL-3.0-or-later"
-    license-files = ["LICENSE", "THIRD-PARTYY-LICENSES.md"]
+    license-files = ["LICENSE", "THIRD-PARTY-LICENSES.md"]
     name = "Subsearch"
     readme = "README.md"
     requires-python = ">=3.14"
