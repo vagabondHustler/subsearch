@@ -41,7 +41,7 @@ def test_read_nested_value_with_missing_parent_returns_none():
 
 
 def test_session_keeps_disk_untouched_until_commit(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     session.write("search.accept_threshold", 42)
 
@@ -51,7 +51,7 @@ def test_session_keeps_disk_untouched_until_commit(fake_config_file):
 
 def test_session_commit_persists_and_clears_backup(fake_config_file):
     backup_file = fake_config_file.with_suffix(f"{fake_config_file.suffix}.bak")
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     session.write("search.accept_threshold", 42)
     assert backup_file.exists()
@@ -64,7 +64,7 @@ def test_session_commit_persists_and_clears_backup(fake_config_file):
 
 def test_session_backup_holds_last_known_good_before_first_write(fake_config_file):
     backup_file = fake_config_file.with_suffix(f"{fake_config_file.suffix}.bak")
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     session.write("search.accept_threshold", 1)
     session.write("search.accept_threshold", 2)
@@ -73,7 +73,7 @@ def test_session_backup_holds_last_known_good_before_first_write(fake_config_fil
 
 
 def test_session_revert_discards_uncommitted_changes(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     session.write("search.accept_threshold", 42)
     session.revert()
@@ -82,7 +82,7 @@ def test_session_revert_discards_uncommitted_changes(fake_config_file):
 
 
 def test_snapshot_is_isolated_from_later_nested_mutations(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     snapshot = session.snapshot()
     original_move_best = snapshot.post_processing["move_best"]
@@ -93,7 +93,7 @@ def test_snapshot_is_isolated_from_later_nested_mutations(fake_config_file):
 
 
 def test_snapshot_is_isolated_from_later_provider_mutations(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     snapshot = session.snapshot()
     a_provider = next(iter(snapshot.providers))
@@ -105,7 +105,7 @@ def test_snapshot_is_isolated_from_later_provider_mutations(fake_config_file):
 
 
 def test_later_snapshot_reflects_change_earlier_snapshot_does_not(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     before = session.snapshot()
     session.write("search.accept_threshold", 42)
@@ -116,7 +116,7 @@ def test_later_snapshot_reflects_change_earlier_snapshot_does_not(fake_config_fi
 
 
 def test_uncommitted_edit_does_not_survive_simulated_crash(fake_config_file):
-    session = toml_file.ConfigSession(fake_config_file)
+    session = toml_file.ConfigSession(fake_config_file, toml_file.load_toml_data(fake_config_file))
 
     session.write("search.accept_threshold", 42)
 
