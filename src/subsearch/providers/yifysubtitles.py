@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urlsplit
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
@@ -6,30 +7,37 @@ from subsearch.io import http
 from subsearch.providers import provider_helper
 from subsearch.runtime.models.model import ProviderDiagnosticStatus
 
-_YIFY_DOWNLOAD_DOMAIN = "https://yifysubtitles.ch"
-
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def __init__(self, *args, **kwargs) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
+        self.download_domain = ""
+        self.any_mirror_responded = False
 
     def response_is_well_formed(self, tree: Any) -> bool:
         return tree.css_first("table") is not None
 
-    def _fetch_first_responding_mirror(self) -> LexborHTMLParser | None:
+    def _select_responding_mirror(self) -> tuple[LexborHTMLParser, str] | None:
+        self.any_mirror_responded = False
         for url in self.url_yifysubtitles:
             tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
-            if tree:
-                return tree
+            if not tree:
+                continue
+            self.any_mirror_responded = True
+            if self.response_is_well_formed(tree):
+                return tree, url
         return None
 
     def get_subtitles(self) -> ProviderDiagnosticStatus:
-        tree = self._fetch_first_responding_mirror()
-        if not tree:
+        selected = self._select_responding_mirror()
+        if selected is None:
+            if self.any_mirror_responded:
+                return ProviderDiagnosticStatus.STRUCTURE_INVALID
             return ProviderDiagnosticStatus.NO_RESPONSE
-        if not self.response_is_well_formed(tree):
-            return ProviderDiagnosticStatus.STRUCTURE_INVALID
+        tree, responding_url = selected
+        split_url = urlsplit(responding_url)
+        self.download_domain = f"{split_url.scheme}://{split_url.netloc}"
 
         product = tree.select("tr")
         for item in product.matches[1:]:  # type: ignore
@@ -49,7 +57,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         titles = node.text().strip().split("subtitle ")[-1].split("\n")
         _href = node.attributes["href"].split("/")  # type: ignore
         href = _href[-1]
-        download_url = f"{_YIFY_DOWNLOAD_DOMAIN}/subtitle/{href}.zip"
+        download_url = f"{self.download_domain}/subtitle/{href}.zip"
         for subtitle_name in titles:
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 
