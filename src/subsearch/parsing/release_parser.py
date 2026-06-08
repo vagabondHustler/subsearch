@@ -23,6 +23,7 @@ def remove_padded_zero(x: str) -> str:
 
 
 def find_year(string: str) -> int:
+    # matches a 4-digit year between dots (1000–2999) e.g. "Movie.Title.2023.1080p" → "2023"
     re_year = re.findall(r"^.*\.([1-2][0-9]{3})\.", string)
     if re_year:
         year = re_year[0]
@@ -31,6 +32,7 @@ def find_year(string: str) -> int:
 
 
 def find_title_by_year(string: str) -> str:
+    # captures everything before the year segment e.g. "Movie.Title.2023.1080p" → "Movie.Title"
     re_title = re.findall(r"^(.*)\.[1-2][0-9]{3}\.", string)
     if re_title:
         title: str = re_title[0]
@@ -40,6 +42,7 @@ def find_title_by_year(string: str) -> str:
 
 
 def find_title_by_show(string: str) -> str:
+    # captures everything before the SxxExx segment e.g. "Show.Title.S01E02.1080p" → "Show.Title"
     re_title = re.findall(r"^(.*)\.[s]\d*[e]\d*\.", string)
     if re_title:
         title: str = re_title[0]
@@ -49,6 +52,7 @@ def find_title_by_show(string: str) -> str:
 
 
 def find_season_episode(string: str) -> str:
+    # captures the SxxExx token between dots e.g. "Show.Title.S01E02.1080p" → "S01E02"
     re_se = re.findall(r"\.([s]\d*[e]\d*)\.", string)
     if re_se:
         se: str = re_se[0]
@@ -212,12 +216,15 @@ _SOURCE_TOKENS: frozenset[str] = frozenset(
     ["web", "webrip", "webdl", "bluray", "bdrip", "hdtv", "dvdrip", "hdrip"]
 )
 
+# matches exactly 4 digits e.g. "2023" matches, "20231" does not
 _YEAR_PATTERN: re.Pattern[str] = re.compile(r"^\d{4}$")
+# matches lowercase SxxExx with one or more digits each e.g. "s01e02" matches, "S01E02" does not
 _SEASON_EPISODE_PATTERN: re.Pattern[str] = re.compile(r"^s\d+e\d+$")
 
 
 def _normalize_tokens(filename: str) -> dict:
     group = filename.rsplit("-", 1)[-1].lower()
+    # splits on dots or hyphens e.g. "Movie.Title-2023" → ["Movie", "Title", "2023"]
     raw_tokens = re.split(r"[.\-]", filename.lower())
     year: str | None = None
     season_episode: str | None = None
@@ -267,11 +274,13 @@ def calculate_match(from_user: str, from_website: str) -> int:
 
 
 def valid_filename(input_string) -> bool:
+    # matches any Windows-forbidden filename character: < > : " / \ | ? * or null byte
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return bool(re.search(forbidden_characters_pattern, input_string))
 
 
 def fix_filename(input_string) -> str:
+    # replaces any Windows-forbidden filename character with a dot
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return re.sub(forbidden_characters_pattern, ".", input_string)
 
@@ -280,7 +289,9 @@ def valid_path(input_str, path_resolution) -> bool:
     if input_str == "":
         return False
     patterns = {
+        # matches relative Windows paths like ".\folder\sub" or ".." (lowercase only)
         "relative": r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$",
+        # matches absolute Windows paths like "C:\folder\sub" (lowercase segments)
         "absolute": r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$",
     }
     pattern = patterns.get(path_resolution)
@@ -298,14 +309,17 @@ def drive_exists(input_str: str) -> bool:
 
 
 def detect_path_resolution(input_str: str) -> str:
+    # matches a Windows drive root like "C:\" to distinguish absolute from relative paths
     return "absolute" if re.match(r"^[a-zA-Z]:\\", input_str) else "relative"
 
 
 def valid_api_request_input(input: str) -> bool:
+    # matches a non-empty string of digits only e.g. "12345" matches, "12.34" does not
     pattern = r"^\d+$"
     return bool(re.match(pattern, input))
 
 
 def valid_subsource_api_key(api_key: str) -> bool:
+    # matches a subsource API key: "sk_" followed by one or more lowercase hex characters
     pattern = r"^sk_[0-9a-f]+$"
     return bool(re.match(pattern, api_key))

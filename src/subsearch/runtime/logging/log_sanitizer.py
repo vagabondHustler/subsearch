@@ -9,8 +9,11 @@ from subsearch.runtime.models.model import DataclassInstance
 
 REDACTED = "[REDACTED]"
 
+# matches IPv4 addresses e.g. "192.168.1.1" matches, "1234.1.1.1" does not
 IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
+# matches email addresses e.g. "user.name+tag@sub.domain.org"
 EMAIL_PATTERN = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
+# matches subsource API keys e.g. "sk_AbcDef123", case-insensitive
 API_KEY_PATTERN = re.compile(r"\bsk_[A-Za-z0-9_-]+", re.IGNORECASE)
 
 
@@ -44,6 +47,7 @@ def dataclass_lines(instance: DataclassInstance, banner_template: str) -> list[s
     return lines
 
 
+# matches log lines containing a crash indicator e.g. "ERROR", "Traceback", or "Exception" as whole words
 CRASH_PATTERN = re.compile(r"\b(ERROR|Traceback|Exception)\b")
 
 SESSION_SEPARATOR = "\x1c"

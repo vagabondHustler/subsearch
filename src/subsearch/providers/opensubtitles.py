@@ -56,7 +56,8 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
             if download_url is None:
                 continue
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
-            subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]  # https://regex101.com/r/LWAmJK/1
+            # matches the value in lines like "Also Known As: Some Title;" — captures between ": " and ";"
+            subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
         return ProviderDiagnosticStatus.OK
 
