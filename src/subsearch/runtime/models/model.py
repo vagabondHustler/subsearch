@@ -86,10 +86,10 @@ class ReleaseInfo:
 
 @dataclass(slots=True)
 class ProviderUrls:
-    opensubtitles: str
-    opensubtitles_hash: str
-    yifysubtitles: str
-    subsource: str
+    opensubtitles: list[str]
+    opensubtitles_hash: list[str]
+    yifysubtitles: list[str]
+    subsource: list[str]
 
 
 class SubtitleStatus(Enum):

@@ -1,10 +1,12 @@
 from typing import Any
 
-from selectolax.lexbor import LexborNode
+from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
 from subsearch.runtime.models.model import ProviderDiagnosticStatus
+
+_YIFY_DOWNLOAD_DOMAIN = "https://yifysubtitles.ch"
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
@@ -15,8 +17,15 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def response_is_well_formed(self, tree: Any) -> bool:
         return tree.css_first("table") is not None
 
+    def _fetch_first_responding_mirror(self) -> LexborHTMLParser | None:
+        for url in self.url_yifysubtitles:
+            tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
+            if tree:
+                return tree
+        return None
+
     def get_subtitles(self) -> ProviderDiagnosticStatus:
-        tree = http.request_parsed_response(url=self.url_yifysubtitles, timeout=self.request_timeout)
+        tree = self._fetch_first_responding_mirror()
         if not tree:
             return ProviderDiagnosticStatus.NO_RESPONSE
         if not self.response_is_well_formed(tree):
@@ -40,7 +49,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         titles = node.text().strip().split("subtitle ")[-1].split("\n")
         _href = node.attributes["href"].split("/")  # type: ignore
         href = _href[-1]
-        download_url = f"https://yifysubtitles.org/subtitle/{href}.zip"
+        download_url = f"{_YIFY_DOWNLOAD_DOMAIN}/subtitle/{href}.zip"
         for subtitle_name in titles:
             self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
 

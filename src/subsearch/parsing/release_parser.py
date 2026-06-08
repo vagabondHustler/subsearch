@@ -83,6 +83,13 @@ def find_title(filename: str, year: int, series: bool) -> str:
     return title
 
 
+_YIFY_MIRRORS: list[str] = [
+    "https://yifysubtitles.ch",
+    "https://yifysubtitles.mx",
+    "https://yifysubtitles.org",
+]
+
+
 class CreateProviderUrls:
     def __init__(self, app_config: AppConfig, release_data: ReleaseInfo, language_data: dict[str, Any]) -> None:
         self.app_config = app_config
@@ -101,33 +108,30 @@ class CreateProviderUrls:
 
     @classmethod
     def no_urls(cls) -> ProviderUrls:
-        return ProviderUrls("", "", "", "")
+        return ProviderUrls([], [], [], [])
 
     @property
-    def subsource(self) -> str:
-        return "https://api.subsource.net/api"
+    def subsource(self) -> list[str]:
+        return ["https://api.subsource.net/api"]
 
     @property
-    def opensubtitles(self) -> str:
+    def opensubtitles(self) -> list[str]:
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
         search_parameter = self._opensubtitles_search_parameter()
-        return f"{domain}/{subtitle_type}/{search_parameter}/rss_2_00".replace(" ", "%20")
+        return [f"{domain}/{subtitle_type}/{search_parameter}/rss_2_00".replace(" ", "%20")]
 
     @property
-    def opensubtitles_hash(self) -> str:
+    def opensubtitles_hash(self) -> list[str]:
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
-        return f"{domain}/{subtitle_type}/moviehash-{VIDEO_FILE.file_hash}"
+        return [f"{domain}/{subtitle_type}/moviehash-{VIDEO_FILE.file_hash}"]
 
     @property
-    def yifysubtitles(self) -> str:
-        if self.release_data.tvseries:
-            return ""
-        domain = "https://yifysubtitles.org"
-        if self.release_data.imdb_id:
-            return f"{domain}/movie-imdb/{self.release_data.imdb_id}"
-        return ""
+    def yifysubtitles(self) -> list[str]:
+        if self.release_data.tvseries or not self.release_data.imdb_id:
+            return []
+        return [f"{mirror}/movie-imdb/{self.release_data.imdb_id}" for mirror in _YIFY_MIRRORS]
 
     def _opensubtitles_subtitle_type(self) -> str:
         three_letter_code = self.current_language_data.three_letter_code
