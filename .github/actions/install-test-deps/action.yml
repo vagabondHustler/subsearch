@@ -1,0 +1,10 @@
+name: Install test dependencies
+description: Install binary test dependencies and the package in editable mode
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        python -m pip install --upgrade pip psutil pywin32 toml
+        python -m pip install -e . --no-deps
+      shell: pwsh

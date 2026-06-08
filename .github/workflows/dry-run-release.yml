@@ -23,11 +23,12 @@ concurrency:
 
 env:
   ARTIFACT_RETENTION_DAYS: 3
+  JOBS: python .github/workflows/scripts/jobs.py
 
 jobs:
   init:
     name: Version control (dry run)
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     outputs:
       bumped: ${{ steps.run.outputs.bumped }}
@@ -36,53 +37,36 @@ jobs:
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version
-
-      - name: Install commitizen
-        run: |
-          python -m pip install --upgrade pip commitizen
-          python -m pip install -e . --no-deps
+      - uses: ./.github/actions/install-commitizen
 
       - name: Set fake version outputs (no bump, no push)
         id: run
-        run: python .github/workflows/automation/workflows.py dry_run_init
+        run: ${{ env.JOBS }} dry_run_init
 
   build_binaries:
     name: Build binaries
     needs: init
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     outputs:
       msi_hash: ${{ steps.run.outputs.msi_hash }}
       exe_hash: ${{ steps.run.outputs.exe_hash }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
+      - uses: ./.github/actions/setup-python
 
-      - uses: actions/setup-python@v5
+      - uses: ./.github/actions/install-build-deps
         with:
-          python-version-file: .python-version
-
-      - name: Build binaries
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[build]
-          python .github/workflows/automation/workflows.py make_msi
+          dry-run-version: ${{ needs.init.outputs.current_tag }}
 
       - name: Hash and collect artifacts
         id: run
-        run: python .github/workflows/automation/workflows.py build_binaries
+        run: ${{ env.JOBS }} build_binaries
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
@@ -93,51 +77,34 @@ jobs:
     name: Test binaries
     needs: [init, build_binaries]
     if: ${{ inputs.skip_binary_tests == 'false' }}
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version
+      - uses: ./.github/actions/setup-python
 
       - uses: actions/download-artifact@v4
         with:
           name: build_${{ needs.init.outputs.artifact_id }}
           path: artifacts
 
-      - name: Install test dependencies
-        run: |
-          python -m pip install --upgrade pip psutil pywin32
-          python -m pip install -e . --no-deps
+      - uses: ./.github/actions/install-test-deps
 
-      - run: python .github/workflows/automation/workflows.py test_binaries
+      - run: ${{ env.JOBS }} test_binaries
 
   changelog:
     name: Changelog
     needs: [init, build_binaries]
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: .python-version
-
-      - name: Install commitizen
-        run: |
-          python -m pip install --upgrade pip commitizen
-          python -m pip install -e . --no-deps
+      - uses: ./.github/actions/install-commitizen
 
       - name: Render changelog and append links
-        run: python .github/workflows/automation/workflows.py changelog
+        run: ${{ env.JOBS }} changelog
         env:
           CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
           PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
@@ -145,8 +112,7 @@ jobs:
           MSI_HASH: ${{ needs.build_binaries.outputs.msi_hash }}
           EXE_HASH: ${{ needs.build_binaries.outputs.exe_hash }}
 
-      - name: Upload changelog artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: changelog_${{ needs.init.outputs.artifact_id }}
           path: artifacts
