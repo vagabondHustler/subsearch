@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ICON_SOURCE_DIRECTORY = REPO_ROOT / "assets" / "icons"
 ICON_MODULE = REPO_ROOT / "src" / "subsearch" / "ui" / "icons" / "icons_data.py"
 
-GENERATED_HEADER = "# AUTO-GENERATED — edit assets/icons/*.svg and run tools/bundle_icons.py"
+GENERATED_HEADER = "# AUTO-GENERATED , edit assets/icons/*.svg and run tools/bundle_icons.py"
 
 
 def read_icon_sources() -> dict[str, str]:
@@ -43,7 +43,7 @@ def check_icon_module() -> bool:
     current = ICON_MODULE.read_text(encoding="utf-8") if ICON_MODULE.exists() else ""
     if current == render_icon_module():
         return True
-    print(f"{ICON_MODULE} is out of date — run tools/bundle_icons.py", file=sys.stderr)
+    print(f"{ICON_MODULE} is out of date , run tools/bundle_icons.py", file=sys.stderr)
     return False
 
 
