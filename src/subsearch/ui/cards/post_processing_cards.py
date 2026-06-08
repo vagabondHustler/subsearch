@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QEvent, QSize, Qt
+from PySide6.QtGui import QEnterEvent, QMouseEvent
 from PySide6.QtWidgets import QFileDialog, QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
-from qfluentwidgets import CaptionLabel, CheckBox, LineEdit, MessageBox, TransparentToolButton
+from qfluentwidgets import BodyLabel, CaptionLabel, CheckBox, LineEdit, MessageBox, TransparentToolButton
 
 from subsearch.io import windows_registry
 from subsearch.parsing import release_parser
@@ -11,6 +12,26 @@ from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font, apply_caption_font
 from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow, read_value, write_value
+
+class _ButtonProxyLabel(BodyLabel):
+    def __init__(self, text: str, button: TransparentToolButton, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setText(text)
+        self._button = button
+
+    def enterEvent(self, event: QEnterEvent) -> None:
+        self._button.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, True)
+        self._button.update()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        self._button.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
+        self._button.update()
+        super().leaveEvent(event)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        self._button.animateClick()
+
 
 EXTENSION_GRID_ROWS = 3
 
@@ -172,6 +193,8 @@ class FileExtensionsCard(SettingsCard):
         column_count = -(-len(file_extensions) // EXTENSION_GRID_ROWS)
         for column in range(column_count):
             grid.setColumnStretch(column, 1)
+        last_row = 0
+        last_column = 0
         for index, (extension, enabled) in enumerate(file_extensions.items()):
             row = index % EXTENSION_GRID_ROWS
             column = index // EXTENSION_GRID_ROWS
@@ -181,6 +204,33 @@ class FileExtensionsCard(SettingsCard):
             check_box.toggled.connect(lambda checked, ext=extension: self._on_extension_toggled(ext, checked))
             grid.addWidget(check_box, row, column, alignment=Qt.AlignmentFlag.AlignLeft)
             self.check_boxes[extension] = check_box
+            last_row = row
+            last_column = column
+
+        self.invert_button = TransparentToolButton(lucide_qicon(LucideIcon.ARROW_LEFT_RIGHT, TEXT_COLOR), self)
+        self.invert_button.setFixedSize(22, 22)
+        self.invert_button.setIconSize(QSize(16, 16))
+        self.invert_button.clicked.connect(self._invert_selection)
+
+        self.invert_label = _ButtonProxyLabel("Invert selection", self.invert_button, self)
+        apply_body_font(self.invert_label)
+        self.invert_label.setCursor(self.invert_button.cursor())
+
+        invert_row = QHBoxLayout()
+        invert_row.setContentsMargins(0, 0, 0, 0)
+        invert_row.setSpacing(6)
+        invert_row.addWidget(self.invert_button)
+        invert_row.addWidget(self.invert_label)
+
+        invert_container = QWidget(self)
+        invert_container.setLayout(invert_row)
+
+        next_row = last_row + 1
+        next_column = last_column
+        if next_row >= EXTENSION_GRID_ROWS:
+            next_row = 0
+            next_column = last_column + 1
+        grid.addWidget(invert_container, next_row, next_column, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.body_layout.addLayout(grid)
 
@@ -189,11 +239,25 @@ class FileExtensionsCard(SettingsCard):
         file_extensions[extension] = checked
         write_value("shell_integration.file_extensions", file_extensions)
         if read_value("shell_integration.context_menu"):
-            windows_registry.write_all_registry_values()
+            windows_registry.write_registry_value_by_key("appliesto")
+
+    def _invert_selection(self) -> None:
+        file_extensions = read_value("shell_integration.file_extensions")
+        for extension, check_box in self.check_boxes.items():
+            inverted = not check_box.isChecked()
+            check_box.blockSignals(True)
+            check_box.setChecked(inverted)
+            check_box.blockSignals(False)
+            file_extensions[extension] = inverted
+        write_value("shell_integration.file_extensions", file_extensions)
+        if read_value("shell_integration.context_menu"):
+            windows_registry.write_registry_value_by_key("appliesto")
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
             check_box.setEnabled(enabled)
+        self.invert_button.setEnabled(enabled)
+        self.invert_label.setEnabled(enabled)
 
 
 class ShellIntegrationCard(SettingsCard):
@@ -218,7 +282,7 @@ class ShellIntegrationCard(SettingsCard):
 
     def _on_context_menu_icon_toggled(self) -> None:
         if read_value("shell_integration.context_menu"):
-            windows_registry.write_all_registry_values()
+            windows_registry.write_registry_value_by_key("icon")
 
     def _apply_context_menu_state(self, enabled: bool) -> None:
         self.context_menu_icon.set_enabled(enabled)

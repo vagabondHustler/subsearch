@@ -1,9 +1,10 @@
 from PySide6.QtWidgets import QWidget
 
+from subsearch.io import windows_registry
 from subsearch.runtime.config.constants import DEVICE_INFO
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow
+from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow, read_value
 
 
 class NotificationsCard(SettingsCard):
@@ -48,8 +49,13 @@ class ApplicationCard(SettingsCard):
         show_terminal = SwitchRow("application.show_terminal")
         if DEVICE_INFO.mode == "executable":
             show_terminal.set_enabled(False)
+        show_terminal.toggled.connect(self._on_show_terminal_toggled)
         self.add_row(show_terminal)
         self.add_row(SwitchRow("application.single_instance"))
+
+    def _on_show_terminal_toggled(self) -> None:
+        if read_value("shell_integration.context_menu"):
+            windows_registry.write_registry_value_by_key("command")
 
 
 class NetworkCard(SettingsCard):

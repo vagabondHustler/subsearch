@@ -101,18 +101,16 @@ def write_registry_value(sub_key: str, value_name: str, value: str) -> None:
 
 def write_registry_value_by_key(key: str) -> None:
     key_map = {
-        "subsearch": {"key_type": REGISTRY_PATHS.subsearch, "value_name": "", "value": "Subsearch"},
-        "icon": {"key_type": REGISTRY_PATHS.subsearch, "value_name": "Icon", "value": get_icon_value()},
-        "appliesto": {"key_type": REGISTRY_PATHS.subsearch, "value_name": "AppliesTo", "value": get_appliesto_value()},
-        "command": {"key_type": REGISTRY_PATHS.subsearch_command, "value_name": "", "value": get_command_value()},
+        "subsearch": (REGISTRY_PATHS.subsearch, "", lambda: "Subsearch"),
+        "icon": (REGISTRY_PATHS.subsearch, "Icon", get_icon_value),
+        "appliesto": (REGISTRY_PATHS.subsearch, "AppliesTo", get_appliesto_value),
+        "command": (REGISTRY_PATHS.subsearch_command, "", get_command_value),
     }
 
     key = key.lower()
     if key in key_map:
-        key_type = key_map[key]["key_type"]
-        value_name = key_map[key]["value_name"]
-        value = key_map[key]["value"]
-        write_registry_value(key_type, value_name, value)
+        key_type, value_name, value_factory = key_map[key]
+        write_registry_value(key_type, value_name, value_factory())
 
 
 def write_all_registry_values() -> None:

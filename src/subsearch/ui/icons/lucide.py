@@ -39,6 +39,7 @@ class LucideIcon(FluentIconBase, Enum):
     CIRCLE = "circle"
     CIRCLE_X = "circle-x"
     CIRCLE_DOT_DASHED = "circle-dot-dashed"
+    ARROW_LEFT_RIGHT = "arrow-left-right"
     ARROW_DOWN_TO_LINE = "arrow-down-to-line"
     REFRESH_CW_DOT = "refresh-cw-dot"
     LIST = "list"
