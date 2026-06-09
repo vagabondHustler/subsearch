@@ -94,6 +94,11 @@ class ProviderUrls:
     subsource: list[str]
 
 
+class AppMode(Enum):
+    SETTINGS = "settings"
+    SEARCH = "search"
+
+
 class SubtitleStatus(Enum):
     FILTERED_OUT = "filtered_out"
     BELOW_THRESHOLD = "below_threshold"
