@@ -66,7 +66,7 @@ class Subsource(provider_helper.ProviderHelper):
         if movie_id is None:
             return ProviderDiagnosticStatus.OK
 
-        subtitles_response = api.list_subtitles(movie_id, self.current_language)
+        subtitles_response = api.list_subtitles(movie_id, self.selected_language)
         if not api.response_status_ok(subtitles_response):
             return ProviderDiagnosticStatus.NO_RESPONSE
 

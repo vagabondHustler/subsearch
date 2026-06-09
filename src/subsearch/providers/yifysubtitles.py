@@ -64,7 +64,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def skip_reason(self, item: LexborNode) -> str:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
         subtitle_hi = item.css_matches("span.hi-subtitle")
-        if subtitle_language.lower() != self.current_language.lower():  # type: ignore
+        if subtitle_language.lower() != self.selected_language.lower():  # type: ignore
             return "language"
         if not self.subtitle_hi_match(subtitle_hi):
             return "hi"

@@ -16,24 +16,26 @@ from subsearch.runtime.models.model import (
     SubtitleStatus,
 )
 
-_thread_lock = threading.Lock()
+_subtitle_list_lock = threading.Lock()
 
 
-def combine_provider_diagnostic_status(*healths: ProviderDiagnosticStatus) -> ProviderDiagnosticStatus:
-    if ProviderDiagnosticStatus.STRUCTURE_INVALID in healths:
+def combine_provider_diagnostic_status(*statuses: ProviderDiagnosticStatus) -> ProviderDiagnosticStatus:
+    if ProviderDiagnosticStatus.STRUCTURE_INVALID in statuses:
         return ProviderDiagnosticStatus.STRUCTURE_INVALID
-    if all(health is ProviderDiagnosticStatus.NO_RESPONSE for health in healths):
+    if all(status is ProviderDiagnosticStatus.NO_RESPONSE for status in statuses):
         return ProviderDiagnosticStatus.NO_RESPONSE
     return ProviderDiagnosticStatus.OK
 
 
 class ProviderDataContainer:
-    def __init__(self, *args, **kwargs) -> None:
-        release_data: ReleaseInfo = kwargs["release_data"]
-        app_config: AppConfig = kwargs["app_config"]
-        provider_urls: ProviderUrls = kwargs["provider_urls"]
-        language_data: Language = kwargs["language_data"]
-
+    def __init__(
+        self,
+        *,
+        release_data: ReleaseInfo,
+        app_config: AppConfig,
+        provider_urls: ProviderUrls,
+        language_data: Language,
+    ) -> None:
         self.app_config = app_config
         self.release_data = release_data
         self.provider_urls = provider_urls
@@ -50,7 +52,7 @@ class ProviderDataContainer:
         self.group = release_data.group
         self.imdb_id = release_data.imdb_id
 
-        self.current_language = app_config.selected_language
+        self.selected_language = app_config.selected_language
         self.hearing_impaired = app_config.hearing_impaired
         self.non_hearing_impaired = app_config.non_hearing_impaired
         self.accept_threshold = app_config.accept_threshold
@@ -66,135 +68,167 @@ class ProviderDataContainer:
         self.url_subsource = provider_urls.subsource
 
         self.file_hash = VIDEO_FILE.file_hash
-        self.season_no_padding = self._season_no_padding()
-        self.episode_no_padding = self._episode_no_padding()
-        self.ok_season_episode_pattern = self._ok_season_episode_pattern()
+        self.season_no_padding = release_parser.remove_padded_zero(release_data.season)
+        self.episode_no_padding = release_parser.remove_padded_zero(release_data.episode)
+        self.ok_season_episode_pattern = self._build_season_episode_patterns()
 
-    def _season_no_padding(self) -> str:
-        return release_parser.remove_padded_zero(self.release_data.season)
-
-    def _episode_no_padding(self) -> str:
-        return release_parser.remove_padded_zero(self.release_data.episode)
-
-    def _ok_season_episode_pattern(self) -> list[str]:
-        season_episode_pattern_0 = [
+    def _build_season_episode_patterns(self) -> list[str]:
+        padded = [
             f"season.{self.season}.",
             f"s{self.season}e{self.episode}.",
             f"s{self.season}.e{self.episode}.",
         ]
-        season_episode_pattern_1 = [
+        unpadded = [
             f"season.{self.season_no_padding}.",
             f"s{self.season_no_padding}.e{self.episode_no_padding}.",
         ]
-        return season_episode_pattern_0 + season_episode_pattern_1
+        return padded + unpadded
 
 
 class SubtitleCollector:
-    _shared_accepted: list[Subtitle] = []
-    _shared_rejected: list[Subtitle] = []
-    _shared_filtered: list[Subtitle] = []
+    _accepted: list[Subtitle] = []
+    _rejected: list[Subtitle] = []
+    _filtered: list[Subtitle] = []
 
-    def __init__(self, master: "ProviderHelper", *args, **kwargs) -> None:
-        self.provider_name = master.provider_name
-        self.subtitle_name = master.subtitle_name
-        self.percentage_result = 0
-        self.download_url = master.download_url
-        self.release_name = VIDEO_FILE.filename
-        self.accept_threshold = master.accept_threshold
-        self.match_weights = master.app_config.match_weights
-        self.request_data = master.request_data
-        self.download_headers = master.download_headers
-        self.master = master
+    def __init__(
+        self,
+        provider_name: str,
+        subtitle_name: str,
+        download_url: str,
+        request_data: dict[str, Any],
+        download_headers: dict[str, str],
+        hash_match: bool,
+        accept_threshold: int,
+        token_weights: dict[str, Any],
+        token_multipliers: dict[str, Any],
+    ) -> None:
+        self.provider_name = provider_name
+        self.subtitle_name = subtitle_name
+        self.download_url = download_url
+        self.request_data = request_data
+        self.download_headers = download_headers
+        self.hash_match = hash_match
+        self.accept_threshold = accept_threshold
+        self.token_weights = token_weights
+        self.token_multipliers = token_multipliers
+        self.token_score = 0
 
-    @property
-    def _subtitle(self) -> Subtitle:
-        self.subtitle_name = self._sanitize_filename(self.subtitle_name)
+    def collect(self, score_override: int | None = None) -> None:
+        self._set_token_score(score_override)
+        self._add_to_subtitle_list()
+
+    def _set_token_score(self, score_override: int | None) -> None:
+        if score_override is not None:
+            self.token_score = score_override
+        else:
+            self.token_score = release_parser.score_subtitle_tokens(
+                VIDEO_FILE.filename,
+                self.subtitle_name,
+                self.token_weights,
+                self.token_multipliers,
+            )
+
+    def _add_to_subtitle_list(self) -> None:
+        subtitle = self._build_subtitle()
+        with _subtitle_list_lock:
+            if subtitle.status is SubtitleStatus.ACCEPTED:
+                log.event(
+                    "subtitle_match",
+                    provider=self.provider_name,
+                    subtitle_name=self.subtitle_name,
+                    percentage=self.token_score,
+                )
+                SubtitleCollector._accepted.append(subtitle)
+            else:
+                log.event(
+                    "subtitle_rejected",
+                    provider=self.provider_name,
+                    subtitle_name=self.subtitle_name,
+                    percentage=self.token_score,
+                )
+                SubtitleCollector._rejected.append(subtitle)
+
+    def _build_subtitle(self) -> Subtitle:
+        sanitized_name = _sanitize_subtitle_filename(self.subtitle_name)
+        status = SubtitleStatus.ACCEPTED if self.token_score >= self.accept_threshold else SubtitleStatus.BELOW_THRESHOLD
         if self.download_url:
-            subtitle = self._build_subtitle_from_url()
-        elif self.request_data:
-            subtitle = self._build_subtitle_from_request_data()
-        else:
-            raise Exception("Subtitle not corectlly populated")
-        return subtitle
-
-    def _sanitize_filename(self, filename: str) -> str:
-        original = filename
-        invalid_chars = '<>:"/\\|?*'
-        for char in invalid_chars:
-            filename = filename.replace(char, "_")
-        filename = filename.replace("'", "")
-        if filename != original:
-            log.info(f"Filename sanitized: {original!r} -> {filename!r}")
-        return filename
-
-    def _build_subtitle_from_url(self) -> Subtitle:
-        return Subtitle(
-            percentage_result=self.percentage_result,
-            provider_name=self.provider_name,
-            subtitle_name=self.subtitle_name.lower(),
-            download_url=self.download_url,
-            request_data={},
-            download_headers=self.download_headers,
-            status=self._status,
-        )
-
-    def _build_subtitle_from_request_data(self) -> Subtitle:
-        return Subtitle(
-            percentage_result=self.percentage_result,
-            provider_name=self.provider_name,
-            subtitle_name=self.subtitle_name.lower(),
-            download_url="",
-            request_data=self.request_data,
-            status=self._status,
-        )
-
-    @property
-    def _status(self) -> SubtitleStatus:
-        if self.master.threshold_met(self.percentage_result):
-            return SubtitleStatus.ACCEPTED
-        return SubtitleStatus.BELOW_THRESHOLD
-
-    def prepare_subtitle(self, percentage_override: int | None = None) -> None:
-        self.set_percentage_result(percentage_override)
-        self.populate_correct_subtitle_list()
-
-    def set_percentage_result(self, percentage_override: int | None = None) -> None:
-        if percentage_override is not None:
-            self.percentage_result = percentage_override
-        else:
-            self.percentage_result = release_parser.calculate_match(
-                self.subtitle_name, self.release_name, self.match_weights
+            return Subtitle(
+                token_result=self.token_score,
+                provider_name=self.provider_name,
+                subtitle_name=sanitized_name.lower(),
+                download_url=self.download_url,
+                request_data={},
+                download_headers=self.download_headers,
+                status=status,
+                hash_match=self.hash_match,
             )
-
-    def populate_correct_subtitle_list(self) -> None:
-        if self.master.threshold_met(self.percentage_result):
-            log.event(
-                "subtitle_match",
-                provider=self.provider_name,
-                subtitle_name=self.subtitle_name,
-                percentage=self.percentage_result,
+        if self.request_data:
+            return Subtitle(
+                token_result=self.token_score,
+                provider_name=self.provider_name,
+                subtitle_name=sanitized_name.lower(),
+                download_url="",
+                request_data=self.request_data,
+                status=status,
+                hash_match=self.hash_match,
             )
-            return SubtitleCollector._shared_accepted.append(self._subtitle)
-        log.event(
-            "subtitle_rejected",
-            provider=self.provider_name,
-            subtitle_name=self.subtitle_name,
-            percentage=self.percentage_result,
-        )
-        return SubtitleCollector._shared_rejected.append(self._subtitle)
+        raise ValueError(f"Subtitle has neither download_url nor request_data: {self.subtitle_name!r}")
+
+
+def _sanitize_subtitle_filename(filename: str) -> str:
+    invalid_chars = '<>:"/\\|?*'
+    sanitized = filename
+    for char in invalid_chars:
+        sanitized = sanitized.replace(char, "_")
+    sanitized = sanitized.replace("'", "")
+    if sanitized != filename:
+        log.info(f"Filename sanitized: {filename!r} -> {sanitized!r}")
+    return sanitized
 
 
 class ProviderHelper(ProviderDataContainer):
 
-    def __init__(self, *args, **kwargs) -> None:
-        ProviderDataContainer.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs) -> None:
+        ProviderDataContainer.__init__(self, **kwargs)
         self.provider_name = ""
-        self.subtitle_name = ""
-        self.download_url = ""
-        self.request_data: dict[str, Any] = {}
-        self.download_headers: dict[str, str] = {}
         self.reported_health: list[ProviderResult] = []
         self.skip_counts: dict[str, int] = {}
+
+    def prepare_subtitle(
+        self,
+        provider_name: str,
+        subtitle_name: str,
+        download_url: str,
+        request_data: dict[str, Any],
+        download_headers: dict[str, str] | None = None,
+        percentage_override: int | None = None,
+        hash_match: bool = False,
+    ) -> None:
+        collector = SubtitleCollector(
+            provider_name=provider_name,
+            subtitle_name=subtitle_name,
+            download_url=download_url,
+            request_data=request_data,
+            download_headers=download_headers or {},
+            hash_match=hash_match,
+            accept_threshold=self.accept_threshold,
+            token_weights=self.app_config.token_weights,
+            token_multipliers=self.app_config.token_multipliers,
+        )
+        collector.collect(percentage_override)
+
+    def record_filtered_out(self, provider_name: str, subtitle_name: str, reason: str) -> None:
+        subtitle = Subtitle(
+            token_result=0,
+            provider_name=provider_name,
+            subtitle_name=subtitle_name.lower(),
+            download_url="",
+            request_data={},
+            status=SubtitleStatus.FILTERED_OUT,
+        )
+        with _subtitle_list_lock:
+            SubtitleCollector._filtered.append(subtitle)
+            self.skip_counts[reason] = self.skip_counts.get(reason, 0) + 1
 
     def report_diagnostic_status(self, diagnostic_status: ProviderDiagnosticStatus, subtitles_found: int) -> None:
         result = ProviderResult(self.provider_name, diagnostic_status, subtitles_found)
@@ -207,93 +241,50 @@ class ProviderHelper(ProviderDataContainer):
         breakdown = ", ".join(f"{reason}: {count}" for reason, count in self.skip_counts.items())
         log.event("provider_skips", provider=self.provider_name, total=total, breakdown=breakdown)
 
-    def _set_subtitle_state(self, *args, **kwargs) -> None:
-        self.provider_name = args[0]
-        self.subtitle_name = args[1]
-        self.download_url = args[2]
-        self.request_data = kwargs.get("request_data", {}) or args[3]
-        self.download_headers = kwargs.get("download_headers", {})
-
-    @property
-    def accepted_subtitles(self) -> list[Subtitle]:
-        with _thread_lock:
-            return SubtitleCollector._shared_accepted
-
-    @property
-    def rejected_subtitles(self) -> list[Subtitle]:
-        with _thread_lock:
-            return SubtitleCollector._shared_rejected
-
-    @property
-    def filtered_subtitles(self) -> list[Subtitle]:
-        with _thread_lock:
-            return SubtitleCollector._shared_filtered
-
-    def record_filtered_out(self, provider_name: str, subtitle_name: str, reason: str) -> None:
-        with _thread_lock:
-            subtitle = Subtitle(
-                percentage_result=0,
-                provider_name=provider_name,
-                subtitle_name=subtitle_name.lower(),
-                download_url="",
-                request_data={},
-                status=SubtitleStatus.FILTERED_OUT,
-            )
-            SubtitleCollector._shared_filtered.append(subtitle)
-            self.skip_counts[reason] = self.skip_counts.get(reason, 0) + 1
-
-    def prepare_subtitle(
-        self,
-        provider_name: str,
-        subtitle_name: str,
-        download_url: str,
-        request_data: dict,
-        download_headers: dict[str, str] | None = None,
-        percentage_override: int | None = None,
-    ) -> None:
-        with _thread_lock:
-            self._set_subtitle_state(
-                provider_name, subtitle_name, download_url, request_data, download_headers=download_headers or {}
-            )
-            collector = SubtitleCollector(self)
-            collector.prepare_subtitle(percentage_override)
-
     def start_search(self, *args, **kwargs) -> None:
         raise NotImplementedError
 
     def run_search(self, search_fn: Callable[[], ProviderDiagnosticStatus]) -> None:
         subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
         try:
-            health = search_fn()
+            diagnostic_status = search_fn()
         except Exception as error:
             log.error(f"{self.provider_name} response was unrecognized: {error}")
             self.report_diagnostic_status(ProviderDiagnosticStatus.STRUCTURE_INVALID, 0)
             return
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
         self.log_provider_skips()
-        self.report_diagnostic_status(health, subtitles_after - subtitles_before)
+        self.report_diagnostic_status(diagnostic_status, subtitles_after - subtitles_before)
 
-    def subtitle_hi_match(self, hi: bool) -> bool:
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        with _subtitle_list_lock:
+            return SubtitleCollector._accepted
+
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        with _subtitle_list_lock:
+            return SubtitleCollector._rejected
+
+    @property
+    def filtered_subtitles(self) -> list[Subtitle]:
+        with _subtitle_list_lock:
+            return SubtitleCollector._filtered
+
+    def subtitle_hi_match(self, hearing_impaired: bool) -> bool:
         if self.hearing_impaired and self.non_hearing_impaired:
             return True
-        if not self.hearing_impaired and hi:
+        if not self.hearing_impaired and hearing_impaired:
             return False
-        if not self.non_hearing_impaired and hi:
+        if not self.non_hearing_impaired and hearing_impaired:
             return False
         return True
 
     def subtitle_language_match(self, language: str) -> bool:
-        if self.current_language.lower() != language.lower():
-            return False
-        return True
+        return self.selected_language.lower() == language.lower()
 
-    def keys_exist(self, dict_: dict[str, Any], keys: list[str]) -> bool:
-        for key in keys:
-            if key not in dict_:
-                return False
-        return True
+    def keys_exist(self, dictionary: dict[str, Any], keys: list[str]) -> bool:
+        return all(key in dictionary for key in keys)
 
-    def threshold_met(self, percentage_result: int) -> bool:
-        if percentage_result >= self.accept_threshold:
-            return True
-        return False
+    def threshold_met(self, token_score: int) -> bool:
+        return token_score >= self.accept_threshold

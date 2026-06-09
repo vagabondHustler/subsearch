@@ -14,7 +14,7 @@ from tests import fixture_data
 def _search_kwargs() -> dict:
     app_config = toml_file.get_app_config(FILE_PATHS.config)
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    release_data = release_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+    release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
     return dict(
         release_data=release_data,
         app_config=app_config,

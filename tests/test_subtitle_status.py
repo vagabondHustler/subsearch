@@ -11,7 +11,7 @@ def _build_helper() -> provider_helper.ProviderHelper:
     app_config = toml_file.get_app_config(FILE_PATHS.config)
     app_config.selected_language = "english"
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    release_data = release_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+    release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
     helper = provider_helper.ProviderHelper(
         release_data=release_data,
         app_config=app_config,
@@ -51,7 +51,7 @@ def _downloaded_count(evaluated: list[Subtitle]) -> int:
 
 def _make_subtitle(status: SubtitleStatus) -> Subtitle:
     return Subtitle(
-        percentage_result=95,
+        token_result=95,
         provider_name="testprovider",
         subtitle_name="some.release",
         download_url="http://example/x.zip",

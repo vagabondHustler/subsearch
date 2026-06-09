@@ -16,7 +16,7 @@ def _build_subsource(api_key: str, filename: str = fixture_data.FAKE_VIDEO_FILE_
     app_config.non_hearing_impaired = True
     app_config.selected_language = "english"
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    release_data = release_parser.get_release_data(filename)
+    release_data = release_parser.get_release_info(filename)
     return Subsource(
         release_data=release_data,
         app_config=app_config,
