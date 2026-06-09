@@ -20,6 +20,18 @@ SUPPORTED_FILE_EXTENSIONS: list[str] = [
     "mswmm",
 ]
 
+DEFAULT_TOKEN_WEIGHTS: dict[str, float] = {
+    "title": 75,
+    "group": 5,
+    "source": 20,
+}
+
+DEFAULT_TOKEN_MULTIPLIERS: dict[str, float] = {
+    "year": 0.1,
+    "season_episode": 0.1,
+    "edition": 0.1,
+}
+
 SUPPORTED_PROVIDERS: list[str] = ["opensubtitles", "yifysubtitles_site", "subsource_site"]
 
 HEALTH_TRACKED_PROVIDERS: list[str] = ["imdb", "opensubtitles", "yifysubtitles", "subsource"]

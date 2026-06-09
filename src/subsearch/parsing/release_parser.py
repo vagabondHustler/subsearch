@@ -6,6 +6,7 @@ from typing import Any
 from num2words import num2words
 
 from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config.static_values import DEFAULT_TOKEN_MULTIPLIERS, DEFAULT_TOKEN_WEIGHTS
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     AppConfig,
@@ -173,7 +174,7 @@ class CreateProviderUrls:
         return hi_all_parts, hi_foreign_parts, non_hi_foreign_parts
 
 
-def get_release_data(filename: str) -> ReleaseInfo:
+def get_release_info(filename: str) -> ReleaseInfo:
     if not filename:
         return no_release_data()
     release = filename.lower()
@@ -218,13 +219,65 @@ _STRIPPED_TOKENS: frozenset[str] = frozenset(
         "x265",
         "hevc",
         "avc",
+        "av1",
+        "vp9",
+        "xvid",
+        "divx",
+        "10bit",
+        "8bit",
+        "hdr",
+        "hdr10",
+        "dv",
+        "sdr",
+        "dts",
+        "dtshd",
+        "ac3",
+        "eac3",
+        "dd",
+        "ddp",
+        "aac",
+        "truehd",
+        "atmos",
+        "flac",
         "mkv",
         "mp4",
         "avi",
+        "proper",
+        "repack",
     ]
 )
 
-_SOURCE_TOKENS: frozenset[str] = frozenset(["web", "webrip", "webdl", "bluray", "bdrip", "hdtv", "dvdrip", "hdrip"])
+_SOURCE_TOKEN_FAMILIES: dict[str, frozenset[str]] = {
+    "digital": frozenset(["web", "webrip", "webdl"]),
+    "bluray": frozenset(["bluray", "bdrip", "brrip", "remux"]),
+    "dvd": frozenset(["dvdrip", "dvdscr"]),
+    "broadcast": frozenset(["hdtv", "hdrip"]),
+    "cam": frozenset(["cam", "ts", "telesync"]),
+}
+
+_SOURCE_TOKENS: frozenset[str] = frozenset().union(*_SOURCE_TOKEN_FAMILIES.values())
+
+_SOURCE_FAMILY_BY_TOKEN: dict[str, str] = {
+    token: family for family, tokens in _SOURCE_TOKEN_FAMILIES.items() for token in tokens
+}
+
+_SOURCE_COMPATIBILITY: dict[frozenset[str], float] = {
+    frozenset(["digital", "bluray"]): 0.5,
+    frozenset(["dvd", "broadcast"]): 0.5,
+}
+
+_EDITION_TOKENS: frozenset[str] = frozenset(
+    [
+        "extended",
+        "uncut",
+        "unrated",
+        "remastered",
+        "theatrical",
+        "imax",
+        "directors",
+        "cut",
+    ]
+)
 
 # matches exactly 4 digits e.g. "2023" matches, "20231" does not
 _YEAR_PATTERN: re.Pattern[str] = re.compile(r"^\d{4}$")
@@ -232,13 +285,27 @@ _YEAR_PATTERN: re.Pattern[str] = re.compile(r"^\d{4}$")
 _SEASON_EPISODE_PATTERN: re.Pattern[str] = re.compile(r"^s\d+e\d+$")
 
 
+def _source_compatibility(source_a: str | None, source_b: str | None) -> float:
+    if source_a is None and source_b is None:
+        return 1.0
+    if source_a is None or source_b is None:
+        return 0.5
+    family_a = _SOURCE_FAMILY_BY_TOKEN[source_a]
+    family_b = _SOURCE_FAMILY_BY_TOKEN[source_b]
+    if family_a == "cam" or family_b == "cam":
+        return 0.0
+    if family_a == family_b:
+        return 1.0
+    return _SOURCE_COMPATIBILITY.get(frozenset([family_a, family_b]), 0.0)
+
+
 def _normalize_tokens(filename: str) -> dict:
     group = filename.rsplit("-", 1)[-1].lower()
-    # splits on dots or hyphens e.g. "Movie.Title-2023" → ["Movie", "Title", "2023"]
-    raw_tokens = re.split(r"[.\-]", filename.lower())
+    raw_tokens = re.split(r"[.\-]", filename.lower())  # dots or hyphens as delimiters
     year: str | None = None
     season_episode: str | None = None
     source: str | None = None
+    edition: set[str] = set()
     title: list[str] = []
 
     for token in raw_tokens:
@@ -253,44 +320,63 @@ def _normalize_tokens(filename: str) -> dict:
         if token in _SOURCE_TOKENS:
             source = token
             continue
+        if token in _EDITION_TOKENS:
+            edition.add(token)
+            continue
         title.append(token)
 
-    return {"title": title, "year": year, "season_episode": season_episode, "group": group, "source": source}
+    return {
+        "title": title,
+        "year": year,
+        "season_episode": season_episode,
+        "group": group,
+        "source": source,
+        "edition": edition,
+    }
 
 
-DEFAULT_MATCH_WEIGHTS: dict[str, float] = {
-    "title": 60,
-    "group": 30,
-    "source": 10,
-    "year_mismatch_multiplier": 0.1,
-    "season_episode_mismatch_multiplier": 0.1,
-}
 
 
-def calculate_match(from_user: str, from_website: str, weights: dict[str, float] | None = None) -> int:
-    weights = weights or DEFAULT_MATCH_WEIGHTS
-    tokens_a = _normalize_tokens(from_user)
-    tokens_b = _normalize_tokens(from_website)
 
-    if tokens_a == tokens_b:
-        return 100
+def _fields_conflict(value_a, value_b) -> bool:
+    return bool(value_a) and bool(value_b) and value_a != value_b
 
+
+def _mismatch_factor(tokens_a: dict, tokens_b: dict, multipliers: dict[str, float]) -> float:
+    multiplier = 1.0
+    if _fields_conflict(tokens_a["year"], tokens_b["year"]):
+        multiplier *= multipliers["year"]
+    if _fields_conflict(tokens_a["season_episode"], tokens_b["season_episode"]):
+        multiplier *= multipliers["season_episode"]
+    if _fields_conflict(tokens_a["edition"], tokens_b["edition"]):
+        multiplier *= multipliers["edition"]
+    return multiplier
+
+
+def _get_base_score(tokens_a: dict, tokens_b: dict, weights: dict[str, float]) -> int:
     title_score = round(SequenceMatcher(None, tokens_a["title"], tokens_b["title"]).ratio() * 100)
     group_score = 100 if tokens_a["group"] == tokens_b["group"] else 0
-    source_score = 100 if tokens_a["source"] == tokens_b["source"] else 0
-    base = (title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]) // 100
+    source_score = round(_source_compatibility(tokens_a["source"], tokens_b["source"]) * 100)
+    return (title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]) // 100
 
-    multiplier = 1.0
-    if tokens_a["year"] is not None and tokens_b["year"] is not None and tokens_a["year"] != tokens_b["year"]:
-        multiplier *= weights["year_mismatch_multiplier"]
-    if (
-        tokens_a["season_episode"] is not None
-        and tokens_b["season_episode"] is not None
-        and tokens_a["season_episode"] != tokens_b["season_episode"]
-    ):
-        multiplier *= weights["season_episode_mismatch_multiplier"]
 
-    return round(base * multiplier)
+def score_subtitle_tokens(
+    reference: str,
+    from_provider: str,
+    token_weights: dict[str, float] = DEFAULT_TOKEN_WEIGHTS,
+    token_multipliers: dict[str, float] = DEFAULT_TOKEN_MULTIPLIERS,
+) -> int:
+    reference_tokens = _normalize_tokens(reference)
+    provider_tokens = _normalize_tokens(from_provider)
+
+    if reference_tokens == provider_tokens:
+        return 100
+
+    base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
+    mismatch_multiplier = _mismatch_factor(reference_tokens, provider_tokens, token_multipliers)
+    score = round(base_score * mismatch_multiplier)
+
+    return score
 
 
 def valid_filename(input_string) -> bool:

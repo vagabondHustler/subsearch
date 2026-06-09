@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from subsearch.runtime.config.static_values import (
+    DEFAULT_TOKEN_MULTIPLIERS,
+    DEFAULT_TOKEN_WEIGHTS,
     HEALTH_TRACKED_PROVIDERS,
     SUPPORTED_FILE_EXTENSIONS,
     SUPPORTED_PROVIDERS,
@@ -56,13 +58,8 @@ def get_default_app_config() -> dict[str, Any]:
             "non_hearing_impaired": True,
             "only_foreign_parts": False,
             "providers": providers,
-            "match_weights": {
-                "title": 60,
-                "group": 30,
-                "source": 10,
-                "year_mismatch_multiplier": 0.1,
-                "season_episode_mismatch_multiplier": 0.1,
-            },
+            "token_weights": {**DEFAULT_TOKEN_WEIGHTS},
+            "token_multipliers": {**DEFAULT_TOKEN_MULTIPLIERS},
         },
         "shell_integration": {
             "context_menu": True,

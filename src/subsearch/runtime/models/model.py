@@ -1,5 +1,5 @@
 from dataclasses import Field, dataclass, field
-from enum import Enum
+from enum import Enum, IntEnum
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
@@ -51,7 +51,8 @@ class AppConfig:
     non_hearing_impaired: bool
     only_foreign_parts: bool
     providers: dict[str, bool]
-    match_weights: dict[str, float]
+    token_weights: dict[str, float]
+    token_multipliers: dict[str, float]
     context_menu: bool
     context_menu_icon: bool
     file_extensions: dict[str, bool]
@@ -104,13 +105,31 @@ class SubtitleStatus(Enum):
 
 @dataclass(slots=True)
 class Subtitle:
-    percentage_result: int
+    token_result: int
     provider_name: str
     subtitle_name: str
     download_url: str
     request_data: dict[str, Any]
     download_headers: dict[str, str] = field(default_factory=dict)
     status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
+    hash_match: bool = False
+
+
+class MatchTier(IntEnum):
+    C = 0
+    B = 1
+    A = 2
+    S = 3
+
+
+def classify_match_tier(hash_match: bool, percentage_result: int, accept_threshold: int) -> MatchTier:
+    if hash_match:
+        return MatchTier.S
+    if percentage_result == 100:
+        return MatchTier.A
+    if percentage_result >= accept_threshold:
+        return MatchTier.B
+    return MatchTier.C
 
 
 class ProviderDiagnosticStatus(Enum):
