@@ -3,6 +3,7 @@ from pathlib import Path
 
 from subsearch.io import file_system, toml_file, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
+from subsearch.providers.provider_helper import SubtitleResults
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import ProviderResult, Subtitle
@@ -13,8 +14,7 @@ class Bootstrap:
         self.start = pref_counter
         self.api_calls_made: dict[str, int] = {}
         self.ran_download_tab = False
-        self.accepted_subtitles: list[Subtitle] = []
-        self.rejected_subtitles: list[Subtitle] = []
+        self.subtitle_results = SubtitleResults()
         self.manually_accepted_subtitles: list[Subtitle] = []
         self.health_reports: list[ProviderResult] = []
         self.release_data = release_parser.no_release_data()
@@ -68,6 +68,7 @@ class Bootstrap:
                 app_config=self.app_config,
                 provider_urls=self.provider_urls,
                 language_data=self.language_data,
+                subtitle_results=self.subtitle_results,
             )
         log.event("task_completed")
 
@@ -88,6 +89,14 @@ class Bootstrap:
         if self.file_exists:
             file_system.create_directory(VIDEO_FILE.subs_dir)
             file_system.create_directory(VIDEO_FILE.tmp_dir)
+
+    @property
+    def accepted_subtitles(self) -> list[Subtitle]:
+        return self.subtitle_results.accepted
+
+    @property
+    def rejected_subtitles(self) -> list[Subtitle]:
+        return self.subtitle_results.rejected
 
     @property
     def gui_may_open(self) -> bool:

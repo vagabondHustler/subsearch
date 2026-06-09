@@ -57,8 +57,8 @@ class Subsource(provider_helper.ProviderHelper):
 
     def _search_and_collect(self) -> ProviderDiagnosticStatus:
         api = SubsourceApi(self.api_key)
-        content_type = "series" if self.tvseries else "movie"
-        search_response = api.search_by_imdb(self.imdb_id, content_type)
+        content_type = "series" if self.release_data.tvseries else "movie"
+        search_response = api.search_by_imdb(self.release_data.imdb_id, content_type)
         if not api.response_status_ok(search_response):
             return ProviderDiagnosticStatus.NO_RESPONSE
 
@@ -66,7 +66,7 @@ class Subsource(provider_helper.ProviderHelper):
         if movie_id is None:
             return ProviderDiagnosticStatus.OK
 
-        subtitles_response = api.list_subtitles(movie_id, self.selected_language)
+        subtitles_response = api.list_subtitles(movie_id, self.app_config.selected_language)
         if not api.response_status_ok(subtitles_response):
             return ProviderDiagnosticStatus.NO_RESPONSE
 
@@ -108,9 +108,9 @@ class Subsource(provider_helper.ProviderHelper):
         keys = ["movieId", "type", "title"]
         if not self.keys_exist(movie, keys):
             return True
-        if movie["title"].lower() != self.title:
+        if movie["title"].lower() != self.release_data.title:
             return True
-        if self.tvseries and movie.get("season") != int(self.season_no_padding):
+        if self.release_data.tvseries and movie.get("season") != int(self.season_no_padding):
             return True
         return False
 

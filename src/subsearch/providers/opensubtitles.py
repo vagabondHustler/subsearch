@@ -84,8 +84,8 @@ class OpenSubtitles(OpenSubtitlesScraper):
         self.provider_name = self.__class__.__name__.lower()
 
     def _do_search(self) -> ProviderDiagnosticStatus:
-        hash_health = self.with_hash(self.url_opensubtitles_hash[0], self.release)
-        site_health = self.get_subtitles(self.url_opensubtitles[0])
+        hash_health = self.with_hash(self.provider_urls.opensubtitles_hash[0], self.release_data.release)
+        site_health = self.get_subtitles(self.provider_urls.opensubtitles[0])
         return combine_provider_diagnostic_status(hash_health, site_health)
 
     def start_search(self, *args, **kwargs) -> None:

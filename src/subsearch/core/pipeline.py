@@ -93,8 +93,6 @@ class SearchPipeline:
             search_provider.start_search(flag=flag)
         except MissingApiKey:
             self._notify_missing_api_key(search_provider.provider_name)
-        self.bootstrap.accepted_subtitles.extend(search_provider.accepted_subtitles)
-        self.bootstrap.rejected_subtitles.extend(search_provider.rejected_subtitles)
         self.bootstrap.health_reports.extend(search_provider.reported_health)
 
     def _notify_missing_api_key(self, provider_name: str) -> None:

@@ -6,7 +6,10 @@ from typing import Any
 from num2words import num2words
 
 from subsearch.runtime.config.constants import VIDEO_FILE
-from subsearch.runtime.config.static_values import DEFAULT_TOKEN_MULTIPLIERS, DEFAULT_TOKEN_WEIGHTS
+from subsearch.runtime.config.static_values import (
+    DEFAULT_TOKEN_MULTIPLIERS,
+    DEFAULT_TOKEN_WEIGHTS,
+)
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     AppConfig,
@@ -333,9 +336,6 @@ def _normalize_tokens(filename: str) -> dict:
         "source": source,
         "edition": edition,
     }
-
-
-
 
 
 def _fields_conflict(value_a, value_b) -> bool:

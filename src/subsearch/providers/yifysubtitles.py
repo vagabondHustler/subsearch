@@ -20,7 +20,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
 
     def _select_responding_mirror(self) -> tuple[LexborHTMLParser, str] | None:
         self.any_mirror_responded = False
-        for url in self.url_yifysubtitles:
+        for url in self.provider_urls.yifysubtitles:
             tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
             if not tree:
                 continue
@@ -64,7 +64,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def skip_reason(self, item: LexborNode) -> str:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
         subtitle_hi = item.css_matches("span.hi-subtitle")
-        if subtitle_language.lower() != self.selected_language.lower():  # type: ignore
+        if subtitle_language.lower() != self.app_config.selected_language.lower():  # type: ignore
             return "language"
         if not self.subtitle_hi_match(subtitle_hi):
             return "hi"
