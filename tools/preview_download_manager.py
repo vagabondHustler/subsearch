@@ -68,7 +68,7 @@ def make_subtitles() -> list[Subtitle]:
         quality = QUALITIES[index % len(QUALITIES)]
         subtitles.append(
             Subtitle(
-                percentage_result=percentage,
+                token_result=percentage,
                 provider_name=provider,
                 subtitle_name=f"{title}.{quality}",
                 download_url="https://example.invalid/mock.zip",

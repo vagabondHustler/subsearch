@@ -14,7 +14,7 @@ from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import Subtitle
+from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
 
 
 def create_path_from_string(string: str, path_resolution: str, create_missing_folder: bool = True) -> Path:
@@ -46,11 +46,15 @@ def is_zip_payload(chunk: bytes) -> bool:
     return chunk.startswith(_ZIP_MAGIC_BYTES)
 
 
+_HASH_MATCH_PREFIX = "hashmatch__"
+
+
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
     log.info(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
-    file_name = f"{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
+    prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
+    file_name = f"{prefix}{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = VIDEO_FILE.tmp_dir / file_name
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
@@ -67,7 +71,7 @@ _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
 _MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB , generous for any subtitle archive
 
 
-def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path) -> None:
+def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> None:
     total_uncompressed = sum(info.file_size for info in archive.infolist())
     if total_uncompressed > _MAX_UNCOMPRESSED_BYTES:
         log.warning(f"Archive uncompressed size {total_uncompressed} exceeds limit, skipping")
@@ -81,7 +85,9 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path) -> None:
             continue
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
             continue
-        archive.extract(member, dst)
+        extracted_path = Path(archive.extract(member, dst))
+        if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
+            extracted_path.rename(extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}"))
 
 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
@@ -89,23 +95,40 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
         log.event("extract", src=file, dst=dst)
         try:
             with zipfile.ZipFile(file) as archive:
-                _safe_extract_archive(archive, dst)
+                _safe_extract_archive(archive, dst, hash_match=file.name.startswith(_HASH_MATCH_PREFIX))
         except zipfile.BadZipFile, OSError:
             log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
 
 def find_best_subtitle_match(release_name: str, extension: str = ".srt") -> Path:
-    weights = toml_file.get_config_session().read("search.match_weights")
-    best_match = (0, Path("."))
-    for file in VIDEO_FILE.subs_dir.glob(f"*{extension}"):
-        value = release_parser.calculate_match(file.name, release_name, weights)
-        if value >= best_match[0]:
-            best_match = value, file
-    return best_match[1]
+    config = toml_file.get_config_session()
+    weights = config.read("search.match_weights")
+    accept_threshold = config.read("search.accept_threshold")
+    best_rank = (MatchTier.C, 0)
+    best_match = Path(".")
+    for file in sorted(VIDEO_FILE.subs_dir.glob(f"*{extension}")):
+        is_hash_match = file.name.startswith(_HASH_MATCH_PREFIX)
+        token_name = file.name.removeprefix(_HASH_MATCH_PREFIX)
+        token_score = release_parser.score_subtitle_tokens(token_name, release_name, weights)
+        tier = classify_match_tier(is_hash_match, token_score, accept_threshold)
+        rank = (tier, token_score)
+        if rank > best_rank:
+            best_rank = rank
+            best_match = file
+    return best_match
+
+
+def _next_available_path(directory: Path, stem: str, extension: str) -> Path:
+    candidate = directory / f"{stem}{extension}"
+    version = 1
+    while candidate.exists():
+        candidate = directory / f"{stem}_v{version}{extension}"
+        version += 1
+    return candidate
 
 
 def rename_subtitle_to_release(file_path: Path, release_name: str, extension: str = ".srt") -> Path:
-    new_file_path = file_path.with_name(f"{release_name}{extension}")
+    new_file_path = _next_available_path(file_path.parent, release_name, extension)
     log.event("rename", src=file_path, dst=new_file_path)
     file_path.rename(new_file_path)
     return new_file_path
@@ -118,7 +141,9 @@ def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
 
 def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
     for file in src.glob(f"*{extension}"):
-        move_and_replace(file.absolute(), dst)
+        destination = _next_available_path(dst, file.stem, file.suffix)
+        log.event("move", src=file, dst=destination)
+        file.absolute().replace(destination)
 
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:

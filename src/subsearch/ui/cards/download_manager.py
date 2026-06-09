@@ -7,7 +7,12 @@ from subsearch.io import file_system, toml_file
 from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import Subtitle, SubtitleStatus
+from subsearch.runtime.models.model import (
+    MatchTier,
+    Subtitle,
+    SubtitleStatus,
+    classify_match_tier,
+)
 from subsearch.ui.cards import (
     CARD_BORDER_COLOR,
     CARD_BORDER_RADIUS,
@@ -97,7 +102,8 @@ class DownloadManagerInterface(QWidget):
     def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
         super().__init__()
         self.setObjectName("downloadManagerInterface")
-        self.subtitles = sorted(subtitles or [], key=lambda subtitle: subtitle.percentage_result, reverse=True)
+        self.accept_threshold = toml_file.get_config_session().read("search.accept_threshold")
+        self.subtitles = sorted(subtitles or [], key=self._sort_key, reverse=True)
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
         self.download_number = 1
@@ -129,7 +135,6 @@ class DownloadManagerInterface(QWidget):
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         card.viewLayout.addWidget(self.list_widget, stretch=1)
         self.items_by_subtitle: dict[int, Subtitle] = {}
-        accept_threshold = toml_file.get_config_session().read("search.accept_threshold")
         automatic_downloads = toml_file.get_config_session().read("download.automatic")
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
@@ -139,7 +144,7 @@ class DownloadManagerInterface(QWidget):
             item.setForeground(QColor(PENDING_COLOR))
             self.list_widget.addItem(item)
             self.items_by_subtitle[self.list_widget.row(item)] = subtitle
-            if subtitle.percentage_result == accept_threshold and not automatic_downloads:
+            if subtitle.token_result == self.accept_threshold and not automatic_downloads:
                 self.downloaded.append(subtitle)
                 subtitle.status = SubtitleStatus.MANUALLY_DOWNLOADED
                 self.download_number += 1
@@ -153,9 +158,15 @@ class DownloadManagerInterface(QWidget):
         font.setWeight(SEMI_BOLD)
         return font
 
-    @staticmethod
-    def _row_text(subtitle: Subtitle) -> str:
-        return f"{subtitle.percentage_result}%  {subtitle.subtitle_name}"
+    def _match_tier(self, subtitle: Subtitle) -> MatchTier:
+        return classify_match_tier(subtitle.hash_match, subtitle.token_result, self.accept_threshold)
+
+    def _sort_key(self, subtitle: Subtitle) -> tuple[int, int]:
+        return self._match_tier(subtitle), subtitle.token_result
+
+    def _row_text(self, subtitle: Subtitle) -> str:
+        tier = self._match_tier(subtitle)
+        return f"[{tier.name}] {subtitle.token_result}%  {subtitle.subtitle_name}"
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
         row = self.list_widget.row(item)
