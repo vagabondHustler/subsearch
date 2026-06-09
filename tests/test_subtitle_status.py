@@ -1,7 +1,6 @@
 from subsearch.io import toml_file
 from subsearch.parsing import release_parser
 from subsearch.providers import provider_helper
-from subsearch.providers.provider_helper import SubtitleCollector
 from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.runtime.models.model import Subtitle, SubtitleStatus
 from tests import fixture_data
@@ -22,14 +21,7 @@ def _build_helper() -> provider_helper.ProviderHelper:
     return helper
 
 
-def _reset_class_lists() -> None:
-    SubtitleCollector._shared_accepted = []
-    SubtitleCollector._shared_rejected = []
-    SubtitleCollector._shared_filtered = []
-
-
 def test_record_filtered_out_appends_status_and_counts() -> None:
-    _reset_class_lists()
     helper = _build_helper()
     helper.record_filtered_out("testprovider", "Some.Release.spanish", "language")
     helper.record_filtered_out("testprovider", "Some.Release.hi", "hi")
