@@ -129,9 +129,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def download_files(self) -> None:
         log.event("banner", title="Downloading subtitles")
-        accepted = sorted(
-            self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.percentage_result, reverse=True
-        )
+        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.token_result, reverse=True)
         for subtitle in accepted:
             if self._provider_at_api_call_limit(subtitle.provider_name):
                 continue

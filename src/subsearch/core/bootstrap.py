@@ -57,7 +57,7 @@ class Bootstrap:
             VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path)
             log.dataclass(VIDEO_FILE, level="debug", to_console=False)
             file_system.create_directory(VIDEO_FILE.file_directory)
-            self.release_data = release_parser.get_release_data(VIDEO_FILE.filename)
+            self.release_data = release_parser.get_release_info(VIDEO_FILE.filename)
             self.update_imdb_id()
             log.dataclass(self.release_data, level="debug", to_console=False)
             provider_urls = release_parser.CreateProviderUrls(self.app_config, self.release_data, self.language_data)

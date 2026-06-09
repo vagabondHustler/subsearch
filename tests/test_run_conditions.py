@@ -13,7 +13,7 @@ class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
         self.file_exists = True
         self.app_config = toml_file.get_app_config(FILE_PATHS.config)
-        self.release_data = release_parser.get_release_data(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+        self.release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
         self.language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
         self.accepted_subtitles: list[str] = []
