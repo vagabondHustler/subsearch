@@ -6,7 +6,7 @@ from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers.provider_helper import SubtitleResults
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import ProviderResult, Subtitle
+from subsearch.runtime.models.model import AppMode, ProviderResult, Subtitle
 
 
 class Bootstrap:
@@ -19,7 +19,7 @@ class Bootstrap:
         self.health_reports: list[ProviderResult] = []
         self.release_data = release_parser.no_release_data()
         self.provider_urls = release_parser.CreateProviderUrls.no_urls()
-        self.file_exists = VIDEO_FILE.file_exists
+        self.app_mode = AppMode.SEARCH if VIDEO_FILE.file_exists else AppMode.SETTINGS
         self.autoload_src: Path = Path("")
 
         self.downloaded_subtitle_archives: int = 0
@@ -28,7 +28,7 @@ class Bootstrap:
 
         log.debug(f"sys.argv: {sys.argv}", to_console=False)
         log.debug(
-            f"Video file {'found' if self.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}",
+            f"Video file {'found' if self.app_mode is AppMode.SEARCH else 'not found'}: {VIDEO_FILE.file_path or 'none'}",
             to_console=False,
         )
         log.debug("Verifying files and paths")
@@ -53,7 +53,7 @@ class Bootstrap:
 
             warmup.start_warmup()
 
-        if self.file_exists:
+        if self.app_mode is AppMode.SEARCH:
             VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path)
             log.dataclass(VIDEO_FILE, level="debug", to_console=False)
             file_system.create_directory(VIDEO_FILE.file_directory)
@@ -86,7 +86,7 @@ class Bootstrap:
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        if self.file_exists:
+        if self.app_mode is AppMode.SEARCH:
             file_system.create_directory(VIDEO_FILE.subs_dir)
             file_system.create_directory(VIDEO_FILE.tmp_dir)
 
@@ -100,7 +100,7 @@ class Bootstrap:
 
     @property
     def gui_may_open(self) -> bool:
-        return not self.file_exists or self.app_config.always_open_manager or self.app_config.open_manager_on_no_matches
+        return self.app_mode is AppMode.SETTINGS or self.app_config.always_open_manager or self.app_config.open_manager_on_no_matches
 
     def all_providers_disabled(self) -> bool:
         if (

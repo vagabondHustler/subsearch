@@ -13,6 +13,7 @@ from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FIL
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.models.model import (
+    AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,
     Subtitle,
@@ -25,7 +26,7 @@ class SearchPipeline:
         self.bootstrap = Bootstrap(pref_counter)
         self.call_conditions = RunConditions(self.bootstrap)
         self._set_console_title()
-        if self._open_settings_on_missing_file():
+        if self._run_settings_mode():
             return None
         self._warn_if_filename_has_spaces()
         if not self.bootstrap.all_providers_disabled():
@@ -35,8 +36,8 @@ class SearchPipeline:
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
 
-    def _open_settings_on_missing_file(self) -> bool:
-        if self.bootstrap.file_exists:
+    def _run_settings_mode(self) -> bool:
+        if self.bootstrap.app_mode is not AppMode.SETTINGS:
             return False
         log.event("banner", title="GUI")
         from subsearch.ui.application import open_settings_window

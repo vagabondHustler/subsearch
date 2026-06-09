@@ -2,6 +2,7 @@ from typing import Callable
 
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models.model import AppMode
 
 ConditionList = list[tuple[str, "bool | Callable[[], bool]"]]
 
@@ -13,7 +14,7 @@ class RunConditions:
 
     def sync_state(self) -> None:
         self.app_config = self.bootstrap.app_config
-        self.file_exists = self.bootstrap.file_exists
+        self.app_mode = self.bootstrap.app_mode
         self.release_data = self.bootstrap.release_data
         self.provider_urls = self.bootstrap.provider_urls
         self.language_data = self.bootstrap.language_data
@@ -61,15 +62,13 @@ class RunConditions:
         post_processing = self.app_config.post_processing
         conditions: dict[str, ConditionList] = {
             "init_search": [
-                ("file_exists", self.file_exists),
+                ("app_mode_search", self.app_mode is AppMode.SEARCH),
             ],
             "opensubtitles": [
-                ("file_exists", self.file_exists),
                 ("language_supports_opensubtitles", lambda: self.language_supports_provider("opensubtitles")),
                 ("provider_enabled", self.app_config.providers["opensubtitles"]),
             ],
             "yifysubtitles": [
-                ("file_exists", self.file_exists),
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_yifysubtitles", lambda: self.language_supports_provider("yifysubtitles")),
                 ("not_tvseries", not self.release_data.tvseries),
@@ -77,7 +76,6 @@ class RunConditions:
                 ("provider_enabled", self.app_config.providers["yifysubtitles_site"]),
             ],
             "subsource": [
-                ("file_exists", self.file_exists),
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_subsource", lambda: self.language_supports_provider("subsource")),
                 ("provider_enabled", self.app_config.providers["subsource_site"]),
@@ -88,9 +86,7 @@ class RunConditions:
             "download_manager": [
                 ("should_open_download_manager", self.should_open_download_manager),
             ],
-            "subtitle_post_processing": [
-                ("file_exists", self.file_exists),
-            ],
+            "subtitle_post_processing": [],
             "extract_files": [
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
@@ -108,16 +104,12 @@ class RunConditions:
                 ("move_all_enabled", post_processing["move_all"]),
             ],
             "summary_notification": [
-                ("file_exists", self.file_exists),
                 ("summary_notification_enabled", self.app_config.summary_notification),
             ],
             "run_provider_diagnostics": [
-                ("file_exists", self.file_exists),
                 ("diagnostics_enabled", self.app_config.diagnostics["enabled"]),
             ],
-            "clean_up": [
-                ("file_exists", self.file_exists),
-            ],
+            "clean_up": [],
         }
 
         return self._evaluate_and_log(pipeline_step, conditions[pipeline_step])
