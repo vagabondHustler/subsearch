@@ -181,10 +181,22 @@ class SwitchRow(SettingRow):
         self.switch.setChecked(bool(store.read(config_key)))
         super().__init__(config_key, self.switch, store, parent)
         self.switch.checkedChanged.connect(self._on_checked_changed)
+        store.value_changed.connect(self._on_store_changed)
 
     def _on_checked_changed(self, checked: bool) -> None:
         self.store.write(self.config_key, checked)
         self.toggled.emit(checked)
+
+    def _on_store_changed(self, key: str, value: object) -> None:
+        if key != self.config_key:
+            return
+        new_checked = bool(value)
+        if self.switch.isChecked() == new_checked:
+            return
+        self.switch.blockSignals(True)
+        self.switch.setChecked(new_checked)
+        self.switch.blockSignals(False)
+        self.toggled.emit(new_checked)
 
     def set_checked_silently(self, checked: bool) -> None:
         self.switch.blockSignals(True)
@@ -207,11 +219,20 @@ class SpinBoxRow(SettingRow):
         self.spin_box.setFixedWidth(120)
         super().__init__(config_key, self.spin_box, store, parent)
         self.spin_box.valueChanged.connect(self._on_value_changed)
+        store.value_changed.connect(self._on_store_changed)
         self._update_help(self.spin_box.value())
 
     def _on_value_changed(self, value: int) -> None:
         self.store.write(self.config_key, value)
         self._update_help(value)
+
+    def _on_store_changed(self, key: str, value: object) -> None:
+        if key != self.config_key:
+            return
+        self.spin_box.blockSignals(True)
+        self.spin_box.setValue(int(value))
+        self.spin_box.blockSignals(False)
+        self._update_help(int(value))
 
     def _update_help(self, value: int) -> None:
         if self.help_button is not None:
@@ -241,6 +262,7 @@ class SearchableComboBoxRow(SettingRow):
             self.combo_box.setCurrentText(self._label_by_value[current_value])
         super().__init__(config_key, self.combo_box, store, parent, show_help=show_help)
         self.combo_box.currentTextChanged.connect(self._on_selection_changed)
+        store.value_changed.connect(self._on_store_changed)
 
     def _on_selection_changed(self, label: str) -> None:
         if label not in self._value_by_label:
@@ -248,3 +270,13 @@ class SearchableComboBoxRow(SettingRow):
         value = self._value_by_label[label]
         self.store.write(self.config_key, value)
         self.selection_changed.emit(value)
+
+    def _on_store_changed(self, key: str, value: object) -> None:
+        if key != self.config_key:
+            return
+        label = self._label_by_value.get(str(value))
+        if label is None:
+            return
+        self.combo_box.blockSignals(True)
+        self.combo_box.setCurrentText(label)
+        self.combo_box.blockSignals(False)

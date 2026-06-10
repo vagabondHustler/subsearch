@@ -238,6 +238,13 @@ class CircleDotSlider(Slider):
     def update_value_from_handle(self, handle_position: QPoint) -> None:
         self.setValue(self._posToValue(self.handle.mapToParent(handle_position)))
 
+    def set_value_silent(self, value: int) -> None:
+        """Set value without emitting valueChanged; repositions the handle manually."""
+        self.blockSignals(True)
+        self.setValue(value)
+        self._adjustHandlePos()
+        self.blockSignals(False)
+
 
 # --- Styled dropdown / completer menus -------------------------------------------
 # Combo menus ignore the application font and text color; menu.view and the
