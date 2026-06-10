@@ -1,7 +1,9 @@
 from PySide6.QtGui import QColor
 from qfluentwidgets import ThemeColor
 
-ACCENT_COLOR = "#c8c8c7"
+from subsearch.ui.theme import palette
+
+ACCENT_COLOR = palette.NEUTRAL_1
 
 _BRIGHTNESS_BY_VARIANT = {
     ThemeColor.PRIMARY: 1.0,

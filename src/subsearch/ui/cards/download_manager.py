@@ -21,6 +21,7 @@ from subsearch.ui.cards import (
 )
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
+from subsearch.ui.theme import palette
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
@@ -55,10 +56,10 @@ ListWidget::item:selected {
 }
 """
 
-PENDING_COLOR = "#c8c8c7"
-DOWNLOADING_COLOR = "#89b4fa"
-SUCCESS_COLOR = "#a6d778"
-FAILED_COLOR = "#f38ba8"
+PENDING_COLOR = palette.NEUTRAL_1
+DOWNLOADING_COLOR = palette.BLUE
+SUCCESS_COLOR = palette.GREEN
+FAILED_COLOR = palette.RED
 
 PENDING_ICON = LucideIcon.CIRCLE
 DOWNLOADING_ICON = LucideIcon.CIRCLE_DOT_DASHED
