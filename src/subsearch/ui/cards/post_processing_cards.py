@@ -112,7 +112,9 @@ class PostProcessingCard(SettingsCard):
         path_row.addWidget(help_button)
         destination_layout.addLayout(path_row)
 
-        destination_layout.addWidget(SwitchRow("post_processing.create_missing_folder", self.store, self))
+        create_missing_folder = SwitchRow("post_processing.create_missing_folder", self.store, self)
+        destination_layout.addWidget(create_missing_folder)
+        self.register_restore_defaults([(create_missing_folder.config_key, create_missing_folder.default_value)])
         self.body_layout.addWidget(self.destination)
 
     def _build_browse_button(self) -> QWidget:
