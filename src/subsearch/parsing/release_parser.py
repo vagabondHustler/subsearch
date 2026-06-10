@@ -351,8 +351,6 @@ def _mismatch_factor(tokens_a: dict, tokens_b: dict, multipliers: dict[str, int]
     year_a, year_b = tokens_a["year"], tokens_b["year"]
     if _fields_conflict(year_a, year_b):
         multiplier *= _penalty_to_multiplier(multipliers["year"])
-    elif bool(year_a) != bool(year_b):
-        multiplier *= (1 + _penalty_to_multiplier(multipliers["year"])) / 2
     if _fields_conflict(tokens_a["season_episode"], tokens_b["season_episode"]):
         multiplier *= _penalty_to_multiplier(multipliers["season_episode"])
     if _fields_conflict(tokens_a["edition"], tokens_b["edition"]):
