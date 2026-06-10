@@ -28,9 +28,9 @@ from qfluentwidgets import (
 )
 from qfluentwidgets.components.widgets.line_edit import CompleterMenu
 
-from subsearch.io import toml_file
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
@@ -276,11 +276,13 @@ class SettingRow(QFrame):
         self,
         config_key: str,
         control: QWidget,
+        store: SettingsStore,
         parent: QWidget | None = None,
         show_help: bool = True,
     ) -> None:
         super().__init__(parent)
         self.config_key = config_key
+        self.store = store
         description = SETTING_DESCRIPTIONS[config_key]
 
         layout = QHBoxLayout(self)
@@ -301,53 +303,47 @@ class SettingRow(QFrame):
             layout.addWidget(self.help_button, alignment=Qt.AlignmentFlag.AlignVCenter)
 
 
-def read_value(config_key: str):
-    return toml_file.get_config_session().read(config_key)
-
-
-def write_value(config_key: str, value) -> None:
-    toml_file.get_config_session().write(config_key, value)
-
-
 class SwitchRow(SettingRow):
     toggled = Signal(bool)
 
-    def __init__(self, config_key: str, parent: QWidget | None = None) -> None:
+    def __init__(self, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
         self.switch = SwitchButton()
         self.switch.setOnText("")
         self.switch.setOffText("")
         thicken_unchecked_switch_border(self.switch)
-        self.switch.setChecked(bool(read_value(config_key)))
-        super().__init__(config_key, self.switch, parent)
+        self.switch.setChecked(bool(store.read(config_key)))
+        super().__init__(config_key, self.switch, store, parent)
         self.switch.checkedChanged.connect(self._on_checked_changed)
 
     def _on_checked_changed(self, checked: bool) -> None:
-        write_value(self.config_key, checked)
+        self.store.write(self.config_key, checked)
         self.toggled.emit(checked)
 
     def set_checked_silently(self, checked: bool) -> None:
         self.switch.blockSignals(True)
         self.switch.setChecked(checked)
         self.switch.blockSignals(False)
-        write_value(self.config_key, checked)
+        self.store.write(self.config_key, checked)
 
     def set_enabled(self, enabled: bool) -> None:
         self.switch.setEnabled(enabled)
 
 
 class SpinBoxRow(SettingRow):
-    def __init__(self, config_key: str, minimum: int, maximum: int, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, config_key: str, store: SettingsStore, minimum: int, maximum: int, parent: QWidget | None = None
+    ) -> None:
         self.spin_box = SpinBox()
         apply_body_font(self.spin_box)
         self.spin_box.setRange(minimum, maximum)
-        self.spin_box.setValue(int(read_value(config_key)))
+        self.spin_box.setValue(int(store.read(config_key)))
         self.spin_box.setFixedWidth(120)
-        super().__init__(config_key, self.spin_box, parent)
+        super().__init__(config_key, self.spin_box, store, parent)
         self.spin_box.valueChanged.connect(self._on_value_changed)
         self._update_help(self.spin_box.value())
 
     def _on_value_changed(self, value: int) -> None:
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
         self._update_help(value)
 
     def _update_help(self, value: int) -> None:
@@ -361,6 +357,7 @@ class SearchableComboBoxRow(SettingRow):
     def __init__(
         self,
         config_key: str,
+        store: SettingsStore,
         labelled_values: dict[str, str],
         aliases_by_label: dict[str, list[str]] | None = None,
         parent: QWidget | None = None,
@@ -372,15 +369,15 @@ class SearchableComboBoxRow(SettingRow):
         self._value_by_label = labelled_values
         self._label_by_value = {value: label for label, value in labelled_values.items()}
         self.combo_box.setItems(list(labelled_values.keys()), aliases_by_label)
-        current_value = read_value(config_key)
+        current_value = store.read(config_key)
         if current_value in self._label_by_value:
             self.combo_box.setCurrentText(self._label_by_value[current_value])
-        super().__init__(config_key, self.combo_box, parent, show_help=show_help)
+        super().__init__(config_key, self.combo_box, store, parent, show_help=show_help)
         self.combo_box.currentTextChanged.connect(self._on_selection_changed)
 
     def _on_selection_changed(self, label: str) -> None:
         if label not in self._value_by_label:
             return
         value = self._value_by_label[label]
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
         self.selection_changed.emit(value)

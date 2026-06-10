@@ -27,8 +27,9 @@ def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
 def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> None:
     from subsearch.io import toml_file
     from subsearch.ui.cards.search_cards import SearchThresholdCard
+    from subsearch.ui.state.store import SettingsStore
 
-    card = SearchThresholdCard()
+    card = SearchThresholdCard(SettingsStore())
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
 

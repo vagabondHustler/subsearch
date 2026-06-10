@@ -3,7 +3,7 @@ from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
-from subsearch.io import file_system, toml_file
+from subsearch.io import file_system
 from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
@@ -21,6 +21,7 @@ from subsearch.ui.cards import (
 )
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
+from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
@@ -100,10 +101,11 @@ class SubtitleCard(HeaderCardWidget):
 
 
 class DownloadManagerInterface(QWidget):
-    def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
+    def __init__(self, store: SettingsStore, subtitles: list[Subtitle] | None = None) -> None:
         super().__init__()
         self.setObjectName("downloadManagerInterface")
-        self.accept_threshold = toml_file.get_config_session().read("search.accept_threshold")
+        self.store = store
+        self.accept_threshold = store.read("search.accept_threshold")
         self.subtitles = sorted(subtitles or [], key=self._sort_key, reverse=True)
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
@@ -136,7 +138,7 @@ class DownloadManagerInterface(QWidget):
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         card.viewLayout.addWidget(self.list_widget, stretch=1)
         self.items_by_subtitle: dict[int, Subtitle] = {}
-        automatic_downloads = toml_file.get_config_session().read("download.automatic")
+        automatic_downloads = store.read("download.automatic")
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
             item.setFont(self._list_font())
@@ -183,7 +185,7 @@ class DownloadManagerInterface(QWidget):
         self._download(item, subtitle)
 
     def _download(self, item: QListWidgetItem, subtitle: Subtitle) -> None:
-        toml_file.get_config_session().commit()
+        self.store.commit()
         try:
             if release_parser.valid_filename(subtitle.subtitle_name):
                 subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)

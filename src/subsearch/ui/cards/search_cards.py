@@ -7,7 +7,6 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
-from subsearch.io import toml_file
 from subsearch.parsing.release_parser import score_subtitle_tokens
 from subsearch.runtime.config.static_values import (
     DEFAULT_TOKEN_MULTIPLIERS,
@@ -16,6 +15,7 @@ from subsearch.runtime.config.static_values import (
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
@@ -29,8 +29,6 @@ from subsearch.ui.widgets.setting_rows import (
     HelpButton,
     SearchableComboBoxRow,
     SwitchRow,
-    read_value,
-    write_value,
 )
 from subsearch.ui.widgets.slider import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 
@@ -44,9 +42,9 @@ PROVIDER_INCOMPATIBILITY_NAMES = {
 
 
 class LanguageCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Language", parent)
-        languages = toml_file.load_language_data()
+        languages = store.language_data()
         labelled_values = {data["name"]: key for key, data in languages.items()}
         aliases_by_label = {
             data["name"]: [code for code in (data["two_letter_code"], data["three_letter_code"]) if code]
@@ -54,7 +52,7 @@ class LanguageCard(SettingsCard):
         }
         self.add_header_help(SETTING_DESCRIPTIONS["language.selected"].explanation)
         self.language_row = SearchableComboBoxRow(
-            "language.selected", labelled_values, aliases_by_label, show_help=False
+            "language.selected", store, labelled_values, aliases_by_label, show_help=False
         )
         self.add_row(self.language_row)
 
@@ -64,11 +62,11 @@ class LanguageCard(SettingsCard):
 
 
 class SubtitleFiltersCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle filters", parent)
-        self.add_row(SwitchRow("search.hearing_impaired"))
-        self.add_row(SwitchRow("search.non_hearing_impaired"))
-        self.add_row(SwitchRow("search.only_foreign_parts"))
+        self.add_row(SwitchRow("search.hearing_impaired", store))
+        self.add_row(SwitchRow("search.non_hearing_impaired", store))
+        self.add_row(SwitchRow("search.only_foreign_parts", store))
 
 
 EXAMPLE_REFERENCE_MOVIE = "Shrek.2001.1080p.BluRay.x264-YOLO"
@@ -145,9 +143,12 @@ class ThresholdExampleRow(QWidget):
 class AdvancedTuningRow(QWidget):
     value_changed = Signal()
 
-    def __init__(self, label_text: str, config_key: str, spin_box, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, label_text: str, config_key: str, spin_box, store: SettingsStore, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.config_key = config_key
+        self.store = store
         self.spin_box = spin_box
         apply_body_font(self.spin_box)
         self.spin_box.setFixedWidth(110)
@@ -163,14 +164,14 @@ class AdvancedTuningRow(QWidget):
         self.spin_box.valueChanged.connect(self._on_value_changed)
 
     def _on_value_changed(self, value) -> None:
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
         self.value_changed.emit()
 
     def reset_to(self, value) -> None:
         self.spin_box.blockSignals(True)
         self.spin_box.setValue(value)
         self.spin_box.blockSignals(False)
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
 
 
 class SliderWithValueLabel(QWidget):
@@ -227,8 +228,9 @@ class SliderWithValueLabel(QWidget):
 
 
 class SearchThresholdCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Search threshold", parent)
+        self.store = store
         self._using_series = False
         self.tuning_rows: dict[str, AdvancedTuningRow] = {}
         self._build_header()
@@ -240,7 +242,7 @@ class SearchThresholdCard(SettingsCard):
 
         self.slider = SliderWithValueLabel(self)
         self.slider.setRange(0, 100)
-        self.slider.setValue(int(read_value("search.accept_threshold")))
+        self.slider.setValue(int(store.read("search.accept_threshold")))
 
         slider_row = QHBoxLayout()
         slider_row.setContentsMargins(48 - HANDLE_CENTER, 6, 48, 10)
@@ -323,8 +325,8 @@ class SearchThresholdCard(SettingsCard):
     def _tuning_row(self, token_name: str, label_text: str, config_key: str) -> AdvancedTuningRow:
         spin_box = SpinBox()
         spin_box.setRange(0, 100)
-        spin_box.setValue(int(read_value(config_key)))
-        row = AdvancedTuningRow(label_text, config_key, spin_box, self)
+        spin_box.setValue(int(self.store.read(config_key)))
+        row = AdvancedTuningRow(label_text, config_key, spin_box, self.store, self)
         row.value_changed.connect(self._refresh_examples)
         row.value_changed.connect(self._refresh_restore_icon)
         self.tuning_rows[token_name] = row
@@ -342,7 +344,7 @@ class SearchThresholdCard(SettingsCard):
         defaults = {f"search.token_weights.{name}": default for name, default in DEFAULT_TOKEN_WEIGHTS.items()} | {
             f"search.token_multipliers.{name}": default for name, default in DEFAULT_TOKEN_MULTIPLIERS.items()
         }
-        return all(int(read_value(config_key)) == int(default) for config_key, default in defaults.items())
+        return all(int(self.store.read(config_key)) == int(default) for config_key, default in defaults.items())
 
     def _refresh_restore_icon(self) -> None:
         color = DISABLED_TEXT_COLOR if self._is_at_defaults() else TEXT_COLOR
@@ -370,11 +372,11 @@ class SearchThresholdCard(SettingsCard):
         self._refresh_examples()
 
     def _on_slider_released(self) -> None:
-        write_value("search.accept_threshold", self.slider.value())
+        self.store.write("search.accept_threshold", self.slider.value())
 
     def _refresh_examples(self) -> None:
-        token_weights = read_value("search.token_weights")
-        token_multipliers = read_value("search.token_multipliers")
+        token_weights = self.store.read("search.token_weights")
+        token_multipliers = self.store.read("search.token_multipliers")
         threshold = self.slider.value()
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE
         subtitle_names = EXAMPLE_SERIES_SUBTITLE if self._using_series else EXAMPLE_MOVIE_SUBTITLE
@@ -384,15 +386,16 @@ class SearchThresholdCard(SettingsCard):
 
 
 class ProvidersCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle providers", parent)
+        self.store = store
         provider_labels = {
             "opensubtitles": "Opensubtitles",
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
         }
-        self._language_data = toml_file.load_language_data()
-        providers = read_value("search.providers")
+        self._language_data = store.language_data()
+        providers = store.read("search.providers")
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS["search.providers"].explanation)
 
         self.check_boxes: dict[str, CheckBox] = {}
@@ -414,12 +417,12 @@ class ProvidersCard(SettingsCard):
 
         self.body_layout.addLayout(grid)
 
-        self.apply_language_compatibility(read_value("language.selected"))
+        self.apply_language_compatibility(store.read("language.selected"))
 
     def _on_provider_toggled(self, provider_key: str, checked: bool) -> None:
-        providers = read_value("search.providers")
+        providers = self.store.read("search.providers")
         providers[provider_key] = checked
-        write_value("search.providers", providers)
+        self.store.write("search.providers", providers)
 
     def apply_language_compatibility(self, language: str) -> None:
         incompatible_providers = self._language_data.get(language, {}).get("incompatibility", [])

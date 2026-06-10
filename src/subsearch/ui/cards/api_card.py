@@ -9,12 +9,12 @@ from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
 )
-from subsearch.ui.widgets.setting_rows import read_value, write_value
 
 VISIBLE_PREFIX_LENGTH = 4
 MASK_CHARACTER = "•"
@@ -115,11 +115,14 @@ class MaskedApiKeyLineEdit(LineEdit):
 
 
 class ApiKeyField(QWidget):
-    def __init__(self, config_key: str, config_key_exists: str, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, config_key: str, config_key_exists: str, store: SettingsStore, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.config_key = config_key
         self.config_key_exists = config_key_exists
-        api_key = str(read_value(config_key))
+        self.store = store
+        api_key = str(store.read(config_key))
 
         self.line_edit = MaskedApiKeyLineEdit(api_key, self)
         apply_body_font(self.line_edit)
@@ -151,8 +154,8 @@ class ApiKeyField(QWidget):
 
     def _on_api_key_changed(self) -> None:
         api_key = self.line_edit.api_key
-        write_value(self.config_key, api_key)
-        write_value(self.config_key_exists, bool(api_key))
+        self.store.write(self.config_key, api_key)
+        self.store.write(self.config_key_exists, bool(api_key))
         self._apply_validation_state(api_key)
 
     def _apply_validation_state(self, api_key: str) -> None:
@@ -161,7 +164,7 @@ class ApiKeyField(QWidget):
 
 
 class ApiCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subsource", parent)
         self.add_header_help(SETTING_DESCRIPTIONS[API_KEY_DESCRIPTION_KEY].explanation)
 
@@ -172,7 +175,7 @@ class ApiCard(SettingsCard):
         title_row.addWidget(title_label)
         self.body_layout.addLayout(title_row)
 
-        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, API_KEY_CONFIG_KEY_EXISTS, self))
+        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, API_KEY_CONFIG_KEY_EXISTS, store, self))
         self.body_layout.addWidget(self._build_request_limits())
         self.body_layout.addWidget(self._build_getting_started())
 
