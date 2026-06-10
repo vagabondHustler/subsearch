@@ -70,10 +70,6 @@ def delete_nested_value(toml_data: dict, key: str) -> None:
         parent.pop(keys[-1], None)
 
 
-
-
-
-
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
     log.warning("Config schema mismatch , repairing")
     toml_data = load_toml_data(toml_file_path)

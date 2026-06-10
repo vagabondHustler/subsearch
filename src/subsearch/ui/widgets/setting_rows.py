@@ -355,8 +355,6 @@ class SpinBoxRow(SettingRow):
             self.help_button.set_explanation(SETTING_DESCRIPTIONS[self.config_key].explanation.format(limit=value))
 
 
-
-
 class SearchableComboBoxRow(SettingRow):
     selection_changed = Signal(str)
 

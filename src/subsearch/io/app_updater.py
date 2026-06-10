@@ -90,4 +90,3 @@ def download_installer(version: str, on_progress: Callable[[float], None] | None
 def run_installer(msi_package_path: Path) -> None:
     command = f"msiexec.exe /i {msi_package_path}"
     subprocess.Popen(command, shell=True, creationflags=subprocess.DETACHED_PROCESS)
-
