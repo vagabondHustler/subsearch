@@ -80,13 +80,15 @@ class SettingsWindow(FluentWindow):
 
         self.post_processing_card = PostProcessingCard()
 
+        search_threshold_card = SearchThresholdCard()
+
         search_interface = SettingsInterface(
             "searchInterface",
             [
                 language_card,
                 SubtitleFiltersCard(),
                 providers_card,
-                SearchThresholdCard(),
+                search_threshold_card,
                 self.post_processing_card,
             ],
         )

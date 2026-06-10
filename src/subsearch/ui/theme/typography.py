@@ -2,13 +2,17 @@ from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import setFont
 
+from subsearch.ui.theme import palette
+
 BODY_FONT_SIZE = 12
 CAPTION_FONT_SIZE = 11
+SUBSECTION_FONT_SIZE = 13
 TITLE_FONT_SIZE = 14
 SEMI_BOLD = QFont.Weight.DemiBold
-TEXT_COLOR = "#c8c8c7"
-DISABLED_TEXT_COLOR = "#5a5a5a"
-ERROR_TEXT_COLOR = "#e85b5b"
+TEXT_COLOR = palette.NEUTRAL_1
+DISABLED_TEXT_COLOR = palette.NEUTRAL_4
+ERROR_TEXT_COLOR = palette.RED
+SUCCESS_TEXT_COLOR = palette.GREEN
 
 
 def body_font() -> QFont:
@@ -46,6 +50,16 @@ def apply_caption_font(widget: QWidget) -> None:
     apply_text_color(widget)
 
 
+def apply_subsection_font(widget: QWidget) -> None:
+    setFont(widget, SUBSECTION_FONT_SIZE, SEMI_BOLD)
+    apply_text_color(widget)
+
+
 def apply_title_font(widget: QWidget) -> None:
     setFont(widget, TITLE_FONT_SIZE, SEMI_BOLD)
+    apply_text_color(widget)
+
+
+def apply_section_label_font(widget: QWidget) -> None:
+    setFont(widget, CAPTION_FONT_SIZE, QFont.Weight.Normal)
     apply_text_color(widget)

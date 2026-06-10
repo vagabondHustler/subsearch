@@ -33,6 +33,12 @@ class LucideIcon(FluentIconBase, Enum):
     FOLDER_OPEN = "folder-open"
     FOLDER_SEARCH = "folder-search"
     SETTINGS = "settings"
+    CHEVRON_DOWN = "chevron-down"
+    CHEVRON_RIGHT = "chevron-right"
+    BRAIN = "brain"
+    BRAIN_CIRCUIT = "brain-circuit"
+    LAYERS_PLUS = "layers-plus"
+    LAYERS_MINUS = "layers-minus"
     LIGHTBULB = "lightbulb"
     CIRCLE_CHECK_BIG = "circle-check-big"
     HEART_HANDSHAKE = "heart-handshake"
@@ -52,6 +58,8 @@ class LucideIcon(FluentIconBase, Enum):
     GITHUB = "github"
     KEY_ROUND = "key-round"
     SHIELD = "shield"
+    TV = "tv"
+    MONITOR = "monitor"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

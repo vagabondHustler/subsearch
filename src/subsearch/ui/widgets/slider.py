@@ -33,11 +33,18 @@ class CircleDotHandle(SliderHandle):
         self._pressed = True
         self.update()
         self.pressed.emit()
+        self._drag_to(e)
+
+    def mouseMoveEvent(self, e) -> None:
+        self._drag_to(e)
 
     def mouseReleaseEvent(self, e) -> None:
         self._pressed = False
         self.update()
         self.released.emit()
+
+    def _drag_to(self, e) -> None:
+        self.parent().update_value_from_handle(e.position().toPoint())
 
     def paintEvent(self, e) -> None:
         center = QPoint(HANDLE_CENTER, HANDLE_CENTER)
@@ -67,3 +74,6 @@ class CircleDotSlider(Slider):
         self.handle.setHandleColor(self.lightGrooveColor, self.darkGrooveColor)
         self.setMinimumHeight(HANDLE_SIZE)
         self._adjustHandlePos()
+
+    def update_value_from_handle(self, handle_position: QPoint) -> None:
+        self.setValue(self._posToValue(self.handle.mapToParent(handle_position)))
