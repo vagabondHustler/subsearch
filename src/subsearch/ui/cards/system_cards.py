@@ -1,17 +1,22 @@
 from PySide6.QtWidgets import QWidget
 
-from subsearch.io import windows_registry
 from subsearch.runtime.config.constants import DEVICE_INFO
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow, read_value
+from subsearch.ui.services.shell_integration import ShellIntegrationService
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.widgets.setting_rows import (
+    SpinBoxRow,
+    SwitchRow,
+    make_switches_mutually_exclusive,
+)
 
 
 class NotificationsCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Notifications", parent)
-        self.system_tray = SwitchRow("notifications.system_tray")
-        self.summary_notification = SwitchRow("notifications.summary_notification")
+        self.system_tray = SwitchRow("notifications.system_tray", store)
+        self.summary_notification = SwitchRow("notifications.summary_notification", store)
         self.add_row(self.system_tray)
         self.add_row(self.summary_notification)
         self.system_tray.toggled.connect(self.summary_notification.set_enabled)
@@ -19,59 +24,49 @@ class NotificationsCard(SettingsCard):
 
 
 class DownloadManagerCard(SettingsCard):
-    mutually_exclusive_keys = {
-        "download.open_manager_on_no_matches",
-        "download.always_open_manager",
-    }
-
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Download manager", parent)
-        self.add_row(SwitchRow("download.automatic"))
-        self.open_on_no_matches = SwitchRow("download.open_manager_on_no_matches")
-        self.always_open = SwitchRow("download.always_open_manager")
+        self.add_row(SwitchRow("download.automatic", store))
+        self.open_on_no_matches = SwitchRow("download.open_manager_on_no_matches", store)
+        self.always_open = SwitchRow("download.always_open_manager", store)
         self.add_row(self.open_on_no_matches)
         self.add_row(self.always_open)
-        self.open_on_no_matches.toggled.connect(
-            lambda checked: self._enforce_mutual_exclusivity(self.always_open, checked)
-        )
-        self.always_open.toggled.connect(
-            lambda checked: self._enforce_mutual_exclusivity(self.open_on_no_matches, checked)
-        )
-
-    def _enforce_mutual_exclusivity(self, other_row: SwitchRow, enabled: bool) -> None:
-        if enabled and other_row.switch.isChecked():
-            other_row.set_checked_silently(False)
+        make_switches_mutually_exclusive(self.open_on_no_matches, self.always_open)
 
 
 class ApplicationCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
+    ) -> None:
         super().__init__("Application", parent)
-        show_terminal = SwitchRow("application.show_terminal")
+        self.store = store
+        self.shell_service = shell_service
+        show_terminal = SwitchRow("application.show_terminal", store)
         if DEVICE_INFO.mode == "executable":
             show_terminal.set_enabled(False)
         show_terminal.toggled.connect(self._on_show_terminal_toggled)
         self.add_row(show_terminal)
-        self.add_row(SwitchRow("application.single_instance"))
+        self.add_row(SwitchRow("application.single_instance", store))
 
     def _on_show_terminal_toggled(self) -> None:
-        if read_value("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("command")
+        if self.store.read("shell_integration.context_menu"):
+            self.shell_service.refresh_registry_value("command")
 
 
 class NetworkCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Network", parent)
-        self.add_row(SpinBoxRow("network.api_call_limit", 1, 99))
-        self.add_row(SpinBoxRow("network.request_connect_timeout", 1, 99))
-        self.add_row(SpinBoxRow("network.request_read_timeout", 1, 99))
+        self.add_row(SpinBoxRow("network.api_call_limit", store, 1, 99))
+        self.add_row(SpinBoxRow("network.request_connect_timeout", store, 1, 99))
+        self.add_row(SpinBoxRow("network.request_read_timeout", store, 1, 99))
 
 
 class ProviderDiagnosticsCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Provider diagnostics", parent)
         self.add_header_help(SETTING_DESCRIPTIONS["diagnostics.header"].explanation)
-        self.enabled = SwitchRow("diagnostics.enabled")
-        self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", 1, 99)
+        self.enabled = SwitchRow("diagnostics.enabled", store)
+        self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", store, 1, 99)
         self.add_row(self.enabled)
         self.add_row(self.failed_attempts)
         self.enabled.toggled.connect(self._apply_enabled_state)

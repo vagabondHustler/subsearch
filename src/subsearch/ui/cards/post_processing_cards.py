@@ -11,28 +11,25 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     BodyLabel,
-    CaptionLabel,
     CheckBox,
     LineEdit,
     MessageBox,
     TransparentToolButton,
 )
 
-from subsearch.io import windows_registry
 from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard, build_section_header
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme.typography import (
-    TEXT_COLOR,
-    apply_body_font,
-    apply_caption_font,
-)
+from subsearch.ui.services.shell_integration import ShellIntegrationService
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
+from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.setting_rows import (
     HelpButton,
     SwitchRow,
-    read_value,
-    write_value,
+    make_switches_mutually_exclusive,
 )
 
 
@@ -72,32 +69,22 @@ DESTINATION_PATH_EXAMPLES = (
 
 
 class PostProcessingCard(SettingsCard):
-    mutually_exclusive_keys = {"post_processing.move_best", "post_processing.move_all"}
-
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle post-processing", parent)
-        self.add_row(SwitchRow("post_processing.rename"))
-        self.move_best = SwitchRow("post_processing.move_best")
-        self.move_all = SwitchRow("post_processing.move_all")
+        self.store = store
+        self.add_row(SwitchRow("post_processing.rename", store))
+        self.move_best = SwitchRow("post_processing.move_best", store)
+        self.move_all = SwitchRow("post_processing.move_all", store)
         self.add_row(self.move_best)
         self.add_row(self.move_all)
-        self.move_best.toggled.connect(self._on_move_toggled)
-        self.move_all.toggled.connect(self._on_move_toggled)
+        make_switches_mutually_exclusive(self.move_best, self.move_all)
+        self.move_best.toggled.connect(self._update_destination_enabled)
+        self.move_all.toggled.connect(self._update_destination_enabled)
 
         self._build_destination()
         self._update_destination_enabled()
 
-    def _on_move_toggled(self, checked: bool) -> None:
-        toggled_row = self.sender()
-        other_row = self.move_all if toggled_row is self.move_best else self.move_best
-        self._enforce_mutual_exclusivity(other_row, checked)
-        self._update_destination_enabled()
-
-    def _enforce_mutual_exclusivity(self, other_row: SwitchRow, enabled: bool) -> None:
-        if enabled and other_row.switch.isChecked():
-            other_row.set_checked_silently(False)
-
-    def _update_destination_enabled(self) -> None:
+    def _update_destination_enabled(self, _checked: bool = False) -> None:
         moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()
         self.destination.setEnabled(moving_enabled)
 
@@ -108,38 +95,28 @@ class PostProcessingCard(SettingsCard):
         destination_layout.addLayout(build_section_header("post_processing.target_path", self))
 
         self.path_edit = LineEdit(self)
-        self.path_edit.setText(str(read_value("post_processing.target_path")))
+        self.path_edit.setText(str(self.store.read("post_processing.target_path")))
         self.path_edit.setClearButtonEnabled(True)
         apply_body_font(self.path_edit)
         self.path_edit.textChanged.connect(self._on_path_text_changed)
         self.path_edit.editingFinished.connect(self._save_path_if_valid)
         help_button = HelpButton(DESTINATION_PATH_EXAMPLES, self)
         path_row = QHBoxLayout()
-        path_row.setContentsMargins(16, 0, 16, 10)
+        path_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
         path_row.addWidget(self.path_edit, stretch=1)
         path_row.addWidget(self._build_browse_button())
         path_row.addWidget(help_button)
         destination_layout.addLayout(path_row)
 
-        destination_layout.addWidget(SwitchRow("post_processing.create_missing_folder", self))
+        destination_layout.addWidget(SwitchRow("post_processing.create_missing_folder", self.store, self))
         self.body_layout.addWidget(self.destination)
 
     def _build_browse_button(self) -> QWidget:
-        browse_button = TransparentToolButton(lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), self)
-        browse_button.setFixedSize(32, 32)
-        browse_button.setIconSize(QSize(24, 24))
+        browse_button = CaptionedToolButton(
+            "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
+        )
         browse_button.clicked.connect(self._browse_for_folder)
-        caption = CaptionLabel("Browse", self)
-        apply_caption_font(caption)
-        caption.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-
-        container = QWidget(self)
-        container_layout = QVBoxLayout(container)
-        container_layout.setContentsMargins(0, 0, 0, 0)
-        container_layout.setSpacing(0)
-        container_layout.addWidget(browse_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        container_layout.addWidget(caption)
-        return container
+        return browse_button
 
     def _browse_for_folder(self) -> None:
         selected_folder = QFileDialog.getExistingDirectory(
@@ -167,8 +144,8 @@ class PostProcessingCard(SettingsCard):
         target_path = self.path_edit.text()
         path_resolution = release_parser.detect_path_resolution(target_path)
         self._apply_path_error_style(False)
-        write_value("post_processing.target_path", target_path)
-        write_value("post_processing.path_resolution", path_resolution)
+        self.store.write("post_processing.target_path", target_path)
+        self.store.write("post_processing.path_resolution", path_resolution)
 
     def _save_path_if_valid(self) -> None:
         if self._path_is_valid():
@@ -193,8 +170,8 @@ class PostProcessingCard(SettingsCard):
         if not confirmation.exec():
             return False
         self.path_edit.setText(DEFAULT_TARGET_PATH)
-        write_value("post_processing.target_path", DEFAULT_TARGET_PATH)
-        write_value("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION)
+        self.store.write("post_processing.target_path", DEFAULT_TARGET_PATH)
+        self.store.write("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION)
         return True
 
     def _on_path_text_changed(self, target_path: str) -> None:
@@ -203,14 +180,19 @@ class PostProcessingCard(SettingsCard):
 
 
 class FileExtensionsCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
+    ) -> None:
         super().__init__("File extensions", parent)
+        self.store = store
+        self.shell_service = shell_service
+        store.subscribe("shell_integration.context_menu", self.set_enabled)
         self.add_header_help(SETTING_DESCRIPTIONS["shell_integration.file_extensions"].explanation)
 
-        file_extensions = read_value("shell_integration.file_extensions")
+        file_extensions = store.read("shell_integration.file_extensions")
         self.check_boxes: dict[str, CheckBox] = {}
         grid = QGridLayout()
-        grid.setContentsMargins(48, 0, 48, 10)
+        grid.setContentsMargins(CARD_CONTENT_INSET, 0, CARD_CONTENT_INSET, 10)
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(12)
         column_count = -(-len(file_extensions) // EXTENSION_GRID_ROWS)
@@ -256,14 +238,15 @@ class FileExtensionsCard(SettingsCard):
         grid.addWidget(invert_container, next_row, next_column, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.body_layout.addLayout(grid)
+        self.set_enabled(bool(store.read("shell_integration.context_menu")))
 
     def _on_extension_toggled(self, extension: str, checked: bool) -> None:
-        file_extensions = read_value("shell_integration.file_extensions")
+        file_extensions = self.store.read("shell_integration.file_extensions")
         file_extensions[extension] = checked
         self._persist_file_extensions(file_extensions)
 
     def _invert_selection(self) -> None:
-        file_extensions = read_value("shell_integration.file_extensions")
+        file_extensions = self.store.read("shell_integration.file_extensions")
         for extension, check_box in self.check_boxes.items():
             inverted = not check_box.isChecked()
             check_box.blockSignals(True)
@@ -273,9 +256,9 @@ class FileExtensionsCard(SettingsCard):
         self._persist_file_extensions(file_extensions)
 
     def _persist_file_extensions(self, file_extensions: dict) -> None:
-        write_value("shell_integration.file_extensions", file_extensions)
-        if read_value("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("appliesto")
+        self.store.write("shell_integration.file_extensions", file_extensions)
+        if self.store.read("shell_integration.context_menu"):
+            self.shell_service.refresh_registry_value("appliesto")
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
@@ -285,29 +268,28 @@ class FileExtensionsCard(SettingsCard):
 
 
 class ShellIntegrationCard(SettingsCard):
-    def __init__(self, file_extensions_card: FileExtensionsCard, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        store: SettingsStore,
+        shell_service: ShellIntegrationService,
+        parent: QWidget | None = None,
+    ) -> None:
         super().__init__("Shell integration", parent)
-        self.file_extensions_card = file_extensions_card
+        self.store = store
+        self.shell_service = shell_service
 
-        self.context_menu = SwitchRow("shell_integration.context_menu")
-        self.context_menu_icon = SwitchRow("shell_integration.context_menu_icon")
+        self.context_menu = SwitchRow("shell_integration.context_menu", store)
+        self.context_menu_icon = SwitchRow("shell_integration.context_menu_icon", store)
         self.add_row(self.context_menu)
         self.add_row(self.context_menu_icon)
         self.context_menu.toggled.connect(self._on_context_menu_toggled)
         self.context_menu_icon.toggled.connect(self._on_context_menu_icon_toggled)
-        self._apply_context_menu_state(self.context_menu.switch.isChecked())
+        self.context_menu_icon.set_enabled(self.context_menu.switch.isChecked())
 
     def _on_context_menu_toggled(self, enabled: bool) -> None:
-        if enabled:
-            windows_registry.add_context_menu()
-        else:
-            windows_registry.del_context_menu()
-        self._apply_context_menu_state(enabled)
+        self.shell_service.set_context_menu_enabled(enabled)
+        self.context_menu_icon.set_enabled(enabled)
 
     def _on_context_menu_icon_toggled(self) -> None:
-        if read_value("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("icon")
-
-    def _apply_context_menu_state(self, enabled: bool) -> None:
-        self.context_menu_icon.set_enabled(enabled)
-        self.file_extensions_card.set_enabled(enabled)
+        if self.store.read("shell_integration.context_menu"):
+            self.shell_service.refresh_registry_value("icon")

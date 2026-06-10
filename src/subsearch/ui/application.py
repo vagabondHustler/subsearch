@@ -1,4 +1,5 @@
 import sys
+from typing import Callable
 
 from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
 from PySide6.QtGui import QCloseEvent, QColor, QIcon
@@ -12,7 +13,6 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
-from subsearch.io import toml_file
 from subsearch.runtime.config.constants import APP_PATHS
 from subsearch.runtime.models.model import Subtitle
 from subsearch.ui import warmup
@@ -34,10 +34,18 @@ from subsearch.ui.cards import (
     UpdateCard,
 )
 from subsearch.ui.cards.download_manager import DownloadManagerInterface
+from subsearch.ui.compat.qfluent import (
+    ACCENT_COLOR,
+    NAVIGATION_ITEM_HEIGHT,
+    enlarge_navigation_icons,
+    force_fixed_accent_color,
+)
 from subsearch.ui.icons.lucide import LucideIcon
-from subsearch.ui.navigation import NAVIGATION_ITEM_HEIGHT, enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
-from subsearch.ui.theme.theme_patch import ACCENT_COLOR, force_fixed_accent_color
+from subsearch.ui.services.shell_integration import ShellIntegrationService
+from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
 NAVIGATION_EXPAND_WIDTH = 242
@@ -72,60 +80,62 @@ class SettingsWindow(FluentWindow):
         self.setMicaEffectEnabled(True)
         self._clear_title_bar()
 
-        file_extensions_card = FileExtensionsCard()
+        self.store = SettingsStore(self)
+        self.task_runner = TaskRunner(self)
+        self._close_validators: list[Callable[[], bool]] = []
+        store = self.store
+        shell_service = ShellIntegrationService(self.task_runner, self)
+        download_service = SubtitleDownloadService(self.task_runner, self)
 
-        language_card = LanguageCard()
-        providers_card = ProvidersCard()
-        language_card.selection_changed.connect(providers_card.apply_language_compatibility)
+        post_processing_card = PostProcessingCard(store)
+        self.register_close_validator(post_processing_card.commit_path_or_revert)
 
-        self.post_processing_card = PostProcessingCard()
-
-        search_threshold_card = SearchThresholdCard()
+        search_threshold_card = SearchThresholdCard(store)
 
         search_interface = SettingsInterface(
             "searchInterface",
             [
-                language_card,
-                SubtitleFiltersCard(),
-                providers_card,
+                LanguageCard(store),
+                SubtitleFiltersCard(store),
+                ProvidersCard(store),
                 search_threshold_card,
-                self.post_processing_card,
+                post_processing_card,
             ],
         )
         integration_interface = SettingsInterface(
             "integrationInterface",
             [
-                ShellIntegrationCard(file_extensions_card),
-                file_extensions_card,
-                NotificationsCard(),
-                DownloadManagerCard(),
+                ShellIntegrationCard(store, shell_service),
+                FileExtensionsCard(store, shell_service),
+                NotificationsCard(store),
+                DownloadManagerCard(store),
             ],
         )
         application_interface = SettingsInterface(
             "applicationInterface",
             [
-                ApplicationCard(),
-                NetworkCard(),
-                ProviderDiagnosticsCard(),
+                ApplicationCard(store, shell_service),
+                NetworkCard(store),
+                ProviderDiagnosticsCard(store),
             ],
         )
 
         api_interface = SettingsInterface(
             "apiInterface",
             [
-                ApiCard(),
+                ApiCard(store),
             ],
         )
 
         about_interface = SettingsInterface(
             "aboutInterface",
             [
-                UpdateCard(),
+                UpdateCard(self.task_runner),
                 ResourcesCard(),
             ],
         )
 
-        self.download_manager_interface = DownloadManagerInterface(subtitles)
+        self.download_manager_interface = DownloadManagerInterface(store, download_service, subtitles)
         download_manager_interface = self.download_manager_interface
 
         self.navigationInterface.addItem(
@@ -177,9 +187,13 @@ class SettingsWindow(FluentWindow):
         spacer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         panel.topLayout.insertWidget(layout_index, spacer, 0, Qt.AlignmentFlag.AlignTop)
 
+    def register_close_validator(self, validator: Callable[[], bool]) -> None:
+        self._close_validators.append(validator)
+
     def closeEvent(self, e: QCloseEvent) -> None:
-        if self.post_processing_card.commit_path_or_revert():
-            toml_file.get_config_session().commit()
+        if all(validator() for validator in self._close_validators):
+            self.task_runner.shutdown()
+            self.store.commit()
             super().closeEvent(e)
         else:
             e.ignore()

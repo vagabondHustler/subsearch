@@ -100,7 +100,11 @@ class Bootstrap:
 
     @property
     def gui_may_open(self) -> bool:
-        return self.app_mode is AppMode.SETTINGS or self.app_config.always_open_manager or self.app_config.open_manager_on_no_matches
+        return (
+            self.app_mode is AppMode.SETTINGS
+            or self.app_config.always_open_manager
+            or self.app_config.open_manager_on_no_matches
+        )
 
     def all_providers_disabled(self) -> bool:
         if (

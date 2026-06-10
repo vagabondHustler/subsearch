@@ -2,6 +2,7 @@ from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget
 
+from subsearch.ui.theme.metrics import ROW_INSET
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import apply_body_font, apply_title_font
 from subsearch.ui.widgets.setting_rows import HelpButton
@@ -20,7 +21,7 @@ def build_section_header(config_key: str, parent: QWidget) -> QHBoxLayout:
     apply_body_font(title_label)
     help_button = HelpButton(description.explanation, parent)
     header = QHBoxLayout()
-    header.setContentsMargins(16, 10, 16, 4)
+    header.setContentsMargins(ROW_INSET, 10, ROW_INSET, 4)
     header.addWidget(title_label, stretch=1)
     header.addWidget(help_button)
     return header
@@ -34,7 +35,7 @@ class SettingsCard(HeaderCardWidget):
         self.setTitle(title)
         apply_title_font(self.headerLabel)
         self._replace_header_separator()
-        self.headerLayout.setContentsMargins(16, 0, 16, 0)
+        self.headerLayout.setContentsMargins(ROW_INSET, 0, ROW_INSET, 0)
         self.viewLayout.setContentsMargins(0, 8, 0, 8)
         self.body_layout = QVBoxLayout()
         self.body_layout.setContentsMargins(0, 0, 0, 0)

@@ -3,12 +3,10 @@ from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget
 from qfluentwidgets import (
     CaptionLabel,
     CheckBox,
-    PushButton,
     SpinBox,
     TransparentToolButton,
 )
 
-from subsearch.io import toml_file
 from subsearch.parsing.release_parser import score_subtitle_tokens
 from subsearch.runtime.config.static_values import (
     DEFAULT_TOKEN_MULTIPLIERS,
@@ -16,7 +14,11 @@ from subsearch.runtime.config.static_values import (
 )
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.compat.qfluent import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
+from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     ERROR_TEXT_COLOR,
@@ -24,16 +26,12 @@ from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
-    apply_section_label_font,
 )
 from subsearch.ui.widgets.setting_rows import (
     HelpButton,
     SearchableComboBoxRow,
     SwitchRow,
-    read_value,
-    write_value,
 )
-from subsearch.ui.widgets.slider import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 
 PROVIDER_GRID_COLUMNS = 3
 
@@ -45,9 +43,9 @@ PROVIDER_INCOMPATIBILITY_NAMES = {
 
 
 class LanguageCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Language", parent)
-        languages = toml_file.load_language_data()
+        languages = store.language_data()
         labelled_values = {data["name"]: key for key, data in languages.items()}
         aliases_by_label = {
             data["name"]: [code for code in (data["two_letter_code"], data["three_letter_code"]) if code]
@@ -55,21 +53,17 @@ class LanguageCard(SettingsCard):
         }
         self.add_header_help(SETTING_DESCRIPTIONS["language.selected"].explanation)
         self.language_row = SearchableComboBoxRow(
-            "language.selected", labelled_values, aliases_by_label, show_help=False
+            "language.selected", store, labelled_values, aliases_by_label, show_help=False
         )
         self.add_row(self.language_row)
 
-    @property
-    def selection_changed(self):
-        return self.language_row.selection_changed
-
 
 class SubtitleFiltersCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle filters", parent)
-        self.add_row(SwitchRow("search.hearing_impaired"))
-        self.add_row(SwitchRow("search.non_hearing_impaired"))
-        self.add_row(SwitchRow("search.only_foreign_parts"))
+        self.add_row(SwitchRow("search.hearing_impaired", store))
+        self.add_row(SwitchRow("search.non_hearing_impaired", store))
+        self.add_row(SwitchRow("search.only_foreign_parts", store))
 
 
 EXAMPLE_REFERENCE_MOVIE = "Shrek.2001.1080p.BluRay.x264-YOLO"
@@ -109,7 +103,7 @@ class ThresholdExampleRow(QWidget):
         self._accepted: bool | None = None
         self.setFixedHeight(EXAMPLE_ROW_HEIGHT)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(48, 2, 48, 2)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
 
         name_label = CaptionLabel(subtitle_name, self)
@@ -146,15 +140,18 @@ class ThresholdExampleRow(QWidget):
 class AdvancedTuningRow(QWidget):
     value_changed = Signal()
 
-    def __init__(self, label_text: str, config_key: str, spin_box, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, label_text: str, config_key: str, spin_box, store: SettingsStore, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.config_key = config_key
+        self.store = store
         self.spin_box = spin_box
         apply_body_font(self.spin_box)
         self.spin_box.setFixedWidth(110)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(48, 2, 48, 2)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
         label = CaptionLabel(label_text, self)
         apply_caption_font(label)
@@ -164,14 +161,14 @@ class AdvancedTuningRow(QWidget):
         self.spin_box.valueChanged.connect(self._on_value_changed)
 
     def _on_value_changed(self, value) -> None:
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
         self.value_changed.emit()
 
     def reset_to(self, value) -> None:
         self.spin_box.blockSignals(True)
         self.spin_box.setValue(value)
         self.spin_box.blockSignals(False)
-        write_value(self.config_key, value)
+        self.store.write(self.config_key, value)
 
 
 class SliderWithValueLabel(QWidget):
@@ -228,8 +225,9 @@ class SliderWithValueLabel(QWidget):
 
 
 class SearchThresholdCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Search threshold", parent)
+        self.store = store
         self._using_series = False
         self.tuning_rows: dict[str, AdvancedTuningRow] = {}
         self._build_header()
@@ -241,10 +239,10 @@ class SearchThresholdCard(SettingsCard):
 
         self.slider = SliderWithValueLabel(self)
         self.slider.setRange(0, 100)
-        self.slider.setValue(int(read_value("search.accept_threshold")))
+        self.slider.setValue(int(store.read("search.accept_threshold")))
 
         slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(48 - HANDLE_CENTER, 6, 48, 10)
+        slider_row.setContentsMargins(CARD_CONTENT_INSET - HANDLE_CENTER, 6, CARD_CONTENT_INSET, 10)
         slider_row.setSpacing(0)
         slider_row.addWidget(self.slider)
         slider_row.addWidget(self._swap_button, 0, Qt.AlignmentFlag.AlignBottom)
@@ -272,11 +270,11 @@ class SearchThresholdCard(SettingsCard):
 
     def _build_examples(self) -> None:
         self._example_heading = CaptionLabel("", self)
-        apply_section_label_font(self._example_heading)
-        self._example_heading.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
+        apply_caption_font(self._example_heading)
+        self._example_heading.setStyleSheet(f"color: {TEXT_COLOR};")
 
         heading_row = QHBoxLayout()
-        heading_row.setContentsMargins(48, 4, 48, 0)
+        heading_row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
         heading_row.addWidget(self._example_heading)
         self.body_layout.addLayout(heading_row)
 
@@ -286,6 +284,7 @@ class SearchThresholdCard(SettingsCard):
             self.body_layout.addWidget(row)
 
     def _build_token_tuning(self) -> None:
+        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.5))
         self.body_layout.addWidget(self._heading("Weights"))
         for token_name, label_text in TOKEN_WEIGHT_LABELS.items():
             self.body_layout.addWidget(self._weight_row(token_name, label_text))
@@ -293,21 +292,23 @@ class SearchThresholdCard(SettingsCard):
         for token_name, label_text in TOKEN_MULTIPLIER_LABELS.items():
             self.body_layout.addWidget(self._multiplier_row(token_name, label_text))
 
-        reset_button = PushButton("Reset to defaults", self)
-        apply_body_font(reset_button)
-        reset_button.setFixedWidth(110)
-        reset_button.clicked.connect(self._reset)
-        reset_row = QHBoxLayout()
-        reset_row.setContentsMargins(48, 6, 48, 4)
-        reset_row.addStretch(1)
-        reset_row.addWidget(reset_button)
-        self.body_layout.addLayout(reset_row)
+        self._restore_button = TransparentToolButton(self)
+        self._restore_button.setIconSize(QSize(16, 16))
+        self._restore_button.setFixedSize(32, 32)
+        self._restore_button.setToolTip("Restore default values")
+        self._restore_button.clicked.connect(self._restore_defaults)
+        restore_row = QHBoxLayout()
+        restore_row.setContentsMargins(CARD_CONTENT_INSET, 6, CARD_CONTENT_INSET, 4)
+        restore_row.addStretch(1)
+        restore_row.addWidget(self._restore_button)
+        self.body_layout.addLayout(restore_row)
+        self._refresh_restore_icon()
 
     def _heading(self, text: str) -> CaptionLabel:
         heading = CaptionLabel(text, self)
-        apply_section_label_font(heading)
-        heading.setContentsMargins(48, 4, 48, 0)
-        heading.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
+        apply_caption_font(heading)
+        heading.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
+        heading.setStyleSheet(f"color: {TEXT_COLOR};")
         return heading
 
     def _weight_row(self, token_name: str, label_text: str) -> AdvancedTuningRow:
@@ -321,18 +322,30 @@ class SearchThresholdCard(SettingsCard):
     def _tuning_row(self, token_name: str, label_text: str, config_key: str) -> AdvancedTuningRow:
         spin_box = SpinBox()
         spin_box.setRange(0, 100)
-        spin_box.setValue(int(read_value(config_key)))
-        row = AdvancedTuningRow(label_text, config_key, spin_box, self)
+        spin_box.setValue(int(self.store.read(config_key)))
+        row = AdvancedTuningRow(label_text, config_key, spin_box, self.store, self)
         row.value_changed.connect(self._refresh_examples)
+        row.value_changed.connect(self._refresh_restore_icon)
         self.tuning_rows[token_name] = row
         return row
 
-    def _reset(self) -> None:
+    def _restore_defaults(self) -> None:
         for token_name, default in DEFAULT_TOKEN_WEIGHTS.items():
             self.tuning_rows[token_name].reset_to(default)
         for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
             self.tuning_rows[token_name].reset_to(default)
         self._refresh_examples()
+        self._refresh_restore_icon()
+
+    def _is_at_defaults(self) -> bool:
+        defaults = {f"search.token_weights.{name}": default for name, default in DEFAULT_TOKEN_WEIGHTS.items()} | {
+            f"search.token_multipliers.{name}": default for name, default in DEFAULT_TOKEN_MULTIPLIERS.items()
+        }
+        return all(int(self.store.read(config_key)) == int(default) for config_key, default in defaults.items())
+
+    def _refresh_restore_icon(self) -> None:
+        color = DISABLED_TEXT_COLOR if self._is_at_defaults() else TEXT_COLOR
+        self._restore_button.setIcon(lucide_qicon(LucideIcon.HISTORY, color))
 
     def _update_example_heading(self) -> None:
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE
@@ -356,11 +369,11 @@ class SearchThresholdCard(SettingsCard):
         self._refresh_examples()
 
     def _on_slider_released(self) -> None:
-        write_value("search.accept_threshold", self.slider.value())
+        self.store.write("search.accept_threshold", self.slider.value())
 
     def _refresh_examples(self) -> None:
-        token_weights = read_value("search.token_weights")
-        token_multipliers = read_value("search.token_multipliers")
+        token_weights = self.store.read("search.token_weights")
+        token_multipliers = self.store.read("search.token_multipliers")
         threshold = self.slider.value()
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE
         subtitle_names = EXAMPLE_SERIES_SUBTITLE if self._using_series else EXAMPLE_MOVIE_SUBTITLE
@@ -370,20 +383,21 @@ class SearchThresholdCard(SettingsCard):
 
 
 class ProvidersCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle providers", parent)
+        self.store = store
         provider_labels = {
             "opensubtitles": "Opensubtitles",
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
         }
-        self._language_data = toml_file.load_language_data()
-        providers = read_value("search.providers")
+        self._language_data = store.language_data()
+        providers = store.read("search.providers")
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS["search.providers"].explanation)
 
         self.check_boxes: dict[str, CheckBox] = {}
         grid = QGridLayout()
-        grid.setContentsMargins(48, 0, 48, 10)
+        grid.setContentsMargins(CARD_CONTENT_INSET, 0, CARD_CONTENT_INSET, 10)
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(12)
         for column in range(PROVIDER_GRID_COLUMNS):
@@ -400,12 +414,13 @@ class ProvidersCard(SettingsCard):
 
         self.body_layout.addLayout(grid)
 
-        self.apply_language_compatibility(read_value("language.selected"))
+        self.apply_language_compatibility(store.read("language.selected"))
+        store.subscribe("language.selected", self.apply_language_compatibility)
 
     def _on_provider_toggled(self, provider_key: str, checked: bool) -> None:
-        providers = read_value("search.providers")
+        providers = self.store.read("search.providers")
         providers[provider_key] = checked
-        write_value("search.providers", providers)
+        self.store.write("search.providers", providers)
 
     def apply_language_compatibility(self, language: str) -> None:
         incompatible_providers = self._language_data.get(language, {}).get("incompatibility", [])

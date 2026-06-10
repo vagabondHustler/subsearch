@@ -426,8 +426,6 @@ def detect_path_resolution(input_str: str) -> str:
     return "absolute" if re.match(r"^[a-zA-Z]:\\", input_str) else "relative"
 
 
-
-
 def valid_subsource_api_key(api_key: str) -> bool:
     # matches a subsource API key: "sk_" followed by one or more lowercase hex characters
     pattern = r"^sk_[0-9a-f]+$"

@@ -60,6 +60,7 @@ class LucideIcon(FluentIconBase, Enum):
     SHIELD = "shield"
     TV = "tv"
     MONITOR = "monitor"
+    HISTORY = "history"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

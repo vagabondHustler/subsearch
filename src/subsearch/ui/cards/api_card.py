@@ -1,6 +1,6 @@
 import webbrowser
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QKeyEvent, QKeySequence
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, CaptionLabel, LineEdit, TransparentToolButton
@@ -9,12 +9,14 @@ from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import ROW_INSET
 from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
 )
-from subsearch.ui.widgets.setting_rows import read_value, write_value
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 VISIBLE_PREFIX_LENGTH = 4
 MASK_CHARACTER = "•"
@@ -40,6 +42,8 @@ def mask_api_key(api_key: str) -> str:
 
 
 class MaskedApiKeyLineEdit(LineEdit):
+    api_key_changed = Signal()
+
     def __init__(self, api_key: str, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._api_key = api_key
@@ -69,20 +73,25 @@ class MaskedApiKeyLineEdit(LineEdit):
             return
         self._api_key = api_key
         self._render()
-        self.api_key_changed()
+        self.api_key_changed.emit()
 
-    def api_key_changed(self) -> None: ...
+    def _edit_range(self) -> tuple[int, int]:
+        if self.hasSelectedText():
+            start = self.selectionStart()
+            return start, start + len(self.selectedText())
+        caret = self.cursorPosition()
+        return caret, caret
+
+    def _replace_range(self, start: int, end: int, text: str) -> None:
+        self._set_api_key(self._api_key[:start] + text + self._api_key[end:])
+        self.setCursorPosition(start + len(text))
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.matches(QKeySequence.StandardKey.Paste):
             text = QApplication.clipboard().text()
             if text:
-                if self.hasSelectedText():
-                    start = self.selectionStart()
-                    end = start + len(self.selectedText())
-                    self._set_api_key(self._api_key[:start] + text + self._api_key[end:])
-                else:
-                    self._set_api_key(self._api_key + text)
+                start, end = self._edit_range()
+                self._replace_range(start, end, text)
             return
         if event.matches(QKeySequence.StandardKey.Cut):
             if self._revealed:
@@ -95,35 +104,41 @@ class MaskedApiKeyLineEdit(LineEdit):
         if event.matches(QKeySequence.StandardKey.SelectAll):
             self.selectAll()
             return
-        if event.key() in (Qt.Key.Key_Backspace, Qt.Key.Key_Delete):
-            self._set_api_key(self._api_key[:-1])
+        if event.key() == Qt.Key.Key_Backspace:
+            start, end = self._edit_range()
+            if start == end and start > 0:
+                start -= 1
+            self._replace_range(start, end, "")
+            return
+        if event.key() == Qt.Key.Key_Delete:
+            start, end = self._edit_range()
+            if start == end and end < len(self._api_key):
+                end += 1
+            self._replace_range(start, end, "")
             return
         if event.text() and event.text().isprintable():
-            self._set_api_key(self._api_key + event.text())
+            start, end = self._edit_range()
+            self._replace_range(start, end, event.text())
             return
-        event.ignore()
-
-    def mousePressEvent(self, event) -> None:
-        self.setFocus()
-        event.accept()
-
-    def mouseMoveEvent(self, event) -> None:
-        event.accept()
+        super().keyPressEvent(event)
 
     def mouseDoubleClickEvent(self, event) -> None:
         event.accept()
 
 
 class ApiKeyField(QWidget):
-    def __init__(self, config_key: str, config_key_exists: str, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, config_key: str, config_key_exists: str, store: SettingsStore, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.config_key = config_key
         self.config_key_exists = config_key_exists
-        api_key = str(read_value(config_key))
+        self.store = store
+        api_key = str(store.read(config_key))
 
         self.line_edit = MaskedApiKeyLineEdit(api_key, self)
         apply_body_font(self.line_edit)
-        self.line_edit.api_key_changed = self._on_api_key_changed
+        self.line_edit.api_key_changed.connect(self._on_api_key_changed)
 
         self._revealed = False
         self.reveal_button = TransparentToolButton(self)
@@ -133,7 +148,7 @@ class ApiKeyField(QWidget):
         self._apply_reveal_icon()
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 4, 16, 8)
+        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(8)
         layout.addWidget(self.line_edit, stretch=1)
         layout.addWidget(self.reveal_button)
@@ -151,8 +166,8 @@ class ApiKeyField(QWidget):
 
     def _on_api_key_changed(self) -> None:
         api_key = self.line_edit.api_key
-        write_value(self.config_key, api_key)
-        write_value(self.config_key_exists, bool(api_key))
+        self.store.write(self.config_key, api_key)
+        self.store.write(self.config_key_exists, bool(api_key))
         self._apply_validation_state(api_key)
 
     def _apply_validation_state(self, api_key: str) -> None:
@@ -161,18 +176,18 @@ class ApiKeyField(QWidget):
 
 
 class ApiCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subsource", parent)
         self.add_header_help(SETTING_DESCRIPTIONS[API_KEY_DESCRIPTION_KEY].explanation)
 
         title_label = BodyLabel("API key", self)
         apply_body_font(title_label)
         title_row = QHBoxLayout()
-        title_row.setContentsMargins(16, 6, 16, 0)
+        title_row.setContentsMargins(ROW_INSET, 6, ROW_INSET, 0)
         title_row.addWidget(title_label)
         self.body_layout.addLayout(title_row)
 
-        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, API_KEY_CONFIG_KEY_EXISTS, self))
+        self.add_row(ApiKeyField(API_KEY_CONFIG_KEY, API_KEY_CONFIG_KEY_EXISTS, store, self))
         self.body_layout.addWidget(self._build_request_limits())
         self.body_layout.addWidget(self._build_getting_started())
 
@@ -184,7 +199,7 @@ class ApiCard(SettingsCard):
         description = SETTING_DESCRIPTIONS[description_key]
         container = QWidget(self)
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(16, 4, 16, 8)
+        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(6)
 
         title_label = BodyLabel(description.title, self)
@@ -216,18 +231,6 @@ class ApiCard(SettingsCard):
         return button_row
 
     def _build_labelled_link(self, caption: str, url: str) -> QWidget:
-        button = TransparentToolButton(lucide_qicon(LucideIcon.EXTERNAL_LINK, TEXT_COLOR), self)
-        button.setFixedSize(LINK_BUTTON_SIZE, LINK_BUTTON_SIZE)
-        button.setIconSize(QSize(LINK_BUTTON_ICON_SIZE, LINK_BUTTON_ICON_SIZE))
-        button.clicked.connect(lambda: webbrowser.open(url))
-
-        caption_label = CaptionLabel(caption, self)
-        apply_caption_font(caption_label)
-
-        column_widget = QWidget(self)
-        column = QVBoxLayout(column_widget)
-        column.setContentsMargins(0, 0, 0, 0)
-        column.setSpacing(0)
-        column.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-        return column_widget
+        link_button = CaptionedToolButton(caption, icon=lucide_qicon(LucideIcon.EXTERNAL_LINK, TEXT_COLOR), parent=self)
+        link_button.clicked.connect(lambda: webbrowser.open(url))
+        return link_button
