@@ -1,7 +1,6 @@
 from typing import NamedTuple
 
 from PySide6.QtCore import (
-    QPoint,
     QSize,
     QSortFilterProxyModel,
     Qt,
@@ -10,7 +9,6 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import QPen, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
-    QApplication,
     QCompleter,
     QFrame,
     QHBoxLayout,
@@ -32,6 +30,7 @@ from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
+from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
 from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
     CAPTION_FONT_SIZE,
@@ -39,24 +38,18 @@ from subsearch.ui.theme.typography import (
     apply_body_font,
     body_font,
 )
+from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
 UNCHECKED_BORDER_WIDTH = 2
-HELP_ICON_SIZE = 16
 HELP_POPUP_MAX_WIDTH = 560
-HELP_POPUP_GAP = 6
 HELP_POPUP_HOVER_DELAY_MS = 300
 MAX_VISIBLE_DROPDOWN_ITEMS = 8
 
 
-class HelpPopup(QFrame):
+class HelpPopup(AnchoredPopup):
     def __init__(self, explanation: str, anchor: QWidget) -> None:
-        super().__init__(anchor.window())
-        self._anchor = anchor
-        self.setWindowFlags(Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint)
+        super().__init__(anchor, Qt.WindowType.ToolTip)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        self.setStyleSheet(
-            "HelpPopup {" " background-color: #2b2b2b;" " border: 1px solid #454545;" " border-radius: 6px;" " }"
-        )
 
         caption_font = body_font()
         caption_font.setPixelSize(CAPTION_FONT_SIZE)
@@ -74,27 +67,6 @@ class HelpPopup(QFrame):
     def set_explanation(self, explanation: str) -> None:
         self._message.setText(explanation)
 
-    def show_above(self) -> None:
-        self.adjustSize()
-        anchor_top_left = self._anchor.mapToGlobal(QPoint(0, 0))
-        anchor_center_x = anchor_top_left.x() + self._anchor.width() // 2
-        anchor_bottom = anchor_top_left.y() + self._anchor.height()
-
-        screen = self.screen() or QApplication.screenAt(anchor_top_left)
-        screen_area = screen.availableGeometry()
-
-        x = anchor_center_x - self.width() // 2
-        x = max(screen_area.left(), min(x, screen_area.right() - self.width() + 1))
-
-        y = anchor_top_left.y() - self.height() - HELP_POPUP_GAP
-        if y < screen_area.top():
-            y = anchor_bottom + HELP_POPUP_GAP
-        y = max(screen_area.top(), min(y, screen_area.bottom() - self.height() + 1))
-
-        self.move(QPoint(x, y))
-        self.show()
-        self.raise_()
-
 
 class HelpButton(TransparentToolButton):
     def __init__(
@@ -102,8 +74,8 @@ class HelpButton(TransparentToolButton):
     ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
         self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, palette.NEUTRAL_3))
-        self.setFixedSize(32, 32)
-        self.setIconSize(QSize(HELP_ICON_SIZE, HELP_ICON_SIZE))
+        self.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
+        self.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
         self._popup = HelpPopup(explanation, self)
         self._hover_timer = QTimer(self)
         self._hover_timer.setSingleShot(True)
@@ -286,7 +258,7 @@ class SettingRow(QFrame):
         description = SETTING_DESCRIPTIONS[config_key]
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 4, 16, 4)
+        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 4)
         layout.setSpacing(12)
 
         title_label = BodyLabel(description.title, self)
@@ -301,6 +273,18 @@ class SettingRow(QFrame):
         if show_help:
             self.help_button = HelpButton(description.explanation, self)
             layout.addWidget(self.help_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+
+
+def make_switches_mutually_exclusive(first: "SwitchRow", second: "SwitchRow") -> None:
+    def uncheck_other_when_enabled(other_row: "SwitchRow"):
+        def on_toggled(checked: bool) -> None:
+            if checked and other_row.switch.isChecked():
+                other_row.set_checked_silently(False)
+
+        return on_toggled
+
+    first.toggled.connect(uncheck_other_when_enabled(second))
+    second.toggled.connect(uncheck_other_when_enabled(first))
 
 
 class SwitchRow(SettingRow):

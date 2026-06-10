@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
-from qfluentwidgets import CaptionLabel, ProgressBar, TransparentToolButton
+from qfluentwidgets import CaptionLabel, ProgressBar
 
 from subsearch.io import app_updater
 from subsearch.runtime.config.constants import VERSION
@@ -11,11 +11,13 @@ from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.app_updates import UpdateCheckWorker, UpdateInstallWorker
 from subsearch.ui.state.tasks import TaskRunner
+from subsearch.ui.theme.metrics import ROW_INSET
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_caption_font,
 )
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 UPDATE_IDLE_STATUS = "Check for updates to see if a newer version is available."
 UPDATE_BUTTON_ICON_SIZE = 24
@@ -48,17 +50,22 @@ class UpdateCard(SettingsCard):
         text_column.addWidget(self.latest_version_label)
         text_column.addWidget(self.status_label)
 
-        self.install_button, install_column = self._build_update_button(LucideIcon.ARROW_DOWN_TO_LINE, "Install")
+        install_column = CaptionedToolButton("Install", parent=self)
+        self.install_button = install_column.button
         self.install_button.clicked.connect(self._download_and_install)
         self._apply_install_button_state(False)
 
-        self.check_button, check_column = self._build_update_button(LucideIcon.REFRESH_CW_DOT, "Search")
+        check_column = CaptionedToolButton(
+            "Search", icon=lucide_qicon(LucideIcon.REFRESH_CW_DOT, TEXT_COLOR), parent=self
+        )
+        self.check_button = check_column.button
         self.check_button.clicked.connect(self._check_for_update)
 
-        self.changelog_button, changelog_column = self._build_changelog_button()
+        self.changelog_button = ChangelogButton(self)
+        changelog_column = CaptionedToolButton("Changelog", button=self.changelog_button, parent=self)
 
         content_row = QHBoxLayout()
-        content_row.setContentsMargins(16, 8, 16, 4)
+        content_row.setContentsMargins(ROW_INSET, 8, ROW_INSET, 4)
         content_row.setSpacing(8)
         content_row.addLayout(text_column, stretch=1)
         content_row.addWidget(check_column, alignment=Qt.AlignmentFlag.AlignVCenter)
@@ -71,41 +78,9 @@ class UpdateCard(SettingsCard):
         self.progress_bar.setRange(0, 100)
         self.progress_bar.hide()
         progress_row = QHBoxLayout()
-        progress_row.setContentsMargins(16, 0, 16, 10)
+        progress_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
         progress_row.addWidget(self.progress_bar, stretch=1)
         self.body_layout.addLayout(progress_row)
-
-    def _build_update_button(self, icon: LucideIcon, caption: str) -> tuple[TransparentToolButton, QWidget]:
-        button = TransparentToolButton(lucide_qicon(icon, TEXT_COLOR), self)
-        button.setFixedSize(UPDATE_BUTTON_SIZE, UPDATE_BUTTON_SIZE)
-        button.setIconSize(QSize(UPDATE_BUTTON_ICON_SIZE, UPDATE_BUTTON_ICON_SIZE))
-
-        caption_label = CaptionLabel(caption, self)
-        apply_caption_font(caption_label)
-
-        column_widget = QWidget(self)
-        column = QVBoxLayout(column_widget)
-        column.setContentsMargins(0, 0, 0, 0)
-        column.setSpacing(0)
-        column.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-        return button, column_widget
-
-    def _build_changelog_button(self) -> tuple[ChangelogButton, QWidget]:
-        button = ChangelogButton(self)
-        button.setFixedSize(UPDATE_BUTTON_SIZE, UPDATE_BUTTON_SIZE)
-        button.setIconSize(QSize(UPDATE_BUTTON_ICON_SIZE, UPDATE_BUTTON_ICON_SIZE))
-
-        caption_label = CaptionLabel("Changelog", self)
-        apply_caption_font(caption_label)
-
-        column_widget = QWidget(self)
-        column = QVBoxLayout(column_widget)
-        column.setContentsMargins(0, 0, 0, 0)
-        column.setSpacing(0)
-        column.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-        return button, column_widget
 
     def _apply_install_button_state(self, enabled: bool) -> None:
         color = TEXT_COLOR if enabled else DISABLED_TEXT_COLOR

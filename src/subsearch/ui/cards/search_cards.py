@@ -16,6 +16,7 @@ from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
@@ -102,7 +103,7 @@ class ThresholdExampleRow(QWidget):
         self._accepted: bool | None = None
         self.setFixedHeight(EXAMPLE_ROW_HEIGHT)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(48, 2, 48, 2)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
 
         name_label = CaptionLabel(subtitle_name, self)
@@ -150,7 +151,7 @@ class AdvancedTuningRow(QWidget):
         self.spin_box.setFixedWidth(110)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(48, 2, 48, 2)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
         label = CaptionLabel(label_text, self)
         apply_caption_font(label)
@@ -241,7 +242,7 @@ class SearchThresholdCard(SettingsCard):
         self.slider.setValue(int(store.read("search.accept_threshold")))
 
         slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(48 - HANDLE_CENTER, 6, 48, 10)
+        slider_row.setContentsMargins(CARD_CONTENT_INSET - HANDLE_CENTER, 6, CARD_CONTENT_INSET, 10)
         slider_row.setSpacing(0)
         slider_row.addWidget(self.slider)
         slider_row.addWidget(self._swap_button, 0, Qt.AlignmentFlag.AlignBottom)
@@ -273,7 +274,7 @@ class SearchThresholdCard(SettingsCard):
         self._example_heading.setStyleSheet(f"color: {TEXT_COLOR};")
 
         heading_row = QHBoxLayout()
-        heading_row.setContentsMargins(48, 4, 48, 0)
+        heading_row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
         heading_row.addWidget(self._example_heading)
         self.body_layout.addLayout(heading_row)
 
@@ -297,7 +298,7 @@ class SearchThresholdCard(SettingsCard):
         self._restore_button.setToolTip("Restore default values")
         self._restore_button.clicked.connect(self._restore_defaults)
         restore_row = QHBoxLayout()
-        restore_row.setContentsMargins(48, 6, 48, 4)
+        restore_row.setContentsMargins(CARD_CONTENT_INSET, 6, CARD_CONTENT_INSET, 4)
         restore_row.addStretch(1)
         restore_row.addWidget(self._restore_button)
         self.body_layout.addLayout(restore_row)
@@ -306,7 +307,7 @@ class SearchThresholdCard(SettingsCard):
     def _heading(self, text: str) -> CaptionLabel:
         heading = CaptionLabel(text, self)
         apply_caption_font(heading)
-        heading.setContentsMargins(48, 4, 48, 0)
+        heading.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
         heading.setStyleSheet(f"color: {TEXT_COLOR};")
         return heading
 
@@ -396,7 +397,7 @@ class ProvidersCard(SettingsCard):
 
         self.check_boxes: dict[str, CheckBox] = {}
         grid = QGridLayout()
-        grid.setContentsMargins(48, 0, 48, 10)
+        grid.setContentsMargins(CARD_CONTENT_INSET, 0, CARD_CONTENT_INSET, 10)
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(12)
         for column in range(PROVIDER_GRID_COLUMNS):

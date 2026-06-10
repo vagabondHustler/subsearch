@@ -1,7 +1,7 @@
 from PySide6.QtCore import QSize, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QPainter
+from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
-from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
+from qfluentwidgets import BodyLabel, ListWidget
 
 from subsearch.runtime.models.model import (
     MatchTier,
@@ -9,25 +9,13 @@ from subsearch.runtime.models.model import (
     SubtitleStatus,
     classify_match_tier,
 )
-from subsearch.ui.cards import (
-    CARD_BORDER_COLOR,
-    CARD_BORDER_RADIUS,
-    CARD_FILL_COLOR,
-    CARD_PANEL_OPACITY,
-)
+from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
 from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.separators import make_fading_separator
-from subsearch.ui.theme.typography import (
-    BODY_FONT_SIZE,
-    SEMI_BOLD,
-    apply_body_font,
-    apply_title_font,
-)
-from subsearch.ui.widgets.setting_rows import HelpButton
+from subsearch.ui.theme.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
@@ -68,33 +56,12 @@ SPINNER_FRAME_INTERVAL_MS = 60
 SPINNER_DEGREES_PER_FRAME = 10
 
 
-class SubtitleCard(HeaderCardWidget):
-    def __init__(self, parent: QWidget | None = None) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
-        super().__init__(parent)
+class SubtitleCard(SettingsCard):
+    def __init__(self, parent: QWidget | None = None) -> None:
         description = SETTING_DESCRIPTIONS["download_manager.available_subtitles"]
-        self.setTitle(description.title)
-        apply_title_font(self.headerLabel)
-        self._replace_header_separator()
-        self._add_header_help(description.explanation)
+        super().__init__(description.title, parent)
+        self.add_header_help(description.explanation)
         self.viewLayout.setContentsMargins(*CARD_BODY_MARGINS)
-
-    def paintEvent(self, e) -> None:
-        painter = QPainter(self)
-        painter.setRenderHints(QPainter.RenderHint.Antialiasing)
-        painter.setOpacity(CARD_PANEL_OPACITY)
-        painter.setBrush(CARD_FILL_COLOR)
-        painter.setPen(CARD_BORDER_COLOR)
-        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), CARD_BORDER_RADIUS, CARD_BORDER_RADIUS)
-
-    def _replace_header_separator(self) -> None:
-        index = self.vBoxLayout.indexOf(self.separator)
-        self.separator.hide()
-        self.vBoxLayout.removeWidget(self.separator)
-        self.vBoxLayout.insertWidget(index, make_fading_separator())
-
-    def _add_header_help(self, explanation: str) -> None:
-        self.headerLayout.addStretch(1)
-        self.headerLayout.addWidget(HelpButton(explanation, self))
 
 
 class DownloadManagerInterface(QWidget):

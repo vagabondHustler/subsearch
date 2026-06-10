@@ -5,7 +5,11 @@ from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow
+from subsearch.ui.widgets.setting_rows import (
+    SpinBoxRow,
+    SwitchRow,
+    make_switches_mutually_exclusive,
+)
 
 
 class NotificationsCard(SettingsCard):
@@ -27,16 +31,7 @@ class DownloadManagerCard(SettingsCard):
         self.always_open = SwitchRow("download.always_open_manager", store)
         self.add_row(self.open_on_no_matches)
         self.add_row(self.always_open)
-        self.open_on_no_matches.toggled.connect(
-            lambda checked: self._enforce_mutual_exclusivity(self.always_open, checked)
-        )
-        self.always_open.toggled.connect(
-            lambda checked: self._enforce_mutual_exclusivity(self.open_on_no_matches, checked)
-        )
-
-    def _enforce_mutual_exclusivity(self, other_row: SwitchRow, enabled: bool) -> None:
-        if enabled and other_row.switch.isChecked():
-            other_row.set_checked_silently(False)
+        make_switches_mutually_exclusive(self.open_on_no_matches, self.always_open)
 
 
 class ApplicationCard(SettingsCard):

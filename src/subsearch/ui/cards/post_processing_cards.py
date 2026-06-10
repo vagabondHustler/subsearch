@@ -11,7 +11,6 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     BodyLabel,
-    CaptionLabel,
     CheckBox,
     LineEdit,
     MessageBox,
@@ -24,12 +23,14 @@ from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.typography import (
-    TEXT_COLOR,
-    apply_body_font,
-    apply_caption_font,
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
+from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.setting_rows import (
+    HelpButton,
+    SwitchRow,
+    make_switches_mutually_exclusive,
 )
-from subsearch.ui.widgets.setting_rows import HelpButton, SwitchRow
 
 
 class _ButtonProxyLabel(BodyLabel):
@@ -68,8 +69,6 @@ DESTINATION_PATH_EXAMPLES = (
 
 
 class PostProcessingCard(SettingsCard):
-    mutually_exclusive_keys = {"post_processing.move_best", "post_processing.move_all"}
-
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle post-processing", parent)
         self.store = store
@@ -78,23 +77,14 @@ class PostProcessingCard(SettingsCard):
         self.move_all = SwitchRow("post_processing.move_all", store)
         self.add_row(self.move_best)
         self.add_row(self.move_all)
-        self.move_best.toggled.connect(self._on_move_toggled)
-        self.move_all.toggled.connect(self._on_move_toggled)
+        make_switches_mutually_exclusive(self.move_best, self.move_all)
+        self.move_best.toggled.connect(self._update_destination_enabled)
+        self.move_all.toggled.connect(self._update_destination_enabled)
 
         self._build_destination()
         self._update_destination_enabled()
 
-    def _on_move_toggled(self, checked: bool) -> None:
-        toggled_row = self.sender()
-        other_row = self.move_all if toggled_row is self.move_best else self.move_best
-        self._enforce_mutual_exclusivity(other_row, checked)
-        self._update_destination_enabled()
-
-    def _enforce_mutual_exclusivity(self, other_row: SwitchRow, enabled: bool) -> None:
-        if enabled and other_row.switch.isChecked():
-            other_row.set_checked_silently(False)
-
-    def _update_destination_enabled(self) -> None:
+    def _update_destination_enabled(self, _checked: bool = False) -> None:
         moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()
         self.destination.setEnabled(moving_enabled)
 
@@ -112,7 +102,7 @@ class PostProcessingCard(SettingsCard):
         self.path_edit.editingFinished.connect(self._save_path_if_valid)
         help_button = HelpButton(DESTINATION_PATH_EXAMPLES, self)
         path_row = QHBoxLayout()
-        path_row.setContentsMargins(16, 0, 16, 10)
+        path_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
         path_row.addWidget(self.path_edit, stretch=1)
         path_row.addWidget(self._build_browse_button())
         path_row.addWidget(help_button)
@@ -122,21 +112,11 @@ class PostProcessingCard(SettingsCard):
         self.body_layout.addWidget(self.destination)
 
     def _build_browse_button(self) -> QWidget:
-        browse_button = TransparentToolButton(lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), self)
-        browse_button.setFixedSize(32, 32)
-        browse_button.setIconSize(QSize(24, 24))
+        browse_button = CaptionedToolButton(
+            "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
+        )
         browse_button.clicked.connect(self._browse_for_folder)
-        caption = CaptionLabel("Browse", self)
-        apply_caption_font(caption)
-        caption.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-
-        container = QWidget(self)
-        container_layout = QVBoxLayout(container)
-        container_layout.setContentsMargins(0, 0, 0, 0)
-        container_layout.setSpacing(0)
-        container_layout.addWidget(browse_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        container_layout.addWidget(caption)
-        return container
+        return browse_button
 
     def _browse_for_folder(self) -> None:
         selected_folder = QFileDialog.getExistingDirectory(
@@ -212,7 +192,7 @@ class FileExtensionsCard(SettingsCard):
         file_extensions = store.read("shell_integration.file_extensions")
         self.check_boxes: dict[str, CheckBox] = {}
         grid = QGridLayout()
-        grid.setContentsMargins(48, 0, 48, 10)
+        grid.setContentsMargins(CARD_CONTENT_INSET, 0, CARD_CONTENT_INSET, 10)
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(12)
         column_count = -(-len(file_extensions) // EXTENSION_GRID_ROWS)

@@ -2,10 +2,9 @@ import webbrowser
 from typing import Callable
 from urllib.parse import urlencode
 
-from PySide6.QtCore import QSize, Qt, QUrl
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QApplication, QGridLayout, QVBoxLayout, QWidget
-from qfluentwidgets import CaptionLabel, TransparentToolButton
+from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 
 from subsearch.runtime.config.constants import (
     DEVICE_INFO,
@@ -16,14 +15,14 @@ from subsearch.runtime.config.constants import (
 from subsearch.runtime.logging import log_sanitizer
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme.typography import TEXT_COLOR, apply_caption_font
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
+from subsearch.ui.theme.typography import TEXT_COLOR
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 ISSUE_TEMPLATE_URL = "https://github.com/vagabondHustler/subsearch/issues/new"
 REPOSITORY_URL = "https://github.com/vagabondHustler/subsearch"
 SECURITY_ADVISORY_URL = "https://github.com/vagabondHustler/subsearch/security/advisories/new"
 THIRD_PARTY_LICENSES_URL = "https://github.com/vagabondHustler/subsearch/blob/main/THIRD-PARTY-LICENSES.md"
-RESOURCES_BUTTON_ICON_SIZE = 24
-RESOURCES_BUTTON_SIZE = 32
 RESOURCES_GRID_COLUMNS = 3
 NO_VIDEO_FILE = "none (running in configure mode, no video file was opened)"
 
@@ -90,7 +89,7 @@ class ResourcesCard(SettingsCard):
             (LucideIcon.GITHUB, "View source on GitHub", _open_repository),
         ]
         grid = QGridLayout()
-        grid.setContentsMargins(48, 8, 48, 10)
+        grid.setContentsMargins(CARD_CONTENT_INSET, 8, CARD_CONTENT_INSET, 10)
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(12)
         for column in range(RESOURCES_GRID_COLUMNS):
@@ -107,18 +106,6 @@ class ResourcesCard(SettingsCard):
         self.body_layout.addLayout(grid)
 
     def _build_labelled_action(self, icon: LucideIcon, caption: str, on_click: Callable[[], None]) -> QWidget:
-        button = TransparentToolButton(lucide_qicon(icon, TEXT_COLOR), self)
-        button.setFixedSize(RESOURCES_BUTTON_SIZE, RESOURCES_BUTTON_SIZE)
-        button.setIconSize(QSize(RESOURCES_BUTTON_ICON_SIZE, RESOURCES_BUTTON_ICON_SIZE))
-        button.clicked.connect(on_click)
-
-        caption_label = CaptionLabel(caption, self)
-        apply_caption_font(caption_label)
-
-        column_widget = QWidget(self)
-        column = QVBoxLayout(column_widget)
-        column.setContentsMargins(0, 0, 0, 0)
-        column.setSpacing(0)
-        column.addWidget(button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        column.addWidget(caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
-        return column_widget
+        action_button = CaptionedToolButton(caption, icon=lucide_qicon(icon, TEXT_COLOR), parent=self)
+        action_button.clicked.connect(on_click)
+        return action_button
