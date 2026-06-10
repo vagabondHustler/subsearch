@@ -70,8 +70,12 @@ DESTINATION_PATH_EXAMPLES = (
 
 class PostProcessingCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Subtitle post-processing", parent)
+        super().__init__("Subtitle post-processing", store, parent=parent)
         self.store = store
+        self.register_restore_defaults([
+            ("post_processing.target_path", DEFAULT_TARGET_PATH),
+            ("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION),
+        ])
         self.add_row(SwitchRow("post_processing.rename", store))
         self.move_best = SwitchRow("post_processing.move_best", store)
         self.move_all = SwitchRow("post_processing.move_all", store)
@@ -183,7 +187,7 @@ class FileExtensionsCard(SettingsCard):
     def __init__(
         self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
     ) -> None:
-        super().__init__("File extensions", parent)
+        super().__init__("File extensions", show_restore_button=False, parent=parent)
         self.store = store
         self.shell_service = shell_service
         store.subscribe("shell_integration.context_menu", self.set_enabled)
@@ -274,7 +278,7 @@ class ShellIntegrationCard(SettingsCard):
         shell_service: ShellIntegrationService,
         parent: QWidget | None = None,
     ) -> None:
-        super().__init__("Shell integration", parent)
+        super().__init__("Shell integration", store, parent=parent)
         self.store = store
         self.shell_service = shell_service
 

@@ -14,7 +14,7 @@ from subsearch.ui.widgets.setting_rows import (
 
 class NotificationsCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Notifications", parent)
+        super().__init__("Notifications", store, parent=parent)
         self.system_tray = SwitchRow("notifications.system_tray", store)
         self.summary_notification = SwitchRow("notifications.summary_notification", store)
         self.add_row(self.system_tray)
@@ -25,7 +25,7 @@ class NotificationsCard(SettingsCard):
 
 class DownloadManagerCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Download manager", parent)
+        super().__init__("Download manager", store, parent=parent)
         self.add_row(SwitchRow("download.automatic", store))
         self.open_on_no_matches = SwitchRow("download.open_manager_on_no_matches", store)
         self.always_open = SwitchRow("download.always_open_manager", store)
@@ -38,7 +38,7 @@ class ApplicationCard(SettingsCard):
     def __init__(
         self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
     ) -> None:
-        super().__init__("Application", parent)
+        super().__init__("Application", store, parent=parent)
         self.store = store
         self.shell_service = shell_service
         show_terminal = SwitchRow("application.show_terminal", store)
@@ -55,7 +55,7 @@ class ApplicationCard(SettingsCard):
 
 class NetworkCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Network", parent)
+        super().__init__("Network", store, parent=parent)
         self.add_row(SpinBoxRow("network.api_call_limit", store, 1, 99))
         self.add_row(SpinBoxRow("network.request_connect_timeout", store, 1, 99))
         self.add_row(SpinBoxRow("network.request_read_timeout", store, 1, 99))
@@ -63,7 +63,7 @@ class NetworkCard(SettingsCard):
 
 class ProviderDiagnosticsCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Provider diagnostics", parent)
+        super().__init__("Provider diagnostics", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["diagnostics.header"].explanation)
         self.enabled = SwitchRow("diagnostics.enabled", store)
         self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", store, 1, 99)
