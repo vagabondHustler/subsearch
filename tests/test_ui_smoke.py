@@ -44,6 +44,18 @@ _NETWORK_DEFAULTS = {
 }
 
 
+def _collect_switch_rows(card):
+    from subsearch.ui.widgets.setting_rows import SwitchRow
+
+    return {row.config_key: row for row in card.findChildren(SwitchRow)}
+
+
+def _collect_spinbox_rows(card):
+    from subsearch.ui.widgets.setting_rows import SpinBoxRow
+
+    return {row.config_key: row for row in card.findChildren(SpinBoxRow)}
+
+
 @pytest.fixture
 def settings_window(qtbot):
     from subsearch.ui.application import SettingsWindow
@@ -67,20 +79,26 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
     from subsearch.ui.cards.search_cards import SearchThresholdCard
     from subsearch.ui.state.store import SettingsStore
 
-    card = SearchThresholdCard(SettingsStore())
+    store = SettingsStore()
+    card = SearchThresholdCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
 
+    store.write("search.accept_threshold", 50)
     for row in card.tuning_rows.values():
         row.spin_box.setValue(1)
     assert session.read("search.token_weights.title") == 1
+    assert card.slider.value() == 50
 
     card._restore_defaults()
 
+    assert card.slider.value() == 90
     for token_name, default in DEFAULT_TOKEN_WEIGHTS.items():
         assert session.read(f"search.token_weights.{token_name}") == default
+        assert card.tuning_rows[token_name].spin_box.value() == default
     for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
         assert session.read(f"search.token_multipliers.{token_name}") == default
+        assert card.tuning_rows[token_name].spin_box.value() == default
 
 
 def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> None:
@@ -110,14 +128,18 @@ def test_subtitle_filters_restore_defaults(qtbot) -> None:
     card = SubtitleFiltersCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    switch_rows = _collect_switch_rows(card)
 
-    for key in _SUBTITLE_FILTERS_DEFAULTS:
-        store.write(key, not _SUBTITLE_FILTERS_DEFAULTS[key])
+    for key, default in _SUBTITLE_FILTERS_DEFAULTS.items():
+        store.write(key, not default)
+    for key, default in _SUBTITLE_FILTERS_DEFAULTS.items():
+        assert switch_rows[key].switch.isChecked() == (not default)
 
     card._restore_defaults()
 
     for key, default in _SUBTITLE_FILTERS_DEFAULTS.items():
         assert session.read(key) == default
+        assert switch_rows[key].switch.isChecked() == default
 
 
 def test_post_processing_restore_defaults(qtbot) -> None:
@@ -129,15 +151,60 @@ def test_post_processing_restore_defaults(qtbot) -> None:
     card = PostProcessingCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    switch_rows = _collect_switch_rows(card)
 
     store.write("post_processing.rename", False)
-    store.write("post_processing.target_path", "custom/path")
-    store.write("post_processing.path_resolution", "absolute")
+    store.write("post_processing.move_best", False)
+    store.write("post_processing.create_missing_folder", False)
+    assert switch_rows["post_processing.rename"].switch.isChecked() is False
+    assert switch_rows["post_processing.move_best"].switch.isChecked() is False
 
     card._restore_defaults()
 
     for key, default in _POST_PROCESSING_DEFAULTS.items():
         assert session.read(key) == default
+    assert switch_rows["post_processing.rename"].switch.isChecked() is True
+    assert switch_rows["post_processing.move_best"].switch.isChecked() is True
+    assert switch_rows["post_processing.create_missing_folder"].switch.isChecked() is True
+
+
+def test_post_processing_restore_re_enables_destination(qtbot) -> None:
+    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    card = PostProcessingCard(store)
+    qtbot.addWidget(card)
+
+    # Disable both move switches so the destination section becomes disabled.
+    store.write("post_processing.move_best", False)
+    store.write("post_processing.move_all", False)
+    assert not card.destination.isEnabled()
+
+    card._restore_defaults()
+
+    # Default has move_best=True, so destination must be re-enabled after restore.
+    assert card.destination.isEnabled()
+
+
+def test_shell_integration_restore_re_enables_context_menu_icon(qtbot) -> None:
+    from subsearch.ui.cards.post_processing_cards import ShellIntegrationCard
+    from subsearch.ui.services.shell_integration import ShellIntegrationService
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.state.tasks import TaskRunner
+
+    store = SettingsStore()
+    card = ShellIntegrationCard(store, ShellIntegrationService(TaskRunner()))
+    qtbot.addWidget(card)
+
+    # Disabling context_menu disables the icon row.
+    store.write("shell_integration.context_menu", False)
+    assert not card.context_menu_icon.switch.isEnabled()
+
+    card._restore_defaults()
+
+    # Default has context_menu=True, so the icon row must be re-enabled after restore.
+    assert card.context_menu_icon.switch.isEnabled()
 
 
 def test_notifications_restore_defaults(qtbot) -> None:
@@ -149,14 +216,18 @@ def test_notifications_restore_defaults(qtbot) -> None:
     card = NotificationsCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    switch_rows = _collect_switch_rows(card)
 
     store.write("notifications.system_tray", False)
     store.write("notifications.summary_notification", True)
+    assert switch_rows["notifications.system_tray"].switch.isChecked() is False
+    assert switch_rows["notifications.summary_notification"].switch.isChecked() is True
 
     card._restore_defaults()
 
     for key, default in _NOTIFICATIONS_DEFAULTS.items():
         assert session.read(key) == default
+        assert switch_rows[key].switch.isChecked() == default
 
 
 def test_download_manager_restore_defaults(qtbot) -> None:
@@ -168,14 +239,18 @@ def test_download_manager_restore_defaults(qtbot) -> None:
     card = DownloadManagerCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    switch_rows = _collect_switch_rows(card)
 
     store.write("download.automatic", False)
     store.write("download.open_manager_on_no_matches", False)
+    assert switch_rows["download.automatic"].switch.isChecked() is False
+    assert switch_rows["download.open_manager_on_no_matches"].switch.isChecked() is False
 
     card._restore_defaults()
 
     for key, default in _DOWNLOAD_MANAGER_DEFAULTS.items():
         assert session.read(key) == default
+        assert switch_rows[key].switch.isChecked() == default
 
 
 def test_application_restore_defaults(qtbot) -> None:
@@ -189,14 +264,18 @@ def test_application_restore_defaults(qtbot) -> None:
     card = ApplicationCard(store, ShellIntegrationService(TaskRunner()))
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    switch_rows = _collect_switch_rows(card)
 
     store.write("application.show_terminal", True)
     store.write("application.single_instance", False)
+    assert switch_rows["application.show_terminal"].switch.isChecked() is True
+    assert switch_rows["application.single_instance"].switch.isChecked() is False
 
     card._restore_defaults()
 
     for key, default in _APPLICATION_DEFAULTS.items():
         assert session.read(key) == default
+        assert switch_rows[key].switch.isChecked() == default
 
 
 def test_network_restore_defaults(qtbot) -> None:
@@ -208,12 +287,17 @@ def test_network_restore_defaults(qtbot) -> None:
     card = NetworkCard(store)
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
+    spinbox_rows = _collect_spinbox_rows(card)
 
     store.write("network.api_call_limit", 99)
     store.write("network.request_connect_timeout", 99)
     store.write("network.request_read_timeout", 99)
+    assert spinbox_rows["network.api_call_limit"].spin_box.value() == 99
+    assert spinbox_rows["network.request_connect_timeout"].spin_box.value() == 99
+    assert spinbox_rows["network.request_read_timeout"].spin_box.value() == 99
 
     card._restore_defaults()
 
     for key, default in _NETWORK_DEFAULTS.items():
         assert session.read(key) == default
+        assert spinbox_rows[key].spin_box.value() == default
