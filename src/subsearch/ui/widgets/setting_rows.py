@@ -1,15 +1,5 @@
-from typing import NamedTuple
-
-from PySide6.QtCore import (
-    QSize,
-    QSortFilterProxyModel,
-    Qt,
-    QTimer,
-    Signal,
-)
-from PySide6.QtGui import QPen, QStandardItem, QStandardItemModel
+from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
-    QCompleter,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -18,21 +8,21 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     BodyLabel,
-    ComboBox,
-    EditableComboBox,
     SpinBox,
     SwitchButton,
     TransparentToolButton,
 )
-from qfluentwidgets.components.widgets.line_edit import CompleterMenu
 
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.compat.qfluent import (
+    SearchableComboBox,
+    thicken_unchecked_switch_border,
+)
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
 from subsearch.ui.theme.typography import (
-    BODY_FONT_SIZE,
     CAPTION_FONT_SIZE,
     TEXT_COLOR,
     apply_body_font,
@@ -40,10 +30,8 @@ from subsearch.ui.theme.typography import (
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
-UNCHECKED_BORDER_WIDTH = 2
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
-MAX_VISIBLE_DROPDOWN_ITEMS = 8
 
 
 class HelpPopup(AnchoredPopup):
@@ -94,153 +82,6 @@ class HelpButton(TransparentToolButton):
         self._hover_timer.stop()
         self._popup.hide()
         super().leaveEvent(e)
-
-
-def style_dropdown_menu(menu, object_name: str) -> None:
-    font = body_font()
-    menu.view.setFont(font)
-    for action in menu.actions():
-        action.setFont(font)
-    menu.view.setStyleSheet(f"#{object_name} {{ color: {TEXT_COLOR}; font-size: {BODY_FONT_SIZE}px; }}")
-
-
-class BodyFontComboBox(ComboBox):
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-
-    def _showComboMenu(self) -> None:
-        super()._showComboMenu()
-        if self.dropMenu is None:
-            return
-        style_dropdown_menu(self.dropMenu, "comboListWidget")
-
-
-SEARCH_TERMS_ROLE = Qt.ItemDataRole.UserRole + 1
-
-
-class MatchRank(NamedTuple):
-    tier: int
-    label_length: int
-
-
-def rank_match(terms: list[str], query: str) -> MatchRank:
-    query_lower = query.lower()
-    best_tier = 3
-    for term in terms:
-        term_lower = term.lower()
-        if term_lower == query_lower:
-            best_tier = min(best_tier, 0)
-        elif term_lower.startswith(query_lower):
-            best_tier = min(best_tier, 1)
-        elif query_lower in term_lower:
-            best_tier = min(best_tier, 2)
-    return MatchRank(best_tier, len(terms[0]))
-
-
-def best_matching_label(search_terms_by_label: dict[str, list[str]], query: str) -> str | None:
-    if not query:
-        return None
-    ranked = min(
-        search_terms_by_label,
-        key=lambda label: rank_match(search_terms_by_label[label], query),
-    )
-    if rank_match(search_terms_by_label[ranked], query).tier == 3:
-        return None
-    return ranked
-
-
-class SearchTermsFilterProxy(QSortFilterProxyModel):
-    def filterAcceptsRow(self, source_row: int, source_parent) -> bool:
-        index = self.sourceModel().index(source_row, 0, source_parent)
-        query = self.filterRegularExpression().pattern().lower()
-        if not query:
-            return True
-        terms = self.sourceModel().data(index, SEARCH_TERMS_ROLE) or []
-        return any(query in term.lower() for term in terms)
-
-
-class SearchableComboBox(EditableComboBox):
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-        self._search_terms_by_label: dict[str, list[str]] = {}
-
-    def setItems(self, labels: list[str], aliases_by_label: dict[str, list[str]] | None = None) -> None:
-        aliases_by_label = aliases_by_label or {}
-        self._search_terms_by_label = {label: [label, *aliases_by_label.get(label, [])] for label in labels}
-        self.addItems(labels)
-
-        model = QStandardItemModel(self)
-        for label, terms in self._search_terms_by_label.items():
-            item = QStandardItem(label)
-            item.setData(terms, SEARCH_TERMS_ROLE)
-            model.appendRow(item)
-
-        self._filter_proxy = SearchTermsFilterProxy(self)
-        self._filter_proxy.setSourceModel(model)
-
-        completer = QCompleter(self._filter_proxy, self)
-        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
-        completer.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-        self.setCompleter(completer)
-
-    def _showCompleterMenu(self) -> None:
-        if not self.completer() or not self.text():
-            return
-        self._filter_proxy.setFilterFixedString(self.text())
-        if self._completerMenu is None:
-            self.setCompleterMenu(CompleterMenu(self))
-            style_dropdown_menu(self._completerMenu, "completerListWidget")
-        self.completer().setCompletionPrefix("")
-        changed = self._completerMenu.setCompletion(
-            self.completer().completionModel(), self.completer().completionColumn()
-        )
-        self._completerMenu.setMaxVisibleItems(self.completer().maxVisibleItems())
-        if changed:
-            self._completerMenu.popup()
-        self._highlight_best_completion()
-
-    def _highlight_best_completion(self) -> None:
-        match = best_matching_label(self._search_terms_by_label, self.text())
-        view = self._completerMenu.view
-        if match is None:
-            view.setCurrentRow(-1)
-            return
-        row = self._completerMenu.items.index(match) if match in self._completerMenu.items else -1
-        view.setCurrentRow(row)
-
-    def _onReturnPressed(self) -> None:
-        match = best_matching_label(self._search_terms_by_label, self.text())
-        if match is None:
-            return
-        self.setCurrentIndex(self.findText(match))
-        if self._completerMenu:
-            self._completerMenu.close()
-
-    def _showComboMenu(self) -> None:
-        super()._showComboMenu()
-        if self.dropMenu is None:
-            return
-        style_dropdown_menu(self.dropMenu, "comboListWidget")
-
-
-def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
-    indicator = switch.indicator
-    radius = indicator.height() / 2
-
-    def draw_background(painter) -> None:
-        if indicator.isChecked():
-            painter.setPen(indicator._borderColor())
-        else:
-            pen = QPen(indicator._borderColor())
-            pen.setWidth(UNCHECKED_BORDER_WIDTH)
-            painter.setPen(pen)
-        painter.setBrush(indicator._backgroundColor())
-        painter.drawRoundedRect(indicator.rect().adjusted(1, 1, -1, -1), radius, radius)
-
-    indicator._drawBackground = draw_background
 
 
 class SettingRow(QFrame):

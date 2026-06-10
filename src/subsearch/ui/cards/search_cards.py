@@ -14,6 +14,7 @@ from subsearch.runtime.config.static_values import (
 )
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.compat.qfluent import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
@@ -31,7 +32,6 @@ from subsearch.ui.widgets.setting_rows import (
     SearchableComboBoxRow,
     SwitchRow,
 )
-from subsearch.ui.widgets.slider import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 
 PROVIDER_GRID_COLUMNS = 3
 

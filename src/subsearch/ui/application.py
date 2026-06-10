@@ -34,14 +34,18 @@ from subsearch.ui.cards import (
     UpdateCard,
 )
 from subsearch.ui.cards.download_manager import DownloadManagerInterface
+from subsearch.ui.compat.qfluent import (
+    ACCENT_COLOR,
+    NAVIGATION_ITEM_HEIGHT,
+    enlarge_navigation_icons,
+    force_fixed_accent_color,
+)
 from subsearch.ui.icons.lucide import LucideIcon
-from subsearch.ui.navigation import NAVIGATION_ITEM_HEIGHT, enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner
-from subsearch.ui.theme.theme_patch import ACCENT_COLOR, force_fixed_accent_color
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
 NAVIGATION_EXPAND_WIDTH = 242
