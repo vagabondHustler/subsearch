@@ -37,7 +37,10 @@ from subsearch.ui.cards.download_manager import DownloadManagerInterface
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.navigation import NAVIGATION_ITEM_HEIGHT, enlarge_navigation_icons
 from subsearch.ui.qt_application import get_application
+from subsearch.ui.services.shell_integration import ShellIntegrationService
+from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
 from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme.theme_patch import ACCENT_COLOR, force_fixed_accent_color
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
@@ -74,10 +77,13 @@ class SettingsWindow(FluentWindow):
         self._clear_title_bar()
 
         self.store = SettingsStore(self)
+        self.task_runner = TaskRunner(self)
         self._close_validators: list[Callable[[], bool]] = []
         store = self.store
+        shell_service = ShellIntegrationService(self.task_runner, self)
+        download_service = SubtitleDownloadService(self.task_runner, self)
 
-        file_extensions_card = FileExtensionsCard(store)
+        file_extensions_card = FileExtensionsCard(store, shell_service)
 
         language_card = LanguageCard(store)
         providers_card = ProvidersCard(store)
@@ -101,7 +107,7 @@ class SettingsWindow(FluentWindow):
         integration_interface = SettingsInterface(
             "integrationInterface",
             [
-                ShellIntegrationCard(store, file_extensions_card),
+                ShellIntegrationCard(store, shell_service, file_extensions_card),
                 file_extensions_card,
                 NotificationsCard(store),
                 DownloadManagerCard(store),
@@ -110,7 +116,7 @@ class SettingsWindow(FluentWindow):
         application_interface = SettingsInterface(
             "applicationInterface",
             [
-                ApplicationCard(store),
+                ApplicationCard(store, shell_service),
                 NetworkCard(store),
                 ProviderDiagnosticsCard(store),
             ],
@@ -126,12 +132,12 @@ class SettingsWindow(FluentWindow):
         about_interface = SettingsInterface(
             "aboutInterface",
             [
-                UpdateCard(),
+                UpdateCard(self.task_runner),
                 ResourcesCard(),
             ],
         )
 
-        self.download_manager_interface = DownloadManagerInterface(store, subtitles)
+        self.download_manager_interface = DownloadManagerInterface(store, download_service, subtitles)
         download_manager_interface = self.download_manager_interface
 
         self.navigationInterface.addItem(
@@ -188,6 +194,7 @@ class SettingsWindow(FluentWindow):
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):
+            self.task_runner.shutdown()
             self.store.commit()
             super().closeEvent(e)
         else:

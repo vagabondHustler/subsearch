@@ -3,10 +3,6 @@ from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, ListWidget
 
-from subsearch.io import file_system
-from subsearch.parsing import release_parser
-from subsearch.runtime.config.constants import VIDEO_FILE
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     MatchTier,
     Subtitle,
@@ -21,6 +17,7 @@ from subsearch.ui.cards import (
 )
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
+from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.separators import make_fading_separator
@@ -101,17 +98,22 @@ class SubtitleCard(HeaderCardWidget):
 
 
 class DownloadManagerInterface(QWidget):
-    def __init__(self, store: SettingsStore, subtitles: list[Subtitle] | None = None) -> None:
+    def __init__(
+        self,
+        store: SettingsStore,
+        download_service: SubtitleDownloadService,
+        subtitles: list[Subtitle] | None = None,
+    ) -> None:
         super().__init__()
         self.setObjectName("downloadManagerInterface")
-        self.store = store
         self.accept_threshold = store.read("search.accept_threshold")
+        self.download_service = download_service
         self.subtitles = sorted(subtitles or [], key=self._sort_key, reverse=True)
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
-        self.download_number = 1
-        self.download_index_size = len(self.subtitles)
 
+        self.items_by_subtitle_id: dict[int, QListWidgetItem] = {}
+        self.subtitles_by_row: dict[int, Subtitle] = {}
         self.spinning_rows: dict[int, tuple[QListWidgetItem, str]] = {}
         self.spinner_angle = 0.0
         self.spinner_timer = QTimer(self)
@@ -132,13 +134,16 @@ class DownloadManagerInterface(QWidget):
             card.viewLayout.addWidget(empty_label, stretch=1)
             return
 
+        self.download_service.set_download_total(len(self.subtitles))
+        self.download_service.started.connect(self._on_download_started)
+        self.download_service.succeeded.connect(self._on_download_succeeded)
+        self.download_service.failed.connect(self._on_download_failed)
+
         self.list_widget = ListWidget(self)
         self.list_widget.setStyleSheet(LIST_STYLE_SHEET)
         self.list_widget.setFont(self._list_font())
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         card.viewLayout.addWidget(self.list_widget, stretch=1)
-        self.items_by_subtitle: dict[int, Subtitle] = {}
-        automatic_downloads = store.read("download.automatic")
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
             item.setFont(self._list_font())
@@ -146,13 +151,14 @@ class DownloadManagerInterface(QWidget):
             item.setIcon(lucide_qicon(PENDING_ICON, PENDING_COLOR))
             item.setForeground(QColor(PENDING_COLOR))
             self.list_widget.addItem(item)
-            self.items_by_subtitle[self.list_widget.row(item)] = subtitle
-            if subtitle.token_result == self.accept_threshold and not automatic_downloads:
+            self.items_by_subtitle_id[id(subtitle)] = item
+            self.subtitles_by_row[self.list_widget.row(item)] = subtitle
+            if subtitle.status is SubtitleStatus.AUTO_DOWNLOADED:
                 self.downloaded.append(subtitle)
-                subtitle.status = SubtitleStatus.MANUALLY_DOWNLOADED
-                self.download_number += 1
-                self._set_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
+                self._render_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
         self.list_widget.itemClicked.connect(self._on_item_clicked)
+
+        self._enqueue_accepted_subtitles()
 
     @staticmethod
     def _list_font() -> QFont:
@@ -171,42 +177,43 @@ class DownloadManagerInterface(QWidget):
         tier = self._match_tier(subtitle)
         return f"[{tier.name}] {subtitle.token_result}%  {subtitle.subtitle_name}"
 
+    def _enqueue_accepted_subtitles(self) -> None:
+        for subtitle in self.subtitles:
+            if subtitle.status is SubtitleStatus.ACCEPTED and subtitle.download_url:
+                self.download_service.enqueue(subtitle)
+
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
-        row = self.list_widget.row(item)
-        subtitle = self.items_by_subtitle[row]
+        subtitle = self.subtitles_by_row[self.list_widget.row(item)]
         if subtitle in self.downloaded or subtitle in self.failed:
             return
         if not subtitle.download_url:
-            self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
             subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
             self.failed.append(subtitle)
+            self._render_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
             return
-        self._set_status(item, subtitle, DOWNLOADING_ICON, DOWNLOADING_COLOR)
-        self._download(item, subtitle)
+        self.download_service.enqueue(subtitle)
 
-    def _download(self, item: QListWidgetItem, subtitle: Subtitle) -> None:
-        self.store.commit()
-        try:
-            if release_parser.valid_filename(subtitle.subtitle_name):
-                subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
-            file_system.download_subtitle(subtitle, self.download_number, self.download_index_size)
-            file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
-            zip_archive = (
-                VIDEO_FILE.tmp_dir / f"{subtitle.provider_name}_{subtitle.subtitle_name}_{self.download_number}.zip"
-            )
-            zip_archive.unlink()
-            self._set_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
-            subtitle.status = SubtitleStatus.MANUALLY_DOWNLOADED
-            self.download_number += 1
-            self.download_index_size += 1
-            self.downloaded.append(subtitle)
-        except Exception as error:
-            log.error(str(error))
-            self._set_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
-            subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
-            self.failed.append(subtitle)
+    def _item_for(self, subtitle: Subtitle) -> QListWidgetItem | None:
+        return self.items_by_subtitle_id.get(id(subtitle))
 
-    def _set_status(self, item: QListWidgetItem, subtitle: Subtitle, icon: LucideIcon, color: str) -> None:
+    def _on_download_started(self, subtitle: Subtitle) -> None:
+        item = self._item_for(subtitle)
+        if item is not None:
+            self._render_status(item, subtitle, DOWNLOADING_ICON, DOWNLOADING_COLOR)
+
+    def _on_download_succeeded(self, subtitle: Subtitle) -> None:
+        self.downloaded.append(subtitle)
+        item = self._item_for(subtitle)
+        if item is not None:
+            self._render_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
+
+    def _on_download_failed(self, subtitle: Subtitle, _message: str) -> None:
+        self.failed.append(subtitle)
+        item = self._item_for(subtitle)
+        if item is not None:
+            self._render_status(item, subtitle, FAILED_ICON, FAILED_COLOR)
+
+    def _render_status(self, item: QListWidgetItem, subtitle: Subtitle, icon: LucideIcon, color: str) -> None:
         if icon is DOWNLOADING_ICON:
             self._start_spinning(item, color)
         else:

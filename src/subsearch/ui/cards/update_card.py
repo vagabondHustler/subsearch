@@ -1,15 +1,16 @@
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QSize, Qt, QThread, QTimer, Signal
+from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, ProgressBar, TransparentToolButton
 
 from subsearch.io import app_updater
 from subsearch.runtime.config.constants import VERSION
-from subsearch.runtime.logging.logger import log
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.services.app_updates import UpdateCheckWorker, UpdateInstallWorker
+from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
@@ -23,46 +24,10 @@ UPDATE_BUTTON_GROUP_GAP = 16
 INSTALLER_HANDOFF_DELAY_MS = 1500
 
 
-class UpdateWorker(QObject):
-    def run(self) -> None:
-        raise NotImplementedError
-
-
-class UpdateCheckWorker(UpdateWorker):
-    finished = Signal(object)
-    failed = Signal(str)
-
-    def run(self) -> None:
-        try:
-            self.finished.emit(app_updater.check_for_update())
-        except Exception as error:
-            log.error(str(error))
-            self.failed.emit(str(error))
-
-
-class UpdateInstallWorker(UpdateWorker):
-    progress = Signal(float)
-    finished = Signal(str)
-    failed = Signal(str)
-
-    def __init__(self, latest_version: str) -> None:
-        super().__init__()
-        self.latest_version = latest_version
-
-    def run(self) -> None:
-        try:
-            msi_package_path = app_updater.download_installer(self.latest_version, self.progress.emit)
-            self.finished.emit(str(msi_package_path))
-        except Exception as error:
-            log.error(str(error))
-            self.failed.emit(str(error))
-
-
 class UpdateCard(SettingsCard):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, task_runner: TaskRunner, parent: QWidget | None = None) -> None:
         super().__init__("Update", parent)
-        self._thread: QThread | None = None
-        self._worker: UpdateWorker | None = None
+        self._task_runner = task_runner
         self._latest_version = ""
 
         self.current_version_label = CaptionLabel(f"Installed version  {VERSION}", self)
@@ -147,21 +112,6 @@ class UpdateCard(SettingsCard):
         self.install_button.setIcon(lucide_qicon(LucideIcon.ARROW_DOWN_TO_LINE, color))
         self.install_button.setEnabled(enabled)
 
-    def _run_in_thread(self, worker: UpdateWorker) -> None:
-        thread = QThread(self)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        self._thread = thread
-        self._worker = worker
-        thread.start()
-
-    def _finish_thread(self) -> None:
-        if self._thread is not None:
-            self._thread.quit()
-            self._thread.wait()
-            self._thread = None
-            self._worker = None
-
     def _check_for_update(self) -> None:
         self.check_button.setEnabled(False)
         self._apply_install_button_state(False)
@@ -170,10 +120,9 @@ class UpdateCard(SettingsCard):
         worker = UpdateCheckWorker()
         worker.finished.connect(self._on_check_finished)
         worker.failed.connect(self._on_check_failed)
-        self._run_in_thread(worker)
+        self._task_runner.submit(worker)
 
     def _on_check_finished(self, availability: app_updater.UpdateAvailability) -> None:
-        self._finish_thread()
         self.check_button.setEnabled(True)
         self._latest_version = availability.latest_version
         self.latest_version_label.setText(f"Latest version  {availability.latest_version}")
@@ -187,7 +136,6 @@ class UpdateCard(SettingsCard):
             self.status_label.setText("You are running the latest version.")
 
     def _on_check_failed(self, message: str) -> None:
-        self._finish_thread()
         self.check_button.setEnabled(True)
         self.status_label.setText(f"Could not check for updates: {message}")
 
@@ -201,20 +149,18 @@ class UpdateCard(SettingsCard):
         worker.progress.connect(self._on_install_progress)
         worker.finished.connect(self._on_install_finished)
         worker.failed.connect(self._on_install_failed)
-        self._run_in_thread(worker)
+        self._task_runner.submit(worker)
 
     def _on_install_progress(self, percentage: float) -> None:
         self.progress_bar.setValue(int(percentage))
 
     def _on_install_finished(self, msi_package_path: str) -> None:
-        self._finish_thread()
         self.progress_bar.hide()
         self.status_label.setText("Launching the installer, closing Subsearch…")
         app_updater.run_installer(Path(msi_package_path))
         QTimer.singleShot(INSTALLER_HANDOFF_DELAY_MS, QApplication.quit)
 
     def _on_install_failed(self, message: str) -> None:
-        self._finish_thread()
         self.progress_bar.hide()
         self.check_button.setEnabled(True)
         self._apply_install_button_state(True)

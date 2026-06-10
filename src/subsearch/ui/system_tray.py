@@ -25,6 +25,8 @@ class SystemTray(metaclass=metaclasses.Singleton):
         if not self.enabled:
             return
         self.tray.showMessage(title, msg, QSystemTrayIcon.MessageIcon.Information, TOAST_DURATION_MS)
+        # The core pipeline runs without QApplication.exec, so toasts only render
+        # if events are pumped manually here.
         self.application.processEvents()
 
     def start(self) -> None:

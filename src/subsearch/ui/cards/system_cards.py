@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QWidget
 
-from subsearch.io import windows_registry
 from subsearch.runtime.config.constants import DEVICE_INFO
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow
 
@@ -40,9 +40,12 @@ class DownloadManagerCard(SettingsCard):
 
 
 class ApplicationCard(SettingsCard):
-    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
+    ) -> None:
         super().__init__("Application", parent)
         self.store = store
+        self.shell_service = shell_service
         show_terminal = SwitchRow("application.show_terminal", store)
         if DEVICE_INFO.mode == "executable":
             show_terminal.set_enabled(False)
@@ -52,7 +55,7 @@ class ApplicationCard(SettingsCard):
 
     def _on_show_terminal_toggled(self) -> None:
         if self.store.read("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("command")
+            self.shell_service.refresh_registry_value("command")
 
 
 class NetworkCard(SettingsCard):

@@ -18,11 +18,11 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
-from subsearch.io import windows_registry
 from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard, build_section_header
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.typography import (
     TEXT_COLOR,
@@ -200,9 +200,12 @@ class PostProcessingCard(SettingsCard):
 
 
 class FileExtensionsCard(SettingsCard):
-    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
+    ) -> None:
         super().__init__("File extensions", parent)
         self.store = store
+        self.shell_service = shell_service
         self.add_header_help(SETTING_DESCRIPTIONS["shell_integration.file_extensions"].explanation)
 
         file_extensions = store.read("shell_integration.file_extensions")
@@ -273,7 +276,7 @@ class FileExtensionsCard(SettingsCard):
     def _persist_file_extensions(self, file_extensions: dict) -> None:
         self.store.write("shell_integration.file_extensions", file_extensions)
         if self.store.read("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("appliesto")
+            self.shell_service.refresh_registry_value("appliesto")
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
@@ -284,10 +287,15 @@ class FileExtensionsCard(SettingsCard):
 
 class ShellIntegrationCard(SettingsCard):
     def __init__(
-        self, store: SettingsStore, file_extensions_card: FileExtensionsCard, parent: QWidget | None = None
+        self,
+        store: SettingsStore,
+        shell_service: ShellIntegrationService,
+        file_extensions_card: FileExtensionsCard,
+        parent: QWidget | None = None,
     ) -> None:
         super().__init__("Shell integration", parent)
         self.store = store
+        self.shell_service = shell_service
         self.file_extensions_card = file_extensions_card
 
         self.context_menu = SwitchRow("shell_integration.context_menu", store)
@@ -299,15 +307,12 @@ class ShellIntegrationCard(SettingsCard):
         self._apply_context_menu_state(self.context_menu.switch.isChecked())
 
     def _on_context_menu_toggled(self, enabled: bool) -> None:
-        if enabled:
-            windows_registry.add_context_menu()
-        else:
-            windows_registry.del_context_menu()
+        self.shell_service.set_context_menu_enabled(enabled)
         self._apply_context_menu_state(enabled)
 
     def _on_context_menu_icon_toggled(self) -> None:
         if self.store.read("shell_integration.context_menu"):
-            windows_registry.write_registry_value_by_key("icon")
+            self.shell_service.refresh_registry_value("icon")
 
     def _apply_context_menu_state(self, enabled: bool) -> None:
         self.context_menu_icon.set_enabled(enabled)
