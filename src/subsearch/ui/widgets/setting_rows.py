@@ -13,6 +13,7 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
+from subsearch.runtime.config.constants import DEFAULT_CONFIG
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import (
     SearchableComboBox,
@@ -24,6 +25,7 @@ from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
 from subsearch.ui.theme.typography import (
     CAPTION_FONT_SIZE,
+    DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
     body_font,
@@ -32,6 +34,15 @@ from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
+
+DefaultsMap = list[tuple[str, object]]
+
+
+def _resolve_default(config_key: str) -> object:
+    node: object = DEFAULT_CONFIG
+    for part in config_key.split("."):
+        node = node[part]  # type: ignore[index]
+    return node
 
 
 class HelpPopup(AnchoredPopup):
@@ -84,6 +95,36 @@ class HelpButton(TransparentToolButton):
         super().leaveEvent(e)
 
 
+class RestoreDefaultsButton(TransparentToolButton):
+    def __init__(
+        self, defaults: DefaultsMap, store: SettingsStore, parent: QWidget
+    ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
+        super().__init__(parent)
+        self._defaults = defaults
+        self._store = store
+        self.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
+        self.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
+        self._watched_keys = {key for key, _ in defaults}
+        self._refresh_icon()
+        self._store.value_changed.connect(lambda key, _: self._on_watched_key_changed(key))
+        self.clicked.connect(self._restore_defaults)
+
+    def _is_at_defaults(self) -> bool:
+        return all(self._store.read(key) == default for key, default in self._defaults)
+
+    def _refresh_icon(self) -> None:
+        color = DISABLED_TEXT_COLOR if self._is_at_defaults() else TEXT_COLOR
+        self.setIcon(lucide_qicon(LucideIcon.HISTORY, color))
+
+    def _on_watched_key_changed(self, changed_key: str) -> None:
+        if changed_key in self._watched_keys:
+            self._refresh_icon()
+
+    def _restore_defaults(self) -> None:
+        for key, default in self._defaults:
+            self._store.write(key, default)
+
+
 class SettingRow(QFrame):
     def __init__(
         self,
@@ -95,6 +136,7 @@ class SettingRow(QFrame):
     ) -> None:
         super().__init__(parent)
         self.config_key = config_key
+        self.default_value = _resolve_default(config_key)
         self.store = store
         description = SETTING_DESCRIPTIONS[config_key]
 

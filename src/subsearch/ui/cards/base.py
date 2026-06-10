@@ -1,11 +1,13 @@
+from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget
 
-from subsearch.ui.theme.metrics import ROW_INSET
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import ROW_INSET, TOOL_BUTTON_SIZE
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import apply_body_font, apply_title_font
-from subsearch.ui.widgets.setting_rows import HelpButton
+from subsearch.ui.widgets.setting_rows import DefaultsMap, HelpButton, RestoreDefaultsButton
 
 CARD_PANEL_OPACITY = 0.4
 CARD_FILL_COLOR = QColor(255, 255, 255, 13)
@@ -27,9 +29,19 @@ def build_section_header(config_key: str, parent: QWidget) -> QHBoxLayout:
     return header
 
 
+def _make_button_placeholder(parent: QWidget) -> QWidget:
+    placeholder = QWidget(parent)
+    placeholder.setFixedSize(QSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE))
+    return placeholder
+
+
 class SettingsCard(HeaderCardWidget):
     def __init__(  # pyright: ignore[reportIncompatibleVariableOverride]
-        self, title: str, parent: QWidget | None = None
+        self,
+        title: str,
+        store: SettingsStore | None = None,
+        show_restore_button: bool = True,
+        parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.setTitle(title)
@@ -41,6 +53,21 @@ class SettingsCard(HeaderCardWidget):
         self.body_layout.setContentsMargins(0, 0, 0, 0)
         self.body_layout.setSpacing(4)
         self.viewLayout.addLayout(self.body_layout)
+        self._restore_store = store
+        self._collected_defaults: DefaultsMap = []
+
+        # Reserve fixed slots: stretch → help slot → restore slot.
+        # Placeholders keep both positions stable whether or not each button is present.
+        self.headerLayout.addStretch(1)
+        self._restore_slot = _make_button_placeholder(self)
+        self.headerLayout.addWidget(self._restore_slot)
+        self._help_slot = _make_button_placeholder(self)
+        self.headerLayout.addWidget(self._help_slot)
+
+        if not show_restore_button:
+            self._restore_slot.hide()
+        elif store is not None:
+            QTimer.singleShot(0, self._wire_restore_button)
 
     def paintEvent(self, e) -> None:
         painter = QPainter(self)
@@ -56,11 +83,29 @@ class SettingsCard(HeaderCardWidget):
         self.vBoxLayout.removeWidget(self.separator)
         self.vBoxLayout.insertWidget(index, make_fading_separator())
 
+    def _wire_restore_button(self) -> None:
+        if not self._collected_defaults or self._restore_store is None:
+            return
+        restore_button = RestoreDefaultsButton(self._collected_defaults, self._restore_store, self)
+        self.headerLayout.replaceWidget(self._restore_slot, restore_button)
+        self._restore_slot.deleteLater()
+
     def add_row(self, widget: QWidget) -> None:
         self.body_layout.addWidget(widget)
+        if hasattr(widget, "config_key") and hasattr(widget, "default_value"):
+            self._collected_defaults.append((widget.config_key, widget.default_value))
+
+    def register_restore_defaults(self, defaults: DefaultsMap) -> None:
+        self._collected_defaults.extend(defaults)
+
+    def _restore_defaults(self) -> None:
+        if self._restore_store is None:
+            return
+        for key, default in self._collected_defaults:
+            self._restore_store.write(key, default)
 
     def add_header_help(self, explanation: str) -> HelpButton:
-        self.headerLayout.addStretch(1)
         help_button = HelpButton(explanation, self)
-        self.headerLayout.addWidget(help_button)
+        self.headerLayout.replaceWidget(self._help_slot, help_button)
+        self._help_slot.deleteLater()
         return help_button
