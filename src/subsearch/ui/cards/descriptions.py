@@ -17,7 +17,17 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     "search.accept_threshold": SettingDescription(
         "Filename match threshold",
         "How closely a subtitle's filename has to match your video before Subsearch accepts it. "
-        "Higher means stricter matching; lower lets through looser ones.",
+        "Higher means stricter matching; lower lets through looser ones.\n\n"
+        "The examples below show how three sample subtitles score against your video, "
+        "and which ones the current threshold accepts.",
+    ),
+    "search.token_weights": SettingDescription(
+        "Advanced matching",
+        "Fine-tune how the match score is calculated.\n\n"
+        "Weights set how much each part of the filename counts towards the score: the title, "
+        "the release group, and the source like BluRay or WEB.\n\n"
+        "Penalties shrink the score when a part clearly disagrees: a different year, a different "
+        "season or episode, or a different edition. A lower penalty rejects the mismatch harder.",
     ),
     "search.hearing_impaired": SettingDescription(
         "Hearing impaired",
