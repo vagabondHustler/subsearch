@@ -1,0 +1,10 @@
+GREEN = "#a6e3a1"
+BLUE = "#89b4fa"
+RED = "#f38ba8"
+ORANGE = "#fab387"
+YELLOW = "#888888"
+
+NEUTRAL_1 = "#d3d3d3"
+NEUTRAL_2 = "#c5c5c5"
+NEUTRAL_3 = "#999999"
+NEUTRAL_4 = "#525252"
