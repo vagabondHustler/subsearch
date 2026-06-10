@@ -400,10 +400,10 @@ def valid_path(input_str, path_resolution) -> bool:
     if input_str == "":
         return False
     patterns = {
-        # matches relative Windows paths like ".\folder\sub" or ".." (lowercase only)
-        "relative": r"^\.{1,2}\\([a-z0-9-_]|\\[a-z0-9-_])+$|^\.{1,2}$",
-        # matches absolute Windows paths like "C:\folder\sub" (lowercase segments)
-        "absolute": r"^[a-zA-Z]{1}:\\([a-z0-9-_]|\\[a-z0-9-_])+$",
+        # matches relative Windows paths like ".\folder\sub" or ".." (case-insensitive segments)
+        "relative": r"^\.{1,2}\\([a-zA-Z0-9-_]|\\[a-zA-Z0-9-_])+$|^\.{1,2}$",
+        # matches absolute Windows paths like "C:\folder\sub" (case-insensitive segments)
+        "absolute": r"^[a-zA-Z]{1}:\\([a-zA-Z0-9-_]|\\[a-zA-Z0-9-_])+$",
     }
     pattern = patterns.get(path_resolution)
     if pattern is None:
