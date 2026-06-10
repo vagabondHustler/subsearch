@@ -74,11 +74,6 @@ def sessions_with_crash(raw_log: str) -> str:
     return sessions[-1] if sessions else raw_log
 
 
-def read_sanitized_log() -> str:
-    raw_log = FILE_PATHS.log.read_text(encoding="utf-8", errors="replace")
-    return sanitize(raw_log)
-
-
 def read_sanitized_crash_sessions() -> str:
     raw_log = FILE_PATHS.log.read_text(encoding="utf-8", errors="replace")
     return sanitize(sessions_with_crash(raw_log))

@@ -91,15 +91,3 @@ def run_installer(msi_package_path: Path) -> None:
     command = f"msiexec.exe /i {msi_package_path}"
     subprocess.Popen(command, shell=True, creationflags=subprocess.DETACHED_PROCESS)
 
-
-def download_and_update() -> None:
-    log.event("banner", title="Updating Application")
-    availability = check_for_update()
-    if not availability.update_available:
-        log.info("No new version available")
-        return
-
-    log.info("New version available")
-    msi_package_path = download_installer(availability.latest_version)
-    run_installer(msi_package_path)
-    sys.exit()
