@@ -206,6 +206,7 @@ class FileExtensionsCard(SettingsCard):
         super().__init__("File extensions", parent)
         self.store = store
         self.shell_service = shell_service
+        store.subscribe("shell_integration.context_menu", self.set_enabled)
         self.add_header_help(SETTING_DESCRIPTIONS["shell_integration.file_extensions"].explanation)
 
         file_extensions = store.read("shell_integration.file_extensions")
@@ -257,6 +258,7 @@ class FileExtensionsCard(SettingsCard):
         grid.addWidget(invert_container, next_row, next_column, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.body_layout.addLayout(grid)
+        self.set_enabled(bool(store.read("shell_integration.context_menu")))
 
     def _on_extension_toggled(self, extension: str, checked: bool) -> None:
         file_extensions = self.store.read("shell_integration.file_extensions")
@@ -290,13 +292,11 @@ class ShellIntegrationCard(SettingsCard):
         self,
         store: SettingsStore,
         shell_service: ShellIntegrationService,
-        file_extensions_card: FileExtensionsCard,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__("Shell integration", parent)
         self.store = store
         self.shell_service = shell_service
-        self.file_extensions_card = file_extensions_card
 
         self.context_menu = SwitchRow("shell_integration.context_menu", store)
         self.context_menu_icon = SwitchRow("shell_integration.context_menu_icon", store)
@@ -304,16 +304,12 @@ class ShellIntegrationCard(SettingsCard):
         self.add_row(self.context_menu_icon)
         self.context_menu.toggled.connect(self._on_context_menu_toggled)
         self.context_menu_icon.toggled.connect(self._on_context_menu_icon_toggled)
-        self._apply_context_menu_state(self.context_menu.switch.isChecked())
+        self.context_menu_icon.set_enabled(self.context_menu.switch.isChecked())
 
     def _on_context_menu_toggled(self, enabled: bool) -> None:
         self.shell_service.set_context_menu_enabled(enabled)
-        self._apply_context_menu_state(enabled)
+        self.context_menu_icon.set_enabled(enabled)
 
     def _on_context_menu_icon_toggled(self) -> None:
         if self.store.read("shell_integration.context_menu"):
             self.shell_service.refresh_registry_value("icon")
-
-    def _apply_context_menu_state(self, enabled: bool) -> None:
-        self.context_menu_icon.set_enabled(enabled)
-        self.file_extensions_card.set_enabled(enabled)

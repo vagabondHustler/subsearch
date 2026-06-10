@@ -43,3 +43,21 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
         assert session.read(f"search.token_weights.{token_name}") == default
     for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
         assert session.read(f"search.token_multipliers.{token_name}") == default
+
+
+def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> None:
+    from subsearch.ui.cards.post_processing_cards import FileExtensionsCard
+    from subsearch.ui.services.shell_integration import ShellIntegrationService
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.state.tasks import TaskRunner
+
+    store = SettingsStore()
+    card = FileExtensionsCard(store, ShellIntegrationService(TaskRunner()))
+    qtbot.addWidget(card)
+    assert all(check_box.isEnabled() for check_box in card.check_boxes.values())
+
+    store.write("shell_integration.context_menu", False)
+    assert not any(check_box.isEnabled() for check_box in card.check_boxes.values())
+
+    store.write("shell_integration.context_menu", True)
+    assert all(check_box.isEnabled() for check_box in card.check_boxes.values())

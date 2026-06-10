@@ -29,23 +29,27 @@ class TaskRunner(QObject):
         thread.started.connect(worker.run)
         worker.finished.connect(thread.quit)
         worker.failed.connect(thread.quit)
-        thread.finished.connect(
-            lambda finished_thread=thread, finished_worker=worker: self._discard(finished_thread, finished_worker)
-        )
+        # Bound-method receiver makes this a queued connection, so reaping runs
+        # on the TaskRunner's thread instead of inside the dying worker thread.
+        thread.finished.connect(self._reap_finished_threads)
         self._active.append((thread, worker))
         thread.start()
 
-    def _discard(self, thread: QThread, worker: Worker) -> None:
-        self._active = [
-            (active_thread, active_worker)
-            for active_thread, active_worker in self._active
-            if active_thread is not thread
-        ]
-        worker.deleteLater()
-        thread.deleteLater()
+    def _reap_finished_threads(self) -> None:
+        still_active: list[tuple[QThread, Worker]] = []
+        for thread, worker in self._active:
+            if thread.isFinished():
+                thread.wait()
+                worker.deleteLater()
+                thread.deleteLater()
+            else:
+                still_active.append((thread, worker))
+        self._active = still_active
 
     def shutdown(self) -> None:
-        for thread, _worker in list(self._active):
+        for thread, worker in self._active:
             thread.quit()
             thread.wait()
+            worker.deleteLater()
+            thread.deleteLater()
         self._active.clear()

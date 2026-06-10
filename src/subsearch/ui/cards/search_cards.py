@@ -56,10 +56,6 @@ class LanguageCard(SettingsCard):
         )
         self.add_row(self.language_row)
 
-    @property
-    def selection_changed(self):
-        return self.language_row.selection_changed
-
 
 class SubtitleFiltersCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
@@ -418,6 +414,7 @@ class ProvidersCard(SettingsCard):
         self.body_layout.addLayout(grid)
 
         self.apply_language_compatibility(store.read("language.selected"))
+        store.subscribe("language.selected", self.apply_language_compatibility)
 
     def _on_provider_toggled(self, provider_key: str, checked: bool) -> None:
         providers = self.store.read("search.providers")

@@ -83,12 +83,6 @@ class SettingsWindow(FluentWindow):
         shell_service = ShellIntegrationService(self.task_runner, self)
         download_service = SubtitleDownloadService(self.task_runner, self)
 
-        file_extensions_card = FileExtensionsCard(store, shell_service)
-
-        language_card = LanguageCard(store)
-        providers_card = ProvidersCard(store)
-        language_card.selection_changed.connect(providers_card.apply_language_compatibility)
-
         post_processing_card = PostProcessingCard(store)
         self.register_close_validator(post_processing_card.commit_path_or_revert)
 
@@ -97,9 +91,9 @@ class SettingsWindow(FluentWindow):
         search_interface = SettingsInterface(
             "searchInterface",
             [
-                language_card,
+                LanguageCard(store),
                 SubtitleFiltersCard(store),
-                providers_card,
+                ProvidersCard(store),
                 search_threshold_card,
                 post_processing_card,
             ],
@@ -107,8 +101,8 @@ class SettingsWindow(FluentWindow):
         integration_interface = SettingsInterface(
             "integrationInterface",
             [
-                ShellIntegrationCard(store, shell_service, file_extensions_card),
-                file_extensions_card,
+                ShellIntegrationCard(store, shell_service),
+                FileExtensionsCard(store, shell_service),
                 NotificationsCard(store),
                 DownloadManagerCard(store),
             ],
