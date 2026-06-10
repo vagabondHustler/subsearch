@@ -16,6 +16,8 @@ class SettingsStore(QObject):
         return self._session.read(key)
 
     def write(self, key: str, value: Any) -> None:
+        if self._session.read(key) == value:
+            return
         self._session.write(key, value)
         self.value_changed.emit(key, value)
 
