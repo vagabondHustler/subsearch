@@ -15,6 +15,7 @@ from subsearch.ui.widgets.setting_rows import (
 class NotificationsCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Notifications", store, parent=parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.notifications"].explanation)
         self.system_tray = SwitchRow("notifications.system_tray", store)
         self.summary_notification = SwitchRow("notifications.summary_notification", store)
         self.add_row(self.system_tray)
@@ -26,6 +27,7 @@ class NotificationsCard(SettingsCard):
 class DownloadManagerCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Download manager", store, parent=parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager"].explanation)
         self.add_row(SwitchRow("download.automatic", store))
         self.open_on_no_matches = SwitchRow("download.open_manager_on_no_matches", store)
         self.always_open = SwitchRow("download.always_open_manager", store)
@@ -41,6 +43,7 @@ class ApplicationCard(SettingsCard):
         super().__init__("Application", store, parent=parent)
         self.store = store
         self.shell_service = shell_service
+        self.add_header_help(SETTING_DESCRIPTIONS["card.application"].explanation)
         show_terminal = SwitchRow("application.show_terminal", store)
         if DEVICE_INFO.mode == "executable":
             show_terminal.set_enabled(False)
@@ -56,6 +59,7 @@ class ApplicationCard(SettingsCard):
 class NetworkCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Network", store, parent=parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.network"].explanation)
         self.add_row(SpinBoxRow("network.api_call_limit", store, 1, 99))
         self.add_row(SpinBoxRow("network.request_connect_timeout", store, 1, 99))
         self.add_row(SpinBoxRow("network.request_read_timeout", store, 1, 99))

@@ -161,4 +161,53 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Getting an API key",
         'Go to your Subsource profile, open "My Profile", and generate a key. ' "Keep it secret.",
     ),
+    "card.subtitle_filters": SettingDescription(
+        "Subtitle filters",
+        "Control which subtitle types Subsearch fetches. "
+        "You can combine hearing-impaired and non-hearing-impaired to accept both, "
+        "or enable foreign-parts-only to target films with untranslated sections.",
+    ),
+    "card.post_processing": SettingDescription(
+        "Subtitle post-processing",
+        "What Subsearch does with a subtitle after downloading it. "
+        "Rename it so your media player finds it automatically, "
+        "and optionally move it to a fixed or relative destination folder.",
+    ),
+    "card.shell_integration": SettingDescription(
+        "Shell integration",
+        "Adds Subsearch to the Windows right-click context menu for video files. "
+        "Requires administrator privileges to write to the registry.",
+    ),
+    "card.notifications": SettingDescription(
+        "Notifications",
+        "Controls the system tray icon and the pop-up that appears when a search finishes. "
+        "The summary notification requires the tray icon to be turned on.",
+    ),
+    "card.download_manager": SettingDescription(
+        "Download manager",
+        "Decides when the download manager opens. "
+        "Automatic mode picks the best match silently; "
+        "you can also force it open every time or only when nothing matched.",
+    ),
+    "card.application": SettingDescription(
+        "Application",
+        "General application behaviour. "
+        "Show the terminal window during a search (Python only), "
+        "and prevent more than one instance of Subsearch from running at once.",
+    ),
+    "card.network": SettingDescription(
+        "Network",
+        "Caps how many subtitle files are fetched from each provider per search, "
+        "and sets how long Subsearch waits for a site to respond before giving up.",
+    ),
+    "card.update": SettingDescription(
+        "Update",
+        "Check whether a newer version of Subsearch is available and install it. "
+        "The installer runs automatically after the download finishes.",
+    ),
+    "card.resources": SettingDescription(
+        "Resources",
+        "Shortcuts for reporting bugs, sharing crash logs with the developer, "
+        "viewing third-party licenses, and browsing the source code on GitHub.",
+    ),
 }

@@ -14,6 +14,7 @@ from subsearch.runtime.config.constants import (
 )
 from subsearch.runtime.logging import log_sanitizer
 from subsearch.ui.cards.base import SettingsCard
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
 from subsearch.ui.theme.typography import TEXT_COLOR
@@ -79,6 +80,7 @@ def _open_third_party_licenses() -> None:
 class ResourcesCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Resources", parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.resources"].explanation)
 
         actions = [
             (LucideIcon.BUG, "Report bug", _open_bug_report),

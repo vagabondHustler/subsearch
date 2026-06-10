@@ -5,6 +5,7 @@ from qfluentwidgets import CaptionLabel, ProgressBar
 from subsearch.runtime.config.constants import VERSION
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.app_updates import (
     UpdateAvailability,
@@ -31,6 +32,7 @@ INSTALLER_HANDOFF_DELAY_MS = 1500
 class UpdateCard(SettingsCard):
     def __init__(self, task_runner: TaskRunner, parent: QWidget | None = None) -> None:
         super().__init__("Update", parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.update"].explanation)
         self._task_runner = task_runner
         self._latest_version = ""
 

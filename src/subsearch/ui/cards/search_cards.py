@@ -72,6 +72,7 @@ class LanguageCard(SettingsCard):
 class SubtitleFiltersCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle filters", store, parent=parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["card.subtitle_filters"].explanation)
         self.add_row(SwitchRow("search.hearing_impaired", store))
         self.add_row(SwitchRow("search.non_hearing_impaired", store))
         self.add_row(SwitchRow("search.only_foreign_parts", store))

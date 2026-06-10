@@ -72,6 +72,7 @@ class PostProcessingCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle post-processing", store, parent=parent)
         self.store = store
+        self.add_header_help(SETTING_DESCRIPTIONS["card.post_processing"].explanation)
         self.register_restore_defaults([
             ("post_processing.target_path", DEFAULT_TARGET_PATH),
             ("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION),
@@ -283,6 +284,7 @@ class ShellIntegrationCard(SettingsCard):
         super().__init__("Shell integration", store, parent=parent)
         self.store = store
         self.shell_service = shell_service
+        self.add_header_help(SETTING_DESCRIPTIONS["card.shell_integration"].explanation)
 
         self.context_menu = SwitchRow("shell_integration.context_menu", store)
         self.context_menu_icon = SwitchRow("shell_integration.context_menu_icon", store)
