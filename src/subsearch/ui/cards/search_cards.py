@@ -3,7 +3,6 @@ from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget
 from qfluentwidgets import (
     CaptionLabel,
     CheckBox,
-    PushButton,
     SpinBox,
     TransparentToolButton,
 )
@@ -17,6 +16,7 @@ from subsearch.runtime.config.static_values import (
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     ERROR_TEXT_COLOR,
@@ -24,7 +24,6 @@ from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
-    apply_section_label_font,
 )
 from subsearch.ui.widgets.setting_rows import (
     HelpButton,
@@ -272,8 +271,8 @@ class SearchThresholdCard(SettingsCard):
 
     def _build_examples(self) -> None:
         self._example_heading = CaptionLabel("", self)
-        apply_section_label_font(self._example_heading)
-        self._example_heading.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
+        apply_caption_font(self._example_heading)
+        self._example_heading.setStyleSheet(f"color: {TEXT_COLOR};")
 
         heading_row = QHBoxLayout()
         heading_row.setContentsMargins(48, 4, 48, 0)
@@ -286,6 +285,7 @@ class SearchThresholdCard(SettingsCard):
             self.body_layout.addWidget(row)
 
     def _build_token_tuning(self) -> None:
+        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.5))
         self.body_layout.addWidget(self._heading("Weights"))
         for token_name, label_text in TOKEN_WEIGHT_LABELS.items():
             self.body_layout.addWidget(self._weight_row(token_name, label_text))
@@ -293,21 +293,23 @@ class SearchThresholdCard(SettingsCard):
         for token_name, label_text in TOKEN_MULTIPLIER_LABELS.items():
             self.body_layout.addWidget(self._multiplier_row(token_name, label_text))
 
-        reset_button = PushButton("Reset to defaults", self)
-        apply_body_font(reset_button)
-        reset_button.setFixedWidth(110)
-        reset_button.clicked.connect(self._reset)
-        reset_row = QHBoxLayout()
-        reset_row.setContentsMargins(48, 6, 48, 4)
-        reset_row.addStretch(1)
-        reset_row.addWidget(reset_button)
-        self.body_layout.addLayout(reset_row)
+        self._restore_button = TransparentToolButton(self)
+        self._restore_button.setIconSize(QSize(16, 16))
+        self._restore_button.setFixedSize(32, 32)
+        self._restore_button.setToolTip("Restore default values")
+        self._restore_button.clicked.connect(self._restore_defaults)
+        restore_row = QHBoxLayout()
+        restore_row.setContentsMargins(48, 6, 48, 4)
+        restore_row.addStretch(1)
+        restore_row.addWidget(self._restore_button)
+        self.body_layout.addLayout(restore_row)
+        self._refresh_restore_icon()
 
     def _heading(self, text: str) -> CaptionLabel:
         heading = CaptionLabel(text, self)
-        apply_section_label_font(heading)
+        apply_caption_font(heading)
         heading.setContentsMargins(48, 4, 48, 0)
-        heading.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
+        heading.setStyleSheet(f"color: {TEXT_COLOR};")
         return heading
 
     def _weight_row(self, token_name: str, label_text: str) -> AdvancedTuningRow:
@@ -324,15 +326,27 @@ class SearchThresholdCard(SettingsCard):
         spin_box.setValue(int(read_value(config_key)))
         row = AdvancedTuningRow(label_text, config_key, spin_box, self)
         row.value_changed.connect(self._refresh_examples)
+        row.value_changed.connect(self._refresh_restore_icon)
         self.tuning_rows[token_name] = row
         return row
 
-    def _reset(self) -> None:
+    def _restore_defaults(self) -> None:
         for token_name, default in DEFAULT_TOKEN_WEIGHTS.items():
             self.tuning_rows[token_name].reset_to(default)
         for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
             self.tuning_rows[token_name].reset_to(default)
         self._refresh_examples()
+        self._refresh_restore_icon()
+
+    def _is_at_defaults(self) -> bool:
+        defaults = {f"search.token_weights.{name}": default for name, default in DEFAULT_TOKEN_WEIGHTS.items()} | {
+            f"search.token_multipliers.{name}": default for name, default in DEFAULT_TOKEN_MULTIPLIERS.items()
+        }
+        return all(int(read_value(config_key)) == int(default) for config_key, default in defaults.items())
+
+    def _refresh_restore_icon(self) -> None:
+        color = DISABLED_TEXT_COLOR if self._is_at_defaults() else TEXT_COLOR
+        self._restore_button.setIcon(lucide_qicon(LucideIcon.HISTORY, color))
 
     def _update_example_heading(self) -> None:
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE
