@@ -102,14 +102,15 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
 
 def find_best_subtitle_match(release_name: str, extension: str = ".srt") -> Path:
     config = toml_file.get_config_session()
-    weights = config.read("search.match_weights")
+    weights = config.read("search.token_weights")
+    multipliers = config.read("search.token_multipliers")
     accept_threshold = config.read("search.accept_threshold")
     best_rank = (MatchTier.C, 0)
     best_match = Path(".")
     for file in sorted(VIDEO_FILE.subs_dir.glob(f"*{extension}")):
         is_hash_match = file.name.startswith(_HASH_MATCH_PREFIX)
         token_name = file.name.removeprefix(_HASH_MATCH_PREFIX)
-        token_score = release_parser.score_subtitle_tokens(token_name, release_name, weights)
+        token_score = release_parser.score_subtitle_tokens(token_name, release_name, weights, multipliers)
         tier = classify_match_tier(is_hash_match, token_score, accept_threshold)
         rank = (tier, token_score)
         if rank > best_rank:
