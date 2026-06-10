@@ -218,11 +218,12 @@ class SearchPipeline:
     @run_if_conditions_met
     def clean_up(self) -> None:
         log.event("banner", title="Cleaning up")
-        file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        file_system.del_directory(VIDEO_FILE.tmp_dir)
-        if file_system.directory_is_empty(VIDEO_FILE.subs_dir):
-            file_system.del_directory(VIDEO_FILE.subs_dir)
+        if VIDEO_FILE.file_exists:
+            file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
+            file_system.del_directory(VIDEO_FILE.tmp_dir)
+            if file_system.directory_is_empty(VIDEO_FILE.subs_dir):
+                file_system.del_directory(VIDEO_FILE.subs_dir)
         log.event("task_completed")
 
     def _wait_for_terminal_input(self) -> None:

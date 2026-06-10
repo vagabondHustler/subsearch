@@ -86,8 +86,11 @@ class RunConditions:
             "download_manager": [
                 ("should_open_download_manager", self.should_open_download_manager),
             ],
-            "subtitle_post_processing": [],
+            "subtitle_post_processing": [
+                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+            ],
             "extract_files": [
+                ("app_mode_search", self.app_mode is AppMode.SEARCH),
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
             "subtitle_rename": [
@@ -104,9 +107,11 @@ class RunConditions:
                 ("move_all_enabled", post_processing["move_all"]),
             ],
             "summary_notification": [
+                ("app_mode_search", self.app_mode is AppMode.SEARCH),
                 ("summary_notification_enabled", self.app_config.summary_notification),
             ],
             "run_provider_diagnostics": [
+                ("app_mode_search", self.app_mode is AppMode.SEARCH),
                 ("diagnostics_enabled", self.app_config.diagnostics["enabled"]),
             ],
             "clean_up": [],
