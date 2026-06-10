@@ -52,7 +52,7 @@ class AppConfig:
     only_foreign_parts: bool
     providers: dict[str, bool]
     token_weights: dict[str, float]
-    token_multipliers: dict[str, float]
+    token_multipliers: dict[str, int]
     context_menu: bool
     context_menu_icon: bool
     file_extensions: dict[str, bool]

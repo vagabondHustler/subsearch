@@ -342,14 +342,21 @@ def _fields_conflict(value_a, value_b) -> bool:
     return bool(value_a) and bool(value_b) and value_a != value_b
 
 
-def _mismatch_factor(tokens_a: dict, tokens_b: dict, multipliers: dict[str, float]) -> float:
+def _penalty_to_multiplier(penalty: int) -> float:
+    return (100 - penalty) / 100
+
+
+def _mismatch_factor(tokens_a: dict, tokens_b: dict, multipliers: dict[str, int]) -> float:
     multiplier = 1.0
-    if _fields_conflict(tokens_a["year"], tokens_b["year"]):
-        multiplier *= multipliers["year"]
+    year_a, year_b = tokens_a["year"], tokens_b["year"]
+    if _fields_conflict(year_a, year_b):
+        multiplier *= _penalty_to_multiplier(multipliers["year"])
+    elif bool(year_a) != bool(year_b):
+        multiplier *= (1 + _penalty_to_multiplier(multipliers["year"])) / 2
     if _fields_conflict(tokens_a["season_episode"], tokens_b["season_episode"]):
-        multiplier *= multipliers["season_episode"]
+        multiplier *= _penalty_to_multiplier(multipliers["season_episode"])
     if _fields_conflict(tokens_a["edition"], tokens_b["edition"]):
-        multiplier *= multipliers["edition"]
+        multiplier *= _penalty_to_multiplier(multipliers["edition"])
     return multiplier
 
 
@@ -364,7 +371,7 @@ def score_subtitle_tokens(
     reference: str,
     from_provider: str,
     token_weights: dict[str, float] = DEFAULT_TOKEN_WEIGHTS,
-    token_multipliers: dict[str, float] = DEFAULT_TOKEN_MULTIPLIERS,
+    token_multipliers: dict[str, int] = DEFAULT_TOKEN_MULTIPLIERS,
 ) -> int:
     reference_tokens = _normalize_tokens(reference)
     provider_tokens = _normalize_tokens(from_provider)
