@@ -48,10 +48,6 @@ class MarkdownPopup(QFrame):
         self._browser.setMarkdown(markdown)
         self._fit_width_to_content()
 
-    def set_plain_text(self, text: str) -> None:
-        self._browser.setPlainText(text)
-        self._fit_width_to_content()
-
     def _fit_width_to_content(self) -> None:
         self._browser.document().adjustSize()
         content_width = int(self._browser.document().idealWidth()) + CONTENT_MARGIN

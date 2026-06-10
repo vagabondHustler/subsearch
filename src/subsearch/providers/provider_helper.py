@@ -204,6 +204,3 @@ class ProviderHelper:
 
     def keys_exist(self, dictionary: dict[str, Any], keys: list[str]) -> bool:
         return all(key in dictionary for key in keys)
-
-    def threshold_met(self, token_score: int) -> bool:
-        return token_score >= self.app_config.accept_threshold

@@ -70,16 +70,8 @@ def delete_nested_value(toml_data: dict, key: str) -> None:
         parent.pop(keys[-1], None)
 
 
-def update_toml_key(toml_file_path: Path, key: str, value: Any | None) -> None:
-    toml_data = load_toml_data(toml_file_path)
-    set_nested_value(toml_data, key, value)
-    dump_toml_data(toml_file_path, toml_data)
 
 
-def del_toml_key(toml_file_path: Path, key: str) -> None:
-    toml_data = load_toml_data(toml_file_path)
-    delete_nested_value(toml_data, key)
-    dump_toml_data(toml_file_path, toml_data)
 
 
 def repair_toml_config(toml_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:

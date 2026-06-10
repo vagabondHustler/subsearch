@@ -101,7 +101,7 @@ class HelpButton(TransparentToolButton):
         self, explanation: str, parent: QWidget
     ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
         super().__init__(parent)
-        self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, TEXT_COLOR))
+        self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, palette.NEUTRAL_3))
         self.setFixedSize(32, 32)
         self.setIconSize(QSize(HELP_ICON_SIZE, HELP_ICON_SIZE))
         self._popup = HelpPopup(explanation, self)
@@ -355,31 +355,6 @@ class SpinBoxRow(SettingRow):
             self.help_button.set_explanation(SETTING_DESCRIPTIONS[self.config_key].explanation.format(limit=value))
 
 
-class ComboBoxRow(SettingRow):
-    selection_changed = Signal(str)
-
-    def __init__(
-        self,
-        config_key: str,
-        labelled_values: dict[str, str],
-        parent: QWidget | None = None,
-    ) -> None:
-        self.combo_box = BodyFontComboBox()
-        apply_body_font(self.combo_box)
-        self.combo_box.setFixedWidth(160)
-        self._value_by_label = labelled_values
-        self._label_by_value = {value: label for label, value in labelled_values.items()}
-        self.combo_box.addItems(list(labelled_values.keys()))
-        current_value = read_value(config_key)
-        if current_value in self._label_by_value:
-            self.combo_box.setCurrentText(self._label_by_value[current_value])
-        super().__init__(config_key, self.combo_box, parent)
-        self.combo_box.currentTextChanged.connect(self._on_selection_changed)
-
-    def _on_selection_changed(self, label: str) -> None:
-        value = self._value_by_label[label]
-        write_value(self.config_key, value)
-        self.selection_changed.emit(value)
 
 
 class SearchableComboBoxRow(SettingRow):

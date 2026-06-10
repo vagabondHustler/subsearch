@@ -426,10 +426,6 @@ def detect_path_resolution(input_str: str) -> str:
     return "absolute" if re.match(r"^[a-zA-Z]:\\", input_str) else "relative"
 
 
-def valid_api_request_input(input: str) -> bool:
-    # matches a non-empty string of digits only e.g. "12345" matches, "12.34" does not
-    pattern = r"^\d+$"
-    return bool(re.match(pattern, input))
 
 
 def valid_subsource_api_key(api_key: str) -> bool:
