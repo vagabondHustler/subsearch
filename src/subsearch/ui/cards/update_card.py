@@ -1,15 +1,17 @@
-from pathlib import Path
-
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, ProgressBar
 
-from subsearch.io import app_updater
 from subsearch.runtime.config.constants import VERSION
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.services.app_updates import UpdateCheckWorker, UpdateInstallWorker
+from subsearch.ui.services.app_updates import (
+    UpdateAvailability,
+    UpdateCheckWorker,
+    UpdateInstallWorker,
+    launch_installer,
+)
 from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme.metrics import ROW_INSET
 from subsearch.ui.theme.typography import (
@@ -97,7 +99,7 @@ class UpdateCard(SettingsCard):
         worker.failed.connect(self._on_check_failed)
         self._task_runner.submit(worker)
 
-    def _on_check_finished(self, availability: app_updater.UpdateAvailability) -> None:
+    def _on_check_finished(self, availability: UpdateAvailability) -> None:
         self.check_button.setEnabled(True)
         self._latest_version = availability.latest_version
         self.latest_version_label.setText(f"Latest version  {availability.latest_version}")
@@ -132,7 +134,7 @@ class UpdateCard(SettingsCard):
     def _on_install_finished(self, msi_package_path: str) -> None:
         self.progress_bar.hide()
         self.status_label.setText("Launching the installer, closing Subsearch…")
-        app_updater.run_installer(Path(msi_package_path))
+        launch_installer(msi_package_path)
         QTimer.singleShot(INSTALLER_HANDOFF_DELAY_MS, QApplication.quit)
 
     def _on_install_failed(self, message: str) -> None:

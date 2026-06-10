@@ -1,11 +1,18 @@
+from pathlib import Path
+
 from PySide6.QtCore import Signal
 
 from subsearch.io import app_updater
+from subsearch.io.app_updater import UpdateAvailability
 from subsearch.ui.state.tasks import Worker
 
 
+def launch_installer(msi_package_path: str) -> None:
+    app_updater.run_installer(Path(msi_package_path))
+
+
 class UpdateCheckWorker(Worker):
-    def execute(self) -> app_updater.UpdateAvailability:
+    def execute(self) -> UpdateAvailability:
         return app_updater.check_for_update()
 
 
