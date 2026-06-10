@@ -238,9 +238,7 @@ class SliderWithValueLabel(QWidget):
         self._slider.setValue(value)
 
     def set_value_silent(self, value: int) -> None:
-        self._slider.blockSignals(True)
-        self._slider.setValue(value)
-        self._slider.blockSignals(False)
+        self._slider.set_value_silent(value)
         self._label.setText(f"{value} %")
         self._update_label_pos()
 
@@ -311,7 +309,7 @@ class SearchThresholdCard(SettingsCard):
             self.body_layout.addWidget(row)
 
     def _build_token_tuning(self) -> None:
-        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.5))
+        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=6))
         self.body_layout.addWidget(self._heading("Weights"))
         for token_name, label_text in TOKEN_WEIGHT_LABELS.items():
             self.body_layout.addWidget(self._weight_row(token_name, label_text))
