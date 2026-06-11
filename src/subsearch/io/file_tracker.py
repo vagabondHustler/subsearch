@@ -40,7 +40,7 @@ class FileTracker:
     def delete_if_tracked(self, path: Path) -> bool:
         if not self.is_tracked(path):
             if path.exists():
-                log.debug(f"Refusing to delete untracked path {path}", to_console=False)
+                log.debug(f"Refusing to delete untracked path {path}")
             return False
         if path.is_dir():
             shutil.rmtree(path, ignore_errors=True)
@@ -63,7 +63,7 @@ class FileTracker:
             if not path.exists():
                 self.tracked_paths.discard(tracked)
             elif self._is_temp_path(path):
-                log.debug(f"Reclaiming leftover temp path {path}", to_console=False)
+                log.debug(f"Reclaiming leftover temp path {path}")
                 if path.is_dir():
                     shutil.rmtree(path, ignore_errors=True)
                 else:

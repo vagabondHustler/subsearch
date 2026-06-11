@@ -12,9 +12,9 @@ def apply_mutex(func: Callable) -> Callable:
         log.event("banner", title="Initializing")
         try:
             single_instance = config_session.get_config_session().read("application.single_instance")
-            log.debug(f"Single-instance enforcement: {single_instance}", to_console=False)
+            log.debug(f"Single-instance enforcement: {single_instance}")
             if not single_instance:
-                log.debug("Single-instance disabled, skipping mutex", to_console=False)
+                log.debug("Single-instance disabled, skipping mutex")
                 return func()
         except FileNotFoundError:
             pass
@@ -30,10 +30,10 @@ def apply_mutex(func: Callable) -> Callable:
             raise exceptions.MultipleInstancesError(GUID)
         try:
             kernel32.WaitForSingleObject(mutex, -1)
-            log.debug(f"Mutex acquired: {GUID}", to_console=False)
+            log.debug(f"Mutex acquired: {GUID}")
             return func(*args, **kwargs)
         finally:
             kernel32.ReleaseMutex(mutex)
-            log.debug(f"Mutex released: {GUID}", to_console=False)
+            log.debug(f"Mutex released: {GUID}")
 
     return inner

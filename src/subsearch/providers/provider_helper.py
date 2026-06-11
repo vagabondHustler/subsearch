@@ -54,7 +54,7 @@ def _sanitize_subtitle_filename(filename: str) -> str:
         sanitized = sanitized.replace(char, "_")
     sanitized = sanitized.replace("'", "")
     if sanitized != filename:
-        log.debug(f"Filename sanitized: {filename!r} -> {sanitized!r}", to_console=False)
+        log.debug(f"Filename sanitized: {filename!r} -> {sanitized!r}")
     return sanitized
 
 

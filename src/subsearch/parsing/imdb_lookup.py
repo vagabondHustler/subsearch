@@ -35,7 +35,7 @@ def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> li
         log.warning(f"IMDb connection failed while fetching suggestions for {typed_term!r}")
         return []
     if not search_result:
-        log.debug(f"IMDb returned no suggestions for {typed_term!r}", to_console=False)
+        log.debug(f"IMDb returned no suggestions for {typed_term!r}")
         return []
     suggestions = [
         TitleSuggestion(
@@ -71,7 +71,7 @@ class ImdbIdLookup:
             self.diagnostic_status = ProviderDiagnosticStatus.STRUCTURE_INVALID
             return None
         if not search_result:
-            log.debug(f"IMDb returned no results for {title!r}", to_console=False)
+            log.debug(f"IMDb returned no results for {title!r}")
             return None
 
         for found_title in search_result.titles:
@@ -83,11 +83,11 @@ class ImdbIdLookup:
                 continue
 
             self.imdb_id = found_title.imdbId
-            log.debug(f"IMDb matched {title!r} -> {self.imdb_id}", to_console=False)
+            log.debug(f"IMDb matched {title!r} -> {self.imdb_id}")
             break
         else:
             log.debug(
-                f"IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", to_console=False
+                f"IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})"
             )
 
     def _title_matches(self, found_title: str) -> bool:

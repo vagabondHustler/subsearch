@@ -1,11 +1,9 @@
-import dataclasses
 import getpass
 import os
 import re
 from pathlib import Path
 
 from subsearch.runtime.config.constants import COMPUTER_NAME, FILE_PATHS, GUID
-from subsearch.runtime.models.model import DataclassInstance
 
 REDACTED = "[REDACTED]"
 
@@ -41,19 +39,6 @@ def sanitize(text: str) -> str:
     for pattern in _IDENTITY_PATTERNS:
         text = pattern.sub(REDACTED, text)
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
-
-
-def dataclass_lines(instance: DataclassInstance, banner_template: str) -> list[str]:
-    if not dataclasses.is_dataclass(instance):
-        raise ValueError("Input is not a dataclass instance.")
-    lines = [banner_template.format(title=instance.__class__.__name__)]
-    for dataclass_field in dataclasses.fields(instance):
-        value = getattr(instance, dataclass_field.name)
-        if isinstance(value, str):
-            value = API_KEY_PATTERN.sub(REDACTED, value)
-        padding = " " * (30 - len(dataclass_field.name))
-        lines.append(f"{dataclass_field.name}:{padding}{value}")
-    return lines
 
 
 # matches log lines containing a crash indicator e.g. "ERROR", "Traceback", or "Exception" as whole words

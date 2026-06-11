@@ -52,7 +52,7 @@ _HASH_MATCH_PREFIX = "hashmatch__"
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> None:
-    log.info(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
+    log.info(f"{subtitle.provider_name:<14}{index_position}/{index_size} {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""

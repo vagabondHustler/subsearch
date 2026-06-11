@@ -31,12 +31,11 @@ class Bootstrap:
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
 
-        log.debug(f"sys.argv: {sys.argv}", to_console=False)
+        log.debug(f"sys.argv: {sys.argv}")
         log.debug(
             f"Video file {'found' if VIDEO_FILE.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}",
-            to_console=False,
         )
-        log.debug("Verifying files and paths")
+        log.info("Verifying files and paths")
         self.setup_file_system()
         self.language_data = language_data.load_language_data()
         self.app_config = config_session.get_config_session().snapshot()
@@ -55,7 +54,7 @@ class Bootstrap:
         self.system_tray.start()
 
         if self.gui_may_open:
-            log.debug("GUI warmup triggered", to_console=False)
+            log.debug("GUI warmup triggered")
             from subsearch.ui import warmup
 
             warmup.start_warmup()

@@ -38,7 +38,7 @@ class SubsourceApi:
         return {"X-API-Key": self.api_key}
 
     def response_status_ok(self, response: Response) -> bool:
-        log.info(f"{response.url} status_code: {response.status_code} {response.reason}")
+        log.debug(f"{response.url} status_code: {response.status_code} {response.reason}")
         return response.status_code == 200
 
 

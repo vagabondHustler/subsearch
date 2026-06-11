@@ -444,7 +444,7 @@ def score_subtitle_tokens(
     provider_tokens = _normalize_tokens(from_provider)
 
     if reference_tokens == provider_tokens:
-        log.debug(f"Fuzzy match: exact token match for {from_provider!r}", to_console=False)
+        log.debug(f"Fuzzy match: exact token match for {from_provider!r}")
         return 100
 
     base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
@@ -453,7 +453,6 @@ def score_subtitle_tokens(
 
     log.debug(
         f"Fuzzy match: {score}% for {from_provider!r} (base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
-        to_console=False,
     )
     return score
 
