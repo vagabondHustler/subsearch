@@ -1,8 +1,9 @@
 import sys
 
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
+from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
@@ -24,7 +25,7 @@ PROVIDER_CLASSES = {
 def record_health_reports(reports: list[ProviderResult]) -> None:
     if not FILE_PATHS.config.exists():
         return None
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     for report in reports:
         key = f"diagnostics.provider_diagnostics.{report.provider_name}.failed_attempts"
         if report.diagnostic_status is ProviderDiagnosticStatus.OK and report.subtitles_found > 0:
@@ -73,9 +74,9 @@ def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
 
 def _load_app_config() -> AppConfig:
     if not FILE_PATHS.config.exists():
-        return toml_file.get_app_config_from_data(DEFAULT_CONFIG)
-    toml_file.reset_config_session()
-    return toml_file.get_config_session().snapshot()
+        return config_session.get_app_config_from_data(DEFAULT_CONFIG)
+    config_session.reset_config_session()
+    return config_session.get_config_session().snapshot()
 
 
 def _diagnose_imdb(search_kwargs: dict) -> ProviderResult:
@@ -86,7 +87,7 @@ def _diagnose_imdb(search_kwargs: dict) -> ProviderResult:
 
 def _known_good_search_kwargs() -> dict:
     app_config = _load_app_config()
-    language_data = toml_file.load_language_data()
+    language_data = load_language_data()
     release_data = release_parser.get_release_info(KNOWN_GOOD_RELEASE)
     lookup = imdb_lookup.ImdbIdLookup(release_data.title, release_data.year, release_data.tvseries)
     release_data.imdb_id = lookup.imdb_id

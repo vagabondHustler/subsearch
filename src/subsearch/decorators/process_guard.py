@@ -1,7 +1,7 @@
 import ctypes
 from typing import Any, Callable
 
-from subsearch.io import toml_file
+from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import GUID
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import exceptions
@@ -11,7 +11,7 @@ def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
         log.event("banner", title="Initializing")
         try:
-            single_instance = toml_file.get_config_session().read("application.single_instance")
+            single_instance = config_session.get_config_session().read("application.single_instance")
             log.debug(f"Single-instance enforcement: {single_instance}", to_console=False)
             if not single_instance:
                 log.debug("Single-instance disabled, skipping mutex", to_console=False)

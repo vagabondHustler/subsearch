@@ -9,10 +9,10 @@ from typing import Callable, Iterable, Optional
 
 import requests
 
-from subsearch.io import toml_file
 from subsearch.io.file_tracker import get_file_tracker
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
+from subsearch.runtime.config import config_session
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
 
@@ -107,7 +107,7 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
 
 
 def find_best_subtitle_match(release_name: str, subs_dir: Path, extension: str = ".srt") -> Path:
-    config = toml_file.get_config_session()
+    config = config_session.get_config_session()
     weights = config.read("search.token_weights")
     multipliers = config.read("search.token_multipliers")
     accept_threshold = config.read("search.accept_threshold")
