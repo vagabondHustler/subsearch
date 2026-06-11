@@ -77,8 +77,8 @@ def reset_constants() -> None:
 
 @pytest.fixture(autouse=True)
 def reset_config_session() -> Any:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
 
-    toml_file.reset_config_session()
+    config_session.reset_config_session()
     yield
-    toml_file.reset_config_session()
+    config_session.reset_config_session()

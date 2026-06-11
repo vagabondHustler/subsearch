@@ -89,14 +89,15 @@ def test_layers_respect_the_import_table() -> None:
     assert not violations, "Layer violations (see src/subsearch/ui/CLAUDE.md):\n" + "\n".join(violations)
 
 
-def test_only_the_store_imports_toml_file_within_ui() -> None:
+def test_only_the_store_imports_config_within_ui() -> None:
+    config_modules = {"subsearch.io.toml_file", "subsearch.runtime.config.config_session"}
     offenders = []
     for path in ui_module_paths():
         if path.relative_to(UI_ROOT).as_posix() == "state/store.py":
             continue
-        if any(module == "subsearch.io.toml_file" for module in imported_modules(path)):
+        if any(module in config_modules for module in imported_modules(path)):
             offenders.append(str(path.relative_to(UI_ROOT)))
-    assert not offenders, f"Only state/store.py may import toml_file, found: {offenders}"
+    assert not offenders, f"Only state/store.py may import config modules, found: {offenders}"
 
 
 def test_private_qfluentwidgets_access_only_in_compat() -> None:

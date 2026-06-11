@@ -1,0 +1,108 @@
+import toml
+
+from subsearch.io import toml_file
+from subsearch.io.nested_dict import get_keys_recursively
+from subsearch.runtime.config import config_integrity, constants, factories
+
+
+def write_config(path, data):
+    with path.open("w") as file:
+        toml.dump(data, file)
+
+
+def test_resolve_restores_backup_when_config_is_corrupt(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    backup_file = fake_config_file.with_suffix(f"{fake_config_file.suffix}.bak")
+
+    good_config = factories.get_default_app_config()
+    good_config["search"]["accept_threshold"] = 73
+    write_config(backup_file, good_config)
+    fake_config_file.write_text("this is { not valid toml")
+
+    config_integrity.resolve_on_integrity_failure()
+
+    assert toml_file.load_toml_value(fake_config_file, "search.accept_threshold") == 73
+    assert not backup_file.exists()
+
+
+def test_resolve_resets_to_default_when_corrupt_and_no_backup(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    fake_config_file.write_text("this is { not valid toml")
+
+    config_integrity.resolve_on_integrity_failure()
+
+    valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)
+    config_keys = get_keys_recursively(toml_file.load_toml_data(fake_config_file))
+    assert sorted(config_keys) == sorted(valid_keys)
+
+
+def test_resolve_creates_default_when_missing(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    fake_config_file.unlink()
+
+    config_integrity.resolve_on_integrity_failure()
+
+    assert fake_config_file.exists()
+    valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)
+    config_keys = get_keys_recursively(toml_file.load_toml_data(fake_config_file))
+    assert sorted(config_keys) == sorted(valid_keys)
+
+
+def test_repair_adds_missing_and_removes_obsolete_keys_in_one_write(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+
+    data = factories.get_default_app_config()
+    data["search"].pop("accept_threshold")
+    data["obsolete_section"] = {"stale": True}
+    write_config(fake_config_file, data)
+
+    config_integrity.resolve_on_integrity_failure()
+
+    repaired = toml_file.load_toml_data(fake_config_file)
+    assert "accept_threshold" in repaired["search"]
+    assert "obsolete_section" not in repaired
+    valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)
+    config_keys = get_keys_recursively(repaired)
+    assert sorted(config_keys) == sorted(valid_keys)
+
+
+def test_resolve_marks_fresh_when_config_missing(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    fake_config_file.unlink()
+
+    resolution = config_integrity.resolve_on_integrity_failure()
+
+    assert resolution.is_fresh is True
+
+
+def test_resolve_marks_fresh_when_repaired(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    data = factories.get_default_app_config()
+    data["search"].pop("accept_threshold")
+    write_config(fake_config_file, data)
+
+    resolution = config_integrity.resolve_on_integrity_failure()
+
+    assert resolution.is_fresh is True
+
+
+def test_resolve_not_fresh_when_config_is_healthy(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    write_config(fake_config_file, factories.get_default_app_config())
+
+    resolution = config_integrity.resolve_on_integrity_failure()
+
+    assert resolution.is_fresh is False
+
+
+def test_stale_temp_and_backup_removed_when_config_is_healthy(fake_config_file):
+    constants.FILE_PATHS.config = fake_config_file
+    temp_file = fake_config_file.with_suffix(f"{fake_config_file.suffix}.tmp")
+    backup_file = fake_config_file.with_suffix(f"{fake_config_file.suffix}.bak")
+    temp_file.write_text("leftover")
+    write_config(backup_file, factories.get_default_app_config())
+
+    config_integrity.resolve_on_integrity_failure()
+
+    assert not temp_file.exists()
+    assert not backup_file.exists()

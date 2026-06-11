@@ -1,7 +1,7 @@
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
-from subsearch.runtime.config import static_values
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import config_session, static_values
+from subsearch.runtime.config.factories import get_default_app_config
 from tests import fixture_data
 
 
@@ -175,7 +175,7 @@ def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
     release_data = release_parser.get_release_info(filename)
 
-    assert release_data.title == "the foo bar 1080p web h264"
+    assert release_data.title == "the foo bar"
     assert release_data.year == 0
     assert release_data.season == ""
     assert release_data.season_ordinal == ""
@@ -183,7 +183,40 @@ def test_string_parser_bad_filename() -> None:
     assert release_data.episode_ordinal == ""
     assert release_data.tvseries is False
     assert release_data.release == "the foo bar 1080p web h264"
-    assert release_data.group == "the foo bar 1080p web h264"
+    assert release_data.group == ""
+
+
+def test_string_parser_typed_hyphenated_title() -> None:
+    release_data = release_parser.get_release_info("spider-man")
+
+    assert release_data.title == "spider man"
+    assert release_data.group == ""
+
+
+def test_string_parser_typed_punctuation_stripped() -> None:
+    assert release_parser.get_release_info("don't look up").title == "dont look up"
+    assert release_parser.get_release_info("matrix: reloaded (2003)").title == "matrix reloaded"
+    assert release_parser.get_release_info("tom & jerry").title == "tom and jerry"
+
+
+def test_str_parser_typed_term_typo_scores_high() -> None:
+    provider = "the.matrix.1999.1080p.web.h264-foobar"
+    typo_score = release_parser.score_subtitle_tokens("the matix", provider)
+    exact_score = release_parser.score_subtitle_tokens("the matrix", provider)
+    assert typo_score >= 75
+    assert exact_score >= typo_score
+
+
+def test_str_parser_typed_apostrophe_matches_release() -> None:
+    provider = "dont.look.up.2021.1080p.web.h264-foobar"
+    score = release_parser.score_subtitle_tokens("don't look up", provider)
+    assert score >= 80
+
+
+def test_str_parser_typed_term_not_penalized_for_missing_group() -> None:
+    provider = "the.matrix.1999.1080p.web.h264-foobar"
+    typed = release_parser.score_subtitle_tokens("the matrix", provider)
+    assert typed >= 80
 
 
 def test_string_parser_typed_show_with_dotted_season_episode() -> None:
@@ -220,10 +253,10 @@ def test_str_parser_dotted_season_episode_normalizes_for_scoring() -> None:
 
 
 def test_provider_urls_movie() -> None:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
     provider_url = create_provider_urls.retrieve_urls()
 
@@ -235,10 +268,10 @@ def test_provider_urls_movie() -> None:
 
 
 def test_provider_urls_movie_with_hash() -> None:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(
         app_config, release_data, language_data, file_hash="abc123"
     )
@@ -250,9 +283,9 @@ def test_provider_urls_movie_with_hash() -> None:
 
 
 def test_provider_urls_typed_term_without_year() -> None:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
     release_data = release_parser.get_release_info("the matrix")
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
     provider_url = create_provider_urls.retrieve_urls()
 
@@ -262,10 +295,10 @@ def test_provider_urls_typed_term_without_year() -> None:
 
 
 def test_provider_urls_series() -> None:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
     filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
     release_data = release_parser.get_release_info(filename)
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
     provider_url = create_provider_urls.retrieve_urls()
 

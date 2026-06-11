@@ -70,14 +70,14 @@ def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
 
 
 def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.search_cards import SearchThresholdCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
     card = SearchThresholdCard(store)
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
 
     store.write("search.accept_threshold", 50)
     for row in card.tuning_rows.values():
@@ -115,14 +115,14 @@ def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> N
 
 
 def test_subtitle_filters_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.search_cards import SubtitleFiltersCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
     card = SubtitleFiltersCard(store)
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     switch_rows = _collect_switch_rows(card)
 
     for key, default in _SUBTITLE_FILTERS_DEFAULTS.items():
@@ -138,14 +138,14 @@ def test_subtitle_filters_restore_defaults(qtbot) -> None:
 
 
 def test_post_processing_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.post_processing_cards import PostProcessingCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
     card = PostProcessingCard(store)
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     switch_rows = _collect_switch_rows(card)
 
     store.write("post_processing.rename", False)
@@ -203,14 +203,14 @@ def test_shell_integration_restore_re_enables_context_menu_icon(qtbot) -> None:
 
 
 def test_notifications_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.system_cards import NotificationsCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
     card = NotificationsCard(store)
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     switch_rows = _collect_switch_rows(card)
 
     store.write("notifications.system_tray", False)
@@ -226,7 +226,7 @@ def test_notifications_restore_defaults(qtbot) -> None:
 
 
 def test_download_manager_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.download_manager import DownloadManagerSettingsCard
     from subsearch.ui.services.video_file import VideoFileService
     from subsearch.ui.state.store import SettingsStore
@@ -235,7 +235,7 @@ def test_download_manager_restore_defaults(qtbot) -> None:
     store = SettingsStore()
     card = DownloadManagerSettingsCard(store, VideoFileService())
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     combo_rows = {row.config_key: row for row in card.findChildren(SearchableComboBoxRow)}
 
     store.write("download_manager.search_mode", "manual")
@@ -265,7 +265,7 @@ def test_post_processing_card_disables_body_when_manually_handle_enabled(qtbot) 
 
 
 def test_application_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.system_cards import ApplicationCard
     from subsearch.ui.services.shell_integration import ShellIntegrationService
     from subsearch.ui.state.store import SettingsStore
@@ -274,7 +274,7 @@ def test_application_restore_defaults(qtbot) -> None:
     store = SettingsStore()
     card = ApplicationCard(store, ShellIntegrationService(TaskRunner()))
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     switch_rows = _collect_switch_rows(card)
 
     store.write("application.show_terminal", True)
@@ -290,14 +290,14 @@ def test_application_restore_defaults(qtbot) -> None:
 
 
 def test_network_restore_defaults(qtbot) -> None:
-    from subsearch.io import toml_file
+    from subsearch.runtime.config import config_session
     from subsearch.ui.cards.system_cards import NetworkCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
     card = NetworkCard(store)
     qtbot.addWidget(card)
-    session = toml_file.get_config_session()
+    session = config_session.get_config_session()
     spinbox_rows = _collect_spinbox_rows(card)
 
     store.write("network.api_call_limit", 99)

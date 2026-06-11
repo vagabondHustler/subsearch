@@ -1,19 +1,19 @@
 from selectolax.parser import HTMLParser
 
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
 from subsearch.providers import diagnostics as diagnostics
 from subsearch.providers import opensubtitles, yifysubtitles
 from subsearch.providers.provider_helper import combine_provider_diagnostic_status
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import config_session
 from subsearch.runtime.config.factories import get_default_app_config
 from subsearch.runtime.models.model import ProviderDiagnosticStatus
 from tests import fixture_data
 
 
 def _search_kwargs() -> dict:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
+    language_data = load_language_data()
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
     return dict(
@@ -163,7 +163,7 @@ def test_providers_due_when_failed_attempts_reach_threshold() -> None:
     threshold = config["diagnostics"]["failed_attempts_threshold"]
     config["diagnostics"]["provider_diagnostics"]["opensubtitles"]["failed_attempts"] = threshold
     config["diagnostics"]["provider_diagnostics"]["subsource"]["failed_attempts"] = threshold - 1
-    app_config = toml_file.get_app_config_from_data(config)
+    app_config = config_session.get_app_config_from_data(config)
     due = diagnostics.providers_due_for_diagnostic(app_config)
     assert "opensubtitles" in due
     assert "subsource" not in due
@@ -171,5 +171,5 @@ def test_providers_due_when_failed_attempts_reach_threshold() -> None:
 
 def test_provider_never_attempted_is_not_due() -> None:
     config = get_default_app_config()
-    app_config = toml_file.get_app_config_from_data(config)
+    app_config = config_session.get_app_config_from_data(config)
     assert diagnostics.providers_due_for_diagnostic(app_config) == []

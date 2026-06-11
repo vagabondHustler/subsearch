@@ -3,9 +3,10 @@ import inspect
 import pytest
 
 from subsearch.core.run_conditions import RunConditions
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import config_session
+from subsearch.runtime.config.factories import get_default_app_config
 from subsearch.runtime.models.model import AppMode
 from tests import fixture_data
 
@@ -13,10 +14,10 @@ from tests import fixture_data
 class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
         self.app_mode = AppMode.SEARCH_HYBRID
-        self.app_config = toml_file.get_app_config(FILE_PATHS.config)
+        self.app_config = config_session.get_app_config_from_data(get_default_app_config())
         self.release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
-        self.language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+        self.language_data = load_language_data()
         self.accepted_subtitles: list[str] = []
         self.rejected_subtitles: list[str] = []
         self.downloaded_subtitle_archives = 0

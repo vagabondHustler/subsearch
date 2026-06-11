@@ -1,15 +1,16 @@
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
 from subsearch.providers import provider_helper
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import config_session
+from subsearch.runtime.config.factories import get_default_app_config
 from subsearch.runtime.models.model import Subtitle, SubtitleStatus
 from tests import fixture_data
 
 
 def _build_helper() -> provider_helper.ProviderHelper:
-    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    app_config = config_session.get_app_config_from_data(get_default_app_config())
     app_config.selected_language = "english"
-    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    language_data = load_language_data()
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
     helper = provider_helper.ProviderHelper(
