@@ -44,4 +44,7 @@ class ImdbIdLookup:
         return kind == "tvSeries"
 
     def _year_matches(self, release_year: int | None) -> bool:
+        if self.year == 0:
+            # typed search term without a year: accept the first title match
+            return True
         return self.year == release_year or (self.year - 1) == release_year

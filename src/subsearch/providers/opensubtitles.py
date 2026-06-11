@@ -57,8 +57,10 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
                 continue
             released_as = item.css_first("description").child.text_content.strip()  # type: ignore
             # matches the value in lines like "Also Known As: Some Title;" — captures between ": " and ";"
-            subtitle_name = re.findall("^.*?: (.*?);", released_as)[0]
-            self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
+            subtitle_names = re.findall("^.*?: (.*?);", released_as)
+            if not subtitle_names:
+                continue
+            self.prepare_subtitle(self.provider_name, subtitle_names[0], download_url, {})
         return ProviderDiagnosticStatus.OK
 
     def with_hash(self, url: str, subtitle_name: str) -> ProviderDiagnosticStatus:
@@ -84,8 +86,10 @@ class OpenSubtitles(OpenSubtitlesScraper):
         self.provider_name = self.__class__.__name__.lower()
 
     def _do_search(self) -> ProviderDiagnosticStatus:
-        hash_health = self.with_hash(self.provider_urls.opensubtitles_hash[0], self.release_data.release)
         site_health = self.get_subtitles(self.provider_urls.opensubtitles[0])
+        if not self.provider_urls.opensubtitles_hash:
+            return site_health
+        hash_health = self.with_hash(self.provider_urls.opensubtitles_hash[0], self.release_data.release)
         return combine_provider_diagnostic_status(hash_health, site_health)
 
     def start_search(self, *args, **kwargs) -> None:

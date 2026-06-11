@@ -3,7 +3,6 @@ from collections.abc import Callable
 from typing import Any
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import (
     AppConfig,
@@ -28,18 +27,24 @@ def combine_provider_diagnostic_status(*statuses: ProviderDiagnosticStatus) -> P
 class SubtitleResults:
     def __init__(self) -> None:
         self._lock = threading.Lock()
+        self._seen: set[tuple[str, str, str]] = set()
         self.accepted: list[Subtitle] = []
         self.rejected: list[Subtitle] = []
         self.filtered: list[Subtitle] = []
 
-    def add(self, subtitle: Subtitle) -> None:
+    def add(self, subtitle: Subtitle) -> bool:
+        identity = (subtitle.provider_name, subtitle.subtitle_name, subtitle.download_url)
         with self._lock:
+            if identity in self._seen:
+                return False
+            self._seen.add(identity)
             if subtitle.status is SubtitleStatus.ACCEPTED:
                 self.accepted.append(subtitle)
             elif subtitle.status is SubtitleStatus.FILTERED_OUT:
                 self.filtered.append(subtitle)
             else:
                 self.rejected.append(subtitle)
+            return True
 
 
 def _sanitize_subtitle_filename(filename: str) -> str:
@@ -61,12 +66,14 @@ class ProviderHelper:
         app_config: AppConfig,
         provider_urls: ProviderUrls,
         language_data: Language,
+        filename: str,
         subtitle_results: SubtitleResults | None = None,
     ) -> None:
         self.release_data = release_data
         self.app_config = app_config
         self.provider_urls = provider_urls
         self.language_data = language_data
+        self.filename = filename
         self.subtitle_results = subtitle_results or SubtitleResults()
 
         self.request_timeout = (app_config.request_connect_timeout, app_config.request_read_timeout)
@@ -90,7 +97,7 @@ class ProviderHelper:
             token_score = percentage_override
         else:
             token_score = release_parser.score_subtitle_tokens(
-                VIDEO_FILE.filename,
+                self.filename,
                 subtitle_name,
                 self.app_config.token_weights,
                 self.app_config.token_multipliers,
@@ -124,6 +131,8 @@ class ProviderHelper:
             )
         else:
             raise ValueError(f"Subtitle has neither download_url nor request_data: {subtitle_name!r}")
+        if not self.subtitle_results.add(subtitle):
+            return
         if status is SubtitleStatus.ACCEPTED:
             log.event(
                 "subtitle_match",
@@ -138,7 +147,6 @@ class ProviderHelper:
                 subtitle_name=subtitle_name,
                 percentage=token_score,
             )
-        self.subtitle_results.add(subtitle)
 
     def record_filtered_out(self, provider_name: str, subtitle_name: str, reason: str) -> None:
         subtitle = Subtitle(
@@ -149,8 +157,8 @@ class ProviderHelper:
             request_data={},
             status=SubtitleStatus.FILTERED_OUT,
         )
-        self.subtitle_results.add(subtitle)
-        self.skip_counts[reason] = self.skip_counts.get(reason, 0) + 1
+        if self.subtitle_results.add(subtitle):
+            self.skip_counts[reason] = self.skip_counts.get(reason, 0) + 1
 
     def report_diagnostic_status(self, diagnostic_status: ProviderDiagnosticStatus, subtitles_found: int) -> None:
         result = ProviderResult(self.provider_name, diagnostic_status, subtitles_found)

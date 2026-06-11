@@ -5,7 +5,6 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.config.static_values import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
@@ -26,41 +25,42 @@ def remove_padded_zero(x: str) -> str:
     return x
 
 
+# matches a 4-digit year (1000–2999) preceded by a dot/space/hyphen/"(" and followed by one or end of string,
+# so it works for release names ("Movie.Title.2023.1080p") and typed terms ("the matrix 1999", "the matrix (1999)")
+_RELEASE_YEAR_PATTERN = re.compile(r"(?<=[. (\-])([1-2][0-9]{3})(?=[. )\-]|$)")
+# matches a season/episode token in the forms s01e02, s01.e02, s01 e02 or s01-e02, at a token boundary
+_RELEASE_SEASON_EPISODE_PATTERN = re.compile(r"(?:^|[. (\-])s(\d{1,2})[. \-]?e(\d{1,4})(?=[. )\-]|$)")
+
+
 def find_year(string: str) -> int:
-    # matches a 4-digit year between dots (1000–2999) e.g. "Movie.Title.2023.1080p" → "2023"
-    re_year = re.findall(r"^.*\.([1-2][0-9]{3})\.", string)
-    if re_year:
-        year = re_year[0]
-        return int(year)
+    years = _RELEASE_YEAR_PATTERN.findall(string)
+    if years:
+        return int(years[-1])
     return 0
 
 
+def _title_before(string: str, cutoff: int) -> str:
+    return string[:cutoff].replace(".", " ").strip(" (-")
+
+
 def find_title_by_year(string: str) -> str:
-    # captures everything before the year segment e.g. "Movie.Title.2023.1080p" → "Movie.Title"
-    re_title = re.findall(r"^(.*)\.[1-2][0-9]{3}\.", string)
-    if re_title:
-        title: str = re_title[0]
-        title = title.replace(".", " ")
-        return title
+    year_matches = list(_RELEASE_YEAR_PATTERN.finditer(string))
+    if year_matches:
+        return _title_before(string, year_matches[-1].start())
     return ""
 
 
 def find_title_by_show(string: str) -> str:
-    # captures everything before the SxxExx segment e.g. "Show.Title.S01E02.1080p" → "Show.Title"
-    re_title = re.findall(r"^(.*)\.[s]\d*[e]\d*\.", string)
-    if re_title:
-        title: str = re_title[0]
-        title = title.replace(".", " ")
-        return title
+    season_episode_match = _RELEASE_SEASON_EPISODE_PATTERN.search(string)
+    if season_episode_match:
+        return _title_before(string, season_episode_match.start())
     return ""
 
 
 def find_season_episode(string: str) -> str:
-    # captures the SxxExx token between dots e.g. "Show.Title.S01E02.1080p" → "S01E02"
-    re_se = re.findall(r"\.([s]\d*[e]\d*)\.", string)
-    if re_se:
-        se: str = re_se[0]
-        return se
+    season_episode_match = _RELEASE_SEASON_EPISODE_PATTERN.search(string)
+    if season_episode_match:
+        return f"s{season_episode_match.group(1)}e{season_episode_match.group(2)}"
     return ""
 
 
@@ -99,10 +99,13 @@ _YIFYSUBTITLES_MIRRORS: list[str] = [
 
 
 class CreateProviderUrls:
-    def __init__(self, app_config: AppConfig, release_data: ReleaseInfo, language_data: dict[str, Any]) -> None:
+    def __init__(
+        self, app_config: AppConfig, release_data: ReleaseInfo, language_data: dict[str, Any], file_hash: str = ""
+    ) -> None:
         self.app_config = app_config
         self.release_data = release_data
         self.language_data = language_data
+        self.file_hash = file_hash
         self.current_language_data: Language = Language(**language_data[app_config.selected_language])
 
     def retrieve_urls(self) -> ProviderUrls:
@@ -131,9 +134,11 @@ class CreateProviderUrls:
 
     @property
     def opensubtitles_hash(self) -> list[str]:
+        if not self.file_hash:
+            return []
         domain = "https://www.opensubtitles.org"
         subtitle_type = self._opensubtitles_subtitle_type()
-        return [f"{domain}/{subtitle_type}/moviehash-{VIDEO_FILE.file_hash}"]
+        return [f"{domain}/{subtitle_type}/moviehash-{self.file_hash}"]
 
     @property
     def yifysubtitles(self) -> list[str]:
@@ -156,6 +161,9 @@ class CreateProviderUrls:
     def _opensubtitles_search_parameter(self) -> str:
         if self.release_data.tvseries:
             return f"searchonlytvseries-on/season-{self.release_data.season}/episode-{self.release_data.episode}/moviename-{self.release_data.title}"
+        if self.release_data.year == 0:
+            # typed term without a year: movie/series unknown, so search everything and skip the year suffix
+            return f"moviename-{self.release_data.title}"
         return f"searchonlymovies-on/moviename-{self.release_data.title} ({self.release_data.year})"
 
     def subtitle_type_logic(self) -> tuple[bool, bool, bool]:
@@ -302,9 +310,16 @@ def _source_compatibility(source_a: str | None, source_b: str | None) -> float:
     return _SOURCE_COMPATIBILITY.get(frozenset([family_a, family_b]), 0.0)
 
 
+def _collapse_season_episode(filename: str) -> str:
+    return _RELEASE_SEASON_EPISODE_PATTERN.sub(
+        lambda season_episode: f".s{season_episode.group(1)}e{season_episode.group(2)}", filename
+    )
+
+
 def _normalize_tokens(filename: str) -> dict:
-    group = filename.rsplit("-", 1)[-1].lower()
-    raw_tokens = re.split(r"[.\-]", filename.lower())  # dots or hyphens as delimiters
+    lowered = _collapse_season_episode(filename.lower())
+    group = lowered.rsplit("-", 1)[-1]
+    raw_tokens = [token for token in re.split(r"[. \-]", lowered) if token]  # dots, spaces or hyphens as delimiters
     year: str | None = None
     season_episode: str | None = None
     source: str | None = None
@@ -362,7 +377,8 @@ def _get_base_score(tokens_a: dict, tokens_b: dict, weights: dict[str, float]) -
     title_score = round(SequenceMatcher(None, tokens_a["title"], tokens_b["title"]).ratio() * 100)
     group_score = 100 if tokens_a["group"] == tokens_b["group"] else 0
     source_score = round(_source_compatibility(tokens_a["source"], tokens_b["source"]) * 100)
-    return (title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]) // 100
+    weighted_total = title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]
+    return int(weighted_total // 100)
 
 
 def score_subtitle_tokens(
