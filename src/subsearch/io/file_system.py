@@ -10,30 +10,32 @@ from typing import Callable, Iterable, Optional
 import requests
 
 from subsearch.io import toml_file
+from subsearch.io.file_tracker import get_file_tracker
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
-from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
 
 
-def create_path_from_string(string: str, path_resolution: str, create_missing_folder: bool = True) -> Path:
-    path = VIDEO_FILE.file_directory
+def create_path_from_string(
+    string: str, path_resolution: str, file_directory: Path, create_missing_folder: bool = True
+) -> Path:
+    path = file_directory
     if path_resolution == "relative":
         if string == ".":
-            path = VIDEO_FILE.file_directory
+            path = file_directory
         elif string.startswith(".\\") and len(string) > 2:
-            path = VIDEO_FILE.file_directory.joinpath(string[2:])
+            path = file_directory.joinpath(string[2:])
         elif string == "..":
-            path = VIDEO_FILE.file_directory.parent
+            path = file_directory.parent
         elif string.startswith("..\\") and len(string) > 3:
-            path = VIDEO_FILE.file_directory.parent.joinpath(string[3:])
+            path = file_directory.parent.joinpath(string[3:])
     elif path_resolution == "absolute":
         path = Path(string)
 
     if not path.is_dir() and not create_missing_folder:
-        log.warning(f"Destination folder {path} does not exist, moving to {VIDEO_FILE.file_directory} instead")
-        return VIDEO_FILE.file_directory
+        log.warning(f"Destination folder {path} does not exist, moving to {file_directory} instead")
+        return file_directory
 
     path.mkdir(parents=True, exist_ok=True)
     return path
@@ -49,18 +51,19 @@ def is_zip_payload(chunk: bytes) -> bool:
 _HASH_MATCH_PREFIX = "hashmatch__"
 
 
-def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int) -> None:
+def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> None:
     log.info(f"{subtitle.provider_name}: {index_position}/{index_size}: {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     file_name = f"{prefix}{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
-    download_path = VIDEO_FILE.tmp_dir / file_name
+    download_path = tmp_dir / file_name
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if not is_zip_payload(first_chunk):
         log.warning(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip, skipping download")
         return
+    get_file_tracker().track(download_path)
     with open(download_path, "wb") as fd:
         fd.write(first_chunk)
         for chunk in chunks:
@@ -87,7 +90,10 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
             continue
         extracted_path = Path(archive.extract(member, dst))
         if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
-            extracted_path.rename(extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}"))
+            renamed_path = extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}")
+            extracted_path.rename(renamed_path)
+            extracted_path = renamed_path
+        get_file_tracker().track(extracted_path)
 
 
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
@@ -100,14 +106,14 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> None:
             log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
 
 
-def find_best_subtitle_match(release_name: str, extension: str = ".srt") -> Path:
+def find_best_subtitle_match(release_name: str, subs_dir: Path, extension: str = ".srt") -> Path:
     config = toml_file.get_config_session()
     weights = config.read("search.token_weights")
     multipliers = config.read("search.token_multipliers")
     accept_threshold = config.read("search.accept_threshold")
     best_rank = (MatchTier.C, 0)
     best_match = Path(".")
-    for file in sorted(VIDEO_FILE.subs_dir.glob(f"*{extension}")):
+    for file in sorted(subs_dir.glob(f"*{extension}")):
         is_hash_match = file.name.startswith(_HASH_MATCH_PREFIX)
         token_name = file.name.removeprefix(_HASH_MATCH_PREFIX)
         token_score = release_parser.score_subtitle_tokens(token_name, release_name, weights, multipliers)
@@ -135,8 +141,8 @@ def rename_subtitle_to_release(file_path: Path, release_name: str, extension: st
     return new_file_path
 
 
-def autoload_rename(release_name: str, extension: str = ".srt") -> Path:
-    matched_file = find_best_subtitle_match(release_name, extension)
+def autoload_rename(release_name: str, subs_dir: Path, extension: str = ".srt") -> Path:
+    matched_file = find_best_subtitle_match(release_name, subs_dir, extension)
     return rename_subtitle_to_release(matched_file, release_name, extension)
 
 
@@ -178,11 +184,12 @@ def del_directory_content(directory: Path) -> None:
             shutil.rmtree(item)
 
 
-def create_directory(path: Path) -> None:
+def create_directory(path: Path) -> bool:
     if path.exists():
-        return None
+        return False
     log.debug(f"Creating {path}")
     path.mkdir(parents=True, exist_ok=True)
+    return True
 
 
 def get_file_hash(file_path: Path) -> str:

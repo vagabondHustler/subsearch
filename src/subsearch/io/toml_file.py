@@ -126,6 +126,23 @@ def reset_to_default_config() -> None:
     dump_toml_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
 
+def migrate_download_section(toml_data: dict[str, Any]) -> bool:
+    if "download" not in toml_data:
+        return False
+    old = toml_data.pop("download")
+    automatic = old.get("automatic", True)
+    always_open = old.get("always_open_manager", False)
+    if not automatic:
+        search_mode = "manual"
+    elif always_open:
+        search_mode = "hybrid"
+    else:
+        search_mode = "automatic"
+    toml_data.setdefault("download_manager", {})["search_mode"] = search_mode
+    log.info(f"Migrated download config to download_manager.search_mode = {search_mode}")
+    return True
+
+
 def resolve_on_integrity_failure() -> dict[str, Any]:
     remove_stale_temp_file()
     valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
@@ -148,6 +165,9 @@ def resolve_on_integrity_failure() -> dict[str, Any]:
             return load_toml_data(FILE_PATHS.config)
     else:
         remove_stale_backup_file()
+    if migrate_download_section(toml_data):
+        dump_toml_data(FILE_PATHS.config, toml_data)
+        config_keys = get_keys_recursively(toml_data)
     if valid_config(valid_config_keys, config_keys):
         log.debug("Config integrity check passed")
         return toml_data
@@ -175,9 +195,11 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         file_extensions=data["shell_integration"]["file_extensions"],
         system_tray=data["notifications"]["system_tray"],
         summary_notification=data["notifications"]["summary_notification"],
-        automatic_downloads=data["download"]["automatic"],
-        always_open_manager=data["download"]["always_open_manager"],
-        open_manager_on_no_matches=data["download"]["open_manager_on_no_matches"],
+        search_mode=data["download_manager"]["search_mode"],
+        manually_handle_post_processing=data["download_manager"]["manually_handle_post_processing"],
+        use_post_processing_target=data["download_manager"]["use_post_processing_target"],
+        download_manager_target_path=data["download_manager"]["target_path"],
+        download_manager_working_directory=data["download_manager"]["working_directory"],
         post_processing=data["post_processing"],
         show_terminal=data["application"]["show_terminal"],
         single_instance=data["application"]["single_instance"],
