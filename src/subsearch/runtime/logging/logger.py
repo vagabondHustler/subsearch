@@ -10,6 +10,7 @@ from subsearch.runtime.logging import log_events, log_sanitizer
 from subsearch.runtime.models.model import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
+LOG_SESSIONS_TO_KEEP = 3
 
 LEVELS = {
     "debug": logging.DEBUG,
@@ -40,12 +41,23 @@ def _terminal_sink(message: str, color: Optional[str], bold: bool) -> None:
     print(paint(message, color, bold) if color else message)
 
 
+def _rotate_session_logs() -> None:
+    log_path = FILE_PATHS.log
+    for index in range(LOG_SESSIONS_TO_KEEP - 1, 0, -1):
+        older = log_path.with_suffix(f".{index}.log")
+        newer = log_path.with_suffix(f".{index - 1}.log") if index > 1 else log_path
+        if newer.exists():
+            older.unlink(missing_ok=True)
+            newer.rename(older)
+
+
 def _build_file_logger() -> logging.Logger:
     APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
+    _rotate_session_logs()
     logger = logging.getLogger("subsearch")
     logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
-    file_handler = RotatingFileHandler(FILE_PATHS.log, mode="a", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
+    file_handler = RotatingFileHandler(FILE_PATHS.log, mode="w", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
     file_handler.setFormatter(
         logging.Formatter(
             "%(levelname)s %(module)s:%(lineno)d %(asctime)s.%(msecs)03d: %(message)s", datefmt="%H:%M:%S"
