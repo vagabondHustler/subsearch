@@ -2,13 +2,11 @@ import sys
 import winreg
 from pathlib import Path
 
-from subsearch.io import toml_file
-from subsearch.io.toml_file import diagnostics_enabled
+from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import (
     APP_PATHS,
     COMPUTER_NAME,
     DEVICE_INFO,
-    FILE_PATHS,
     REGISTRY_PATHS,
 )
 from subsearch.runtime.logging.logger import log
@@ -22,7 +20,7 @@ class PythonExecutable:
 
 class RegistryLaunchCommand:
     def __init__(self) -> None:
-        show_terminal = toml_file.load_toml_value(FILE_PATHS.config, "application.show_terminal")
+        show_terminal = config_session.read_config_value("application.show_terminal")
         self._mode = DEVICE_INFO.mode
         self._python_executable = PythonExecutable(show_terminal)
 
@@ -46,7 +44,7 @@ def get_command_value() -> str:
 
 
 def get_icon_value() -> str:
-    show_icon: str = toml_file.load_toml_value(FILE_PATHS.config, "shell_integration.context_menu_icon")
+    show_icon: str = config_session.read_config_value("shell_integration.context_menu_icon")
     if show_icon:
         return str(APP_PATHS.ui_assets / "subsearch.ico")
     else:
@@ -54,26 +52,72 @@ def get_icon_value() -> str:
 
 
 def get_appliesto_value() -> str:
-    file_extensions = toml_file.load_toml_value(FILE_PATHS.config, "shell_integration.file_extensions")
+    file_extensions = config_session.read_config_value("shell_integration.file_extensions")
     enabled_extensions = [f'".{ext}"' for ext, enabled in file_extensions.items() if enabled]
     return " OR ".join(enabled_extensions)
 
 
-def del_registry_key(reg_path: str, key: str) -> None:
-    if diagnostics_enabled():
-        log.debug(f"Deleting registry key: {key}")
-    with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
-        with winreg.OpenKey(hkey, reg_path, 0, winreg.KEY_WRITE) as sk:
-            winreg.DeleteKey(sk, key)
+VALUE_LOCATIONS = {
+    "subsearch": (REGISTRY_PATHS.subsearch, ""),
+    "icon": (REGISTRY_PATHS.subsearch, "Icon"),
+    "appliesto": (REGISTRY_PATHS.subsearch, "AppliesTo"),
+    "command": (REGISTRY_PATHS.subsearch_command, ""),
+}
 
 
-def del_context_menu() -> None:
+def desired_registry_values() -> dict[str, str]:
+    return {
+        "subsearch": "Subsearch",
+        "icon": get_icon_value(),
+        "appliesto": get_appliesto_value(),
+        "command": get_command_value(),
+    }
+
+
+def changed_value_names(desired: dict[str, str], current: dict[str, str | None]) -> list[str]:
+    return [name for name, value in desired.items() if current.get(name) != value]
+
+
+def _read_registry_value(sub_key: str, value_name: str) -> str | None:
+    try:
+        with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
+            with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_READ) as sk:
+                value, _ = winreg.QueryValueEx(sk, value_name)
+                return str(value)
+    except FileNotFoundError:
+        return None
+
+
+def current_registry_values() -> dict[str, str | None]:
+    return {name: _read_registry_value(sub_key, value_name) for name, (sub_key, value_name) in VALUE_LOCATIONS.items()}
+
+
+def _context_menu_key_exists() -> bool:
+    try:
+        with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
+            with winreg.OpenKey(hkey, REGISTRY_PATHS.subsearch, 0, winreg.KEY_READ):
+                return True
+    except FileNotFoundError:
+        return False
+
+
+def _del_registry_key(reg_path: str, key: str) -> None:
+    log.debug(f"Deleting registry key: {key}")
+    try:
+        with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
+            with winreg.OpenKey(hkey, reg_path, 0, winreg.KEY_WRITE) as sk:
+                winreg.DeleteKey(sk, key)
+    except FileNotFoundError:
+        pass
+
+
+def _del_context_menu() -> None:
     log.info("Removing Subsearch context menu from registry")
-    del_registry_key(REGISTRY_PATHS.subsearch, "command")
-    del_registry_key(REGISTRY_PATHS.shell, "Subsearch")
+    _del_registry_key(REGISTRY_PATHS.subsearch, "command")
+    _del_registry_key(REGISTRY_PATHS.shell, "Subsearch")
 
 
-def write_keys() -> None:
+def _create_context_menu_keys() -> None:
     registry_keys = [
         (REGISTRY_PATHS.classes, "*"),
         (REGISTRY_PATHS.asterisk, "shell"),
@@ -82,47 +126,40 @@ def write_keys() -> None:
     ]
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         for key, sub_key in registry_keys:
-            if diagnostics_enabled():
-                log.debug(f"Creating registry key: {key}\\{sub_key}")
             with winreg.OpenKey(hkey, key, 0, winreg.KEY_WRITE) as sk:
                 winreg.CreateKey(sk, sub_key)
 
 
-def write_registry_value(sub_key: str, value_name: str, value: str) -> None:
+def _write_registry_value(sub_key: str, value_name: str, value: str) -> None:
     try:
-        if diagnostics_enabled():
-            log.debug(f"Wrote registry entry: [{value_name or '(default)'}] = {value!r}")
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
             with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
                 winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
     except FileNotFoundError:
-        pass
+        log.warning(f"Registry key missing, could not write {sub_key}\\{value_name}")
 
 
-def write_registry_value_by_key(key: str) -> None:
-    key_map = {
-        "subsearch": (REGISTRY_PATHS.subsearch, "", lambda: "Subsearch"),
-        "icon": (REGISTRY_PATHS.subsearch, "Icon", get_icon_value),
-        "appliesto": (REGISTRY_PATHS.subsearch, "AppliesTo", get_appliesto_value),
-        "command": (REGISTRY_PATHS.subsearch_command, "", get_command_value),
-    }
-
-    key = key.lower()
-    if key in key_map:
-        key_type, value_name, value_factory = key_map[key]
-        write_registry_value(key_type, value_name, value_factory())
-
-
-def write_all_registry_values() -> None:
-    items = ["subsearch", "icon", "appliesto", "command"]
-    for item in items:
-        write_registry_value_by_key(item)
-
-
-def add_context_menu() -> None:
-    log.info("Adding Subsearch context menu to registry")
-    write_keys()
-    write_all_registry_values()
+def reconcile_shell_integration() -> None:
+    if DEVICE_INFO.mode == "executable":
+        log.debug("Skipping registry reconcile: MSI installer owns the context menu keys")
+        return
+    context_menu_enabled = config_session.read_config_value("shell_integration.context_menu")
+    if not context_menu_enabled:
+        if _context_menu_key_exists():
+            _del_context_menu()
+        else:
+            log.debug("Registry matches config: context menu absent")
+        return
+    desired = desired_registry_values()
+    stale_names = changed_value_names(desired, current_registry_values())
+    if not stale_names:
+        log.debug("Registry matches config: context menu up to date")
+        return
+    _create_context_menu_keys()
+    for name in stale_names:
+        sub_key, value_name = VALUE_LOCATIONS[name]
+        _write_registry_value(sub_key, value_name, desired[name])
+        log.info(f"Registry updated: {name}")
 
 
 def check_long_paths_enabled() -> bool:
