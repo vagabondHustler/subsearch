@@ -2,7 +2,7 @@ import logging
 import traceback
 from logging.handlers import RotatingFileHandler
 from types import TracebackType
-from typing import Optional
+from typing import Callable, Optional
 
 from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
 from subsearch.runtime.config.metaclasses import Singleton
@@ -22,6 +22,9 @@ LEVELS = {
 ANSI_RESET = "\033[0m"
 ANSI_BOLD = "\033[1m"
 
+# Sink signature: (message, hex_color_or_None, bold)
+ConsoleSink = Callable[[str, Optional[str], bool], None]
+
 
 def _ansi_color(hex_color: str) -> str:
     red, green, blue = int(hex_color[1:3], 16), int(hex_color[3:5], 16), int(hex_color[5:7], 16)
@@ -31,6 +34,10 @@ def _ansi_color(hex_color: str) -> str:
 def paint(message: str, hex_color: str, bold: bool = False) -> str:
     bold_code = ANSI_BOLD if bold else ""
     return f"{bold_code}{_ansi_color(hex_color)}{message}{ANSI_RESET}"
+
+
+def _terminal_sink(message: str, color: Optional[str], bold: bool) -> None:
+    print(paint(message, color, bold) if color else message)
 
 
 def _build_file_logger() -> logging.Logger:
@@ -58,6 +65,13 @@ def _write_session_header(handler: RotatingFileHandler) -> None:
 class Logger(metaclass=Singleton):
     def __init__(self) -> None:
         self._file_logger = _build_file_logger()
+        self._sinks: list[ConsoleSink] = [_terminal_sink]
+
+    def add_sink(self, sink: ConsoleSink) -> None:
+        self._sinks.append(sink)
+
+    def remove_sink(self, sink: ConsoleSink) -> None:
+        self._sinks.remove(sink)
 
     def write(
         self,
@@ -70,7 +84,8 @@ class Logger(metaclass=Singleton):
         safe_message = log_sanitizer.sanitize(message)
         self._file_logger.log(LEVELS[level], safe_message, stacklevel=3)
         if to_console:
-            print(paint(safe_message, color, bold) if color else safe_message)
+            for sink in self._sinks:
+                sink(safe_message, color, bold)
 
     def debug(self, message: str, to_console: bool = True) -> None:
         self.write(message, "debug", to_console)
