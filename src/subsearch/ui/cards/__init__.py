@@ -21,7 +21,6 @@ from subsearch.ui.cards.search_cards import (
 )
 from subsearch.ui.cards.system_cards import (
     ApplicationCard,
-    DownloadManagerCard,
     NetworkCard,
     NotificationsCard,
     ProviderDiagnosticsCard,
@@ -45,7 +44,6 @@ __all__ = [
     "SearchThresholdCard",
     "SubtitleFiltersCard",
     "ApplicationCard",
-    "DownloadManagerCard",
     "NetworkCard",
     "NotificationsCard",
     "ProviderDiagnosticsCard",

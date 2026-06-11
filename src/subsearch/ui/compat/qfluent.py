@@ -225,6 +225,8 @@ class CircleDotHandle(SliderHandle):
 
 
 class CircleDotSlider(Slider):
+    handle: "CircleDotHandle"
+
     def _postInit(self) -> None:
         super()._postInit()
         self.handle.deleteLater()

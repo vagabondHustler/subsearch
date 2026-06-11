@@ -1,6 +1,10 @@
-from PySide6.QtCore import QObject, Signal
+from pathlib import Path
+from typing import Protocol
+
+from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
+from subsearch.io.file_tracker import get_file_tracker
 from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.models.model import Subtitle, SubtitleStatus
@@ -13,18 +17,29 @@ class SubtitleDownloadWorker(Worker):
         self.subtitle = subtitle
         self.download_number = download_number
         self.download_total = download_total
+        self.tmp_dir: Path = VIDEO_FILE.tmp_dir
+        self.subs_dir: Path = VIDEO_FILE.subs_dir
 
     def execute(self) -> Subtitle:
         subtitle = self.subtitle
         if release_parser.valid_filename(subtitle.subtitle_name):
             subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
-        file_system.download_subtitle(subtitle, self.download_number, self.download_total)
+        file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
         try:
-            file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+            file_system.extract_files_in_dir(self.tmp_dir, self.subs_dir)
         finally:
-            for archive in VIDEO_FILE.tmp_dir.glob("*.zip"):
-                archive.unlink(missing_ok=True)
+            get_file_tracker().delete_tracked_within(self.tmp_dir, "*.zip")
         return subtitle
+
+
+class DownloadServiceProtocol(Protocol):
+    started: SignalInstance
+    succeeded: SignalInstance
+    failed: SignalInstance
+
+    def set_download_total(self, download_total: int) -> None: ...
+
+    def enqueue(self, subtitle: Subtitle) -> None: ...
 
 
 class SubtitleDownloadService(QObject):

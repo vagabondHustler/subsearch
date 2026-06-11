@@ -31,7 +31,7 @@ INSTALLER_HANDOFF_DELAY_MS = 1500
 
 class UpdateCard(SettingsCard):
     def __init__(self, task_runner: TaskRunner, parent: QWidget | None = None) -> None:
-        super().__init__("Update", parent)
+        super().__init__("Update", parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["card.update"].explanation)
         self._task_runner = task_runner
         self._latest_version = ""

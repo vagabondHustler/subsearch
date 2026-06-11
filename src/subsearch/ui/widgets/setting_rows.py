@@ -1,5 +1,9 @@
+from pathlib import Path
+from typing import Any
+
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
+    QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -8,11 +12,13 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     BodyLabel,
+    LineEdit,
     SpinBox,
     SwitchButton,
     TransparentToolButton,
 )
 
+from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import DEFAULT_CONFIG
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import (
@@ -31,6 +37,7 @@ from subsearch.ui.theme.typography import (
     body_font,
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -226,7 +233,7 @@ class SpinBoxRow(SettingRow):
         self.store.write(self.config_key, value)
         self._update_help(value)
 
-    def _on_store_changed(self, key: str, value: object) -> None:
+    def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
         self.spin_box.blockSignals(True)
@@ -280,3 +287,96 @@ class SearchableComboBoxRow(SettingRow):
         self.combo_box.blockSignals(True)
         self.combo_box.setCurrentText(label)
         self.combo_box.blockSignals(False)
+
+
+class FolderPathRow(QWidget):
+    path_saved = Signal(str, str)  # (path, detected_resolution)
+
+    def __init__(
+        self,
+        config_key: str,
+        store: SettingsStore,
+        inline_help_text: str | None = None,
+        placeholder_text: str = "",
+        dialog_title: str = "Select destination folder",
+        validate_path: bool = True,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.config_key = config_key
+        self.store = store
+        self._validate_path = validate_path
+        self._dialog_title = dialog_title
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addLayout(self._build_header())
+        layout.addLayout(self._build_path_row(placeholder_text, inline_help_text))
+        store.value_changed.connect(self._on_store_changed)
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key == self.config_key and self.path_edit.text() != str(value):
+            self.path_edit.setText(str(value))
+
+    def _build_header(self) -> QHBoxLayout:
+        description = SETTING_DESCRIPTIONS[self.config_key]
+        title_label = BodyLabel(description.title, self)
+        apply_body_font(title_label)
+        header = QHBoxLayout()
+        header.setContentsMargins(ROW_INSET, 10, ROW_INSET, 4)
+        header.addWidget(title_label, stretch=1)
+        header.addWidget(HelpButton(description.explanation, self))
+        return header
+
+    def _build_path_row(self, placeholder_text: str, inline_help_text: str | None) -> QHBoxLayout:
+        self.path_edit = LineEdit(self)
+        self.path_edit.setPlaceholderText(placeholder_text)
+        self.path_edit.setText(str(self.store.read(self.config_key)))
+        self.path_edit.setClearButtonEnabled(True)
+        apply_body_font(self.path_edit)
+        self.path_edit.textChanged.connect(self._on_text_changed)
+        self.path_edit.editingFinished.connect(self.save_if_valid)
+
+        browse_button = CaptionedToolButton(
+            "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
+        )
+        browse_button.clicked.connect(self._browse_for_folder)
+
+        row = QHBoxLayout()
+        row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
+        row.addWidget(self.path_edit, stretch=1)
+        row.addWidget(browse_button)
+        if inline_help_text is not None:
+            row.addWidget(HelpButton(inline_help_text, self))
+        return row
+
+    def text(self) -> str:
+        return self.path_edit.text()
+
+    def set_path(self, path: str) -> None:
+        self.path_edit.setText(path)
+        self.save_if_valid()
+
+    def is_valid(self) -> bool:
+        if not self._validate_path:
+            return True
+        path = self.path_edit.text()
+        return release_parser.valid_path(path, release_parser.detect_path_resolution(path))
+
+    def save_if_valid(self) -> None:
+        if not self.is_valid():
+            return
+        path = self.path_edit.text().strip()
+        self.store.write(self.config_key, path)
+        self.path_saved.emit(path, release_parser.detect_path_resolution(path))
+
+    def _on_text_changed(self, path: str) -> None:
+        if not self._validate_path:
+            return
+        self.path_edit.setError(not release_parser.valid_path(path, release_parser.detect_path_resolution(path)))
+
+    def _browse_for_folder(self) -> None:
+        selected_folder = QFileDialog.getExistingDirectory(self.window(), self._dialog_title, self.path_edit.text())
+        if not selected_folder:
+            return
+        self.set_path(str(Path(selected_folder)))

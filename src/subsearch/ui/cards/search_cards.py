@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget
 from qfluentwidgets import (
@@ -34,14 +36,8 @@ from subsearch.ui.widgets.setting_rows import (
 
 _TOKEN_TUNING_DEFAULTS: list[tuple[str, object]] = [
     ("search.accept_threshold", 90),
-    *(
-        (f"search.token_weights.{name}", default)
-        for name, default in DEFAULT_TOKEN_WEIGHTS.items()
-    ),
-    *(
-        (f"search.token_multipliers.{name}", default)
-        for name, default in DEFAULT_TOKEN_MULTIPLIERS.items()
-    ),
+    *((f"search.token_weights.{name}", default) for name, default in DEFAULT_TOKEN_WEIGHTS.items()),
+    *((f"search.token_multipliers.{name}", default) for name, default in DEFAULT_TOKEN_MULTIPLIERS.items()),
 ]
 
 PROVIDER_GRID_COLUMNS = 3
@@ -177,7 +173,7 @@ class AdvancedTuningRow(QWidget):
         self.store.write(self.config_key, value)
         self.value_changed.emit()
 
-    def _on_store_changed(self, key: str, value: object) -> None:
+    def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
         self.spin_box.blockSignals(True)
@@ -311,20 +307,21 @@ class SearchThresholdCard(SettingsCard):
 
     def _build_token_tuning(self) -> None:
         self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=6))
-        self.body_layout.addWidget(self._heading("Weights"))
+        self.body_layout.addLayout(self._heading("Weights"))
         for token_name, label_text in TOKEN_WEIGHT_LABELS.items():
             self.body_layout.addWidget(self._weight_row(token_name, label_text))
-        self.body_layout.addWidget(self._heading("Mismatch penalties"))
+        self.body_layout.addLayout(self._heading("Mismatch penalties"))
         for token_name, label_text in TOKEN_MULTIPLIER_LABELS.items():
             self.body_layout.addWidget(self._multiplier_row(token_name, label_text))
 
-
-    def _heading(self, text: str) -> CaptionLabel:
+    def _heading(self, text: str) -> QHBoxLayout:
         heading = CaptionLabel(text, self)
         apply_caption_font(heading)
-        heading.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
         heading.setStyleSheet(f"color: {TEXT_COLOR};")
-        return heading
+        heading_row = QHBoxLayout()
+        heading_row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
+        heading_row.addWidget(heading)
+        return heading_row
 
     def _weight_row(self, token_name: str, label_text: str) -> AdvancedTuningRow:
         config_key = f"search.token_weights.{token_name}"
@@ -367,7 +364,7 @@ class SearchThresholdCard(SettingsCard):
     def _on_slider_released(self) -> None:
         self.store.write("search.accept_threshold", self.slider.value())
 
-    def _on_threshold_store_changed(self, key: str, value: object) -> None:
+    def _on_threshold_store_changed(self, key: str, value: Any) -> None:
         if key != "search.accept_threshold":
             return
         self.slider.set_value_silent(int(value))

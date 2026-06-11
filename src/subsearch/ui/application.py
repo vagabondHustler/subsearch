@@ -14,12 +14,11 @@ from qfluentwidgets import (
 )
 
 from subsearch.runtime.config.constants import APP_PATHS
-from subsearch.runtime.models.model import Subtitle
+from subsearch.runtime.models.model import SearchOutcome, Subtitle
 from subsearch.ui import warmup
 from subsearch.ui.cards import (
     ApiCard,
     ApplicationCard,
-    DownloadManagerCard,
     FileExtensionsCard,
     LanguageCard,
     NetworkCard,
@@ -29,6 +28,7 @@ from subsearch.ui.cards import (
     ProvidersCard,
     ResourcesCard,
     SearchThresholdCard,
+    SettingsCard,
     ShellIntegrationCard,
     SubtitleFiltersCard,
     UpdateCard,
@@ -42,14 +42,29 @@ from subsearch.ui.compat.qfluent import (
 )
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.qt_application import get_application
+from subsearch.ui.services.log_panel import LogPanelSink
+from subsearch.ui.services.post_processing import (
+    PostProcessingService,
+    PostProcessingServiceProtocol,
+)
 from subsearch.ui.services.shell_integration import ShellIntegrationService
-from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
+from subsearch.ui.services.subtitle_downloads import (
+    DownloadServiceProtocol,
+    SubtitleDownloadService,
+)
+from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.state.tasks import TaskRunner
+from subsearch.ui.state.tasks import TaskRunner, Worker
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
 NAVIGATION_EXPAND_WIDTH = 242
 NAVIGATION_TOP_MARGIN = 8
+
+
+def _collapsible(*cards: SettingsCard) -> list[SettingsCard]:
+    for card in cards:
+        card.make_collapsible()
+    return list(cards)
 
 
 class SettingsInterface(SingleDirectionScrollArea):
@@ -72,8 +87,17 @@ class SettingsInterface(SingleDirectionScrollArea):
 
 
 class SettingsWindow(FluentWindow):
-    def __init__(self, subtitles: list[Subtitle] | None = None) -> None:
+    def __init__(
+        self,
+        subtitles: list[Subtitle] | None = None,
+        search_worker_factory: Callable[[], Worker] | None = None,
+        download_service: DownloadServiceProtocol | None = None,
+        post_processing_service: PostProcessingServiceProtocol | None = None,
+        start_search_immediately: bool = False,
+    ) -> None:
         super().__init__()
+        self._search_worker_factory = search_worker_factory
+        self._search_running = False
         self.setWindowTitle("Subsearch")
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.resize(900, 760)
@@ -85,7 +109,12 @@ class SettingsWindow(FluentWindow):
         self._close_validators: list[Callable[[], bool]] = []
         store = self.store
         shell_service = ShellIntegrationService(self.task_runner, self)
-        download_service = SubtitleDownloadService(self.task_runner, self)
+        if download_service is None:
+            download_service = SubtitleDownloadService(self.task_runner, self)
+        if post_processing_service is None:
+            post_processing_service = PostProcessingService(self.task_runner, self)
+        in_search_mode = subtitles is not None or search_worker_factory is not None
+        log_panel_sink = LogPanelSink(self) if in_search_mode else None
 
         post_processing_card = PostProcessingCard(store)
         self.register_close_validator(post_processing_card.commit_path_or_revert)
@@ -94,49 +123,56 @@ class SettingsWindow(FluentWindow):
 
         search_interface = SettingsInterface(
             "searchInterface",
-            [
+            _collapsible(
                 LanguageCard(store),
                 SubtitleFiltersCard(store),
                 ProvidersCard(store),
                 search_threshold_card,
                 post_processing_card,
-            ],
+            ),
         )
         integration_interface = SettingsInterface(
             "integrationInterface",
-            [
+            _collapsible(
                 ShellIntegrationCard(store, shell_service),
                 FileExtensionsCard(store, shell_service),
                 NotificationsCard(store),
-                DownloadManagerCard(store),
-            ],
+            ),
         )
         application_interface = SettingsInterface(
             "applicationInterface",
-            [
+            _collapsible(
                 ApplicationCard(store, shell_service),
                 NetworkCard(store),
                 ProviderDiagnosticsCard(store),
-            ],
+            ),
         )
 
         api_interface = SettingsInterface(
             "apiInterface",
-            [
+            _collapsible(
                 ApiCard(store),
-            ],
+            ),
         )
 
         about_interface = SettingsInterface(
             "aboutInterface",
-            [
+            _collapsible(
                 UpdateCard(self.task_runner),
                 ResourcesCard(),
-            ],
+            ),
         )
 
-        self.download_manager_interface = DownloadManagerInterface(store, download_service, subtitles)
+        video_file_service = VideoFileService(self)
+        self.download_manager_interface = DownloadManagerInterface(
+            store, download_service, post_processing_service, video_file_service, subtitles, log_panel_sink
+        )
         download_manager_interface = self.download_manager_interface
+
+        if search_worker_factory is not None:
+            self.download_manager_interface.research_requested.connect(self._start_search)
+            if start_search_immediately:
+                self._start_search()
 
         self.navigationInterface.addItem(
             routeKey="header",
@@ -190,6 +226,24 @@ class SettingsWindow(FluentWindow):
     def register_close_validator(self, validator: Callable[[], bool]) -> None:
         self._close_validators.append(validator)
 
+    def _start_search(self) -> None:
+        if self._search_worker_factory is None or self._search_running:
+            return
+        self._search_running = True
+        self.download_manager_interface.reset_for_search()
+        worker = self._search_worker_factory()
+        worker.finished.connect(self._on_search_finished)
+        worker.failed.connect(self._on_search_failed)
+        self.task_runner.submit(worker)
+
+    def _on_search_finished(self, outcome: SearchOutcome) -> None:
+        self._search_running = False
+        self.download_manager_interface.populate(outcome.subtitles, outcome.skipped_providers)
+
+    def _on_search_failed(self, message: str) -> None:
+        self._search_running = False
+        self.download_manager_interface.populate([], [f"Search failed: {message}"])
+
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):
             self.task_runner.shutdown()
@@ -205,7 +259,13 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
     sys.stderr.write(f"{message}\n")
 
 
-def open_settings_window(subtitles: list[Subtitle] | None = None) -> list[Subtitle]:
+def open_settings_window(
+    subtitles: list[Subtitle] | None = None,
+    search_worker_factory: Callable[[], Worker] | None = None,
+    download_service: DownloadServiceProtocol | None = None,
+    post_processing_service: PostProcessingServiceProtocol | None = None,
+    start_search_immediately: bool = False,
+) -> list[Subtitle]:
     warmup.await_warmup()
     qInstallMessageHandler(_suppress_point_size_warning)
     application = get_application()
@@ -219,7 +279,9 @@ def open_settings_window(subtitles: list[Subtitle] | None = None) -> list[Subtit
         f"HeaderCardWidget, CardWidget, SimpleCardWidget, ElevatedCardWidget "
         f"{{ background-color: transparent; border: none; }}"
     )
-    window = SettingsWindow(subtitles)
+    window = SettingsWindow(
+        subtitles, search_worker_factory, download_service, post_processing_service, start_search_immediately
+    )
     window.show()
     application.exec()
     return window.download_manager_interface.downloaded

@@ -1,9 +1,6 @@
-from pathlib import Path
-
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtGui import QEnterEvent, QMouseEvent
 from PySide6.QtWidgets import (
-    QFileDialog,
     QGridLayout,
     QHBoxLayout,
     QVBoxLayout,
@@ -12,22 +9,19 @@ from PySide6.QtWidgets import (
 from qfluentwidgets import (
     BodyLabel,
     CheckBox,
-    LineEdit,
     MessageBox,
     TransparentToolButton,
 )
 
-from subsearch.parsing import release_parser
-from subsearch.ui.cards.base import SettingsCard, build_section_header
+from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.setting_rows import (
-    HelpButton,
+    FolderPathRow,
     SwitchRow,
     make_switches_mutually_exclusive,
 )
@@ -73,10 +67,12 @@ class PostProcessingCard(SettingsCard):
         super().__init__("Subtitle post-processing", store, parent=parent)
         self.store = store
         self.add_header_help(SETTING_DESCRIPTIONS["card.post_processing"].explanation)
-        self.register_restore_defaults([
-            ("post_processing.target_path", DEFAULT_TARGET_PATH),
-            ("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION),
-        ])
+        self.register_restore_defaults(
+            [
+                ("post_processing.target_path", DEFAULT_TARGET_PATH),
+                ("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION),
+            ]
+        )
         self.add_row(SwitchRow("post_processing.rename", store))
         self.move_best = SwitchRow("post_processing.move_best", store)
         self.move_all = SwitchRow("post_processing.move_all", store)
@@ -89,6 +85,16 @@ class PostProcessingCard(SettingsCard):
         self._build_destination()
         self._update_destination_enabled()
 
+        store.value_changed.connect(self._on_store_changed)
+        self._apply_manual_handle_state(bool(store.read("download_manager.manually_handle_post_processing")))
+
+    def _on_store_changed(self, key: str, value: object) -> None:
+        if key == "download_manager.manually_handle_post_processing":
+            self._apply_manual_handle_state(bool(value))
+
+    def _apply_manual_handle_state(self, manual_enabled: bool) -> None:
+        self.set_body_enabled(not manual_enabled)
+
     def _update_destination_enabled(self, _checked: bool = False) -> None:
         moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()
         self.destination.setEnabled(moving_enabled)
@@ -97,77 +103,29 @@ class PostProcessingCard(SettingsCard):
         self.destination = QWidget(self)
         destination_layout = QVBoxLayout(self.destination)
         destination_layout.setContentsMargins(0, 0, 0, 0)
-        destination_layout.addLayout(build_section_header("post_processing.target_path", self))
 
-        self.path_edit = LineEdit(self)
-        self.path_edit.setText(str(self.store.read("post_processing.target_path")))
-        self.path_edit.setClearButtonEnabled(True)
-        apply_body_font(self.path_edit)
-        self.path_edit.textChanged.connect(self._on_path_text_changed)
-        self.path_edit.editingFinished.connect(self._save_path_if_valid)
-        help_button = HelpButton(DESTINATION_PATH_EXAMPLES, self)
-        path_row = QHBoxLayout()
-        path_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
-        path_row.addWidget(self.path_edit, stretch=1)
-        path_row.addWidget(self._build_browse_button())
-        path_row.addWidget(help_button)
-        destination_layout.addLayout(path_row)
+        self.destination_path = FolderPathRow("post_processing.target_path", self.store, DESTINATION_PATH_EXAMPLES)
+        self.destination_path.path_saved.connect(self._on_destination_path_saved)
+        destination_layout.addWidget(self.destination_path)
 
         create_missing_folder = SwitchRow("post_processing.create_missing_folder", self.store, self)
         destination_layout.addWidget(create_missing_folder)
         self.register_restore_defaults([(create_missing_folder.config_key, create_missing_folder.default_value)])
         self.body_layout.addWidget(self.destination)
 
-    def _build_browse_button(self) -> QWidget:
-        browse_button = CaptionedToolButton(
-            "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
-        )
-        browse_button.clicked.connect(self._browse_for_folder)
-        return browse_button
-
-    def _browse_for_folder(self) -> None:
-        selected_folder = QFileDialog.getExistingDirectory(
-            self.window(),
-            "Select destination folder",
-            self.path_edit.text(),
-        )
-        if not selected_folder:
-            return
-        self.path_edit.setText(str(Path(selected_folder)))
-        self._save_path_if_valid()
-
-    def _apply_path_error_style(self, is_error: bool) -> None:
-        self.path_edit.setError(is_error)
-        self.path_edit.setProperty("error", "true" if is_error else "false")
-        self.path_edit.style().unpolish(self.path_edit)
-        self.path_edit.style().polish(self.path_edit)
-
-    def _path_is_valid(self) -> bool:
-        target_path = self.path_edit.text()
-        path_resolution = release_parser.detect_path_resolution(target_path)
-        return release_parser.valid_path(target_path, path_resolution)
-
-    def _persist_path(self) -> None:
-        target_path = self.path_edit.text()
-        path_resolution = release_parser.detect_path_resolution(target_path)
-        self._apply_path_error_style(False)
-        self.store.write("post_processing.target_path", target_path)
+    def _on_destination_path_saved(self, _path: str, path_resolution: str) -> None:
         self.store.write("post_processing.path_resolution", path_resolution)
 
-    def _save_path_if_valid(self) -> None:
-        if self._path_is_valid():
-            self._persist_path()
-
     def commit_path_or_revert(self) -> bool:
-        if self._path_is_valid():
-            self._persist_path()
+        if self.destination_path.is_valid():
+            self.destination_path.save_if_valid()
             return True
         return self._prompt_invalid_path_on_exit()
 
     def _prompt_invalid_path_on_exit(self) -> bool:
         confirmation = MessageBox(
             "Destination folder is not valid",
-            f'The destination folder\n\n"{self.path_edit.text()}"\n\nis not valid. '
+            f'The destination folder\n\n"{self.destination_path.text()}"\n\nis not valid. '
             f'Exit anyway and reset it to the default ("{DEFAULT_TARGET_PATH}"), '
             "or stay and fix it?",
             self.window(),
@@ -176,14 +134,8 @@ class PostProcessingCard(SettingsCard):
         confirmation.cancelButton.setText("Stay and fix")
         if not confirmation.exec():
             return False
-        self.path_edit.setText(DEFAULT_TARGET_PATH)
-        self.store.write("post_processing.target_path", DEFAULT_TARGET_PATH)
-        self.store.write("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION)
+        self.destination_path.set_path(DEFAULT_TARGET_PATH)
         return True
-
-    def _on_path_text_changed(self, target_path: str) -> None:
-        path_resolution = release_parser.detect_path_resolution(target_path)
-        self._apply_path_error_style(not release_parser.valid_path(target_path, path_resolution))
 
 
 class FileExtensionsCard(SettingsCard):

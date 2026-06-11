@@ -67,19 +67,32 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Summary notification",
         "Pop up a notification when a search finishes. Needs the system tray icon turned on.",
     ),
-    "download.automatic": SettingDescription(
-        "Automatic downloads",
-        "Automatically download the best matching subtitle instead of showing every match for you to pick from.",
+    "download_manager.search_mode": SettingDescription(
+        "Search mode",
+        "Manual: always open the download manager so you pick the subtitle yourself. "
+        "Hybrid: auto-download the best match; open the manager only when nothing qualifies. "
+        "Automatic: always auto-download silently, never open the manager.",
     ),
-    "download.always_open_manager": SettingDescription(
-        "Always open download manager",
-        "Open the download manager after every search so you can choose a subtitle yourself. "
-        "Can't be used together with opening it only when nothing matches.",
+    "download_manager.manually_handle_post_processing": SettingDescription(
+        "Manually handle post-processing",
+        "When on, the Download Manager lets you pick and process subtitles yourself. "
+        "The Post-Processing card is disabled while this is active.",
     ),
-    "download.open_manager_on_no_matches": SettingDescription(
-        "Open manager on no matches",
-        "Open the download manager only when nothing matched automatically. "
-        "Can't be used together with always opening it.",
+    "download_manager.use_post_processing_target": SettingDescription(
+        "Use post-processing destination",
+        "When on, the Download Manager moves subtitles to the same folder as Post-Processing. "
+        "Turn off to set a separate destination folder just for the manager.",
+    ),
+    "download_manager.target_path": SettingDescription(
+        "Destination folder",
+        "The folder subtitles are moved to when using the Download Manager. "
+        "Can be relative to the video's folder or a fixed path on your drive.",
+    ),
+    "download_manager.working_directory": SettingDescription(
+        "Working folder",
+        "Where the Download Manager keeps its working files when searching without a video file: "
+        "downloaded archives land in a temporary folder here and subtitles are extracted to a subs folder. "
+        "Leave empty to let Subsearch decide (your Downloads folder).",
     ),
     "download_manager.available_subtitles": SettingDescription(
         "Available subtitles",
@@ -183,11 +196,11 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Controls the system tray icon and the pop-up that appears when a search finishes. "
         "The summary notification requires the tray icon to be turned on.",
     ),
-    "card.download_manager": SettingDescription(
-        "Download manager",
-        "Decides when the download manager opens. "
-        "Automatic mode picks the best match silently; "
-        "you can also force it open every time or only when nothing matched.",
+    "card.download_manager_settings": SettingDescription(
+        "Download manager settings",
+        "Controls how the Download Manager handles subtitles after finding them. "
+        "Enable manual post-processing to pick and move subtitles yourself, "
+        "and choose where they are placed.",
     ),
     "card.application": SettingDescription(
         "Application",

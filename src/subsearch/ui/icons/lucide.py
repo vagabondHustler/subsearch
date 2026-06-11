@@ -61,6 +61,9 @@ class LucideIcon(FluentIconBase, Enum):
     TV = "tv"
     MONITOR = "monitor"
     HISTORY = "history"
+    SEARCH = "search"
+    FOLDER_OUTPUT = "folder-output"
+    FILE_OUTPUT = "file-output"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

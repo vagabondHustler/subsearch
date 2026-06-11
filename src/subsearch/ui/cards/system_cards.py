@@ -5,11 +5,7 @@ from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.widgets.setting_rows import (
-    SpinBoxRow,
-    SwitchRow,
-    make_switches_mutually_exclusive,
-)
+from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow
 
 
 class NotificationsCard(SettingsCard):
@@ -24,18 +20,6 @@ class NotificationsCard(SettingsCard):
         self.summary_notification.set_enabled(self.system_tray.switch.isChecked())
 
 
-class DownloadManagerCard(SettingsCard):
-    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Download manager", store, parent=parent)
-        self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager"].explanation)
-        self.add_row(SwitchRow("download.automatic", store))
-        self.open_on_no_matches = SwitchRow("download.open_manager_on_no_matches", store)
-        self.always_open = SwitchRow("download.always_open_manager", store)
-        self.add_row(self.open_on_no_matches)
-        self.add_row(self.always_open)
-        make_switches_mutually_exclusive(self.open_on_no_matches, self.always_open)
-
-
 class ApplicationCard(SettingsCard):
     def __init__(
         self, store: SettingsStore, shell_service: ShellIntegrationService, parent: QWidget | None = None
@@ -45,10 +29,9 @@ class ApplicationCard(SettingsCard):
         self.shell_service = shell_service
         self.add_header_help(SETTING_DESCRIPTIONS["card.application"].explanation)
         show_terminal = SwitchRow("application.show_terminal", store)
-        if DEVICE_INFO.mode == "executable":
-            show_terminal.set_enabled(False)
         show_terminal.toggled.connect(self._on_show_terminal_toggled)
-        self.add_row(show_terminal)
+        if DEVICE_INFO.mode != "executable":
+            self.add_row(show_terminal)
         self.add_row(SwitchRow("application.single_instance", store))
 
     def _on_show_terminal_toggled(self) -> None:

@@ -177,7 +177,7 @@ class ApiKeyField(QWidget):
 
 class ApiCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Subsource", parent)
+        super().__init__("Subsource", parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS[API_KEY_DESCRIPTION_KEY].explanation)
 
         title_label = BodyLabel("API key", self)

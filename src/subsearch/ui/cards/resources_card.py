@@ -79,7 +79,7 @@ def _open_third_party_licenses() -> None:
 
 class ResourcesCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__("Resources", parent)
+        super().__init__("Resources", parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["card.resources"].explanation)
 
         actions = [
