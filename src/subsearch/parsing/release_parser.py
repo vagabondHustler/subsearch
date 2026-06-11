@@ -30,6 +30,17 @@ def remove_padded_zero(x: str) -> str:
 _RELEASE_YEAR_PATTERN = re.compile(r"(?<=[. (\-])([1-2][0-9]{3})(?=[. )\-]|$)")
 # matches a season/episode token in the forms s01e02, s01.e02, s01 e02 or s01-e02, at a token boundary
 _RELEASE_SEASON_EPISODE_PATTERN = re.compile(r"(?:^|[. (\-])s(\d{1,2})[. \-]?e(\d{1,4})(?=[. )\-]|$)")
+# matches punctuation users type freely but release names omit: apostrophes, backticks, colons, semicolons, commas, quotes, ! and ?
+_TYPED_PUNCTUATION_PATTERN = re.compile(r"[’'`:;,!?\"]")
+
+
+def normalize_typed_punctuation(string: str) -> str:
+    without_punctuation = _TYPED_PUNCTUATION_PATTERN.sub("", string.replace("&", " and "))
+    return " ".join(without_punctuation.split())
+
+
+def _looks_like_typed_term(string: str) -> bool:
+    return "." not in string
 
 
 def find_year(string: str) -> int:
@@ -40,7 +51,7 @@ def find_year(string: str) -> int:
 
 
 def _title_before(string: str, cutoff: int) -> str:
-    return string[:cutoff].replace(".", " ").strip(" (-")
+    return " ".join(string[:cutoff].replace(".", " ").split()).strip(" (-")
 
 
 def find_title_by_year(string: str) -> str:
@@ -81,11 +92,17 @@ def find_group(string: str) -> str:
     return group
 
 
+def _typed_term_title(string: str) -> str:
+    return " ".join(_normalize_tokens(string)["title"])
+
+
 def find_title(filename: str, year: int, series: bool) -> str:
     if year != 0:
         title = find_title_by_year(filename)
     elif series and year == 0:
         title = find_title_by_show(filename)
+    elif _looks_like_typed_term(filename):
+        title = _typed_term_title(filename)
     else:
         title = filename.rsplit("-", 1)[0]
     return title
@@ -188,13 +205,13 @@ class CreateProviderUrls:
 def get_release_info(filename: str) -> ReleaseInfo:
     if not filename:
         return no_release_data()
-    release = filename.lower()
+    release = normalize_typed_punctuation(filename.lower())
     year = find_year(release)
     season_episode = find_season_episode(release)
     season, season_ordinal, episode, episode_ordinal, series = convert_to_ordinal_string(season_episode)
 
     title = find_title(release, year, series)
-    group = find_group(release)
+    group = "" if _looks_like_typed_term(release) else find_group(release)
     imdb_id = ""
 
     parameters = ReleaseInfo(
@@ -317,8 +334,9 @@ def _collapse_season_episode(filename: str) -> str:
 
 
 def _normalize_tokens(filename: str) -> dict:
-    lowered = _collapse_season_episode(filename.lower())
-    group = lowered.rsplit("-", 1)[-1]
+    lowered = _collapse_season_episode(normalize_typed_punctuation(filename.lower()))
+    has_release_group = "-" in lowered and not _looks_like_typed_term(lowered)
+    group = lowered.rsplit("-", 1)[-1] if has_release_group else ""
     raw_tokens = [token for token in re.split(r"[. \-]", lowered) if token]  # dots, spaces or hyphens as delimiters
     year: str | None = None
     season_episode: str | None = None
@@ -342,6 +360,9 @@ def _normalize_tokens(filename: str) -> dict:
             edition.add(token)
             continue
         title.append(token)
+
+    if group and title and title[-1] == group:
+        title.pop()
 
     return {
         "title": title,
@@ -373,9 +394,41 @@ def _mismatch_factor(tokens_a: dict, tokens_b: dict, multipliers: dict[str, int]
     return multiplier
 
 
+# below this ratio two words are considered different words rather than a typo of the same word
+_TOKEN_SIMILARITY_CUTOFF = 0.75
+
+
+def _token_similarity(token_a: str, token_b: str) -> float:
+    return SequenceMatcher(None, token_a, token_b).ratio()
+
+
+def _fuzzy_title_score(title_a: list[str], title_b: list[str]) -> int:
+    if not title_a and not title_b:
+        return 100
+    unmatched = list(title_b)
+    matched_similarity_sum = 0.0
+    for token in title_a:
+        if not unmatched:
+            break
+        best_candidate = max(unmatched, key=lambda candidate: _token_similarity(token, candidate))
+        similarity = _token_similarity(token, best_candidate)
+        if similarity >= _TOKEN_SIMILARITY_CUTOFF:
+            matched_similarity_sum += similarity
+            unmatched.remove(best_candidate)
+    return round(2 * matched_similarity_sum / (len(title_a) + len(title_b)) * 100)
+
+
+def _group_score(group_a: str, group_b: str) -> int:
+    if group_a == group_b:
+        return 100
+    if not group_a or not group_b:
+        return 50
+    return 0
+
+
 def _get_base_score(tokens_a: dict, tokens_b: dict, weights: dict[str, float]) -> int:
-    title_score = round(SequenceMatcher(None, tokens_a["title"], tokens_b["title"]).ratio() * 100)
-    group_score = 100 if tokens_a["group"] == tokens_b["group"] else 0
+    title_score = _fuzzy_title_score(tokens_a["title"], tokens_b["title"])
+    group_score = _group_score(tokens_a["group"], tokens_b["group"])
     source_score = round(_source_compatibility(tokens_a["source"], tokens_b["source"]) * 100)
     weighted_total = title_score * weights["title"] + group_score * weights["group"] + source_score * weights["source"]
     return int(weighted_total // 100)
@@ -391,12 +444,17 @@ def score_subtitle_tokens(
     provider_tokens = _normalize_tokens(from_provider)
 
     if reference_tokens == provider_tokens:
+        log.debug(f"Fuzzy match: exact token match for {from_provider!r}", to_console=False)
         return 100
 
     base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
     mismatch_multiplier = _mismatch_factor(reference_tokens, provider_tokens, token_multipliers)
     score = round(base_score * mismatch_multiplier)
 
+    log.debug(
+        f"Fuzzy match: {score}% for {from_provider!r} (base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
+        to_console=False,
+    )
     return score
 
 

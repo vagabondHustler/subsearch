@@ -1,7 +1,53 @@
+from dataclasses import dataclass
+
 import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.model import ProviderDiagnosticStatus
+
+SUGGESTION_LIMIT = 5
+_SUGGESTION_KINDS = {"movie", "tvSeries", "tvMiniSeries", "tvMovie"}
+
+
+@dataclass(frozen=True)
+class TitleSuggestion:
+    title: str
+    year: int
+    tvseries: bool
+    imdb_id: str
+
+    def display_text(self) -> str:
+        year_suffix = f" ({self.year})" if self.year else ""
+        kind_suffix = "  ·  TV series" if self.tvseries else ""
+        return f"{self.title}{year_suffix}{kind_suffix}"
+
+    def search_term(self) -> str:
+        if self.tvseries or not self.year:
+            return self.title
+        return f"{self.title} ({self.year})"
+
+
+def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> list[TitleSuggestion]:
+    try:
+        search_result = imdbinfo.search_title(typed_term)
+    except ImdbinfoError:
+        log.warning(f"IMDb connection failed while fetching suggestions for {typed_term!r}")
+        return []
+    if not search_result:
+        log.debug(f"IMDb returned no suggestions for {typed_term!r}", to_console=False)
+        return []
+    suggestions = [
+        TitleSuggestion(
+            title=found_title.title,
+            year=found_title.year or 0,
+            tvseries=found_title.kind in ("tvSeries", "tvMiniSeries"),
+            imdb_id=found_title.imdbId,
+        )
+        for found_title in search_result.titles
+        if found_title.kind in _SUGGESTION_KINDS
+    ]
+    return suggestions[:limit]
 
 
 class ImdbIdLookup:
@@ -21,9 +67,11 @@ class ImdbIdLookup:
         try:
             search_result = imdbinfo.search_title(title)
         except ImdbinfoError:
+            log.warning(f"IMDb connection failed while looking up {title!r}")
             self.diagnostic_status = ProviderDiagnosticStatus.STRUCTURE_INVALID
             return None
         if not search_result:
+            log.debug(f"IMDb returned no results for {title!r}", to_console=False)
             return None
 
         for found_title in search_result.titles:
@@ -35,7 +83,12 @@ class ImdbIdLookup:
                 continue
 
             self.imdb_id = found_title.imdbId
+            log.debug(f"IMDb matched {title!r} -> {self.imdb_id}", to_console=False)
             break
+        else:
+            log.debug(
+                f"IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", to_console=False
+            )
 
     def _title_matches(self, found_title: str) -> bool:
         return self.title == found_title.lower()
