@@ -119,3 +119,9 @@
     ignore_missing_imports = false
     mypy_path = "src"
     warn_no_return = true
+
+# These libraries ship no type stubs; ignore only them so new untyped
+# dependencies still get flagged by ignore_missing_imports = false.
+[[tool.mypy.overrides]]
+    module = ["qfluentwidgets.*", "toml.*", "num2words.*", "imdbinfo.*"]
+    ignore_missing_imports = true

@@ -42,6 +42,10 @@ class VideoFile:
     subs_dir: Path
     tmp_dir: Path
 
+    def copy_from(self, other: "VideoFile") -> None:
+        for field_name in self.__slots__:
+            setattr(self, field_name, getattr(other, field_name))
+
 
 @dataclass(slots=True)
 class AppConfig:
@@ -58,9 +62,11 @@ class AppConfig:
     file_extensions: dict[str, bool]
     system_tray: bool
     summary_notification: bool
-    automatic_downloads: bool
-    always_open_manager: bool
-    open_manager_on_no_matches: bool
+    search_mode: str
+    manually_handle_post_processing: bool
+    use_post_processing_target: bool
+    download_manager_target_path: str
+    download_manager_working_directory: str
     post_processing: dict[str, Any]
     show_terminal: bool
     single_instance: bool
@@ -96,7 +102,10 @@ class ProviderUrls:
 
 class AppMode(Enum):
     SETTINGS = "settings"
-    SEARCH = "search"
+    SEARCH_MANUAL = "search_manual"
+    SEARCH_HYBRID = "search_hybrid"
+    SEARCH_AUTOMATIC = "search_automatic"
+    DEV = "dev"
 
 
 class SubtitleStatus(Enum):
@@ -118,6 +127,12 @@ class Subtitle:
     download_headers: dict[str, str] = field(default_factory=dict)
     status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
     hash_match: bool = False
+
+
+@dataclass(slots=True)
+class SearchOutcome:
+    subtitles: list[Subtitle]
+    skipped_providers: list[str]
 
 
 class MatchTier(IntEnum):

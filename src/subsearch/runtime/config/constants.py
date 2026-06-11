@@ -2,6 +2,7 @@ from subsearch.runtime.config import factories, static_values
 
 DEVICE_INFO = factories.get_system_info()
 VIDEO_FILE = factories.get_video_file_data()
+VIDEO_FILE_RESOLVER = factories.VideoFileResolver(static_values.SUPPORTED_FILE_EXTENSIONS)
 APP_PATHS = factories.get_app_paths()
 FILE_PATHS = factories.get_file_paths()
 SUPPORTED_FILE_EXT = static_values.SUPPORTED_FILE_EXTENSIONS

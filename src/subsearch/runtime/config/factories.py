@@ -70,10 +70,12 @@ def get_default_app_config() -> dict[str, Any]:
             "system_tray": True,
             "summary_notification": False,
         },
-        "download": {
-            "automatic": True,
-            "always_open_manager": False,
-            "open_manager_on_no_matches": True,
+        "download_manager": {
+            "search_mode": "hybrid",
+            "manually_handle_post_processing": False,
+            "use_post_processing_target": True,
+            "target_path": ".",
+            "working_directory": "",
         },
         "post_processing": {
             "rename": True,
@@ -106,42 +108,68 @@ def get_default_app_config() -> dict[str, Any]:
     }
 
 
-def _find_video_file(argument: str, supported_extensions: list[str]) -> Path | None:
-    argument_path = Path(argument)
-    extension = argument_path.suffix.lstrip(".")
-    if extension in supported_extensions and "\\" in argument:
-        return argument_path
-    return None
+class VideoFileResolver:
+    def __init__(self, supported_extensions: list[str]) -> None:
+        self._supported_extensions = supported_extensions
 
+    def resolve_from_argv(self) -> VideoFile:
+        for argument in sys.argv:
+            file_path = self._find_video_file_path(argument)
+            if file_path is not None:
+                return self._build_from_path(file_path)
+        return self._build_empty()
 
-def _build_video_file(file_path: Path) -> VideoFile:
-    return VideoFile(
-        file_exists=True,
-        filename=file_path.stem,
-        file_hash="",
-        file_extension=file_path.suffix,
-        file_path=file_path,
-        file_directory=file_path.parent,
-        subs_dir=file_path.parent / "subs",
-        tmp_dir=file_path.parent / "tmp_subsearch",
-    )
+    def re_resolve(self, filename: str, file_directory: Path) -> VideoFile:
+        suffix = Path(filename).suffix
+        has_video_extension = suffix.lstrip(".") in self._supported_extensions
+        file_path = file_directory / filename
+        if has_video_extension and file_path.exists():
+            return self._build_from_path(file_path)
+        return VideoFile(
+            file_exists=False,
+            filename=Path(filename).stem if has_video_extension else filename,
+            file_hash="",
+            file_extension=suffix if has_video_extension else "",
+            file_path=file_path,
+            file_directory=file_directory,
+            subs_dir=file_directory / "subs",
+            tmp_dir=file_directory / "tmp_subsearch",
+        )
+
+    def _find_video_file_path(self, argument: str) -> Path | None:
+        argument_path = Path(argument)
+        extension = argument_path.suffix.lstrip(".")
+        if extension in self._supported_extensions and "\\" in argument:
+            return argument_path
+        return None
+
+    def _build_from_path(self, file_path: Path) -> VideoFile:
+        return VideoFile(
+            file_exists=True,
+            filename=file_path.stem,
+            file_hash="",
+            file_extension=file_path.suffix,
+            file_path=file_path,
+            file_directory=file_path.parent,
+            subs_dir=file_path.parent / "subs",
+            tmp_dir=file_path.parent / "tmp_subsearch",
+        )
+
+    def _build_empty(self) -> VideoFile:
+        return VideoFile(
+            file_exists=False,
+            filename="",
+            file_hash="",
+            file_extension="",
+            file_path=Path(""),
+            file_directory=Path(""),
+            subs_dir=Path(""),
+            tmp_dir=Path(""),
+        )
 
 
 def get_video_file_data() -> VideoFile:
-    for argument in sys.argv:
-        file_path = _find_video_file(argument, SUPPORTED_FILE_EXTENSIONS)
-        if file_path is not None:
-            return _build_video_file(file_path)
-    return VideoFile(
-        file_exists=False,
-        filename="",
-        file_hash="",
-        file_extension="",
-        file_path=Path(""),
-        file_directory=Path(""),
-        subs_dir=Path(""),
-        tmp_dir=Path(""),
-    )
+    return VideoFileResolver(SUPPORTED_FILE_EXTENSIONS).resolve_from_argv()
 
 
 def get_system_info() -> SystemInfo:
