@@ -37,18 +37,30 @@ class RunConditions:
         return len(self.rejected_subtitles) >= 1
 
     @property
+    def is_search_mode(self) -> bool:
+        return self.app_mode in (AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID, AppMode.SEARCH_AUTOMATIC, AppMode.DEV)
+
+    @property
+    def is_pipeline_post_processing_mode(self) -> bool:
+        return self.app_mode in (AppMode.SEARCH_HYBRID, AppMode.SEARCH_AUTOMATIC)
+
+    @property
     def should_download_files(self) -> bool:
         if not self.has_accepted:
             return False
-        if self.app_config.automatic_downloads:
+        if self.app_mode is AppMode.SEARCH_AUTOMATIC:
             return True
-        return not self.app_config.always_open_manager and not self.app_config.open_manager_on_no_matches
+        if self.app_mode is AppMode.SEARCH_HYBRID:
+            return True
+        return False
 
     @property
     def should_open_download_manager(self) -> bool:
-        open_no_matches = not self.has_accepted and self.has_rejected and self.app_config.open_manager_on_no_matches
-        always_open = (self.has_accepted or self.has_rejected) and self.app_config.always_open_manager
-        return open_no_matches or always_open
+        if self.app_mode is AppMode.SEARCH_MANUAL or self.app_mode is AppMode.DEV:
+            return True
+        if self.app_mode is AppMode.SEARCH_HYBRID and not self.has_accepted:
+            return True
+        return False
 
     def _evaluate_and_log(self, pipeline_step: str, condition_list: ConditionList) -> bool:
         results = [(label, condition() if callable(condition) else condition) for label, condition in condition_list]
@@ -59,10 +71,21 @@ class RunConditions:
 
     def conditions_met(self, pipeline_step: str) -> bool:
         self.sync_state()
+        return self._evaluate_and_log(pipeline_step, self._conditions_for(pipeline_step))
+
+    def unmet_condition_labels(self, pipeline_step: str) -> list[str]:
+        self.sync_state()
+        return [
+            label
+            for label, condition in self._conditions_for(pipeline_step)
+            if not (condition() if callable(condition) else condition)
+        ]
+
+    def _conditions_for(self, pipeline_step: str) -> ConditionList:
         post_processing = self.app_config.post_processing
         conditions: dict[str, ConditionList] = {
             "init_search": [
-                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+                ("app_mode_search", self.is_search_mode),
             ],
             "opensubtitles": [
                 ("language_supports_opensubtitles", lambda: self.language_supports_provider("opensubtitles")),
@@ -87,34 +110,37 @@ class RunConditions:
                 ("should_open_download_manager", self.should_open_download_manager),
             ],
             "subtitle_post_processing": [
-                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
             ],
             "extract_files": [
-                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
             "subtitle_rename": [
+                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("rename_enabled", post_processing["rename"]),
             ],
             "subtitle_move_best": [
+                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_best_enabled", post_processing["move_best"]),
                 ("not_move_all", not post_processing["move_all"]),
             ],
             "subtitle_move_all": [
+                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_all_enabled", post_processing["move_all"]),
             ],
             "summary_notification": [
-                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+                ("app_mode_search", self.is_search_mode),
                 ("summary_notification_enabled", self.app_config.summary_notification),
             ],
             "run_provider_diagnostics": [
-                ("app_mode_search", self.app_mode is AppMode.SEARCH),
+                ("app_mode_search", self.is_search_mode),
                 ("diagnostics_enabled", self.app_config.diagnostics["enabled"]),
             ],
             "clean_up": [],
         }
 
-        return self._evaluate_and_log(pipeline_step, conditions[pipeline_step])
+        return conditions[pipeline_step]

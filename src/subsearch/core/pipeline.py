@@ -6,19 +6,51 @@ from typing import Any, Callable
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
-from subsearch.io import file_system
+from subsearch.io import file_system, file_tracker
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
 from subsearch.runtime.config import parallel_tasks
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.models.model import (
-    AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,
+    SearchOutcome,
     Subtitle,
     SubtitleStatus,
 )
+from subsearch.ui.state.tasks import Worker
+
+PROVIDER_SKIP_EXPLANATIONS = {
+    "provider_enabled": "disabled in settings",
+    "language_supports_opensubtitles": "does not support the selected language",
+    "language_supports_yifysubtitles": "does not support the selected language",
+    "language_supports_subsource": "does not support the selected language",
+    "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
+    "not_tvseries": "does not support tv series",
+    "url_not_empty": "needs an IMDb match and none was found for this search",
+}
+
+
+class SearchWorker(Worker):
+    def __init__(self, pipeline: "SearchPipeline") -> None:
+        super().__init__()
+        self._pipeline = pipeline
+
+    def execute(self) -> SearchOutcome:
+        self._pipeline.bootstrap.ensure_search_mode()
+        self._pipeline.bootstrap.resync_app_config()
+        self._pipeline.bootstrap.rebuild_search_inputs()
+        self._pipeline.init_search(
+            self._pipeline.opensubtitles,
+            self._pipeline.yifysubtitles,
+            self._pipeline.subsource,
+        )
+        skipped_providers = self._pipeline.provider_skip_reasons()
+        for skip_reason in skipped_providers:
+            log.warning(skip_reason)
+        subtitles = self._pipeline.bootstrap.accepted_subtitles + self._pipeline.bootstrap.rejected_subtitles
+        return SearchOutcome(subtitles, skipped_providers)
 
 
 class SearchPipeline:
@@ -26,36 +58,24 @@ class SearchPipeline:
         self.bootstrap = Bootstrap(pref_counter)
         self.call_conditions = RunConditions(self.bootstrap)
         self._set_console_title()
-        if self._run_settings_mode():
-            return None
-        self._warn_if_filename_has_spaces()
-        if not self.bootstrap.all_providers_disabled():
-            self.bootstrap.prevent_conflicting_config_settings()
-            log.event("banner", title="Search started")
 
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
-
-    def _run_settings_mode(self) -> bool:
-        if self.bootstrap.app_mode is not AppMode.SETTINGS:
-            return False
-        log.event("banner", title="GUI")
-        from subsearch.ui.application import open_settings_window
-
-        open_settings_window()
-        log.debug("Exiting GUI")
-        self.bootstrap.resync_app_config()
-        self.bootstrap.prevent_conflicting_config_settings()
-        return True
-
-    def _warn_if_filename_has_spaces(self) -> None:
-        if " " in VIDEO_FILE.filename:
-            log.warning(f"{VIDEO_FILE.filename} contains spaces, result may vary")
 
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
         parallel_tasks.run_in_threads(*providers)
         log.event("task_completed")
+
+    def provider_skip_reasons(self) -> list[str]:
+        reasons = []
+        for provider_step in ("opensubtitles", "yifysubtitles", "subsource"):
+            unmet_labels = self.call_conditions.unmet_condition_labels(provider_step)
+            if not unmet_labels:
+                continue
+            explanation = "; ".join(PROVIDER_SKIP_EXPLANATIONS.get(label, label) for label in unmet_labels)
+            reasons.append(f"{provider_step} skipped: {explanation}")
+        return reasons
 
     @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
@@ -121,7 +141,7 @@ class SearchPipeline:
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        file_system.download_subtitle(subtitle, subtitle_number, total_count)
+        file_system.download_subtitle(subtitle, subtitle_number, total_count, VIDEO_FILE.tmp_dir)
         subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
@@ -141,7 +161,9 @@ class SearchPipeline:
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.application import open_settings_window
 
-        self.bootstrap.manually_accepted_subtitles = open_settings_window(subtitles)
+        self.bootstrap.manually_accepted_subtitles = open_settings_window(
+            subtitles, search_worker_factory=lambda: SearchWorker(self)
+        )
         self.bootstrap.resync_app_config()
         log.event("task_completed")
 
@@ -149,7 +171,7 @@ class SearchPipeline:
         target = self.bootstrap.app_config.post_processing["target_path"]
         resolution = self.bootstrap.app_config.post_processing["path_resolution"]
         create_missing_folder = self.bootstrap.app_config.post_processing["create_missing_folder"]
-        return file_system.create_path_from_string(target, resolution, create_missing_folder)
+        return file_system.create_path_from_string(target, resolution, VIDEO_FILE.file_directory, create_missing_folder)
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
@@ -170,7 +192,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
         log.event("banner", title="Renaming best match")
-        new_name = file_system.autoload_rename(VIDEO_FILE.filename, ".srt")
+        new_name = file_system.autoload_rename(VIDEO_FILE.filename, VIDEO_FILE.subs_dir, ".srt")
         self.bootstrap.autoload_src = new_name
         log.event("task_completed")
 
@@ -219,11 +241,13 @@ class SearchPipeline:
     def clean_up(self) -> None:
         log.event("banner", title="Cleaning up")
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        if VIDEO_FILE.file_exists:
-            file_system.del_file_type(VIDEO_FILE.subs_dir, ".nfo")
-            file_system.del_directory(VIDEO_FILE.tmp_dir)
-            if file_system.directory_is_empty(VIDEO_FILE.subs_dir):
-                file_system.del_directory(VIDEO_FILE.subs_dir)
+        tracker = file_tracker.get_file_tracker()
+        if VIDEO_FILE.tmp_dir != Path(""):
+            tracker.delete_tracked_within(VIDEO_FILE.subs_dir, "*.nfo")
+            tracker.delete_tracked_within(VIDEO_FILE.tmp_dir)
+            tracker.delete_if_tracked(VIDEO_FILE.tmp_dir)
+            if VIDEO_FILE.subs_dir.is_dir() and file_system.directory_is_empty(VIDEO_FILE.subs_dir):
+                tracker.delete_if_tracked(VIDEO_FILE.subs_dir)
         log.event("task_completed")
 
     def _wait_for_terminal_input(self) -> None:
