@@ -415,9 +415,18 @@ class ProvidersCard(SettingsCard):
 
         self.apply_language_compatibility(store.read("language.selected"))
         store.subscribe("language.selected", self.apply_language_compatibility)
+        store.value_changed.connect(self._on_store_changed)
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key != "search.providers":
+            return
+        for provider_key, check_box in self.check_boxes.items():
+            check_box.blockSignals(True)
+            check_box.setChecked(bool(value.get(provider_key, False)))
+            check_box.blockSignals(False)
 
     def _on_provider_toggled(self, provider_key: str, checked: bool) -> None:
-        providers = self.store.read("search.providers")
+        providers = dict(self.store.read("search.providers"))
         providers[provider_key] = checked
         self.store.write("search.providers", providers)
 

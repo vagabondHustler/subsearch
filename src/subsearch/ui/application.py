@@ -13,6 +13,7 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
+from subsearch.io import windows_registry
 from subsearch.runtime.config.constants import APP_PATHS
 from subsearch.runtime.models.model import SearchOutcome, Subtitle
 from subsearch.ui import warmup
@@ -52,6 +53,7 @@ from subsearch.ui.services.subtitle_downloads import (
     DownloadServiceProtocol,
     SubtitleDownloadService,
 )
+from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
@@ -90,7 +92,7 @@ class SettingsWindow(FluentWindow):
     def __init__(
         self,
         subtitles: list[Subtitle] | None = None,
-        search_worker_factory: Callable[[], Worker] | None = None,
+        search_worker_factory: Callable[[str], Worker] | None = None,
         download_service: DownloadServiceProtocol | None = None,
         post_processing_service: PostProcessingServiceProtocol | None = None,
         start_search_immediately: bool = False,
@@ -164,15 +166,22 @@ class SettingsWindow(FluentWindow):
         )
 
         video_file_service = VideoFileService(self)
+        title_suggestion_service = TitleSuggestionService(self.task_runner, self)
         self.download_manager_interface = DownloadManagerInterface(
-            store, download_service, post_processing_service, video_file_service, subtitles, log_panel_sink
+            store,
+            download_service,
+            post_processing_service,
+            video_file_service,
+            subtitles,
+            log_panel_sink,
+            title_suggestion_service,
         )
         download_manager_interface = self.download_manager_interface
 
         if search_worker_factory is not None:
             self.download_manager_interface.research_requested.connect(self._start_search)
             if start_search_immediately:
-                self._start_search()
+                self._start_search("")
 
         self.navigationInterface.addItem(
             routeKey="header",
@@ -226,12 +235,12 @@ class SettingsWindow(FluentWindow):
     def register_close_validator(self, validator: Callable[[], bool]) -> None:
         self._close_validators.append(validator)
 
-    def _start_search(self) -> None:
+    def _start_search(self, imdb_id: str = "") -> None:
         if self._search_worker_factory is None or self._search_running:
             return
         self._search_running = True
         self.download_manager_interface.reset_for_search()
-        worker = self._search_worker_factory()
+        worker = self._search_worker_factory(imdb_id)
         worker.finished.connect(self._on_search_finished)
         worker.failed.connect(self._on_search_failed)
         self.task_runner.submit(worker)
@@ -248,6 +257,7 @@ class SettingsWindow(FluentWindow):
         if all(validator() for validator in self._close_validators):
             self.task_runner.shutdown()
             self.store.commit()
+            windows_registry.reconcile_shell_integration()
             super().closeEvent(e)
         else:
             e.ignore()
@@ -261,7 +271,7 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
 
 def open_settings_window(
     subtitles: list[Subtitle] | None = None,
-    search_worker_factory: Callable[[], Worker] | None = None,
+    search_worker_factory: Callable[[str], Worker] | None = None,
     download_service: DownloadServiceProtocol | None = None,
     post_processing_service: PostProcessingServiceProtocol | None = None,
     start_search_immediately: bool = False,

@@ -52,6 +52,9 @@ def _make_fixture_subtitles() -> list[Subtitle]:
 
 
 class DevSearchWorker(Worker):
+    def __init__(self, _imdb_id: str = "") -> None:
+        super().__init__()
+
     def execute(self) -> SearchOutcome:
         time.sleep(_SIMULATED_SEARCH_SECONDS)
         return SearchOutcome(_make_fixture_subtitles(), ["yifysubtitles skipped: dev stub sample reason"])

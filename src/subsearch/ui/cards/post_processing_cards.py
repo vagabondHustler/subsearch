@@ -198,6 +198,15 @@ class FileExtensionsCard(SettingsCard):
 
         self.body_layout.addLayout(grid)
         self.set_enabled(bool(store.read("shell_integration.context_menu")))
+        store.value_changed.connect(self._on_store_changed)
+
+    def _on_store_changed(self, key: str, value: object) -> None:
+        if key != "shell_integration.file_extensions":
+            return
+        for extension, check_box in self.check_boxes.items():
+            check_box.blockSignals(True)
+            check_box.setChecked(bool(value.get(extension, False)))  # type: ignore[union-attr]
+            check_box.blockSignals(False)
 
     def _on_extension_toggled(self, extension: str, checked: bool) -> None:
         file_extensions = self.store.read("shell_integration.file_extensions")
@@ -216,8 +225,7 @@ class FileExtensionsCard(SettingsCard):
 
     def _persist_file_extensions(self, file_extensions: dict) -> None:
         self.store.write("shell_integration.file_extensions", file_extensions)
-        if self.store.read("shell_integration.context_menu"):
-            self.shell_service.refresh_registry_value("appliesto")
+        self.shell_service.reconcile()
 
     def set_enabled(self, enabled: bool) -> None:
         for check_box in self.check_boxes.values():
@@ -247,9 +255,8 @@ class ShellIntegrationCard(SettingsCard):
         self.context_menu_icon.set_enabled(self.context_menu.switch.isChecked())
 
     def _on_context_menu_toggled(self, enabled: bool) -> None:
-        self.shell_service.set_context_menu_enabled(enabled)
+        self.shell_service.reconcile()
         self.context_menu_icon.set_enabled(enabled)
 
     def _on_context_menu_icon_toggled(self) -> None:
-        if self.store.read("shell_integration.context_menu"):
-            self.shell_service.refresh_registry_value("icon")
+        self.shell_service.reconcile()

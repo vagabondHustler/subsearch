@@ -1,17 +1,22 @@
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QIcon
+from PySide6.QtCore import QByteArray, QRect, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QLabel,
     QListWidgetItem,
+    QSplitter,
+    QSplitterHandle,
     QVBoxLayout,
     QWidget,
 )
 from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButton
 
+from subsearch.parsing.imdb_lookup import TitleSuggestion
+from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.models.model import (
     MatchTier,
@@ -25,6 +30,7 @@ from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_q
 from subsearch.ui.services.log_panel import LogPanelSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
 from subsearch.ui.services.subtitle_downloads import DownloadServiceProtocol
+from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
@@ -42,8 +48,86 @@ from subsearch.ui.widgets.setting_rows import (
     SearchableComboBoxRow,
     SwitchRow,
 )
+from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
+
+# "Log" label (BODY_FONT_SIZE) + layout spacing (4) + one list item (BODY_FONT_SIZE + 2)
+_LOG_MIN_HEIGHT = BODY_FONT_SIZE + 4 + BODY_FONT_SIZE + 2
+# label + spacing + 4 rows
+_LOG_DEFAULT_HEIGHT = BODY_FONT_SIZE + 4 + 4 * (BODY_FONT_SIZE + 2)
+
+_HANDLE_HEIGHT = 20
+_HANDLE_LINE_WIDTH_FRACTION = 0.75
+_ICON_SIZE = 16
+
+
+class _SplitterHandle(QSplitterHandle):
+    def __init__(self, orientation: Qt.Orientation, parent: QSplitter) -> None:
+        super().__init__(orientation, parent)
+        self.setCursor(Qt.CursorShape.SizeVerCursor)
+        svg_bytes = LucideIcon.GRIP_HORIZONTAL.source().encode()
+        self._normal_svg = self._recolor(svg_bytes, palette.POPUP_BORDER)
+        self._hover_svg = self._recolor(svg_bytes, palette.NEUTRAL_3)
+        self._hovered = False
+
+    @staticmethod
+    def _recolor(svg_bytes: bytes, color: str) -> bytes:
+        return svg_bytes.replace(b"currentColor", color.encode())
+
+    def sizeHint(self) -> QSize:
+        return QSize(0, _HANDLE_HEIGHT)
+
+    def enterEvent(self, _event) -> None:
+        self._hovered = True
+        self.update()
+
+    def leaveEvent(self, _event) -> None:
+        self._hovered = False
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        line_color = palette.NEUTRAL_3 if self._hovered else palette.POPUP_BORDER
+        pen = QPen(QColor(line_color), 1)
+        painter.setPen(pen)
+        mid_y = self.height() // 2
+        line_width = int(self.width() * _HANDLE_LINE_WIDTH_FRACTION)
+        line_x = (self.width() - line_width) // 2
+        icon_gap = _ICON_SIZE // 2 + 4
+        center_x = self.width() // 2
+        painter.drawLine(line_x, mid_y, center_x - icon_gap, mid_y)
+        painter.drawLine(center_x + icon_gap, mid_y, line_x + line_width, mid_y)
+
+        svg_data = self._hover_svg if self._hovered else self._normal_svg
+        renderer = QSvgRenderer(QByteArray(svg_data))
+        icon_rect = QRect(
+            (self.width() - _ICON_SIZE) // 2,
+            (self.height() - _ICON_SIZE) // 2,
+            _ICON_SIZE,
+            _ICON_SIZE,
+        )
+        renderer.render(painter, icon_rect)
+        painter.end()
+
+
+class _StyledSplitter(QSplitter):
+    def createHandle(self) -> QSplitterHandle:
+        return _SplitterHandle(self.orientation(), self)
+
+
+def _build_splitter(top: QWidget, bottom: QWidget) -> QSplitter:
+    splitter = _StyledSplitter(Qt.Orientation.Vertical)
+    splitter.setChildrenCollapsible(False)
+    splitter.addWidget(top)
+    splitter.addWidget(bottom)
+    top.setMinimumHeight(80)
+    bottom.setMinimumHeight(_LOG_MIN_HEIGHT)
+    splitter.setSizes([splitter.sizeHint().height() - _LOG_DEFAULT_HEIGHT, _LOG_DEFAULT_HEIGHT])
+    return splitter
+
 
 LIST_FONT_FAMILY = "Segoe UI Semibold"
 ICON_SIZE = 16
@@ -99,14 +183,24 @@ DESTINATION_PATH_EXAMPLES = (
 
 
 class DownloadManagerSettingsCard(SettingsCard):
-    research_requested = Signal()
+    research_requested = Signal(str)
 
     def __init__(
-        self, store: SettingsStore, video_file_service: VideoFileService, parent: QWidget | None = None
+        self,
+        store: SettingsStore,
+        video_file_service: VideoFileService,
+        title_suggestion_service: TitleSuggestionService | None = None,
+        parent: QWidget | None = None,
     ) -> None:
         super().__init__("Download manager settings", store, parent=parent)
         self.store = store
         self._video_file_service = video_file_service
+        self._title_suggestion_service = title_suggestion_service
+        self._awaiting_suggestions = False
+        self._term_without_suggestions = ""
+        if title_suggestion_service is not None:
+            title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
+            title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
         self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager_settings"].explanation)
 
         search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
@@ -136,6 +230,16 @@ class DownloadManagerSettingsCard(SettingsCard):
         self.register_restore_defaults([("download_manager.working_directory", DEFAULT_WORKING_DIRECTORY)])
 
         self._build_video_file_section()
+        store.subscribe("search.providers", self._on_providers_changed)
+        self._on_providers_changed(store.read("search.providers"))
+
+    def _on_providers_changed(self, providers: dict) -> None:
+        all_disabled = not any(providers.values())
+        self._search_video.setEnabled(not all_disabled)
+        if all_disabled:
+            self._search_video.setToolTip("Enable at least one subtitle provider to search")
+        else:
+            self._search_video.setToolTip("Search for subtitles")
 
     def _apply_use_pp_target_state(self, use_pp: bool) -> None:
         self._target_path_row.setVisible(not use_pp)
@@ -160,23 +264,80 @@ class DownloadManagerSettingsCard(SettingsCard):
         browse_video = CaptionedToolButton("Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self)
         browse_video.clicked.connect(self._browse_for_video_file)
 
-        search_video = CaptionedToolButton("Search", icon=lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR), parent=self)
-        search_video.clicked.connect(self._on_search_clicked)
+        self._search_video = CaptionedToolButton(
+            "Search", icon=lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR), parent=self
+        )
+        self._search_video.clicked.connect(self._on_search_clicked)
 
         file_row = QHBoxLayout()
         file_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
         file_row.addWidget(self._filename_edit, stretch=1)
         file_row.addWidget(browse_video)
-        file_row.addWidget(search_video)
+        file_row.addWidget(self._search_video)
         section_layout.addLayout(file_row)
 
         self.body_layout.addLayout(section_layout)
 
     def _on_search_clicked(self) -> None:
+        if self._awaiting_suggestions:
+            return
         # Tool buttons do not take focus on click, so editingFinished never fires
         # for a typed search term; commit the field before starting the search.
         self._on_filename_edited()
-        self.research_requested.emit()
+        typed_term = self._filename_edit.text().strip()
+        suggestion_service = self._title_suggestion_service
+        if suggestion_service is not None and self._needs_title_suggestions(typed_term):
+            self._awaiting_suggestions = True
+            suggestion_service.request(typed_term)
+            return
+        self.research_requested.emit("")
+
+    def _needs_title_suggestions(self, typed_term: str) -> bool:
+        if not typed_term:
+            return False
+        if typed_term == self._term_without_suggestions:
+            return False
+        release_info = get_release_info(typed_term)
+        return release_info.year == 0 and not release_info.tvseries
+
+    def _on_suggestions_ready(self, typed_term: str, suggestions: list[TitleSuggestion]) -> None:
+        if not self._awaiting_suggestions:
+            return
+        self._awaiting_suggestions = False
+        if not suggestions:
+            self._search_as_typed(typed_term)
+            return
+        self._suggestion_popup().show_suggestions(suggestions)
+
+    def _on_suggestion_lookup_failed(self, _message: str) -> None:
+        if not self._awaiting_suggestions:
+            return
+        self._awaiting_suggestions = False
+        self._search_as_typed(self._filename_edit.text().strip())
+
+    def _suggestion_popup(self) -> TitleSuggestionPopup:
+        popup = getattr(self, "_title_suggestion_popup", None)
+        if popup is None:
+            popup = TitleSuggestionPopup(self._filename_edit)
+            popup.suggestion_accepted.connect(self._on_suggestion_accepted)
+            popup.dismissed.connect(self._on_suggestions_dismissed)
+            self._title_suggestion_popup = popup
+        return popup
+
+    def _on_suggestion_accepted(self, suggestion: TitleSuggestion) -> None:
+        accepted_term = suggestion.search_term()
+        self._filename_edit.setText(accepted_term)
+        self._term_without_suggestions = accepted_term
+        self._on_filename_edited()
+        self.research_requested.emit(suggestion.imdb_id)
+
+    def _on_suggestions_dismissed(self) -> None:
+        self._search_as_typed(self._filename_edit.text().strip())
+
+    def _search_as_typed(self, typed_term: str) -> None:
+        self._term_without_suggestions = typed_term
+        self._on_filename_edited()
+        self.research_requested.emit("")
 
     def _on_filename_edited(self) -> None:
         filename = self._filename_edit.text().strip()
@@ -205,6 +366,7 @@ class DownloadManagerSettingsCard(SettingsCard):
 
 class SubtitleCard(SettingsCard):
     search_text_changed = Signal(str)
+    search_confirmed = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         description = SETTING_DESCRIPTIONS["download_manager.available_subtitles"]
@@ -231,6 +393,7 @@ class SubtitleCard(SettingsCard):
         apply_body_font(bar)
         bar.setClearButtonEnabled(True)
         bar.textChanged.connect(self.search_text_changed)
+        bar.returnPressed.connect(self.search_confirmed)
         bar.setVisible(False)
         return bar
 
@@ -315,7 +478,7 @@ class SubtitleActionRow(QWidget):
 
 
 class DownloadManagerInterface(QWidget):
-    research_requested = Signal()
+    research_requested = Signal(str)
 
     def __init__(
         self,
@@ -325,6 +488,7 @@ class DownloadManagerInterface(QWidget):
         video_file_service: VideoFileService,
         subtitles: list[Subtitle] | None = None,
         log_panel_sink: LogPanelSink | None = None,
+        title_suggestion_service: TitleSuggestionService | None = None,
     ) -> None:
         super().__init__()
         self.setObjectName("downloadManagerInterface")
@@ -349,18 +513,21 @@ class DownloadManagerInterface(QWidget):
         layout.setContentsMargins(36, 24, 36, 24)
         layout.setSpacing(8)
 
-        self._settings_card = DownloadManagerSettingsCard(store, video_file_service, self)
+        self._settings_card = DownloadManagerSettingsCard(store, video_file_service, title_suggestion_service, self)
         self._settings_card.research_requested.connect(self.research_requested)
         self._settings_card.make_collapsible(collapsed=bool(self.subtitles))
         layout.addWidget(self._settings_card)
 
         self._card = SubtitleCard(self)
         self._card.search_text_changed.connect(self._filter_list)
-        layout.addWidget(self._card, stretch=1)
+        self._card.search_confirmed.connect(self._select_first_visible)
 
         if log_panel_sink is not None:
             self._log_panel = LogPanel(log_panel_sink, self)
-            layout.addWidget(self._log_panel, stretch=1)
+            self._splitter = _build_splitter(self._card, self._log_panel)
+            layout.addWidget(self._splitter, stretch=1)
+        else:
+            layout.addWidget(self._card, stretch=1)
 
         if not self.subtitles:
             self._show_placeholder(IDLE_PLACEHOLDER_TEXT)
@@ -473,6 +640,16 @@ class DownloadManagerInterface(QWidget):
             item = self.list_widget.item(row)
             if item is not None:
                 item.setHidden(bool(lowered) and lowered not in subtitle.subtitle_name.lower())
+
+    def _select_first_visible(self) -> None:
+        if not hasattr(self, "list_widget"):
+            return
+        for row in range(self.list_widget.count()):
+            item = self.list_widget.item(row)
+            if item is not None and not item.isHidden():
+                self.list_widget.setCurrentItem(item)
+                self.list_widget.scrollToItem(item)
+                break
 
     def _on_item_clicked(self, item: QListWidgetItem) -> None:
         subtitle = self.subtitles_by_row[self.list_widget.row(item)]

@@ -2,7 +2,8 @@ from typing import Any, Callable
 
 from PySide6.QtCore import QObject, Signal
 
-from subsearch.io import toml_file
+from subsearch.io.language_data import load_language_data
+from subsearch.runtime.config import config_session
 
 
 class SettingsStore(QObject):
@@ -10,7 +11,7 @@ class SettingsStore(QObject):
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
-        self._session = toml_file.get_config_session()
+        self._session = config_session.get_config_session()
 
     def read(self, key: str) -> Any:
         return self._session.read(key)
@@ -32,4 +33,4 @@ class SettingsStore(QObject):
         self._session.commit()
 
     def language_data(self) -> dict[str, Any]:
-        return toml_file.load_language_data()
+        return load_language_data()

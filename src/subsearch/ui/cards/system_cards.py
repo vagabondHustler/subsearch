@@ -35,8 +35,7 @@ class ApplicationCard(SettingsCard):
         self.add_row(SwitchRow("application.single_instance", store))
 
     def _on_show_terminal_toggled(self) -> None:
-        if self.store.read("shell_integration.context_menu"):
-            self.shell_service.refresh_registry_value("command")
+        self.shell_service.reconcile()
 
 
 class NetworkCard(SettingsCard):

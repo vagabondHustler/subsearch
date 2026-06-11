@@ -57,6 +57,10 @@ class LogPanel(QWidget):
         font.setWeight(SEMI_BOLD)
         return font
 
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._list.scrollToBottom()
+
     def _append(self, message: str, color: str, bold: bool) -> None:
         item = QListWidgetItem(message)
         item.setForeground(QColor(color))
