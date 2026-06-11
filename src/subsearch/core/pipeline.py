@@ -33,14 +33,15 @@ PROVIDER_SKIP_EXPLANATIONS = {
 
 
 class SearchWorker(Worker):
-    def __init__(self, pipeline: "SearchPipeline") -> None:
+    def __init__(self, pipeline: "SearchPipeline", imdb_id: str = "") -> None:
         super().__init__()
         self._pipeline = pipeline
+        self._imdb_id = imdb_id
 
     def execute(self) -> SearchOutcome:
         self._pipeline.bootstrap.ensure_search_mode()
         self._pipeline.bootstrap.resync_app_config()
-        self._pipeline.bootstrap.rebuild_search_inputs()
+        self._pipeline.bootstrap.rebuild_search_inputs(self._imdb_id)
         self._pipeline.init_search(
             self._pipeline.opensubtitles,
             self._pipeline.yifysubtitles,
@@ -162,7 +163,7 @@ class SearchPipeline:
         from subsearch.ui.application import open_settings_window
 
         self.bootstrap.manually_accepted_subtitles = open_settings_window(
-            subtitles, search_worker_factory=lambda: SearchWorker(self)
+            subtitles, search_worker_factory=lambda imdb_id="": SearchWorker(self, imdb_id)
         )
         self.bootstrap.resync_app_config()
         log.event("task_completed")

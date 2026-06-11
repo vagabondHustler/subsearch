@@ -27,7 +27,9 @@ class SettingsFlow(Flow):
         log.event("banner", title="GUI")
         from subsearch.ui.application import open_settings_window
 
-        manually_accepted = open_settings_window(search_worker_factory=lambda: SearchWorker(self.pipeline))
+        manually_accepted = open_settings_window(
+            search_worker_factory=lambda imdb_id="": SearchWorker(self.pipeline, imdb_id)
+        )
         log.debug("Exiting GUI")
         self._record_gui_results(manually_accepted)
         self.bootstrap.prevent_conflicting_config_settings()
@@ -41,7 +43,7 @@ class ManualSearchFlow(Flow):
 
         manually_accepted = open_settings_window(
             subtitles=None,
-            search_worker_factory=lambda: SearchWorker(self.pipeline),
+            search_worker_factory=lambda imdb_id="": SearchWorker(self.pipeline, imdb_id),
             start_search_immediately=True,
         )
         self._record_gui_results(manually_accepted)

@@ -1,12 +1,18 @@
 import sys
 from pathlib import Path
 
-from subsearch.io import file_system, file_tracker, toml_file, windows_registry
+from subsearch.io import file_system, file_tracker, language_data, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers.provider_helper import SubtitleResults
+from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppMode, ProviderResult, Subtitle
+from subsearch.runtime.models.model import (
+    AppMode,
+    ProviderDiagnosticStatus,
+    ProviderResult,
+    Subtitle,
+)
 
 
 class Bootstrap:
@@ -32,8 +38,9 @@ class Bootstrap:
         )
         log.debug("Verifying files and paths")
         self.setup_file_system()
-        self.language_data = toml_file.load_language_data()
-        self.app_config = toml_file.get_config_session().snapshot()
+        self.language_data = language_data.load_language_data()
+        self.app_config = config_session.get_config_session().snapshot()
+        windows_registry.reconcile_shell_integration()
         self.app_mode = self._resolve_app_mode()
         if not windows_registry.check_long_paths_enabled():
             self._notify_user()
@@ -61,7 +68,7 @@ class Bootstrap:
         if self.app_mode is AppMode.SETTINGS:
             self.app_mode = AppMode.SEARCH_MANUAL
 
-    def rebuild_search_inputs(self) -> None:
+    def rebuild_search_inputs(self, imdb_id: str = "") -> None:
         self._anchor_working_directory()
         VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path) if VIDEO_FILE.file_exists else ""
         log.dataclass(VIDEO_FILE, level="debug", to_console=False)
@@ -71,7 +78,7 @@ class Bootstrap:
         self.subtitle_results = SubtitleResults()
         self.health_reports = []
         self.release_data = release_parser.get_release_info(VIDEO_FILE.filename)
-        self.update_imdb_id()
+        self.update_imdb_id(imdb_id)
         log.dataclass(self.release_data, level="debug", to_console=False)
         provider_urls = release_parser.CreateProviderUrls(
             self.app_config, self.release_data, self.language_data, VIDEO_FILE.file_hash
@@ -87,7 +94,11 @@ class Bootstrap:
             subtitle_results=self.subtitle_results,
         )
 
-    def update_imdb_id(self) -> None:
+    def update_imdb_id(self, imdb_id: str = "") -> None:
+        if imdb_id:
+            self.release_data.imdb_id = imdb_id
+            self.health_reports.append(ProviderResult("imdb", ProviderDiagnosticStatus.OK, 1))
+            return
         find_id = imdb_lookup.ImdbIdLookup(
             self.release_data.title,
             self.release_data.year,
@@ -165,10 +176,10 @@ class Bootstrap:
         return False
 
     def resync_app_config(self) -> None:
-        self.app_config = toml_file.get_config_session().snapshot()
+        self.app_config = config_session.get_config_session().snapshot()
 
     def prevent_conflicting_config_settings(self) -> None:
-        session = toml_file.get_config_session()
+        session = config_session.get_config_session()
         if self.app_config.post_processing["move_best"] and self.app_config.post_processing["move_all"]:
             session.write("post_processing.move_best", False)
         session.commit()
