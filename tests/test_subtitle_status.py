@@ -10,12 +10,14 @@ def _build_helper() -> provider_helper.ProviderHelper:
     app_config = toml_file.get_app_config(FILE_PATHS.config)
     app_config.selected_language = "english"
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    release_data = release_parser.get_release_info(filename)
     helper = provider_helper.ProviderHelper(
         release_data=release_data,
         app_config=app_config,
         provider_urls=fixture_data.FAKE_PROVIDER_URLS,
         language_data=language_data,
+        filename=filename,
     )
     helper.provider_name = "testprovider"
     return helper

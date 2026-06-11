@@ -1,5 +1,4 @@
 from pathlib import Path
-from types import SimpleNamespace
 
 from subsearch.io import file_system
 from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
@@ -41,35 +40,32 @@ def test_classify_match_tier_ladder() -> None:
     assert MatchTier.S > MatchTier.A > MatchTier.B > MatchTier.C
 
 
-def test_find_best_subtitle_match_prefers_hash_over_equal_token_score(monkeypatch, tmp_path) -> None:
+def test_find_best_subtitle_match_prefers_hash_over_equal_token_score(tmp_path) -> None:
     release = "the.foo.bar.2021.1080p.web.h264-foobar"
     _make_srt(tmp_path, f"{release}.srt")
     _make_srt(tmp_path, f"{file_system._HASH_MATCH_PREFIX}{release}.srt")
-    monkeypatch.setattr(file_system, "VIDEO_FILE", SimpleNamespace(subs_dir=tmp_path))
 
-    best = file_system.find_best_subtitle_match(release)
+    best = file_system.find_best_subtitle_match(release, tmp_path)
 
     assert best.name.startswith(file_system._HASH_MATCH_PREFIX)
 
 
-def test_find_best_subtitle_match_picks_highest_token_score(monkeypatch, tmp_path) -> None:
+def test_find_best_subtitle_match_picks_highest_token_score(tmp_path) -> None:
     release = "the.foo.bar.2021.1080p.web.h264-foobar"
     _make_srt(tmp_path, "completely.unrelated.movie.1999.dvdrip-xyz.srt")
     _make_srt(tmp_path, f"{release}.srt")
-    monkeypatch.setattr(file_system, "VIDEO_FILE", SimpleNamespace(subs_dir=tmp_path))
 
-    best = file_system.find_best_subtitle_match(release)
+    best = file_system.find_best_subtitle_match(release, tmp_path)
 
     assert best.name == f"{release}.srt"
 
 
-def test_find_best_subtitle_match_breaks_ties_on_first_file(monkeypatch, tmp_path) -> None:
+def test_find_best_subtitle_match_breaks_ties_on_first_file(tmp_path) -> None:
     release = "the.foo.bar.2021.1080p.web.h264-foobar"
     _make_srt(tmp_path, f"a.{release}.srt")
     _make_srt(tmp_path, f"b.{release}.srt")
-    monkeypatch.setattr(file_system, "VIDEO_FILE", SimpleNamespace(subs_dir=tmp_path))
 
-    best = file_system.find_best_subtitle_match(release)
+    best = file_system.find_best_subtitle_match(release, tmp_path)
 
     assert best.name == f"a.{release}.srt"
 

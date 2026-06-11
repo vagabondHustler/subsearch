@@ -186,41 +186,91 @@ def test_string_parser_bad_filename() -> None:
     assert release_data.group == "the foo bar 1080p web h264"
 
 
-def test_provider_urls_movie(monkeypatch) -> None:
-    monkeypatch.setattr(release_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_MOVIE)
+def test_string_parser_typed_show_with_dotted_season_episode() -> None:
+    release_data = release_parser.get_release_info("Breakingbad.s01.e01")
+
+    assert release_data.title == "breakingbad"
+    assert release_data.year == 0
+    assert release_data.season == "01"
+    assert release_data.episode == "01"
+    assert release_data.tvseries is True
+
+
+def test_string_parser_typed_term_with_year() -> None:
+    release_data = release_parser.get_release_info("the matrix 1999")
+
+    assert release_data.title == "the matrix"
+    assert release_data.year == 1999
+    assert release_data.tvseries is False
+
+
+def test_string_parser_typed_term_with_parenthesized_year() -> None:
+    release_data = release_parser.get_release_info("the matrix (1999)")
+
+    assert release_data.title == "the matrix"
+    assert release_data.year == 1999
+
+
+def test_str_parser_dotted_season_episode_normalizes_for_scoring() -> None:
+    assert release_parser._normalize_tokens("breakingbad.s01.e01")["season_episode"] == "s01e01"
+    provider = "breakingbad.s01e01.1080p.web.h264-foobar"
+    dotted_score = release_parser.score_subtitle_tokens("breakingbad.s01.e01", provider)
+    joined_score = release_parser.score_subtitle_tokens("breakingbad.s01e01", provider)
+    assert dotted_score == joined_score
+
+
+def test_provider_urls_movie() -> None:
     app_config = toml_file.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    create_provider_urls = release_parser.CreateProviderUrls(
-        app_config,
-        release_data,
-        language_data,
-    )
+    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
     provider_url = create_provider_urls.retrieve_urls()
 
     assert provider_url.opensubtitles == [
         "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
     ]
-    assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
+    assert provider_url.opensubtitles_hash == []
     assert provider_url.yifysubtitles == []
 
 
-def test_provider_urls_series(monkeypatch) -> None:
-    monkeypatch.setattr(release_parser, "VIDEO_FILE", fixture_data.FAKE_VIDEO_FILE_SERIES)
+def test_provider_urls_movie_with_hash() -> None:
+    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    release_data = release_parser.get_release_info(filename)
+    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    create_provider_urls = release_parser.CreateProviderUrls(
+        app_config, release_data, language_data, file_hash="abc123"
+    )
+    provider_url = create_provider_urls.retrieve_urls()
+
+    assert provider_url.opensubtitles_hash == [
+        "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-abc123"
+    ]
+
+
+def test_provider_urls_typed_term_without_year() -> None:
+    app_config = toml_file.get_app_config(FILE_PATHS.config)
+    release_data = release_parser.get_release_info("the matrix")
+    language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
+    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
+    provider_url = create_provider_urls.retrieve_urls()
+
+    assert provider_url.opensubtitles == [
+        "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-the%20matrix/rss_2_00"
+    ]
+
+
+def test_provider_urls_series() -> None:
     app_config = toml_file.get_app_config(FILE_PATHS.config)
     filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
     release_data = release_parser.get_release_info(filename)
     language_data = toml_file.load_toml_data(FILE_PATHS.subtitle_languages)
-    create_provider_urls = release_parser.CreateProviderUrls(
-        app_config,
-        release_data,
-        language_data,
-    )
+    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
     provider_url = create_provider_urls.retrieve_urls()
 
     assert provider_url.opensubtitles == [
         "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
     ]
-    assert provider_url.opensubtitles_hash == ["https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"]
+    assert provider_url.opensubtitles_hash == []
     assert provider_url.yifysubtitles == []

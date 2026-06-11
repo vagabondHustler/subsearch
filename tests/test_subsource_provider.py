@@ -22,6 +22,7 @@ def _build_subsource(api_key: str, filename: str = fixture_data.FAKE_VIDEO_FILE_
         app_config=app_config,
         provider_urls=fixture_data.FAKE_PROVIDER_URLS,
         language_data=language_data,
+        filename=filename,
     )
 
 

@@ -48,18 +48,6 @@ def test_resync_does_not_require_commit_to_be_visible(bootstrap: MinimalBootstra
     assert toml_file.load_toml_value(FILE_PATHS.config, "search.accept_threshold") == 90
 
 
-def test_conflict_resolver_routes_through_session_and_resyncs(bootstrap: MinimalBootstrap):
-    session = toml_file.get_config_session()
-    session.write("download.open_manager_on_no_matches", True)
-    session.write("download.always_open_manager", True)
-    bootstrap.resync_app_config()
-
-    bootstrap.prevent_conflicting_config_settings()
-
-    assert bootstrap.app_config.open_manager_on_no_matches is False
-    assert toml_file.load_toml_value(FILE_PATHS.config, "download.open_manager_on_no_matches") is False
-
-
 def test_conflict_resolver_resolves_move_best_move_all(bootstrap: MinimalBootstrap):
     session = toml_file.get_config_session()
     session.write("post_processing.move_best", True)

@@ -12,7 +12,7 @@ from tests import fixture_data
 
 class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
-        self.app_mode = AppMode.SEARCH
+        self.app_mode = AppMode.SEARCH_HYBRID
         self.app_config = toml_file.get_app_config(FILE_PATHS.config)
         self.release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
@@ -69,42 +69,58 @@ def test_conditions_subsource(fake_cls: FakeBootstrap) -> None:
 
 def test_conditions_download_files(fake_cls: FakeBootstrap) -> None:
     fake_cls.accepted_subtitles = []
-    fake_cls.app_config.automatic_downloads = True
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_config.always_open_manager = False
-    fake_cls.app_config.open_manager_on_no_matches = False
-    fake_cls.app_config.automatic_downloads = False
+    fake_cls.app_mode = AppMode.SEARCH_HYBRID
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_config.always_open_manager = True
-    fake_cls.app_config.automatic_downloads = False
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
 
 def test_conditions_download_manager(fake_cls: FakeBootstrap) -> None:
-    fake_cls.accepted_subtitles = []
-    fake_cls.rejected_subtitles = ["subtitle1"]
-    fake_cls.app_config.open_manager_on_no_matches = True
-    fake_cls.app_config.always_open_manager = False
-    fake_cls.app_config.automatic_downloads = False
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.app_config.open_manager_on_no_matches = False
-    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+    fake_cls.app_mode = AppMode.DEV
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.app_config.open_manager_on_no_matches = False
-    fake_cls.app_config.always_open_manager = True
+    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.accepted_subtitles = []
+    fake_cls.rejected_subtitles = ["subtitle1"]
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.accepted_subtitles = []
+    fake_cls.rejected_subtitles = []
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.accepted_subtitles = ["subtitle1"]
+    fake_cls.rejected_subtitles = []
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+
+def test_conditions_subtitle_post_processing(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_mode = AppMode.SEARCH_HYBRID
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.app_config.automatic_downloads = True
-    fake_cls.rejected_subtitles = []
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+    fake_cls.app_mode = AppMode.DEV
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
 
 def test_conditions_extract_files(fake_cls: FakeBootstrap) -> None:
@@ -126,6 +142,10 @@ def test_conditions_subtitle_rename(fake_cls: FakeBootstrap) -> None:
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.app_config.post_processing["rename"] = False
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+    fake_cls.app_config.post_processing["rename"] = True
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
 
@@ -157,6 +177,12 @@ def test_conditions_subtitle_move_best(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.post_processing["open_on_no_matches"] = True
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
+    fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_all"] = False
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
 
 def test_conditions_subtitle_move_all(fake_cls: FakeBootstrap) -> None:
     fake_cls.extracted_subtitle_archives = 1
@@ -165,6 +191,25 @@ def test_conditions_subtitle_move_all(fake_cls: FakeBootstrap) -> None:
 
     fake_cls.app_config.post_processing["move_all"] = False
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+    fake_cls.app_config.post_processing["move_all"] = True
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+
+def test_unmet_condition_labels_yifysubtitles_without_imdb_match(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_config.only_foreign_parts = False
+    fake_cls.release_data.tvseries = False
+    fake_cls.provider_urls.yifysubtitles = []
+    fake_cls.app_config.providers["yifysubtitles_site"] = True
+
+    assert fake_cls.call_conditions.unmet_condition_labels("yifysubtitles") == ["url_not_empty"]
+
+
+def test_unmet_condition_labels_empty_when_provider_runs(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_config.providers["opensubtitles"] = True
+
+    assert fake_cls.call_conditions.unmet_condition_labels("opensubtitles") == []
 
 
 def test_conditions_summary_notification(fake_cls: FakeBootstrap) -> None:

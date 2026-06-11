@@ -26,11 +26,6 @@ _NOTIFICATIONS_DEFAULTS = {
     "notifications.summary_notification": False,
 }
 
-_DOWNLOAD_MANAGER_DEFAULTS = {
-    "download.automatic": True,
-    "download.always_open_manager": False,
-    "download.open_manager_on_no_matches": True,
-}
 
 _APPLICATION_DEFAULTS = {
     "application.show_terminal": False,
@@ -232,25 +227,41 @@ def test_notifications_restore_defaults(qtbot) -> None:
 
 def test_download_manager_restore_defaults(qtbot) -> None:
     from subsearch.io import toml_file
-    from subsearch.ui.cards.system_cards import DownloadManagerCard
+    from subsearch.ui.cards.download_manager import DownloadManagerSettingsCard
+    from subsearch.ui.services.video_file import VideoFileService
     from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.widgets.setting_rows import SearchableComboBoxRow
 
     store = SettingsStore()
-    card = DownloadManagerCard(store)
+    card = DownloadManagerSettingsCard(store, VideoFileService())
     qtbot.addWidget(card)
     session = toml_file.get_config_session()
-    switch_rows = _collect_switch_rows(card)
+    combo_rows = {row.config_key: row for row in card.findChildren(SearchableComboBoxRow)}
 
-    store.write("download.automatic", False)
-    store.write("download.open_manager_on_no_matches", False)
-    assert switch_rows["download.automatic"].switch.isChecked() is False
-    assert switch_rows["download.open_manager_on_no_matches"].switch.isChecked() is False
+    store.write("download_manager.search_mode", "manual")
+    assert combo_rows["download_manager.search_mode"].combo_box.currentText() == "Manual"
 
     card._restore_defaults()
 
-    for key, default in _DOWNLOAD_MANAGER_DEFAULTS.items():
-        assert session.read(key) == default
-        assert switch_rows[key].switch.isChecked() == default
+    assert session.read("download_manager.search_mode") == "hybrid"
+
+
+def test_post_processing_card_disables_body_when_manually_handle_enabled(qtbot) -> None:
+    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    card = PostProcessingCard(store)
+    qtbot.addWidget(card)
+
+    assert card.view.isEnabled()
+
+    store.write("download_manager.manually_handle_post_processing", True)
+    assert not card.view.isEnabled()
+    assert card.isEnabled()
+
+    store.write("download_manager.manually_handle_post_processing", False)
+    assert card.view.isEnabled()
 
 
 def test_application_restore_defaults(qtbot) -> None:

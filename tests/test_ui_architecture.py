@@ -49,6 +49,7 @@ ROW_CONFIG_KEY_PATTERNS = (
     r'SwitchRow\(\s*"([^"]+)"',
     r'SpinBoxRow\(\s*"([^"]+)"',
     r'SearchableComboBoxRow\(\s*"([^"]+)"',
+    r'FolderPathRow\(\s*"([^"]+)"',
     r'build_section_header\(\s*"([^"]+)"',
     r'SETTING_DESCRIPTIONS\["([^"]+)"\]',
 )
