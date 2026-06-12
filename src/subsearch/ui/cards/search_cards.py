@@ -1,7 +1,7 @@
 from typing import Any
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
-from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from qfluentwidgets import (
     CaptionLabel,
     CheckBox,
@@ -29,6 +29,7 @@ from subsearch.ui.theme.typography import (
 )
 from subsearch.ui.widgets.setting_rows import (
     FuzzySelectRow,
+    IntInput,
     SwitchRow,
 )
 from subsearch.ui.widgets.slider import SliderWithValueLabel, track_aligned_label
@@ -145,7 +146,7 @@ class ThresholdExampleRow(QWidget):
             self.verdict_label.setStyleSheet(f"color: {color};")
 
 
-class LabeledSliderRow(QWidget):
+class LabeledIntInputCell(QWidget):
     value_changed = Signal()
 
     def __init__(self, label_text: str, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
@@ -153,27 +154,30 @@ class LabeledSliderRow(QWidget):
         self.config_key = config_key
         self.store = store
 
-        self.slider = SliderWithValueLabel(parent=self)
-        self.slider.setRange(0, 100)
-        self.slider.set_value_silent(int(store.read(config_key)))
+        self.input = IntInput(0, 100, self)
+        self.input.set_value_silent(int(store.read(config_key)))
 
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
-        layout.setSpacing(12)
-        layout.addWidget(track_aligned_label(label_text, self.slider, self))
-        layout.addWidget(self.slider, stretch=1)
+        label = CaptionLabel(label_text, self)
+        apply_caption_font(label)
+        label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        self.slider.valueChanged.connect(lambda _: self.value_changed.emit())
-        self.slider.sliderReleased.connect(self._on_slider_released)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(4)
+        layout.addWidget(label, 0, Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(self.input, 0, Qt.AlignmentFlag.AlignHCenter)
+
+        self.input.value_committed.connect(self._on_committed)
         store.value_changed.connect(self._on_store_changed)
 
-    def _on_slider_released(self) -> None:
-        self.store.write(self.config_key, self.slider.value())
+    def _on_committed(self, value: int) -> None:
+        self.store.write(self.config_key, value)
+        self.value_changed.emit()
 
     def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
-        self.slider.set_value_silent(int(value))
+        self.input.set_value_silent(int(value))
         self.value_changed.emit()
 
 
@@ -182,7 +186,7 @@ class SearchThresholdCard(SettingsCard):
         super().__init__("Subtitle token filter", store, parent=parent)
         self.store = store
         self._using_series = False
-        self.tuning_rows: dict[str, LabeledSliderRow] = {}
+        self.tuning_rows: dict[str, LabeledIntInputCell] = {}
         self.register_restore_defaults(_TOKEN_TUNING_DEFAULTS)
         self._build_header()
 
@@ -243,36 +247,35 @@ class SearchThresholdCard(SettingsCard):
             self.body_layout.addWidget(row)
 
     def _build_token_tuning(self) -> None:
-        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=6))
+        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=12))
         self.body_layout.addLayout(self._heading("Weights"))
-        for token_name, label_text in TOKEN_WEIGHT_LABELS.items():
-            self.body_layout.addWidget(self._weight_row(token_name, label_text))
+        self.body_layout.addLayout(self._tuning_cell_row(TOKEN_WEIGHT_LABELS, "search.token_weights"))
+        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=6))
         self.body_layout.addLayout(self._heading("Mismatch penalties"))
-        for token_name, label_text in TOKEN_MULTIPLIER_LABELS.items():
-            self.body_layout.addWidget(self._multiplier_row(token_name, label_text))
+        self.body_layout.addLayout(self._tuning_cell_row(TOKEN_MULTIPLIER_LABELS, "search.token_multipliers"))
 
-    def _heading(self, text: str) -> QHBoxLayout:
+    def _heading(self, text: str, top_margin: int = 4) -> QHBoxLayout:
         heading = CaptionLabel(text, self)
-        apply_caption_font(heading)
+        apply_body_font(heading)
         heading.setStyleSheet(f"color: {TEXT_COLOR};")
         heading_row = QHBoxLayout()
-        heading_row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
+        heading_row.setContentsMargins(CARD_CONTENT_INSET, top_margin, CARD_CONTENT_INSET, 0)
         heading_row.addWidget(heading)
         return heading_row
 
-    def _weight_row(self, token_name: str, label_text: str) -> LabeledSliderRow:
-        config_key = f"search.token_weights.{token_name}"
-        return self._tuning_row(token_name, label_text, config_key)
-
-    def _multiplier_row(self, token_name: str, label_text: str) -> LabeledSliderRow:
-        config_key = f"search.token_multipliers.{token_name}"
-        return self._tuning_row(token_name, label_text, config_key)
-
-    def _tuning_row(self, token_name: str, label_text: str, config_key: str) -> LabeledSliderRow:
-        row = LabeledSliderRow(label_text, config_key, self.store, self)
-        row.value_changed.connect(self._refresh_examples)
-        self.tuning_rows[token_name] = row
+    def _tuning_cell_row(self, labels: dict[str, str], key_prefix: str) -> QHBoxLayout:
+        row = QHBoxLayout()
+        row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 4)
+        row.setSpacing(12)
+        for token_name, label_text in labels.items():
+            row.addWidget(self._tuning_cell(token_name, label_text, f"{key_prefix}.{token_name}"), stretch=1)
         return row
+
+    def _tuning_cell(self, token_name: str, label_text: str, config_key: str) -> LabeledIntInputCell:
+        cell = LabeledIntInputCell(label_text, config_key, self.store, self)
+        cell.value_changed.connect(self._refresh_examples)
+        self.tuning_rows[token_name] = cell
+        return cell
 
     def _update_example_heading(self) -> None:
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE

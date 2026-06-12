@@ -84,9 +84,9 @@ class ResourcesCard(SettingsCard):
 
         actions = [
             (LucideIcon.BUG, "Report bug", _open_bug_report),
-            (LucideIcon.BUG_FILE, "Copy sanitized log", _copy_sanitized_log_to_clipboard),
+            (LucideIcon.COPY, "Copy sanitized log to clipboard", _copy_sanitized_log_to_clipboard),
             (LucideIcon.SHIELD, "Report vulnerability", _open_security_advisory),
-            (LucideIcon.FOLDER_SEARCH, "Open log location", _open_log_directory),
+            (LucideIcon.FOLDER_SEARCH, "Open config location", _open_log_directory),
             (LucideIcon.SCROLL_TEXT, "View licenses", _open_third_party_licenses),
             (LucideIcon.GITHUB, "View source on GitHub", _open_repository),
         ]
