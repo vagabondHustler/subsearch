@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -46,7 +47,6 @@ from subsearch.ui.theme.typography import (
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.fuzzy_select import FuzzySelect
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
-from subsearch.ui.widgets.slider import SliderWithValueLabel
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -225,31 +225,62 @@ class SwitchRow(SettingRow):
         self.switch.setEnabled(enabled)
 
 
-SLIDER_ROW_CONTROL_WIDTH = 220
+INT_INPUT_CONTROL_WIDTH = 72
 
 
-class SliderRow(SettingRow):
+class IntInput(LineEdit):
+    value_committed = Signal(int)
+
+    def __init__(self, minimum: int, maximum: int, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._minimum = minimum
+        self._maximum = maximum
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFixedWidth(INT_INPUT_CONTROL_WIDTH)
+        self.setClearButtonEnabled(False)
+        self.setValidator(QIntValidator(minimum, maximum, self))
+        apply_body_font(self)
+        flatten_line_edit(self)
+        self.editingFinished.connect(self._commit)
+        self.returnPressed.connect(self.clearFocus)
+
+    def clamp(self, value: int) -> int:
+        return max(self._minimum, min(value, self._maximum))
+
+    def value(self) -> int:
+        try:
+            return self.clamp(int(self.text().strip()))
+        except ValueError:
+            return self._minimum
+
+    def set_value_silent(self, value: int) -> None:
+        self.setText(str(self.clamp(value)))
+
+    def _commit(self) -> None:
+        value = self.value()
+        self.set_value_silent(value)
+        self.value_committed.emit(value)
+
+
+class IntInputRow(SettingRow):
     def __init__(
         self, config_key: str, store: SettingsStore, minimum: int, maximum: int, parent: QWidget | None = None
     ) -> None:
-        self.slider = SliderWithValueLabel()
-        self.slider.setRange(minimum, maximum)
-        self.slider.setFixedWidth(SLIDER_ROW_CONTROL_WIDTH)
-        self.slider.set_value_silent(int(store.read(config_key)))
-        super().__init__(config_key, self.slider, store, parent)
-        self.slider.sliderReleased.connect(self._on_value_committed)
+        self.input = IntInput(minimum, maximum)
+        self.input.set_value_silent(int(store.read(config_key)))
+        super().__init__(config_key, self.input, store, parent)
+        self.input.value_committed.connect(self._on_value_committed)
         store.value_changed.connect(self._on_store_changed)
-        self._update_help(self.slider.value())
+        self._update_help(self.input.value())
 
-    def _on_value_committed(self) -> None:
-        value = self.slider.value()
+    def _on_value_committed(self, value: int) -> None:
         self.store.write(self.config_key, value)
         self._update_help(value)
 
     def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
-        self.slider.set_value_silent(int(value))
+        self.input.set_value_silent(int(value))
         self._update_help(int(value))
 
     def _update_help(self, value: int) -> None:
