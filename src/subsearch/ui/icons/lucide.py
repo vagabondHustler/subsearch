@@ -65,6 +65,7 @@ class LucideIcon(FluentIconBase, Enum):
     SEARCH = "search"
     FOLDER_OUTPUT = "folder-output"
     FILE_OUTPUT = "file-output"
+    COPY = "copy"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]
