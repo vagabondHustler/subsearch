@@ -1,6 +1,6 @@
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import setFont
+from qfluentwidgets import CustomStyleSheet, setCustomStyleSheet, setFont
 
 from subsearch.ui.theme import palette
 
@@ -22,13 +22,28 @@ def body_font() -> QFont:
     return font
 
 
+def append_custom_style(widget: QWidget, qss: str) -> None:
+    """Register qss with qfluent's StyleSheetManager so it survives the manager's
+    QSS re-applies, which silently wipe anything set via plain setStyleSheet."""
+    existing = CustomStyleSheet(widget)
+    setCustomStyleSheet(widget, existing.lightStyleSheet() + qss, existing.darkStyleSheet() + qss)
+
+
 def set_three_state_text_color(widget: QWidget) -> None:
     widget_type = type(widget).__name__
-    widget.setStyleSheet(
+    qss = (
         f"{widget_type} {{ color: {TEXT_COLOR}; }}"
         f"{widget_type}:disabled {{ color: {DISABLED_TEXT_COLOR}; }}"
         f'{widget_type}[error="true"] {{ color: {ERROR_TEXT_COLOR}; }}'
     )
+    widget.setStyleSheet(qss)
+    append_custom_style(widget, qss)
+
+
+def set_error_text(widget: QWidget, has_error: bool) -> None:
+    widget.setProperty("error", has_error)
+    widget.style().unpolish(widget)
+    widget.style().polish(widget)
 
 
 def apply_text_color(widget: QWidget) -> None:
