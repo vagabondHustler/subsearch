@@ -1,24 +1,42 @@
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QApplication, QFrame, QWidget
 
+from subsearch.ui.compat.qfluent import apply_popup_acrylic
 from subsearch.ui.theme import palette
 
 POPUP_GAP = 6
 
 
 class AnchoredPopup(QFrame):
-    def __init__(self, anchor: QWidget, window_flags: Qt.WindowType) -> None:
+    def __init__(self, anchor: QWidget, window_flags: Qt.WindowType, acrylic: bool = False) -> None:
         super().__init__(anchor.window())
         self._anchor = anchor
+        self._acrylic = acrylic
         self.setWindowFlags(window_flags | Qt.WindowType.FramelessWindowHint)
+        if acrylic:
+            # Must be set before the native window is created; toggling it later
+            # breaks background erasing and repaints smear over each other.
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setObjectName("anchoredPopup")
+        self._apply_background("transparent" if acrylic else palette.POPUP_BACKGROUND)
+
+    def _apply_background(self, background: str) -> None:
         self.setStyleSheet(
             f"#anchoredPopup {{"
-            f" background-color: {palette.POPUP_BACKGROUND};"
+            f" background-color: {background};"
             f" border: 1px solid {palette.POPUP_BORDER};"
             f" border-radius: 6px;"
             f" }}"
         )
+
+    def showEvent(self, event) -> None:
+        # Reapplied on every show: hiding a popup can recreate its native window,
+        # and the compositor effect is bound to the old window handle.
+        if self._acrylic:
+            if not apply_popup_acrylic(self):
+                self._acrylic = False
+                self._apply_background(palette.POPUP_BACKGROUND)
+        super().showEvent(event)
 
     def anchor_rect_contains(self, global_position: QPoint) -> bool:
         anchor_top_left = self._anchor.mapToGlobal(QPoint(0, 0))

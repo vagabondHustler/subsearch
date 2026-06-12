@@ -46,7 +46,7 @@ class TitleSuggestionPopup(AnchoredPopup):
     dismissed = Signal()
 
     def __init__(self, anchor: QWidget) -> None:
-        super().__init__(anchor, Qt.WindowType.ToolTip)
+        super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=True)
         self._anchor_widget = anchor
         self._suggestions: list[TitleSuggestion] = []
         self._rows: list[SuggestionRow] = []

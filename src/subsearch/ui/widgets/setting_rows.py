@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (
 from qfluentwidgets import (
     BodyLabel,
     LineEdit,
-    SpinBox,
     SwitchButton,
     TransparentToolButton,
 )
@@ -22,22 +21,32 @@ from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import DEFAULT_CONFIG
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import (
-    SearchableComboBox,
+    flatten_line_edit,
     thicken_unchecked_switch_border,
 )
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
+from subsearch.ui.theme.metrics import (
+    CARD_CONTENT_INSET,
+    PATH_ROW_BUTTON_GAP,
+    PATH_ROW_TRAILING_WIDTH,
+    ROW_INSET,
+    SMALL_ICON_SIZE,
+    TOOL_BUTTON_SIZE,
+)
 from subsearch.ui.theme.typography import (
     CAPTION_FONT_SIZE,
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
     body_font,
+    set_error_text,
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
+from subsearch.ui.widgets.fuzzy_select import FuzzySelect
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.slider import SliderWithValueLabel
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -148,7 +157,8 @@ class SettingRow(QFrame):
         description = SETTING_DESCRIPTIONS[config_key]
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 4)
+        # Right margin stays ROW_INSET so the per-row help lamp lines up with the header lamp.
+        layout.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 4)
         layout.setSpacing(12)
 
         title_label = BodyLabel(description.title, self)
@@ -215,30 +225,31 @@ class SwitchRow(SettingRow):
         self.switch.setEnabled(enabled)
 
 
-class SpinBoxRow(SettingRow):
+SLIDER_ROW_CONTROL_WIDTH = 220
+
+
+class SliderRow(SettingRow):
     def __init__(
         self, config_key: str, store: SettingsStore, minimum: int, maximum: int, parent: QWidget | None = None
     ) -> None:
-        self.spin_box = SpinBox()
-        apply_body_font(self.spin_box)
-        self.spin_box.setRange(minimum, maximum)
-        self.spin_box.setValue(int(store.read(config_key)))
-        self.spin_box.setFixedWidth(120)
-        super().__init__(config_key, self.spin_box, store, parent)
-        self.spin_box.valueChanged.connect(self._on_value_changed)
+        self.slider = SliderWithValueLabel()
+        self.slider.setRange(minimum, maximum)
+        self.slider.setFixedWidth(SLIDER_ROW_CONTROL_WIDTH)
+        self.slider.set_value_silent(int(store.read(config_key)))
+        super().__init__(config_key, self.slider, store, parent)
+        self.slider.sliderReleased.connect(self._on_value_committed)
         store.value_changed.connect(self._on_store_changed)
-        self._update_help(self.spin_box.value())
+        self._update_help(self.slider.value())
 
-    def _on_value_changed(self, value: int) -> None:
+    def _on_value_committed(self) -> None:
+        value = self.slider.value()
         self.store.write(self.config_key, value)
         self._update_help(value)
 
     def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
-        self.spin_box.blockSignals(True)
-        self.spin_box.setValue(int(value))
-        self.spin_box.blockSignals(False)
+        self.slider.set_value_silent(int(value))
         self._update_help(int(value))
 
     def _update_help(self, value: int) -> None:
@@ -246,7 +257,7 @@ class SpinBoxRow(SettingRow):
             self.help_button.set_explanation(SETTING_DESCRIPTIONS[self.config_key].explanation.format(limit=value))
 
 
-class SearchableComboBoxRow(SettingRow):
+class FuzzySelectRow(SettingRow):
     selection_changed = Signal(str)
 
     def __init__(
@@ -257,16 +268,17 @@ class SearchableComboBoxRow(SettingRow):
         aliases_by_label: dict[str, list[str]] | None = None,
         parent: QWidget | None = None,
         show_help: bool = True,
+        searchable: bool = True,
     ) -> None:
-        self.combo_box = SearchableComboBox()
-        apply_body_font(self.combo_box)
-        self.combo_box.setFixedWidth(200)
+        self.combo_box = FuzzySelect(searchable=searchable)
         self._value_by_label = labelled_values
         self._label_by_value = {value: label for label, value in labelled_values.items()}
         self.combo_box.setItems(list(labelled_values.keys()), aliases_by_label)
         current_value = store.read(config_key)
         if current_value in self._label_by_value:
+            self.combo_box.blockSignals(True)
             self.combo_box.setCurrentText(self._label_by_value[current_value])
+            self.combo_box.blockSignals(False)
         super().__init__(config_key, self.combo_box, store, parent, show_help=show_help)
         self.combo_box.currentTextChanged.connect(self._on_selection_changed)
         store.value_changed.connect(self._on_store_changed)
@@ -289,6 +301,30 @@ class SearchableComboBoxRow(SettingRow):
         self.combo_box.blockSignals(False)
 
 
+class TrailingButtonArea(QWidget):
+    """Fixed-width button column at the end of an input row. The constant width keeps
+    every input field's right edge aligned across rows, no matter how many buttons a
+    row carries; an optional help button stays pinned to the far right so the help
+    lamps line up with the card header's lamp."""
+
+    def __init__(
+        self,
+        buttons: list[QWidget],
+        help_button: QWidget | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(PATH_ROW_BUTTON_GAP)
+        for button in buttons:
+            layout.addWidget(button)
+        layout.addStretch(1)
+        if help_button is not None:
+            layout.addWidget(help_button)
+        self.setFixedWidth(PATH_ROW_TRAILING_WIDTH)
+
+
 class FolderPathRow(QWidget):
     path_saved = Signal(str, str)  # (path, detected_resolution)
 
@@ -299,13 +335,13 @@ class FolderPathRow(QWidget):
         inline_help_text: str | None = None,
         placeholder_text: str = "",
         dialog_title: str = "Select destination folder",
-        validate_path: bool = True,
+        allow_empty: bool = False,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.config_key = config_key
         self.store = store
-        self._validate_path = validate_path
+        self._allow_empty = allow_empty
         self._dialog_title = dialog_title
 
         layout = QVBoxLayout(self)
@@ -323,7 +359,7 @@ class FolderPathRow(QWidget):
         title_label = BodyLabel(description.title, self)
         apply_body_font(title_label)
         header = QHBoxLayout()
-        header.setContentsMargins(ROW_INSET, 10, ROW_INSET, 4)
+        header.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 4)
         header.addWidget(title_label, stretch=1)
         header.addWidget(HelpButton(description.explanation, self))
         return header
@@ -334,20 +370,21 @@ class FolderPathRow(QWidget):
         self.path_edit.setText(str(self.store.read(self.config_key)))
         self.path_edit.setClearButtonEnabled(True)
         apply_body_font(self.path_edit)
+        flatten_line_edit(self.path_edit)
         self.path_edit.textChanged.connect(self._on_text_changed)
         self.path_edit.editingFinished.connect(self.save_if_valid)
+        self.path_edit.returnPressed.connect(self.path_edit.clearFocus)
 
         browse_button = CaptionedToolButton(
             "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
         )
         browse_button.clicked.connect(self._browse_for_folder)
 
+        inline_help_button = HelpButton(inline_help_text, self) if inline_help_text is not None else None
         row = QHBoxLayout()
-        row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
+        row.setContentsMargins(CARD_CONTENT_INSET, 0, ROW_INSET, 10)
         row.addWidget(self.path_edit, stretch=1)
-        row.addWidget(browse_button)
-        if inline_help_text is not None:
-            row.addWidget(HelpButton(inline_help_text, self))
+        row.addWidget(TrailingButtonArea([browse_button], inline_help_button, self))
         return row
 
     def text(self) -> str:
@@ -358,9 +395,9 @@ class FolderPathRow(QWidget):
         self.save_if_valid()
 
     def is_valid(self) -> bool:
-        if not self._validate_path:
-            return True
         path = self.path_edit.text()
+        if self._allow_empty and not path.strip():
+            return True
         return release_parser.valid_path(path, release_parser.detect_path_resolution(path))
 
     def save_if_valid(self) -> None:
@@ -370,10 +407,8 @@ class FolderPathRow(QWidget):
         self.store.write(self.config_key, path)
         self.path_saved.emit(path, release_parser.detect_path_resolution(path))
 
-    def _on_text_changed(self, path: str) -> None:
-        if not self._validate_path:
-            return
-        self.path_edit.setError(not release_parser.valid_path(path, release_parser.detect_path_resolution(path)))
+    def _on_text_changed(self, _changed_path: str) -> None:
+        set_error_text(self.path_edit, not self.is_valid())
 
     def _browse_for_folder(self) -> None:
         selected_folder = QFileDialog.getExistingDirectory(self.window(), self._dialog_title, self.path_edit.text())

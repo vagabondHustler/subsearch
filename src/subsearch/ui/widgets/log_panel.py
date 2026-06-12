@@ -7,6 +7,8 @@ from subsearch.ui.services.log_panel import LogPanelSink
 from subsearch.ui.theme.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font
 
 LOG_FONT_FAMILY = "Consolas"
+LOG_LINE_HEIGHT = BODY_FONT_SIZE + 2
+LABEL_TO_LIST_SPACING = 4
 
 LOG_STYLE_SHEET = """
 QListWidget {
@@ -29,11 +31,11 @@ class LogPanel(QWidget):
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
+        layout.setSpacing(LABEL_TO_LIST_SPACING)
 
-        label = BodyLabel("Log", self)
-        apply_body_font(label)
-        layout.addWidget(label)
+        self._label = BodyLabel("Log", self)
+        apply_body_font(self._label)
+        layout.addWidget(self._label)
 
         self._list = QListWidget(self)
         self._list.setStyleSheet(LOG_STYLE_SHEET)
@@ -49,6 +51,9 @@ class LogPanel(QWidget):
         # Queued so the slot always runs on the GUI thread even when the worker
         # thread emits the signal directly from Logger.write.
         sink.message_received.connect(self._append, Qt.ConnectionType.QueuedConnection)
+
+    def height_for_lines(self, line_count: int) -> int:
+        return self._label.sizeHint().height() + LABEL_TO_LIST_SPACING + line_count * LOG_LINE_HEIGHT
 
     @staticmethod
     def _log_font() -> QFont:
@@ -68,6 +73,6 @@ class LogPanel(QWidget):
         if bold:
             font.setWeight(QFont.Weight.Bold)
         item.setFont(font)
-        item.setSizeHint(QSize(0, BODY_FONT_SIZE + 2))
+        item.setSizeHint(QSize(0, LOG_LINE_HEIGHT))
         self._list.addItem(item)
         self._list.scrollToBottom()
