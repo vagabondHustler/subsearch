@@ -5,8 +5,8 @@ from qfluentwidgets import CustomStyleSheet, setCustomStyleSheet, setFont
 from subsearch.ui.theme import palette
 
 BODY_FONT_SIZE = 12
-CAPTION_FONT_SIZE = 11
-SUBSECTION_FONT_SIZE = 13
+CAPTION_FONT_SIZE = 12
+SUBSECTION_FONT_SIZE = 10
 TITLE_FONT_SIZE = 14
 SEMI_BOLD = QFont.Weight.DemiBold
 TEXT_COLOR = palette.NEUTRAL_1
