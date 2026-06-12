@@ -439,21 +439,24 @@ def score_subtitle_tokens(
     from_provider: str,
     token_weights: dict[str, float] = DEFAULT_TOKEN_WEIGHTS,
     token_multipliers: dict[str, int] = DEFAULT_TOKEN_MULTIPLIERS,
+    log_match: bool = True,
 ) -> int:
     reference_tokens = _normalize_tokens(reference)
     provider_tokens = _normalize_tokens(from_provider)
 
     if reference_tokens == provider_tokens:
-        log.debug(f"Fuzzy match: exact token match for {from_provider!r}")
+        if log_match:
+            log.debug(f"Fuzzy match: exact token match for {from_provider!r}")
         return 100
 
     base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
     mismatch_multiplier = _mismatch_factor(reference_tokens, provider_tokens, token_multipliers)
     score = round(base_score * mismatch_multiplier)
 
-    log.debug(
-        f"Fuzzy match: {score}% for {from_provider!r} (base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
-    )
+    if log_match:
+        log.debug(
+            f"Fuzzy match: {score}% for {from_provider!r} (base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
+        )
     return score
 
 
