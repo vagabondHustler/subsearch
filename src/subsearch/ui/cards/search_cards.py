@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget
 from qfluentwidgets import (
     CaptionLabel,
     CheckBox,
-    SpinBox,
     TransparentToolButton,
 )
 
@@ -16,7 +15,6 @@ from subsearch.runtime.config.static_values import (
 )
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.compat.qfluent import HANDLE_CENTER, HANDLE_SIZE, CircleDotSlider
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
@@ -30,9 +28,10 @@ from subsearch.ui.theme.typography import (
     apply_caption_font,
 )
 from subsearch.ui.widgets.setting_rows import (
-    SearchableComboBoxRow,
+    FuzzySelectRow,
     SwitchRow,
 )
+from subsearch.ui.widgets.slider import SliderWithValueLabel, track_aligned_label
 
 _TOKEN_TUNING_DEFAULTS: list[tuple[str, object]] = [
     ("search.accept_threshold", 90),
@@ -59,7 +58,7 @@ class LanguageCard(SettingsCard):
             for data in languages.values()
         }
         self.add_header_help(SETTING_DESCRIPTIONS["language.selected"].explanation)
-        self.language_row = SearchableComboBoxRow(
+        self.language_row = FuzzySelectRow(
             "language.selected", store, labelled_values, aliases_by_label, show_help=False
         )
         self.add_row(self.language_row)
@@ -103,15 +102,16 @@ TOKEN_MULTIPLIER_LABELS = {
 
 
 EXAMPLE_ROW_HEIGHT = 22
+SWAP_BUTTON_SIZE = 32
 
 
 class ThresholdExampleRow(QWidget):
-    def __init__(self, subtitle_name: str, parent: QWidget | None = None) -> None:
+    def __init__(self, subtitle_name: str, left_inset: int, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._accepted: bool | None = None
         self.setFixedHeight(EXAMPLE_ROW_HEIGHT)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
+        layout.setContentsMargins(left_inset, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
 
         name_label = CaptionLabel(subtitle_name, self)
@@ -145,130 +145,63 @@ class ThresholdExampleRow(QWidget):
             self.verdict_label.setStyleSheet(f"color: {color};")
 
 
-class AdvancedTuningRow(QWidget):
+class LabeledSliderRow(QWidget):
     value_changed = Signal()
 
-    def __init__(
-        self, label_text: str, config_key: str, spin_box, store: SettingsStore, parent: QWidget | None = None
-    ) -> None:
+    def __init__(self, label_text: str, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.config_key = config_key
         self.store = store
-        self.spin_box = spin_box
-        apply_body_font(self.spin_box)
-        self.spin_box.setFixedWidth(110)
+
+        self.slider = SliderWithValueLabel(parent=self)
+        self.slider.setRange(0, 100)
+        self.slider.set_value_silent(int(store.read(config_key)))
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(CARD_CONTENT_INSET, 2, CARD_CONTENT_INSET, 2)
         layout.setSpacing(12)
-        label = CaptionLabel(label_text, self)
-        apply_caption_font(label)
-        layout.addWidget(label, stretch=1)
-        layout.addWidget(self.spin_box)
+        layout.addWidget(track_aligned_label(label_text, self.slider, self))
+        layout.addWidget(self.slider, stretch=1)
 
-        self.spin_box.valueChanged.connect(self._on_value_changed)
+        self.slider.valueChanged.connect(lambda _: self.value_changed.emit())
+        self.slider.sliderReleased.connect(self._on_slider_released)
         store.value_changed.connect(self._on_store_changed)
 
-    def _on_value_changed(self, value) -> None:
-        self.store.write(self.config_key, value)
-        self.value_changed.emit()
+    def _on_slider_released(self) -> None:
+        self.store.write(self.config_key, self.slider.value())
 
     def _on_store_changed(self, key: str, value: Any) -> None:
         if key != self.config_key:
             return
-        self.spin_box.blockSignals(True)
-        self.spin_box.setValue(int(value))
-        self.spin_box.blockSignals(False)
+        self.slider.set_value_silent(int(value))
         self.value_changed.emit()
-
-    def reset_to(self, value) -> None:
-        self.spin_box.blockSignals(True)
-        self.spin_box.setValue(value)
-        self.spin_box.blockSignals(False)
-        self.store.write(self.config_key, value)
-
-
-class SliderWithValueLabel(QWidget):
-    valueChanged = Signal(int)
-    sliderReleased = Signal()
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._slider = CircleDotSlider(Qt.Orientation.Horizontal, self)
-        self._label = CaptionLabel("", self)
-        apply_body_font(self._label)
-        self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._label.setFixedWidth(52)
-        self._slider.valueChanged.connect(self._on_value_changed)
-        self._slider.sliderReleased.connect(self.sliderReleased)
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        label_h = self._label.sizeHint().height()
-        self._slider.setGeometry(0, label_h + 4, self.width(), HANDLE_SIZE)
-        self._update_label_pos()
-
-    def sizeHint(self) -> QSize:
-        label_h = self._label.sizeHint().height()
-        return QSize(200, label_h + 4 + HANDLE_SIZE)
-
-    def minimumSizeHint(self) -> QSize:
-        return self.sizeHint()
-
-    def _update_label_pos(self) -> None:
-        if self._slider.width() == 0:
-            return
-        value = self._slider.value()
-        minimum, maximum = self._slider.minimum(), self._slider.maximum()
-        t = (value - minimum) / (maximum - minimum) if maximum > minimum else 0
-        handle_center_x = HANDLE_CENTER + round(t * (self._slider.width() - HANDLE_SIZE))
-        label_x = handle_center_x - self._label.width() // 2
-        label_x = max(0, min(label_x, self.width() - self._label.width()))
-        self._label.move(label_x, 0)
-
-    def _on_value_changed(self, value: int) -> None:
-        self._label.setText(f"{value} %")
-        self._update_label_pos()
-        self.valueChanged.emit(value)
-
-    def setValue(self, value: int) -> None:
-        self._slider.setValue(value)
-
-    def set_value_silent(self, value: int) -> None:
-        self._slider.set_value_silent(value)
-        self._label.setText(f"{value} %")
-        self._update_label_pos()
-
-    def value(self) -> int:
-        return self._slider.value()
-
-    def setRange(self, minimum: int, maximum: int) -> None:
-        self._slider.setRange(minimum, maximum)
 
 
 class SearchThresholdCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Search threshold", store, parent=parent)
+        super().__init__("Subtitle token filter", store, parent=parent)
         self.store = store
         self._using_series = False
-        self.tuning_rows: dict[str, AdvancedTuningRow] = {}
+        self.tuning_rows: dict[str, LabeledSliderRow] = {}
         self.register_restore_defaults(_TOKEN_TUNING_DEFAULTS)
         self._build_header()
 
         self._swap_button = TransparentToolButton(self)
         self._swap_button.setIconSize(QSize(16, 16))
-        self._swap_button.setFixedSize(32, 32)
+        self._swap_button.setFixedSize(SWAP_BUTTON_SIZE, SWAP_BUTTON_SIZE)
         self._swap_button.clicked.connect(self._swap_examples)
+        self._example_heading_spacing = 8
+        self._example_left_inset = CARD_CONTENT_INSET + SWAP_BUTTON_SIZE + self._example_heading_spacing
 
-        self.slider = SliderWithValueLabel(self)
+        self.slider = SliderWithValueLabel(suffix="%", parent=self)
         self.slider.setRange(0, 100)
         self.slider.setValue(int(store.read("search.accept_threshold")))
 
         slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(CARD_CONTENT_INSET - HANDLE_CENTER, 6, CARD_CONTENT_INSET, 10)
-        slider_row.setSpacing(0)
-        slider_row.addWidget(self.slider)
-        slider_row.addWidget(self._swap_button, 0, Qt.AlignmentFlag.AlignBottom)
+        slider_row.setContentsMargins(CARD_CONTENT_INSET, 6, CARD_CONTENT_INSET, 10)
+        slider_row.setSpacing(12)
+        slider_row.addWidget(track_aligned_label("Search threshold", self.slider, self))
+        slider_row.addWidget(self.slider, stretch=1)
         self.body_layout.addLayout(slider_row)
 
         self._build_examples()
@@ -297,11 +230,15 @@ class SearchThresholdCard(SettingsCard):
 
         heading_row = QHBoxLayout()
         heading_row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 0)
-        heading_row.addWidget(self._example_heading)
+        heading_row.setSpacing(self._example_heading_spacing)
+        heading_row.addWidget(self._swap_button, 0, Qt.AlignmentFlag.AlignVCenter)
+        heading_row.addWidget(self._example_heading, stretch=1)
         self.body_layout.addLayout(heading_row)
 
         self._examples_start_index = self.body_layout.count()
-        self.example_rows = [ThresholdExampleRow(name, self) for name in EXAMPLE_MOVIE_SUBTITLE]
+        self.example_rows = [
+            ThresholdExampleRow(name, self._example_left_inset, self) for name in EXAMPLE_MOVIE_SUBTITLE
+        ]
         for row in self.example_rows:
             self.body_layout.addWidget(row)
 
@@ -323,19 +260,16 @@ class SearchThresholdCard(SettingsCard):
         heading_row.addWidget(heading)
         return heading_row
 
-    def _weight_row(self, token_name: str, label_text: str) -> AdvancedTuningRow:
+    def _weight_row(self, token_name: str, label_text: str) -> LabeledSliderRow:
         config_key = f"search.token_weights.{token_name}"
         return self._tuning_row(token_name, label_text, config_key)
 
-    def _multiplier_row(self, token_name: str, label_text: str) -> AdvancedTuningRow:
+    def _multiplier_row(self, token_name: str, label_text: str) -> LabeledSliderRow:
         config_key = f"search.token_multipliers.{token_name}"
         return self._tuning_row(token_name, label_text, config_key)
 
-    def _tuning_row(self, token_name: str, label_text: str, config_key: str) -> AdvancedTuningRow:
-        spin_box = SpinBox()
-        spin_box.setRange(0, 100)
-        spin_box.setValue(int(self.store.read(config_key)))
-        row = AdvancedTuningRow(label_text, config_key, spin_box, self.store, self)
+    def _tuning_row(self, token_name: str, label_text: str, config_key: str) -> LabeledSliderRow:
+        row = LabeledSliderRow(label_text, config_key, self.store, self)
         row.value_changed.connect(self._refresh_examples)
         self.tuning_rows[token_name] = row
         return row
@@ -354,7 +288,7 @@ class SearchThresholdCard(SettingsCard):
         for row in self.example_rows:
             self.body_layout.removeWidget(row)
             row.deleteLater()
-        self.example_rows = [ThresholdExampleRow(name, self) for name in subtitle_names]
+        self.example_rows = [ThresholdExampleRow(name, self._example_left_inset, self) for name in subtitle_names]
         for index, row in enumerate(self.example_rows):
             self.body_layout.insertWidget(self._examples_start_index + index, row)
             row.show()
@@ -377,7 +311,7 @@ class SearchThresholdCard(SettingsCard):
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE
         subtitle_names = EXAMPLE_SERIES_SUBTITLE if self._using_series else EXAMPLE_MOVIE_SUBTITLE
         for row, subtitle_name in zip(self.example_rows, subtitle_names):
-            score = score_subtitle_tokens(reference, subtitle_name, token_weights, token_multipliers)
+            score = score_subtitle_tokens(reference, subtitle_name, token_weights, token_multipliers, log_match=False)
             row.render_verdict(score, score >= threshold)
 
 

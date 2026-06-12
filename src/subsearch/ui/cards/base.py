@@ -6,7 +6,12 @@ from qfluentwidgets import BodyLabel, HeaderCardWidget, TransparentToolButton
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
+from subsearch.ui.theme.metrics import (
+    CARD_CONTENT_INSET,
+    ROW_INSET,
+    SMALL_ICON_SIZE,
+    TOOL_BUTTON_SIZE,
+)
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import apply_body_font, apply_title_font
 from subsearch.ui.widgets.setting_rows import (
@@ -29,7 +34,7 @@ def build_section_header(config_key: str, parent: QWidget) -> QHBoxLayout:
     apply_body_font(title_label)
     help_button = HelpButton(description.explanation, parent)
     header = QHBoxLayout()
-    header.setContentsMargins(ROW_INSET, 10, ROW_INSET, 4)
+    header.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 4)
     header.addWidget(title_label, stretch=1)
     header.addWidget(help_button)
     return header
@@ -114,7 +119,8 @@ class SettingsCard(HeaderCardWidget):
         self.view.setEnabled(enabled)
 
     def is_collapsed(self) -> bool:
-        return not self.view.isVisible()
+        # isHidden (not isVisible) so the answer is right before the card is first shown.
+        return self.view.isHidden()
 
     def _toggle_collapsed(self) -> None:
         self.set_collapsed(not self.is_collapsed())

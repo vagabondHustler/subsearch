@@ -40,6 +40,7 @@ from subsearch.ui.compat.qfluent import (
     NAVIGATION_ITEM_HEIGHT,
     enlarge_navigation_icons,
     force_fixed_accent_color,
+    forward_navigation_wheel_to_page,
 )
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.qt_application import get_application
@@ -59,7 +60,7 @@ from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 
-NAVIGATION_EXPAND_WIDTH = 242
+NAVIGATION_EXPAND_WIDTH = 180
 NAVIGATION_TOP_MARGIN = 8
 
 
@@ -125,13 +126,17 @@ class SettingsWindow(FluentWindow):
 
         search_interface = SettingsInterface(
             "searchInterface",
-            _collapsible(
-                LanguageCard(store),
-                SubtitleFiltersCard(store),
-                ProvidersCard(store),
-                search_threshold_card,
+            [
+                *_collapsible(
+                    LanguageCard(store),
+                    SubtitleFiltersCard(store),
+                    ProvidersCard(store),
+                    search_threshold_card,
+                ),
+                # Manages its own collapsibility: collapses while post-processing
+                # is handled manually in the download manager.
                 post_processing_card,
-            ),
+            ],
         )
         integration_interface = SettingsInterface(
             "integrationInterface",
@@ -223,6 +228,7 @@ class SettingsWindow(FluentWindow):
         panel.items["header"].widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self._insert_navigation_spacer(panel, before_route_key="downloadManagerInterface")
         enlarge_navigation_icons(panel)
+        forward_navigation_wheel_to_page(panel, self.stackedWidget.currentWidget)
 
     def _insert_navigation_spacer(self, panel, before_route_key: str) -> None:
         target_widget = panel.items[before_route_key].widget

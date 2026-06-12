@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     BodyLabel,
+    CaptionLabel,
     CheckBox,
     MessageBox,
     TransparentToolButton,
@@ -19,7 +20,12 @@ from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
-from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
+from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
+    TEXT_COLOR,
+    apply_body_font,
+    apply_caption_font,
+)
 from subsearch.ui.widgets.setting_rows import (
     FolderPathRow,
     SwitchRow,
@@ -85,15 +91,27 @@ class PostProcessingCard(SettingsCard):
         self._build_destination()
         self._update_destination_enabled()
 
+        manual_enabled = bool(store.read("download_manager.manually_handle_post_processing"))
+        self.make_collapsible(collapsed=manual_enabled)
+        self._build_disabled_status_label()
         store.value_changed.connect(self._on_store_changed)
-        self._apply_manual_handle_state(bool(store.read("download_manager.manually_handle_post_processing")))
+        self._apply_manual_handle_state(manual_enabled)
 
     def _on_store_changed(self, key: str, value: object) -> None:
         if key == "download_manager.manually_handle_post_processing":
             self._apply_manual_handle_state(bool(value))
 
+    def _build_disabled_status_label(self) -> None:
+        self._disabled_status = CaptionLabel("Disabled — handled in download manager", self)
+        apply_caption_font(self._disabled_status)
+        self._disabled_status.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
+        title_index = self.headerLayout.indexOf(self.headerLabel)
+        self.headerLayout.insertWidget(title_index + 1, self._disabled_status)
+
     def _apply_manual_handle_state(self, manual_enabled: bool) -> None:
         self.set_body_enabled(not manual_enabled)
+        self._disabled_status.setVisible(manual_enabled)
+        self.set_collapsed(manual_enabled)
 
     def _update_destination_enabled(self, _checked: bool = False) -> None:
         moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()

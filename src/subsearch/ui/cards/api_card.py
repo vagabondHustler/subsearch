@@ -8,13 +8,15 @@ from qfluentwidgets import BodyLabel, CaptionLabel, LineEdit, TransparentToolBut
 from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.compat.qfluent import flatten_line_edit
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.metrics import ROW_INSET
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
 from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
+    set_error_text,
 )
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
@@ -138,6 +140,7 @@ class ApiKeyField(QWidget):
 
         self.line_edit = MaskedApiKeyLineEdit(api_key, self)
         apply_body_font(self.line_edit)
+        flatten_line_edit(self.line_edit)
         self.line_edit.api_key_changed.connect(self._on_api_key_changed)
 
         self._revealed = False
@@ -148,7 +151,7 @@ class ApiKeyField(QWidget):
         self._apply_reveal_icon()
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 8)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(8)
         layout.addWidget(self.line_edit, stretch=1)
         layout.addWidget(self.reveal_button)
@@ -172,7 +175,7 @@ class ApiKeyField(QWidget):
 
     def _apply_validation_state(self, api_key: str) -> None:
         is_error = bool(api_key) and not release_parser.valid_subsource_api_key(api_key)
-        self.line_edit.setError(is_error)
+        set_error_text(self.line_edit, is_error)
 
 
 class ApiCard(SettingsCard):
@@ -183,7 +186,7 @@ class ApiCard(SettingsCard):
         title_label = BodyLabel("API key", self)
         apply_body_font(title_label)
         title_row = QHBoxLayout()
-        title_row.setContentsMargins(ROW_INSET, 6, ROW_INSET, 0)
+        title_row.setContentsMargins(CARD_CONTENT_INSET, 6, ROW_INSET, 0)
         title_row.addWidget(title_label)
         self.body_layout.addLayout(title_row)
 

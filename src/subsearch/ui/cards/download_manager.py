@@ -26,6 +26,7 @@ from subsearch.runtime.models.model import (
 )
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.compat.qfluent import flatten_line_edit
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
 from subsearch.ui.services.log_panel import LogPanelSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
@@ -34,7 +35,12 @@ from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
+from subsearch.ui.theme.metrics import (
+    CARD_CONTENT_INSET,
+    ROW_INSET,
+    SMALL_ICON_SIZE,
+    TOOL_BUTTON_SIZE,
+)
 from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
     SEMI_BOLD,
@@ -45,17 +51,16 @@ from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.log_panel import LogPanel
 from subsearch.ui.widgets.setting_rows import (
     FolderPathRow,
-    SearchableComboBoxRow,
+    FuzzySelectRow,
     SwitchRow,
+    TrailingButtonArea,
 )
 from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
-# "Log" label (BODY_FONT_SIZE) + layout spacing (4) + one list item (BODY_FONT_SIZE + 2)
-_LOG_MIN_HEIGHT = BODY_FONT_SIZE + 4 + BODY_FONT_SIZE + 2
-# label + spacing + 4 rows
-_LOG_DEFAULT_HEIGHT = BODY_FONT_SIZE + 4 + 4 * (BODY_FONT_SIZE + 2)
+_LOG_MIN_VISIBLE_LINES = 1
+_LOG_DEFAULT_VISIBLE_LINES = 4
 
 _HANDLE_HEIGHT = 20
 _HANDLE_LINE_WIDTH_FRACTION = 0.75
@@ -118,14 +123,15 @@ class _StyledSplitter(QSplitter):
         return _SplitterHandle(self.orientation(), self)
 
 
-def _build_splitter(top: QWidget, bottom: QWidget) -> QSplitter:
+def _build_splitter(top: QWidget, bottom: LogPanel) -> QSplitter:
     splitter = _StyledSplitter(Qt.Orientation.Vertical)
     splitter.setChildrenCollapsible(False)
     splitter.addWidget(top)
     splitter.addWidget(bottom)
     top.setMinimumHeight(80)
-    bottom.setMinimumHeight(_LOG_MIN_HEIGHT)
-    splitter.setSizes([splitter.sizeHint().height() - _LOG_DEFAULT_HEIGHT, _LOG_DEFAULT_HEIGHT])
+    bottom.setMinimumHeight(bottom.height_for_lines(_LOG_MIN_VISIBLE_LINES))
+    default_height = bottom.height_for_lines(_LOG_DEFAULT_VISIBLE_LINES)
+    splitter.setSizes([splitter.sizeHint().height() - default_height, default_height])
     return splitter
 
 
@@ -164,6 +170,8 @@ FAILED_ICON = LucideIcon.CIRCLE_X
 
 SPINNER_FRAME_INTERVAL_MS = 60
 SPINNER_DEGREES_PER_FRAME = 10
+
+FILTER_BAR_WIDTH = 200
 
 DEFAULT_MANAGER_TARGET_PATH = "."
 DEFAULT_WORKING_DIRECTORY = ""
@@ -204,7 +212,7 @@ class DownloadManagerSettingsCard(SettingsCard):
         self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager_settings"].explanation)
 
         search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
-        self.add_row(SearchableComboBoxRow("download_manager.search_mode", store, search_mode_values))
+        self.add_row(FuzzySelectRow("download_manager.search_mode", store, search_mode_values, searchable=False))
 
         self._manually_handle = SwitchRow("download_manager.manually_handle_post_processing", store)
         self.add_row(self._manually_handle)
@@ -224,12 +232,16 @@ class DownloadManagerSettingsCard(SettingsCard):
             store,
             placeholder_text=WORKING_DIRECTORY_PLACEHOLDER,
             dialog_title="Select working folder",
-            validate_path=False,
+            allow_empty=True,
         )
         self.body_layout.addWidget(self._working_directory_row)
         self.register_restore_defaults([("download_manager.working_directory", DEFAULT_WORKING_DIRECTORY)])
 
         self._build_video_file_section()
+        self._suggestion_spinner_angle = 0.0
+        self._suggestion_spinner_timer = QTimer(self)
+        self._suggestion_spinner_timer.setInterval(SPINNER_FRAME_INTERVAL_MS)
+        self._suggestion_spinner_timer.timeout.connect(self._advance_suggestion_spinner)
         store.subscribe("search.providers", self._on_providers_changed)
         self._on_providers_changed(store.read("search.providers"))
 
@@ -249,7 +261,7 @@ class DownloadManagerSettingsCard(SettingsCard):
         section_layout.setContentsMargins(0, 0, 0, 0)
 
         label_row = QHBoxLayout()
-        label_row.setContentsMargins(ROW_INSET, 10, ROW_INSET, 4)
+        label_row.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 4)
         label = BodyLabel("Video file", self)
         apply_body_font(label)
         label_row.addWidget(label, stretch=1)
@@ -259,7 +271,9 @@ class DownloadManagerSettingsCard(SettingsCard):
         self._filename_edit.setPlaceholderText("No video file selected")
         self._filename_edit.setText(VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else "")
         apply_body_font(self._filename_edit)
+        flatten_line_edit(self._filename_edit)
         self._filename_edit.editingFinished.connect(self._on_filename_edited)
+        self._filename_edit.returnPressed.connect(self._on_search_clicked)
 
         browse_video = CaptionedToolButton("Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self)
         browse_video.clicked.connect(self._browse_for_video_file)
@@ -270,10 +284,9 @@ class DownloadManagerSettingsCard(SettingsCard):
         self._search_video.clicked.connect(self._on_search_clicked)
 
         file_row = QHBoxLayout()
-        file_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
+        file_row.setContentsMargins(CARD_CONTENT_INSET, 0, ROW_INSET, 10)
         file_row.addWidget(self._filename_edit, stretch=1)
-        file_row.addWidget(browse_video)
-        file_row.addWidget(self._search_video)
+        file_row.addWidget(TrailingButtonArea([self._search_video, browse_video], parent=self))
         section_layout.addLayout(file_row)
 
         self.body_layout.addLayout(section_layout)
@@ -288,9 +301,25 @@ class DownloadManagerSettingsCard(SettingsCard):
         suggestion_service = self._title_suggestion_service
         if suggestion_service is not None and self._needs_title_suggestions(typed_term):
             self._awaiting_suggestions = True
+            self._start_suggestion_spinner()
             suggestion_service.request(typed_term)
             return
         self.research_requested.emit("")
+
+    def _start_suggestion_spinner(self) -> None:
+        self._suggestion_spinner_angle = 0.0
+        self._advance_suggestion_spinner()
+        self._suggestion_spinner_timer.start()
+
+    def _stop_suggestion_spinner(self) -> None:
+        self._suggestion_spinner_timer.stop()
+        self._search_video.button.setIcon(lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR))
+
+    def _advance_suggestion_spinner(self) -> None:
+        self._suggestion_spinner_angle = (self._suggestion_spinner_angle + SPINNER_DEGREES_PER_FRAME) % 360
+        self._search_video.button.setIcon(
+            lucide_rotated_qicon(DOWNLOADING_ICON, DOWNLOADING_COLOR, self._suggestion_spinner_angle)
+        )
 
     def _needs_title_suggestions(self, typed_term: str) -> bool:
         if not typed_term:
@@ -304,6 +333,7 @@ class DownloadManagerSettingsCard(SettingsCard):
         if not self._awaiting_suggestions:
             return
         self._awaiting_suggestions = False
+        self._stop_suggestion_spinner()
         if not suggestions:
             self._search_as_typed(typed_term)
             return
@@ -313,6 +343,7 @@ class DownloadManagerSettingsCard(SettingsCard):
         if not self._awaiting_suggestions:
             return
         self._awaiting_suggestions = False
+        self._stop_suggestion_spinner()
         self._search_as_typed(self._filename_edit.text().strip())
 
     def _suggestion_popup(self) -> TitleSuggestionPopup:
@@ -374,45 +405,18 @@ class SubtitleCard(SettingsCard):
         self.add_header_help(description.explanation)
         self.viewLayout.setContentsMargins(*CARD_BODY_MARGINS)
         self._search_bar = self._build_search_bar()
-        self._search_button = self._build_search_button()
-        self._insert_search_into_header()
-
-    def _build_search_button(self) -> TransparentToolButton:
-        button = TransparentToolButton(self)
-        button.setIcon(lucide_qicon(LucideIcon.SEARCH, palette.NEUTRAL_3))
-        button.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
-        button.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
-        button.setToolTip("Search subtitles")
-        button.setCheckable(True)
-        button.toggled.connect(self._on_search_toggled)
-        return button
+        self.add_header_button(self._search_bar)
 
     def _build_search_bar(self) -> LineEdit:
         bar = LineEdit(self)
         bar.setPlaceholderText("Filter subtitles…")
         apply_body_font(bar)
+        flatten_line_edit(bar)
+        bar.setFixedWidth(FILTER_BAR_WIDTH)
         bar.setClearButtonEnabled(True)
         bar.textChanged.connect(self.search_text_changed)
         bar.returnPressed.connect(self.search_confirmed)
-        bar.setVisible(False)
         return bar
-
-    def _insert_search_into_header(self) -> None:
-        # Place the search bar directly before the search button in the header row.
-        # replaceWidget puts the button where the placeholder was; we insert the bar
-        # one position to the left of it.
-        self.add_header_button(self._search_button)
-        button_index = self.headerLayout.indexOf(self._search_button)
-        self.headerLayout.insertWidget(button_index, self._search_bar)
-
-    def _on_search_toggled(self, active: bool) -> None:
-        self._search_bar.setVisible(active)
-        icon_color = TEXT_COLOR if active else palette.NEUTRAL_3
-        self._search_button.setIcon(lucide_qicon(LucideIcon.SEARCH, icon_color))
-        if active:
-            self._search_bar.setFocus()
-        else:
-            self._search_bar.clear()
 
 
 class SubtitleActionRow(QWidget):

@@ -5,7 +5,7 @@ from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.widgets.setting_rows import SpinBoxRow, SwitchRow
+from subsearch.ui.widgets.setting_rows import SliderRow, SwitchRow
 
 
 class NotificationsCard(SettingsCard):
@@ -42,9 +42,9 @@ class NetworkCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Network", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["card.network"].explanation)
-        self.add_row(SpinBoxRow("network.api_call_limit", store, 1, 99))
-        self.add_row(SpinBoxRow("network.request_connect_timeout", store, 1, 99))
-        self.add_row(SpinBoxRow("network.request_read_timeout", store, 1, 99))
+        self.add_row(SliderRow("network.api_call_limit", store, 1, 10))
+        self.add_row(SliderRow("network.request_connect_timeout", store, 1, 10))
+        self.add_row(SliderRow("network.request_read_timeout", store, 1, 10))
 
 
 class ProviderDiagnosticsCard(SettingsCard):
@@ -52,7 +52,7 @@ class ProviderDiagnosticsCard(SettingsCard):
         super().__init__("Provider diagnostics", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["diagnostics.header"].explanation)
         self.enabled = SwitchRow("diagnostics.enabled", store)
-        self.failed_attempts = SpinBoxRow("diagnostics.failed_attempts_threshold", store, 1, 99)
+        self.failed_attempts = SliderRow("diagnostics.failed_attempts_threshold", store, 1, 10)
         self.add_row(self.enabled)
         self.add_row(self.failed_attempts)
         self.enabled.toggled.connect(self._apply_enabled_state)
