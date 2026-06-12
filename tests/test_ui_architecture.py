@@ -44,7 +44,7 @@ PRIVATE_QFLUENT_PATTERNS = (
 
 ROW_CONFIG_KEY_PATTERNS = (
     r'SwitchRow\(\s*"([^"]+)"',
-    r'SliderRow\(\s*"([^"]+)"',
+    r'IntInputRow\(\s*"([^"]+)"',
     r'FuzzySelectRow\(\s*"([^"]+)"',
     r'FolderPathRow\(\s*"([^"]+)"',
     r'build_section_header\(\s*"([^"]+)"',

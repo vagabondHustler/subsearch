@@ -46,9 +46,9 @@ def _collect_switch_rows(card):
 
 
 def _collect_slider_rows(card):
-    from subsearch.ui.widgets.setting_rows import SliderRow
+    from subsearch.ui.widgets.setting_rows import IntInputRow
 
-    return {row.config_key: row for row in card.findChildren(SliderRow)}
+    return {row.config_key: row for row in card.findChildren(IntInputRow)}
 
 
 @pytest.fixture
@@ -90,10 +90,10 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
     assert card.slider.value() == 90
     for token_name, default in DEFAULT_TOKEN_WEIGHTS.items():
         assert session.read(f"search.token_weights.{token_name}") == default
-        assert card.tuning_rows[token_name].slider.value() == default
+        assert card.tuning_rows[token_name].input.value() == default
     for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
         assert session.read(f"search.token_multipliers.{token_name}") == default
-        assert card.tuning_rows[token_name].slider.value() == default
+        assert card.tuning_rows[token_name].input.value() == default
 
 
 def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> None:
@@ -303,15 +303,15 @@ def test_network_restore_defaults(qtbot) -> None:
     store.write("network.api_call_limit", 10)
     store.write("network.request_connect_timeout", 10)
     store.write("network.request_read_timeout", 10)
-    assert slider_rows["network.api_call_limit"].slider.value() == 10
-    assert slider_rows["network.request_connect_timeout"].slider.value() == 10
-    assert slider_rows["network.request_read_timeout"].slider.value() == 10
+    assert slider_rows["network.api_call_limit"].input.value() == 10
+    assert slider_rows["network.request_connect_timeout"].input.value() == 10
+    assert slider_rows["network.request_read_timeout"].input.value() == 10
 
     card._restore_defaults()
 
     for key, default in _NETWORK_DEFAULTS.items():
         assert session.read(key) == default
-        assert slider_rows[key].slider.value() == default
+        assert slider_rows[key].input.value() == default
 
 
 def test_slider_edit_enter_commits_and_clamps(qtbot) -> None:
@@ -330,18 +330,18 @@ def test_slider_edit_enter_commits_and_clamps(qtbot) -> None:
     assert slider._edit.text() == "100 %"
 
 
-def test_slider_row_writes_committed_value_to_store(qtbot) -> None:
+def test_int_input_row_writes_committed_value_to_store(qtbot) -> None:
     from subsearch.ui.state.store import SettingsStore
-    from subsearch.ui.widgets.setting_rows import SliderRow
+    from subsearch.ui.widgets.setting_rows import IntInputRow
 
     store = SettingsStore()
-    row = SliderRow("network.api_call_limit", store, 1, 99)
+    row = IntInputRow("network.api_call_limit", store, 1, 99)
     qtbot.addWidget(row)
 
-    row.slider._edit.setText("250")
-    row.slider.commit_edit()
+    row.input.setText("250")
+    row.input._commit()
 
-    assert row.slider.value() == 99
+    assert row.input.value() == 99
     assert store.read("network.api_call_limit") == 99
 
 
