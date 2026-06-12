@@ -45,10 +45,10 @@ def _collect_switch_rows(card):
     return {row.config_key: row for row in card.findChildren(SwitchRow)}
 
 
-def _collect_spinbox_rows(card):
-    from subsearch.ui.widgets.setting_rows import SpinBoxRow
+def _collect_slider_rows(card):
+    from subsearch.ui.widgets.setting_rows import SliderRow
 
-    return {row.config_key: row for row in card.findChildren(SpinBoxRow)}
+    return {row.config_key: row for row in card.findChildren(SliderRow)}
 
 
 @pytest.fixture
@@ -81,7 +81,7 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
 
     store.write("search.accept_threshold", 50)
     for row in card.tuning_rows.values():
-        row.spin_box.setValue(1)
+        store.write(row.config_key, 1)
     assert session.read("search.token_weights.title") == 1
     assert card.slider.value() == 50
 
@@ -90,10 +90,10 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
     assert card.slider.value() == 90
     for token_name, default in DEFAULT_TOKEN_WEIGHTS.items():
         assert session.read(f"search.token_weights.{token_name}") == default
-        assert card.tuning_rows[token_name].spin_box.value() == default
+        assert card.tuning_rows[token_name].slider.value() == default
     for token_name, default in DEFAULT_TOKEN_MULTIPLIERS.items():
         assert session.read(f"search.token_multipliers.{token_name}") == default
-        assert card.tuning_rows[token_name].spin_box.value() == default
+        assert card.tuning_rows[token_name].slider.value() == default
 
 
 def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> None:
@@ -230,13 +230,13 @@ def test_download_manager_restore_defaults(qtbot) -> None:
     from subsearch.ui.cards.download_manager import DownloadManagerSettingsCard
     from subsearch.ui.services.video_file import VideoFileService
     from subsearch.ui.state.store import SettingsStore
-    from subsearch.ui.widgets.setting_rows import SearchableComboBoxRow
+    from subsearch.ui.widgets.setting_rows import FuzzySelectRow
 
     store = SettingsStore()
     card = DownloadManagerSettingsCard(store, VideoFileService())
     qtbot.addWidget(card)
     session = config_session.get_config_session()
-    combo_rows = {row.config_key: row for row in card.findChildren(SearchableComboBoxRow)}
+    combo_rows = {row.config_key: row for row in card.findChildren(FuzzySelectRow)}
 
     store.write("download_manager.search_mode", "manual")
     assert combo_rows["download_manager.search_mode"].combo_box.currentText() == "Manual"
@@ -298,17 +298,89 @@ def test_network_restore_defaults(qtbot) -> None:
     card = NetworkCard(store)
     qtbot.addWidget(card)
     session = config_session.get_config_session()
-    spinbox_rows = _collect_spinbox_rows(card)
+    slider_rows = _collect_slider_rows(card)
 
-    store.write("network.api_call_limit", 99)
-    store.write("network.request_connect_timeout", 99)
-    store.write("network.request_read_timeout", 99)
-    assert spinbox_rows["network.api_call_limit"].spin_box.value() == 99
-    assert spinbox_rows["network.request_connect_timeout"].spin_box.value() == 99
-    assert spinbox_rows["network.request_read_timeout"].spin_box.value() == 99
+    store.write("network.api_call_limit", 10)
+    store.write("network.request_connect_timeout", 10)
+    store.write("network.request_read_timeout", 10)
+    assert slider_rows["network.api_call_limit"].slider.value() == 10
+    assert slider_rows["network.request_connect_timeout"].slider.value() == 10
+    assert slider_rows["network.request_read_timeout"].slider.value() == 10
 
     card._restore_defaults()
 
     for key, default in _NETWORK_DEFAULTS.items():
         assert session.read(key) == default
-        assert spinbox_rows[key].spin_box.value() == default
+        assert slider_rows[key].slider.value() == default
+
+
+def test_slider_edit_enter_commits_and_clamps(qtbot) -> None:
+    from subsearch.ui.widgets.slider import SliderWithValueLabel
+
+    slider = SliderWithValueLabel(suffix="%")
+    qtbot.addWidget(slider)
+    slider.setRange(0, 100)
+    slider.set_value_silent(40)
+    assert slider._edit.text() == "40 %"
+
+    slider._edit.setText("150")
+    slider.commit_edit()
+
+    assert slider.value() == 100
+    assert slider._edit.text() == "100 %"
+
+
+def test_slider_row_writes_committed_value_to_store(qtbot) -> None:
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.widgets.setting_rows import SliderRow
+
+    store = SettingsStore()
+    row = SliderRow("network.api_call_limit", store, 1, 99)
+    qtbot.addWidget(row)
+
+    row.slider._edit.setText("250")
+    row.slider.commit_edit()
+
+    assert row.slider.value() == 99
+    assert store.read("network.api_call_limit") == 99
+
+
+def test_post_processing_card_collapses_and_shows_status_when_manual(qtbot) -> None:
+    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    card = PostProcessingCard(store)
+    qtbot.addWidget(card)
+
+    assert not card.is_collapsed()
+    assert card._disabled_status.isHidden()
+
+    store.write("download_manager.manually_handle_post_processing", True)
+    assert card.is_collapsed()
+    assert not card._disabled_status.isHidden()
+    assert card._collapse_button.isEnabled()
+
+    store.write("download_manager.manually_handle_post_processing", False)
+    assert not card.is_collapsed()
+    assert card._disabled_status.isHidden()
+
+
+def test_working_directory_accepts_empty_and_rejects_invalid_path(qtbot) -> None:
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.widgets.setting_rows import FolderPathRow
+
+    store = SettingsStore()
+    row = FolderPathRow("download_manager.working_directory", store, allow_empty=True)
+    qtbot.addWidget(row)
+
+    row.path_edit.setText("")
+    assert row.is_valid()
+    row.save_if_valid()
+    assert store.read("download_manager.working_directory") == ""
+
+    row.path_edit.setText("::not a path::")
+    assert not row.is_valid()
+    assert row.path_edit.property("error") is True
+    row.save_if_valid()
+    assert store.read("download_manager.working_directory") == ""

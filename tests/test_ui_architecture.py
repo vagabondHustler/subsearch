@@ -32,9 +32,6 @@ FORBIDDEN_IMPORT_PREFIXES_BY_LAYER = {
 
 # Private qfluentwidgets attributes Subsearch is known to touch; allowed in compat only.
 PRIVATE_QFLUENT_PATTERNS = (
-    "_showComboMenu",
-    "_showCompleterMenu",
-    "_completerMenu",
     "_drawBackground",
     "_postInit",
     "_posToValue",
@@ -47,8 +44,8 @@ PRIVATE_QFLUENT_PATTERNS = (
 
 ROW_CONFIG_KEY_PATTERNS = (
     r'SwitchRow\(\s*"([^"]+)"',
-    r'SpinBoxRow\(\s*"([^"]+)"',
-    r'SearchableComboBoxRow\(\s*"([^"]+)"',
+    r'SliderRow\(\s*"([^"]+)"',
+    r'FuzzySelectRow\(\s*"([^"]+)"',
     r'FolderPathRow\(\s*"([^"]+)"',
     r'build_section_header\(\s*"([^"]+)"',
     r'SETTING_DESCRIPTIONS\["([^"]+)"\]',
