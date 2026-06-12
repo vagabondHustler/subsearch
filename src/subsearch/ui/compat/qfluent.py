@@ -6,34 +6,17 @@ reaches into private internals. When upgrading the library, re-verify this file
 first - nothing outside ui/compat/ may touch a private qfluentwidgets attribute.
 """
 
-from typing import NamedTuple
-
-from PySide6.QtCore import QPoint, QRect, QRectF, QSortFilterProxyModel, Qt
-from PySide6.QtGui import (
-    QColor,
-    QCursor,
-    QPainter,
-    QPen,
-    QStandardItem,
-    QStandardItemModel,
-)
-from PySide6.QtWidgets import QCompleter, QWidget
-from qfluentwidgets import (
-    ComboBox,
-    EditableComboBox,
-    NavigationPanel,
-    Slider,
-    SwitchButton,
-    ThemeColor,
-)
+from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QRectF, Qt
+from PySide6.QtGui import QColor, QCursor, QPainter, QPen
+from PySide6.QtWidgets import QAbstractScrollArea, QApplication
+from qfluentwidgets import LineEdit, NavigationPanel, Slider, SwitchButton, ThemeColor
 from qfluentwidgets.common.color import autoFallbackThemeColor
 from qfluentwidgets.common.icon import drawIcon, isDarkTheme
-from qfluentwidgets.components.widgets.line_edit import CompleterMenu
 from qfluentwidgets.components.widgets.slider import SliderHandle
 
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.typography import BODY_FONT_SIZE, TEXT_COLOR, body_font
+from subsearch.ui.theme.typography import TEXT_COLOR, append_custom_style
 
 # --- Fixed accent color -------------------------------------------------------
 # qfluentwidgets derives light/dark accent variants from the saved theme color;
@@ -133,6 +116,34 @@ def enlarge_navigation_icons(panel: NavigationPanel) -> None:
         item.update()
 
 
+# --- Navigation wheel forwarding -----------------------------------------------
+# The navigation panel swallows wheel events instead of letting them scroll the
+# page beside it. NavigationPanel exposes no scroll-passthrough hook, so an event
+# filter intercepts wheel events over the panel and replays them on the current
+# page's scroll area viewport.
+
+
+class _NavigationWheelForwarder(QObject):
+    def __init__(self, panel: NavigationPanel, page_provider) -> None:
+        super().__init__(panel)
+        self._page_provider = page_provider
+
+    def eventFilter(self, _watched, event) -> bool:
+        if event.type() != QEvent.Type.Wheel:
+            return False
+        page = self._page_provider()
+        scroll_area = page.findChild(QAbstractScrollArea) if page is not None else None
+        if scroll_area is None:
+            return False
+        QApplication.sendEvent(scroll_area.viewport(), event)
+        return True
+
+
+def forward_navigation_wheel_to_page(panel: NavigationPanel, page_provider) -> None:
+    forwarder = _NavigationWheelForwarder(panel, page_provider)
+    panel.installEventFilter(forwarder)
+
+
 # --- Switch border -------------------------------------------------------------
 # The unchecked switch border is 1px and nearly invisible on the dark theme;
 # the indicator exposes no border-width property, so its private
@@ -158,6 +169,77 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
     indicator._drawBackground = draw_background
 
 
+# --- Borderless line edit --------------------------------------------------------
+# LineEdit paints a focused accent underline directly in paintEvent (not via QSS),
+# so a stylesheet "border: none" cannot remove it; the only hook is the color the
+# paint uses, so focusedBorderColor is forced transparent.
+
+
+def hide_line_edit_focus_underline(line_edit: LineEdit) -> None:
+    line_edit.focusedBorderColor = lambda: Qt.GlobalColor.transparent
+
+
+# The brighter resting bottom underline comes from qfluent's LINE_EDIT QSS
+# (border-bottom at ~0.54 alpha vs 0.08 for the other edges); the rule below
+# matches the bottom edge to the other three.
+_UNIFORM_BORDER_QSS = " LineEdit { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }"
+_CHROMELESS_QSS = " LineEdit { background: transparent; border: none; }"
+
+
+def flatten_line_edit(line_edit: LineEdit) -> None:
+    """Replace the bright bottom underline with the same thin 1px border as the
+    other edges, and hide the painted focus underline. Registered as custom QSS
+    because the StyleSheetManager wipes plain setStyleSheet on its re-applies."""
+    append_custom_style(line_edit, _UNIFORM_BORDER_QSS)
+    hide_line_edit_focus_underline(line_edit)
+
+
+def make_line_edit_chromeless(line_edit: LineEdit) -> None:
+    """No background, border, or underline at all (the slider's value edit)."""
+    append_custom_style(line_edit, _CHROMELESS_QSS)
+    hide_line_edit_focus_underline(line_edit)
+
+
+# --- Acrylic popups -------------------------------------------------------------
+# Qt cannot blur what is behind a window; the acrylic backdrop comes from the
+# Windows compositor via qframelesswindow's WindowsWindowEffect, and the rounded
+# corners from DWM (attribute 33), since the QSS border-radius cannot clip the
+# compositor-drawn backdrop.
+
+# RGBA tint over the blurred backdrop; POPUP_BACKGROUND at ~70% opacity.
+_ACRYLIC_TINT = palette.POPUP_BACKGROUND.lstrip("#") + "B3"
+_DWMWA_WINDOW_CORNER_PREFERENCE = 33
+_DWMWCP_ROUND = 2
+
+
+def apply_popup_acrylic(popup) -> bool:
+    # The caller must set WA_TranslucentBackground before the native window exists
+    # (i.e. in __init__): toggling it on a live window leaves the surface without an
+    # alpha channel while disabling background erase, so repaints smear over each other.
+    import ctypes
+
+    from qframelesswindow.windows.window_effect import (  # type: ignore[import-untyped]
+        WindowsWindowEffect,
+    )
+
+    try:
+        window_handle = int(popup.winId())
+        effect = WindowsWindowEffect(popup)
+        effect.setAcrylicEffect(window_handle, _ACRYLIC_TINT)
+        corner_preference = ctypes.c_int(_DWMWCP_ROUND)
+        ctypes.windll.dwmapi.DwmSetWindowAttribute(
+            window_handle,
+            _DWMWA_WINDOW_CORNER_PREFERENCE,
+            ctypes.byref(corner_preference),
+            ctypes.sizeof(corner_preference),
+        )
+        return True
+    except OSError, AttributeError:
+        # Compositor effects are unavailable (offscreen rendering, older Windows);
+        # the caller falls back to painting an opaque background instead.
+        return False
+
+
 # --- Circle-dot slider handle ----------------------------------------------------
 # Slider builds its handle in the private _postInit and offers no handle
 # factory, so the stock handle is deleted and replaced; dragging maps back to
@@ -180,6 +262,7 @@ class CircleDotHandle(SliderHandle):
         self.setFixedSize(HANDLE_SIZE, HANDLE_SIZE)
         self._hovered = False
         self._pressed = False
+        self._press_offset = QPoint()
 
     def enterEvent(self, e) -> None:
         self._hovered = True
@@ -191,20 +274,19 @@ class CircleDotHandle(SliderHandle):
 
     def mousePressEvent(self, e) -> None:
         self._pressed = True
+        # Remember where on the handle the press landed so an off-center grab
+        # does not jump the value; only drags move it.
+        self._press_offset = e.position().toPoint() - QPoint(HANDLE_CENTER, HANDLE_CENTER)
         self.update()
         self.pressed.emit()
-        self._drag_to(e)
 
     def mouseMoveEvent(self, e) -> None:
-        self._drag_to(e)
+        self.parent().update_value_from_handle(e.position().toPoint() - self._press_offset)
 
     def mouseReleaseEvent(self, e) -> None:
         self._pressed = False
         self.update()
         self.released.emit()
-
-    def _drag_to(self, e) -> None:
-        self.parent().update_value_from_handle(e.position().toPoint())
 
     def paintEvent(self, e) -> None:
         center = QPoint(HANDLE_CENTER, HANDLE_CENTER)
@@ -237,6 +319,12 @@ class CircleDotSlider(Slider):
         self.setMinimumHeight(HANDLE_SIZE)
         self._adjustHandlePos()
 
+    def _drawHorizonGroove(self, painter: QPainter) -> None:
+        # qfluent's groove paints a colored fill up to the handle; we draw only the
+        # plain base groove so no accent-colored line appears under the value.
+        width, radius = self.width(), self.handle.width() / 2
+        painter.drawRoundedRect(QRectF(radius, radius - 2, width - radius * 2, 4), 2, 2)
+
     def update_value_from_handle(self, handle_position: QPoint) -> None:
         self.setValue(self._posToValue(self.handle.mapToParent(handle_position)))
 
@@ -246,140 +334,3 @@ class CircleDotSlider(Slider):
         self.setValue(value)
         self._adjustHandlePos()
         self.blockSignals(False)
-
-
-# --- Styled dropdown / completer menus -------------------------------------------
-# Combo menus ignore the application font and text color; menu.view and the
-# private _showComboMenu/_completerMenu hooks are the only access points.
-
-MAX_VISIBLE_DROPDOWN_ITEMS = 8
-
-
-def style_dropdown_menu(menu, object_name: str) -> None:
-    font = body_font()
-    menu.view.setFont(font)
-    for action in menu.actions():
-        action.setFont(font)
-    menu.view.setStyleSheet(f"#{object_name} {{ color: {TEXT_COLOR}; font-size: {BODY_FONT_SIZE}px; }}")
-
-
-class BodyFontComboBox(ComboBox):
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-
-    def _showComboMenu(self) -> None:
-        super()._showComboMenu()
-        if self.dropMenu is None:
-            return
-        style_dropdown_menu(self.dropMenu, "comboListWidget")
-
-
-SEARCH_TERMS_ROLE = Qt.ItemDataRole.UserRole + 1
-
-
-class MatchRank(NamedTuple):
-    tier: int
-    label_length: int
-
-
-def rank_match(terms: list[str], query: str) -> MatchRank:
-    query_lower = query.lower()
-    best_tier = 3
-    for term in terms:
-        term_lower = term.lower()
-        if term_lower == query_lower:
-            best_tier = min(best_tier, 0)
-        elif term_lower.startswith(query_lower):
-            best_tier = min(best_tier, 1)
-        elif query_lower in term_lower:
-            best_tier = min(best_tier, 2)
-    return MatchRank(best_tier, len(terms[0]))
-
-
-def best_matching_label(search_terms_by_label: dict[str, list[str]], query: str) -> str | None:
-    if not query:
-        return None
-    ranked = min(
-        search_terms_by_label,
-        key=lambda label: rank_match(search_terms_by_label[label], query),
-    )
-    if rank_match(search_terms_by_label[ranked], query).tier == 3:
-        return None
-    return ranked
-
-
-class SearchTermsFilterProxy(QSortFilterProxyModel):
-    def filterAcceptsRow(self, source_row: int, source_parent) -> bool:
-        index = self.sourceModel().index(source_row, 0, source_parent)
-        query = self.filterRegularExpression().pattern().lower()
-        if not query:
-            return True
-        terms = self.sourceModel().data(index, SEARCH_TERMS_ROLE) or []
-        return any(query in term.lower() for term in terms)
-
-
-class SearchableComboBox(EditableComboBox):
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-        self._search_terms_by_label: dict[str, list[str]] = {}
-
-    def setItems(self, labels: list[str], aliases_by_label: dict[str, list[str]] | None = None) -> None:
-        aliases_by_label = aliases_by_label or {}
-        self._search_terms_by_label = {label: [label, *aliases_by_label.get(label, [])] for label in labels}
-        self.addItems(labels)
-
-        model = QStandardItemModel(self)
-        for label, terms in self._search_terms_by_label.items():
-            item = QStandardItem(label)
-            item.setData(terms, SEARCH_TERMS_ROLE)
-            model.appendRow(item)
-
-        self._filter_proxy = SearchTermsFilterProxy(self)
-        self._filter_proxy.setSourceModel(model)
-
-        completer = QCompleter(self._filter_proxy, self)
-        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
-        completer.setMaxVisibleItems(MAX_VISIBLE_DROPDOWN_ITEMS)
-        self.setCompleter(completer)
-
-    def _showCompleterMenu(self) -> None:
-        if not self.completer() or not self.text():
-            return
-        self._filter_proxy.setFilterFixedString(self.text())
-        if self._completerMenu is None:
-            self.setCompleterMenu(CompleterMenu(self))
-            style_dropdown_menu(self._completerMenu, "completerListWidget")
-        self.completer().setCompletionPrefix("")
-        changed = self._completerMenu.setCompletion(
-            self.completer().completionModel(), self.completer().completionColumn()
-        )
-        self._completerMenu.setMaxVisibleItems(self.completer().maxVisibleItems())
-        if changed:
-            self._completerMenu.popup()
-        self._highlight_best_completion()
-
-    def _highlight_best_completion(self) -> None:
-        match = best_matching_label(self._search_terms_by_label, self.text())
-        view = self._completerMenu.view
-        if match is None:
-            view.setCurrentRow(-1)
-            return
-        row = self._completerMenu.items.index(match) if match in self._completerMenu.items else -1
-        view.setCurrentRow(row)
-
-    def _onReturnPressed(self) -> None:
-        match = best_matching_label(self._search_terms_by_label, self.text())
-        if match is None:
-            return
-        self.setCurrentIndex(self.findText(match))
-        if self._completerMenu:
-            self._completerMenu.close()
-
-    def _showComboMenu(self) -> None:
-        super()._showComboMenu()
-        if self.dropMenu is None:
-            return
-        style_dropdown_menu(self.dropMenu, "comboListWidget")
