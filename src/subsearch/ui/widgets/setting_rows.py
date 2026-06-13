@@ -1,10 +1,8 @@
-from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import (
-    QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -47,7 +45,7 @@ from subsearch.ui.theme.typography import (
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.fuzzy_select import FuzzySelect
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.browse_line_edit import BrowseLineEdit
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -434,26 +432,22 @@ class FolderPathRow(QWidget):
         return header
 
     def _build_path_row(self, placeholder_text: str, inline_help_text: str | None) -> QHBoxLayout:
-        self.path_edit = LineEdit(self)
-        self.path_edit.setPlaceholderText(placeholder_text)
+        self.path_edit = BrowseLineEdit(
+            placeholder=placeholder_text,
+            dialog_title=self._dialog_title,
+            parent=self,
+        )
         self.path_edit.setText(str(self.store.read(self.config_key)))
-        self.path_edit.setClearButtonEnabled(True)
-        apply_body_font(self.path_edit)
-        flatten_line_edit(self.path_edit)
         self.path_edit.textChanged.connect(self._on_text_changed)
         self.path_edit.editingFinished.connect(self.save_if_valid)
         self.path_edit.returnPressed.connect(self.path_edit.clearFocus)
-
-        browse_button = CaptionedToolButton(
-            "Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self
-        )
-        browse_button.clicked.connect(self._browse_for_folder)
+        self.path_edit.path_picked.connect(self.save_if_valid)
 
         inline_help_button = HelpButton(inline_help_text, self) if inline_help_text is not None else None
         row = QHBoxLayout()
         row.setContentsMargins(CARD_CONTENT_INSET, 0, ROW_INSET, 10)
         row.addWidget(self.path_edit, stretch=1)
-        row.addWidget(TrailingButtonArea([browse_button], inline_help_button, self))
+        row.addWidget(TrailingButtonArea([], inline_help_button, self))
         return row
 
     def text(self) -> str:
@@ -478,9 +472,3 @@ class FolderPathRow(QWidget):
 
     def _on_text_changed(self, _changed_path: str) -> None:
         set_error_text(self.path_edit, not self.is_valid())
-
-    def _browse_for_folder(self) -> None:
-        selected_folder = QFileDialog.getExistingDirectory(self.window(), self._dialog_title, self.path_edit.text())
-        if not selected_folder:
-            return
-        self.set_path(str(Path(selected_folder)))

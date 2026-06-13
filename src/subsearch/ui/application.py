@@ -117,7 +117,7 @@ class SettingsWindow(FluentWindow):
         store = self.store
         shell_service = ShellIntegrationService(self.task_runner, self)
         if download_service is None:
-            download_service = SubtitleDownloadService(self.task_runner, self)
+            download_service = SubtitleDownloadService(self.task_runner, self) # type: ignore
         if post_processing_service is None:
             post_processing_service = PostProcessingService(self.task_runner, self)
         in_search_mode = subtitles is not None or search_worker_factory is not None
