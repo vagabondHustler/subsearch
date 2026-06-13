@@ -87,6 +87,19 @@ def migrate_download_section(toml_data: dict[str, Any]) -> bool:
     return True
 
 
+def migrate_token_multipliers(toml_data: dict[str, Any]) -> bool:
+    multipliers = toml_data.get("search", {}).get("token_multipliers")
+    if not multipliers:
+        return False
+    # Old format stored a 0-100 integer penalty; the new format stores the multiplier float directly.
+    if not any(isinstance(value, int) for value in multipliers.values()):
+        return False
+    converted = {token: (100 - penalty) / 100 for token, penalty in multipliers.items()}
+    toml_data["search"]["token_multipliers"] = converted
+    log.info(f"Migrated token multipliers from penalty integers to multiplier floats: {converted}")
+    return True
+
+
 def resolve_on_integrity_failure() -> ConfigResolution:
     remove_stale_temp_file()
     valid_config_keys = get_keys_recursively(DEFAULT_CONFIG)
@@ -109,7 +122,9 @@ def resolve_on_integrity_failure() -> ConfigResolution:
             return ConfigResolution(toml_file.load_toml_data(FILE_PATHS.config), is_fresh=True)
     else:
         remove_stale_backup_file()
-    if migrate_download_section(toml_data):
+    migrated_download = migrate_download_section(toml_data)
+    migrated_multipliers = migrate_token_multipliers(toml_data)
+    if migrated_download or migrated_multipliers:
         toml_file.dump_toml_data(FILE_PATHS.config, toml_data)
         config_keys = get_keys_recursively(toml_data)
     if valid_config(valid_config_keys, config_keys):

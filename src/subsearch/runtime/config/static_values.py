@@ -26,10 +26,10 @@ DEFAULT_TOKEN_WEIGHTS: dict[str, float] = {
     "source": 20,
 }
 
-DEFAULT_TOKEN_MULTIPLIERS: dict[str, int] = {
-    "year": 90,
-    "season_episode": 90,
-    "edition": 90,
+DEFAULT_TOKEN_MULTIPLIERS: dict[str, float] = {
+    "year": 0.1,
+    "season_episode": 0.1,
+    "edition": 0.1,
 }
 
 SUPPORTED_PROVIDERS: list[str] = ["opensubtitles", "yifysubtitles_site", "subsource_site"]
