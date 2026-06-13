@@ -6,7 +6,6 @@ from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
-    QLabel,
     QListWidgetItem,
     QSplitter,
     QSplitterHandle,
@@ -27,7 +26,7 @@ from subsearch.runtime.models.model import (
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import flatten_line_edit
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon, lucide_rotated_qicon
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.log_panel import LogPanelSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
 from subsearch.ui.services.subtitle_downloads import DownloadServiceProtocol
@@ -37,6 +36,7 @@ from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import (
     CARD_CONTENT_INSET,
+    PATH_ROW_BUTTON_GAP,
     ROW_INSET,
     SMALL_ICON_SIZE,
     TOOL_BUTTON_SIZE,
@@ -49,6 +49,12 @@ from subsearch.ui.theme.typography import (
 )
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.log_panel import LogPanel
+from subsearch.ui.widgets.ripple_spinner import (
+    CYCLE_MS,
+    FRAME_INTERVAL_MS,
+    RippleSpinner,
+    ripple_pixmap,
+)
 from subsearch.ui.widgets.setting_rows import (
     FolderPathRow,
     FuzzySelectRow,
@@ -162,14 +168,13 @@ PENDING_COLOR = palette.NEUTRAL_1
 DOWNLOADING_COLOR = palette.BLUE
 SUCCESS_COLOR = palette.GREEN
 FAILED_COLOR = palette.RED
+SEARCH_SPINNER_COLOR = TEXT_COLOR
 
 PENDING_ICON = LucideIcon.CIRCLE
+# Sentinel marking the downloading state; rendered as the ripple animation, not this icon.
 DOWNLOADING_ICON = LucideIcon.CIRCLE_DOT_DASHED
 SUCCESS_ICON = LucideIcon.CIRCLE_CHECK_BIG
 FAILED_ICON = LucideIcon.CIRCLE_X
-
-SPINNER_FRAME_INTERVAL_MS = 60
-SPINNER_DEGREES_PER_FRAME = 10
 
 FILTER_BAR_WIDTH = 200
 
@@ -190,7 +195,7 @@ DESTINATION_PATH_EXAMPLES = (
 )
 
 
-class DownloadManagerSettingsCard(SettingsCard):
+class SubtitleSearchBar(QWidget):
     research_requested = Signal(str)
 
     def __init__(
@@ -200,7 +205,7 @@ class DownloadManagerSettingsCard(SettingsCard):
         title_suggestion_service: TitleSuggestionService | None = None,
         parent: QWidget | None = None,
     ) -> None:
-        super().__init__("Download manager settings", store, parent=parent)
+        super().__init__(parent)
         self.store = store
         self._video_file_service = video_file_service
         self._title_suggestion_service = title_suggestion_service
@@ -209,39 +214,8 @@ class DownloadManagerSettingsCard(SettingsCard):
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
-        self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager_settings"].explanation)
-
-        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
-        self.add_row(FuzzySelectRow("download_manager.search_mode", store, search_mode_values, searchable=False))
-
-        self._manually_handle = SwitchRow("download_manager.manually_handle_post_processing", store)
-        self.add_row(self._manually_handle)
-
-        self._use_pp_target = SwitchRow("download_manager.use_post_processing_target", store)
-        self.add_row(self._use_pp_target)
-
-        self._target_path_row = FolderPathRow("download_manager.target_path", store, DESTINATION_PATH_EXAMPLES)
-        self.body_layout.addWidget(self._target_path_row)
-        self.register_restore_defaults([("download_manager.target_path", DEFAULT_MANAGER_TARGET_PATH)])
-
-        self._use_pp_target.toggled.connect(self._apply_use_pp_target_state)
-        self._apply_use_pp_target_state(self._use_pp_target.switch.isChecked())
-
-        self._working_directory_row = FolderPathRow(
-            "download_manager.working_directory",
-            store,
-            placeholder_text=WORKING_DIRECTORY_PLACEHOLDER,
-            dialog_title="Select working folder",
-            allow_empty=True,
-        )
-        self.body_layout.addWidget(self._working_directory_row)
-        self.register_restore_defaults([("download_manager.working_directory", DEFAULT_WORKING_DIRECTORY)])
 
         self._build_video_file_section()
-        self._suggestion_spinner_angle = 0.0
-        self._suggestion_spinner_timer = QTimer(self)
-        self._suggestion_spinner_timer.setInterval(SPINNER_FRAME_INTERVAL_MS)
-        self._suggestion_spinner_timer.timeout.connect(self._advance_suggestion_spinner)
         store.subscribe("search.providers", self._on_providers_changed)
         self._on_providers_changed(store.read("search.providers"))
 
@@ -253,11 +227,8 @@ class DownloadManagerSettingsCard(SettingsCard):
         else:
             self._search_video.setToolTip("Search for subtitles")
 
-    def _apply_use_pp_target_state(self, use_pp: bool) -> None:
-        self._target_path_row.setVisible(not use_pp)
-
     def _build_video_file_section(self) -> None:
-        section_layout = QVBoxLayout()
+        section_layout = QVBoxLayout(self)
         section_layout.setContentsMargins(0, 0, 0, 0)
 
         label_row = QHBoxLayout()
@@ -282,14 +253,15 @@ class DownloadManagerSettingsCard(SettingsCard):
             "Search", icon=lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR), parent=self
         )
         self._search_video.clicked.connect(self._on_search_clicked)
+        self._search_spinner = RippleSpinner(SEARCH_SPINNER_COLOR, self._search_video.button)
+        self._search_spinner.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
+        self._search_spinner.move(0, 0)
 
         file_row = QHBoxLayout()
         file_row.setContentsMargins(CARD_CONTENT_INSET, 0, ROW_INSET, 10)
         file_row.addWidget(self._filename_edit, stretch=1)
         file_row.addWidget(TrailingButtonArea([self._search_video, browse_video], parent=self))
         section_layout.addLayout(file_row)
-
-        self.body_layout.addLayout(section_layout)
 
     def _on_search_clicked(self) -> None:
         if self._awaiting_suggestions:
@@ -301,25 +273,18 @@ class DownloadManagerSettingsCard(SettingsCard):
         suggestion_service = self._title_suggestion_service
         if suggestion_service is not None and self._needs_title_suggestions(typed_term):
             self._awaiting_suggestions = True
-            self._start_suggestion_spinner()
+            self.start_spinner()
             suggestion_service.request(typed_term)
             return
         self.research_requested.emit("")
 
-    def _start_suggestion_spinner(self) -> None:
-        self._suggestion_spinner_angle = 0.0
-        self._advance_suggestion_spinner()
-        self._suggestion_spinner_timer.start()
+    def start_spinner(self) -> None:
+        self._search_video.button.setIcon(QIcon())
+        self._search_spinner.start()
 
-    def _stop_suggestion_spinner(self) -> None:
-        self._suggestion_spinner_timer.stop()
+    def stop_spinner(self) -> None:
+        self._search_spinner.stop()
         self._search_video.button.setIcon(lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR))
-
-    def _advance_suggestion_spinner(self) -> None:
-        self._suggestion_spinner_angle = (self._suggestion_spinner_angle + SPINNER_DEGREES_PER_FRAME) % 360
-        self._search_video.button.setIcon(
-            lucide_rotated_qicon(DOWNLOADING_ICON, DOWNLOADING_COLOR, self._suggestion_spinner_angle)
-        )
 
     def _needs_title_suggestions(self, typed_term: str) -> bool:
         if not typed_term:
@@ -333,17 +298,17 @@ class DownloadManagerSettingsCard(SettingsCard):
         if not self._awaiting_suggestions:
             return
         self._awaiting_suggestions = False
-        self._stop_suggestion_spinner()
         if not suggestions:
+            # No popup; the spinner keeps running straight into the search.
             self._search_as_typed(typed_term)
             return
+        self.stop_spinner()
         self._suggestion_popup().show_suggestions(suggestions)
 
     def _on_suggestion_lookup_failed(self, _message: str) -> None:
         if not self._awaiting_suggestions:
             return
         self._awaiting_suggestions = False
-        self._stop_suggestion_spinner()
         self._search_as_typed(self._filename_edit.text().strip())
 
     def _suggestion_popup(self) -> TitleSuggestionPopup:
@@ -395,6 +360,42 @@ class DownloadManagerSettingsCard(SettingsCard):
         self._video_file_service.select_video(selected_path)
 
 
+class DownloadManagerSettingsCard(SettingsCard):
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
+        super().__init__("Download settings", store, parent=parent)
+        self.store = store
+        self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager_settings"].explanation)
+
+        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
+        self.add_row(FuzzySelectRow("download_manager.search_mode", store, search_mode_values, searchable=False))
+
+        self._manually_handle = SwitchRow("download_manager.manually_handle_post_processing", store)
+        self.add_row(self._manually_handle)
+
+        self._use_pp_target = SwitchRow("download_manager.use_post_processing_target", store)
+        self.add_row(self._use_pp_target)
+
+        self._target_path_row = FolderPathRow("download_manager.target_path", store, DESTINATION_PATH_EXAMPLES)
+        self.body_layout.addWidget(self._target_path_row)
+        self.register_restore_defaults([("download_manager.target_path", DEFAULT_MANAGER_TARGET_PATH)])
+
+        self._use_pp_target.toggled.connect(self._apply_use_pp_target_state)
+        self._apply_use_pp_target_state(self._use_pp_target.switch.isChecked())
+
+        self._working_directory_row = FolderPathRow(
+            "download_manager.working_directory",
+            store,
+            placeholder_text=WORKING_DIRECTORY_PLACEHOLDER,
+            dialog_title="Select working folder",
+            allow_empty=True,
+        )
+        self.body_layout.addWidget(self._working_directory_row)
+        self.register_restore_defaults([("download_manager.working_directory", DEFAULT_WORKING_DIRECTORY)])
+
+    def _apply_use_pp_target_state(self, use_pp: bool) -> None:
+        self._target_path_row.setVisible(not use_pp)
+
+
 class SubtitleCard(SettingsCard):
     search_text_changed = Signal(str)
     search_confirmed = Signal()
@@ -423,8 +424,6 @@ class SubtitleActionRow(QWidget):
     def __init__(
         self,
         subtitle: Subtitle,
-        row_text: str,
-        text_color: str,
         store: SettingsStore,
         post_processing_service: PostProcessingServiceProtocol,
         parent: QWidget | None = None,
@@ -434,18 +433,14 @@ class SubtitleActionRow(QWidget):
         self._store = store
         self._post_processing_service = post_processing_service
 
+        # Transparent so the list item's own icon and text show through underneath:
+        # the buttons only overlay the right edge, leaving the item to render its
+        # status the same way every other row does, with identical alignment.
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 0, 4, 0)
-        layout.setSpacing(4)
-
-        icon_label = QLabel(self)
-        icon_label.setPixmap(lucide_qicon(SUCCESS_ICON, SUCCESS_COLOR).pixmap(ICON_SIZE, ICON_SIZE))
-        layout.addWidget(icon_label)
-
-        label = BodyLabel(row_text, self)
-        label.setFont(DownloadManagerInterface._list_font())
-        label.setStyleSheet(f"color: {text_color};")
-        layout.addWidget(label, stretch=1)
+        layout.setContentsMargins(0, 0, 4, 0)
+        layout.setSpacing(PATH_ROW_BUTTON_GAP)
+        layout.addStretch(1)
 
         move_tooltip = f"Unpack and move all subtitles to: {self._target_path_text()}"
         layout.addWidget(self._make_action_button(LucideIcon.FOLDER_OUTPUT, move_tooltip, self._unpack_and_move))
@@ -481,7 +476,7 @@ class SubtitleActionRow(QWidget):
         self._post_processing_service.unpack_rename_and_place(self._store)
 
 
-class DownloadManagerInterface(QWidget):
+class ManualSearchInterface(QWidget):
     research_requested = Signal(str)
 
     def __init__(
@@ -495,7 +490,7 @@ class DownloadManagerInterface(QWidget):
         title_suggestion_service: TitleSuggestionService | None = None,
     ) -> None:
         super().__init__()
-        self.setObjectName("downloadManagerInterface")
+        self.setObjectName("manualSearchInterface")
         self._store = store
         self._post_processing_service = post_processing_service
         self.accept_threshold = store.read("search.accept_threshold")
@@ -508,19 +503,18 @@ class DownloadManagerInterface(QWidget):
         self.items_by_subtitle_id: dict[int, QListWidgetItem] = {}
         self.subtitles_by_row: dict[int, Subtitle] = {}
         self.spinning_rows: dict[int, tuple[QListWidgetItem, str]] = {}
-        self.spinner_angle = 0.0
+        self.spinner_progress = 0.0
         self.spinner_timer = QTimer(self)
-        self.spinner_timer.setInterval(SPINNER_FRAME_INTERVAL_MS)
+        self.spinner_timer.setInterval(FRAME_INTERVAL_MS)
         self.spinner_timer.timeout.connect(self._advance_spinner)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(36, 24, 36, 24)
         layout.setSpacing(8)
 
-        self._settings_card = DownloadManagerSettingsCard(store, video_file_service, title_suggestion_service, self)
-        self._settings_card.research_requested.connect(self.research_requested)
-        self._settings_card.make_collapsible(collapsed=bool(self.subtitles))
-        layout.addWidget(self._settings_card)
+        self._search_bar = SubtitleSearchBar(store, video_file_service, title_suggestion_service, self)
+        self._search_bar.research_requested.connect(self.research_requested)
+        layout.addWidget(self._search_bar)
 
         self._card = SubtitleCard(self)
         self._card.search_text_changed.connect(self._filter_list)
@@ -552,7 +546,7 @@ class DownloadManagerInterface(QWidget):
             del self._empty_label
 
     def reset_for_search(self) -> None:
-        self._settings_card.set_collapsed(True)
+        self._search_bar.start_spinner()
         self._disconnect_download_service()
         self._teardown_list_widget()
         self._clear_placeholder()
@@ -580,6 +574,7 @@ class DownloadManagerInterface(QWidget):
         self.spinning_rows.clear()
 
     def populate(self, subtitles: list[Subtitle], skipped_providers: list[str] | None = None) -> None:
+        self._search_bar.stop_spinner()
         self.accept_threshold = self._store.read("search.accept_threshold")
         self.subtitles = sorted(subtitles, key=self._sort_key, reverse=True)
         self.skipped_providers = skipped_providers or []
@@ -674,14 +669,10 @@ class DownloadManagerInterface(QWidget):
             return
         row = SubtitleActionRow(
             subtitle,
-            self._row_text(subtitle),
-            SUCCESS_COLOR,
             self._store,
             self._post_processing_service,
             self.list_widget,
         )
-        item.setText("")
-        item.setIcon(QIcon())
         self.list_widget.setItemWidget(item, row)
 
     def _on_download_started(self, subtitle: Subtitle) -> None:
@@ -713,7 +704,7 @@ class DownloadManagerInterface(QWidget):
 
     def _start_spinning(self, item: QListWidgetItem, color: str) -> None:
         self.spinning_rows[self.list_widget.row(item)] = (item, color)
-        item.setIcon(lucide_rotated_qicon(DOWNLOADING_ICON, color, self.spinner_angle))
+        item.setIcon(QIcon(ripple_pixmap(ICON_SIZE, color, self.spinner_progress)))
         if not self.spinner_timer.isActive():
             self.spinner_timer.start()
 
@@ -723,6 +714,6 @@ class DownloadManagerInterface(QWidget):
             self.spinner_timer.stop()
 
     def _advance_spinner(self) -> None:
-        self.spinner_angle = (self.spinner_angle + SPINNER_DEGREES_PER_FRAME) % 360
+        self.spinner_progress = (self.spinner_progress + FRAME_INTERVAL_MS / CYCLE_MS) % 1.0
         for item, color in self.spinning_rows.values():
-            item.setIcon(lucide_rotated_qicon(DOWNLOADING_ICON, color, self.spinner_angle))
+            item.setIcon(QIcon(ripple_pixmap(ICON_SIZE, color, self.spinner_progress)))

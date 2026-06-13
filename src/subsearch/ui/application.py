@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Sequence
 from typing import Callable
 
 from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
@@ -34,7 +35,10 @@ from subsearch.ui.cards import (
     SubtitleFiltersCard,
     UpdateCard,
 )
-from subsearch.ui.cards.download_manager import DownloadManagerInterface
+from subsearch.ui.cards.download_manager import (
+    DownloadManagerSettingsCard,
+    ManualSearchInterface,
+)
 from subsearch.ui.compat.qfluent import (
     ACCENT_COLOR,
     NAVIGATION_ITEM_HEIGHT,
@@ -71,7 +75,7 @@ def _collapsible(*cards: SettingsCard) -> list[SettingsCard]:
 
 
 class SettingsInterface(SingleDirectionScrollArea):
-    def __init__(self, object_name: str, cards: list[QWidget]) -> None:
+    def __init__(self, object_name: str, cards: Sequence[QWidget]) -> None:
         super().__init__(orient=Qt.Orientation.Vertical)
         self.setObjectName(object_name)
         self.setWidgetResizable(True)
@@ -130,13 +134,19 @@ class SettingsWindow(FluentWindow):
                 *_collapsible(
                     LanguageCard(store),
                     SubtitleFiltersCard(store),
-                    ProvidersCard(store),
                     search_threshold_card,
                 ),
                 # Manages its own collapsibility: collapses while post-processing
                 # is handled manually in the download manager.
                 post_processing_card,
             ],
+        )
+        providers_interface = SettingsInterface(
+            "providersInterface",
+            _collapsible(
+                ProvidersCard(store),
+                ProviderDiagnosticsCard(store),
+            ),
         )
         integration_interface = SettingsInterface(
             "integrationInterface",
@@ -151,7 +161,6 @@ class SettingsWindow(FluentWindow):
             _collapsible(
                 ApplicationCard(store, shell_service),
                 NetworkCard(store),
-                ProviderDiagnosticsCard(store),
             ),
         )
 
@@ -172,7 +181,7 @@ class SettingsWindow(FluentWindow):
 
         video_file_service = VideoFileService(self)
         title_suggestion_service = TitleSuggestionService(self.task_runner, self)
-        self.download_manager_interface = DownloadManagerInterface(
+        self.manual_search_interface = ManualSearchInterface(
             store,
             download_service,
             post_processing_service,
@@ -181,10 +190,14 @@ class SettingsWindow(FluentWindow):
             log_panel_sink,
             title_suggestion_service,
         )
-        download_manager_interface = self.download_manager_interface
+        manual_search_interface = self.manual_search_interface
+        manual_settings_interface = SettingsInterface(
+            "manualSettingsInterface",
+            _collapsible(DownloadManagerSettingsCard(store)),
+        )
 
         if search_worker_factory is not None:
-            self.download_manager_interface.research_requested.connect(self._start_search)
+            self.manual_search_interface.research_requested.connect(self._start_search)
             if start_search_immediately:
                 self._start_search("")
 
@@ -195,11 +208,13 @@ class SettingsWindow(FluentWindow):
             selectable=False,
         )
 
-        self.addSubInterface(search_interface, LucideIcon.TEXT_SEARCH, "Search", isTransparent=True)
+        self.addSubInterface(search_interface, LucideIcon.TEXT_SEARCH, "Subtitle preferences", isTransparent=True)
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
+        self.addSubInterface(providers_interface, LucideIcon.LIST, "Providers", isTransparent=True)
         self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
-        self.addSubInterface(download_manager_interface, LucideIcon.FOLDER_DOWN, "Download manager", isTransparent=True)
+        self.addSubInterface(manual_search_interface, LucideIcon.FOLDER_SEARCH, "Search", isTransparent=True)
+        self.addSubInterface(manual_settings_interface, LucideIcon.FOLDER_DOWN, "Settings", isTransparent=True)
         self.addSubInterface(
             about_interface,
             LucideIcon.HEART_HANDSHAKE,
@@ -226,7 +241,7 @@ class SettingsWindow(FluentWindow):
             navigation_item.widget.setTextColor(text_color, text_color)
             apply_body_font(getattr(navigation_item.widget, "itemWidget"))
         panel.items["header"].widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self._insert_navigation_spacer(panel, before_route_key="downloadManagerInterface")
+        self._insert_navigation_spacer(panel, before_route_key="manualSearchInterface")
         enlarge_navigation_icons(panel)
         forward_navigation_wheel_to_page(panel, self.stackedWidget.currentWidget)
 
@@ -245,7 +260,7 @@ class SettingsWindow(FluentWindow):
         if self._search_worker_factory is None or self._search_running:
             return
         self._search_running = True
-        self.download_manager_interface.reset_for_search()
+        self.manual_search_interface.reset_for_search()
         worker = self._search_worker_factory(imdb_id)
         worker.finished.connect(self._on_search_finished)
         worker.failed.connect(self._on_search_failed)
@@ -253,11 +268,11 @@ class SettingsWindow(FluentWindow):
 
     def _on_search_finished(self, outcome: SearchOutcome) -> None:
         self._search_running = False
-        self.download_manager_interface.populate(outcome.subtitles, outcome.skipped_providers)
+        self.manual_search_interface.populate(outcome.subtitles, outcome.skipped_providers)
 
     def _on_search_failed(self, message: str) -> None:
         self._search_running = False
-        self.download_manager_interface.populate([], [f"Search failed: {message}"])
+        self.manual_search_interface.populate([], [f"Search failed: {message}"])
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):
@@ -300,4 +315,4 @@ def open_settings_window(
     )
     window.show()
     application.exec()
-    return window.download_manager_interface.downloaded
+    return window.manual_search_interface.downloaded

@@ -95,12 +95,13 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "download_manager.working_directory": SettingDescription(
         "Working folder",
-        "Where the Download Manager keeps its working files when searching without a video file: "
-        "downloaded archives land in a temporary folder here and subtitles are extracted to a subs folder. "
-        "Leave empty to let Subsearch decide (your Downloads folder).",
+        "Where the Download Manager places subtitles when searching without a video file. "
+        "Subtitles are extracted straight into the folder you pick; a temporary folder is created "
+        "alongside them while downloading and removed afterwards. "
+        "Leave empty to let Subsearch decide (a subs folder in your Downloads).",
     ),
     "download_manager.available_subtitles": SettingDescription(
-        "Available subtitles",
+        "Found subtitles",
         "Every subtitle found for this video, closest matches at the top. Click one to download it. "
         "If automatic downloads are on, the best ones are already downloaded and ticked.",
     ),
@@ -202,8 +203,8 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "The summary notification requires the tray icon to be turned on.",
     ),
     "card.download_manager_settings": SettingDescription(
-        "Download manager settings",
-        "Controls how the Download Manager handles subtitles after finding them. "
+        "Download settings",
+        "Controls how subtitles are handled after finding them. "
         "Enable manual post-processing to pick and move subtitles yourself, "
         "and choose where they are placed.",
     ),
