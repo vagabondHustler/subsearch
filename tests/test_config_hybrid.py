@@ -4,13 +4,11 @@ from subsearch.core.bootstrap import Bootstrap
 from subsearch.io import toml_file
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import FILE_PATHS
-from subsearch.runtime.models.model import AppConfig
 
 
-class MinimalBootstrap:
-    app_config: AppConfig
-    resync_app_config = Bootstrap.resync_app_config
-    prevent_conflicting_config_settings = Bootstrap.prevent_conflicting_config_settings
+class MinimalBootstrap(Bootstrap):
+    def __init__(self) -> None:
+        pass
 
 
 @pytest.fixture

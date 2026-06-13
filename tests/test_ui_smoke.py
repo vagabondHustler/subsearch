@@ -62,7 +62,7 @@ def settings_window(qtbot):
 
 def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
     stacked = settings_window.stackedWidget
-    assert stacked.count() == 6
+    assert stacked.count() == 8
     for index in range(stacked.count()):
         interface = stacked.widget(index)
         settings_window.switchTo(interface)
@@ -230,12 +230,11 @@ def test_notifications_restore_defaults(qtbot) -> None:
 def test_download_manager_restore_defaults(qtbot) -> None:
     from subsearch.runtime.config import config_session
     from subsearch.ui.cards.download_manager import DownloadManagerSettingsCard
-    from subsearch.ui.services.video_file import VideoFileService
     from subsearch.ui.state.store import SettingsStore
     from subsearch.ui.widgets.setting_rows import FuzzySelectRow
 
     store = SettingsStore()
-    card = DownloadManagerSettingsCard(store, VideoFileService())
+    card = DownloadManagerSettingsCard(store)
     qtbot.addWidget(card)
     session = config_session.get_config_session()
     combo_rows = {row.config_key: row for row in card.findChildren(FuzzySelectRow)}

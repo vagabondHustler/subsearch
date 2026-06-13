@@ -3,7 +3,7 @@ from subsearch.parsing import release_parser
 from subsearch.providers import provider_helper
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.factories import get_default_app_config
-from subsearch.runtime.models.model import Subtitle, SubtitleStatus
+from subsearch.runtime.models.model import Language, Subtitle, SubtitleStatus
 from tests import fixture_data
 
 
@@ -11,13 +11,14 @@ def _build_helper() -> provider_helper.ProviderHelper:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
     app_config.selected_language = "english"
     language_data = load_language_data()
+    language = Language(**language_data[app_config.selected_language])
     filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
     release_data = release_parser.get_release_info(filename)
     helper = provider_helper.ProviderHelper(
         release_data=release_data,
         app_config=app_config,
         provider_urls=fixture_data.FAKE_PROVIDER_URLS,
-        language_data=language_data,
+        language_data=language,
         filename=filename,
     )
     helper.provider_name = "testprovider"

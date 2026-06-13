@@ -63,7 +63,7 @@ def layer_of(path: Path) -> str:
 
 def imported_modules(path: Path) -> list[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
-    modules = []
+    modules: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             modules.extend(alias.name for alias in node.names)

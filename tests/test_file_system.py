@@ -92,3 +92,11 @@ def test_move_all_versions_colliding_files(tmp_path) -> None:
 
     moved_names = sorted(path.name for path in destination.glob("*.srt"))
     assert moved_names == ["subtitle.srt", "subtitle_v1.srt"]
+
+
+def test_move_all_leaves_files_in_place_when_source_is_destination(tmp_path) -> None:
+    _make_srt(tmp_path, "subtitle.srt")
+
+    file_system.move_all(tmp_path, tmp_path)
+
+    assert sorted(path.name for path in tmp_path.glob("*.srt")) == ["subtitle.srt"]

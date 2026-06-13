@@ -32,7 +32,7 @@ def download_environment(monkeypatch, tmp_path):
 
 
 def build_interface(subtitles, qtbot):
-    from subsearch.ui.cards.download_manager import DownloadManagerInterface
+    from subsearch.ui.cards.download_manager import ManualSearchInterface
     from subsearch.ui.services.post_processing import PostProcessingService
     from subsearch.ui.services.subtitle_downloads import SubtitleDownloadService
     from subsearch.ui.services.video_file import VideoFileService
@@ -42,7 +42,7 @@ def build_interface(subtitles, qtbot):
     task_runner = TaskRunner()
     download_service = SubtitleDownloadService(task_runner)
     post_processing_service = PostProcessingService(task_runner)
-    interface = DownloadManagerInterface(
+    interface = ManualSearchInterface(
         SettingsStore(), download_service, post_processing_service, VideoFileService(), subtitles
     )
     qtbot.addWidget(interface)
@@ -85,8 +85,9 @@ def test_auto_downloaded_subtitles_render_as_downloaded_without_redownload(qtbot
     assert download_environment == []
 
 
-def test_action_row_renders_text_and_buttons_when_manual_handling_enabled(qtbot, download_environment) -> None:
-    from PySide6.QtWidgets import QLabel
+def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_handling_enabled(
+    qtbot, download_environment
+) -> None:
     from qfluentwidgets import TransparentToolButton
 
     from subsearch.runtime.config import constants
@@ -96,18 +97,19 @@ def test_action_row_renders_text_and_buttons_when_manual_handling_enabled(qtbot,
 
     interface, task_runner = build_interface([auto_downloaded], qtbot)
     interface._store.write("download_manager.manually_handle_post_processing", True)
-    interface._attach_action_buttons(interface.list_widget.item(0), auto_downloaded)
+    item = interface.list_widget.item(0)
+    interface._attach_action_buttons(item, auto_downloaded)
     try:
-        row = interface.list_widget.itemWidget(interface.list_widget.item(0))
+        row = interface.list_widget.itemWidget(item)
         assert isinstance(row, SubtitleActionRow)
-        labels = [child for child in row.findChildren(QLabel) if child.text()]
-        assert any("Auto.Sub" in label.text() for label in labels)
         buttons = row.findChildren(TransparentToolButton)
         assert len(buttons) == 2
         move_button, place_button = buttons
         assert "move all subtitles to" in move_button.toolTip().lower()
         assert place_button.isEnabled() == constants.VIDEO_FILE.file_exists
-        assert interface.list_widget.item(0).text() == ""
+        # The item keeps its native icon and text so the row stays aligned with
+        # every other row; the widget only adds the trailing action buttons.
+        assert "Auto.Sub" in item.text()
     finally:
         task_runner.shutdown()
 

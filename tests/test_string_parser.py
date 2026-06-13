@@ -55,7 +55,7 @@ def test_str_parser_default_weights_match_passed_defaults() -> None:
 def test_str_parser_title_dominant_weights_raise_source_mismatch_score() -> None:
     base_release = "the.foo.bar.2021.1080p.web.h264-foobar"
     diff_source = "the.foo.bar.2021.1080p.hdtv.h264-foobar"
-    title_dominant_weights = {"title": 90, "group": 5, "source": 5}
+    title_dominant_weights = {"title": 90.0, "group": 5.0, "source": 5.0}
     default_score = release_parser.score_subtitle_tokens(base_release, diff_source)
     title_dominant_score = release_parser.score_subtitle_tokens(base_release, diff_source, title_dominant_weights)
     assert title_dominant_score > default_score
@@ -64,7 +64,7 @@ def test_str_parser_title_dominant_weights_raise_source_mismatch_score() -> None
 def test_str_parser_custom_year_multiplier_softens_penalty() -> None:
     movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
     movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
-    lenient_weights = {"title": 60, "group": 30, "source": 10}
+    lenient_weights = {"title": 60.0, "group": 30.0, "source": 10.0}
     lenient_multipliers = {"year": 1.0, "season_episode": 1.0, "edition": 1.0}
     assert release_parser.score_subtitle_tokens(movie_2021, movie_1993, lenient_weights, lenient_multipliers) == 100
 
