@@ -80,8 +80,10 @@ def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> No
     session = config_session.get_config_session()
 
     store.write("search.accept_threshold", 50)
-    for row in card.tuning_rows.values():
-        store.write(row.config_key, 1)
+    for token_name in DEFAULT_TOKEN_WEIGHTS:
+        store.write(f"search.token_weights.{token_name}", 1)
+    for token_name in DEFAULT_TOKEN_MULTIPLIERS:
+        store.write(f"search.token_multipliers.{token_name}", 0.5)
     assert session.read("search.token_weights.title") == 1
     assert card.slider.value() == 50
 

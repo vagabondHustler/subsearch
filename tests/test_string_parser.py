@@ -65,7 +65,7 @@ def test_str_parser_custom_year_multiplier_softens_penalty() -> None:
     movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
     movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
     lenient_weights = {"title": 60, "group": 30, "source": 10}
-    lenient_multipliers = {"year": 0, "season_episode": 0, "edition": 0}
+    lenient_multipliers = {"year": 1.0, "season_episode": 1.0, "edition": 1.0}
     assert release_parser.score_subtitle_tokens(movie_2021, movie_1993, lenient_weights, lenient_multipliers) == 100
 
 
