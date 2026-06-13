@@ -124,17 +124,15 @@ class Bootstrap:
     def _anchor_working_directory(self) -> None:
         if VIDEO_FILE.file_exists or VIDEO_FILE.file_directory != Path(""):
             return
-        working_directory = self._resolve_working_directory()
+        configured = self.app_config.download_manager_working_directory.strip()
+        working_directory = Path(configured) if configured else Path.home() / "Downloads"
+        # An explicitly chosen folder is used as the subtitle destination directly;
+        # only the default Downloads location gets a "subs" subfolder so subtitles
+        # are not dropped loose into the user's Downloads.
         VIDEO_FILE.file_directory = working_directory
         VIDEO_FILE.file_path = working_directory / (VIDEO_FILE.filename + VIDEO_FILE.file_extension)
-        VIDEO_FILE.subs_dir = working_directory / "subs"
+        VIDEO_FILE.subs_dir = working_directory if configured else working_directory / "subs"
         VIDEO_FILE.tmp_dir = working_directory / "tmp_subsearch"
-
-    def _resolve_working_directory(self) -> Path:
-        configured = self.app_config.download_manager_working_directory.strip()
-        if configured:
-            return Path(configured)
-        return Path.home() / "Downloads"
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
