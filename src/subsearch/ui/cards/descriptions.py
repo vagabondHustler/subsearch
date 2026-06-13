@@ -139,9 +139,9 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Single instance",
         "Only allow one instance of Subsearch to run at a time.",
     ),
-    "network.api_call_limit": SettingDescription(
-        "API call limit",
-        "How many subtitles Subsearch downloads from a single site per search. "
+    "search.downloads_per_provider": SettingDescription(
+        "Downloads per provider",
+        "How many subtitles Subsearch downloads from a single provider per search. "
         "It keeps the {limit} best matches and skips the rest. "
         "Setting this too high may get your connection temporarily blocked.",
     ),

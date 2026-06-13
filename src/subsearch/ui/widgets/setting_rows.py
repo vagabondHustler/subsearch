@@ -41,6 +41,7 @@ from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
+    apply_token_value_font,
     body_font,
     set_error_text,
 )
@@ -239,7 +240,7 @@ class IntInput(LineEdit):
         self.setFixedWidth(INT_INPUT_CONTROL_WIDTH)
         self.setClearButtonEnabled(False)
         self.setValidator(QIntValidator(minimum, maximum, self))
-        apply_body_font(self)
+        apply_token_value_font(self)
         flatten_line_edit(self)
         self.editingFinished.connect(self._commit)
         self.returnPressed.connect(self.clearFocus)
@@ -276,7 +277,7 @@ class FloatInput(LineEdit):
         validator = QDoubleValidator(minimum, maximum, decimals, self)
         validator.setNotation(QDoubleValidator.Notation.StandardNotation)
         self.setValidator(validator)
-        apply_body_font(self)
+        apply_token_value_font(self)
         flatten_line_edit(self)
         self.editingFinished.connect(self._commit)
         self.returnPressed.connect(self.clearFocus)

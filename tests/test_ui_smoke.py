@@ -33,7 +33,6 @@ _APPLICATION_DEFAULTS = {
 }
 
 _NETWORK_DEFAULTS = {
-    "network.api_call_limit": 4,
     "network.request_connect_timeout": 4,
     "network.request_read_timeout": 5,
 }
@@ -301,10 +300,8 @@ def test_network_restore_defaults(qtbot) -> None:
     session = config_session.get_config_session()
     slider_rows = _collect_slider_rows(card)
 
-    store.write("network.api_call_limit", 10)
     store.write("network.request_connect_timeout", 10)
     store.write("network.request_read_timeout", 10)
-    assert slider_rows["network.api_call_limit"].input.value() == 10
     assert slider_rows["network.request_connect_timeout"].input.value() == 10
     assert slider_rows["network.request_read_timeout"].input.value() == 10
 
@@ -336,14 +333,14 @@ def test_int_input_row_writes_committed_value_to_store(qtbot) -> None:
     from subsearch.ui.widgets.setting_rows import IntInputRow
 
     store = SettingsStore()
-    row = IntInputRow("network.api_call_limit", store, 1, 99)
+    row = IntInputRow("search.downloads_per_provider", store, 1, 99)
     qtbot.addWidget(row)
 
     row.input.setText("250")
     row.input._commit()
 
     assert row.input.value() == 99
-    assert store.read("network.api_call_limit") == 99
+    assert store.read("search.downloads_per_provider") == 99
 
 
 def test_post_processing_card_collapses_and_shows_status_when_manual(qtbot) -> None:

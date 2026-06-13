@@ -159,6 +159,7 @@ class SettingsWindow(FluentWindow):
         application_interface = SettingsInterface(
             "applicationInterface",
             _collapsible(
+                UpdateCard(self.task_runner),
                 ApplicationCard(store, shell_service),
                 NetworkCard(store),
             ),
@@ -174,7 +175,6 @@ class SettingsWindow(FluentWindow):
         about_interface = SettingsInterface(
             "aboutInterface",
             _collapsible(
-                UpdateCard(self.task_runner),
                 ResourcesCard(),
             ),
         )
@@ -208,13 +208,13 @@ class SettingsWindow(FluentWindow):
             selectable=False,
         )
 
-        self.addSubInterface(search_interface, LucideIcon.TEXT_SEARCH, "Subtitle preferences", isTransparent=True)
+        self.addSubInterface(search_interface, LucideIcon.CAPTIONS, "Subtitle preferences", isTransparent=True)
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
         self.addSubInterface(providers_interface, LucideIcon.LIST, "Providers", isTransparent=True)
         self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
-        self.addSubInterface(manual_search_interface, LucideIcon.FOLDER_SEARCH, "Search", isTransparent=True)
-        self.addSubInterface(manual_settings_interface, LucideIcon.FOLDER_DOWN, "Settings", isTransparent=True)
+        self.addSubInterface(manual_search_interface, LucideIcon.TEXT_SEARCH, "Search", isTransparent=True)
+        self.addSubInterface(manual_settings_interface, LucideIcon.FOLDER_COG, "Settings", isTransparent=True)
         self.addSubInterface(
             about_interface,
             LucideIcon.HEART_HANDSHAKE,

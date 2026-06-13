@@ -42,7 +42,6 @@ class NetworkCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Network", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS["card.network"].explanation)
-        self.add_row(IntInputRow("network.api_call_limit", store, 1, 10))
         self.add_row(IntInputRow("network.request_connect_timeout", store, 1, 10))
         self.add_row(IntInputRow("network.request_read_timeout", store, 1, 10))
 

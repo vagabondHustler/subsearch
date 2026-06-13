@@ -63,6 +63,8 @@ class LucideIcon(FluentIconBase, Enum):
     MONITOR = "monitor"
     HISTORY = "history"
     SEARCH = "search"
+    CAPTIONS = "captions"
+    FOLDER_COG = "folder-cog"
     FOLDER_OUTPUT = "folder-output"
     FILE_OUTPUT = "file-output"
     COPY = "copy"

@@ -28,13 +28,13 @@ from subsearch.ui.theme.typography import (
     apply_caption_font,
     apply_token_header_font,
     apply_token_row_label_font,
-    apply_token_value_font,
 )
 from subsearch.ui.widgets.setting_rows import (
     FloatInput,
     FuzzySelectRow,
     HelpButton,
     IntInput,
+    IntInputRow,
     SwitchRow,
 )
 from subsearch.ui.widgets.slider import SliderWithValueLabel, track_aligned_label
@@ -171,7 +171,6 @@ class TokenWeightCell(QWidget):
 
         self.input = IntInput(WEIGHT_MINIMUM, WEIGHT_MAXIMUM, self)
         self.input.set_value_silent(int(store.read(config_key)))
-        apply_token_value_font(self.input)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -204,7 +203,6 @@ class TokenMultiplierCell(QWidget):
 
         self.input = FloatInput(MULTIPLIER_MINIMUM, MULTIPLIER_MAXIMUM, MULTIPLIER_DECIMALS, self)
         self.input.set_value_silent(float(store.read(config_key)))
-        apply_token_value_font(self.input)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -413,6 +411,8 @@ class ProvidersCard(SettingsCard):
             self.check_boxes[provider_key] = check_box
 
         self.body_layout.addLayout(grid)
+
+        self.add_row(IntInputRow("search.downloads_per_provider", store, 1, 10))
 
         self.apply_language_compatibility(store.read("language.selected"))
         store.subscribe("language.selected", self.apply_language_compatibility)

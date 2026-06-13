@@ -25,7 +25,7 @@ from subsearch.runtime.models.model import (
 )
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.compat.qfluent import flatten_line_edit
+from subsearch.ui.compat.qfluent import embed_trailing_widget, flatten_line_edit
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.log_panel import LogPanelSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
@@ -35,12 +35,11 @@ from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import (
-    CARD_CONTENT_INSET,
     PATH_ROW_BUTTON_GAP,
-    ROW_INSET,
     SMALL_ICON_SIZE,
     TOOL_BUTTON_SIZE,
 )
+from subsearch.ui.theme.separators import SEPARATOR_INSET
 from subsearch.ui.theme.typography import (
     BODY_FONT_SIZE,
     SEMI_BOLD,
@@ -178,10 +177,19 @@ FAILED_ICON = LucideIcon.CIRCLE_X
 
 FILTER_BAR_WIDTH = 200
 
+# Match the splitter handle's centered line (_HANDLE_LINE_WIDTH_FRACTION) so the
+# search field and the separator below it span the same width.
+SEARCH_BAR_WIDTH_FRACTION = _HANDLE_LINE_WIDTH_FRACTION
+
+# The search glass sits inside the filename field, sized to clear the field's
+# inner height (~25px between the layout's 4px margins) like qfluent's own
+# trailing clear button rather than the taller free-standing tool button.
+IN_FIELD_BUTTON_SIZE = 24
+
 DEFAULT_MANAGER_TARGET_PATH = "."
 DEFAULT_WORKING_DIRECTORY = ""
 WORKING_DIRECTORY_PLACEHOLDER = "Let Subsearch decide (Downloads\\subs)"
-IDLE_PLACEHOLDER_TEXT = "Select a video file or type a search term, then press Search"
+IDLE_PLACEHOLDER_TEXT = "Pick a video file or type a search term, then click the search glass"
 SEARCHING_PLACEHOLDER_TEXT = "Searching for subtitles…"
 NO_RESULTS_PLACEHOLDER_TEXT = "No subtitles found"
 DESTINATION_PATH_EXAMPLES = (
@@ -231,36 +239,35 @@ class SubtitleSearchBar(QWidget):
         section_layout = QVBoxLayout(self)
         section_layout.setContentsMargins(0, 0, 0, 0)
 
-        label_row = QHBoxLayout()
-        label_row.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 4)
-        label = BodyLabel("Search for subtitles", self)
-        apply_body_font(label)
-        label_row.addWidget(label, stretch=1)
-        section_layout.addLayout(label_row)
-
         self._filename_edit = LineEdit(self)
-        self._filename_edit.setPlaceholderText("Enter title or point to file")
+        self._filename_edit.setPlaceholderText("Search for subtitles")
         self._filename_edit.setText(VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else "")
         apply_body_font(self._filename_edit)
         flatten_line_edit(self._filename_edit)
         self._filename_edit.editingFinished.connect(self._on_filename_edited)
         self._filename_edit.returnPressed.connect(self._on_search_clicked)
 
-        browse_video = CaptionedToolButton("Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self)
-        browse_video.clicked.connect(self._browse_for_video_file)
-
-        self._search_video = CaptionedToolButton(
-            "Search", icon=lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR), parent=self
-        )
+        self._search_video = TransparentToolButton(self._filename_edit)
+        self._search_video.setIcon(lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR))
+        self._search_video.setFixedSize(IN_FIELD_BUTTON_SIZE, IN_FIELD_BUTTON_SIZE)
+        self._search_video.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
         self._search_video.clicked.connect(self._on_search_clicked)
-        self._search_spinner = RippleSpinner(SEARCH_SPINNER_COLOR, self._search_video.button)
-        self._search_spinner.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
+        embed_trailing_widget(self._filename_edit, self._search_video, IN_FIELD_BUTTON_SIZE)
+        self._search_spinner = RippleSpinner(SEARCH_SPINNER_COLOR, self._search_video)
+        self._search_spinner.setFixedSize(IN_FIELD_BUTTON_SIZE, IN_FIELD_BUTTON_SIZE)
         self._search_spinner.move(0, 0)
 
+        # browse_video = CaptionedToolButton("Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self)
+        # browse_video.clicked.connect(self._browse_for_video_file)
+
         file_row = QHBoxLayout()
-        file_row.setContentsMargins(CARD_CONTENT_INSET, 0, ROW_INSET, 10)
-        file_row.addWidget(self._filename_edit, stretch=1)
-        file_row.addWidget(TrailingButtonArea([self._search_video, browse_video], parent=self))
+        file_row.setContentsMargins(SEPARATOR_INSET, 0, SEPARATOR_INSET, 10)
+        file_row.setSpacing(0)
+        side_stretch = round((1 - SEARCH_BAR_WIDTH_FRACTION) * 100 / 2)
+        file_row.addStretch(side_stretch)
+        file_row.addWidget(self._filename_edit, stretch=round(SEARCH_BAR_WIDTH_FRACTION * 100))
+        file_row.addStretch(side_stretch)
+        # file_row.addWidget(TrailingButtonArea([browse_video], parent=self))
         section_layout.addLayout(file_row)
 
     def _on_search_clicked(self) -> None:
@@ -279,12 +286,12 @@ class SubtitleSearchBar(QWidget):
         self.research_requested.emit("")
 
     def start_spinner(self) -> None:
-        self._search_video.button.setIcon(QIcon())
+        self._search_video.setIcon(QIcon())
         self._search_spinner.start()
 
     def stop_spinner(self) -> None:
         self._search_spinner.stop()
-        self._search_video.button.setIcon(lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR))
+        self._search_video.setIcon(lucide_qicon(LucideIcon.SEARCH, TEXT_COLOR))
 
     def _needs_title_suggestions(self, typed_term: str) -> bool:
         if not typed_term:

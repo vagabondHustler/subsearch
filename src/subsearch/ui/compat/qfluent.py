@@ -10,7 +10,7 @@ from typing import cast
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QRectF, Qt
 from PySide6.QtGui import QColor, QCursor, QPainter, QPen
-from PySide6.QtWidgets import QAbstractScrollArea, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QApplication, QWidget
 from qfluentwidgets import LineEdit, NavigationPanel, Slider, SwitchButton, ThemeColor
 from qfluentwidgets.common.color import autoFallbackThemeColor
 from qfluentwidgets.common.icon import drawIcon, isDarkTheme
@@ -200,6 +200,18 @@ def make_line_edit_chromeless(line_edit: LineEdit) -> None:
     """No background, border, or underline at all (the slider's value edit)."""
     append_custom_style(line_edit, _CHROMELESS_QSS)
     hide_line_edit_focus_underline(line_edit)
+
+
+# --- Trailing widget inside a line edit ------------------------------------------
+# LineEdit lays its clear button out in a private hBoxLayout pinned to the right
+# edge; embedding our own button there is the only way to sit a control inside the
+# field. We reserve right text margin for it so typed text never runs underneath.
+
+
+def embed_trailing_widget(line_edit: LineEdit, widget: QWidget, reserved_width: int) -> None:
+    line_edit.hBoxLayout.addWidget(widget, 0, Qt.AlignmentFlag.AlignRight)
+    margins = line_edit.textMargins()
+    line_edit.setTextMargins(margins.left(), margins.top(), reserved_width, margins.bottom())
 
 
 # --- Acrylic popups -------------------------------------------------------------
