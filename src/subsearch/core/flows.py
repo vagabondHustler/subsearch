@@ -21,6 +21,9 @@ class Flow:
         self.pipeline.run_provider_diagnostics()
         self.pipeline.clean_up()
 
+    def _make_search_worker(self, imdb_id: str = "") -> SearchWorker:
+        return SearchWorker(self.pipeline, imdb_id)
+
 
 class SettingsFlow(Flow):
     def run(self) -> None:
@@ -28,7 +31,7 @@ class SettingsFlow(Flow):
         from subsearch.ui.application import open_settings_window
 
         manually_accepted = open_settings_window(
-            search_worker_factory=lambda imdb_id="": SearchWorker(self.pipeline, imdb_id)
+            search_worker_factory=self._make_search_worker
         )
         log.debug("Exiting GUI")
         self._record_gui_results(manually_accepted)
@@ -43,7 +46,7 @@ class ManualSearchFlow(Flow):
 
         manually_accepted = open_settings_window(
             subtitles=None,
-            search_worker_factory=lambda imdb_id="": SearchWorker(self.pipeline, imdb_id),
+            search_worker_factory=self._make_search_worker,
             start_search_immediately=True,
         )
         self._record_gui_results(manually_accepted)

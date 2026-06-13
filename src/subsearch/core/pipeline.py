@@ -63,6 +63,9 @@ class SearchPipeline:
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
 
+    def _make_search_worker(self, imdb_id: str = "") -> "SearchWorker":
+        return SearchWorker(self, imdb_id)
+
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
         parallel_tasks.run_in_threads(*providers)
@@ -163,7 +166,7 @@ class SearchPipeline:
         from subsearch.ui.application import open_settings_window
 
         self.bootstrap.manually_accepted_subtitles = open_settings_window(
-            subtitles, search_worker_factory=lambda imdb_id="": SearchWorker(self, imdb_id)
+            subtitles, search_worker_factory=self._make_search_worker
         )
         self.bootstrap.resync_app_config()
         log.event("task_completed")
