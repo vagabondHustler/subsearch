@@ -147,6 +147,8 @@ def autoload_rename(release_name: str, subs_dir: Path, extension: str = ".srt") 
 
 
 def move_all(src: Path, dst: Path, extension: str = ".srt") -> None:
+    if src.resolve() == dst.resolve():
+        return
     for file in src.glob(f"*{extension}"):
         destination = _next_available_path(dst, file.stem, file.suffix)
         log.event("move", src=file, dst=destination)
