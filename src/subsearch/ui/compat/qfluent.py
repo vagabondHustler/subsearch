@@ -6,6 +6,8 @@ reaches into private internals. When upgrading the library, re-verify this file
 first - nothing outside ui/compat/ may touch a private qfluentwidgets attribute.
 """
 
+from typing import cast
+
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QRectF, Qt
 from PySide6.QtGui import QColor, QCursor, QPainter, QPen
 from PySide6.QtWidgets import QAbstractScrollArea, QApplication
@@ -176,7 +178,7 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
 
 
 def hide_line_edit_focus_underline(line_edit: LineEdit) -> None:
-    line_edit.focusedBorderColor = lambda: Qt.GlobalColor.transparent
+    line_edit.focusedBorderColor = lambda: QColor(Qt.GlobalColor.transparent)
 
 
 # The brighter resting bottom underline comes from qfluent's LINE_EDIT QSS
@@ -281,7 +283,8 @@ class CircleDotHandle(SliderHandle):
         self.pressed.emit()
 
     def mouseMoveEvent(self, e) -> None:
-        self.parent().update_value_from_handle(e.position().toPoint() - self._press_offset)
+        slider = cast("CircleDotSlider", self.parent())
+        slider.update_value_from_handle(e.position().toPoint() - self._press_offset)
 
     def mouseReleaseEvent(self, e) -> None:
         self._pressed = False

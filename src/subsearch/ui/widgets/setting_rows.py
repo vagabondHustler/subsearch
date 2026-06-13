@@ -84,9 +84,9 @@ class HelpPopup(AnchoredPopup):
 
 
 class HelpButton(TransparentToolButton):
-    def __init__(
+    def __init__(  # pyright: ignore[reportIncompatibleVariableOverride]
         self, explanation: str, parent: QWidget
-    ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
+    ) -> None:
         super().__init__(parent)
         self.setIcon(lucide_qicon(LucideIcon.LIGHTBULB, palette.NEUTRAL_3))
         self.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
@@ -112,9 +112,9 @@ class HelpButton(TransparentToolButton):
 
 
 class RestoreDefaultsButton(TransparentToolButton):
-    def __init__(
+    def __init__(  # pyright: ignore[reportIncompatibleVariableOverride]
         self, defaults: DefaultsMap, store: SettingsStore, parent: QWidget
-    ) -> None:  # pyright: ignore[reportIncompatibleVariableOverride]
+    ) -> None:
         super().__init__(parent)
         self._defaults = defaults
         self._store = store

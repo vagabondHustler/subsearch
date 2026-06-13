@@ -221,9 +221,11 @@ class FileExtensionsCard(SettingsCard):
     def _on_store_changed(self, key: str, value: object) -> None:
         if key != "shell_integration.file_extensions":
             return
+        if not isinstance(value, dict):
+            return
         for extension, check_box in self.check_boxes.items():
             check_box.blockSignals(True)
-            check_box.setChecked(bool(value.get(extension, False)))  # type: ignore[union-attr]
+            check_box.setChecked(bool(value.get(extension, False)))
             check_box.blockSignals(False)
 
     def _on_extension_toggled(self, extension: str, checked: bool) -> None:

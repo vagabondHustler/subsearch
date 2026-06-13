@@ -1,3 +1,5 @@
+from typing import Protocol, runtime_checkable
+
 from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
@@ -24,6 +26,12 @@ CARD_PANEL_OPACITY = 0.4
 CARD_FILL_COLOR = QColor(255, 255, 255, 13)
 CARD_BORDER_COLOR = QColor(0, 0, 0, 48)
 CARD_BORDER_RADIUS = 6.0
+
+
+@runtime_checkable
+class RestorableRow(Protocol):
+    config_key: str
+    default_value: object
 
 
 def build_section_header(config_key: str, parent: QWidget) -> QHBoxLayout:
@@ -134,7 +142,7 @@ class SettingsCard(HeaderCardWidget):
 
     def add_row(self, widget: QWidget) -> None:
         self.body_layout.addWidget(widget)
-        if hasattr(widget, "config_key") and hasattr(widget, "default_value"):
+        if isinstance(widget, RestorableRow):
             self._collected_defaults.append((widget.config_key, widget.default_value))
 
     def register_restore_defaults(self, defaults: DefaultsMap) -> None:

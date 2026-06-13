@@ -1,5 +1,6 @@
 import sys
 import winreg
+from collections.abc import Mapping
 from pathlib import Path
 
 from subsearch.runtime.config import config_session
@@ -74,7 +75,7 @@ def desired_registry_values() -> dict[str, str]:
     }
 
 
-def changed_value_names(desired: dict[str, str], current: dict[str, str | None]) -> list[str]:
+def changed_value_names(desired: Mapping[str, str], current: Mapping[str, str | None]) -> list[str]:
     return [name for name, value in desired.items() if current.get(name) != value]
 
 
