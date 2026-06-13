@@ -17,7 +17,7 @@ from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
@@ -26,9 +26,14 @@ from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
+    apply_token_header_font,
+    apply_token_row_label_font,
+    apply_token_value_font,
 )
 from subsearch.ui.widgets.setting_rows import (
+    FloatInput,
     FuzzySelectRow,
+    HelpButton,
     IntInput,
     SwitchRow,
 )
@@ -92,14 +97,24 @@ VERDICT_ICON_SIZE = 16
 
 TOKEN_WEIGHT_LABELS = {
     "title": "Title",
-    "group": "Release group",
     "source": "Source",
+    "group": "Release group",
 }
 TOKEN_MULTIPLIER_LABELS = {
-    "year": "Different year",
-    "season_episode": "Different season or episode",
-    "edition": "Different edition",
+    "year": "Year",
+    "season_episode": "Season & episode",
+    "edition": "Edition",
 }
+
+TOKEN_GRID_COLUMNS = 3
+
+WEIGHT_ROW_LABEL = "Weight"
+WEIGHT_MINIMUM = 0
+WEIGHT_MAXIMUM = 100
+MULTIPLIER_ROW_LABEL = "Mismatch multiplier"
+MULTIPLIER_MINIMUM = 0.01
+MULTIPLIER_MAXIMUM = 1.0
+MULTIPLIER_DECIMALS = 2
 
 
 EXAMPLE_ROW_HEIGHT = 22
@@ -146,29 +161,27 @@ class ThresholdExampleRow(QWidget):
             self.verdict_label.setStyleSheet(f"color: {color};")
 
 
-class LabeledIntInputCell(QWidget):
+class TokenWeightCell(QWidget):
     value_changed = Signal()
 
-    def __init__(self, label_text: str, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
+    def __init__(self, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.config_key = config_key
         self.store = store
 
-        self.input = IntInput(0, 100, self)
+        self.input = IntInput(WEIGHT_MINIMUM, WEIGHT_MAXIMUM, self)
         self.input.set_value_silent(int(store.read(config_key)))
-
-        label = CaptionLabel(label_text, self)
-        apply_caption_font(label)
-        label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        apply_token_value_font(self.input)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
-        layout.addWidget(label, 0, Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.input, 0, Qt.AlignmentFlag.AlignHCenter)
 
         self.input.value_committed.connect(self._on_committed)
         store.value_changed.connect(self._on_store_changed)
+
+    def value(self) -> int:
+        return self.input.value()
 
     def _on_committed(self, value: int) -> None:
         self.store.write(self.config_key, value)
@@ -181,12 +194,45 @@ class LabeledIntInputCell(QWidget):
         self.value_changed.emit()
 
 
+class TokenMultiplierCell(QWidget):
+    value_changed = Signal()
+
+    def __init__(self, config_key: str, store: SettingsStore, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.config_key = config_key
+        self.store = store
+
+        self.input = FloatInput(MULTIPLIER_MINIMUM, MULTIPLIER_MAXIMUM, MULTIPLIER_DECIMALS, self)
+        self.input.set_value_silent(float(store.read(config_key)))
+        apply_token_value_font(self.input)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.input, 0, Qt.AlignmentFlag.AlignHCenter)
+
+        self.input.value_committed.connect(self._on_committed)
+        store.value_changed.connect(self._on_store_changed)
+
+    def value(self) -> float:
+        return self.input.value()
+
+    def _on_committed(self, value: float) -> None:
+        self.store.write(self.config_key, value)
+        self.value_changed.emit()
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key != self.config_key:
+            return
+        self.input.set_value_silent(float(value))
+        self.value_changed.emit()
+
+
 class SearchThresholdCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle token filter", store, parent=parent)
         self.store = store
         self._using_series = False
-        self.tuning_rows: dict[str, LabeledIntInputCell] = {}
+        self.tuning_rows: dict[str, TokenWeightCell | TokenMultiplierCell] = {}
         self.register_restore_defaults(_TOKEN_TUNING_DEFAULTS)
         self._build_header()
 
@@ -201,14 +247,8 @@ class SearchThresholdCard(SettingsCard):
         self.slider.setRange(0, 100)
         self.slider.setValue(int(store.read("search.accept_threshold")))
 
-        slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(CARD_CONTENT_INSET, 6, CARD_CONTENT_INSET, 10)
-        slider_row.setSpacing(12)
-        slider_row.addWidget(track_aligned_label("Search threshold", self.slider, self))
-        slider_row.addWidget(self.slider, stretch=1)
-        self.body_layout.addLayout(slider_row)
-
         self._build_examples()
+        self._build_threshold_slider()
         self._build_token_tuning()
 
         self._write_timer = QTimer(self)
@@ -246,36 +286,60 @@ class SearchThresholdCard(SettingsCard):
         for row in self.example_rows:
             self.body_layout.addWidget(row)
 
+    def _build_threshold_slider(self) -> None:
+        slider_row = QHBoxLayout()
+        slider_row.setContentsMargins(CARD_CONTENT_INSET, 10, CARD_CONTENT_INSET, 10)
+        slider_row.setSpacing(12)
+        slider_row.addWidget(track_aligned_label("Search threshold", self.slider, self))
+        slider_row.addWidget(self.slider, stretch=1)
+        self.body_layout.addLayout(slider_row)
+
     def _build_token_tuning(self) -> None:
         self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=12))
-        self.body_layout.addLayout(self._heading("Weights"))
-        self.body_layout.addLayout(self._tuning_cell_row(TOKEN_WEIGHT_LABELS, "search.token_weights"))
-        self.body_layout.addWidget(make_fading_separator(opacity=0.6, width_fraction=0.75, vertical_margin=6))
-        self.body_layout.addLayout(self._heading("Mismatch penalties"))
-        self.body_layout.addLayout(self._tuning_cell_row(TOKEN_MULTIPLIER_LABELS, "search.token_multipliers"))
+        grid = QGridLayout()
+        grid.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 4)
+        grid.setHorizontalSpacing(12)
+        grid.setVerticalSpacing(4)
+        grid.setColumnStretch(0, 0)
+        for column in range(1, TOKEN_GRID_COLUMNS + 1):
+            grid.setColumnStretch(column, 1)
+        grid.setColumnStretch(TOKEN_GRID_COLUMNS + 1, 0)
 
-    def _heading(self, text: str, top_margin: int = 4) -> QHBoxLayout:
-        heading = CaptionLabel(text, self)
-        apply_body_font(heading)
-        heading.setStyleSheet(f"color: {TEXT_COLOR};")
-        heading_row = QHBoxLayout()
-        heading_row.setContentsMargins(CARD_CONTENT_INSET, top_margin, CARD_CONTENT_INSET, 0)
-        heading_row.addWidget(heading)
-        return heading_row
+        self._add_token_grid_block(
+            grid, 0, WEIGHT_ROW_LABEL, TOKEN_WEIGHT_LABELS, "search.token_weights", TokenWeightCell
+        )
+        self._add_token_grid_block(
+            grid, 2, MULTIPLIER_ROW_LABEL, TOKEN_MULTIPLIER_LABELS, "search.token_multipliers", TokenMultiplierCell
+        )
+        self.body_layout.addLayout(grid)
 
-    def _tuning_cell_row(self, labels: dict[str, str], key_prefix: str) -> QHBoxLayout:
-        row = QHBoxLayout()
-        row.setContentsMargins(CARD_CONTENT_INSET, 4, CARD_CONTENT_INSET, 4)
-        row.setSpacing(12)
-        for token_name, label_text in labels.items():
-            row.addWidget(self._tuning_cell(token_name, label_text, f"{key_prefix}.{token_name}"), stretch=1)
-        return row
+    def _add_token_grid_block(
+        self,
+        grid: QGridLayout,
+        header_row: int,
+        row_label_text: str,
+        token_labels: dict[str, str],
+        key_prefix: str,
+        cell_type: type[TokenWeightCell] | type[TokenMultiplierCell],
+    ) -> None:
+        cell_row = header_row + 1
 
-    def _tuning_cell(self, token_name: str, label_text: str, config_key: str) -> LabeledIntInputCell:
-        cell = LabeledIntInputCell(label_text, config_key, self.store, self)
-        cell.value_changed.connect(self._refresh_examples)
-        self.tuning_rows[token_name] = cell
-        return cell
+        row_label = CaptionLabel(row_label_text, self)
+        apply_token_row_label_font(row_label)
+        grid.addWidget(row_label, cell_row, 0, Qt.AlignmentFlag.AlignVCenter)
+
+        for column, (token_name, token_text) in enumerate(token_labels.items(), start=1):
+            header = CaptionLabel(token_text, self)
+            apply_token_header_font(header)
+            header.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            grid.addWidget(header, header_row, column, Qt.AlignmentFlag.AlignHCenter)
+            cell = cell_type(f"{key_prefix}.{token_name}", self.store, self)
+            cell.value_changed.connect(self._refresh_examples)
+            self.tuning_rows[token_name] = cell
+            grid.addWidget(cell, cell_row, column, Qt.AlignmentFlag.AlignHCenter)
+
+        lamp = HelpButton(SETTING_DESCRIPTIONS[key_prefix].explanation, self)
+        grid.addWidget(lamp, header_row, TOKEN_GRID_COLUMNS + 1, 2, 1, Qt.AlignmentFlag.AlignVCenter)
 
     def _update_example_heading(self) -> None:
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE

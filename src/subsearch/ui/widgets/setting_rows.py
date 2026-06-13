@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QIntValidator
+from PySide6.QtGui import QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -255,6 +255,43 @@ class IntInput(LineEdit):
 
     def set_value_silent(self, value: int) -> None:
         self.setText(str(self.clamp(value)))
+
+    def _commit(self) -> None:
+        value = self.value()
+        self.set_value_silent(value)
+        self.value_committed.emit(value)
+
+
+class FloatInput(LineEdit):
+    value_committed = Signal(float)
+
+    def __init__(self, minimum: float, maximum: float, decimals: int, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._minimum = minimum
+        self._maximum = maximum
+        self._decimals = decimals
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFixedWidth(INT_INPUT_CONTROL_WIDTH)
+        self.setClearButtonEnabled(False)
+        validator = QDoubleValidator(minimum, maximum, decimals, self)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        self.setValidator(validator)
+        apply_body_font(self)
+        flatten_line_edit(self)
+        self.editingFinished.connect(self._commit)
+        self.returnPressed.connect(self.clearFocus)
+
+    def clamp(self, value: float) -> float:
+        return max(self._minimum, min(value, self._maximum))
+
+    def value(self) -> float:
+        try:
+            return self.clamp(round(float(self.text().strip()), self._decimals))
+        except ValueError:
+            return self._minimum
+
+    def set_value_silent(self, value: float) -> None:
+        self.setText(f"{self.clamp(value):.{self._decimals}f}")
 
     def _commit(self) -> None:
         value = self.value()

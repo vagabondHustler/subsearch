@@ -7,9 +7,13 @@ from subsearch.ui.theme import palette
 BODY_FONT_SIZE = 12
 CAPTION_FONT_SIZE = 12
 SUBSECTION_FONT_SIZE = 10
+TOKEN_HEADER_FONT_SIZE = 12
+TOKEN_VALUE_FONT_SIZE = 12
 TITLE_FONT_SIZE = 14
 SEMI_BOLD = QFont.Weight.DemiBold
 TEXT_COLOR = palette.NEUTRAL_1
+SUBTLE_TEXT_COLOR = palette.NEUTRAL_2
+MUTED_TEXT_COLOR = palette.NEUTRAL_3
 DISABLED_TEXT_COLOR = palette.NEUTRAL_4
 ERROR_TEXT_COLOR = palette.RED
 SUCCESS_TEXT_COLOR = palette.GREEN
@@ -78,3 +82,24 @@ def apply_title_font(widget: QWidget) -> None:
 def apply_section_label_font(widget: QWidget) -> None:
     setFont(widget, CAPTION_FONT_SIZE, QFont.Weight.Normal)
     apply_text_color(widget)
+
+
+def apply_label_color(widget: QWidget, color: str) -> None:
+    widget.setStyleSheet(f"color: {color};")
+
+
+def apply_token_row_label_font(widget: QWidget) -> None:
+    setFont(widget, TOKEN_HEADER_FONT_SIZE, SEMI_BOLD)
+    apply_label_color(widget, TEXT_COLOR)
+
+
+def apply_token_header_font(widget: QWidget) -> None:
+    setFont(widget, TOKEN_HEADER_FONT_SIZE, SEMI_BOLD)
+    apply_label_color(widget, SUBTLE_TEXT_COLOR)
+
+
+def apply_token_value_font(widget: QWidget) -> None:
+    setFont(widget, TOKEN_VALUE_FONT_SIZE, SEMI_BOLD)
+    qss = f"{type(widget).__name__} {{ color: {MUTED_TEXT_COLOR}; }}"
+    widget.setStyleSheet(qss)
+    append_custom_style(widget, qss)

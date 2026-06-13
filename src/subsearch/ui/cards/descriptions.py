@@ -22,12 +22,17 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "and which ones the current threshold accepts.",
     ),
     "search.token_weights": SettingDescription(
-        "Advanced matching",
-        "Fine-tune how the match score is calculated.\n\n"
-        "Weights set how much each part of the filename counts towards the score: the title, "
-        "the release group, and the source like BluRay or WEB.\n\n"
-        "Penalties shrink the score when a part clearly disagrees: a different year, a different "
-        "season or episode, or a different edition. A lower penalty rejects the mismatch harder.",
+        "Weights",
+        "How much each part of the filename counts towards the match score: the title, "
+        "the source like BluRay or WEB, and the release group.\n\n"
+        "Raise a weight to let that part sway the score more, lower it to make it matter less.",
+    ),
+    "search.token_multipliers": SettingDescription(
+        "Mismatch multiplier",
+        "How hard the score is cut when a part clearly disagrees: a different year, a different "
+        "season or episode, or a different edition.\n\n"
+        "The score is multiplied by this value, so 1.0 keeps the score untouched and 0.01 "
+        "collapses it almost to nothing. Lower rejects the mismatch harder.",
     ),
     "search.hearing_impaired": SettingDescription(
         "Hearing impaired",

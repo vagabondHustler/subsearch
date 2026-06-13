@@ -262,13 +262,13 @@ class DownloadManagerSettingsCard(SettingsCard):
 
         label_row = QHBoxLayout()
         label_row.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 4)
-        label = BodyLabel("Video file", self)
+        label = BodyLabel("Search for subtitles", self)
         apply_body_font(label)
         label_row.addWidget(label, stretch=1)
         section_layout.addLayout(label_row)
 
         self._filename_edit = LineEdit(self)
-        self._filename_edit.setPlaceholderText("No video file selected")
+        self._filename_edit.setPlaceholderText("Enter title or point to file")
         self._filename_edit.setText(VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else "")
         apply_body_font(self._filename_edit)
         flatten_line_edit(self._filename_edit)
