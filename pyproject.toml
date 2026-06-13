@@ -24,7 +24,6 @@
         "PySide6-Fluent-Widgets==1.11.2",
         "requests==2.34.2",
         "selectolax==0.4.10",
-        "toml==0.10.2",
     ]
     description = "Subsearch"
     dynamic = ["version"]
