@@ -58,6 +58,7 @@ def get_default_app_config() -> dict[str, Any]:
             "non_hearing_impaired": True,
             "only_foreign_parts": False,
             "providers": providers,
+            "downloads_per_provider": 4,
             "token_weights": {**DEFAULT_TOKEN_WEIGHTS},
             "token_multipliers": {**DEFAULT_TOKEN_MULTIPLIERS},
         },
@@ -90,7 +91,6 @@ def get_default_app_config() -> dict[str, Any]:
             "single_instance": True,
         },
         "network": {
-            "api_call_limit": 4,
             "request_connect_timeout": 4,
             "request_read_timeout": 5,
         },

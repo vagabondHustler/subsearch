@@ -55,6 +55,7 @@ class AppConfig:
     non_hearing_impaired: bool
     only_foreign_parts: bool
     providers: dict[str, bool]
+    downloads_per_provider: int
     token_weights: dict[str, float]
     token_multipliers: dict[str, float]
     context_menu: bool
@@ -70,7 +71,6 @@ class AppConfig:
     post_processing: dict[str, Any]
     show_terminal: bool
     single_instance: bool
-    api_call_limit: int
     request_connect_timeout: int
     request_read_timeout: int
     diagnostics: dict[str, Any]

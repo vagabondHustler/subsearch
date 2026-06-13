@@ -138,10 +138,10 @@ class SearchPipeline:
     def subsource(self) -> None:
         self._start_search(provider=subsource.Subsource, flag="site")
 
-    def _provider_at_api_call_limit(self, provider_name: str) -> bool:
+    def _provider_at_download_limit(self, provider_name: str) -> bool:
         if provider_name not in self.bootstrap.api_calls_made:
             self.bootstrap.api_calls_made[provider_name] = 0
-        return self.bootstrap.api_calls_made[provider_name] == self.bootstrap.app_config.api_call_limit
+        return self.bootstrap.api_calls_made[provider_name] == self.bootstrap.app_config.downloads_per_provider
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
@@ -154,7 +154,7 @@ class SearchPipeline:
         log.event("banner", title="Downloading subtitles")
         accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.token_result, reverse=True)
         for subtitle in accepted:
-            if self._provider_at_api_call_limit(subtitle.provider_name):
+            if self._provider_at_download_limit(subtitle.provider_name):
                 continue
             self._download_accepted_subtitle(subtitle, len(accepted))
         log.event("task_completed")
