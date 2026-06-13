@@ -21,8 +21,6 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         summary_notification=data["notifications"]["summary_notification"],
         search_mode=data["download_manager"]["search_mode"],
         manually_handle_post_processing=data["download_manager"]["manually_handle_post_processing"],
-        use_post_processing_target=data["download_manager"]["use_post_processing_target"],
-        download_manager_target_path=data["download_manager"]["target_path"],
         download_manager_working_directory=data["download_manager"]["working_directory"],
         post_processing=data["post_processing"],
         show_terminal=data["application"]["show_terminal"],

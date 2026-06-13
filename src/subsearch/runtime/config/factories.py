@@ -74,8 +74,6 @@ def get_default_app_config() -> dict[str, Any]:
         "download_manager": {
             "search_mode": "hybrid",
             "manually_handle_post_processing": False,
-            "use_post_processing_target": True,
-            "target_path": ".",
             "working_directory": "",
         },
         "post_processing": {

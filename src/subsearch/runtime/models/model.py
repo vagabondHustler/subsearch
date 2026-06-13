@@ -65,8 +65,6 @@ class AppConfig:
     summary_notification: bool
     search_mode: str
     manually_handle_post_processing: bool
-    use_post_processing_target: bool
-    download_manager_target_path: str
     download_manager_working_directory: str
     post_processing: dict[str, Any]
     show_terminal: bool

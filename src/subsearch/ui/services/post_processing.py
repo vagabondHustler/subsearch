@@ -4,7 +4,6 @@ from typing import Protocol
 from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
-from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.models.model import Subtitle
 from subsearch.ui.state.store import SettingsStore
@@ -28,14 +27,9 @@ class _PostProcessWorker(Worker):
         return None
 
     def _resolve_target_path(self) -> Path:
-        if self._store.read("download_manager.use_post_processing_target"):
-            target = str(self._store.read("post_processing.target_path"))
-            resolution = str(self._store.read("post_processing.path_resolution"))
-            create = bool(self._store.read("post_processing.create_missing_folder"))
-        else:
-            target = str(self._store.read("download_manager.target_path"))
-            resolution = release_parser.detect_path_resolution(target)
-            create = True
+        target = str(self._store.read("post_processing.target_path"))
+        resolution = str(self._store.read("post_processing.path_resolution"))
+        create = bool(self._store.read("post_processing.create_missing_folder"))
         return file_system.create_path_from_string(target, resolution, VIDEO_FILE.file_directory, create)
 
 

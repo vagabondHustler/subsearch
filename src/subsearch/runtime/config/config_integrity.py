@@ -87,6 +87,17 @@ def migrate_download_section(config_data: dict[str, Any]) -> bool:
     return True
 
 
+def migrate_unified_download_destination(config_data: dict[str, Any]) -> bool:
+    download_manager = config_data.get("download_manager", {})
+    stale_keys = [key for key in ("use_post_processing_target", "target_path") if key in download_manager]
+    if not stale_keys:
+        return False
+    for key in stale_keys:
+        download_manager.pop(key)
+    log.info(f"Removed stale download_manager keys now unified with post_processing: {stale_keys}")
+    return True
+
+
 def migrate_token_multipliers(config_data: dict[str, Any]) -> bool:
     multipliers = config_data.get("search", {}).get("token_multipliers")
     if not multipliers:
@@ -133,9 +144,10 @@ def resolve_on_integrity_failure() -> ConfigResolution:
     else:
         remove_stale_backup_file()
     migrated_download = migrate_download_section(config_data)
+    migrated_destination = migrate_unified_download_destination(config_data)
     migrated_multipliers = migrate_token_multipliers(config_data)
     migrated_api_call_limit = migrate_api_call_limit(config_data)
-    if migrated_download or migrated_multipliers or migrated_api_call_limit:
+    if migrated_download or migrated_destination or migrated_multipliers or migrated_api_call_limit:
         json_file.dump_json_data(FILE_PATHS.config, config_data)
         config_keys = get_keys_recursively(config_data)
     if valid_config(valid_config_keys, config_keys):
