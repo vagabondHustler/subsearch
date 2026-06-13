@@ -3,14 +3,11 @@ from PySide6.QtGui import QEnterEvent, QMouseEvent
 from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
-    QVBoxLayout,
     QWidget,
 )
 from qfluentwidgets import (
     BodyLabel,
-    CaptionLabel,
     CheckBox,
-    MessageBox,
     TransparentToolButton,
 )
 
@@ -21,16 +18,10 @@ from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
 from subsearch.ui.theme.typography import (
-    DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
-    apply_caption_font,
 )
-from subsearch.ui.widgets.setting_rows import (
-    FolderPathRow,
-    SwitchRow,
-    make_switches_mutually_exclusive,
-)
+from subsearch.ui.widgets.setting_rows import SwitchRow
 
 
 class _ButtonProxyLabel(BodyLabel):
@@ -54,106 +45,6 @@ class _ButtonProxyLabel(BodyLabel):
 
 
 EXTENSION_GRID_ROWS = 3
-
-DEFAULT_TARGET_PATH = "."
-DEFAULT_PATH_RESOLUTION = "relative"
-DESTINATION_PATH_EXAMPLES = (
-    "Where moved subtitles are placed.\n\n"
-    "Relative , taken from the video's own folder:\n"
-    "    subs\n"
-    "    ..\\Subtitles\n\n"
-    "Absolute , a fixed path on disk:\n"
-    "    C:\\Users\\You\\Subtitles\n"
-    "    D:\\Media\\Subs"
-)
-
-
-class PostProcessingCard(SettingsCard):
-    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Subtitle post-processing", store, parent=parent)
-        self.store = store
-        self.add_header_help(SETTING_DESCRIPTIONS["card.post_processing"].explanation)
-        self.register_restore_defaults(
-            [
-                ("post_processing.target_path", DEFAULT_TARGET_PATH),
-                ("post_processing.path_resolution", DEFAULT_PATH_RESOLUTION),
-            ]
-        )
-        self.add_row(SwitchRow("post_processing.rename", store))
-        self.move_best = SwitchRow("post_processing.move_best", store)
-        self.move_all = SwitchRow("post_processing.move_all", store)
-        self.add_row(self.move_best)
-        self.add_row(self.move_all)
-        make_switches_mutually_exclusive(self.move_best, self.move_all)
-        self.move_best.toggled.connect(self._update_destination_enabled)
-        self.move_all.toggled.connect(self._update_destination_enabled)
-
-        self._build_destination()
-        self._update_destination_enabled()
-
-        manual_enabled = bool(store.read("download_manager.manually_handle_post_processing"))
-        self.make_collapsible(collapsed=manual_enabled)
-        self._build_disabled_status_label()
-        store.value_changed.connect(self._on_store_changed)
-        self._apply_manual_handle_state(manual_enabled)
-
-    def _on_store_changed(self, key: str, value: object) -> None:
-        if key == "download_manager.manually_handle_post_processing":
-            self._apply_manual_handle_state(bool(value))
-
-    def _build_disabled_status_label(self) -> None:
-        self._disabled_status = CaptionLabel("Disabled — handled in download manager", self)
-        apply_caption_font(self._disabled_status)
-        self._disabled_status.setStyleSheet(f"color: {DISABLED_TEXT_COLOR};")
-        title_index = self.headerLayout.indexOf(self.headerLabel)
-        self.headerLayout.insertWidget(title_index + 1, self._disabled_status)
-
-    def _apply_manual_handle_state(self, manual_enabled: bool) -> None:
-        self.set_body_enabled(not manual_enabled)
-        self._disabled_status.setVisible(manual_enabled)
-        self.set_collapsed(manual_enabled)
-
-    def _update_destination_enabled(self, _checked: bool = False) -> None:
-        moving_enabled = self.move_best.switch.isChecked() or self.move_all.switch.isChecked()
-        self.destination.setEnabled(moving_enabled)
-
-    def _build_destination(self) -> None:
-        self.destination = QWidget(self)
-        destination_layout = QVBoxLayout(self.destination)
-        destination_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.destination_path = FolderPathRow("post_processing.target_path", self.store, DESTINATION_PATH_EXAMPLES)
-        self.destination_path.path_saved.connect(self._on_destination_path_saved)
-        destination_layout.addWidget(self.destination_path)
-
-        create_missing_folder = SwitchRow("post_processing.create_missing_folder", self.store, self)
-        destination_layout.addWidget(create_missing_folder)
-        self.register_restore_defaults([(create_missing_folder.config_key, create_missing_folder.default_value)])
-        self.body_layout.addWidget(self.destination)
-
-    def _on_destination_path_saved(self, _path: str, path_resolution: str) -> None:
-        self.store.write("post_processing.path_resolution", path_resolution)
-
-    def commit_path_or_revert(self) -> bool:
-        if self.destination_path.is_valid():
-            self.destination_path.save_if_valid()
-            return True
-        return self._prompt_invalid_path_on_exit()
-
-    def _prompt_invalid_path_on_exit(self) -> bool:
-        confirmation = MessageBox(
-            "Destination folder is not valid",
-            f'The destination folder\n\n"{self.destination_path.text()}"\n\nis not valid. '
-            f'Exit anyway and reset it to the default ("{DEFAULT_TARGET_PATH}"), '
-            "or stay and fix it?",
-            self.window(),
-        )
-        confirmation.yesButton.setText("Reset and exit")
-        confirmation.cancelButton.setText("Stay and fix")
-        if not confirmation.exec():
-            return False
-        self.destination_path.set_path(DEFAULT_TARGET_PATH)
-        return True
 
 
 class FileExtensionsCard(SettingsCard):

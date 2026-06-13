@@ -9,16 +9,17 @@ from subsearch.ui.cards.base import (
 )
 from subsearch.ui.cards.post_processing_cards import (
     FileExtensionsCard,
-    PostProcessingCard,
     ShellIntegrationCard,
 )
 from subsearch.ui.cards.resources_card import ResourcesCard
 from subsearch.ui.cards.search_cards import (
     LanguageCard,
     ProvidersCard,
+    SearchModeCard,
     SearchThresholdCard,
     SubtitleFiltersCard,
 )
+from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
 from subsearch.ui.cards.system_cards import (
     ApplicationCard,
     NetworkCard,
@@ -36,13 +37,14 @@ __all__ = [
     "build_section_header",
     "ApiCard",
     "FileExtensionsCard",
-    "PostProcessingCard",
     "ShellIntegrationCard",
     "ResourcesCard",
     "LanguageCard",
     "ProvidersCard",
+    "SearchModeCard",
     "SearchThresholdCard",
     "SubtitleFiltersCard",
+    "SubtitleHandlingCard",
     "ApplicationCard",
     "NetworkCard",
     "NotificationsCard",

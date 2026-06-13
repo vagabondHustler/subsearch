@@ -25,23 +25,20 @@ from subsearch.ui.cards import (
     LanguageCard,
     NetworkCard,
     NotificationsCard,
-    PostProcessingCard,
     ProviderDiagnosticsCard,
     ProvidersCard,
     ResourcesCard,
+    SearchModeCard,
     SearchThresholdCard,
     SettingsCard,
     ShellIntegrationCard,
     SubtitleFiltersCard,
+    SubtitleHandlingCard,
     UpdateCard,
 )
-from subsearch.ui.cards.download_manager import (
-    DownloadManagerSettingsCard,
-    ManualSearchInterface,
-)
+from subsearch.ui.cards.download_manager import ManualSearchInterface
 from subsearch.ui.compat.qfluent import (
     ACCENT_COLOR,
-    NAVIGATION_ITEM_HEIGHT,
     enlarge_navigation_icons,
     force_fixed_accent_color,
     forward_navigation_wheel_to_page,
@@ -117,33 +114,31 @@ class SettingsWindow(FluentWindow):
         store = self.store
         shell_service = ShellIntegrationService(self.task_runner, self)
         if download_service is None:
-            download_service = SubtitleDownloadService(self.task_runner, self) # type: ignore
+            download_service = SubtitleDownloadService(self.task_runner, self)  # type: ignore
         if post_processing_service is None:
             post_processing_service = PostProcessingService(self.task_runner, self)
         in_search_mode = subtitles is not None or search_worker_factory is not None
         log_panel_sink = LogPanelSink(self) if in_search_mode else None
 
-        post_processing_card = PostProcessingCard(store)
-        self.register_close_validator(post_processing_card.commit_path_or_revert)
-
-        search_threshold_card = SearchThresholdCard(store)
+        subtitle_handling_card = SubtitleHandlingCard(store)
+        self.register_close_validator(subtitle_handling_card.commit_path_or_revert)
 
         search_interface = SettingsInterface(
             "searchInterface",
-            [
-                *_collapsible(
-                    LanguageCard(store),
-                    SubtitleFiltersCard(store),
-                    search_threshold_card,
-                ),
-                # Manages its own collapsibility: collapses while post-processing
-                # is handled manually in the download manager.
-                post_processing_card,
-            ],
+            _collapsible(
+                LanguageCard(store),
+                SubtitleFiltersCard(store),
+                SearchThresholdCard(store),
+            ),
+        )
+        download_prefs_interface = SettingsInterface(
+            "downloadPrefsInterface",
+            _collapsible(subtitle_handling_card),
         )
         providers_interface = SettingsInterface(
             "providersInterface",
             _collapsible(
+                SearchModeCard(store),
                 ProvidersCard(store),
                 ProviderDiagnosticsCard(store),
             ),
@@ -191,10 +186,6 @@ class SettingsWindow(FluentWindow):
             title_suggestion_service,
         )
         manual_search_interface = self.manual_search_interface
-        manual_settings_interface = SettingsInterface(
-            "manualSettingsInterface",
-            _collapsible(DownloadManagerSettingsCard(store)),
-        )
 
         if search_worker_factory is not None:
             self.manual_search_interface.research_requested.connect(self._start_search)
@@ -208,13 +199,15 @@ class SettingsWindow(FluentWindow):
             selectable=False,
         )
 
+        self.addSubInterface(manual_search_interface, LucideIcon.TEXT_SEARCH, "Get subtitles", isTransparent=True)
+        self.addSubInterface(providers_interface, LucideIcon.LIST, "Search preferences", isTransparent=True)
         self.addSubInterface(search_interface, LucideIcon.CAPTIONS, "Subtitle preferences", isTransparent=True)
-        self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Integration", isTransparent=True)
-        self.addSubInterface(providers_interface, LucideIcon.LIST, "Providers", isTransparent=True)
-        self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API", isTransparent=True)
+        self.addSubInterface(
+            download_prefs_interface, LucideIcon.FOLDER_COG, "Download preferences", isTransparent=True
+        )
+        self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Desktop behaviour", isTransparent=True)
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)
-        self.addSubInterface(manual_search_interface, LucideIcon.TEXT_SEARCH, "Search", isTransparent=True)
-        self.addSubInterface(manual_settings_interface, LucideIcon.FOLDER_COG, "Settings", isTransparent=True)
+        self.addSubInterface(api_interface, LucideIcon.KEY_ROUND, "API keys", isTransparent=True)
         self.addSubInterface(
             about_interface,
             LucideIcon.HEART_HANDSHAKE,
@@ -241,17 +234,8 @@ class SettingsWindow(FluentWindow):
             navigation_item.widget.setTextColor(text_color, text_color)
             apply_body_font(getattr(navigation_item.widget, "itemWidget"))
         panel.items["header"].widget.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self._insert_navigation_spacer(panel, before_route_key="manualSearchInterface")
         enlarge_navigation_icons(panel)
         forward_navigation_wheel_to_page(panel, self.stackedWidget.currentWidget)
-
-    def _insert_navigation_spacer(self, panel, before_route_key: str) -> None:
-        target_widget = panel.items[before_route_key].widget
-        layout_index = panel.topLayout.indexOf(target_widget)
-        spacer = QWidget(panel)
-        spacer.setFixedHeight(NAVIGATION_ITEM_HEIGHT)
-        spacer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        panel.topLayout.insertWidget(layout_index, spacer, 0, Qt.AlignmentFlag.AlignTop)
 
     def register_close_validator(self, validator: Callable[[], bool]) -> None:
         self._close_validators.append(validator)

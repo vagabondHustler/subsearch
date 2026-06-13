@@ -54,12 +54,6 @@ from subsearch.ui.widgets.ripple_spinner import (
     ripple_pixmap,
 )
 from subsearch.ui.widgets.search_line_edit import SearchLineEdit
-from subsearch.ui.widgets.setting_rows import (
-    FolderPathRow,
-    FuzzySelectRow,
-    SwitchRow,
-    TrailingButtonArea,
-)
 from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
@@ -180,21 +174,9 @@ FILTER_BAR_WIDTH = 200
 # search field and the separator below it span the same width.
 SEARCH_BAR_WIDTH_FRACTION = _HANDLE_LINE_WIDTH_FRACTION
 
-DEFAULT_MANAGER_TARGET_PATH = "."
-DEFAULT_WORKING_DIRECTORY = ""
-WORKING_DIRECTORY_PLACEHOLDER = "Let Subsearch decide (Downloads\\subs)"
 IDLE_PLACEHOLDER_TEXT = "Pick a video file or type a search term, then click the search glass"
 SEARCHING_PLACEHOLDER_TEXT = "Searching for subtitles…"
 NO_RESULTS_PLACEHOLDER_TEXT = "No subtitles found"
-DESTINATION_PATH_EXAMPLES = (
-    "Where moved subtitles are placed.\n\n"
-    "Relative , taken from the video's own folder:\n"
-    "    subs\n"
-    "    ..\\Subtitles\n\n"
-    "Absolute , a fixed path on disk:\n"
-    "    C:\\Users\\You\\Subtitles\n"
-    "    D:\\Media\\Subs"
-)
 
 
 class SubtitleSearchBar(QWidget):
@@ -347,42 +329,6 @@ class SubtitleSearchBar(QWidget):
         self._video_file_service.select_video(selected_path)
 
 
-class DownloadManagerSettingsCard(SettingsCard):
-    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
-        super().__init__("Download settings", store, parent=parent)
-        self.store = store
-        self.add_header_help(SETTING_DESCRIPTIONS["card.download_manager_settings"].explanation)
-
-        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
-        self.add_row(FuzzySelectRow("download_manager.search_mode", store, search_mode_values, searchable=False))
-
-        self._manually_handle = SwitchRow("download_manager.manually_handle_post_processing", store)
-        self.add_row(self._manually_handle)
-
-        self._use_pp_target = SwitchRow("download_manager.use_post_processing_target", store)
-        self.add_row(self._use_pp_target)
-
-        self._target_path_row = FolderPathRow("download_manager.target_path", store, DESTINATION_PATH_EXAMPLES)
-        self.body_layout.addWidget(self._target_path_row)
-        self.register_restore_defaults([("download_manager.target_path", DEFAULT_MANAGER_TARGET_PATH)])
-
-        self._use_pp_target.toggled.connect(self._apply_use_pp_target_state)
-        self._apply_use_pp_target_state(self._use_pp_target.switch.isChecked())
-
-        self._working_directory_row = FolderPathRow(
-            "download_manager.working_directory",
-            store,
-            placeholder_text=WORKING_DIRECTORY_PLACEHOLDER,
-            dialog_title="Select working folder",
-            allow_empty=True,
-        )
-        self.body_layout.addWidget(self._working_directory_row)
-        self.register_restore_defaults([("download_manager.working_directory", DEFAULT_WORKING_DIRECTORY)])
-
-    def _apply_use_pp_target_state(self, use_pp: bool) -> None:
-        self._target_path_row.setVisible(not use_pp)
-
-
 class SubtitleCard(SettingsCard):
     search_text_changed = Signal(str)
     search_confirmed = Signal()
@@ -443,9 +389,7 @@ class SubtitleActionRow(QWidget):
         layout.addWidget(place_button)
 
     def _target_path_text(self) -> str:
-        if self._store.read("download_manager.use_post_processing_target"):
-            return str(self._store.read("post_processing.target_path"))
-        return str(self._store.read("download_manager.target_path"))
+        return str(self._store.read("post_processing.target_path"))
 
     def _make_action_button(self, icon: LucideIcon, tooltip: str, slot) -> TransparentToolButton:
         button = TransparentToolButton(self)

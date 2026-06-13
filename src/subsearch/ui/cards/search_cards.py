@@ -54,6 +54,15 @@ PROVIDER_INCOMPATIBILITY_NAMES = {
 }
 
 
+class SearchModeCard(SettingsCard):
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
+        super().__init__("Search mode", store, parent=parent)
+        self.add_header_help(SETTING_DESCRIPTIONS["download_manager.search_mode"].explanation)
+        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
+        self.add_row(FuzzySelectRow("download_manager.search_mode", store, search_mode_values, searchable=False))
+        self.register_restore_defaults([("download_manager.search_mode", "hybrid")])
+
+
 class LanguageCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Language", show_restore_button=False, parent=parent)

@@ -80,18 +80,8 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "download_manager.manually_handle_post_processing": SettingDescription(
         "Manually handle post-processing",
-        "When on, the Download Manager lets you pick and process subtitles yourself. "
-        "The Post-Processing card is disabled while this is active.",
-    ),
-    "download_manager.use_post_processing_target": SettingDescription(
-        "Use post-processing destination",
-        "When on, the Download Manager moves subtitles to the same folder as Post-Processing. "
-        "Turn off to set a separate destination folder just for the manager.",
-    ),
-    "download_manager.target_path": SettingDescription(
-        "Destination folder",
-        "The folder subtitles are moved to when using the Download Manager. "
-        "Can be relative to the video's folder or a fixed path on your drive.",
+        "When on, you pick and process subtitles yourself from the search results. "
+        "The automatic rename and move options above are disabled while this is active.",
     ),
     "download_manager.working_directory": SettingDescription(
         "Working folder",
@@ -186,11 +176,12 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "You can combine hearing-impaired and non-hearing-impaired to accept both, "
         "or enable foreign-parts-only to target films with untranslated sections.",
     ),
-    "card.post_processing": SettingDescription(
-        "Subtitle post-processing",
-        "What Subsearch does with a subtitle after downloading it. "
-        "Rename it so your media player finds it automatically, "
-        "and optionally move it to a fixed or relative destination folder.",
+    "card.subtitle_handling": SettingDescription(
+        "Subtitle handling",
+        "What Subsearch does with a subtitle after finding it. "
+        "Automatically rename and move it to a destination folder, "
+        "or take over and process subtitles yourself from the search results. "
+        "The working folder is where the search places subtitles when no video file is selected.",
     ),
     "card.shell_integration": SettingDescription(
         "Shell integration",
@@ -201,12 +192,6 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Notifications",
         "Controls the system tray icon and the pop-up that appears when a search finishes. "
         "The summary notification requires the tray icon to be turned on.",
-    ),
-    "card.download_manager_settings": SettingDescription(
-        "Download settings",
-        "Controls how subtitles are handled after finding them. "
-        "Enable manual post-processing to pick and move subtitles yourself, "
-        "and choose where they are placed.",
     ),
     "card.application": SettingDescription(
         "Application",
