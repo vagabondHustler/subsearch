@@ -1,11 +1,11 @@
 import importlib
+import json
 import os
 import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
-import json
 
 # Qt must render offscreen under pytest; set before any QApplication is created.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

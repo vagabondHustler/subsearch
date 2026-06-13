@@ -138,13 +138,13 @@ def test_subtitle_filters_restore_defaults(qtbot) -> None:
         assert switch_rows[key].switch.isChecked() == default
 
 
-def test_post_processing_restore_defaults(qtbot) -> None:
+def test_subtitle_handling_restore_defaults(qtbot) -> None:
     from subsearch.runtime.config import config_session
-    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
-    card = PostProcessingCard(store)
+    card = SubtitleHandlingCard(store)
     qtbot.addWidget(card)
     session = config_session.get_config_session()
     switch_rows = _collect_switch_rows(card)
@@ -164,12 +164,12 @@ def test_post_processing_restore_defaults(qtbot) -> None:
     assert switch_rows["post_processing.create_missing_folder"].switch.isChecked() is True
 
 
-def test_post_processing_restore_re_enables_destination(qtbot) -> None:
-    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+def test_subtitle_handling_restore_re_enables_destination(qtbot) -> None:
+    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
-    card = PostProcessingCard(store)
+    card = SubtitleHandlingCard(store)
     qtbot.addWidget(card)
 
     # Disable both move switches so the destination section becomes disabled.
@@ -226,14 +226,14 @@ def test_notifications_restore_defaults(qtbot) -> None:
         assert switch_rows[key].switch.isChecked() == default
 
 
-def test_download_manager_restore_defaults(qtbot) -> None:
+def test_search_mode_restore_defaults(qtbot) -> None:
     from subsearch.runtime.config import config_session
-    from subsearch.ui.cards.download_manager import DownloadManagerSettingsCard
+    from subsearch.ui.cards.search_cards import SearchModeCard
     from subsearch.ui.state.store import SettingsStore
     from subsearch.ui.widgets.setting_rows import FuzzySelectRow
 
     store = SettingsStore()
-    card = DownloadManagerSettingsCard(store)
+    card = SearchModeCard(store)
     qtbot.addWidget(card)
     session = config_session.get_config_session()
     combo_rows = {row.config_key: row for row in card.findChildren(FuzzySelectRow)}
@@ -246,22 +246,24 @@ def test_download_manager_restore_defaults(qtbot) -> None:
     assert session.read("download_manager.search_mode") == "hybrid"
 
 
-def test_post_processing_card_disables_body_when_manually_handle_enabled(qtbot) -> None:
-    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
+def test_subtitle_handling_greys_out_automatic_rows_when_manually_handle_enabled(qtbot) -> None:
+    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
-    card = PostProcessingCard(store)
+    card = SubtitleHandlingCard(store)
     qtbot.addWidget(card)
 
-    assert card.view.isEnabled()
+    assert card._automatic_handling.isEnabled()
 
     store.write("download_manager.manually_handle_post_processing", True)
-    assert not card.view.isEnabled()
+    assert not card._automatic_handling.isEnabled()
+    # The card itself and its shared destination stay usable.
     assert card.isEnabled()
+    assert card.destination.isEnabled()
 
     store.write("download_manager.manually_handle_post_processing", False)
-    assert card.view.isEnabled()
+    assert card._automatic_handling.isEnabled()
 
 
 def test_application_restore_defaults(qtbot) -> None:
@@ -341,27 +343,6 @@ def test_int_input_row_writes_committed_value_to_store(qtbot) -> None:
 
     assert row.input.value() == 99
     assert store.read("search.downloads_per_provider") == 99
-
-
-def test_post_processing_card_collapses_and_shows_status_when_manual(qtbot) -> None:
-    from subsearch.ui.cards.post_processing_cards import PostProcessingCard
-    from subsearch.ui.state.store import SettingsStore
-
-    store = SettingsStore()
-    card = PostProcessingCard(store)
-    qtbot.addWidget(card)
-
-    assert not card.is_collapsed()
-    assert card._disabled_status.isHidden()
-
-    store.write("download_manager.manually_handle_post_processing", True)
-    assert card.is_collapsed()
-    assert not card._disabled_status.isHidden()
-    assert card._collapse_button.isEnabled()
-
-    store.write("download_manager.manually_handle_post_processing", False)
-    assert not card.is_collapsed()
-    assert card._disabled_status.isHidden()
 
 
 def test_working_directory_accepts_empty_and_rejects_invalid_path(qtbot) -> None:
