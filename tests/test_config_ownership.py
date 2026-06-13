@@ -4,15 +4,15 @@ from pathlib import Path
 SRC_ROOT = Path(__file__).parent.parent / "src" / "subsearch"
 TESTS_ROOT = Path(__file__).parent
 
-TOML_FILE_MODULE = "subsearch.io.toml_file"
+JSON_FILE_MODULE = "subsearch.io.json_file"
 CONFIG_INTEGRITY_MODULE = "subsearch.runtime.config.config_integrity"
 APP_CONFIG_MAPPER_MODULE = "subsearch.runtime.config.app_config_mapper"
 
 # config_session owns config handling; everything else in src goes through it.
 # config_integrity is its internal helper for on-disk repair, so it may also
-# reach the TOML serializer.
+# reach the JSON serializer.
 OWNERSHIP_RULES = [
-    (TOML_FILE_MODULE, {"runtime/config/config_session.py", "runtime/config/config_integrity.py"}),
+    (JSON_FILE_MODULE, {"runtime/config/config_session.py", "runtime/config/config_integrity.py"}),
     (CONFIG_INTEGRITY_MODULE, {"runtime/config/config_session.py"}),
     (APP_CONFIG_MAPPER_MODULE, {"runtime/config/config_session.py"}),
 ]
@@ -20,8 +20,8 @@ OWNERSHIP_RULES = [
 # These tests exercise the serializer, session persistence, and repair directly.
 TEST_OWNERSHIP_RULES = [
     (
-        TOML_FILE_MODULE,
-        {"test_toml_file.py", "test_config_session.py", "test_config_hybrid.py", "test_config_integrity.py"},
+        JSON_FILE_MODULE,
+        {"test_json_file.py", "test_config_session.py", "test_config_hybrid.py", "test_config_integrity.py"},
     ),
     (CONFIG_INTEGRITY_MODULE, {"test_config_integrity.py"}),
     (APP_CONFIG_MAPPER_MODULE, set()),
@@ -37,7 +37,7 @@ def imports_module(path: Path, target: str) -> bool:
         elif isinstance(node, ast.ImportFrom) and node.module:
             if node.module == target:
                 return True
-            # `from subsearch.io import toml_file` -> module + name == target
+            # `from subsearch.io import json_file` -> module + name == target
             if any(f"{node.module}.{alias.name}" == target for alias in node.names):
                 return True
     return False

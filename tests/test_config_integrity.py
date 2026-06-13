@@ -1,13 +1,13 @@
-import toml
+import json
 
-from subsearch.io import toml_file
+from subsearch.io import json_file
 from subsearch.io.nested_dict import get_keys_recursively
 from subsearch.runtime.config import config_integrity, constants, factories
 
 
 def write_config(path, data):
     with path.open("w") as file:
-        toml.dump(data, file)
+        json.dump(data, file)
 
 
 def test_resolve_restores_backup_when_config_is_corrupt(fake_config_file):
@@ -17,22 +17,22 @@ def test_resolve_restores_backup_when_config_is_corrupt(fake_config_file):
     good_config = factories.get_default_app_config()
     good_config["search"]["accept_threshold"] = 73
     write_config(backup_file, good_config)
-    fake_config_file.write_text("this is { not valid toml")
+    fake_config_file.write_text("this is not valid json {")
 
     config_integrity.resolve_on_integrity_failure()
 
-    assert toml_file.load_toml_value(fake_config_file, "search.accept_threshold") == 73
+    assert json_file.load_json_value(fake_config_file, "search.accept_threshold") == 73
     assert not backup_file.exists()
 
 
 def test_resolve_resets_to_default_when_corrupt_and_no_backup(fake_config_file):
     constants.FILE_PATHS.config = fake_config_file
-    fake_config_file.write_text("this is { not valid toml")
+    fake_config_file.write_text("this is not valid json {")
 
     config_integrity.resolve_on_integrity_failure()
 
     valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)
-    config_keys = get_keys_recursively(toml_file.load_toml_data(fake_config_file))
+    config_keys = get_keys_recursively(json_file.load_json_data(fake_config_file))
     assert sorted(config_keys) == sorted(valid_keys)
 
 
@@ -44,7 +44,7 @@ def test_resolve_creates_default_when_missing(fake_config_file):
 
     assert fake_config_file.exists()
     valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)
-    config_keys = get_keys_recursively(toml_file.load_toml_data(fake_config_file))
+    config_keys = get_keys_recursively(json_file.load_json_data(fake_config_file))
     assert sorted(config_keys) == sorted(valid_keys)
 
 
@@ -58,7 +58,7 @@ def test_repair_adds_missing_and_removes_obsolete_keys_in_one_write(fake_config_
 
     config_integrity.resolve_on_integrity_failure()
 
-    repaired = toml_file.load_toml_data(fake_config_file)
+    repaired = json_file.load_json_data(fake_config_file)
     assert "accept_threshold" in repaired["search"]
     assert "obsolete_section" not in repaired
     valid_keys = get_keys_recursively(constants.DEFAULT_CONFIG)

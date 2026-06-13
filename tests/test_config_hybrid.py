@@ -1,7 +1,7 @@
 import pytest
 
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.io import toml_file
+from subsearch.io import json_file
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import FILE_PATHS
 
@@ -43,7 +43,7 @@ def test_resync_does_not_require_commit_to_be_visible(bootstrap: MinimalBootstra
     bootstrap.resync_app_config()
 
     assert bootstrap.app_config.accept_threshold == 33
-    assert toml_file.load_toml_value(FILE_PATHS.config, "search.accept_threshold") == 90
+    assert json_file.load_json_value(FILE_PATHS.config, "search.accept_threshold") == 90
 
 
 def test_conflict_resolver_resolves_move_best_move_all(bootstrap: MinimalBootstrap):
@@ -55,4 +55,4 @@ def test_conflict_resolver_resolves_move_best_move_all(bootstrap: MinimalBootstr
     bootstrap.prevent_conflicting_config_settings()
 
     assert bootstrap.app_config.post_processing["move_best"] is False
-    assert toml_file.load_toml_value(FILE_PATHS.config, "post_processing.move_best") is False
+    assert json_file.load_json_value(FILE_PATHS.config, "post_processing.move_best") is False

@@ -87,7 +87,7 @@ def test_layers_respect_the_import_table() -> None:
 
 
 def test_only_the_store_imports_config_within_ui() -> None:
-    config_modules = {"subsearch.io.toml_file", "subsearch.runtime.config.config_session"}
+    config_modules = {"subsearch.io.json_file", "subsearch.runtime.config.config_session"}
     offenders = []
     for path in ui_module_paths():
         if path.relative_to(UI_ROOT).as_posix() == "state/store.py":
