@@ -92,6 +92,23 @@ LOG_EVENTS: dict[str, LogEvent] = {
     # http.*
     "http.request_failed": LogEvent("Request failed for {url}: {reason}", console=False),
     "http.bad_status": LogEvent("Request to {url} returned status {status_code}", console=False),
+    # registry.*
+    "registry.key_deleting": LogEvent("Deleting registry key: {key}", console=False),
+    "registry.context_menu_removing": LogEvent("Removing Subsearch context menu from registry", console=False),
+    "registry.key_missing": LogEvent("Registry key missing, could not write {sub_key}\\{value_name}", console=False),
+    "registry.reconcile_skipped": LogEvent(
+        "Skipping registry reconcile: MSI installer owns the context menu keys", console=False
+    ),
+    "registry.matches_absent": LogEvent("Registry matches config: context menu absent", console=False),
+    "registry.matches_current": LogEvent("Registry matches config: context menu up to date", console=False),
+    "registry.value_updated": LogEvent("Registry updated: {name}", console=False),
+    "registry.long_paths_disabled": LogEvent(
+        "Win32 long paths are not enabled, long file names may fail", console=False
+    ),
+    "registry.long_paths_key_missing": LogEvent(
+        "Win32 long paths registry key not found, assuming disabled", console=False
+    ),
+    "registry.long_paths_check_failed": LogEvent("Failed to check long path status: {reason}", console=False),
 }
 
 

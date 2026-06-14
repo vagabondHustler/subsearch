@@ -103,7 +103,7 @@ def _context_menu_key_exists() -> bool:
 
 
 def _del_registry_key(reg_path: str, key: str) -> None:
-    log.debug(f"Deleting registry key: {key}")
+    log.event("registry.key_deleting", level="debug", key=key)
     try:
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
             with winreg.OpenKey(hkey, reg_path, 0, winreg.KEY_WRITE) as sk:
@@ -113,7 +113,7 @@ def _del_registry_key(reg_path: str, key: str) -> None:
 
 
 def _del_context_menu() -> None:
-    log.info("Removing Subsearch context menu from registry")
+    log.event("registry.context_menu_removing")
     _del_registry_key(REGISTRY_PATHS.subsearch, "command")
     _del_registry_key(REGISTRY_PATHS.shell, "Subsearch")
 
@@ -137,30 +137,30 @@ def _write_registry_value(sub_key: str, value_name: str, value: str) -> None:
             with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
                 winreg.SetValueEx(sk, value_name, 0, winreg.REG_SZ, value)
     except FileNotFoundError:
-        log.warning(f"Registry key missing, could not write {sub_key}\\{value_name}")
+        log.event("registry.key_missing", level="warning", sub_key=sub_key, value_name=value_name)
 
 
 def reconcile_shell_integration() -> None:
     if DEVICE_INFO.mode == "executable":
-        log.debug("Skipping registry reconcile: MSI installer owns the context menu keys")
+        log.event("registry.reconcile_skipped", level="debug")
         return
     context_menu_enabled = config_session.read_config_value("shell_integration.context_menu")
     if not context_menu_enabled:
         if _context_menu_key_exists():
             _del_context_menu()
         else:
-            log.debug("Registry matches config: context menu absent")
+            log.event("registry.matches_absent", level="debug")
         return
     desired = desired_registry_values()
     stale_names = changed_value_names(desired, current_registry_values())
     if not stale_names:
-        log.debug("Registry matches config: context menu up to date")
+        log.event("registry.matches_current", level="debug")
         return
     _create_context_menu_keys()
     for name in stale_names:
         sub_key, value_name = VALUE_LOCATIONS[name]
         _write_registry_value(sub_key, value_name, desired[name])
-        log.info(f"Registry updated: {name}")
+        log.event("registry.value_updated", name=name)
 
 
 def check_long_paths_enabled() -> bool:
@@ -172,11 +172,11 @@ def check_long_paths_enabled() -> bool:
                 value, _ = winreg.QueryValueEx(sk, value_name)
                 enabled = bool(value)
                 if not enabled:
-                    log.warning("Win32 long paths are not enabled , long file names may fail")
+                    log.event("registry.long_paths_disabled", level="warning")
                 return enabled
     except FileNotFoundError:
-        log.warning("Win32 long paths registry key not found , assuming disabled")
+        log.event("registry.long_paths_key_missing", level="warning")
         return False
     except Exception as e:
-        log.error(f"Failed to check long path status: {e}")
+        log.event("registry.long_paths_check_failed", level="error", reason=str(e))
         return False
