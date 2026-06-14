@@ -71,6 +71,8 @@ LOG_EVENTS: dict[str, LogEvent] = {
     ),
     "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL),
     "config.changed": LogEvent("Config change: {change}", console=False),
+    "http.request_failed": LogEvent("Request failed for {url}: {reason}", console=False),
+    "http.bad_status": LogEvent("Request to {url} returned status {status_code}", console=False),
 }
 
 
