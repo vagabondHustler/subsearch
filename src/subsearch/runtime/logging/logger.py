@@ -101,8 +101,16 @@ def _write_session_header(handler: RotatingFileHandler) -> None:
 
 class Logger(metaclass=Singleton):
     def __init__(self) -> None:
-        self._file_logger = _build_file_logger()
+        self._file_logger: Optional[logging.Logger] = None
         self._sinks: list[ConsoleSink] = [_terminal_sink]
+
+    @property
+    def file_logger(self) -> logging.Logger:
+        # Built on first write, not at import, so importing this module never
+        # opens (and truncates, via mode="w") the log file on disk.
+        if self._file_logger is None:
+            self._file_logger = _build_file_logger()
+        return self._file_logger
 
     def add_sink(self, sink: ConsoleSink) -> None:
         self._sinks.append(sink)
@@ -118,7 +126,7 @@ class Logger(metaclass=Singleton):
         color: Optional[str] = None,
         bold: bool = False,
     ) -> None:
-        self._file_logger.log(LEVELS[level], message, stacklevel=3)
+        self.file_logger.log(LEVELS[level], message, stacklevel=3)
         if to_console:
             for sink in self._sinks:
                 sink(message, color, bold)

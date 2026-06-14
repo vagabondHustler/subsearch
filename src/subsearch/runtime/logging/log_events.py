@@ -9,6 +9,7 @@ from subsearch.runtime.models.model import DataclassInstance
 BANNER_COLOR = "#fab387"
 MATCH_COLOR = "#a6e3a1"
 DONE_COLOR = "#89b4fa"
+FAIL_COLOR = "#f38ba8"
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +45,7 @@ def _shorten(path: Optional[Path]) -> Optional[Path]:
 LOG_EVENTS: dict[str, LogEvent] = {
     "banner": LogEvent("--- [{title}] ---", BANNER_COLOR, bold=True),
     "task_completed": LogEvent("Tasks completed", DONE_COLOR),
+    "video_file_selected": LogEvent("Selected video file: {filename}", BANNER_COLOR, bold=True),
     "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", MATCH_COLOR),
     "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}"),
     "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
@@ -51,6 +53,12 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "rename": FilesystemEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}", console=False),
     "move": FilesystemEvent(r"Moving {kind}: ...\{src} -> ...\{dst}", console=False),
     "extract": FilesystemEvent(r"Extracting archive: ...\{src} -> ...\{dst}", console=False),
+    "post_processing_started": LogEvent("Unpacking subtitles to {destination}", BANNER_COLOR, bold=True),
+    "post_processing_completed": LogEvent("Unpacked {extracted}, moved {moved} subtitles to {destination}", DONE_COLOR),
+    "post_processing_no_files": LogEvent(
+        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", FAIL_COLOR
+    ),
+    "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", FAIL_COLOR),
 }
 
 

@@ -71,6 +71,18 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 
 
 @pytest.fixture(autouse=True)
+def redirect_logger_to_temp_log(override_constants) -> Any:
+    from subsearch.runtime.logging import logger
+
+    logger.log._file_logger = None
+    yield
+    if logger.log._file_logger is not None:
+        for handler in logger.log._file_logger.handlers:
+            handler.close()
+    logger.log._file_logger = None
+
+
+@pytest.fixture(autouse=True)
 def reset_constants() -> None:
     importlib.reload(factories)
 
