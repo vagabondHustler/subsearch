@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from typing import Any
+from uuid import uuid4
 
 
 class SubtitleStatus(Enum):
@@ -22,6 +23,7 @@ class Subtitle:
     download_headers: dict[str, str] = field(default_factory=dict)
     status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
     hash_match: bool = False
+    subtitle_id: str = field(default_factory=lambda: uuid4().hex)
 
 
 @dataclass(slots=True)
