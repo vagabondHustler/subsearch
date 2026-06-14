@@ -30,6 +30,8 @@ def remove_padded_zero(x: str) -> str:
 _RELEASE_YEAR_PATTERN = re.compile(r"(?<=[. (\-])([1-2][0-9]{3})(?=[. )\-]|$)")
 # matches a season/episode token in the forms s01e02, s01.e02, s01 e02 or s01-e02, at a token boundary
 _RELEASE_SEASON_EPISODE_PATTERN = re.compile(r"(?:^|[. (\-])s(\d{1,2})[. \-]?e(\d{1,4})(?=[. )\-]|$)")
+# matches the NxNN season/episode form e.g. 1x03 or [1x14], at a token boundary
+_RELEASE_SEASON_EPISODE_X_PATTERN = re.compile(r"(?:^|[. (\[\-])(\d{1,2})x(\d{1,4})(?=[. )\]\-]|$)")
 # matches punctuation users type freely but release names omit: apostrophes, backticks, colons, semicolons, commas, quotes, ! and ?
 _TYPED_PUNCTUATION_PATTERN = re.compile(r"[’'`:;,!?\"]")
 
@@ -327,9 +329,16 @@ def _source_compatibility(source_a: str | None, source_b: str | None) -> float:
     return _SOURCE_COMPATIBILITY.get(frozenset([family_a, family_b]), 0.0)
 
 
+def _canonical_season_episode(season: str, episode: str) -> str:
+    return f".s{int(season):02d}e{int(episode):02d}"
+
+
 def _collapse_season_episode(filename: str) -> str:
-    return _RELEASE_SEASON_EPISODE_PATTERN.sub(
-        lambda season_episode: f".s{season_episode.group(1)}e{season_episode.group(2)}", filename
+    collapsed = _RELEASE_SEASON_EPISODE_PATTERN.sub(
+        lambda match: _canonical_season_episode(match.group(1), match.group(2)), filename
+    )
+    return _RELEASE_SEASON_EPISODE_X_PATTERN.sub(
+        lambda match: _canonical_season_episode(match.group(1), match.group(2)), collapsed
     )
 
 
@@ -337,7 +346,8 @@ def _normalize_tokens(filename: str) -> dict:
     lowered = _collapse_season_episode(normalize_typed_punctuation(filename.lower()))
     has_release_group = "-" in lowered and not _looks_like_typed_term(lowered)
     group = lowered.rsplit("-", 1)[-1] if has_release_group else ""
-    raw_tokens = [token for token in re.split(r"[. \-]", lowered) if token]  # dots, spaces or hyphens as delimiters
+    # dots, spaces, hyphens, or square/round brackets as delimiters
+    raw_tokens = [token for token in re.split(r"[. \-\[\]()]", lowered) if token]
     year: str | None = None
     season_episode: str | None = None
     source: str | None = None

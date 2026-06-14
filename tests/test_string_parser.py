@@ -253,6 +253,26 @@ def test_str_parser_dotted_season_episode_normalizes_for_scoring() -> None:
     assert dotted_score == joined_score
 
 
+def test_str_parser_nxnn_season_episode_normalizes_for_scoring() -> None:
+    assert release_parser._normalize_tokens("Prison Break - 1x03")["season_episode"] == "s01e03"
+    assert release_parser._normalize_tokens("Prison Break - [1x03]")["season_episode"] == "s01e03"
+
+
+def test_str_parser_nxnn_episode_number_excluded_from_title() -> None:
+    assert "1x03" not in release_parser._normalize_tokens("Prison Break - 1x03 - Cell Test")["title"]
+
+
+def test_str_parser_nxnn_episode_mismatch_collapses_score() -> None:
+    reference = "Prison.Break.S01E03"
+    correct_episode = release_parser.score_subtitle_tokens(reference, "Prison Break - 1x03 - Cell Test")
+    wrong_episode = release_parser.score_subtitle_tokens(reference, "Prison Break - 1x14 - The Rat")
+    assert correct_episode > wrong_episode
+
+
+def test_str_parser_resolution_is_not_a_season_episode() -> None:
+    assert release_parser._normalize_tokens("movie.title.2023.1920x1080.bluray")["season_episode"] is None
+
+
 def test_provider_urls_movie() -> None:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
     filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
