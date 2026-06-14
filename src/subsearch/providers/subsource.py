@@ -9,7 +9,7 @@ from subsearch.runtime.models.exceptions import (
     MissingApiKey,
     ProviderResponseUnrecognized,
 )
-from subsearch.runtime.models.model import ProviderDiagnosticStatus
+from subsearch.runtime.models import ProviderDiagnosticStatus
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 

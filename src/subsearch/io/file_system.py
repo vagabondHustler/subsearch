@@ -14,7 +14,7 @@ from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import config_session
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
+from subsearch.runtime.models import MatchTier, Subtitle, classify_match_tier
 
 
 def create_path_from_string(

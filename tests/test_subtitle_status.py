@@ -3,7 +3,7 @@ from subsearch.parsing import release_parser
 from subsearch.providers import provider_helper
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.factories import get_default_app_config
-from subsearch.runtime.models.model import Language, Subtitle, SubtitleStatus
+from subsearch.runtime.models import Language, Subtitle, SubtitleStatus
 from tests import fixture_data
 
 

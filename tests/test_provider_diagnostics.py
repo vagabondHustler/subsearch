@@ -7,7 +7,7 @@ from subsearch.providers import opensubtitles, yifysubtitles
 from subsearch.providers.provider_helper import combine_provider_diagnostic_status
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.factories import get_default_app_config
-from subsearch.runtime.models.model import ProviderDiagnosticStatus
+from subsearch.runtime.models import ProviderDiagnosticStatus
 from tests import fixture_data
 
 

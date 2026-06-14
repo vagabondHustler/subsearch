@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from subsearch.runtime.models.model import DataclassInstance
+from subsearch.runtime.models import DataclassInstance
 
 BANNER_COLOR = "#fab387"
 MATCH_COLOR = "#a6e3a1"

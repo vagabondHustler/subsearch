@@ -7,7 +7,7 @@ from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     AppConfig,
     ProviderDiagnosticStatus,
     ProviderResult,

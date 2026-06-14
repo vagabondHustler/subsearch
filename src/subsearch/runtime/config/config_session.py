@@ -8,7 +8,7 @@ from subsearch.runtime.config import config_integrity
 from subsearch.runtime.config.app_config_mapper import get_app_config_from_data
 from subsearch.runtime.config.constants import FILE_PATHS
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppConfig
+from subsearch.runtime.models import AppConfig
 
 
 class ConfigSession:

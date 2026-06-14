@@ -25,7 +25,7 @@ from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButto
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config.constants import SUPPORTED_FILE_EXT, VIDEO_FILE
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     MatchTier,
     Subtitle,
     SubtitleStatus,

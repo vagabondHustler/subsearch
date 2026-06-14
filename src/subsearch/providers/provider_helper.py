@@ -4,7 +4,7 @@ from typing import Any
 
 from subsearch.parsing import release_parser
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     AppConfig,
     Language,
     ProviderDiagnosticStatus,

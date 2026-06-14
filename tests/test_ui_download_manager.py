@@ -1,6 +1,6 @@
 import pytest
 
-from subsearch.runtime.models.model import Subtitle, SubtitleStatus
+from subsearch.runtime.models import Subtitle, SubtitleStatus
 
 
 def make_subtitle(

@@ -12,7 +12,7 @@ from subsearch.runtime.config.static_values import (
     SUPPORTED_PROVIDERS,
 )
 from subsearch.runtime.config.version import __version__
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     AppPaths,
     FilePaths,
     SystemInfo,

@@ -1,7 +1,7 @@
 import pytest
 
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.runtime.models.model import AppMode
+from subsearch.runtime.models import AppMode
 
 
 def make_bootstrap(app_mode: AppMode) -> Bootstrap:

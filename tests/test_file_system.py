@@ -2,7 +2,7 @@ import zipfile
 from pathlib import Path
 
 from subsearch.io import file_system
-from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_tier
+from subsearch.runtime.models import MatchTier, Subtitle, classify_match_tier
 
 
 def _make_srt(directory: Path, name: str) -> Path:

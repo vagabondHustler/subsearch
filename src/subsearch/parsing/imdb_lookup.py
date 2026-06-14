@@ -4,7 +4,7 @@ import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import ProviderDiagnosticStatus
+from subsearch.runtime.models import ProviderDiagnosticStatus
 
 SUGGESTION_LIMIT = 5
 _SUGGESTION_KINDS = {"movie", "tvSeries", "tvMiniSeries", "tvMovie"}

@@ -10,7 +10,7 @@ from subsearch.runtime.config.static_values import (
     DEFAULT_TOKEN_WEIGHTS,
 )
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     AppConfig,
     Language,
     ProviderUrls,

@@ -2,7 +2,7 @@ import time
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
-from subsearch.runtime.models.model import SearchOutcome, Subtitle, SubtitleStatus
+from subsearch.runtime.models import SearchOutcome, Subtitle, SubtitleStatus
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import Worker
 

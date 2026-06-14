@@ -1,5 +1,5 @@
 from subsearch.providers.provider_helper import SubtitleResults
-from subsearch.runtime.models.model import Subtitle, SubtitleStatus
+from subsearch.runtime.models import Subtitle, SubtitleStatus
 
 
 def make_subtitle(name: str, download_url: str, status: SubtitleStatus) -> Subtitle:

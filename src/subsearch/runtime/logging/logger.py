@@ -8,7 +8,7 @@ from typing import Callable, Optional
 from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
 from subsearch.runtime.config.metaclasses import Singleton
 from subsearch.runtime.logging import log_events
-from subsearch.runtime.models.model import DataclassInstance
+from subsearch.runtime.models import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
 LOG_SESSIONS_TO_KEEP = 3

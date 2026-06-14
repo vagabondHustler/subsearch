@@ -7,7 +7,7 @@ from subsearch.io import file_system
 from subsearch.io.file_tracker import get_file_tracker
 from subsearch.parsing import release_parser
 from subsearch.runtime.config.constants import VIDEO_FILE
-from subsearch.runtime.models.model import Subtitle, SubtitleStatus
+from subsearch.runtime.models import Subtitle, SubtitleStatus
 from subsearch.ui.state.tasks import TaskRunner, Worker
 
 

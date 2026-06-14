@@ -2,7 +2,7 @@ from typing import Callable
 
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppMode
+from subsearch.runtime.models import AppMode
 
 ConditionList = list[tuple[str, "bool | Callable[[], bool]"]]
 

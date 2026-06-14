@@ -7,7 +7,7 @@ from subsearch.providers.provider_helper import SubtitleResults
 from subsearch.runtime.config import config_session
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import (
+from subsearch.runtime.models import (
     AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,

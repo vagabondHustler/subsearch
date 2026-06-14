@@ -1,6 +1,6 @@
 from typing import Any
 
-from subsearch.runtime.models.model import AppConfig
+from subsearch.runtime.models import AppConfig
 
 
 def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:

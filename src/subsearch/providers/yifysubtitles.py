@@ -5,7 +5,7 @@ from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.models.model import ProviderDiagnosticStatus
+from subsearch.runtime.models import ProviderDiagnosticStatus
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):

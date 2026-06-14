@@ -1,7 +1,7 @@
 from subsearch.core.pipeline import SearchPipeline, SearchWorker
 from subsearch.runtime.config.constants import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.model import AppMode, Subtitle
+from subsearch.runtime.models import AppMode, Subtitle
 
 
 class Flow:
