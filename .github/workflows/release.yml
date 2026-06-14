@@ -31,13 +31,9 @@ jobs:
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
-      - uses: crazy-max/ghaction-import-gpg@v6
+      - uses: ./.github/actions/configure-signing
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
+          signing-key: ${{ secrets.SSH_SIGNING_KEY }}
 
       - uses: actions/checkout@v4
         with:
