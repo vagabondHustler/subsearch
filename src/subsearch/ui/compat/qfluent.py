@@ -154,6 +154,9 @@ def forward_navigation_wheel_to_page(panel: NavigationPanel, page_provider) -> N
 UNCHECKED_BORDER_WIDTH = 2
 
 
+SWITCH_HANDLE_FILL = QColor(palette.SWITCH_HANDLE_FILL)
+
+
 def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
     indicator = switch.indicator
     radius = indicator.height() / 2
@@ -168,7 +171,13 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
         painter.setBrush(indicator._backgroundColor())
         painter.drawRoundedRect(indicator.rect().adjusted(1, 1, -1, -1), radius, radius)
 
+    def draw_circle(painter) -> None:
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(SWITCH_HANDLE_FILL)
+        painter.drawEllipse(int(indicator.sliderX), 5, 12, 12)
+
     indicator._drawBackground = draw_background
+    indicator._drawCircle = draw_circle
 
 
 # --- Borderless line edit --------------------------------------------------------

@@ -8,10 +8,15 @@ from qfluentwidgets import BodyLabel, CaptionLabel, LineEdit, TransparentToolBut
 from subsearch.parsing import release_parser
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.compat.qfluent import flatten_line_edit
+from subsearch.ui.compat.qfluent import embed_trailing_widget, flatten_line_edit
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
+from subsearch.ui.theme.metrics import (
+    CARD_CONTENT_INSET,
+    IN_FIELD_BUTTON_SIZE,
+    ROW_INSET,
+    SMALL_ICON_SIZE,
+)
 from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
@@ -22,8 +27,6 @@ from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 VISIBLE_PREFIX_LENGTH = 4
 MASK_CHARACTER = "•"
-REVEAL_ICON_SIZE = 18
-REVEAL_BUTTON_SIZE = 32
 LINK_BUTTON_ICON_SIZE = 24
 LINK_BUTTON_SIZE = 32
 LINK_BUTTON_SPACING = 48
@@ -144,17 +147,17 @@ class ApiKeyField(QWidget):
         self.line_edit.api_key_changed.connect(self._on_api_key_changed)
 
         self._revealed = False
-        self.reveal_button = TransparentToolButton(self)
-        self.reveal_button.setFixedSize(REVEAL_BUTTON_SIZE, REVEAL_BUTTON_SIZE)
-        self.reveal_button.setIconSize(QSize(REVEAL_ICON_SIZE, REVEAL_ICON_SIZE))
+        self.reveal_button = TransparentToolButton(self.line_edit)
+        self.reveal_button.setFixedSize(IN_FIELD_BUTTON_SIZE, IN_FIELD_BUTTON_SIZE)
+        self.reveal_button.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
         self.reveal_button.clicked.connect(self._toggle_revealed)
         self._apply_reveal_icon()
+        embed_trailing_widget(self.line_edit, self.reveal_button, IN_FIELD_BUTTON_SIZE)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(8)
         layout.addWidget(self.line_edit, stretch=1)
-        layout.addWidget(self.reveal_button)
 
         self._apply_validation_state(api_key)
 

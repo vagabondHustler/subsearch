@@ -107,7 +107,7 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "Automatically create the video file directory if it doesn't exist yet.",
     ),
     "download_manager.available_subtitles": SettingDescription(
-        "Found subtitles",
+        "Subtitles",
         "Every subtitle found for this video, closest matches at the top. Click one to download it. "
         "If automatic downloads are on, the best ones are already downloaded and ticked.",
     ),

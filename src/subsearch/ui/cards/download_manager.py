@@ -184,7 +184,7 @@ FILTER_BAR_WIDTH = 200
 # search field and the separator below it span the same width.
 SEARCH_BAR_WIDTH_FRACTION = _HANDLE_LINE_WIDTH_FRACTION
 
-IDLE_PLACEHOLDER_TEXT = "Drop a video file here, or type a search term and hit the search glass"
+IDLE_PLACEHOLDER_TEXT = "Drag and drop a video, or or use the search bar"
 SEARCHING_PLACEHOLDER_TEXT = "Searching for subtitles…"
 NO_RESULTS_PLACEHOLDER_TEXT = "No subtitles found"
 

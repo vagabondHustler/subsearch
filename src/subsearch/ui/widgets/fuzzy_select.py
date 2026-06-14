@@ -19,6 +19,7 @@ from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
+    apply_token_value_font,
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.suggestion_popup import ROW_PADDING, SuggestionRow
@@ -235,7 +236,7 @@ class FuzzySelect(QFrame):
         )
 
         self._current_label = QLabel("", self)
-        apply_body_font(self._current_label)
+        apply_token_value_font(self._current_label)
 
         chevron = QLabel(self)
         chevron.setPixmap(

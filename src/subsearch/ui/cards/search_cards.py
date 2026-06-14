@@ -295,10 +295,14 @@ class SearchThresholdCard(SettingsCard):
 
     def _build_threshold_slider(self) -> None:
         slider_row = QHBoxLayout()
-        slider_row.setContentsMargins(CARD_CONTENT_INSET, 10, CARD_CONTENT_INSET, 10)
+        slider_row.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 10)
         slider_row.setSpacing(12)
         slider_row.addWidget(track_aligned_label("Search threshold", self.slider, self))
         slider_row.addWidget(self.slider, stretch=1)
+        slider_row.addWidget(
+            HelpButton(SETTING_DESCRIPTIONS["search.accept_threshold"].explanation, self),
+            alignment=Qt.AlignmentFlag.AlignVCenter,
+        )
         self.body_layout.addLayout(slider_row)
 
     def _build_token_tuning(self) -> None:
