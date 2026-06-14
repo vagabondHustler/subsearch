@@ -93,6 +93,7 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "http.request_failed": LogEvent("Request failed for {url}: {reason}", console=False),
     "http.bad_status": LogEvent("Request to {url} returned status {status_code}", console=False),
     # registry.*
+    "registry.attempting": LogEvent("Attempting registry {action}: {target}", console=False),
     "registry.key_deleting": LogEvent("Deleting registry key: {key}", console=False),
     "registry.context_menu_removing": LogEvent("Removing Subsearch context menu from registry", console=False),
     "registry.key_missing": LogEvent("Registry key missing, could not write {sub_key}\\{value_name}", console=False),
@@ -203,6 +204,9 @@ LOG_EVENTS: dict[str, LogEvent] = {
     # run_conditions.*
     "run_conditions.evaluated": LogEvent("run_conditions [{step}]: {detail} -> {decision}", console=False),
     # tracker.*
+    "tracker.tracking": LogEvent("Tracking {path}", console=False),
+    "tracker.released": LogEvent("Released {path}", console=False),
+    "tracker.discarding_stale": LogEvent("Discarding stale tracked path {path}", console=False),
     "tracker.manifest_unreadable": LogEvent("Unreadable file manifest at {path}, starting fresh", console=False),
     "tracker.refusing_untracked": LogEvent("Refusing to delete untracked path {path}", console=False),
     "tracker.reclaiming": LogEvent("Reclaiming leftover temp path {path}", console=False),

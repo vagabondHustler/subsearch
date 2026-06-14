@@ -27,6 +27,7 @@ class FileTracker:
         self.manifest_path.write_text(json.dumps(sorted(self.tracked_paths)), encoding="utf-8")
 
     def track(self, path: Path) -> None:
+        log.event("tracker.tracking", level="debug", path=path)
         self.tracked_paths.add(str(path.resolve()))
         self._save_manifest()
 
@@ -34,6 +35,7 @@ class FileTracker:
         return str(path.resolve()) in self.tracked_paths
 
     def forget(self, path: Path) -> None:
+        log.event("tracker.released", level="debug", path=path)
         self.tracked_paths.discard(str(path.resolve()))
         self._save_manifest()
 
@@ -61,6 +63,7 @@ class FileTracker:
         for tracked in sorted(self.tracked_paths, reverse=True):
             path = Path(tracked)
             if not path.exists():
+                log.event("tracker.discarding_stale", level="debug", path=path)
                 self.tracked_paths.discard(tracked)
             elif self._is_temp_path(path):
                 log.event("tracker.reclaiming", level="debug", path=path)

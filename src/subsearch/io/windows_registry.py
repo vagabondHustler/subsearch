@@ -127,11 +127,13 @@ def _create_context_menu_keys() -> None:
     ]
     with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
         for key, sub_key in registry_keys:
+            log.event("registry.attempting", level="debug", action="create key", target=f"{key}\\{sub_key}")
             with winreg.OpenKey(hkey, key, 0, winreg.KEY_WRITE) as sk:
                 winreg.CreateKey(sk, sub_key)
 
 
 def _write_registry_value(sub_key: str, value_name: str, value: str) -> None:
+    log.event("registry.attempting", level="debug", action="set value", target=f"{sub_key}\\{value_name}")
     try:
         with winreg.ConnectRegistry(COMPUTER_NAME, winreg.HKEY_CURRENT_USER) as hkey:
             with winreg.OpenKey(hkey, sub_key, 0, winreg.KEY_WRITE) as sk:
