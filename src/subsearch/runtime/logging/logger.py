@@ -1,5 +1,4 @@
 import logging
-import textwrap
 import traceback
 from logging.handlers import RotatingFileHandler
 from types import TracebackType
@@ -55,30 +54,6 @@ def _rotate_session_logs() -> None:
                 return
 
 
-class AlignedColumnFormatter(logging.Formatter):
-    LEVEL_WIDTH = 9
-    LOCATION_WIDTH = 26
-    MAX_LINE_WIDTH = 170
-
-    def format(self, record: logging.LogRecord) -> str:
-        prefix = self._column_prefix(record)
-        content_lines = self._wrap_message(record.getMessage(), self.MAX_LINE_WIDTH - len(prefix))
-        continuation_indent = " " * len(prefix)
-        first_line, *rest = content_lines
-        return "\n".join([prefix + first_line, *(continuation_indent + line for line in rest)])
-
-    def _column_prefix(self, record: logging.LogRecord) -> str:
-        location = f"{record.module}:{record.lineno}"
-        timestamp = f"{self.formatTime(record, '%H:%M:%S')}.{int(record.msecs):03d}"
-        return f"{timestamp}   {record.levelname:<{self.LEVEL_WIDTH}}{location:<{self.LOCATION_WIDTH}}"
-
-    def _wrap_message(self, message: str, content_width: int) -> list[str]:
-        wrapped: list[str] = []
-        for source_line in message.splitlines() or [""]:
-            wrapped.extend(textwrap.wrap(source_line, content_width) or [""])
-        return wrapped
-
-
 def _build_file_logger() -> logging.Logger:
     APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
     _rotate_session_logs()
@@ -86,7 +61,9 @@ def _build_file_logger() -> logging.Logger:
     logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
     file_handler = RotatingFileHandler(FILE_PATHS.log, mode="w", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
-    file_handler.setFormatter(AlignedColumnFormatter())
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)-8s %(module)s:%(lineno)d  %(message)s", datefmt="%H:%M:%S")
+    )
     logger.addHandler(file_handler)
     _write_session_header(file_handler)
     return logger
