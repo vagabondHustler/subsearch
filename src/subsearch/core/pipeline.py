@@ -49,7 +49,7 @@ class SearchWorker(Worker):
         )
         skipped_providers = self._pipeline.provider_skip_reasons()
         for skip_reason in skipped_providers:
-            log.warning(skip_reason)
+            log.warning(skip_reason, to_console=False)
         subtitles = self._pipeline.bootstrap.accepted_subtitles + self._pipeline.bootstrap.rejected_subtitles
         return SearchOutcome(subtitles, skipped_providers)
 
@@ -70,6 +70,7 @@ class SearchPipeline:
     def init_search(self, *providers: Callable[..., None]) -> None:
         parallel_tasks.run_in_threads(*providers)
         log.event("task_completed")
+        log.event("banner", title="Search completed")
 
     def provider_skip_reasons(self) -> list[str]:
         reasons = []
@@ -83,7 +84,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
-        log.event("banner", title="Provider diagnostics")
+        log.event("banner", title="Running diagnostics")
         from subsearch.providers import diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
@@ -151,7 +152,6 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def download_files(self) -> None:
-        log.event("banner", title="Downloading subtitles")
         accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.token_result, reverse=True)
         for subtitle in accepted:
             if self._provider_at_download_limit(subtitle.provider_name):
@@ -161,7 +161,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def download_manager(self) -> None:
-        log.event("banner", title="Download Manager")
+        log.event("banner", title="Presenting results")
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.application import open_settings_window
 
@@ -192,26 +192,22 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def extract_files(self) -> None:
-        log.event("banner", title="Extracting downloads")
         file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
         log.event("task_completed")
 
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
-        log.event("banner", title="Renaming best match")
         new_name = file_system.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
         self.bootstrap.autoload_src = new_name
         log.event("task_completed")
 
     @run_if_conditions_met
     def subtitle_move_best(self, target: Path) -> None:
-        log.event("banner", title="Move best match")
         file_system.move_and_replace(self.bootstrap.autoload_src, target)
         log.event("task_completed")
 
     @run_if_conditions_met
     def subtitle_move_all(self, target: Path) -> None:
-        log.event("banner", title="Move all")
         file_system.move_all(WORKSPACE.extraction_directory, target)
         log.event("task_completed")
 
@@ -237,7 +233,6 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def summary_notification(self) -> None:
-        log.event("banner", title="Summary toast")
         self._log_provider_diagnostics_warnings()
         downloaded_count, total_count = self._count_downloaded_subtitles()
         matches_downloaded = f"Downloaded: {downloaded_count}/{total_count}"
@@ -273,7 +268,7 @@ class SearchPipeline:
             pass
 
     def on_exit(self) -> None:
-        log.event("banner", title="Exit")
+        log.event("banner", title="Exiting")
         self.bootstrap.system_tray.stop()
         log.event("pipeline.finished", seconds=self._elapsed())
         self._wait_for_terminal_input()

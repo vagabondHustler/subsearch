@@ -28,7 +28,7 @@ class Flow:
 
 class SettingsFlow(Flow):
     def run(self) -> None:
-        log.event("banner", title="GUI")
+        log.event("banner", title="Opening UI")
         from subsearch.ui.application import open_settings_window
 
         manually_accepted = open_settings_window(search_worker_factory=self._make_search_worker)
@@ -39,7 +39,7 @@ class SettingsFlow(Flow):
 
 class ManualSearchFlow(Flow):
     def run(self) -> None:
-        log.event("banner", title="Download Manager")
+        log.event("banner", title="Presenting results")
         from subsearch.ui.application import open_settings_window
 
         manually_accepted = open_settings_window(
@@ -54,7 +54,7 @@ class ManualSearchFlow(Flow):
 
 class DevPreviewFlow(Flow):
     def run(self) -> None:
-        log.event("banner", title="Download Manager")
+        log.event("banner", title="Presenting results")
         from subsearch.ui.application import open_settings_window
         from subsearch.ui.services.dev_stubs import (
             DevPostProcessingService,
@@ -74,17 +74,29 @@ class DevPreviewFlow(Flow):
         self._finish()
 
 
+_PROVIDER_DISPLAY_NAMES = {
+    "opensubtitles": "OpenSubtitles",
+    "yifysubtitles_site": "YIFYSubtitles",
+    "subsource_site": "Subsource",
+}
+
+
 class PipelineSearchFlow(Flow):
     def run(self) -> None:
         self._warn_if_filename_has_spaces()
         if not self.bootstrap.all_providers_disabled():
             self.bootstrap.prevent_conflicting_config_settings()
-            log.event("banner", title="Search started")
+            log.event("banner", title=f"Searching on {self._enabled_provider_names()}")
         pipeline = self.pipeline
         pipeline.init_search(pipeline.opensubtitles, pipeline.yifysubtitles, pipeline.subsource)
         pipeline.download_files()
         pipeline.download_manager()
         self._finish()
+
+    def _enabled_provider_names(self) -> str:
+        providers = self.bootstrap.app_config.providers
+        enabled = [name for key, name in _PROVIDER_DISPLAY_NAMES.items() if providers[key]]
+        return ", ".join(enabled)
 
     def _warn_if_filename_has_spaces(self) -> None:
         if " " in SEARCH_SUBJECT.search_term:

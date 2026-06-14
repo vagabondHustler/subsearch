@@ -9,7 +9,7 @@ from subsearch.runtime.models import exceptions
 
 def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
-        log.event("banner", title="Initializing")
+        log.event("banner", title="Initializing Subsearch")
         try:
             single_instance = config_session.get_config_session().read("application.single_instance")
             log.event("guard.single_instance", level="debug", single_instance=single_instance)
