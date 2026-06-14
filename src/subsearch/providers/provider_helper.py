@@ -175,16 +175,27 @@ class ProviderHelper:
         raise NotImplementedError
 
     def run_search(self, search_fn: Callable[[], ProviderDiagnosticStatus]) -> None:
-        subtitles_before = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        accepted_before = len(self.accepted_subtitles)
+        rejected_before = len(self.rejected_subtitles)
+        log.event("provider.searching", level="debug", provider=self.provider_name)
         try:
             diagnostic_status = search_fn()
         except Exception as error:
             log.event("provider.unrecognized_response", level="error", provider=self.provider_name, reason=str(error))
             self.report_diagnostic_status(ProviderDiagnosticStatus.STRUCTURE_INVALID, 0)
             return
-        subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)
+        accepted = len(self.accepted_subtitles) - accepted_before
+        rejected = len(self.rejected_subtitles) - rejected_before
         self.log_provider_skips()
-        self.report_diagnostic_status(diagnostic_status, subtitles_after - subtitles_before)
+        log.event(
+            "provider.search_result",
+            level="debug",
+            provider=self.provider_name,
+            found=accepted + rejected,
+            accepted=accepted,
+            rejected=rejected,
+        )
+        self.report_diagnostic_status(diagnostic_status, accepted + rejected)
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:

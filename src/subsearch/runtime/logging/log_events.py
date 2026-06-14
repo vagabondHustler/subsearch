@@ -121,6 +121,10 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", console=False
     ),
     # provider.*
+    "provider.searching": LogEvent("{provider}: searching", console=False),
+    "provider.search_result": LogEvent(
+        "{provider}: found {found} ({accepted} accepted, {rejected} rejected)", console=False
+    ),
     "provider.mirror_tried": LogEvent("{provider}: trying mirror {url}", console=False),
     "provider.no_mirror_responded": LogEvent("{provider}: no mirror responded", LogColor.WARN),
     "provider.structure_invalid": LogEvent(
