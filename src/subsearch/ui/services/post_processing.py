@@ -4,7 +4,7 @@ from typing import Protocol
 from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
-from subsearch.runtime.config import VIDEO_FILE
+from subsearch.runtime.config import SEARCH_SUBJECT, WORKSPACE
 from subsearch.runtime.logging.logger import log
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
@@ -19,15 +19,13 @@ class _PostProcessWorker(Worker):
     def execute(self) -> int:
         target_path = self._resolve_target_path()
         log.event("post_processing_started", destination=target_path)
-        extracted_count = file_system.extract_files_in_dir(
-            VIDEO_FILE.download_directory, VIDEO_FILE.extraction_directory
-        )
+        extracted_count = file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
         if self._rename:
-            renamed = file_system.autoload_rename(VIDEO_FILE.filename, VIDEO_FILE.extraction_directory)
+            renamed = file_system.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
             file_system.move_and_replace(renamed, target_path)
             moved_count = 1 if (target_path / renamed.name).exists() else 0
         else:
-            moved_count = file_system.move_all(VIDEO_FILE.extraction_directory, target_path)
+            moved_count = file_system.move_all(WORKSPACE.extraction_directory, target_path)
         delivered_count = self._delivered_count(moved_count, target_path)
         if delivered_count == 0:
             log.event(
@@ -43,7 +41,7 @@ class _PostProcessWorker(Worker):
     def _delivered_count(self, moved_count: int, target_path: Path) -> int:
         if moved_count > 0:
             return moved_count
-        if VIDEO_FILE.extraction_directory.resolve() == target_path.resolve():
+        if WORKSPACE.extraction_directory.resolve() == target_path.resolve():
             return file_system.count_subtitle_files(target_path)
         return 0
 
@@ -51,7 +49,7 @@ class _PostProcessWorker(Worker):
         target = str(self._store.read("paths.video_file_directory"))
         resolution = str(self._store.read("paths.path_resolution"))
         create = bool(self._store.read("paths.create_missing_directory"))
-        return file_system.create_path_from_string(target, resolution, VIDEO_FILE.file_directory, create)
+        return file_system.create_path_from_string(target, resolution, WORKSPACE.file_directory, create)
 
 
 class PostProcessingServiceProtocol(Protocol):

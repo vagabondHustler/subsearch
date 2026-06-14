@@ -9,8 +9,8 @@ def captured_events(monkeypatch):
 
     events: list[tuple[str, dict]] = []
     monkeypatch.setattr(post_processing.log, "event", lambda key, **values: events.append((key, values)))
-    monkeypatch.setattr(post_processing.VIDEO_FILE, "download_directory", Path("."), raising=False)
-    monkeypatch.setattr(post_processing.VIDEO_FILE, "extraction_directory", Path("."), raising=False)
+    monkeypatch.setattr(post_processing.WORKSPACE, "download_directory", Path("."), raising=False)
+    monkeypatch.setattr(post_processing.WORKSPACE, "extraction_directory", Path("."), raising=False)
     return events
 
 

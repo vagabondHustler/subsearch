@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import MessageBox
 
-from subsearch.runtime.config import VIDEO_FILE
+from subsearch.runtime.config import SEARCH_SUBJECT
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.state.store import SettingsStore
@@ -47,7 +47,7 @@ class PathsCard(SettingsCard):
         )
         self._video_file_section = self._build_video_file_section(store)
         self.body_layout.addWidget(self._video_file_section)
-        self._video_file_section.setEnabled(VIDEO_FILE.file_exists)
+        self._video_file_section.setEnabled(SEARCH_SUBJECT.file_exists)
 
     def _build_video_file_section(self, store: SettingsStore) -> QWidget:
         container = QWidget(self)

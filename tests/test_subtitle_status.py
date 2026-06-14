@@ -12,7 +12,7 @@ def _build_helper() -> provider_helper.ProviderHelper:
     app_config.selected_language = "english"
     language_data = load_language_data()
     language = Language(**language_data[app_config.selected_language])
-    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
     release_data = release_parser.get_release_info(filename)
     helper = provider_helper.ProviderHelper(
         release_data=release_data,

@@ -14,7 +14,7 @@ from tests import fixture_data
 def _search_kwargs() -> dict:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
     language_data = load_language_data()
-    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
     release_data = release_parser.get_release_info(filename)
     return dict(
         release_data=release_data,

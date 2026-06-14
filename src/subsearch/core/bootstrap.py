@@ -4,7 +4,7 @@ from pathlib import Path
 from subsearch.io import file_system, file_tracker, language_data, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers.provider_helper import SubtitleResults
-from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, SEARCH_SUBJECT, WORKSPACE
 from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
@@ -28,14 +28,13 @@ class Bootstrap:
 
         self.downloaded_subtitle_archives: int = 0
         self.extracted_subtitle_archives: int = 0
-        self.user_downloaded_files = False
 
         log.event("boot.argv", level="debug", argv=sys.argv)
         log.event(
             "boot.video_file",
             level="debug",
-            presence="found" if VIDEO_FILE.file_exists else "not found",
-            path=VIDEO_FILE.file_path or "none",
+            presence="found" if SEARCH_SUBJECT.file_exists else "not found",
+            path=SEARCH_SUBJECT.file_path or "none",
         )
         log.event("boot.verifying")
         self.setup_file_system()
@@ -71,18 +70,20 @@ class Bootstrap:
 
     def rebuild_search_inputs(self, imdb_id: str = "") -> None:
         self._anchor_working_directory()
-        VIDEO_FILE.file_hash = file_system.get_file_hash(VIDEO_FILE.file_path) if VIDEO_FILE.file_exists else ""
-        log.dataclass(VIDEO_FILE, level="debug", to_console=False)
-        if VIDEO_FILE.file_directory != Path(""):
-            file_system.create_directory(VIDEO_FILE.file_directory)
+        file_path = SEARCH_SUBJECT.file_path
+        SEARCH_SUBJECT.file_hash = file_system.get_file_hash(file_path) if file_path is not None else ""
+        log.dataclass(SEARCH_SUBJECT, level="debug", to_console=False)
+        log.dataclass(WORKSPACE, level="debug", to_console=False)
+        if WORKSPACE.file_directory != Path(""):
+            file_system.create_directory(WORKSPACE.file_directory)
             self._create_search_directories()
         self.subtitle_results = SubtitleResults()
         self.health_reports = []
-        self.release_data = release_parser.get_release_info(VIDEO_FILE.filename)
+        self.release_data = release_parser.get_release_info(SEARCH_SUBJECT.search_term)
         self.update_imdb_id(imdb_id)
         log.dataclass(self.release_data, level="debug", to_console=False)
         provider_urls = release_parser.CreateProviderUrls(
-            self.app_config, self.release_data, self.language_data, VIDEO_FILE.file_hash
+            self.app_config, self.release_data, self.language_data, SEARCH_SUBJECT.file_hash
         )
         self.provider_urls = provider_urls.retrieve_urls()
         log.dataclass(self.provider_urls, level="debug", to_console=False)
@@ -91,7 +92,7 @@ class Bootstrap:
             app_config=self.app_config,
             provider_urls=self.provider_urls,
             language_data=self.language_data,
-            filename=VIDEO_FILE.filename,
+            filename=SEARCH_SUBJECT.search_term,
             subtitle_results=self.subtitle_results,
         )
 
@@ -114,19 +115,19 @@ class Bootstrap:
         file_system.create_directory(APP_PATHS.appdata_subsearch)
         file_tracker.get_file_tracker().reclaim_after_crash()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        if VIDEO_FILE.file_exists:
+        if SEARCH_SUBJECT.file_exists:
             self._create_search_directories()
 
     def _create_search_directories(self) -> None:
         tracker = file_tracker.get_file_tracker()
-        for directory in (VIDEO_FILE.extraction_directory, VIDEO_FILE.download_directory):
+        for directory in (WORKSPACE.extraction_directory, WORKSPACE.download_directory):
             if file_system.create_directory(directory):
                 tracker.track(directory)
 
     def _anchor_working_directory(self) -> None:
-        if VIDEO_FILE.file_exists:
+        if SEARCH_SUBJECT.file_exists:
             return
-        # The no-file flow re-resolves the VideoFile whenever the typed name changes, so this
+        # The no-file flow re-resolves the search subject whenever the typed name changes, so this
         # re-applies every rebuild rather than only the first; it is the single authority for the
         # three directories when no real video file backs the search.
         paths = self.app_config.paths
@@ -134,10 +135,9 @@ class Bootstrap:
         extraction = paths["extraction_directory"].strip()
         working_directory = Path.home() / "Downloads"
         extraction_directory = Path(extraction) if extraction else working_directory / "subs"
-        VIDEO_FILE.file_directory = working_directory
-        VIDEO_FILE.file_path = working_directory / (VIDEO_FILE.filename + VIDEO_FILE.file_extension)
-        VIDEO_FILE.extraction_directory = extraction_directory
-        VIDEO_FILE.download_directory = Path(download) if download else APP_PATHS.tmp_dir
+        WORKSPACE.file_directory = working_directory
+        WORKSPACE.extraction_directory = extraction_directory
+        WORKSPACE.download_directory = Path(download) if download else APP_PATHS.tmp_dir
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
@@ -152,7 +152,7 @@ class Bootstrap:
             return AppMode.DEV
         if not self._has_path_argument():
             return AppMode.SETTINGS
-        if not VIDEO_FILE.file_exists:
+        if not SEARCH_SUBJECT.file_exists:
             return AppMode.SEARCH_MANUAL
         if self.app_config.search_mode == "manual":
             return AppMode.SEARCH_MANUAL

@@ -9,7 +9,7 @@ from subsearch.runtime.models.exceptions import (
     ProviderNotImplemented,
     ProviderResponseUnrecognized,
 )
-from subsearch.runtime.models.media import ReleaseInfo, VideoFile
+from subsearch.runtime.models.media import ReleaseInfo, SearchSubject, Workspace
 from subsearch.runtime.models.paths import (
     AppPaths,
     FilePaths,
@@ -51,10 +51,11 @@ __all__ = [
     "ProviderUrls",
     "ReleaseInfo",
     "SearchOutcome",
+    "SearchSubject",
     "Subtitle",
     "SubtitleStatus",
     "SystemInfo",
-    "VideoFile",
     "WindowsRegistryPaths",
+    "Workspace",
     "classify_match_tier",
 ]

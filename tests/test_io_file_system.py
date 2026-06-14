@@ -1,20 +1,23 @@
 from pathlib import Path
 
 from subsearch.io import file_system
-from subsearch.runtime.config import VIDEO_FILE
+from subsearch.runtime.config import SEARCH_SUBJECT, WORKSPACE
 
 CWD = Path(Path.cwd()) / "tests" / "resources"
 SUBS = Path(CWD) / "subs"
 
 
-def test_video_file_False() -> None:
-    assert VIDEO_FILE.file_exists == False
-    assert VIDEO_FILE.filename == ""
-    assert VIDEO_FILE.file_extension == ""
-    assert VIDEO_FILE.file_path == Path(".")
-    assert VIDEO_FILE.file_directory == Path(".")
-    assert VIDEO_FILE.extraction_directory == Path(".")
-    assert VIDEO_FILE.download_directory == Path(".")
+def test_search_subject_empty() -> None:
+    assert SEARCH_SUBJECT.file_exists == False
+    assert SEARCH_SUBJECT.search_term == ""
+    assert SEARCH_SUBJECT.file_extension == ""
+    assert SEARCH_SUBJECT.file_path is None
+
+
+def test_workspace_empty() -> None:
+    assert WORKSPACE.file_directory == Path(".")
+    assert WORKSPACE.extraction_directory == Path(".")
+    assert WORKSPACE.download_directory == Path(".")
 
 
 def test_get_hash() -> None:

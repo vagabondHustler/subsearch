@@ -3,17 +3,25 @@ from pathlib import Path
 
 
 @dataclass(slots=True)
-class VideoFile:
+class SearchSubject:
     file_exists: bool
-    filename: str
+    search_term: str
     file_hash: str
     file_extension: str
-    file_path: Path
+    file_path: Path | None
+
+    def copy_from(self, other: "SearchSubject") -> None:
+        for field_name in self.__slots__:
+            setattr(self, field_name, getattr(other, field_name))
+
+
+@dataclass(slots=True)
+class Workspace:
     file_directory: Path
     extraction_directory: Path
     download_directory: Path
 
-    def copy_from(self, other: "VideoFile") -> None:
+    def copy_from(self, other: "Workspace") -> None:
         for field_name in self.__slots__:
             setattr(self, field_name, getattr(other, field_name))
 

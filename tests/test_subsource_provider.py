@@ -10,7 +10,7 @@ from subsearch.runtime.models.exceptions import MissingApiKey
 from tests import fixture_data
 
 
-def _build_subsource(api_key: str, filename: str = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename) -> Subsource:
+def _build_subsource(api_key: str, filename: str = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term) -> Subsource:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
     app_config.subsource_api_key = api_key
     app_config.hearing_impaired = True

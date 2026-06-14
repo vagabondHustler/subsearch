@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 from subsearch.runtime.config import (
     DEVICE_INFO,
     FILE_PATHS,
+    SEARCH_SUBJECT,
     VERSION,
-    VIDEO_FILE,
 )
 from subsearch.runtime.logging import log_sanitizer
 from subsearch.ui.cards.base import SettingsCard
@@ -28,8 +28,8 @@ NO_VIDEO_FILE = "none (running in configure mode, no video file was opened)"
 
 
 def _media_filename() -> str:
-    if VIDEO_FILE.file_exists:
-        return f"{VIDEO_FILE.filename}{VIDEO_FILE.file_extension}"
+    if SEARCH_SUBJECT.file_exists:
+        return f"{SEARCH_SUBJECT.search_term}{SEARCH_SUBJECT.file_extension}"
     return NO_VIDEO_FILE
 
 

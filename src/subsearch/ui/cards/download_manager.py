@@ -24,7 +24,7 @@ from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButto
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.parsing.release_parser import get_release_info
-from subsearch.runtime.config import SUPPORTED_FILE_EXT, VIDEO_FILE
+from subsearch.runtime.config import SEARCH_SUBJECT, SUPPORTED_FILE_EXT, WORKSPACE
 from subsearch.runtime.models import (
     MatchTier,
     Subtitle,
@@ -205,7 +205,9 @@ class SubtitleSearchBar(QWidget):
         self._title_suggestion_service = title_suggestion_service
         self._awaiting_suggestions = False
         self._term_without_suggestions = ""
-        self._committed_filename = VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else ""
+        self._committed_filename = (
+            SEARCH_SUBJECT.search_term + SEARCH_SUBJECT.file_extension if SEARCH_SUBJECT.file_exists else ""
+        )
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
@@ -227,7 +229,9 @@ class SubtitleSearchBar(QWidget):
         section_layout.setContentsMargins(0, 0, 0, 0)
 
         self._filename_edit = SearchLineEdit("Search for subtitles", parent=self)
-        self._filename_edit.setText(VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else "")
+        self._filename_edit.setText(
+            SEARCH_SUBJECT.search_term + SEARCH_SUBJECT.file_extension if SEARCH_SUBJECT.file_exists else ""
+        )
         self._filename_edit.editingFinished.connect(self._on_filename_edited)
         self._filename_edit.returnPressed.connect(self._on_search_clicked)
         self._filename_edit.button_clicked.connect(self._on_search_clicked)
@@ -337,7 +341,7 @@ class SubtitleSearchBar(QWidget):
         selected, _ = QFileDialog.getOpenFileName(
             self.window(),
             "Select video file",
-            str(VIDEO_FILE.file_directory) if VIDEO_FILE.file_directory != Path("") else "",
+            str(WORKSPACE.file_directory) if WORKSPACE.file_directory != Path("") else "",
             filter_string,
         )
         if not selected:
@@ -444,7 +448,7 @@ class SubtitleActionRow(QWidget):
             "Unpack, rename to match the video file and place it next to the video",
             self._unpack_rename_and_place,
         )
-        if not VIDEO_FILE.file_exists:
+        if not SEARCH_SUBJECT.file_exists:
             self._place_button.setEnabled(False)
             self._place_button.setToolTip("Select a video file to rename and place a subtitle next to it")
         layout.addWidget(self._place_button)
@@ -504,7 +508,7 @@ class SubtitleActionRow(QWidget):
         self._spinner_timer.stop()
         self._active_button = None
         self._move_button.setEnabled(True)
-        self._place_button.setEnabled(VIDEO_FILE.file_exists)
+        self._place_button.setEnabled(SEARCH_SUBJECT.file_exists)
         return button
 
 

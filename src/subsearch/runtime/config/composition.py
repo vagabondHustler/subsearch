@@ -1,8 +1,8 @@
-from subsearch.runtime.config import defaults, metadata, paths, video_file
+from subsearch.runtime.config import defaults, metadata, paths, search_subject
 
 DEVICE_INFO = metadata.get_system_info()
-VIDEO_FILE = video_file.get_video_file_data()
-VIDEO_FILE_RESOLVER = video_file.VideoFileResolver(defaults.SUPPORTED_FILE_EXTENSIONS)
+SEARCH_SUBJECT, WORKSPACE = search_subject.get_search_data()
+SEARCH_RESOLVER = search_subject.SearchResolver(defaults.SUPPORTED_FILE_EXTENSIONS)
 APP_PATHS = paths.get_app_paths()
 FILE_PATHS = paths.get_file_paths()
 SUPPORTED_FILE_EXT = defaults.SUPPORTED_FILE_EXTENSIONS

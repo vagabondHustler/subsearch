@@ -1,5 +1,5 @@
 from subsearch.core.pipeline import SearchPipeline, SearchWorker
-from subsearch.runtime.config import VIDEO_FILE
+from subsearch.runtime.config import SEARCH_SUBJECT
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppMode, Subtitle
 
@@ -87,8 +87,8 @@ class PipelineSearchFlow(Flow):
         self._finish()
 
     def _warn_if_filename_has_spaces(self) -> None:
-        if " " in VIDEO_FILE.filename:
-            log.event("flow.filename_has_spaces", level="warning", filename=VIDEO_FILE.filename)
+        if " " in SEARCH_SUBJECT.search_term:
+            log.event("flow.filename_has_spaces", level="warning", filename=SEARCH_SUBJECT.search_term)
 
 
 FLOW_BY_APP_MODE: dict[AppMode, type[Flow]] = {

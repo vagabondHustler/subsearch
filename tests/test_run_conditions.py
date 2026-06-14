@@ -15,7 +15,7 @@ class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
         self.app_mode = AppMode.SEARCH_HYBRID
         self.app_config = config_session.get_app_config_from_data(get_default_app_config())
-        self.release_data = release_parser.get_release_info(fixture_data.FAKE_VIDEO_FILE_MOVIE.filename)
+        self.release_data = release_parser.get_release_info(fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
         self.language_data = load_language_data()
         self.accepted_subtitles: list[str] = []

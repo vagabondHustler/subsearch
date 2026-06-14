@@ -255,7 +255,7 @@ def test_str_parser_dotted_season_episode_normalizes_for_scoring() -> None:
 
 def test_provider_urls_movie() -> None:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
     release_data = release_parser.get_release_info(filename)
     language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
@@ -270,7 +270,7 @@ def test_provider_urls_movie() -> None:
 
 def test_provider_urls_movie_with_hash() -> None:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_VIDEO_FILE_MOVIE.filename
+    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
     release_data = release_parser.get_release_info(filename)
     language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(
@@ -297,7 +297,7 @@ def test_provider_urls_typed_term_without_year() -> None:
 
 def test_provider_urls_series() -> None:
     app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_VIDEO_FILE_SERIES.filename
+    filename = fixture_data.FAKE_SEARCH_SUBJECT_SERIES.search_term
     release_data = release_parser.get_release_info(filename)
     language_data = load_language_data()
     create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)

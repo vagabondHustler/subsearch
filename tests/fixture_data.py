@@ -1,26 +1,20 @@
 from pathlib import Path
 
-from subsearch.runtime.models import ProviderUrls, VideoFile
+from subsearch.runtime.models import ProviderUrls, SearchSubject
 
-FAKE_VIDEO_FILE_MOVIE = VideoFile(
+FAKE_SEARCH_SUBJECT_MOVIE = SearchSubject(
     file_exists=True,
-    filename="the.foo.bar.2021.1080p.web.h264-foobar",
+    search_term="the.foo.bar.2021.1080p.web.h264-foobar",
     file_hash="",
     file_extension="mp4",
     file_path=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/the.foo.bar.2021.1080p.web.h264-foobar.mp4"),
-    file_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar"),
-    extraction_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/subs"),
-    download_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/tmp_subsearch"),
 )
-FAKE_VIDEO_FILE_SERIES = VideoFile(
+FAKE_SEARCH_SUBJECT_SERIES = SearchSubject(
     file_exists=True,
-    filename="the.foo.bar.s01e01.1080p.web.h264-foobar",
+    search_term="the.foo.bar.s01e01.1080p.web.h264-foobar",
     file_hash="",
     file_extension="mp4",
     file_path=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/the.foo.bar.s01e01.1080p.web.h264-foobar.mp4"),
-    file_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar"),
-    extraction_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/subs"),
-    download_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/tmp_subsearch"),
 )
 
 FAKE_PROVIDER_URLS = ProviderUrls(

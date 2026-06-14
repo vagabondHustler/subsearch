@@ -6,8 +6,9 @@ from subsearch.runtime.config import (
     FILE_PATHS,
     GUID,
     REGISTRY_PATHS,
+    SEARCH_SUBJECT,
     SUPPORTED_FILE_EXT,
     SUPPORTED_PROVIDERS,
     VERSION,
-    VIDEO_FILE,
+    WORKSPACE,
 )

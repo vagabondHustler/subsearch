@@ -9,7 +9,7 @@ from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, SEARCH_SUBJECT, WORKSPACE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     ProviderDiagnosticStatus,
@@ -145,9 +145,7 @@ class SearchPipeline:
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        downloaded = file_system.download_subtitle(
-            subtitle, subtitle_number, total_count, VIDEO_FILE.download_directory
-        )
+        downloaded = file_system.download_subtitle(subtitle, subtitle_number, total_count, WORKSPACE.download_directory)
         subtitle.status = SubtitleStatus.AUTO_DOWNLOADED if downloaded else SubtitleStatus.DOWNLOAD_FAILED
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
@@ -179,17 +177,15 @@ class SearchPipeline:
         resolution = paths["path_resolution"]
         create_missing_directory = paths["create_missing_directory"]
         return file_system.create_path_from_string(
-            target, resolution, VIDEO_FILE.file_directory, create_missing_directory
+            target, resolution, WORKSPACE.file_directory, create_missing_directory
         )
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
         target_path = self._resolve_post_processing_target()
-        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(
-            VIDEO_FILE.download_directory
-        )
+        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(WORKSPACE.download_directory)
         self.extract_files()
-        self.bootstrap.extracted_subtitle_archives = file_system.count_subtitle_files(VIDEO_FILE.extraction_directory)
+        self.bootstrap.extracted_subtitle_archives = file_system.count_subtitle_files(WORKSPACE.extraction_directory)
         self.subtitle_rename()
         self.subtitle_move_best(target_path)
         self.subtitle_move_all(target_path)
@@ -197,13 +193,13 @@ class SearchPipeline:
     @run_if_conditions_met
     def extract_files(self) -> None:
         log.event("banner", title="Extracting downloads")
-        file_system.extract_files_in_dir(VIDEO_FILE.download_directory, VIDEO_FILE.extraction_directory)
+        file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
         log.event("task_completed")
 
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
         log.event("banner", title="Renaming best match")
-        new_name = file_system.autoload_rename(VIDEO_FILE.filename, VIDEO_FILE.extraction_directory)
+        new_name = file_system.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
         self.bootstrap.autoload_src = new_name
         log.event("task_completed")
 
@@ -216,7 +212,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def subtitle_move_all(self, target: Path) -> None:
         log.event("banner", title="Move all")
-        file_system.move_all(VIDEO_FILE.extraction_directory, target)
+        file_system.move_all(WORKSPACE.extraction_directory, target)
         log.event("task_completed")
 
     def _log_provider_diagnostics_warnings(self) -> None:
@@ -256,14 +252,14 @@ class SearchPipeline:
         log.event("banner", title="Cleaning up")
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         tracker = file_tracker.get_file_tracker()
-        if VIDEO_FILE.download_directory != Path(""):
-            tracker.delete_tracked_within(VIDEO_FILE.extraction_directory, "*.nfo")
-            tracker.delete_tracked_within(VIDEO_FILE.download_directory)
-            tracker.delete_if_tracked(VIDEO_FILE.download_directory)
-            if VIDEO_FILE.extraction_directory.is_dir() and file_system.directory_is_empty(
-                VIDEO_FILE.extraction_directory
+        if WORKSPACE.download_directory != Path(""):
+            tracker.delete_tracked_within(WORKSPACE.extraction_directory, "*.nfo")
+            tracker.delete_tracked_within(WORKSPACE.download_directory)
+            tracker.delete_if_tracked(WORKSPACE.download_directory)
+            if WORKSPACE.extraction_directory.is_dir() and file_system.directory_is_empty(
+                WORKSPACE.extraction_directory
             ):
-                tracker.delete_if_tracked(VIDEO_FILE.extraction_directory)
+                tracker.delete_if_tracked(WORKSPACE.extraction_directory)
         log.event("task_completed")
 
     def _wait_for_terminal_input(self) -> None:
