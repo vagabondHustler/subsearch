@@ -29,14 +29,14 @@ class TitleSuggestion:
 
 
 def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> list[TitleSuggestion]:
-    log.info(f"Connecting to IMDb to look up titles matching {typed_term!r}")
+    log.event("imdb.connecting", term=typed_term)
     try:
         search_result = imdbinfo.search_title(typed_term)
     except ImdbinfoError:
-        log.warning(f"IMDb connection failed while fetching suggestions for {typed_term!r}")
+        log.event("imdb.suggestions_failed", level="warning", term=typed_term)
         return []
     if not search_result:
-        log.info(f"IMDb returned no suggestions for {typed_term!r}")
+        log.event("imdb.no_suggestions", term=typed_term)
         return []
     suggestions = [
         TitleSuggestion(
@@ -48,7 +48,7 @@ def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> li
         for found_title in search_result.titles
         if found_title.kind in _SUGGESTION_KINDS
     ]
-    log.info(f"IMDb returned {len(suggestions)} title suggestion(s) for {typed_term!r}")
+    log.event("imdb.suggestions", count=len(suggestions), term=typed_term)
     return suggestions[:limit]
 
 
@@ -69,11 +69,11 @@ class ImdbIdLookup:
         try:
             search_result = imdbinfo.search_title(title)
         except ImdbinfoError:
-            log.warning(f"IMDb connection failed while looking up {title!r}")
+            log.event("imdb.lookup_failed", level="warning", title=title)
             self.diagnostic_status = ProviderDiagnosticStatus.STRUCTURE_INVALID
             return None
         if not search_result:
-            log.debug(f"IMDb returned no results for {title!r}")
+            log.event("imdb.no_results", level="debug", title=title)
             return None
 
         for found_title in search_result.titles:
@@ -85,10 +85,10 @@ class ImdbIdLookup:
                 continue
 
             self.imdb_id = found_title.imdbId
-            log.debug(f"IMDb matched {title!r} -> {self.imdb_id}")
+            log.event("imdb.matched", level="debug", title=title, imdb_id=self.imdb_id)
             break
         else:
-            log.debug(f"IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})")
+            log.event("imdb.no_match", level="debug", title=title, year=year, tvseries=tvseries)
 
     def _title_matches(self, found_title: str) -> bool:
         return self.title == found_title.lower()

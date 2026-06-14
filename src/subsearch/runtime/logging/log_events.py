@@ -109,6 +109,17 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "Win32 long paths registry key not found, assuming disabled", console=False
     ),
     "registry.long_paths_check_failed": LogEvent("Failed to check long path status: {reason}", console=False),
+    # imdb.*
+    "imdb.connecting": LogEvent("Connecting to IMDb to look up titles matching {term!r}"),
+    "imdb.suggestions_failed": LogEvent("IMDb connection failed while fetching suggestions for {term!r}"),
+    "imdb.no_suggestions": LogEvent("IMDb returned no suggestions for {term!r}"),
+    "imdb.suggestions": LogEvent("IMDb returned {count} title suggestion(s) for {term!r}"),
+    "imdb.lookup_failed": LogEvent("IMDb connection failed while looking up {title!r}"),
+    "imdb.no_results": LogEvent("IMDb returned no results for {title!r}", console=False),
+    "imdb.matched": LogEvent("IMDb matched {title!r} -> {imdb_id}", console=False),
+    "imdb.no_match": LogEvent(
+        "IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", console=False
+    ),
 }
 
 
