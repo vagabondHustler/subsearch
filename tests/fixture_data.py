@@ -9,8 +9,8 @@ FAKE_VIDEO_FILE_MOVIE = VideoFile(
     file_extension="mp4",
     file_path=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/the.foo.bar.2021.1080p.web.h264-foobar.mp4"),
     file_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar"),
-    subs_dir=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/subs"),
-    tmp_dir=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/tmp_subsearch"),
+    extraction_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/subs"),
+    download_directory=Path("/path/to/the.foo.bar.2021.1080p.web.h264-foobar/tmp_subsearch"),
 )
 FAKE_VIDEO_FILE_SERIES = VideoFile(
     file_exists=True,
@@ -19,8 +19,8 @@ FAKE_VIDEO_FILE_SERIES = VideoFile(
     file_extension="mp4",
     file_path=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/the.foo.bar.s01e01.1080p.web.h264-foobar.mp4"),
     file_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar"),
-    subs_dir=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/subs"),
-    tmp_dir=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/tmp_subsearch"),
+    extraction_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/subs"),
+    download_directory=Path("/path/to/the.foo.bar.s01e01.1080p.web.h264-foobar/tmp_subsearch"),
 )
 
 FAKE_PROVIDER_URLS = ProviderUrls(

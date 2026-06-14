@@ -13,8 +13,8 @@ def test_video_file_False() -> None:
     assert VIDEO_FILE.file_extension == ""
     assert VIDEO_FILE.file_path == Path(".")
     assert VIDEO_FILE.file_directory == Path(".")
-    assert VIDEO_FILE.subs_dir == Path(".")
-    assert VIDEO_FILE.tmp_dir == Path(".")
+    assert VIDEO_FILE.extraction_directory == Path(".")
+    assert VIDEO_FILE.download_directory == Path(".")
 
 
 def test_get_hash() -> None:

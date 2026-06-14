@@ -39,8 +39,8 @@ class VideoFile:
     file_extension: str
     file_path: Path
     file_directory: Path
-    subs_dir: Path
-    tmp_dir: Path
+    extraction_directory: Path
+    download_directory: Path
 
     def copy_from(self, other: "VideoFile") -> None:
         for field_name in self.__slots__:
@@ -65,8 +65,8 @@ class AppConfig:
     summary_notification: bool
     search_mode: str
     manually_handle_post_processing: bool
-    download_manager_working_directory: str
     post_processing: dict[str, Any]
+    paths: dict[str, Any]
     show_terminal: bool
     single_instance: bool
     request_connect_timeout: int
