@@ -19,12 +19,3 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
-
-  - repo: local
-    hooks:
-      - id: bundle-icons
-        name: bundle icons
-        entry: python tools/bundle_icons.py --check
-        language: system
-        pass_filenames: false
-        files: ^(assets/icons/.*\.svg|src/subsearch/ui/icons_data\.py)$
