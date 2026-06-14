@@ -117,22 +117,25 @@ class Bootstrap:
 
     def _create_search_directories(self) -> None:
         tracker = file_tracker.get_file_tracker()
-        for directory in (VIDEO_FILE.subs_dir, VIDEO_FILE.tmp_dir):
+        for directory in (VIDEO_FILE.extraction_directory, VIDEO_FILE.download_directory):
             if file_system.create_directory(directory):
                 tracker.track(directory)
 
     def _anchor_working_directory(self) -> None:
-        if VIDEO_FILE.file_exists or VIDEO_FILE.file_directory != Path(""):
+        if VIDEO_FILE.file_exists:
             return
-        configured = self.app_config.download_manager_working_directory.strip()
-        working_directory = Path(configured) if configured else Path.home() / "Downloads"
-        # An explicitly chosen folder is used as the subtitle destination directly;
-        # only the default Downloads location gets a "subs" subfolder so subtitles
-        # are not dropped loose into the user's Downloads.
+        # The no-file flow re-resolves the VideoFile whenever the typed name changes, so this
+        # re-applies every rebuild rather than only the first; it is the single authority for the
+        # three directories when no real video file backs the search.
+        paths = self.app_config.paths
+        download = paths["download_directory"].strip()
+        extraction = paths["extraction_directory"].strip()
+        working_directory = Path.home() / "Downloads"
+        extraction_directory = Path(extraction) if extraction else working_directory / "subs"
         VIDEO_FILE.file_directory = working_directory
         VIDEO_FILE.file_path = working_directory / (VIDEO_FILE.filename + VIDEO_FILE.file_extension)
-        VIDEO_FILE.subs_dir = working_directory if configured else working_directory / "subs"
-        VIDEO_FILE.tmp_dir = working_directory / "tmp_subsearch"
+        VIDEO_FILE.extraction_directory = extraction_directory
+        VIDEO_FILE.download_directory = Path(download) if download else APP_PATHS.tmp_dir
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:

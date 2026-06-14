@@ -19,6 +19,7 @@ class Flow:
     def _finish(self) -> None:
         self.pipeline.subtitle_post_processing()
         self.pipeline.run_provider_diagnostics()
+        self.pipeline.summary_notification()
         self.pipeline.clean_up()
 
     def _make_search_worker(self, imdb_id: str = "") -> SearchWorker:

@@ -8,7 +8,7 @@ from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.runtime.config import parallel_tasks
+from subsearch.core import parallel_tasks
 from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models.exceptions import MissingApiKey
@@ -145,7 +145,7 @@ class SearchPipeline:
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        file_system.download_subtitle(subtitle, subtitle_number, total_count, VIDEO_FILE.tmp_dir)
+        file_system.download_subtitle(subtitle, subtitle_number, total_count, VIDEO_FILE.download_directory)
         subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
@@ -172,17 +172,22 @@ class SearchPipeline:
         log.event("task_completed")
 
     def _resolve_post_processing_target(self) -> Path:
-        target = self.bootstrap.app_config.post_processing["target_path"]
-        resolution = self.bootstrap.app_config.post_processing["path_resolution"]
-        create_missing_folder = self.bootstrap.app_config.post_processing["create_missing_folder"]
-        return file_system.create_path_from_string(target, resolution, VIDEO_FILE.file_directory, create_missing_folder)
+        paths = self.bootstrap.app_config.paths
+        target = paths["video_file_directory"]
+        resolution = paths["path_resolution"]
+        create_missing_directory = paths["create_missing_directory"]
+        return file_system.create_path_from_string(
+            target, resolution, VIDEO_FILE.file_directory, create_missing_directory
+        )
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
         target_path = self._resolve_post_processing_target()
-        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(VIDEO_FILE.tmp_dir)
+        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(
+            VIDEO_FILE.download_directory
+        )
         self.extract_files()
-        self.bootstrap.extracted_subtitle_archives = file_system.count_files_in_directory(VIDEO_FILE.subs_dir, [".srt"])
+        self.bootstrap.extracted_subtitle_archives = file_system.count_subtitle_files(VIDEO_FILE.extraction_directory)
         self.subtitle_rename()
         self.subtitle_move_best(target_path)
         self.subtitle_move_all(target_path)
@@ -190,13 +195,13 @@ class SearchPipeline:
     @run_if_conditions_met
     def extract_files(self) -> None:
         log.event("banner", title="Extracting downloads")
-        file_system.extract_files_in_dir(VIDEO_FILE.tmp_dir, VIDEO_FILE.subs_dir)
+        file_system.extract_files_in_dir(VIDEO_FILE.download_directory, VIDEO_FILE.extraction_directory)
         log.event("task_completed")
 
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
         log.event("banner", title="Renaming best match")
-        new_name = file_system.autoload_rename(VIDEO_FILE.filename, VIDEO_FILE.subs_dir, ".srt")
+        new_name = file_system.autoload_rename(VIDEO_FILE.filename, VIDEO_FILE.extraction_directory)
         self.bootstrap.autoload_src = new_name
         log.event("task_completed")
 
@@ -209,7 +214,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def subtitle_move_all(self, target: Path) -> None:
         log.event("banner", title="Move all")
-        file_system.move_all(VIDEO_FILE.subs_dir, target)
+        file_system.move_all(VIDEO_FILE.extraction_directory, target)
         log.event("task_completed")
 
     def _log_provider_diagnostics_warnings(self) -> None:
@@ -233,25 +238,30 @@ class SearchPipeline:
         self.bootstrap.system_tray.display_toast(title, f"{matches_downloaded}\n{elapsed_summary}")
 
     @run_if_conditions_met
-    def summary_notification(self, elapsed: float) -> None:
+    def summary_notification(self) -> None:
         log.event("banner", title="Summary toast")
         self._log_provider_diagnostics_warnings()
         downloaded_count, total_count = self._count_downloaded_subtitles()
         matches_downloaded = f"Downloaded: {downloaded_count}/{total_count}"
-        elapsed_summary = f"Finished in {elapsed} seconds"
+        elapsed_summary = f"Finished in {self._elapsed()} seconds"
         self._dispatch_summary_toast(matches_downloaded, elapsed_summary, succeeded=downloaded_count > 0)
+
+    def _elapsed(self) -> float:
+        return time.perf_counter() - self.bootstrap.start
 
     @run_if_conditions_met
     def clean_up(self) -> None:
         log.event("banner", title="Cleaning up")
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         tracker = file_tracker.get_file_tracker()
-        if VIDEO_FILE.tmp_dir != Path(""):
-            tracker.delete_tracked_within(VIDEO_FILE.subs_dir, "*.nfo")
-            tracker.delete_tracked_within(VIDEO_FILE.tmp_dir)
-            tracker.delete_if_tracked(VIDEO_FILE.tmp_dir)
-            if VIDEO_FILE.subs_dir.is_dir() and file_system.directory_is_empty(VIDEO_FILE.subs_dir):
-                tracker.delete_if_tracked(VIDEO_FILE.subs_dir)
+        if VIDEO_FILE.download_directory != Path(""):
+            tracker.delete_tracked_within(VIDEO_FILE.extraction_directory, "*.nfo")
+            tracker.delete_tracked_within(VIDEO_FILE.download_directory)
+            tracker.delete_if_tracked(VIDEO_FILE.download_directory)
+            if VIDEO_FILE.extraction_directory.is_dir() and file_system.directory_is_empty(
+                VIDEO_FILE.extraction_directory
+            ):
+                tracker.delete_if_tracked(VIDEO_FILE.extraction_directory)
         log.event("task_completed")
 
     def _wait_for_terminal_input(self) -> None:
@@ -266,8 +276,6 @@ class SearchPipeline:
 
     def on_exit(self) -> None:
         log.event("banner", title="Exit")
-        elapsed = time.perf_counter() - self.bootstrap.start
-        self.summary_notification(elapsed)
         self.bootstrap.system_tray.stop()
-        log.info(f"Finished in {elapsed} seconds", color="#f2cdcd")
+        log.info(f"Finished in {self._elapsed()} seconds", color="#f2cdcd")
         self._wait_for_terminal_input()

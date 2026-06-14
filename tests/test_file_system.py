@@ -1,3 +1,4 @@
+import zipfile
 from pathlib import Path
 
 from subsearch.io import file_system
@@ -5,6 +6,10 @@ from subsearch.runtime.models.model import MatchTier, Subtitle, classify_match_t
 
 
 def _make_srt(directory: Path, name: str) -> Path:
+    return _make_subtitle(directory, name)
+
+
+def _make_subtitle(directory: Path, name: str) -> Path:
     file_path = directory / name
     file_path.write_text("1\n00:00:00,000 --> 00:00:01,000\nfoo\n", encoding="utf-8")
     return file_path
@@ -100,3 +105,62 @@ def test_move_all_leaves_files_in_place_when_source_is_destination(tmp_path) -> 
     file_system.move_all(tmp_path, tmp_path)
 
     assert sorted(path.name for path in tmp_path.glob("*.srt")) == ["subtitle.srt"]
+
+
+def test_move_all_moves_every_subtitle_extension_and_returns_count(tmp_path) -> None:
+    source_directory = tmp_path / "subs"
+    destination = tmp_path / "dst"
+    source_directory.mkdir()
+    destination.mkdir()
+    for name in ("a.srt", "b.ass", "c.ssa", "d.sub", "e.vtt", "ignored.nfo"):
+        _make_subtitle(source_directory, name)
+
+    moved_count = file_system.move_all(source_directory, destination)
+
+    assert moved_count == 5
+    moved_names = sorted(path.name for path in destination.iterdir())
+    assert moved_names == ["a.srt", "b.ass", "c.ssa", "d.sub", "e.vtt"]
+    assert sorted(path.name for path in source_directory.iterdir()) == ["ignored.nfo"]
+
+
+def test_count_subtitle_files_ignores_non_subtitles(tmp_path) -> None:
+    _make_subtitle(tmp_path, "a.srt")
+    _make_subtitle(tmp_path, "b.ass")
+    _make_subtitle(tmp_path, "notes.nfo")
+
+    assert file_system.count_subtitle_files(tmp_path) == 2
+
+
+def test_find_best_subtitle_match_considers_non_srt_extensions(tmp_path) -> None:
+    release = "the.foo.bar.2021.1080p.web.h264-foobar"
+    _make_subtitle(tmp_path, "completely.unrelated.movie.1999.dvdrip-xyz.srt")
+    _make_subtitle(tmp_path, f"{release}.ass")
+
+    best = file_system.find_best_subtitle_match(release, tmp_path)
+
+    assert best.name == f"{release}.ass"
+
+
+def test_autoload_rename_keeps_matched_extension(tmp_path) -> None:
+    release = "the.foo.bar.2021.1080p.web.h264-foobar"
+    _make_subtitle(tmp_path, f"downloaded.{release}.ass")
+
+    renamed = file_system.autoload_rename(release, tmp_path)
+
+    assert renamed.name == f"{release}.ass"
+    assert renamed.exists()
+
+
+def test_extract_files_in_dir_returns_extracted_subtitle_count(tmp_path) -> None:
+    archive_path = tmp_path / "download.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr("movie.srt", "1\n00:00:00,000 --> 00:00:01,000\nfoo\n")
+        archive.writestr("movie.ass", "[Script Info]\n")
+        archive.writestr("readme.nfo", "ignore me")
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    extracted_count = file_system.extract_files_in_dir(tmp_path, destination)
+
+    assert extracted_count == 2
+    assert sorted(path.name for path in destination.iterdir()) == ["movie.ass", "movie.srt"]
