@@ -26,7 +26,8 @@ def download_environment(monkeypatch, tmp_path):
         file_system, "download_subtitle", lambda subtitle, number, total, tmp_dir: downloaded.append(subtitle)
     )
     monkeypatch.setattr(file_system, "extract_files_in_dir", lambda src, dst, extension=".zip": None)
-    monkeypatch.setattr(constants.VIDEO_FILE, "tmp_dir", tmp_path / "tmp", raising=False)
+    monkeypatch.setattr(constants.VIDEO_FILE, "download_directory", tmp_path / "tmp", raising=False)
+    monkeypatch.setattr(constants.VIDEO_FILE, "extraction_directory", tmp_path / "tmp", raising=False)
     (tmp_path / "tmp").mkdir()
     return downloaded
 
@@ -137,6 +138,78 @@ def test_second_search_replaces_no_results_placeholder(qtbot, download_environme
 
     assert not hasattr(interface, "_empty_label")
     assert interface.list_widget.count() == 1
+
+
+class _FakeDropEvent:
+    def __init__(self, *paths):
+        from PySide6.QtCore import QMimeData, QUrl
+
+        self.mime_data = QMimeData()
+        self.mime_data.setUrls([QUrl.fromLocalFile(str(path)) for path in paths])
+        self.accepted = False
+        self.ignored = False
+
+    def mimeData(self):
+        return self.mime_data
+
+    def acceptProposedAction(self) -> None:
+        self.accepted = True
+
+    def ignore(self) -> None:
+        self.ignored = True
+
+
+def test_dropping_video_file_selects_it_and_requests_search(qtbot, tmp_path) -> None:
+    interface, task_runner = build_interface([], qtbot)
+    selected = []
+    requests = []
+    interface._search_bar._video_file_service.select_video = lambda path: selected.append(path)
+    interface.research_requested.connect(lambda imdb_id: requests.append(imdb_id))
+    video_file = tmp_path / "Shrek.2001.1080p.BluRay.x264-YOLO.mkv"
+    video_file.touch()
+    event = _FakeDropEvent(video_file)
+    try:
+        interface.dropEvent(event)
+    finally:
+        task_runner.shutdown()
+
+    assert event.accepted
+    assert selected == [video_file]
+    assert requests == [""]
+
+
+def test_dropping_unsupported_file_is_ignored(qtbot, tmp_path) -> None:
+    interface, task_runner = build_interface([], qtbot)
+    requests = []
+    interface.research_requested.connect(lambda imdb_id: requests.append(imdb_id))
+    text_file = tmp_path / "notes.txt"
+    text_file.touch()
+    event = _FakeDropEvent(text_file)
+    try:
+        interface.dropEvent(event)
+    finally:
+        task_runner.shutdown()
+
+    assert event.ignored
+    assert requests == []
+
+
+def test_dropping_multiple_files_is_ignored(qtbot, tmp_path) -> None:
+    interface, task_runner = build_interface([], qtbot)
+    requests = []
+    interface.research_requested.connect(lambda imdb_id: requests.append(imdb_id))
+    first = tmp_path / "First.mkv"
+    second = tmp_path / "Second.mkv"
+    first.touch()
+    second.touch()
+    event = _FakeDropEvent(first, second)
+    try:
+        interface.dropEvent(event)
+    finally:
+        task_runner.shutdown()
+
+    assert event.ignored
+    assert requests == []
 
 
 def test_subtitle_without_url_fails_on_click(qtbot, download_environment) -> None:

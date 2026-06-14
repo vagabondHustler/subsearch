@@ -1,7 +1,15 @@
 from pathlib import Path
 
 from PySide6.QtCore import QByteArray, QRect, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPen
+from PySide6.QtGui import (
+    QColor,
+    QDragEnterEvent,
+    QDropEvent,
+    QFont,
+    QIcon,
+    QPainter,
+    QPen,
+)
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -16,7 +24,7 @@ from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButto
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.parsing.release_parser import get_release_info
-from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config.constants import SUPPORTED_FILE_EXT, VIDEO_FILE
 from subsearch.runtime.models.model import (
     MatchTier,
     Subtitle,
@@ -36,6 +44,7 @@ from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import (
     PATH_ROW_BUTTON_GAP,
+    ROW_INSET,
     SMALL_ICON_SIZE,
     TOOL_BUTTON_SIZE,
 )
@@ -58,7 +67,6 @@ from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
-_LOG_MIN_VISIBLE_LINES = 1
 _LOG_DEFAULT_VISIBLE_LINES = 4
 
 _HANDLE_HEIGHT = 20
@@ -128,9 +136,11 @@ def _build_splitter(top: QWidget, bottom: LogPanel) -> QSplitter:
     splitter.addWidget(top)
     splitter.addWidget(bottom)
     top.setMinimumHeight(80)
-    bottom.setMinimumHeight(bottom.height_for_lines(_LOG_MIN_VISIBLE_LINES))
     default_height = bottom.height_for_lines(_LOG_DEFAULT_VISIBLE_LINES)
+    bottom.setMinimumHeight(default_height)
     splitter.setSizes([splitter.sizeHint().height() - default_height, default_height])
+    splitter.setStretchFactor(0, 1)
+    splitter.setStretchFactor(1, 0)
     return splitter
 
 
@@ -174,7 +184,7 @@ FILTER_BAR_WIDTH = 200
 # search field and the separator below it span the same width.
 SEARCH_BAR_WIDTH_FRACTION = _HANDLE_LINE_WIDTH_FRACTION
 
-IDLE_PLACEHOLDER_TEXT = "Pick a video file or type a search term, then click the search glass"
+IDLE_PLACEHOLDER_TEXT = "Drop a video file here, or type a search term and hit the search glass"
 SEARCHING_PLACEHOLDER_TEXT = "Searching for subtitles…"
 NO_RESULTS_PLACEHOLDER_TEXT = "No subtitles found"
 
@@ -310,6 +320,11 @@ class SubtitleSearchBar(QWidget):
             return
         self._video_file_service.rename_active_video(filename)
 
+    def select_dropped_video(self, file_path: Path) -> None:
+        self._filename_edit.setText(file_path.name)
+        self._term_without_suggestions = file_path.name
+        self._video_file_service.select_video(file_path)
+
     def _browse_for_video_file(self) -> None:
         from subsearch.runtime.config.constants import DEFAULT_CONFIG
 
@@ -352,6 +367,41 @@ class SubtitleCard(SettingsCard):
         bar.returnPressed.connect(self.search_confirmed)
         return bar
 
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._align_filter_bar_to_search_bar()
+
+    def _align_filter_bar_to_search_bar(self) -> None:
+        # The search bar below is centered at SEARCH_BAR_WIDTH_FRACTION of the field
+        # area (inset by SEPARATOR_INSET on each side), so its right edge sits this far
+        # in from the card's right edge. Pad the header so the filter box's right edge
+        # tracks the search bar's right edge as the window resizes, leaving room for the
+        # help button and restore slot that sit to the right of the filter box.
+        field_area_width = self.width() - 2 * SEPARATOR_INSET
+        search_bar_right_inset = SEPARATOR_INSET + round((1 - SEARCH_BAR_WIDTH_FRACTION) / 2 * field_area_width)
+        trailing_width = self._header_trailing_width()
+        left, top, _, bottom = self.headerLayout.getContentsMargins()
+        right_margin = max(ROW_INSET, search_bar_right_inset - trailing_width)
+        self.headerLayout.setContentsMargins(left, top, right_margin, bottom)
+
+    def _header_trailing_width(self) -> int:
+        spacing = max(self.headerLayout.spacing(), 0)
+        filter_index = self._filter_bar_index()
+        if filter_index is None:
+            return 0
+        trailing = 0
+        for index in range(filter_index + 1, self.headerLayout.count()):
+            widget = self.headerLayout.itemAt(index).widget()
+            if widget is not None and widget.isVisible():
+                trailing += widget.width() + spacing
+        return trailing
+
+    def _filter_bar_index(self) -> int | None:
+        for index in range(self.headerLayout.count()):
+            if self.headerLayout.itemAt(index).widget() is self._search_bar:
+                return index
+        return None
+
 
 class SubtitleActionRow(QWidget):
     def __init__(
@@ -376,10 +426,10 @@ class SubtitleActionRow(QWidget):
         layout.addStretch(1)
 
         move_tooltip = f"Unpack and move all subtitles to: {self._target_path_text()}"
-        layout.addWidget(self._make_action_button(LucideIcon.FOLDER_OUTPUT, move_tooltip, self._unpack_and_move))
+        layout.addWidget(self._make_action_button(LucideIcon.FILES, move_tooltip, self._unpack_and_move))
 
         place_button = self._make_action_button(
-            LucideIcon.FILE_OUTPUT,
+            LucideIcon.FILE_PEN,
             "Unpack, rename to match the video file and place it next to the video",
             self._unpack_rename_and_place,
         )
@@ -389,7 +439,7 @@ class SubtitleActionRow(QWidget):
         layout.addWidget(place_button)
 
     def _target_path_text(self) -> str:
-        return str(self._store.read("post_processing.target_path"))
+        return str(self._store.read("paths.video_file_directory"))
 
     def _make_action_button(self, icon: LucideIcon, tooltip: str, slot) -> TransparentToolButton:
         button = TransparentToolButton(self)
@@ -422,6 +472,7 @@ class ManualSearchInterface(QWidget):
     ) -> None:
         super().__init__()
         self.setObjectName("manualSearchInterface")
+        self.setAcceptDrops(True)
         self._store = store
         self._post_processing_service = post_processing_service
         self.accept_threshold = store.read("search.accept_threshold")
@@ -475,6 +526,34 @@ class ManualSearchInterface(QWidget):
         if empty_label is not None:
             empty_label.deleteLater()
             del self._empty_label
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        if self._dropped_video_file(event) is not None:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        video_file = self._dropped_video_file(event)
+        if video_file is None:
+            event.ignore()
+            return
+        event.acceptProposedAction()
+        self._search_bar.select_dropped_video(video_file)
+        self.research_requested.emit("")
+
+    @staticmethod
+    def _dropped_video_file(event: QDragEnterEvent | QDropEvent) -> Path | None:
+        mime_data = event.mimeData()
+        if not mime_data.hasUrls():
+            return None
+        urls = [url for url in mime_data.urls() if url.isLocalFile()]
+        if len(urls) != 1:
+            return None
+        path = Path(urls[0].toLocalFile())
+        if path.suffix.lstrip(".").lower() not in SUPPORTED_FILE_EXT:
+            return None
+        return path
 
     def reset_for_search(self) -> None:
         self._search_bar.start_spinner()
@@ -559,8 +638,7 @@ class ManualSearchInterface(QWidget):
         return self._match_tier(subtitle), subtitle.token_result
 
     def _row_text(self, subtitle: Subtitle) -> str:
-        tier = self._match_tier(subtitle)
-        return f"[{tier.name}] {subtitle.token_result}%  {subtitle.subtitle_name}"
+        return f"{subtitle.token_result}%  {subtitle.subtitle_name}"
 
     def _filter_list(self, query: str) -> None:
         if not hasattr(self, "list_widget"):
