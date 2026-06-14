@@ -121,6 +121,11 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", console=False
     ),
     # provider.*
+    "provider.mirror_tried": LogEvent("{provider}: trying mirror {url}", console=False),
+    "provider.no_mirror_responded": LogEvent("{provider}: no mirror responded", LogColor.WARN),
+    "provider.structure_invalid": LogEvent(
+        "{provider}: mirror responded but page structure was invalid", LogColor.WARN
+    ),
     "provider.unrecognized_response": LogEvent("{provider} response was unrecognized: {reason}", console=False),
     "provider.skipped_no_api_key": LogEvent(
         "{provider} skipped: no API key configured. Add your Subsource API key in settings.", LogColor.WARN
