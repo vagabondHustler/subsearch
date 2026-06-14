@@ -1,3 +1,4 @@
+import io
 import logging
 import traceback
 from logging.handlers import RotatingFileHandler
@@ -10,6 +11,8 @@ from subsearch.runtime.models import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
 LOG_SESSIONS_TO_KEEP = 3
+LOG_FORMAT = "%(asctime)s %(levelname)-8s %(module)s:%(lineno)d  %(message)s"
+LOG_DATE_FORMAT = "%H:%M:%S"
 
 LEVELS = {
     "debug": logging.DEBUG,
@@ -54,17 +57,40 @@ def _rotate_session_logs() -> None:
                 return
 
 
+class SessionBufferHandler(logging.Handler):
+    # Holds the current session's records in memory so a crash can copy the
+    # session into the durable crash.log without re-reading the open (and
+    # rotation-prone) log.log file on disk.
+    def __init__(self) -> None:
+        super().__init__()
+        self._buffer = io.StringIO()
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self._buffer.write(self.format(record) + "\n")
+
+    def reset(self) -> None:
+        self._buffer = io.StringIO()
+
+    def current_session(self) -> str:
+        return self._buffer.getvalue()
+
+
+_session_buffer = SessionBufferHandler()
+
+
 def _build_file_logger() -> logging.Logger:
     APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
     _rotate_session_logs()
     logger = logging.getLogger("subsearch")
     logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
     file_handler = RotatingFileHandler(FILE_PATHS.log, mode="w", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
-    file_handler.setFormatter(
-        logging.Formatter("%(asctime)s %(levelname)-8s %(module)s:%(lineno)d  %(message)s", datefmt="%H:%M:%S")
-    )
+    file_handler.setFormatter(formatter)
+    _session_buffer.setFormatter(formatter)
+    _session_buffer.reset()
     logger.addHandler(file_handler)
+    logger.addHandler(_session_buffer)
     _write_session_header(file_handler)
     return logger
 
@@ -73,6 +99,19 @@ def _write_session_header(handler: RotatingFileHandler) -> None:
     if handler.stream is not None:
         handler.stream.write(log_events.session_header())
         handler.flush()
+
+
+def _append_crash_session(session_text: str) -> None:
+    if not session_text.strip():
+        return
+    crash_path = FILE_PATHS.crash
+    crash_path.parent.mkdir(parents=True, exist_ok=True)
+    with crash_path.open("a", encoding="utf-8") as crash_file:
+        crash_file.write(log_events.session_header())
+        crash_file.write(session_text)
+    if crash_path.stat().st_size > LOG_MAX_BYTES:
+        retained = crash_path.read_bytes()[-LOG_MAX_BYTES:]
+        crash_path.write_bytes(retained)
 
 
 class Logger:
@@ -139,6 +178,7 @@ class Logger:
     ) -> None:
         formatted = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self.write(f"Uncaught exception on {origin}\n{formatted}", "critical", to_console=False)
+        _append_crash_session(_session_buffer.current_session())
 
 
 log = Logger()

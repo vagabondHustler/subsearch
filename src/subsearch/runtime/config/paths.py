@@ -22,6 +22,7 @@ def get_app_paths() -> AppPaths:
 def get_file_paths() -> FilePaths:
     return FilePaths(
         log=Path.home() / "AppData" / "Local" / "Subsearch" / "log.log",
+        crash=Path.home() / "AppData" / "Local" / "Subsearch" / "crash.log",
         config=Path.home() / "AppData" / "Local" / "Subsearch" / "config.json",
         subtitle_languages=_APP_HOME / "data" / "subtitle_languages.json",
     )

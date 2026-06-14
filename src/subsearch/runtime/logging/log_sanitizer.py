@@ -41,9 +41,6 @@ def sanitize(text: str) -> str:
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
 
 
-# matches log lines containing a crash indicator e.g. "ERROR", "Traceback", or "Exception" as whole words
-CRASH_PATTERN = re.compile(r"\b(ERROR|Traceback|Exception)\b")
-
 SESSION_SEPARATOR = "\x1c"
 
 
@@ -51,14 +48,15 @@ def _sessions(raw_log: str) -> list[str]:
     return [block.strip() for block in raw_log.split(SESSION_SEPARATOR) if block.strip()]
 
 
-def sessions_with_crash(raw_log: str) -> str:
+def _current_session(raw_log: str) -> str:
     sessions = _sessions(raw_log)
-    crashed = [session for session in sessions if CRASH_PATTERN.search(session)]
-    if crashed:
-        return f"\n\n{SESSION_SEPARATOR}\n\n".join(crashed)
     return sessions[-1] if sessions else raw_log
 
 
 def read_sanitized_crash_sessions() -> str:
+    if FILE_PATHS.crash.exists():
+        crash_log = FILE_PATHS.crash.read_text(encoding="utf-8", errors="replace")
+        if crash_log.strip():
+            return sanitize(crash_log)
     raw_log = FILE_PATHS.log.read_text(encoding="utf-8", errors="replace")
-    return sanitize(sessions_with_crash(raw_log))
+    return sanitize(_current_session(raw_log))

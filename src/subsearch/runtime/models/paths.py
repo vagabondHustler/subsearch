@@ -17,6 +17,7 @@ class AppPaths:
 @dataclass(slots=True)
 class FilePaths:
     log: Path
+    crash: Path
     config: Path
     subtitle_languages: Path
 
