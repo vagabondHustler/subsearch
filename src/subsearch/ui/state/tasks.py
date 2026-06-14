@@ -14,7 +14,7 @@ class Worker(QObject):
         try:
             self.finished.emit(self.execute())
         except Exception as error:
-            log.error(str(error))
+            log.error(str(error), to_console=False)
             self.failed.emit(str(error))
 
 

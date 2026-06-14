@@ -67,7 +67,7 @@ def fetch_release_changelog(version: str) -> str:
             return ""
         return response.json().get("body", "").strip()
     except requests.RequestException as error:
-        log.error(str(error))
+        log.error(str(error), to_console=False)
         return ""
 
 

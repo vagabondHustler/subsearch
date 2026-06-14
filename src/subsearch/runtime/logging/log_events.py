@@ -31,7 +31,13 @@ class FilesystemEvent(LogEvent):
     def render(self, **values: Any) -> str:
         source: Path = values["src"]
         destination: Optional[Path] = values.get("dst")
-        return super().render(kind=_path_kind(source), src=_shorten(source), dst=_shorten(destination))
+        return super().render(
+            kind=_path_kind(source),
+            src=_shorten(source),
+            dst=_shorten(destination),
+            src_name=source.name,
+            dst_name=destination.name if destination is not None else None,
+        )
 
 
 def _path_kind(path: Path) -> str:
@@ -52,36 +58,34 @@ def _shorten(path: Optional[Path]) -> Optional[Path]:
 
 
 LOG_EVENTS: dict[str, LogEvent] = {
-    "banner": LogEvent("--- [{title}] ---", LogColor.BANNER, bold=True),
-    "task_completed": LogEvent("Tasks completed", LogColor.SUCCESS),
-    "video_file_selected": LogEvent("Selected video file: {filename}", LogColor.BANNER, bold=True),
+    "banner": LogEvent("{title}", LogColor.BANNER, bold=True),
+    "task_completed": LogEvent("Tasks completed", LogColor.SUCCESS, console=False),
+    "video_file_selected": LogEvent("Selected {filename}", LogColor.MATCH),
     "search_term_set": LogEvent("Search term set: {term}", console=False),
-    "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", LogColor.MATCH),
-    "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}"),
-    "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
+    "subtitle_match": LogEvent("{subtitle_name}", LogColor.MATCH),
+    "subtitle_rejected": LogEvent("{subtitle_name}"),
+    "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})", console=False),
     "remove": FilesystemEvent(r"Removing {kind}: ...\{src}", console=False),
-    "rename": FilesystemEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}", console=False),
+    "rename": FilesystemEvent("Renamed to {dst_name}", LogColor.MATCH),
     "move": FilesystemEvent(r"Moving {kind}: ...\{src} -> ...\{dst}", console=False),
-    "extract": FilesystemEvent(r"Extracting archive: ...\{src} -> ...\{dst}", console=False),
+    "extract": FilesystemEvent("Extracting {src_name}", LogColor.MATCH),
     "post_processing_started": LogEvent(
         "Unpacking subtitles to {destination}", LogColor.BANNER, bold=True, console=False
     ),
-    "post_processing_completed": LogEvent(
-        "Unpacked {extracted}, moved {moved} subtitles to {destination}", LogColor.SUCCESS, console=False
-    ),
+    "post_processing_completed": LogEvent("Moved {moved} subtitles to {destination}", LogColor.SUCCESS, console=False),
     "post_processing_no_files": LogEvent(
-        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL, console=False
+        "No subtitles unpacked or moved (moved {moved})", LogColor.FAIL, console=False
     ),
     "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL, console=False),
     # config.*
     "config.changed": LogEvent("Config change: {change}", console=False),
-    "config.committed": LogEvent("Config session committed to {filename}", console=False),
-    "config.reverted": LogEvent("Reverting uncommitted config changes", console=False),
+    "config.committed": LogEvent("Settings saved", LogColor.SUCCESS),
+    "config.reverted": LogEvent("Discarded unsaved settings", LogColor.WARN),
     "config.schema_mismatch": LogEvent("Config schema mismatch, repairing", console=False),
     "config.key_removed": LogEvent("Removing obsolete config key {key}", console=False),
     "config.key_added": LogEvent("Adding missing config key {key}", console=False),
-    "config.reset": LogEvent("Resetting config to defaults at {path}", console=False),
-    "config.restored": LogEvent("Restoring last known good config from {path}", console=False),
+    "config.reset": LogEvent("Settings reset to defaults", LogColor.WARN),
+    "config.restored": LogEvent("Restored settings from backup", LogColor.WARN),
     "config.restore_attempt": LogEvent("Config missing or unreadable, attempting restore from backup", console=False),
     "config.unreadable_after_restore": LogEvent(
         "Config is unreadable after restore, resetting to defaults", console=False
@@ -114,11 +118,13 @@ LOG_EVENTS: dict[str, LogEvent] = {
     ),
     "registry.long_paths_check_failed": LogEvent("Failed to check long path status: {reason}", console=False),
     # imdb.*
-    "imdb.connecting": LogEvent("Connecting to IMDb to look up titles matching {term!r}"),
-    "imdb.suggestions_failed": LogEvent("IMDb connection failed while fetching suggestions for {term!r}"),
-    "imdb.no_suggestions": LogEvent("IMDb returned no suggestions for {term!r}"),
-    "imdb.suggestions": LogEvent("IMDb returned {count} title suggestion(s) for {term!r}"),
-    "imdb.lookup_failed": LogEvent("IMDb connection failed while looking up {title!r}"),
+    "imdb.connecting": LogEvent("Fuzzy matching {term!r}"),
+    "imdb.suggestions_failed": LogEvent(
+        "IMDb connection failed while fetching suggestions for {term!r}", console=False
+    ),
+    "imdb.no_suggestions": LogEvent("IMDb returned no suggestions for {term!r}", console=False),
+    "imdb.suggestions": LogEvent("IMDb returned {count} title suggestion(s) for {term!r}", console=False),
+    "imdb.lookup_failed": LogEvent("IMDb connection failed while looking up {title!r}", console=False),
     "imdb.no_results": LogEvent("IMDb returned no results for {title!r}", console=False),
     "imdb.matched": LogEvent("IMDb matched {title!r} -> {imdb_id}", console=False),
     "imdb.no_match": LogEvent(
@@ -130,15 +136,17 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "{provider}: found {found} ({accepted} accepted, {rejected} rejected)", console=False
     ),
     "provider.mirror_tried": LogEvent("{provider}: trying mirror {url}", console=False),
-    "provider.no_mirror_responded": LogEvent("{provider}: no mirror responded", LogColor.WARN),
+    "provider.no_mirror_responded": LogEvent("{provider}: no mirror responded", LogColor.WARN, console=False),
     "provider.structure_invalid": LogEvent(
-        "{provider}: mirror responded but page structure was invalid", LogColor.WARN
+        "{provider}: mirror responded but page structure was invalid", LogColor.WARN, console=False
     ),
     "provider.unrecognized_response": LogEvent("{provider} response was unrecognized: {reason}", console=False),
     "provider.skipped_no_api_key": LogEvent(
-        "{provider} skipped: no API key configured. Add your Subsource API key in settings.", LogColor.WARN
+        "{provider} skipped: no API key configured. Add your Subsource API key in settings.",
+        LogColor.WARN,
+        console=False,
     ),
-    "provider.opensubtitles_down": LogEvent("opensubtitles is down: {reason}", LogColor.FAIL),
+    "provider.opensubtitles_down": LogEvent("opensubtitles is down: {reason}", LogColor.FAIL, console=False),
     "provider.subsource_status": LogEvent("{url} status_code: {status_code} {reason}", console=False),
     "provider.filename_sanitized": LogEvent("Filename sanitized: {original!r} -> {sanitized!r}", console=False),
     # diagnostics.*
@@ -146,11 +154,11 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "diagnostics.unhealthy": LogEvent(
         "{provider}: unhealthy ({status}, found {found}), failed_attempts {previous} -> {updated}", console=False
     ),
-    "diagnostics.due": LogEvent("Providers due for diagnostic (threshold={threshold}): {providers}"),
-    "diagnostics.running": LogEvent("Running diagnostics for: {providers}"),
+    "diagnostics.due": LogEvent("Providers due for diagnostic (threshold={threshold}): {providers}", console=False),
+    "diagnostics.running": LogEvent("Running diagnostics for: {providers}", console=False),
     "diagnostics.probing": LogEvent("Probing {provider}", console=False),
-    "diagnostics.skipped_no_api_key": LogEvent("{provider}: skipped, missing API key", LogColor.WARN),
-    "diagnostics.result": LogEvent("{provider}: {status} ({diagnostic_status}, found {found})"),
+    "diagnostics.skipped_no_api_key": LogEvent("{provider}: skipped, missing API key", LogColor.WARN, console=False),
+    "diagnostics.result": LogEvent("{provider}: {status} ({diagnostic_status}, found {found})", console=False),
     # fs.*
     "fs.creating": LogEvent("Creating {path}", console=False),
     "fs.hashing": LogEvent("Calculating hash of video file", console=False),
@@ -162,27 +170,33 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "fs.archive_unsafe_path": LogEvent("Skipping unsafe path in archive: {filename}", console=False),
     "fs.archive_unreadable": LogEvent("Skipping unreadable archive {name}\n{traceback}", console=False),
     # download.*
-    "download.subtitle": LogEvent("{provider:<14}{position}/{size} {subtitle_name}"),
-    "download.not_zip": LogEvent("{provider}: {subtitle_name} is not a zip, skipping download", console=False),
-    "download.started": LogEvent("Download started for {filename}"),
-    "download.progress": LogEvent("Downloading {percentage}%"),
-    "download.completed": LogEvent("Download complete"),
+    "download.subtitle": LogEvent("Downloading {subtitle_name}"),
+    "download.not_zip": LogEvent(
+        "{provider}: {subtitle_name} is not a zip (status {status_code}, cloudflare {cloudflare}) "
+        "from {url}, skipping download",
+        console=False,
+    ),
+    "download.started": LogEvent("Download started for {filename}", console=False),
+    "download.progress": LogEvent("Downloading {percentage}%", console=False),
+    "download.completed": LogEvent("Download complete", console=False),
     # update.*
-    "update.failed": LogEvent("Failed to download MSI file. HTTP Status Code: {status_code}", LogColor.FAIL),
-    "update.downloaded": LogEvent("MSI file downloaded to: {destination}"),
+    "update.failed": LogEvent("Update download failed", LogColor.FAIL),
+    "update.downloaded": LogEvent("MSI file downloaded to: {destination}", console=False),
     # pipeline.*
-    "pipeline.diagnostics_flagged": LogEvent("Provider diagnostics flagged: {message}", LogColor.WARN),
-    "pipeline.provider_changed": LogEvent("{provider} may have changed, unrecognized response", LogColor.WARN),
-    "pipeline.summary_succeeded": LogEvent("{summary}", LogColor.MATCH),
-    "pipeline.summary_failed": LogEvent("{summary}", LogColor.FAIL),
-    "pipeline.finished": LogEvent("Finished in {seconds} seconds", LogColor.FINISH),
+    "pipeline.diagnostics_flagged": LogEvent("Provider diagnostics flagged: {message}", LogColor.WARN, console=False),
+    "pipeline.provider_changed": LogEvent(
+        "{provider} may have changed, unrecognized response", LogColor.WARN, console=False
+    ),
+    "pipeline.summary_succeeded": LogEvent("{summary}", LogColor.MATCH, console=False),
+    "pipeline.summary_failed": LogEvent("{summary}", LogColor.FAIL, console=False),
+    "pipeline.finished": LogEvent("Finished in {seconds} seconds", LogColor.FINISH, console=False),
     # boot.*
     "boot.argv": LogEvent("sys.argv: {argv}", console=False),
     "boot.video_file": LogEvent("Video file {presence}: {path}", console=False),
-    "boot.verifying": LogEvent("Verifying files and paths"),
+    "boot.verifying": LogEvent("Verifying files and paths", console=False),
     "boot.tray_init": LogEvent("Initializing system tray icon", console=False),
     "boot.gui_warmup": LogEvent("GUI warmup triggered", console=False),
-    "boot.gui_opened": LogEvent("GUI opened"),
+    "boot.gui_opened": LogEvent("GUI opened", console=False),
     "boot.gui_closed": LogEvent("GUI closed", console=False),
     "boot.long_paths_disabled": LogEvent(
         "Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot."
@@ -194,7 +208,7 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "thread.completed": LogEvent("Thread {name} completed", console=False),
     "thread.joined": LogEvent("All threads joined: {names}", console=False),
     # flow.*
-    "flow.filename_has_spaces": LogEvent("{filename} contains spaces, result may vary"),
+    "flow.filename_has_spaces": LogEvent("{filename} contains spaces, result may vary", console=False),
     # tray.*
     "tray.added": LogEvent("Subsearch was added to the system tray", console=False),
     "tray.removed": LogEvent("Subsearch was removed from the system tray", console=False),
@@ -239,7 +253,7 @@ def render(event_key: str, **values: Any) -> tuple[str, LogEvent]:
 def dataclass_lines(instance: DataclassInstance) -> list[str]:
     if not dataclasses.is_dataclass(instance):
         raise ValueError("Input is not a dataclass instance.")
-    lines = [LOG_EVENTS["banner"].render(title=instance.__class__.__name__)]
+    lines = [f"--- [{instance.__class__.__name__}] ---"]
     for dataclass_field in dataclasses.fields(instance):
         value = getattr(instance, dataclass_field.name)
         lines.extend(_field_lines(dataclass_field.name, value))

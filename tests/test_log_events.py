@@ -21,6 +21,7 @@ _REPRESENTATIVE_VALUES = {
     "change": "search.accept_threshold: 90 → 50",
     "url": "https://example.test",
     "status_code": 503,
+    "cloudflare": "challenge",
     "key": "search.accept_threshold",
     "path": Path("C:/tmp/x"),
     "filename_field": "movie.mkv",
@@ -80,3 +81,31 @@ def test_every_event_renders_without_keyerror(event_key: str) -> None:
         event.render(**_REPRESENTATIVE_VALUES)
     except KeyError as missing:
         pytest.fail(f"{event_key} template references {missing} not in representative values")
+
+
+# The console is a plain-language progress feed: phase markers, the found subtitle
+# list, downloads, and a handful of saved/restored/failed lines the user can act on.
+# Everything else is forensic detail that belongs only in the log file. This set is the
+# contract; promoting a new event to the console is a deliberate edit to this list.
+CONSOLE_FACING_EVENTS = {
+    "banner",
+    "video_file_selected",
+    "subtitle_match",
+    "subtitle_rejected",
+    "rename",
+    "extract",
+    "config.committed",
+    "config.reverted",
+    "config.reset",
+    "config.restored",
+    "imdb.connecting",
+    "download.subtitle",
+    "update.failed",
+    "boot.long_paths_disabled",
+    "boot.long_paths_help",
+}
+
+
+def test_console_facing_events_match_contract() -> None:
+    actual = {key for key, event in log_events.LOG_EVENTS.items() if event.console}
+    assert actual == CONSOLE_FACING_EVENTS
