@@ -23,9 +23,15 @@ from config import CHANGELOG_NAME, EXE_NAME, Paths
 LICENSE_PATH = Paths.working_directory / "LICENSE"
 
 
+def release_branch() -> str:
+    # On pull_request events GITHUB_REF_NAME is the merge ref (e.g. "925/merge"), not a
+    # branch, so the release workflow passes the real target branch via RELEASE_BRANCH.
+    return os.environ.get("RELEASE_BRANCH") or os.environ["GITHUB_REF_NAME"]
+
+
 class Init:
     def run(self) -> None:
-        ref_name = os.environ["GITHUB_REF_NAME"]
+        ref_name = release_branch()
         run_id = os.environ["GITHUB_RUN_ID"]
 
         commitizen = Commitizen()
@@ -85,7 +91,7 @@ class TestBinaries:
 class BuildChangelog:
     def _read_env(self) -> tuple[str, str, str, str, str, str]:
         return (
-            os.environ["GITHUB_REF_NAME"],
+            release_branch(),
             os.environ["CURRENT_TAG"],
             os.environ["PREVIOUS_TAG"],
             os.environ["MSI_NAME"],
@@ -166,7 +172,7 @@ class OpenMainPullRequest:
 
     def _read_pr_content(self) -> tuple[str, str]:
         predicted_version = os.environ["PREDICTED_VERSION"]
-        title = f"Release {predicted_version}"
+        title = f"chore(release): {predicted_version}"
         body = (Paths.artifacts / CHANGELOG_NAME).read_text()
         return title, body
 
@@ -272,8 +278,7 @@ class DryRunInit:
 
 class SyncDev:
     def run(self) -> None:
-        release_branch = os.environ["GITHUB_REF_NAME"]
-        Git().fast_forward_branch(source_branch=release_branch, target_branch="dev")
+        Git().fast_forward_branch(source_branch=release_branch(), target_branch="dev")
 
 
 class UpdateLicenseYear:
