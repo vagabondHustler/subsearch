@@ -50,7 +50,7 @@ class ConfigSession:
         json_file.dump_json_data(self.config_file_path, self.in_memory_data)
         self.log_tracked_changes()
 
-        log.debug(f"Config session committed to {self.config_file_path.name}")
+        log.event("config.committed", level="debug", filename=self.config_file_path.name)
         self.has_uncommitted_changes = False
         self.backup_file_path.unlink(missing_ok=True)
         self.last_known_good_backed_up = False
@@ -61,7 +61,7 @@ class ConfigSession:
         self.tracked_changes.clear()
 
     def revert(self) -> None:
-        log.warning("Reverting uncommitted config changes")
+        log.event("config.reverted", level="warning")
         self.in_memory_data = json_file.load_json_data(self.config_file_path)
         self.has_uncommitted_changes = False
         self.tracked_changes.clear()

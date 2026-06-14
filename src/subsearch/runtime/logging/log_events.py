@@ -70,7 +70,26 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL
     ),
     "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL),
+    # config.*
     "config.changed": LogEvent("Config change: {change}", console=False),
+    "config.committed": LogEvent("Config session committed to {filename}", console=False),
+    "config.reverted": LogEvent("Reverting uncommitted config changes", console=False),
+    "config.schema_mismatch": LogEvent("Config schema mismatch, repairing", console=False),
+    "config.key_removed": LogEvent("Removing obsolete config key {key}", console=False),
+    "config.key_added": LogEvent("Adding missing config key {key}", console=False),
+    "config.reset": LogEvent("Resetting config to defaults at {path}", console=False),
+    "config.restored": LogEvent("Restoring last known good config from {path}", console=False),
+    "config.restore_attempt": LogEvent("Config missing or unreadable, attempting restore from backup", console=False),
+    "config.unreadable_after_restore": LogEvent(
+        "Config is unreadable after restore, resetting to defaults", console=False
+    ),
+    "config.integrity_passed": LogEvent("Config integrity check passed", console=False),
+    "config.repair_succeeded": LogEvent("Config repair succeeded", console=False),
+    "config.repair_failed": LogEvent("Config repair failed, resetting to defaults", console=False),
+    "config.write_failed": LogEvent("Failed to write config to {filename}: {reason}", console=False),
+    "config.read": LogEvent("Read json file from {filename}", console=False),
+    "config.wrote": LogEvent("Wrote config to {filename}", console=False),
+    # http.*
     "http.request_failed": LogEvent("Request failed for {url}: {reason}", console=False),
     "http.bad_status": LogEvent("Request to {url} returned status {status_code}", console=False),
 }

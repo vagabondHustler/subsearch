@@ -20,17 +20,17 @@ class ConfigResolution:
 
 
 def repair_config(config_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    log.warning("Config schema mismatch , repairing")
+    log.event("config.schema_mismatch", level="warning")
     config_data = json_file.load_json_data(config_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
-        log.info(f"Removing obsolete config key {key}")
+        log.event("config.key_removed", key=key)
         delete_nested_value(config_data, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        log.info(f"Adding missing config key {key}")
+        log.event("config.key_added", key=key)
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         set_nested_value(config_data, key, value)
@@ -57,7 +57,7 @@ def remove_stale_backup_file() -> None:
 
 
 def reset_to_default_config() -> None:
-    log.warning(f"Resetting config to defaults at {FILE_PATHS.config}")
+    log.event("config.reset", level="warning", path=FILE_PATHS.config)
     FILE_PATHS.config.unlink(missing_ok=True)
     json_file.dump_json_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
@@ -66,7 +66,7 @@ def restore_last_known_good_config() -> None:
     backup_file_path = FILE_PATHS.config.with_suffix(f"{FILE_PATHS.config.suffix}.bak")
     if not backup_file_path.exists():
         return None
-    log.info(f"Restoring last known good config from {backup_file_path}")
+    log.event("config.restored", path=backup_file_path)
     os.replace(backup_file_path, FILE_PATHS.config)
 
 
@@ -77,7 +77,7 @@ def resolve_on_integrity_failure() -> ConfigResolution:
         config_data = json_file.load_json_data(FILE_PATHS.config)
         config_keys = get_keys_recursively(config_data)
     except Exception:
-        log.warning("Config missing or unreadable, attempting restore from backup")
+        log.event("config.restore_attempt", level="warning")
         restore_last_known_good_config()
         remove_stale_backup_file()
         if not FILE_PATHS.config.exists():
@@ -87,18 +87,18 @@ def resolve_on_integrity_failure() -> ConfigResolution:
             config_data = json_file.load_json_data(FILE_PATHS.config)
             config_keys = get_keys_recursively(config_data)
         except Exception:
-            log.warning("Config is unreadable after restore, resetting to defaults")
+            log.event("config.unreadable_after_restore", level="warning")
             reset_to_default_config()
             return ConfigResolution(json_file.load_json_data(FILE_PATHS.config), is_fresh=True)
     else:
         remove_stale_backup_file()
     if valid_config(valid_config_keys, config_keys):
-        log.debug("Config integrity check passed")
+        log.event("config.integrity_passed", level="debug")
         return ConfigResolution(config_data, is_fresh=False)
     try:
         repair_config(FILE_PATHS.config, valid_config_keys, config_keys)
-        log.info("Config repair succeeded")
+        log.event("config.repair_succeeded")
     except Exception:
-        log.error("Config repair failed, resetting to defaults")
+        log.event("config.repair_failed", level="error")
         reset_to_default_config()
     return ConfigResolution(json_file.load_json_data(FILE_PATHS.config), is_fresh=True)

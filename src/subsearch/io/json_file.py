@@ -8,7 +8,7 @@ from subsearch.runtime.logging.logger import log
 
 
 def load_json_data(json_file_path: Path) -> dict[str, Any]:
-    log.debug(f"Read json file from {json_file_path.name}")
+    log.event("config.read", level="debug", filename=json_file_path.name)
     with open(json_file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
@@ -29,7 +29,7 @@ def dump_json_data(json_file_path: Path, json_data: dict) -> None:
             os.fsync(file.fileno())
         os.replace(temp_file_path, json_file_path)
 
-        log.debug(f"Wrote config to {json_file_path.name}")
+        log.event("config.wrote", level="debug", filename=json_file_path.name)
     except Exception as e:
-        log.error(f"Failed to write config to {json_file_path.name}: {e}")
+        log.event("config.write_failed", level="error", filename=json_file_path.name, reason=str(e))
         raise
