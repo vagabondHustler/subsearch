@@ -13,7 +13,7 @@ class BrowseLineEdit(IconButtonLineEdit):
     def __init__(
         self,
         placeholder: str = "",
-        dialog_title: str = "Select destination folder",
+        dialog_title: str = "Select destination directory",
         select_file: bool = False,
         icon: LucideIcon = LucideIcon.FOLDER_OPEN,
         parent: QWidget | None = None,

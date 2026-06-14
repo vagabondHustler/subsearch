@@ -46,7 +46,7 @@ ROW_CONFIG_KEY_PATTERNS = (
     r'SwitchRow\(\s*"([^"]+)"',
     r'IntInputRow\(\s*"([^"]+)"',
     r'FuzzySelectRow\(\s*"([^"]+)"',
-    r'FolderPathRow\(\s*"([^"]+)"',
+    r'DirectoryPathRow\(\s*"([^"]+)"',
     r'build_section_header\(\s*"([^"]+)"',
     r'SETTING_DESCRIPTIONS\["([^"]+)"\]',
 )

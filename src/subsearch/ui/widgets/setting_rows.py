@@ -44,8 +44,8 @@ from subsearch.ui.theme.typography import (
     set_error_text,
 )
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
-from subsearch.ui.widgets.fuzzy_select import FuzzySelect
 from subsearch.ui.widgets.browse_line_edit import BrowseLineEdit
+from subsearch.ui.widgets.fuzzy_select import FuzzySelect
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -392,7 +392,7 @@ class TrailingButtonArea(QWidget):
         self.setFixedWidth(PATH_ROW_TRAILING_WIDTH)
 
 
-class FolderPathRow(QWidget):
+class DirectoryPathRow(QWidget):
     path_saved = Signal(str, str)  # (path, detected_resolution)
 
     def __init__(
@@ -401,7 +401,7 @@ class FolderPathRow(QWidget):
         store: SettingsStore,
         inline_help_text: str | None = None,
         placeholder_text: str = "",
-        dialog_title: str = "Select destination folder",
+        dialog_title: str = "Select destination directory",
         allow_empty: bool = False,
         parent: QWidget | None = None,
     ) -> None:

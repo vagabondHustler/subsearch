@@ -1,9 +1,16 @@
 from typing import NamedTuple
 
-from PySide6.QtCore import QEvent, QObject, QSize, Qt, Signal
+from PySide6.QtCore import QElapsedTimer, QEvent, QObject, QSize, Qt, Signal
 from PySide6.QtGui import QKeyEvent
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
-from qfluentwidgets import LineEdit
+from PySide6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
+from qfluentwidgets import LineEdit, SmoothScrollDelegate
 
 from subsearch.ui.compat.qfluent import hide_line_edit_focus_underline
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
@@ -17,12 +24,14 @@ from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.suggestion_popup import ROW_PADDING, SuggestionRow
 
 MAX_VISIBLE_RESULTS = 8
+ROW_HEIGHT_ESTIMATE = 28
 NAVIGATION_HINT = "↑↓ navigate    Enter accept    Esc close"
 ACCEPT_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Tab)
 OPEN_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Space, Qt.Key.Key_Down)
 CHEVRON_ICON_SIZE = 14
 SELECT_FIXED_WIDTH = 200
 SELECT_HEIGHT = 33
+REOPEN_GUARD_MS = 200
 
 
 class MatchRank(NamedTuple):
@@ -68,6 +77,7 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._visible_labels: list[str] = []
         self._rows: list[SuggestionRow] = []
         self._selected_index = 0
+        self._time_since_hidden = QElapsedTimer()
 
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(6, 6, 6, 6)
@@ -86,6 +96,21 @@ class FuzzyFinderPopup(AnchoredPopup):
             self._search_edit.hide()
             self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
+        self._rows_container = QWidget(self)
+        self._rows_layout = QVBoxLayout(self._rows_container)
+        self._rows_layout.setContentsMargins(0, 0, 0, 0)
+        self._rows_layout.setSpacing(2)
+
+        self._scroll_area = QScrollArea(self)
+        self._scroll_area.setWidget(self._rows_container)
+        self._scroll_area.setWidgetResizable(True)
+        self._scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        self._scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._scroll_area.setStyleSheet("QScrollArea { background: transparent; } QWidget { background: transparent; }")
+        self._scroll_delegate = SmoothScrollDelegate(self._scroll_area)
+        self._layout.addWidget(self._scroll_area)
+
         self._hint_label = QLabel(NAVIGATION_HINT, self)
         apply_caption_font(self._hint_label)
         self._hint_label.setStyleSheet(f"color: {palette.NEUTRAL_3}; padding: {ROW_PADDING};")
@@ -101,7 +126,7 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._search_edit.blockSignals(False)
         self._rebuild_rows(matching_labels(self._search_terms_by_label, ""), preferred_label=current_label)
         self.setMinimumWidth(self._anchor_widget.width())
-        self.show_below()
+        self.show_below(centered=True)
         if self._searchable:
             self._search_edit.setFocus()
         else:
@@ -110,17 +135,17 @@ class FuzzyFinderPopup(AnchoredPopup):
     def _refilter(self, query: str) -> None:
         self._rebuild_rows(matching_labels(self._search_terms_by_label, query))
         if self.isVisible():
-            self.show_below()
+            self.show_below(centered=True)
 
     def _rebuild_rows(self, labels: list[str], preferred_label: str | None = None) -> None:
         self._teardown_rows()
-        self._visible_labels = labels[:MAX_VISIBLE_RESULTS]
-        self._rows = [SuggestionRow(index, label, self) for index, label in enumerate(self._visible_labels)]
-        first_row_position = 1 if self._searchable else 0
+        self._visible_labels = labels
+        self._rows = [SuggestionRow(index, label, self._rows_container) for index, label in enumerate(labels)]
         for row in self._rows:
             row.clicked.connect(self._accept_index)
             row.hovered.connect(self._select_index)
-            self._layout.insertWidget(first_row_position + row.index, row)
+            self._rows_layout.addWidget(row)
+        self._cap_scroll_height()
         if self._rows:
             preferred_index = (
                 self._visible_labels.index(preferred_label) if preferred_label in self._visible_labels else 0
@@ -128,9 +153,16 @@ class FuzzyFinderPopup(AnchoredPopup):
             self._select_index(preferred_index)
         self.adjustSize()
 
+    def _cap_scroll_height(self) -> None:
+        self._rows_container.adjustSize()
+        content_height = self._rows_container.sizeHint().height()
+        visible_count = min(len(self._rows), MAX_VISIBLE_RESULTS)
+        capped_height = visible_count * ROW_HEIGHT_ESTIMATE if self._rows else 0
+        self._scroll_area.setFixedHeight(min(content_height, capped_height))
+
     def _teardown_rows(self) -> None:
         for row in self._rows:
-            self._layout.removeWidget(row)
+            self._rows_layout.removeWidget(row)
             row.hide()
             row.deleteLater()
         self._rows = []
@@ -140,6 +172,8 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._selected_index = index
         for row in self._rows:
             row.render_selected(row.index == index)
+        if 0 <= index < len(self._rows):
+            self._scroll_area.ensureWidgetVisible(self._rows[index])
 
     def _accept_index(self, index: int) -> None:
         self.hide()
@@ -170,6 +204,13 @@ class FuzzyFinderPopup(AnchoredPopup):
             self._accept_index(self._selected_index)
             return True
         return False
+
+    def hideEvent(self, event) -> None:
+        self._time_since_hidden.restart()
+        super().hideEvent(event)
+
+    def closed_recently(self) -> bool:
+        return self._time_since_hidden.isValid() and self._time_since_hidden.elapsed() < REOPEN_GUARD_MS
 
 
 class FuzzySelect(QFrame):
@@ -228,6 +269,8 @@ class FuzzySelect(QFrame):
         self._popup.open(self.currentText())
 
     def mousePressEvent(self, event) -> None:
+        if self._popup.closed_recently():
+            return
         self.open_finder()
 
     def keyPressEvent(self, event) -> None:
