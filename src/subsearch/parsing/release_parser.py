@@ -5,7 +5,7 @@ from typing import Any
 
 from num2words import num2words
 
-from subsearch.runtime.config.static_values import (
+from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
 )

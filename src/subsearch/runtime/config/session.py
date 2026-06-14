@@ -4,9 +4,9 @@ from typing import Any
 
 from subsearch.io import json_file
 from subsearch.io.nested_dict import changed_leaves, read_nested_value, set_nested_value
-from subsearch.runtime.config import config_integrity
-from subsearch.runtime.config.app_config_mapper import get_app_config_from_data
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import integrity
+from subsearch.runtime.config.composition import FILE_PATHS
+from subsearch.runtime.config.mapper import get_app_config_from_data
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppConfig
 
@@ -84,7 +84,7 @@ def diagnostics_enabled() -> bool:
 def get_config_session() -> ConfigSession:
     global _active_config_session
     if _active_config_session is None:
-        resolution = config_integrity.resolve_on_integrity_failure()
+        resolution = integrity.resolve_on_integrity_failure()
         _active_config_session = ConfigSession(FILE_PATHS.config, resolution.config_data, resolution.is_fresh)
     return _active_config_session
 

@@ -3,7 +3,7 @@ import os
 import re
 from pathlib import Path
 
-from subsearch.runtime.config.constants import COMPUTER_NAME, FILE_PATHS, GUID
+from subsearch.runtime.config import COMPUTER_NAME, FILE_PATHS, GUID
 
 REDACTED = "[REDACTED]"
 

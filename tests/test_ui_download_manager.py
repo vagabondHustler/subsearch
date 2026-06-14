@@ -19,15 +19,15 @@ def make_subtitle(
 @pytest.fixture
 def download_environment(monkeypatch, tmp_path):
     from subsearch.io import file_system
-    from subsearch.runtime.config import constants
+    from subsearch.runtime.config import composition
 
     downloaded = []
     monkeypatch.setattr(
         file_system, "download_subtitle", lambda subtitle, number, total, tmp_dir: downloaded.append(subtitle)
     )
     monkeypatch.setattr(file_system, "extract_files_in_dir", lambda src, dst, extension=".zip": None)
-    monkeypatch.setattr(constants.VIDEO_FILE, "download_directory", tmp_path / "tmp", raising=False)
-    monkeypatch.setattr(constants.VIDEO_FILE, "extraction_directory", tmp_path / "tmp", raising=False)
+    monkeypatch.setattr(composition.VIDEO_FILE, "download_directory", tmp_path / "tmp", raising=False)
+    monkeypatch.setattr(composition.VIDEO_FILE, "extraction_directory", tmp_path / "tmp", raising=False)
     (tmp_path / "tmp").mkdir()
     return downloaded
 
@@ -91,7 +91,7 @@ def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_handling_en
 ) -> None:
     from qfluentwidgets import TransparentToolButton
 
-    from subsearch.runtime.config import constants
+    from subsearch.runtime.config import composition
     from subsearch.ui.cards.download_manager import SubtitleActionRow
 
     auto_downloaded = make_subtitle("Auto.Sub", 96, SubtitleStatus.AUTO_DOWNLOADED)
@@ -107,7 +107,7 @@ def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_handling_en
         assert len(buttons) == 2
         move_button, place_button = buttons
         assert "move all subtitles to" in move_button.toolTip().lower()
-        assert place_button.isEnabled() == constants.VIDEO_FILE.file_exists
+        assert place_button.isEnabled() == composition.VIDEO_FILE.file_exists
         # The item keeps its native icon and text so the row stays aligned with
         # every other row; the widget only adds the trailing action buttons.
         assert "Auto.Sub" in item.text()

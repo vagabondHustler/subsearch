@@ -9,7 +9,7 @@ from subsearch.io.nested_dict import (
     get_keys_recursively,
     set_nested_value,
 )
-from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.config.composition import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.logging.logger import log
 
 
@@ -68,7 +68,6 @@ def restore_last_known_good_config() -> None:
         return None
     log.info(f"Restoring last known good config from {backup_file_path}")
     os.replace(backup_file_path, FILE_PATHS.config)
-
 
 
 def resolve_on_integrity_failure() -> ConfigResolution:

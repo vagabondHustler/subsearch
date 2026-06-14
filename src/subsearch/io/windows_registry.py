@@ -3,13 +3,13 @@ import winreg
 from collections.abc import Mapping
 from pathlib import Path
 
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.constants import (
+from subsearch.runtime.config import (
     APP_PATHS,
     COMPUTER_NAME,
     DEVICE_INFO,
     REGISTRY_PATHS,
 )
+from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
 
 

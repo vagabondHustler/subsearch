@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget
 
-from subsearch.runtime.config.constants import DEVICE_INFO
+from subsearch.runtime.config import DEVICE_INFO
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.services.shell_integration import ShellIntegrationService

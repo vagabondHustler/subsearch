@@ -2,8 +2,8 @@ import pytest
 
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.io import json_file
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import FILE_PATHS
+from subsearch.runtime.config import session as config_session
 
 
 class MinimalBootstrap(Bootstrap):

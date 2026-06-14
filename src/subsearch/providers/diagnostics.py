@@ -3,15 +3,15 @@ import sys
 from subsearch.io.language_data import load_language_data
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.constants import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.config import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models.exceptions import MissingApiKey
 from subsearch.runtime.models import (
     AppConfig,
     ProviderDiagnosticStatus,
     ProviderResult,
 )
+from subsearch.runtime.models.exceptions import MissingApiKey
 
 KNOWN_GOOD_RELEASE = "The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv"
 

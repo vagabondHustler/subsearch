@@ -1,5 +1,5 @@
 from subsearch.io import json_file
-from subsearch.runtime.config import config_session
+from subsearch.runtime.config import session as config_session
 
 
 def test_session_keeps_disk_untouched_until_commit(fake_config_file):

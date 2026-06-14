@@ -3,7 +3,7 @@ from typing import Any, Callable
 from PySide6.QtCore import QObject, Signal
 
 from subsearch.io.language_data import load_language_data
-from subsearch.runtime.config import config_session
+from subsearch.runtime.config import session as config_session
 
 
 class SettingsStore(QObject):

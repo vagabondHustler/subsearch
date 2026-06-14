@@ -1,7 +1,8 @@
 from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
-from subsearch.runtime.config import config_session, static_values
-from subsearch.runtime.config.factories import get_default_app_config
+from subsearch.runtime.config import defaults
+from subsearch.runtime.config import session as config_session
+from subsearch.runtime.config.defaults import get_default_app_config
 from tests import fixture_data
 
 
@@ -48,7 +49,7 @@ def test_str_parser_default_weights_match_passed_defaults() -> None:
     same_group = "the.foo.bar.2021.1080p.web.h264-foobar"
     diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
     assert release_parser.score_subtitle_tokens(same_group, diff_group) == release_parser.score_subtitle_tokens(
-        same_group, diff_group, static_values.DEFAULT_TOKEN_WEIGHTS, static_values.DEFAULT_TOKEN_MULTIPLIERS
+        same_group, diff_group, defaults.DEFAULT_TOKEN_WEIGHTS, defaults.DEFAULT_TOKEN_MULTIPLIERS
     )
 
 

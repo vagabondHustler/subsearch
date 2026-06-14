@@ -15,7 +15,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.io import windows_registry
-from subsearch.runtime.config.constants import APP_PATHS
+from subsearch.runtime.config import APP_PATHS
 from subsearch.runtime.models import SearchOutcome, Subtitle
 from subsearch.ui import warmup
 from subsearch.ui.cards import (

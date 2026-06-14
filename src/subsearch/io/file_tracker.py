@@ -2,7 +2,7 @@ import json
 import shutil
 from pathlib import Path
 
-from subsearch.runtime.config.constants import APP_PATHS
+from subsearch.runtime.config import APP_PATHS
 from subsearch.runtime.logging.logger import log
 
 TEMP_DIRECTORY_NAME = "tmp_subsearch"

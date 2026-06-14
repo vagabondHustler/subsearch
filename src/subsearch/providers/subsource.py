@@ -5,11 +5,11 @@ from curl_cffi.requests import Response
 
 from subsearch.providers import provider_helper
 from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.models.exceptions import (
     MissingApiKey,
     ProviderResponseUnrecognized,
 )
-from subsearch.runtime.models import ProviderDiagnosticStatus
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 

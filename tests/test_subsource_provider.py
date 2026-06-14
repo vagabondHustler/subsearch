@@ -3,10 +3,10 @@ import pytest
 from subsearch.io.language_data import load_language_data
 from subsearch.parsing import release_parser
 from subsearch.providers.subsource import API_BASE_URL, Subsource, SubsourceApi
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.factories import get_default_app_config
-from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.config import session as config_session
+from subsearch.runtime.config.defaults import get_default_app_config
 from subsearch.runtime.models import ProviderDiagnosticStatus
+from subsearch.runtime.models.exceptions import MissingApiKey
 from tests import fixture_data
 
 

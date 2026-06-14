@@ -1,5 +1,5 @@
 from subsearch.core.pipeline import SearchPipeline, SearchWorker
-from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppMode, Subtitle
 

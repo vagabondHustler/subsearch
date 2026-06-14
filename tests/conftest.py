@@ -10,7 +10,7 @@ import pytest
 # Qt must render offscreen under pytest; set before any QApplication is created.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from subsearch.runtime.config import constants, factories
+from subsearch.runtime.config import composition, defaults
 
 
 @pytest.fixture(scope="session")
@@ -48,7 +48,7 @@ def fake_language_data_file(tmp_path) -> Any:
 
 @pytest.fixture
 def fake_config_file(tmp_path) -> Any:
-    fake_data = factories.get_default_app_config()
+    fake_data = defaults.get_default_app_config()
     fake_file = tmp_path / "fake_subsearch_config.json"
     with fake_file.open("w") as f:
         json.dump(fake_data, f)
@@ -65,9 +65,9 @@ def fake_log_file(tmp_path) -> Any:
 
 @pytest.fixture(autouse=True)
 def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None:
-    constants.FILE_PATHS.config = fake_config_file
-    constants.FILE_PATHS.subtitle_languages = fake_language_data_file
-    constants.FILE_PATHS.log = fake_log_file
+    composition.FILE_PATHS.config = fake_config_file
+    composition.FILE_PATHS.subtitle_languages = fake_language_data_file
+    composition.FILE_PATHS.log = fake_log_file
 
 
 @pytest.fixture(autouse=True)
@@ -84,12 +84,12 @@ def redirect_logger_to_temp_log(override_constants) -> Any:
 
 @pytest.fixture(autouse=True)
 def reset_constants() -> None:
-    importlib.reload(factories)
+    importlib.reload(defaults)
 
 
 @pytest.fixture(autouse=True)
 def reset_config_session() -> Any:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
 
     config_session.reset_config_session()
     yield

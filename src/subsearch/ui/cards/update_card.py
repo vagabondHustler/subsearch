@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, ProgressBar
 
-from subsearch.runtime.config.constants import VERSION
+from subsearch.runtime.config import VERSION
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS

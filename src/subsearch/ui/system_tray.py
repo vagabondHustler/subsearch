@@ -2,8 +2,7 @@ from PySide6.QtCore import QEventLoop
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QSystemTrayIcon
 
-from subsearch.runtime.config import metaclasses
-from subsearch.runtime.config.constants import APP_PATHS, VERSION
+from subsearch.runtime.config import APP_PATHS, VERSION
 from subsearch.runtime.logging.logger import log
 from subsearch.ui.qt_application import get_application
 
@@ -11,7 +10,7 @@ TOAST_DURATION_MS = 5000
 TOAST_REGISTRATION_TIMEOUT_MS = 1000
 
 
-class SystemTray(metaclass=metaclasses.Singleton):
+class SystemTray:
     def __init__(self, enabled: bool) -> None:
         self.enabled = enabled
         if not self.enabled:

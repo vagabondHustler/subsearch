@@ -4,9 +4,8 @@ from typing import Protocol
 from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
-from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config import VIDEO_FILE
 from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models import Subtitle
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
 

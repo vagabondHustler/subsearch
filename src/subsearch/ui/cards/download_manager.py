@@ -24,7 +24,7 @@ from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButto
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.parsing.release_parser import get_release_info
-from subsearch.runtime.config.constants import SUPPORTED_FILE_EXT, VIDEO_FILE
+from subsearch.runtime.config import SUPPORTED_FILE_EXT, VIDEO_FILE
 from subsearch.runtime.models import (
     MatchTier,
     Subtitle,
@@ -326,7 +326,7 @@ class SubtitleSearchBar(QWidget):
         self._video_file_service.select_video(file_path)
 
     def _browse_for_video_file(self) -> None:
-        from subsearch.runtime.config.constants import DEFAULT_CONFIG
+        from subsearch.runtime.config import DEFAULT_CONFIG
 
         extensions = DEFAULT_CONFIG.get("shell_integration", {}).get("file_extensions", {})
         enabled_exts = [ext for ext, enabled in extensions.items() if enabled]

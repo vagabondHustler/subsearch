@@ -5,16 +5,16 @@ SRC_ROOT = Path(__file__).parent.parent / "src" / "subsearch"
 TESTS_ROOT = Path(__file__).parent
 
 JSON_FILE_MODULE = "subsearch.io.json_file"
-CONFIG_INTEGRITY_MODULE = "subsearch.runtime.config.config_integrity"
-APP_CONFIG_MAPPER_MODULE = "subsearch.runtime.config.app_config_mapper"
+CONFIG_INTEGRITY_MODULE = "subsearch.runtime.config.integrity"
+APP_CONFIG_MAPPER_MODULE = "subsearch.runtime.config.mapper"
 
-# config_session owns config handling; everything else in src goes through it.
-# config_integrity is its internal helper for on-disk repair, so it may also
+# session owns config handling; everything else in src goes through it.
+# integrity is its internal helper for on-disk repair, so it may also
 # reach the JSON serializer.
 OWNERSHIP_RULES = [
-    (JSON_FILE_MODULE, {"runtime/config/config_session.py", "runtime/config/config_integrity.py"}),
-    (CONFIG_INTEGRITY_MODULE, {"runtime/config/config_session.py"}),
-    (APP_CONFIG_MAPPER_MODULE, {"runtime/config/config_session.py"}),
+    (JSON_FILE_MODULE, {"runtime/config/session.py", "runtime/config/integrity.py"}),
+    (CONFIG_INTEGRITY_MODULE, {"runtime/config/session.py"}),
+    (APP_CONFIG_MAPPER_MODULE, {"runtime/config/session.py"}),
 ]
 
 # These tests exercise the serializer, session persistence, and repair directly.

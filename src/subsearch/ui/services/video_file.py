@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject
 
-from subsearch.runtime.config.constants import VIDEO_FILE, VIDEO_FILE_RESOLVER
+from subsearch.runtime.config import VIDEO_FILE, VIDEO_FILE_RESOLVER
 from subsearch.runtime.logging.logger import log
 
 

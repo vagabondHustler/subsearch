@@ -1,6 +1,6 @@
 import pytest
 
-from subsearch.runtime.config.static_values import (
+from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
 )
@@ -74,7 +74,7 @@ def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
 
 
 def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.search_cards import SearchThresholdCard
     from subsearch.ui.state.store import SettingsStore
 
@@ -121,7 +121,7 @@ def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> N
 
 
 def test_subtitle_filters_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.search_cards import SubtitleFiltersCard
     from subsearch.ui.state.store import SettingsStore
 
@@ -144,7 +144,7 @@ def test_subtitle_filters_restore_defaults(qtbot) -> None:
 
 
 def test_subtitle_handling_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
     from subsearch.ui.state.store import SettingsStore
 
@@ -168,7 +168,7 @@ def test_subtitle_handling_restore_defaults(qtbot) -> None:
 
 
 def test_paths_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.paths import PathsCard
     from subsearch.ui.state.store import SettingsStore
 
@@ -207,7 +207,7 @@ def test_shell_integration_restore_re_enables_context_menu_icon(qtbot) -> None:
 
 
 def test_notifications_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.system_cards import NotificationsCard
     from subsearch.ui.state.store import SettingsStore
 
@@ -230,7 +230,7 @@ def test_notifications_restore_defaults(qtbot) -> None:
 
 
 def test_search_mode_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.search_cards import SearchModeCard
     from subsearch.ui.state.store import SettingsStore
     from subsearch.ui.widgets.setting_rows import FuzzySelectRow
@@ -269,7 +269,7 @@ def test_subtitle_handling_greys_out_automatic_rows_when_manually_handle_enabled
 
 
 def test_application_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.system_cards import ApplicationCard
     from subsearch.ui.services.shell_integration import ShellIntegrationService
     from subsearch.ui.state.store import SettingsStore
@@ -294,7 +294,7 @@ def test_application_restore_defaults(qtbot) -> None:
 
 
 def test_network_restore_defaults(qtbot) -> None:
-    from subsearch.runtime.config import config_session
+    from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.system_cards import NetworkCard
     from subsearch.ui.state.store import SettingsStore
 

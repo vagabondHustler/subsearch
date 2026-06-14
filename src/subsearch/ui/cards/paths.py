@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import MessageBox
 
-from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config import VIDEO_FILE
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.state.store import SettingsStore

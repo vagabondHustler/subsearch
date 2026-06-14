@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 
-from subsearch.runtime.config.constants import (
+from subsearch.runtime.config import (
     DEVICE_INFO,
     FILE_PATHS,
     VERSION,

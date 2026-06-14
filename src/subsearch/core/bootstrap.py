@@ -4,8 +4,8 @@ from pathlib import Path
 from subsearch.io import file_system, file_tracker, language_data, windows_registry
 from subsearch.parsing import imdb_lookup, release_parser
 from subsearch.providers.provider_helper import SubtitleResults
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.constants import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, VIDEO_FILE
+from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppMode,

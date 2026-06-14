@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from subsearch.runtime.config.constants import FILE_PATHS
+from subsearch.runtime.config import FILE_PATHS
 
 
 @functools.lru_cache(maxsize=None)

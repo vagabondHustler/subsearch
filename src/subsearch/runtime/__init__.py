@@ -1,4 +1,4 @@
-from subsearch.runtime.config.constants import (
+from subsearch.runtime.config import (
     APP_PATHS,
     COMPUTER_NAME,
     DEFAULT_CONFIG,

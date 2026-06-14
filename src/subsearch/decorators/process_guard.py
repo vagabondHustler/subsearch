@@ -1,8 +1,8 @@
 import ctypes
 from typing import Any, Callable
 
-from subsearch.runtime.config import config_session
-from subsearch.runtime.config.constants import GUID
+from subsearch.runtime.config import GUID
+from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import exceptions
 

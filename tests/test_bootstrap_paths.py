@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.runtime.config.constants import VIDEO_FILE
+from subsearch.runtime.config import VIDEO_FILE
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ def test_configured_directories_are_used_verbatim(unanchored_video_file, tmp_pat
 
 
 def test_empty_directories_fall_back_to_temp_and_downloads(unanchored_video_file) -> None:
-    from subsearch.runtime.config.constants import APP_PATHS
+    from subsearch.runtime.config import APP_PATHS
 
     _anchor_with_paths("", "")
 

@@ -5,8 +5,7 @@ from logging.handlers import RotatingFileHandler
 from types import TracebackType
 from typing import Callable, Optional
 
-from subsearch.runtime.config.constants import APP_PATHS, FILE_PATHS
-from subsearch.runtime.config.metaclasses import Singleton
+from subsearch.runtime.config.composition import APP_PATHS, FILE_PATHS
 from subsearch.runtime.logging import log_events
 from subsearch.runtime.models import DataclassInstance
 
@@ -99,7 +98,7 @@ def _write_session_header(handler: RotatingFileHandler) -> None:
         handler.flush()
 
 
-class Logger(metaclass=Singleton):
+class Logger:
     def __init__(self) -> None:
         self._file_logger: Optional[logging.Logger] = None
         self._sinks: list[ConsoleSink] = [_terminal_sink]

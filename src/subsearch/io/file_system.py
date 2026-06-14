@@ -12,7 +12,7 @@ import requests
 from subsearch.io.file_tracker import get_file_tracker
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
-from subsearch.runtime.config import config_session
+from subsearch.runtime.config import session as config_session
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import MatchTier, Subtitle, classify_match_tier
 

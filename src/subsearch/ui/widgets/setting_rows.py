@@ -17,7 +17,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.config.constants import DEFAULT_CONFIG
+from subsearch.runtime.config import DEFAULT_CONFIG
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import (
     flatten_line_edit,
