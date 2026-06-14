@@ -28,7 +28,6 @@ def download_environment(monkeypatch, tmp_path):
         return True
 
     monkeypatch.setattr(file_system, "download_subtitle", fake_download)
-    monkeypatch.setattr(file_system, "extract_files_in_dir", lambda src, dst, extension=".zip": None)
     monkeypatch.setattr(composition.WORKSPACE, "download_directory", tmp_path / "tmp", raising=False)
     monkeypatch.setattr(composition.WORKSPACE, "extraction_directory", tmp_path / "tmp", raising=False)
     (tmp_path / "tmp").mkdir()

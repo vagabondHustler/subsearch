@@ -164,3 +164,20 @@ def test_extract_files_in_dir_returns_extracted_subtitle_count(tmp_path) -> None
 
     assert extracted_count == 2
     assert sorted(path.name for path in destination.iterdir()) == ["movie.ass", "movie.srt"]
+
+
+def test_extract_subtitle_by_id_unpacks_only_the_matching_archive(tmp_path) -> None:
+    downloads = tmp_path / "downloads"
+    downloads.mkdir()
+    wanted_id = "aaaa1111"
+    other_id = "bbbb2222"
+    with zipfile.ZipFile(downloads / f"{wanted_id}_provider_release_1.zip", "w") as archive:
+        archive.writestr("wanted.srt", "1\n00:00:00,000 --> 00:00:01,000\nfoo\n")
+    with zipfile.ZipFile(downloads / f"{other_id}_provider_release_1.zip", "w") as archive:
+        archive.writestr("other.srt", "1\n00:00:00,000 --> 00:00:01,000\nbar\n")
+    destination = tmp_path / "subs"
+
+    extracted_count = file_system.extract_subtitle_by_id(wanted_id, downloads, destination)
+
+    assert extracted_count == 1
+    assert [path.name for path in destination.iterdir()] == ["wanted.srt"]

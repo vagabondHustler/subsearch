@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Callable, Iterable, Optional
 
 import requests
+from curl_cffi.requests import Response as CurlResponse
 
 from subsearch.io.file_tracker import get_file_tracker
 from subsearch.io.http import get_session
@@ -51,6 +52,16 @@ def is_zip_payload(chunk: bytes) -> bool:
 _HASH_MATCH_PREFIX = "hashmatch__"
 
 
+def _cloudflare_block_reason(response: CurlResponse) -> str:
+    headers = response.headers
+    mitigated = headers.get("cf-mitigated")
+    if mitigated:
+        return mitigated
+    if "cloudflare" in headers.get("server", "").lower() and response.status_code == 403:
+        return "blocked"
+    return "none"
+
+
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> bool:
     log.event(
         "download.subtitle",
@@ -62,13 +73,19 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
-    file_name = f"{prefix}{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
+    file_name = f"{prefix}{subtitle.subtitle_id}_{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
     download_path = tmp_dir / file_name
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if not is_zip_payload(first_chunk):
         log.event(
-            "download.not_zip", level="warning", provider=subtitle.provider_name, subtitle_name=subtitle.subtitle_name
+            "download.not_zip",
+            level="warning",
+            provider=subtitle.provider_name,
+            subtitle_name=subtitle.subtitle_name,
+            status_code=response.status_code,
+            cloudflare=_cloudflare_block_reason(response),
+            url=subtitle.download_url,
         )
         return False
     get_file_tracker().track(download_path)
@@ -108,22 +125,29 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
     return extracted_count
 
 
+def _extract_archive_file(file: Path, dst: Path) -> int:
+    log.event("extract", src=file, dst=dst)
+    try:
+        with zipfile.ZipFile(file) as archive:
+            return _safe_extract_archive(archive, dst, hash_match=file.name.startswith(_HASH_MATCH_PREFIX))
+    except zipfile.BadZipFile, OSError:
+        log.event("fs.archive_unreadable", level="error", name=file.name, traceback=traceback.format_exc())
+        return 0
+
+
 def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> int:
     extracted_count = 0
     for file in src.glob(f"*{extension}"):
-        log.event("extract", src=file, dst=dst)
-        try:
-            with zipfile.ZipFile(file) as archive:
-                extracted_count += _safe_extract_archive(
-                    archive, dst, hash_match=file.name.startswith(_HASH_MATCH_PREFIX)
-                )
-        except zipfile.BadZipFile, OSError:
-            log.event("fs.archive_unreadable", level="error", name=file.name, traceback=traceback.format_exc())
+        extracted_count += _extract_archive_file(file, dst)
     return extracted_count
 
 
-def subtitle_extraction_dir(extraction_root: Path, subtitle_id: str) -> Path:
-    return extraction_root / subtitle_id
+def extract_subtitle_by_id(subtitle_id: str, src: Path, dst: Path, extension: str = ".zip") -> int:
+    dst.mkdir(parents=True, exist_ok=True)
+    extracted_count = 0
+    for file in src.glob(f"*{subtitle_id}*{extension}"):
+        extracted_count += _extract_archive_file(file, dst)
+    return extracted_count
 
 
 def _subtitle_files_in(directory: Path) -> list[Path]:

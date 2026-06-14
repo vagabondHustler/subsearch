@@ -16,35 +16,47 @@ class _PostProcessWorker(Worker):
         super().__init__()
         self._rename = rename
         self._store = store
-        self._source_dir = file_system.subtitle_extraction_dir(WORKSPACE.extraction_directory, subtitle.subtitle_id)
+        self._subtitle_id = subtitle.subtitle_id
+        self._download_dir = WORKSPACE.download_directory
+        self._extraction_dir = WORKSPACE.extraction_directory
 
     def execute(self) -> int:
-        target_path = self._resolve_target_path()
-        log.event("post_processing_started", destination=target_path, source=self._source_dir)
+        extracted_count = self._unpack_subtitle()
+        if extracted_count == 0:
+            self._log_no_files(self._extraction_dir, extracted_count)
+            return 0
         if self._rename:
-            renamed = file_system.autoload_rename(SEARCH_SUBJECT.search_term, self._source_dir)
-            file_system.move_and_replace(renamed, target_path)
-            moved_count = 1 if (target_path / renamed.name).exists() else 0
-        else:
-            moved_count = file_system.move_all(self._source_dir, target_path)
-        delivered_count = self._delivered_count(moved_count, target_path)
-        if delivered_count == 0:
-            log.event(
-                "post_processing_no_files",
-                level="warning",
-                destination=target_path,
-                source=self._source_dir,
-                moved=moved_count,
-            )
-        log.event("post_processing_completed", destination=target_path, source=self._source_dir, moved=moved_count)
-        return delivered_count
+            return self._rename_and_place()
+        log.event(
+            "post_processing_completed",
+            destination=self._extraction_dir,
+            source=self._download_dir,
+            moved=extracted_count,
+        )
+        return extracted_count
 
-    def _delivered_count(self, moved_count: int, target_path: Path) -> int:
-        if moved_count > 0:
-            return moved_count
-        if self._source_dir.resolve() == target_path.resolve():
-            return file_system.count_subtitle_files(target_path)
-        return 0
+    def _unpack_subtitle(self) -> int:
+        return file_system.extract_subtitle_by_id(self._subtitle_id, self._download_dir, self._extraction_dir)
+
+    def _rename_and_place(self) -> int:
+        target_path = self._resolve_target_path()
+        renamed = file_system.autoload_rename(SEARCH_SUBJECT.search_term, self._extraction_dir)
+        file_system.move_and_replace(renamed, target_path)
+        placed = (target_path / renamed.name).exists()
+        if not placed:
+            self._log_no_files(target_path, 0)
+            return 0
+        log.event("post_processing_completed", destination=target_path, source=self._extraction_dir, moved=1)
+        return 1
+
+    def _log_no_files(self, destination: Path, moved: int) -> None:
+        log.event(
+            "post_processing_no_files",
+            level="warning",
+            destination=destination,
+            source=self._download_dir,
+            moved=moved,
+        )
 
     def _resolve_target_path(self) -> Path:
         target = str(self._store.read("paths.video_file_directory"))

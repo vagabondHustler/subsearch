@@ -4,7 +4,6 @@ from typing import Protocol
 from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
-from subsearch.io.file_tracker import get_file_tracker
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import WORKSPACE
 from subsearch.runtime.models import Subtitle, SubtitleStatus
@@ -22,7 +21,6 @@ class SubtitleDownloadWorker(Worker):
         self.download_number = download_number
         self.download_total = download_total
         self.tmp_dir: Path = WORKSPACE.download_directory
-        self.subs_dir: Path = file_system.subtitle_extraction_dir(WORKSPACE.extraction_directory, subtitle.subtitle_id)
 
     def execute(self) -> Subtitle:
         subtitle = self.subtitle
@@ -31,10 +29,6 @@ class SubtitleDownloadWorker(Worker):
         downloaded = file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
         if not downloaded:
             raise DownloadFailed(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a downloadable subtitle")
-        try:
-            file_system.extract_files_in_dir(self.tmp_dir, self.subs_dir)
-        finally:
-            get_file_tracker().delete_tracked_within(self.tmp_dir, "*.zip")
         return subtitle
 
 
