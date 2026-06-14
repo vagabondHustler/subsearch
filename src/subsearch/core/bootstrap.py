@@ -19,7 +19,6 @@ class Bootstrap:
     def __init__(self, pref_counter: float) -> None:
         self.start = pref_counter
         self.api_calls_made: dict[str, int] = {}
-        self.ran_download_tab = False
         self.subtitle_results = SubtitleResults()
         self.manually_accepted_subtitles: list[Subtitle] = []
         self.health_reports: list[ProviderResult] = []

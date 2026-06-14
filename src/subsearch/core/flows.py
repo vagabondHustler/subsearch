@@ -32,7 +32,6 @@ class SettingsFlow(Flow):
         from subsearch.ui.application import open_settings_window
 
         manually_accepted = open_settings_window(search_worker_factory=self._make_search_worker)
-        log.event("flow.exiting_gui", level="debug")
         self._record_gui_results(manually_accepted)
         self.bootstrap.prevent_conflicting_config_settings()
         self._finish()

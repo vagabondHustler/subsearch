@@ -179,6 +179,8 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "boot.verifying": LogEvent("Verifying files and paths"),
     "boot.tray_init": LogEvent("Initializing system tray icon", console=False),
     "boot.gui_warmup": LogEvent("GUI warmup triggered", console=False),
+    "boot.gui_opened": LogEvent("GUI opened", LogColor.BANNER),
+    "boot.gui_closed": LogEvent("GUI closed", console=False),
     "boot.long_paths_disabled": LogEvent(
         "Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot."
     ),
@@ -189,7 +191,6 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "thread.completed": LogEvent("Thread {name} completed", console=False),
     "thread.joined": LogEvent("All threads joined: {names}", console=False),
     # flow.*
-    "flow.exiting_gui": LogEvent("Exiting GUI", console=False),
     "flow.filename_has_spaces": LogEvent("{filename} contains spaces, result may vary"),
     # tray.*
     "tray.added": LogEvent("Subsearch was added to the system tray", console=False),

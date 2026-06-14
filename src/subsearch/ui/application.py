@@ -16,6 +16,7 @@ from qfluentwidgets import (
 
 from subsearch.io import windows_registry
 from subsearch.runtime.config import APP_PATHS
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import SearchOutcome, Subtitle
 from subsearch.ui import warmup
 from subsearch.ui.cards import (
@@ -304,6 +305,8 @@ def open_settings_window(
     window = SettingsWindow(
         subtitles, search_worker_factory, download_service, post_processing_service, start_search_immediately
     )
+    log.event("boot.gui_opened")
     window.show()
     application.exec()
+    log.event("boot.gui_closed", level="debug")
     return window.manual_search_interface.downloaded
