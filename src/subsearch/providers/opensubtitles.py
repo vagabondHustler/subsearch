@@ -17,7 +17,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
         outage_text = self._outage_text(tree)
         if not outage_text:
             return False
-        log.error(f"opensubtitles is down: {outage_text}")
+        log.event("provider.opensubtitles_down", level="error", reason=outage_text)
         return True
 
     def _outage_text(self, tree: Any) -> str:

@@ -120,6 +120,24 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "imdb.no_match": LogEvent(
         "IMDb lookup found no matching entry for {title!r} ({year}, tvseries={tvseries})", console=False
     ),
+    # provider.*
+    "provider.unrecognized_response": LogEvent("{provider} response was unrecognized: {reason}", console=False),
+    "provider.skipped_no_api_key": LogEvent(
+        "{provider} skipped: no API key configured. Add your Subsource API key in settings.", LogColor.WARN
+    ),
+    "provider.opensubtitles_down": LogEvent("opensubtitles is down: {reason}", LogColor.FAIL),
+    "provider.subsource_status": LogEvent("{url} status_code: {status_code} {reason}", console=False),
+    "provider.filename_sanitized": LogEvent("Filename sanitized: {original!r} -> {sanitized!r}", console=False),
+    # diagnostics.*
+    "diagnostics.healthy": LogEvent("{provider}: healthy, resetting failed_attempts to 0", console=False),
+    "diagnostics.unhealthy": LogEvent(
+        "{provider}: unhealthy ({status}, found {found}), failed_attempts {previous} -> {updated}", console=False
+    ),
+    "diagnostics.due": LogEvent("Providers due for diagnostic (threshold={threshold}): {providers}"),
+    "diagnostics.running": LogEvent("Running diagnostics for: {providers}"),
+    "diagnostics.probing": LogEvent("Probing {provider}", console=False),
+    "diagnostics.skipped_no_api_key": LogEvent("{provider}: skipped, missing API key", LogColor.WARN),
+    "diagnostics.result": LogEvent("{provider}: {status} ({diagnostic_status}, found {found})"),
 }
 
 

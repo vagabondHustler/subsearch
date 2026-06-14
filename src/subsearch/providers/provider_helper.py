@@ -54,7 +54,7 @@ def _sanitize_subtitle_filename(filename: str) -> str:
         sanitized = sanitized.replace(char, "_")
     sanitized = sanitized.replace("'", "")
     if sanitized != filename:
-        log.debug(f"Filename sanitized: {filename!r} -> {sanitized!r}")
+        log.event("provider.filename_sanitized", level="debug", original=filename, sanitized=sanitized)
     return sanitized
 
 
@@ -179,7 +179,7 @@ class ProviderHelper:
         try:
             diagnostic_status = search_fn()
         except Exception as error:
-            log.error(f"{self.provider_name} response was unrecognized: {error}")
+            log.event("provider.unrecognized_response", level="error", provider=self.provider_name, reason=str(error))
             self.report_diagnostic_status(ProviderDiagnosticStatus.STRUCTURE_INVALID, 0)
             return
         subtitles_after = len(self.accepted_subtitles) + len(self.rejected_subtitles)

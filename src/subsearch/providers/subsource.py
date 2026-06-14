@@ -38,7 +38,13 @@ class SubsourceApi:
         return {"X-API-Key": self.api_key}
 
     def response_status_ok(self, response: Response) -> bool:
-        log.debug(f"{response.url} status_code: {response.status_code} {response.reason}")
+        log.event(
+            "provider.subsource_status",
+            level="debug",
+            url=response.url,
+            status_code=response.status_code,
+            reason=response.reason,
+        )
         return response.status_code == 200
 
 
@@ -50,7 +56,7 @@ class Subsource(provider_helper.ProviderHelper):
 
     def start_search(self, *args, **kwargs) -> None:
         if not self.api_key:
-            log.warning(f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.")
+            log.event("provider.skipped_no_api_key", level="warning", provider=self.provider_name)
             self.report_diagnostic_status(ProviderDiagnosticStatus.NO_RESPONSE, 0)
             raise MissingApiKey(self.provider_name)
         self.run_search(self._search_and_collect)
