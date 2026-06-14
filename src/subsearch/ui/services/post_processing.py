@@ -16,7 +16,7 @@ class _PostProcessWorker(Worker):
         self._rename = rename
         self._store = store
 
-    def execute(self) -> object:
+    def execute(self) -> int:
         target_path = self._resolve_target_path()
         log.event("post_processing_started", destination=target_path)
         extracted_count = file_system.extract_files_in_dir(
@@ -28,7 +28,8 @@ class _PostProcessWorker(Worker):
             moved_count = 1 if (target_path / renamed.name).exists() else 0
         else:
             moved_count = file_system.move_all(VIDEO_FILE.extraction_directory, target_path)
-        if extracted_count == 0 or moved_count == 0:
+        delivered_count = self._delivered_count(moved_count, target_path)
+        if delivered_count == 0:
             log.event(
                 "post_processing_no_files",
                 level="warning",
@@ -37,7 +38,14 @@ class _PostProcessWorker(Worker):
                 moved=moved_count,
             )
         log.event("post_processing_completed", destination=target_path, extracted=extracted_count, moved=moved_count)
-        return None
+        return delivered_count
+
+    def _delivered_count(self, moved_count: int, target_path: Path) -> int:
+        if moved_count > 0:
+            return moved_count
+        if VIDEO_FILE.extraction_directory.resolve() == target_path.resolve():
+            return file_system.count_subtitle_files(target_path)
+        return 0
 
     def _resolve_target_path(self) -> Path:
         target = str(self._store.read("paths.video_file_directory"))
@@ -56,7 +64,7 @@ class PostProcessingServiceProtocol(Protocol):
 
 
 class PostProcessingService(QObject):
-    succeeded = Signal()
+    succeeded = Signal(int)
     failed = Signal(str)
 
     def __init__(self, task_runner: TaskRunner, parent: QObject | None = None) -> None:
@@ -71,9 +79,15 @@ class PostProcessingService(QObject):
 
     def _run(self, rename: bool, store: SettingsStore) -> None:
         worker = _PostProcessWorker(rename=rename, store=store)
-        worker.finished.connect(lambda _: self.succeeded.emit())
+        worker.finished.connect(self._on_finished)
         worker.failed.connect(self._on_failed)
         self._task_runner.submit(worker)
+
+    def _on_finished(self, delivered_count: object) -> None:
+        if isinstance(delivered_count, int) and delivered_count > 0:
+            self.succeeded.emit(delivered_count)
+        else:
+            self.failed.emit("No subtitles were delivered to the destination")
 
     def _on_failed(self, reason: str) -> None:
         log.event("post_processing_failed", level="error", reason=reason)

@@ -205,6 +205,7 @@ class SubtitleSearchBar(QWidget):
         self._title_suggestion_service = title_suggestion_service
         self._awaiting_suggestions = False
         self._term_without_suggestions = ""
+        self._committed_filename = VIDEO_FILE.filename + VIDEO_FILE.file_extension if VIDEO_FILE.file_exists else ""
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
@@ -316,13 +317,15 @@ class SubtitleSearchBar(QWidget):
 
     def _on_filename_edited(self) -> None:
         filename = self._filename_edit.text().strip()
-        if not filename:
+        if not filename or filename == self._committed_filename:
             return
+        self._committed_filename = filename
         self._video_file_service.rename_active_video(filename)
 
     def select_dropped_video(self, file_path: Path) -> None:
         self._filename_edit.setText(file_path.name)
         self._term_without_suggestions = file_path.name
+        self._committed_filename = file_path.name
         self._video_file_service.select_video(file_path)
 
     def _browse_for_video_file(self) -> None:
@@ -341,6 +344,7 @@ class SubtitleSearchBar(QWidget):
             return
         selected_path = Path(selected)
         self._filename_edit.setText(selected_path.name)
+        self._committed_filename = selected_path.name
         self._video_file_service.select_video(selected_path)
 
 
@@ -415,6 +419,12 @@ class SubtitleActionRow(QWidget):
         self._subtitle = subtitle
         self._store = store
         self._post_processing_service = post_processing_service
+        self._active_button: TransparentToolButton | None = None
+        self._idle_icons: dict[TransparentToolButton, LucideIcon] = {}
+        self._spinner_progress = 0.0
+        self._spinner_timer = QTimer(self)
+        self._spinner_timer.setInterval(FRAME_INTERVAL_MS)
+        self._spinner_timer.timeout.connect(self._advance_spinner)
 
         # Transparent so the list item's own icon and text show through underneath:
         # the buttons only overlay the right edge, leaving the item to render its
@@ -426,17 +436,21 @@ class SubtitleActionRow(QWidget):
         layout.addStretch(1)
 
         move_tooltip = f"Unpack and move all subtitles to: {self._target_path_text()}"
-        layout.addWidget(self._make_action_button(LucideIcon.FILES, move_tooltip, self._unpack_and_move))
+        self._move_button = self._make_action_button(LucideIcon.FILES, move_tooltip, self._unpack_and_move)
+        layout.addWidget(self._move_button)
 
-        place_button = self._make_action_button(
+        self._place_button = self._make_action_button(
             LucideIcon.FILE_PEN,
             "Unpack, rename to match the video file and place it next to the video",
             self._unpack_rename_and_place,
         )
         if not VIDEO_FILE.file_exists:
-            place_button.setEnabled(False)
-            place_button.setToolTip("Select a video file to rename and place a subtitle next to it")
-        layout.addWidget(place_button)
+            self._place_button.setEnabled(False)
+            self._place_button.setToolTip("Select a video file to rename and place a subtitle next to it")
+        layout.addWidget(self._place_button)
+
+        self._post_processing_service.succeeded.connect(self._on_succeeded)
+        self._post_processing_service.failed.connect(self._on_failed)
 
     def _target_path_text(self) -> str:
         return str(self._store.read("paths.video_file_directory"))
@@ -447,14 +461,51 @@ class SubtitleActionRow(QWidget):
         button.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
         button.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
         button.setToolTip(tooltip)
+        self._idle_icons[button] = icon
         button.clicked.connect(slot)
         return button
 
     def _unpack_and_move(self) -> None:
+        self._begin_operation(self._move_button)
         self._post_processing_service.unpack_and_move(self._store)
 
     def _unpack_rename_and_place(self) -> None:
+        self._begin_operation(self._place_button)
         self._post_processing_service.unpack_rename_and_place(self._store)
+
+    def _begin_operation(self, button: TransparentToolButton) -> None:
+        self._active_button = button
+        self._move_button.setEnabled(False)
+        self._place_button.setEnabled(False)
+        self._spinner_progress = 0.0
+        self._spinner_timer.start()
+
+    def _advance_spinner(self) -> None:
+        self._spinner_progress = (self._spinner_progress + FRAME_INTERVAL_MS / CYCLE_MS) % 1.0
+        if self._active_button is not None:
+            self._active_button.setIcon(
+                QIcon(ripple_pixmap(SMALL_ICON_SIZE, DOWNLOADING_COLOR, self._spinner_progress))
+            )
+
+    def _on_succeeded(self, _delivered_count: int) -> None:
+        button = self._take_active_button()
+        if button is not None:
+            button.setIcon(lucide_qicon(LucideIcon.CIRCLE_CHECK_BIG, SUCCESS_COLOR))
+
+    def _on_failed(self, _reason: str) -> None:
+        button = self._take_active_button()
+        if button is not None:
+            button.setIcon(lucide_qicon(self._idle_icons[button], FAILED_COLOR))
+
+    def _take_active_button(self) -> TransparentToolButton | None:
+        button = self._active_button
+        if button is None:
+            return None
+        self._spinner_timer.stop()
+        self._active_button = None
+        self._move_button.setEnabled(True)
+        self._place_button.setEnabled(VIDEO_FILE.file_exists)
+        return button
 
 
 class ManualSearchInterface(QWidget):

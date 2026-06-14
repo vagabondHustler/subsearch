@@ -62,14 +62,16 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "rename": FilesystemEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}", console=False),
     "move": FilesystemEvent(r"Moving {kind}: ...\{src} -> ...\{dst}", console=False),
     "extract": FilesystemEvent(r"Extracting archive: ...\{src} -> ...\{dst}", console=False),
-    "post_processing_started": LogEvent("Unpacking subtitles to {destination}", LogColor.BANNER, bold=True),
+    "post_processing_started": LogEvent(
+        "Unpacking subtitles to {destination}", LogColor.BANNER, bold=True, console=False
+    ),
     "post_processing_completed": LogEvent(
-        "Unpacked {extracted}, moved {moved} subtitles to {destination}", LogColor.SUCCESS
+        "Unpacked {extracted}, moved {moved} subtitles to {destination}", LogColor.SUCCESS, console=False
     ),
     "post_processing_no_files": LogEvent(
-        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL
+        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL, console=False
     ),
-    "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL),
+    "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL, console=False),
     # config.*
     "config.changed": LogEvent("Config change: {change}", console=False),
     "config.committed": LogEvent("Config session committed to {filename}", console=False),
