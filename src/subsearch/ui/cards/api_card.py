@@ -24,6 +24,7 @@ from subsearch.ui.theme.typography import (
     set_error_text,
 )
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.setting_rows import TrailingButtonArea
 
 VISIBLE_PREFIX_LENGTH = 4
 MASK_CHARACTER = "•"
@@ -158,6 +159,7 @@ class ApiKeyField(QWidget):
         layout.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(8)
         layout.addWidget(self.line_edit, stretch=1)
+        layout.addWidget(TrailingButtonArea([], None, self))
 
         self._apply_validation_state(api_key)
 
