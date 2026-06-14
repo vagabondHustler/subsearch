@@ -33,7 +33,6 @@ class SettingsFlow(Flow):
 
         manually_accepted = open_settings_window(search_worker_factory=self._make_search_worker)
         self._record_gui_results(manually_accepted)
-        self.bootstrap.prevent_conflicting_config_settings()
         self._finish()
 
 
@@ -85,7 +84,6 @@ class PipelineSearchFlow(Flow):
     def run(self) -> None:
         self._warn_if_filename_has_spaces()
         if not self.bootstrap.all_providers_disabled():
-            self.bootstrap.prevent_conflicting_config_settings()
             log.event("banner", title=f"Searching on {self._enabled_provider_names()}")
         pipeline = self.pipeline
         pipeline.init_search(pipeline.opensubtitles, pipeline.yifysubtitles, pipeline.subsource)

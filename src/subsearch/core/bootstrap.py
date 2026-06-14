@@ -180,12 +180,6 @@ class Bootstrap:
     def resync_app_config(self) -> None:
         self.app_config = config_session.get_config_session().snapshot()
 
-    def prevent_conflicting_config_settings(self) -> None:
-        session = config_session.get_config_session()
-        if self.app_config.post_processing["move_best"] and self.app_config.post_processing["move_all"]:
-            session.write("post_processing.move_best", False)
-        session.commit()
-        self.resync_app_config()
 
     def _notify_user(self) -> None:
         log.event("boot.long_paths_disabled")

@@ -46,13 +46,3 @@ def test_resync_does_not_require_commit_to_be_visible(bootstrap: MinimalBootstra
     assert json_file.load_json_value(FILE_PATHS.config, "search.accept_threshold") == 90
 
 
-def test_conflict_resolver_resolves_move_best_move_all(bootstrap: MinimalBootstrap):
-    session = config_session.get_config_session()
-    session.write("post_processing.move_best", True)
-    session.write("post_processing.move_all", True)
-    bootstrap.resync_app_config()
-
-    bootstrap.prevent_conflicting_config_settings()
-
-    assert bootstrap.app_config.post_processing["move_best"] is False
-    assert json_file.load_json_value(FILE_PATHS.config, "post_processing.move_best") is False
