@@ -70,7 +70,13 @@ class RunConditions:
         results = [(label, condition() if callable(condition) else condition) for label, condition in condition_list]
         passed = all(value for _, value in results)
         detail = ", ".join(f"{label}={value}" for label, value in results)
-        log.debug(f"run_conditions [{pipeline_step}]: {detail} -> {'run' if passed else 'skip'}")
+        log.event(
+            "run_conditions.evaluated",
+            level="debug",
+            step=pipeline_step,
+            detail=detail,
+            decision="run" if passed else "skip",
+        )
         return passed
 
     def conditions_met(self, pipeline_step: str) -> bool:

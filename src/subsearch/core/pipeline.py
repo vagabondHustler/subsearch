@@ -109,7 +109,7 @@ class SearchPipeline:
         if not unhealthy:
             return None
         message = ", ".join(unhealthy)
-        log.warning(f"Provider diagnostics flagged: {message}", color="#f9e2af")
+        log.event("pipeline.diagnostics_flagged", level="warning", message=message)
         self.bootstrap.system_tray.display_toast("Provider diagnostics", f"May have changed: {message}")
 
     def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
@@ -220,7 +220,7 @@ class SearchPipeline:
     def _log_provider_diagnostics_warnings(self) -> None:
         for report in self.bootstrap.health_reports:
             if report.diagnostic_status is ProviderDiagnosticStatus.STRUCTURE_INVALID:
-                log.warning(f"{report.provider_name} may have changed, unrecognized response", color="#f9e2af")
+                log.event("pipeline.provider_changed", level="warning", provider=report.provider_name)
 
     def _count_downloaded_subtitles(self) -> tuple[int, int]:
         evaluated = self.bootstrap.accepted_subtitles + self.bootstrap.rejected_subtitles
@@ -233,8 +233,8 @@ class SearchPipeline:
 
     def _dispatch_summary_toast(self, matches_downloaded: str, elapsed_summary: str, succeeded: bool) -> None:
         title = "Search Succeeded" if succeeded else "Search Failed"
-        color = "#a6e3a1" if succeeded else "#f38ba8"
-        log.info(matches_downloaded, color=color)
+        event_key = "pipeline.summary_succeeded" if succeeded else "pipeline.summary_failed"
+        log.event(event_key, summary=matches_downloaded)
         self.bootstrap.system_tray.display_toast(title, f"{matches_downloaded}\n{elapsed_summary}")
 
     @run_if_conditions_met
@@ -277,5 +277,5 @@ class SearchPipeline:
     def on_exit(self) -> None:
         log.event("banner", title="Exit")
         self.bootstrap.system_tray.stop()
-        log.info(f"Finished in {self._elapsed()} seconds", color="#f2cdcd")
+        log.event("pipeline.finished", seconds=self._elapsed())
         self._wait_for_terminal_input()

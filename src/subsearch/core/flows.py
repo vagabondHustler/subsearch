@@ -32,7 +32,7 @@ class SettingsFlow(Flow):
         from subsearch.ui.application import open_settings_window
 
         manually_accepted = open_settings_window(search_worker_factory=self._make_search_worker)
-        log.debug("Exiting GUI")
+        log.event("flow.exiting_gui", level="debug")
         self._record_gui_results(manually_accepted)
         self.bootstrap.prevent_conflicting_config_settings()
         self._finish()
@@ -89,7 +89,7 @@ class PipelineSearchFlow(Flow):
 
     def _warn_if_filename_has_spaces(self) -> None:
         if " " in VIDEO_FILE.filename:
-            log.warning(f"{VIDEO_FILE.filename} contains spaces, result may vary")
+            log.event("flow.filename_has_spaces", level="warning", filename=VIDEO_FILE.filename)
 
 
 FLOW_BY_APP_MODE: dict[AppMode, type[Flow]] = {

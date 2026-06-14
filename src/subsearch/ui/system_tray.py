@@ -34,11 +34,11 @@ class SystemTray:
             return
         self.tray.show()
         self.application.processEvents()
-        log.debug("Subsearch was added to the system tray")
+        log.event("tray.added", level="debug")
 
     def stop(self) -> None:
         if not self.enabled:
             return
         self.application.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, TOAST_REGISTRATION_TIMEOUT_MS)
         self.tray.hide()
-        log.debug("Subsearch was removed from the system tray")
+        log.event("tray.removed", level="debug")

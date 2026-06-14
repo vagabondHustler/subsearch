@@ -19,7 +19,7 @@ class FileTracker:
         try:
             return set(json.loads(self.manifest_path.read_text(encoding="utf-8")))
         except json.JSONDecodeError, OSError:
-            log.warning(f"Unreadable file manifest at {self.manifest_path}, starting fresh")
+            log.event("tracker.manifest_unreadable", level="warning", path=self.manifest_path)
             return set()
 
     def _save_manifest(self) -> None:
@@ -40,7 +40,7 @@ class FileTracker:
     def delete_if_tracked(self, path: Path) -> bool:
         if not self.is_tracked(path):
             if path.exists():
-                log.debug(f"Refusing to delete untracked path {path}")
+                log.event("tracker.refusing_untracked", level="debug", path=path)
             return False
         if path.is_dir():
             shutil.rmtree(path, ignore_errors=True)
@@ -63,7 +63,7 @@ class FileTracker:
             if not path.exists():
                 self.tracked_paths.discard(tracked)
             elif self._is_temp_path(path):
-                log.debug(f"Reclaiming leftover temp path {path}")
+                log.event("tracker.reclaiming", level="debug", path=path)
                 if path.is_dir():
                     shutil.rmtree(path, ignore_errors=True)
                 else:

@@ -12,9 +12,9 @@ def run_if_conditions_met(func) -> Callable[..., Any]:
         class_name = type(instance).__name__
         qualified_name = f"{class_name}.{func.__name__}"
         if not instance.call_conditions.conditions_met(func.__name__):
-            log.debug(f"skipped {qualified_name}")
+            log.event("guard.step_skipped", level="debug", qualified_name=qualified_name)
             return None
-        log.debug(f"called {qualified_name}")
+        log.event("guard.step_called", level="debug", qualified_name=qualified_name)
         return func(*args, **kwargs)
 
     return wrapper

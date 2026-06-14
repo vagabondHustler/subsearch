@@ -442,7 +442,7 @@ def score_subtitle_tokens(
 
     if reference_tokens == provider_tokens:
         if log_match:
-            log.debug(f"Fuzzy match: exact token match for {from_provider!r}")
+            log.event("score.exact_token_match", level="debug", from_provider=from_provider)
         return 100
 
     base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
@@ -450,8 +450,13 @@ def score_subtitle_tokens(
     score = round(base_score * mismatch_multiplier)
 
     if log_match:
-        log.debug(
-            f"Fuzzy match: {score}% for {from_provider!r} (base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
+        log.event(
+            "score.breakdown",
+            level="debug",
+            score=score,
+            from_provider=from_provider,
+            base=base_score,
+            mismatch=f"{mismatch_multiplier:.2f}",
         )
     return score
 

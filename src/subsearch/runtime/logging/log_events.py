@@ -157,6 +157,51 @@ LOG_EVENTS: dict[str, LogEvent] = {
     # update.*
     "update.failed": LogEvent("Failed to download MSI file. HTTP Status Code: {status_code}", LogColor.FAIL),
     "update.downloaded": LogEvent("MSI file downloaded to: {destination}"),
+    # pipeline.*
+    "pipeline.diagnostics_flagged": LogEvent("Provider diagnostics flagged: {message}", LogColor.WARN),
+    "pipeline.provider_changed": LogEvent("{provider} may have changed, unrecognized response", LogColor.WARN),
+    "pipeline.summary_succeeded": LogEvent("{summary}", LogColor.MATCH),
+    "pipeline.summary_failed": LogEvent("{summary}", LogColor.FAIL),
+    "pipeline.finished": LogEvent("Finished in {seconds} seconds", LogColor.FINISH),
+    # boot.*
+    "boot.argv": LogEvent("sys.argv: {argv}", console=False),
+    "boot.video_file": LogEvent("Video file {presence}: {path}", console=False),
+    "boot.verifying": LogEvent("Verifying files and paths"),
+    "boot.tray_init": LogEvent("Initializing system tray icon", console=False),
+    "boot.gui_warmup": LogEvent("GUI warmup triggered", console=False),
+    "boot.long_paths_disabled": LogEvent(
+        "Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot."
+    ),
+    "boot.long_paths_help": LogEvent("https://github.com/vagabondHustler/Win32LongPaths"),
+    # thread.*
+    "thread.submitting": LogEvent("Submitting {count} thread(s): {names}", console=False),
+    "thread.failed": LogEvent("Thread {name} raised an exception\n{traceback}", console=False),
+    "thread.completed": LogEvent("Thread {name} completed", console=False),
+    "thread.joined": LogEvent("All threads joined: {names}", console=False),
+    # flow.*
+    "flow.exiting_gui": LogEvent("Exiting GUI", console=False),
+    "flow.filename_has_spaces": LogEvent("{filename} contains spaces, result may vary"),
+    # tray.*
+    "tray.added": LogEvent("Subsearch was added to the system tray", console=False),
+    "tray.removed": LogEvent("Subsearch was removed from the system tray", console=False),
+    # guard.*
+    "guard.step_skipped": LogEvent("skipped {qualified_name}", console=False),
+    "guard.step_called": LogEvent("called {qualified_name}", console=False),
+    "guard.single_instance": LogEvent("Single-instance enforcement: {single_instance}", console=False),
+    "guard.single_instance_disabled": LogEvent("Single-instance disabled, skipping mutex", console=False),
+    "guard.mutex_acquired": LogEvent("Mutex acquired: {guid}", console=False),
+    "guard.mutex_released": LogEvent("Mutex released: {guid}", console=False),
+    # run_conditions.*
+    "run_conditions.evaluated": LogEvent("run_conditions [{step}]: {detail} -> {decision}", console=False),
+    # tracker.*
+    "tracker.manifest_unreadable": LogEvent("Unreadable file manifest at {path}, starting fresh", console=False),
+    "tracker.refusing_untracked": LogEvent("Refusing to delete untracked path {path}", console=False),
+    "tracker.reclaiming": LogEvent("Reclaiming leftover temp path {path}", console=False),
+    # score.*
+    "score.exact_token_match": LogEvent("Fuzzy match: exact token match for {from_provider!r}", console=False),
+    "score.breakdown": LogEvent(
+        "Fuzzy match: {score}% for {from_provider!r} (base {base}, mismatch ×{mismatch})", console=False
+    ),
 }
 
 

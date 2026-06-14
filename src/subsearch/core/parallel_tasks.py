@@ -7,7 +7,7 @@ from subsearch.runtime.logging.logger import log
 
 def run_in_threads(*tasks: Callable[..., None]) -> None:
     task_names = [task.__name__.lower() for task in tasks]
-    log.debug(f"Submitting {len(tasks)} thread(s): {', '.join(task_names)}")
+    log.event("thread.submitting", level="debug", count=len(tasks), names=", ".join(task_names))
     with ThreadPoolExecutor(thread_name_prefix="provider", max_workers=4) as executor:
         futures = {executor.submit(task): name for task, name in zip(tasks, task_names)}
         for future in as_completed(futures):
@@ -15,7 +15,7 @@ def run_in_threads(*tasks: Callable[..., None]) -> None:
             exception = future.exception()
             if exception:
                 traceback_text = "".join(traceback.format_exception(exception))
-                log.error(f"Thread {name} raised an exception\n{traceback_text}", to_console=False)
+                log.event("thread.failed", level="error", name=name, traceback=traceback_text)
             else:
-                log.debug(f"Thread {name} completed")
-    log.debug(f"All threads joined: {', '.join(task_names)}")
+                log.event("thread.completed", level="debug", name=name)
+    log.event("thread.joined", level="debug", names=", ".join(task_names))

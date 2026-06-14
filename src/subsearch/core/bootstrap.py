@@ -31,11 +31,14 @@ class Bootstrap:
         self.extracted_subtitle_archives: int = 0
         self.user_downloaded_files = False
 
-        log.debug(f"sys.argv: {sys.argv}")
-        log.debug(
-            f"Video file {'found' if VIDEO_FILE.file_exists else 'not found'}: {VIDEO_FILE.file_path or 'none'}",
+        log.event("boot.argv", level="debug", argv=sys.argv)
+        log.event(
+            "boot.video_file",
+            level="debug",
+            presence="found" if VIDEO_FILE.file_exists else "not found",
+            path=VIDEO_FILE.file_path or "none",
         )
-        log.info("Verifying files and paths")
+        log.event("boot.verifying")
         self.setup_file_system()
         self.language_data = language_data.load_language_data()
         self.app_config = config_session.get_config_session().snapshot()
@@ -47,14 +50,14 @@ class Bootstrap:
         log.dataclass(DEVICE_INFO, level="debug", to_console=False)
         log.dataclass(self.app_config, level="debug", to_console=False)
 
-        log.debug("Initializing system tray icon")
+        log.event("boot.tray_init", level="debug")
         from subsearch.ui.system_tray import SystemTray
 
         self.system_tray = SystemTray(enabled=self.app_config.system_tray)
         self.system_tray.start()
 
         if self.gui_may_open:
-            log.debug("GUI warmup triggered")
+            log.event("boot.gui_warmup", level="debug")
             from subsearch.ui import warmup
 
             warmup.start_warmup()
@@ -186,5 +189,5 @@ class Bootstrap:
         self.resync_app_config()
 
     def _notify_user(self) -> None:
-        log.info("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
-        log.info("https://github.com/vagabondHustler/Win32LongPaths")
+        log.event("boot.long_paths_disabled")
+        log.event("boot.long_paths_help")
