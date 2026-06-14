@@ -34,7 +34,7 @@ def create_path_from_string(
         path = Path(string)
 
     if not path.is_dir() and not create_missing_directory:
-        log.warning(f"Destination directory {path} does not exist, moving to {file_directory} instead")
+        log.event("fs.destination_missing", level="warning", path=path, fallback=file_directory)
         return file_directory
 
     path.mkdir(parents=True, exist_ok=True)
@@ -52,7 +52,13 @@ _HASH_MATCH_PREFIX = "hashmatch__"
 
 
 def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> None:
-    log.info(f"{subtitle.provider_name:<14}{index_position}/{index_size} {subtitle.subtitle_name}")
+    log.event(
+        "download.subtitle",
+        provider=subtitle.provider_name,
+        position=index_position,
+        size=index_size,
+        subtitle_name=subtitle.subtitle_name,
+    )
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
@@ -61,7 +67,9 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if not is_zip_payload(first_chunk):
-        log.warning(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip, skipping download")
+        log.event(
+            "download.not_zip", level="warning", provider=subtitle.provider_name, subtitle_name=subtitle.subtitle_name
+        )
         return
     get_file_tracker().track(download_path)
     with open(download_path, "wb") as fd:
@@ -77,7 +85,7 @@ _MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB , generous for any subtitle 
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
     total_uncompressed = sum(info.file_size for info in archive.infolist())
     if total_uncompressed > _MAX_UNCOMPRESSED_BYTES:
-        log.warning(f"Archive uncompressed size {total_uncompressed} exceeds limit, skipping")
+        log.event("fs.archive_oversize", level="warning", size=total_uncompressed)
         return 0
 
     extracted_count = 0
@@ -85,7 +93,7 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
     for member in archive.infolist():
         member_path = (dst / member.filename).resolve()
         if not str(member_path).startswith(str(dst_resolved)):
-            log.warning(f"Skipping unsafe path in archive: {member.filename}")
+            log.event("fs.archive_unsafe_path", level="warning", filename=member.filename)
             continue
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
             continue
@@ -109,7 +117,7 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> int:
                     archive, dst, hash_match=file.name.startswith(_HASH_MATCH_PREFIX)
                 )
         except zipfile.BadZipFile, OSError:
-            log.error(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}")
+            log.event("fs.archive_unreadable", level="error", name=file.name, traceback=traceback.format_exc())
     return extracted_count
 
 
@@ -209,13 +217,13 @@ def del_directory_content(directory: Path) -> None:
 def create_directory(path: Path) -> bool:
     if path.exists():
         return False
-    log.debug(f"Creating {path}")
+    log.event("fs.creating", level="debug", path=path)
     path.mkdir(parents=True, exist_ok=True)
     return True
 
 
 def get_file_hash(file_path: Path) -> str:
-    log.debug("Calculating hash of video file")
+    log.event("fs.hashing", level="debug")
     if not file_path.exists():
         return ""
 
@@ -252,7 +260,7 @@ class MPCHashAlgorithm:
 
     def valid_file_size(self) -> bool:
         if self.file_size < self.chunk_size * 2:
-            log.warning(f"Invalid file size, {self.file_size} bytes")
+            log.event("fs.invalid_file_size", level="warning", size=self.file_size)
             return False
         return True
 
@@ -276,8 +284,8 @@ def download_response(
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))
         downloaded_size = 0
-        log.info(f"Download started for {msi_package_path.name}")
-        log.info(f"Downloading 0%")
+        log.event("download.started", filename=msi_package_path.name)
+        log.event("download.progress", percentage="0.00")
         for chunk in response.iter_content(chunk_size=128):
             msi_file.write(chunk)
             downloaded_size += len(chunk)
@@ -287,8 +295,8 @@ def download_response(
                     on_progress(progress_percentage)
                 elapsed_time = time.time() - start_time
                 if elapsed_time >= 0.5:
-                    log.info(f"Downloading {progress_percentage:.2f}%")
+                    log.event("download.progress", percentage=f"{progress_percentage:.2f}")
                     start_time = time.time()
         if on_progress is not None:
             on_progress(100.0)
-        log.info(f"Download complete.")
+        log.event("download.completed")

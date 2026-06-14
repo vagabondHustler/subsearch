@@ -138,6 +138,25 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "diagnostics.probing": LogEvent("Probing {provider}", console=False),
     "diagnostics.skipped_no_api_key": LogEvent("{provider}: skipped, missing API key", LogColor.WARN),
     "diagnostics.result": LogEvent("{provider}: {status} ({diagnostic_status}, found {found})"),
+    # fs.*
+    "fs.creating": LogEvent("Creating {path}", console=False),
+    "fs.hashing": LogEvent("Calculating hash of video file", console=False),
+    "fs.invalid_file_size": LogEvent("Invalid file size, {size} bytes", console=False),
+    "fs.destination_missing": LogEvent(
+        "Destination directory {path} does not exist, moving to {fallback} instead", console=False
+    ),
+    "fs.archive_oversize": LogEvent("Archive uncompressed size {size} exceeds limit, skipping", console=False),
+    "fs.archive_unsafe_path": LogEvent("Skipping unsafe path in archive: {filename}", console=False),
+    "fs.archive_unreadable": LogEvent("Skipping unreadable archive {name}\n{traceback}", console=False),
+    # download.*
+    "download.subtitle": LogEvent("{provider:<14}{position}/{size} {subtitle_name}"),
+    "download.not_zip": LogEvent("{provider}: {subtitle_name} is not a zip, skipping download", console=False),
+    "download.started": LogEvent("Download started for {filename}"),
+    "download.progress": LogEvent("Downloading {percentage}%"),
+    "download.completed": LogEvent("Download complete"),
+    # update.*
+    "update.failed": LogEvent("Failed to download MSI file. HTTP Status Code: {status_code}", LogColor.FAIL),
+    "update.downloaded": LogEvent("MSI file downloaded to: {destination}"),
 }
 
 

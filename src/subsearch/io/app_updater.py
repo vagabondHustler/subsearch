@@ -80,10 +80,10 @@ def download_installer(version: str, on_progress: Callable[[float], None] | None
     destination = APP_PATHS.tmp_dir / f"Subsearch-{version}-win64.msi"
     response = requests.get(installer_url(version), stream=True)
     if response.status_code != 200:
-        log.error(f"Failed to download MSI file. HTTP Status Code: {response.status_code}")
+        log.event("update.failed", level="error", status_code=response.status_code)
         raise Exception(response.status_code)
     file_system.download_response(destination, response, on_progress)
-    log.info(f"MSI file downloaded to: {destination}")
+    log.event("update.downloaded", destination=destination)
     return destination
 
 
