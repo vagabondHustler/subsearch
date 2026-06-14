@@ -23,15 +23,15 @@ def delete_nested_value(data: dict, key: str) -> None:
         parent.pop(keys[-1], None)
 
 
-def changed_leaves(key: str, previous_value: Any, new_value: Any) -> list[tuple[str, Any]]:
+def changed_leaves(key: str, previous_value: Any, new_value: Any) -> list[tuple[str, Any, Any]]:
     if isinstance(previous_value, dict) and isinstance(new_value, dict):
-        leaves: list[tuple[str, Any]] = []
+        leaves: list[tuple[str, Any, Any]] = []
         for nested_key in new_value:
             leaves.extend(changed_leaves(f"{key}.{nested_key}", previous_value.get(nested_key), new_value[nested_key]))
         return leaves
     if previous_value == new_value:
         return []
-    return [(key, new_value)]
+    return [(key, previous_value, new_value)]
 
 
 def get_keys_recursively(dictionary: dict, prefix="", keys=None) -> list[str]:

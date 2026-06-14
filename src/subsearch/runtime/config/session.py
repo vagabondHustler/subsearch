@@ -7,6 +7,7 @@ from subsearch.io.nested_dict import changed_leaves, read_nested_value, set_nest
 from subsearch.runtime.config import integrity
 from subsearch.runtime.config.composition import FILE_PATHS
 from subsearch.runtime.config.mapper import get_app_config_from_data
+from subsearch.runtime.logging import log_events
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppConfig
 
@@ -19,7 +20,7 @@ class ConfigSession:
         self.is_fresh = is_fresh
         self.has_uncommitted_changes = False
         self.last_known_good_backed_up = False
-        self.tracked_changes: dict[str, Any] = {}
+        self.tracked_changes: dict[str, tuple[Any, Any]] = {}
 
     def read(self, key: str) -> Any:
         return read_nested_value(self.in_memory_data, key)
@@ -33,8 +34,8 @@ class ConfigSession:
         set_nested_value(self.in_memory_data, key, value)
         self.has_uncommitted_changes = True
 
-        for leaf_key, leaf_value in changed_leaves(key, previous_value, value):
-            self.tracked_changes[leaf_key] = leaf_value
+        for leaf_key, leaf_old, leaf_new in changed_leaves(key, previous_value, value):
+            self.tracked_changes[leaf_key] = (leaf_old, leaf_new)
 
     def back_up_last_known_good(self) -> None:
         if self.last_known_good_backed_up:
@@ -55,8 +56,8 @@ class ConfigSession:
         self.last_known_good_backed_up = False
 
     def log_tracked_changes(self) -> None:
-        for key, value in self.tracked_changes.items():
-            log.debug(f"Config change: {key}={value!r}")
+        for key, (old_value, new_value) in self.tracked_changes.items():
+            log.event("config.changed", level="debug", change=log_events.format_change(key, old_value, new_value))
         self.tracked_changes.clear()
 
     def revert(self) -> None:

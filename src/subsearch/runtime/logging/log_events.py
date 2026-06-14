@@ -70,7 +70,12 @@ LOG_EVENTS: dict[str, LogEvent] = {
         "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL
     ),
     "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL),
+    "config.changed": LogEvent("Config change: {change}", console=False),
 }
+
+
+def format_change(key: str, old: Any, new: Any) -> str:
+    return f"{key}: {old!r} → {new!r}"
 
 
 def session_header() -> str:

@@ -19,3 +19,18 @@ def test_delete_nested_value_with_missing_parent_does_not_raise():
 
 def test_read_nested_value_with_missing_parent_returns_none():
     assert nested_dict.read_nested_value({}, "missing.parent.leaf") is None
+
+
+def test_changed_leaves_carries_old_and_new_value():
+    assert nested_dict.changed_leaves("a.b", 90, 50) == [("a.b", 90, 50)]
+
+
+def test_changed_leaves_walks_nested_dicts():
+    previous = {"search": {"accept_threshold": 90, "language": "en"}}
+    new = {"search": {"accept_threshold": 50, "language": "en"}}
+
+    assert nested_dict.changed_leaves("config", previous, new) == [("config.search.accept_threshold", 90, 50)]
+
+
+def test_changed_leaves_returns_empty_when_unchanged():
+    assert nested_dict.changed_leaves("a.b", 90, 90) == []
