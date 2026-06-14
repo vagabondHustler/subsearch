@@ -55,6 +55,7 @@ LOG_EVENTS: dict[str, LogEvent] = {
     "banner": LogEvent("--- [{title}] ---", LogColor.BANNER, bold=True),
     "task_completed": LogEvent("Tasks completed", LogColor.SUCCESS),
     "video_file_selected": LogEvent("Selected video file: {filename}", LogColor.BANNER, bold=True),
+    "search_term_set": LogEvent("Search term set: {term}", console=False),
     "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", LogColor.MATCH),
     "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}"),
     "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
