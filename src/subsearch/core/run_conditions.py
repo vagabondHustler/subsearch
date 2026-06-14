@@ -37,6 +37,10 @@ class RunConditions:
         return len(self.rejected_subtitles) >= 1
 
     @property
+    def manually_handle_post_processing(self) -> bool:
+        return self.app_config.manually_handle_post_processing
+
+    @property
     def is_search_mode(self) -> bool:
         return self.app_mode in (AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID, AppMode.SEARCH_AUTOMATIC, AppMode.DEV)
 
@@ -83,6 +87,7 @@ class RunConditions:
 
     def _conditions_for(self, pipeline_step: str) -> ConditionList:
         post_processing = self.app_config.post_processing
+        not_manually_handled = ("not_manually_handle_post_processing", not self.manually_handle_post_processing)
         conditions: dict[str, ConditionList] = {
             "init_search": [
                 ("app_mode_search", self.is_search_mode),
@@ -104,30 +109,36 @@ class RunConditions:
                 ("provider_enabled", self.app_config.providers["subsource_site"]),
             ],
             "download_files": [
+                not_manually_handled,
                 ("should_download_files", self.should_download_files),
             ],
             "download_manager": [
                 ("should_open_download_manager", self.should_open_download_manager),
             ],
             "subtitle_post_processing": [
+                not_manually_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
             ],
             "extract_files": [
+                not_manually_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
             "subtitle_rename": [
+                not_manually_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("rename_enabled", post_processing["rename"]),
             ],
             "subtitle_move_best": [
+                not_manually_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_best_enabled", post_processing["move_best"]),
                 ("not_move_all", not post_processing["move_all"]),
             ],
             "subtitle_move_all": [
+                not_manually_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_all_enabled", post_processing["move_all"]),

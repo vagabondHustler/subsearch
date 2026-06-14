@@ -198,6 +198,38 @@ def test_conditions_subtitle_move_all(fake_cls: FakeBootstrap) -> None:
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
 
+def test_manually_handle_post_processing_disables_download_and_post_processing(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.accepted_subtitles = ["subtitle1"]
+    fake_cls.downloaded_subtitle_archives = 1
+    fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.post_processing["rename"] = True
+    fake_cls.app_config.post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_all"] = False
+
+    gated_steps = (
+        "download_files",
+        "subtitle_post_processing",
+        "extract_files",
+        "subtitle_rename",
+        "subtitle_move_best",
+    )
+
+    fake_cls.app_config.manually_handle_post_processing = False
+    for step in gated_steps:
+        assert fake_cls.call_conditions.conditions_met(step) is True, step
+
+    fake_cls.app_config.manually_handle_post_processing = True
+    for step in gated_steps:
+        assert fake_cls.call_conditions.conditions_met(step) is False, step
+
+    fake_cls.app_config.post_processing["move_best"] = False
+    fake_cls.app_config.post_processing["move_all"] = True
+    assert fake_cls.call_conditions.conditions_met("subtitle_move_all") is False
+    fake_cls.app_config.manually_handle_post_processing = False
+    assert fake_cls.call_conditions.conditions_met("subtitle_move_all") is True
+
+
 def test_unmet_condition_labels_yifysubtitles_without_imdb_match(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.only_foreign_parts = False
     fake_cls.release_data.tvseries = False
