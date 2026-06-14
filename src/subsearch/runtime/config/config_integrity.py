@@ -70,56 +70,6 @@ def restore_last_known_good_config() -> None:
     os.replace(backup_file_path, FILE_PATHS.config)
 
 
-def migrate_download_section(config_data: dict[str, Any]) -> bool:
-    if "download" not in config_data:
-        return False
-    old = config_data.pop("download")
-    automatic = old.get("automatic", True)
-    always_open = old.get("always_open_manager", False)
-    if not automatic:
-        search_mode = "manual"
-    elif always_open:
-        search_mode = "hybrid"
-    else:
-        search_mode = "automatic"
-    config_data.setdefault("download_manager", {})["search_mode"] = search_mode
-    log.info(f"Migrated download config to download_manager.search_mode = {search_mode}")
-    return True
-
-
-def migrate_unified_download_destination(config_data: dict[str, Any]) -> bool:
-    download_manager = config_data.get("download_manager", {})
-    stale_keys = [key for key in ("use_post_processing_target", "target_path") if key in download_manager]
-    if not stale_keys:
-        return False
-    for key in stale_keys:
-        download_manager.pop(key)
-    log.info(f"Removed stale download_manager keys now unified with post_processing: {stale_keys}")
-    return True
-
-
-def migrate_token_multipliers(config_data: dict[str, Any]) -> bool:
-    multipliers = config_data.get("search", {}).get("token_multipliers")
-    if not multipliers:
-        return False
-    # Old format stored a 0-100 integer penalty; the new format stores the multiplier float directly.
-    if not any(isinstance(value, int) for value in multipliers.values()):
-        return False
-    converted = {token: (100 - penalty) / 100 for token, penalty in multipliers.items()}
-    config_data["search"]["token_multipliers"] = converted
-    log.info(f"Migrated token multipliers from penalty integers to multiplier floats: {converted}")
-    return True
-
-
-def migrate_api_call_limit(config_data: dict[str, Any]) -> bool:
-    network = config_data.get("network", {})
-    if "api_call_limit" not in network:
-        return False
-    limit = network.pop("api_call_limit")
-    config_data.setdefault("search", {})["downloads_per_provider"] = limit
-    log.info(f"Migrated network.api_call_limit to search.downloads_per_provider = {limit}")
-    return True
-
 
 def resolve_on_integrity_failure() -> ConfigResolution:
     remove_stale_temp_file()
@@ -143,13 +93,6 @@ def resolve_on_integrity_failure() -> ConfigResolution:
             return ConfigResolution(json_file.load_json_data(FILE_PATHS.config), is_fresh=True)
     else:
         remove_stale_backup_file()
-    migrated_download = migrate_download_section(config_data)
-    migrated_destination = migrate_unified_download_destination(config_data)
-    migrated_multipliers = migrate_token_multipliers(config_data)
-    migrated_api_call_limit = migrate_api_call_limit(config_data)
-    if migrated_download or migrated_destination or migrated_multipliers or migrated_api_call_limit:
-        json_file.dump_json_data(FILE_PATHS.config, config_data)
-        config_keys = get_keys_recursively(config_data)
     if valid_config(valid_config_keys, config_keys):
         log.debug("Config integrity check passed")
         return ConfigResolution(config_data, is_fresh=False)

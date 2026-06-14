@@ -74,15 +74,18 @@ def get_default_app_config() -> dict[str, Any]:
         "download_manager": {
             "search_mode": "hybrid",
             "manually_handle_post_processing": False,
-            "working_directory": "",
         },
         "post_processing": {
             "rename": True,
             "move_best": True,
             "move_all": False,
-            "target_path": ".",
+        },
+        "paths": {
+            "download_directory": "",
+            "extraction_directory": "",
+            "video_file_directory": ".",
             "path_resolution": "relative",
-            "create_missing_folder": True,
+            "create_missing_directory": True,
         },
         "application": {
             "show_terminal": False,
@@ -123,6 +126,8 @@ class VideoFileResolver:
         file_path = file_directory / filename
         if has_video_extension and file_path.exists():
             return self._build_from_path(file_path)
+        # Without a real video file these are provisional; Bootstrap._anchor_working_directory
+        # is the authority for the no-file case and overwrites all three from config.
         return VideoFile(
             file_exists=False,
             filename=Path(filename).stem if has_video_extension else filename,
@@ -130,8 +135,8 @@ class VideoFileResolver:
             file_extension=suffix if has_video_extension else "",
             file_path=file_path,
             file_directory=file_directory,
-            subs_dir=file_directory / "subs",
-            tmp_dir=file_directory / "tmp_subsearch",
+            extraction_directory=file_directory,
+            download_directory=file_directory,
         )
 
     def _find_video_file_path(self, argument: str) -> Path | None:
@@ -149,8 +154,8 @@ class VideoFileResolver:
             file_extension=file_path.suffix,
             file_path=file_path,
             file_directory=file_path.parent,
-            subs_dir=file_path.parent / "subs",
-            tmp_dir=file_path.parent / "tmp_subsearch",
+            extraction_directory=file_path.parent / "subs",
+            download_directory=file_path.parent / "tmp_subsearch",
         )
 
     def _build_empty(self) -> VideoFile:
@@ -161,8 +166,8 @@ class VideoFileResolver:
             file_extension="",
             file_path=Path(""),
             file_directory=Path(""),
-            subs_dir=Path(""),
-            tmp_dir=Path(""),
+            extraction_directory=Path(""),
+            download_directory=Path(""),
         )
 
 
