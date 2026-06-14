@@ -346,7 +346,7 @@ class SearchThresholdCard(SettingsCard):
             grid.addWidget(cell, cell_row, column, Qt.AlignmentFlag.AlignHCenter)
 
         lamp = HelpButton(SETTING_DESCRIPTIONS[key_prefix].explanation, self)
-        grid.addWidget(lamp, header_row, TOKEN_GRID_COLUMNS + 1, 2, 1, Qt.AlignmentFlag.AlignVCenter)
+        grid.addWidget(lamp, cell_row, TOKEN_GRID_COLUMNS + 1, Qt.AlignmentFlag.AlignVCenter)
 
     def _update_example_heading(self) -> None:
         reference = EXAMPLE_REFERENCE_SERIES if self._using_series else EXAMPLE_REFERENCE_MOVIE

@@ -23,7 +23,6 @@ from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 ISSUE_TEMPLATE_URL = "https://github.com/vagabondHustler/subsearch/issues/new"
 REPOSITORY_URL = "https://github.com/vagabondHustler/subsearch"
 SECURITY_ADVISORY_URL = "https://github.com/vagabondHustler/subsearch/security/advisories/new"
-THIRD_PARTY_LICENSES_URL = "https://github.com/vagabondHustler/subsearch/blob/main/THIRD-PARTY-LICENSES.md"
 RESOURCES_GRID_COLUMNS = 3
 NO_VIDEO_FILE = "none (running in configure mode, no video file was opened)"
 
@@ -32,6 +31,21 @@ def _media_filename() -> str:
     if VIDEO_FILE.file_exists:
         return f"{VIDEO_FILE.filename}{VIDEO_FILE.file_extension}"
     return NO_VIDEO_FILE
+
+
+def _build_prefilled_feature_body() -> str:
+    return (
+        "#### Summary:\n\n"
+        "A clear description of the feature you would like to see.\n\n"
+        "#### Problem it solves:\n\n"
+        "The problem or limitation that motivates this request.\n\n"
+        "#### Proposed solution:\n\n"
+        "How you imagine it working.\n\n"
+        "#### Alternatives considered:\n\n"
+        "Any alternative approaches or workarounds you have thought about.\n\n"
+        "#### Additional context:\n\n"
+        "Any other details, mockups, or examples that may help.\n"
+    )
 
 
 def _build_prefilled_issue_body() -> str:
@@ -61,6 +75,18 @@ def _copy_sanitized_log_to_clipboard() -> None:
     QApplication.clipboard().setText(log_sanitizer.read_sanitized_crash_sessions())
 
 
+def _open_feature_request() -> None:
+    query = urlencode(
+        {
+            "template": "feature_request.md",
+            "title": "",
+            "labels": "enhancement",
+            "body": _build_prefilled_feature_body(),
+        }
+    )
+    webbrowser.open(f"{ISSUE_TEMPLATE_URL}?{query}")
+
+
 def _open_security_advisory() -> None:
     webbrowser.open(SECURITY_ADVISORY_URL)
 
@@ -73,10 +99,6 @@ def _open_repository() -> None:
     webbrowser.open(REPOSITORY_URL)
 
 
-def _open_third_party_licenses() -> None:
-    webbrowser.open(THIRD_PARTY_LICENSES_URL)
-
-
 class ResourcesCard(SettingsCard):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Resources", parent=parent)
@@ -84,10 +106,10 @@ class ResourcesCard(SettingsCard):
 
         actions = [
             (LucideIcon.BUG, "Report bug", _open_bug_report),
-            (LucideIcon.COPY, "Copy sanitized log to clipboard", _copy_sanitized_log_to_clipboard),
             (LucideIcon.SHIELD, "Report vulnerability", _open_security_advisory),
+            (LucideIcon.LIGHTBULB, "Request feature", _open_feature_request),
+            (LucideIcon.COPY, "Copy sanitized log to clipboard", _copy_sanitized_log_to_clipboard),
             (LucideIcon.FOLDER_SEARCH, "Open config location", _open_log_directory),
-            (LucideIcon.SCROLL_TEXT, "View licenses", _open_third_party_licenses),
             (LucideIcon.GITHUB, "View source on GitHub", _open_repository),
         ]
         grid = QGridLayout()

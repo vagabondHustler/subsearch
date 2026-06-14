@@ -23,4 +23,4 @@ class ChangelogButton(TransparentToolButton):
 
     def _apply_icon_color(self) -> None:
         color = TEXT_COLOR if self._has_changelog else DISABLED_TEXT_COLOR
-        self.setIcon(lucide_qicon(LucideIcon.LIST, color))
+        self.setIcon(lucide_qicon(LucideIcon.LOGS, color))

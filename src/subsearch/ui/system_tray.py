@@ -25,9 +25,10 @@ class SystemTray(metaclass=metaclasses.Singleton):
         if not self.enabled:
             return
         self.tray.showMessage(title, msg, QSystemTrayIcon.MessageIcon.Information, TOAST_DURATION_MS)
-        # The core pipeline runs without QApplication.exec, so toasts only render
-        # if events are pumped manually here.
-        self.application.processEvents()
+        # The core pipeline runs without QApplication.exec, so the balloon only
+        # reaches the shell if events are pumped over its registration window;
+        # a single processEvents fires showMessage before Windows can render it.
+        self.application.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, TOAST_REGISTRATION_TIMEOUT_MS)
 
     def start(self) -> None:
         if not self.enabled:

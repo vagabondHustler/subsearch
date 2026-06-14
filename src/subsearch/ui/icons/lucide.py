@@ -49,7 +49,7 @@ class LucideIcon(FluentIconBase, Enum):
     ARROW_LEFT_RIGHT = "arrow-left-right"
     ARROW_DOWN_TO_LINE = "arrow-down-to-line"
     REFRESH_CW_DOT = "refresh-cw-dot"
-    LIST = "list"
+    LIST_CHECK = "list-check"
     BUG = "bug"
     BUG_FILE = "bug-file"
     SCROLL_TEXT = "scroll-text"
@@ -68,6 +68,10 @@ class LucideIcon(FluentIconBase, Enum):
     FOLDER_OUTPUT = "folder-output"
     FILE_OUTPUT = "file-output"
     COPY = "copy"
+    FILE_ARCHIVE = "file-archive"
+    LOGS = "logs"
+    FILES = "files"
+    FILE_PEN = "file-pen"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

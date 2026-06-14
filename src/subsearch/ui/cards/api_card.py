@@ -202,7 +202,7 @@ class ApiCard(SettingsCard):
         description = SETTING_DESCRIPTIONS[description_key]
         container = QWidget(self)
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(ROW_INSET, 4, ROW_INSET, 8)
+        layout.setContentsMargins(CARD_CONTENT_INSET, 4, ROW_INSET, 8)
         layout.setSpacing(6)
 
         title_label = BodyLabel(description.title, self)

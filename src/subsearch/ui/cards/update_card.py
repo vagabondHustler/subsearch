@@ -14,7 +14,7 @@ from subsearch.ui.services.app_updates import (
     launch_installer,
 )
 from subsearch.ui.state.tasks import TaskRunner
-from subsearch.ui.theme.metrics import ROW_INSET
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
@@ -69,7 +69,7 @@ class UpdateCard(SettingsCard):
         changelog_column = CaptionedToolButton("Changelog", button=self.changelog_button, parent=self)
 
         content_row = QHBoxLayout()
-        content_row.setContentsMargins(ROW_INSET, 8, ROW_INSET, 4)
+        content_row.setContentsMargins(CARD_CONTENT_INSET, 8, ROW_INSET, 4)
         content_row.setSpacing(8)
         content_row.addLayout(text_column, stretch=1)
         content_row.addWidget(check_column, alignment=Qt.AlignmentFlag.AlignVCenter)
