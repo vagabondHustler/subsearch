@@ -380,11 +380,6 @@ class SubtitleCard(SettingsCard):
         self._align_filter_bar_to_search_bar()
 
     def _align_filter_bar_to_search_bar(self) -> None:
-        # The search bar below is centered at SEARCH_BAR_WIDTH_FRACTION of the field
-        # area (inset by SEPARATOR_INSET on each side), so its right edge sits this far
-        # in from the card's right edge. Pad the header so the filter box's right edge
-        # tracks the search bar's right edge as the window resizes, leaving room for the
-        # help button and restore slot that sit to the right of the filter box.
         field_area_width = self.width() - 2 * SEPARATOR_INSET
         search_bar_right_inset = SEPARATOR_INSET + round((1 - SEARCH_BAR_WIDTH_FRACTION) / 2 * field_area_width)
         trailing_width = self._header_trailing_width()
@@ -430,16 +425,13 @@ class SubtitleActionRow(QWidget):
         self._spinner_timer.setInterval(FRAME_INTERVAL_MS)
         self._spinner_timer.timeout.connect(self._advance_spinner)
 
-        # Transparent so the list item's own icon and text show through underneath:
-        # the buttons only overlay the right edge, leaving the item to render its
-        # status the same way every other row does, with identical alignment.
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 4, 0)
         layout.setSpacing(PATH_ROW_BUTTON_GAP)
         layout.addStretch(1)
 
-        move_tooltip = f"Unpack and move all subtitles to: {self._target_path_text()}"
+        move_tooltip = f"Unpack and move this subtitle to: {self._target_path_text()}"
         self._move_button = self._make_action_button(LucideIcon.FILES, move_tooltip, self._unpack_and_move)
         layout.addWidget(self._move_button)
 
@@ -471,11 +463,11 @@ class SubtitleActionRow(QWidget):
 
     def _unpack_and_move(self) -> None:
         self._begin_operation(self._move_button)
-        self._post_processing_service.unpack_and_move(self._store)
+        self._post_processing_service.unpack_and_move(self._store, self._subtitle)
 
     def _unpack_rename_and_place(self) -> None:
         self._begin_operation(self._place_button)
-        self._post_processing_service.unpack_rename_and_place(self._store)
+        self._post_processing_service.unpack_rename_and_place(self._store, self._subtitle)
 
     def _begin_operation(self, button: TransparentToolButton) -> None:
         self._active_button = button
@@ -494,7 +486,7 @@ class SubtitleActionRow(QWidget):
     def _on_succeeded(self, _delivered_count: int) -> None:
         button = self._take_active_button()
         if button is not None:
-            button.setIcon(lucide_qicon(LucideIcon.CIRCLE_CHECK_BIG, SUCCESS_COLOR))
+            button.setIcon(lucide_qicon(LucideIcon.FILES, SUCCESS_COLOR))
 
     def _on_failed(self, _reason: str) -> None:
         button = self._take_active_button()

@@ -106,8 +106,8 @@ class DevPostProcessingService(QObject):
     succeeded = Signal()
     failed = Signal(str)
 
-    def unpack_and_move(self, store: SettingsStore) -> None:
+    def unpack_and_move(self, store: SettingsStore, subtitle: Subtitle) -> None:
         self.succeeded.emit()
 
-    def unpack_rename_and_place(self, store: SettingsStore) -> None:
+    def unpack_rename_and_place(self, store: SettingsStore, subtitle: Subtitle) -> None:
         self.succeeded.emit()

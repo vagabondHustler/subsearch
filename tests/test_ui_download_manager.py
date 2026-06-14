@@ -109,7 +109,7 @@ def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_handling_en
         buttons = row.findChildren(TransparentToolButton)
         assert len(buttons) == 2
         move_button, place_button = buttons
-        assert "move all subtitles to" in move_button.toolTip().lower()
+        assert "move this subtitle to" in move_button.toolTip().lower()
         assert place_button.isEnabled() == composition.SEARCH_SUBJECT.file_exists
         # The item keeps its native icon and text so the row stays aligned with
         # every other row; the widget only adds the trailing action buttons.
