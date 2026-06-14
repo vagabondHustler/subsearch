@@ -122,7 +122,13 @@ def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> int:
     return extracted_count
 
 
+def subtitle_extraction_dir(extraction_root: Path, subtitle_id: str) -> Path:
+    return extraction_root / subtitle_id
+
+
 def _subtitle_files_in(directory: Path) -> list[Path]:
+    if not directory.is_dir():
+        return []
     return sorted(
         file for file in directory.iterdir() if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS
     )

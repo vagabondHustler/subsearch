@@ -22,7 +22,7 @@ class SubtitleDownloadWorker(Worker):
         self.download_number = download_number
         self.download_total = download_total
         self.tmp_dir: Path = WORKSPACE.download_directory
-        self.subs_dir: Path = WORKSPACE.extraction_directory
+        self.subs_dir: Path = file_system.subtitle_extraction_dir(WORKSPACE.extraction_directory, subtitle.subtitle_id)
 
     def execute(self) -> Subtitle:
         subtitle = self.subtitle
