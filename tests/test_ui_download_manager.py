@@ -22,9 +22,12 @@ def download_environment(monkeypatch, tmp_path):
     from subsearch.runtime.config import composition
 
     downloaded = []
-    monkeypatch.setattr(
-        file_system, "download_subtitle", lambda subtitle, number, total, tmp_dir: downloaded.append(subtitle)
-    )
+
+    def fake_download(subtitle, number, total, tmp_dir):
+        downloaded.append(subtitle)
+        return True
+
+    monkeypatch.setattr(file_system, "download_subtitle", fake_download)
     monkeypatch.setattr(file_system, "extract_files_in_dir", lambda src, dst, extension=".zip": None)
     monkeypatch.setattr(composition.VIDEO_FILE, "download_directory", tmp_path / "tmp", raising=False)
     monkeypatch.setattr(composition.VIDEO_FILE, "extraction_directory", tmp_path / "tmp", raising=False)

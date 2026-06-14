@@ -11,6 +11,10 @@ from subsearch.runtime.models import Subtitle, SubtitleStatus
 from subsearch.ui.state.tasks import TaskRunner, Worker
 
 
+class DownloadFailed(Exception):
+    pass
+
+
 class SubtitleDownloadWorker(Worker):
     def __init__(self, subtitle: Subtitle, download_number: int, download_total: int) -> None:
         super().__init__()
@@ -24,7 +28,9 @@ class SubtitleDownloadWorker(Worker):
         subtitle = self.subtitle
         if release_parser.valid_filename(subtitle.subtitle_name):
             subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
-        file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
+        downloaded = file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
+        if not downloaded:
+            raise DownloadFailed(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a downloadable subtitle")
         try:
             file_system.extract_files_in_dir(self.tmp_dir, self.subs_dir)
         finally:

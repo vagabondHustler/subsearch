@@ -51,7 +51,7 @@ def is_zip_payload(chunk: bytes) -> bool:
 _HASH_MATCH_PREFIX = "hashmatch__"
 
 
-def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> None:
+def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> bool:
     log.event(
         "download.subtitle",
         provider=subtitle.provider_name,
@@ -70,12 +70,13 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
         log.event(
             "download.not_zip", level="warning", provider=subtitle.provider_name, subtitle_name=subtitle.subtitle_name
         )
-        return
+        return False
     get_file_tracker().track(download_path)
     with open(download_path, "wb") as fd:
         fd.write(first_chunk)
         for chunk in chunks:
             fd.write(chunk)
+    return True
 
 
 _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}

@@ -145,8 +145,10 @@ class SearchPipeline:
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        file_system.download_subtitle(subtitle, subtitle_number, total_count, VIDEO_FILE.download_directory)
-        subtitle.status = SubtitleStatus.AUTO_DOWNLOADED
+        downloaded = file_system.download_subtitle(
+            subtitle, subtitle_number, total_count, VIDEO_FILE.download_directory
+        )
+        subtitle.status = SubtitleStatus.AUTO_DOWNLOADED if downloaded else SubtitleStatus.DOWNLOAD_FAILED
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
     @run_if_conditions_met
