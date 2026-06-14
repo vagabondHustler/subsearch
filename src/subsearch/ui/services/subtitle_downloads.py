@@ -17,8 +17,8 @@ class SubtitleDownloadWorker(Worker):
         self.subtitle = subtitle
         self.download_number = download_number
         self.download_total = download_total
-        self.tmp_dir: Path = VIDEO_FILE.tmp_dir
-        self.subs_dir: Path = VIDEO_FILE.subs_dir
+        self.tmp_dir: Path = VIDEO_FILE.download_directory
+        self.subs_dir: Path = VIDEO_FILE.extraction_directory
 
     def execute(self) -> Subtitle:
         subtitle = self.subtitle

@@ -25,6 +25,7 @@ from subsearch.ui.cards import (
     LanguageCard,
     NetworkCard,
     NotificationsCard,
+    PathsCard,
     ProviderDiagnosticsCard,
     ProvidersCard,
     ResourcesCard,
@@ -32,8 +33,10 @@ from subsearch.ui.cards import (
     SearchThresholdCard,
     SettingsCard,
     ShellIntegrationCard,
+    SubsearchLicenseCard,
     SubtitleFiltersCard,
     SubtitleHandlingCard,
+    ThirdPartyLicenseCard,
     UpdateCard,
 )
 from subsearch.ui.cards.download_manager import ManualSearchInterface
@@ -104,7 +107,8 @@ class SettingsWindow(FluentWindow):
         self._search_running = False
         self.setWindowTitle("Subsearch")
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
-        self.resize(900, 760)
+        self.setMinimumSize(860, 865)
+        self.resize(900, 865)
         self.setMicaEffectEnabled(True)
         self._clear_title_bar()
 
@@ -121,7 +125,8 @@ class SettingsWindow(FluentWindow):
         log_panel_sink = LogPanelSink(self) if in_search_mode else None
 
         subtitle_handling_card = SubtitleHandlingCard(store)
-        self.register_close_validator(subtitle_handling_card.commit_path_or_revert)
+        paths_card = PathsCard(store)
+        self.register_close_validator(paths_card.commit_path_or_revert)
 
         search_interface = SettingsInterface(
             "searchInterface",
@@ -131,9 +136,9 @@ class SettingsWindow(FluentWindow):
                 SearchThresholdCard(store),
             ),
         )
-        download_prefs_interface = SettingsInterface(
-            "downloadPrefsInterface",
-            _collapsible(subtitle_handling_card),
+        subtitle_handling_interface = SettingsInterface(
+            "subtitleHandlingInterface",
+            _collapsible(subtitle_handling_card, paths_card),
         )
         providers_interface = SettingsInterface(
             "providersInterface",
@@ -169,9 +174,11 @@ class SettingsWindow(FluentWindow):
 
         about_interface = SettingsInterface(
             "aboutInterface",
-            _collapsible(
-                ResourcesCard(),
-            ),
+            [
+                *_collapsible(ResourcesCard()),
+                SubsearchLicenseCard(),
+                ThirdPartyLicenseCard(),
+            ],
         )
 
         video_file_service = VideoFileService(self)
@@ -200,10 +207,10 @@ class SettingsWindow(FluentWindow):
         )
 
         self.addSubInterface(manual_search_interface, LucideIcon.TEXT_SEARCH, "Get subtitles", isTransparent=True)
-        self.addSubInterface(providers_interface, LucideIcon.LIST, "Search preferences", isTransparent=True)
+        self.addSubInterface(providers_interface, LucideIcon.LIST_CHECK, "Search preferences", isTransparent=True)
         self.addSubInterface(search_interface, LucideIcon.CAPTIONS, "Subtitle preferences", isTransparent=True)
         self.addSubInterface(
-            download_prefs_interface, LucideIcon.FOLDER_COG, "Download preferences", isTransparent=True
+            subtitle_handling_interface, LucideIcon.FILE_ARCHIVE, "Subtitle handling", isTransparent=True
         )
         self.addSubInterface(integration_interface, LucideIcon.MONITOR_COG, "Desktop behaviour", isTransparent=True)
         self.addSubInterface(application_interface, LucideIcon.SETTINGS, "Application", isTransparent=True)

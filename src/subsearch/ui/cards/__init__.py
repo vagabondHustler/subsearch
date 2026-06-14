@@ -7,6 +7,11 @@ from subsearch.ui.cards.base import (
     SettingsCard,
     build_section_header,
 )
+from subsearch.ui.cards.license_cards import (
+    SubsearchLicenseCard,
+    ThirdPartyLicenseCard,
+)
+from subsearch.ui.cards.paths import PathsCard
 from subsearch.ui.cards.post_processing_cards import (
     FileExtensionsCard,
     ShellIntegrationCard,
@@ -39,12 +44,15 @@ __all__ = [
     "FileExtensionsCard",
     "ShellIntegrationCard",
     "ResourcesCard",
+    "SubsearchLicenseCard",
+    "ThirdPartyLicenseCard",
     "LanguageCard",
     "ProvidersCard",
     "SearchModeCard",
     "SearchThresholdCard",
     "SubtitleFiltersCard",
     "SubtitleHandlingCard",
+    "PathsCard",
     "ApplicationCard",
     "NetworkCard",
     "NotificationsCard",

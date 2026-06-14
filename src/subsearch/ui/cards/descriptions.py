@@ -83,12 +83,28 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
         "When on, you pick and process subtitles yourself from the search results. "
         "The automatic rename and move options above are disabled while this is active.",
     ),
-    "download_manager.working_directory": SettingDescription(
-        "Working folder",
-        "Where the Download Manager places subtitles when searching without a video file. "
-        "Subtitles are extracted straight into the folder you pick; a temporary folder is created "
-        "alongside them while downloading and removed afterwards. "
-        "Leave empty to let Subsearch decide (a subs folder in your Downloads).",
+    "paths.download_directory": SettingDescription(
+        "Download directory",
+        "Where subtitle archives are downloaded to before they are extracted. "
+        "Leave empty to use the system temporary directory, which is cleaned up automatically.",
+    ),
+    "paths.extraction_directory": SettingDescription(
+        "Extraction directory",
+        "Where downloaded archives are extracted to when searching without a video file. "
+        "Leave empty to use your Downloads directory.",
+    ),
+    "paths.video_file_directory": SettingDescription(
+        "Video file directory",
+        "The directory the best match is renamed and moved to. Can be relative to the video's "
+        "directory or a fixed path on your drive. Ignored when no video file backs the search.",
+    ),
+    "paths.path_resolution": SettingDescription(
+        "Path resolution",
+        "Whether the video file directory is relative to the video's directory or a fixed path on your drive.",
+    ),
+    "paths.create_missing_directory": SettingDescription(
+        "Create missing directory",
+        "Automatically create the video file directory if it doesn't exist yet.",
     ),
     "download_manager.available_subtitles": SettingDescription(
         "Found subtitles",
@@ -101,25 +117,13 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     ),
     "post_processing.move_best": SettingDescription(
         "Move best subtitle",
-        "Move only the single best subtitle to the folder you choose. "
+        "Move only the single best subtitle to the directory you choose. "
         "Can't be used together with moving all of them.",
     ),
     "post_processing.move_all": SettingDescription(
         "Move all subtitles",
         "Move every downloaded subtitle to the folder you choose. "
         "Can't be used together with moving only the best one.",
-    ),
-    "post_processing.target_path": SettingDescription(
-        "Destination folder",
-        "The folder subtitles are moved to. Can be relative to the video's folder or a fixed path on your drive.",
-    ),
-    "post_processing.path_resolution": SettingDescription(
-        "Path resolution",
-        "Whether the destination folder is relative to the video's folder or a fixed path on your drive.",
-    ),
-    "post_processing.create_missing_folder": SettingDescription(
-        "Create missing folder",
-        "Automatically create the destination folder if it doesn't exist yet.",
     ),
     "application.show_terminal": SettingDescription(
         "Show terminal while searching",
@@ -179,9 +183,12 @@ SETTING_DESCRIPTIONS: dict[str, SettingDescription] = {
     "card.subtitle_handling": SettingDescription(
         "Subtitle handling",
         "What Subsearch does with a subtitle after finding it. "
-        "Automatically rename and move it to a destination folder, "
-        "or take over and process subtitles yourself from the search results. "
-        "The working folder is where the search places subtitles when no video file is selected.",
+        "Automatically rename and move it to the video file directory, "
+        "or take over and process subtitles yourself from the search results.",
+    ),
+    "card.paths": SettingDescription(
+        "Paths",
+        "Where Subsearch downloads, extracts, and places subtitles. " "Leave a folder empty to use its default.",
     ),
     "card.shell_integration": SettingDescription(
         "Shell integration",

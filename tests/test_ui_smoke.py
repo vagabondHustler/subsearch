@@ -16,9 +16,14 @@ _POST_PROCESSING_DEFAULTS = {
     "post_processing.rename": True,
     "post_processing.move_best": True,
     "post_processing.move_all": False,
-    "post_processing.target_path": ".",
-    "post_processing.path_resolution": "relative",
-    "post_processing.create_missing_folder": True,
+}
+
+_PATHS_DEFAULTS = {
+    "paths.download_directory": "",
+    "paths.extraction_directory": "",
+    "paths.video_file_directory": ".",
+    "paths.path_resolution": "relative",
+    "paths.create_missing_directory": True,
 }
 
 _NOTIFICATIONS_DEFAULTS = {
@@ -151,7 +156,6 @@ def test_subtitle_handling_restore_defaults(qtbot) -> None:
 
     store.write("post_processing.rename", False)
     store.write("post_processing.move_best", False)
-    store.write("post_processing.create_missing_folder", False)
     assert switch_rows["post_processing.rename"].switch.isChecked() is False
     assert switch_rows["post_processing.move_best"].switch.isChecked() is False
 
@@ -161,26 +165,25 @@ def test_subtitle_handling_restore_defaults(qtbot) -> None:
         assert session.read(key) == default
     assert switch_rows["post_processing.rename"].switch.isChecked() is True
     assert switch_rows["post_processing.move_best"].switch.isChecked() is True
-    assert switch_rows["post_processing.create_missing_folder"].switch.isChecked() is True
 
 
-def test_subtitle_handling_restore_re_enables_destination(qtbot) -> None:
-    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
+def test_paths_restore_defaults(qtbot) -> None:
+    from subsearch.runtime.config import config_session
+    from subsearch.ui.cards.paths import PathsCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
-    card = SubtitleHandlingCard(store)
+    card = PathsCard(store)
     qtbot.addWidget(card)
+    session = config_session.get_config_session()
 
-    # Disable both move switches so the destination section becomes disabled.
-    store.write("post_processing.move_best", False)
-    store.write("post_processing.move_all", False)
-    assert not card.destination.isEnabled()
+    store.write("paths.video_file_directory", "..\\Subtitles")
+    store.write("paths.create_missing_directory", False)
 
     card._restore_defaults()
 
-    # Default has move_best=True, so destination must be re-enabled after restore.
-    assert card.destination.isEnabled()
+    for key, default in _PATHS_DEFAULTS.items():
+        assert session.read(key) == default
 
 
 def test_shell_integration_restore_re_enables_context_menu_icon(qtbot) -> None:
@@ -258,9 +261,8 @@ def test_subtitle_handling_greys_out_automatic_rows_when_manually_handle_enabled
 
     store.write("download_manager.manually_handle_post_processing", True)
     assert not card._automatic_handling.isEnabled()
-    # The card itself and its shared destination stay usable.
+    # The card itself stays usable.
     assert card.isEnabled()
-    assert card.destination.isEnabled()
 
     store.write("download_manager.manually_handle_post_processing", False)
     assert card._automatic_handling.isEnabled()
@@ -345,21 +347,21 @@ def test_int_input_row_writes_committed_value_to_store(qtbot) -> None:
     assert store.read("search.downloads_per_provider") == 99
 
 
-def test_working_directory_accepts_empty_and_rejects_invalid_path(qtbot) -> None:
+def test_extraction_directory_accepts_empty_and_rejects_invalid_path(qtbot) -> None:
     from subsearch.ui.state.store import SettingsStore
-    from subsearch.ui.widgets.setting_rows import FolderPathRow
+    from subsearch.ui.widgets.setting_rows import DirectoryPathRow
 
     store = SettingsStore()
-    row = FolderPathRow("download_manager.working_directory", store, allow_empty=True)
+    row = DirectoryPathRow("paths.extraction_directory", store, allow_empty=True)
     qtbot.addWidget(row)
 
     row.path_edit.setText("")
     assert row.is_valid()
     row.save_if_valid()
-    assert store.read("download_manager.working_directory") == ""
+    assert store.read("paths.extraction_directory") == ""
 
     row.path_edit.setText("::not a path::")
     assert not row.is_valid()
     assert row.path_edit.property("error") is True
     row.save_if_valid()
-    assert store.read("download_manager.working_directory") == ""
+    assert store.read("paths.extraction_directory") == ""
