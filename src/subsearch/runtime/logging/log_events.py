@@ -6,10 +6,14 @@ from typing import Any, Optional
 
 from subsearch.runtime.models import DataclassInstance
 
-BANNER_COLOR = "#fab387"
-MATCH_COLOR = "#a6e3a1"
-DONE_COLOR = "#89b4fa"
-FAIL_COLOR = "#f38ba8"
+
+class LogColor:
+    BANNER = "#fab387"  # orange — section banners / selections
+    MATCH = "#a6e3a1"  # green — accepted subtitle / success
+    SUCCESS = "#89b4fa"  # blue — task completed / done
+    WARN = "#f9e2af"  # yellow — soft warnings
+    FAIL = "#f38ba8"  # red — failures
+    FINISH = "#f2cdcd"  # peach — run summary line
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,26 +43,33 @@ def _path_kind(path: Path) -> str:
 
 
 def _shorten(path: Optional[Path]) -> Optional[Path]:
-    return path.relative_to(path.parent.parent) if path else None
+    if path is None:
+        return None
+    try:
+        return path.relative_to(path.parent.parent)
+    except ValueError:
+        return path
 
 
 LOG_EVENTS: dict[str, LogEvent] = {
-    "banner": LogEvent("--- [{title}] ---", BANNER_COLOR, bold=True),
-    "task_completed": LogEvent("Tasks completed", DONE_COLOR),
-    "video_file_selected": LogEvent("Selected video file: {filename}", BANNER_COLOR, bold=True),
-    "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", MATCH_COLOR),
+    "banner": LogEvent("--- [{title}] ---", LogColor.BANNER, bold=True),
+    "task_completed": LogEvent("Tasks completed", LogColor.SUCCESS),
+    "video_file_selected": LogEvent("Selected video file: {filename}", LogColor.BANNER, bold=True),
+    "subtitle_match": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}", LogColor.MATCH),
     "subtitle_rejected": LogEvent("{provider:<14}{percentage:>3}% {subtitle_name}"),
     "provider_skips": LogEvent("{provider:<14}skipped {total} ({breakdown})"),
     "remove": FilesystemEvent(r"Removing {kind}: ...\{src}", console=False),
     "rename": FilesystemEvent(r"Renaming {kind}: ...\{src} -> ...\{dst}", console=False),
     "move": FilesystemEvent(r"Moving {kind}: ...\{src} -> ...\{dst}", console=False),
     "extract": FilesystemEvent(r"Extracting archive: ...\{src} -> ...\{dst}", console=False),
-    "post_processing_started": LogEvent("Unpacking subtitles to {destination}", BANNER_COLOR, bold=True),
-    "post_processing_completed": LogEvent("Unpacked {extracted}, moved {moved} subtitles to {destination}", DONE_COLOR),
-    "post_processing_no_files": LogEvent(
-        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", FAIL_COLOR
+    "post_processing_started": LogEvent("Unpacking subtitles to {destination}", LogColor.BANNER, bold=True),
+    "post_processing_completed": LogEvent(
+        "Unpacked {extracted}, moved {moved} subtitles to {destination}", LogColor.SUCCESS
     ),
-    "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", FAIL_COLOR),
+    "post_processing_no_files": LogEvent(
+        "No subtitles unpacked or moved (extracted {extracted}, moved {moved})", LogColor.FAIL
+    ),
+    "post_processing_failed": LogEvent("Could not unpack subtitles: {reason}", LogColor.FAIL),
 }
 
 
