@@ -61,9 +61,11 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         titles = node.text().strip().split("subtitle ")[-1].split("\n")
         _href = node.attributes["href"].split("/")  # type: ignore
         href = _href[-1]
-        download_url = f"{self.download_domain}/subtitle/{href}.zip"
+        subtitle_page_url = f"{self.download_domain}/subtitle/{href}"
+        download_url = f"{subtitle_page_url}.zip"
+        download_headers = {"Referer": subtitle_page_url}
         for subtitle_name in titles:
-            self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {})
+            self.prepare_subtitle(self.provider_name, subtitle_name, download_url, {}, download_headers)
 
     def skip_reason(self, item: LexborNode) -> str:
         subtitle_language = item.css_first("span.sub-lang").child.text_content  # type: ignore
