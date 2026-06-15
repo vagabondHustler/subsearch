@@ -1,0 +1,40 @@
+import ctypes
+from typing import Any, Callable
+
+from subsearch.runtime.config import GUID
+from subsearch.runtime.config import session as config_session
+from subsearch.runtime.keys import ConfigKey, LogEvent
+from subsearch.runtime.logging.logger import log
+from subsearch.runtime.models import exceptions
+
+
+def apply_mutex(func: Callable) -> Callable:
+    def inner(*args, **kwargs) -> Any:
+        log.event(LogEvent.BANNER, title="Initializing Subsearch")
+        try:
+            single_instance = config_session.get_config_session().read(ConfigKey.APPLICATION_SINGLE_INSTANCE)
+            log.event(LogEvent.GUARD_SINGLE_INSTANCE, level="debug", single_instance=single_instance)
+            if not single_instance:
+                log.event(LogEvent.GUARD_SINGLE_INSTANCE_DISABLED, level="debug")
+                return func()
+        except FileNotFoundError:
+            pass
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+        kernel32 = ctypes.WinDLL("kernel32")
+        mutex = kernel32.CreateMutexW(None, False, GUID)
+        last_error = kernel32.GetLastError()
+
+        if last_error == 183:
+            raise exceptions.MultipleInstancesError(GUID)
+        try:
+            kernel32.WaitForSingleObject(mutex, -1)
+            log.event(LogEvent.GUARD_MUTEX_ACQUIRED, level="debug", guid=GUID)
+            return func(*args, **kwargs)
+        finally:
+            kernel32.ReleaseMutex(mutex)
+            log.event(LogEvent.GUARD_MUTEX_RELEASED, level="debug", guid=GUID)
+
+    return inner
