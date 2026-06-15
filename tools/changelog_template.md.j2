@@ -1,0 +1,20 @@
+{# merge all tree entries first so each section heading appears exactly once #}
+{% set merged = {} %}
+{% for entry in tree %}
+{% for change_key, changes in entry.changes.items() %}
+{% if merged.update({change_key: merged.get(change_key, []) + changes}) %}{% endif %}
+{% endfor %}
+{% endfor %}
+{% for change_key, changes in merged.items() %}
+{% if change_key %}
+#### {{ change_key }}
+{% endif %}
+{% for change in changes %}
+{% if change.scope %}
+- **{{ change.scope }}**: {{ change.message }}
+{% elif change.message %}
+- {{ change.message }}
+{% endif %}
+{% endfor %}
+
+{% endfor %}

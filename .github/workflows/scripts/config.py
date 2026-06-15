@@ -20,7 +20,7 @@ class Paths:
     user_data_directory: Path = local_app_data / APP_NAME
     installed_executable: Path = install_directory / EXE_NAME
     log_file: Path = user_data_directory / "log.log"
-    config_file: Path = user_data_directory / "config.toml"
+    config_file: Path = user_data_directory / "config.json"
 
     working_directory: Path = Path.cwd()
     pyproject: Path = working_directory / "pyproject.toml"

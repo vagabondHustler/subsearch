@@ -1,7 +1,6 @@
 import hashlib
 import os
 import re
-import socket
 import subprocess
 import sys
 import time
@@ -40,7 +39,7 @@ def msi_freeze_path() -> Path:
 
 
 class StepSummary:
-    CHECK, CROSS = ":heavy_check_mark:", ":x:"
+    PASSED, FAILED = "PASSED", "FAILED"
 
     def set_output(self, name: str, value: str) -> None:
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
@@ -52,21 +51,15 @@ class StepSummary:
             github_step_summary.write(f"{markdown}\n")
 
     def card(self, title: str, passed: bool | None = None) -> None:
-        badge = "" if passed is None else f" {self.CHECK if passed else self.CROSS}"
+        badge = "" if passed is None else f" {self.PASSED if passed else self.FAILED}"
         self.add_summary(f"### {title}{badge}")
-
-    def table(self, headers: tuple[str, ...], rows: list[tuple[str, ...]]) -> None:
-        self.add_summary("| " + " | ".join(headers) + " |")
-        self.add_summary("|" + "|".join(["---"] * len(headers)) + "|")
-        for row in rows:
-            self.add_summary("| " + " | ".join(row) + " |")
 
     def fields(self, items: list[tuple[str, str]]) -> None:
         for label, value in items:
             self.add_summary(f"- **{label}:** {value}")
 
-    def emoji(self, condition: bool) -> str:
-        return self.CHECK if condition else self.CROSS
+    def result(self, condition: bool) -> str:
+        return self.PASSED if condition else self.FAILED
 
 
 class Git:
@@ -204,9 +197,8 @@ def registry_key_exists() -> bool:
     import winreg  # Windows-only; imported lazily so this module loads on the Linux CI runner.
 
     try:
-        with winreg.ConnectRegistry(socket.gethostname(), winreg.HKEY_CURRENT_USER) as registry_root:
-            winreg.OpenKey(registry_root, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_WRITE)
-            return True
+        winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_READ)
+        return True
     except FileNotFoundError:
         return False
 
@@ -389,13 +381,12 @@ class BinaryTestReport:
         self._step_summary = step_summary
 
     def _current_state(self) -> tuple[bool, bool, bool, bool]:
-        return Paths.installed_executable.is_file(), Paths.log_file.is_file(), Paths.config_file.is_file(), registry_key_exists()
-
-    def _build_table_rows(self, actual: tuple[bool, ...], expected: tuple[bool, ...]) -> list[tuple[str, ...]]:
-        return [
-            (probe, self._step_summary.emoji(probe_found), self._step_summary.emoji(probe_expected))
-            for probe, probe_found, probe_expected in zip(self._PROBES, actual, expected)
-        ]
+        return (
+            Paths.installed_executable.is_file(),
+            Paths.log_file.is_file(),
+            Paths.config_file.is_file(),
+            registry_key_exists(),
+        )
 
     def _assert_stage_passed(self, name: str, passed: bool) -> None:
         if not passed:
@@ -408,7 +399,8 @@ class BinaryTestReport:
         expected = self._EXPECTED_STATE[name]
         passed = actual == expected
         self._step_summary.card(f"{name.capitalize()} test", passed=passed)
-        self._step_summary.table(("Probe", "Found", "Expected"), self._build_table_rows(actual, expected))
+        for probe, probe_found, probe_expected in zip(self._PROBES, actual, expected):
+            self._step_summary.add_summary(f"- {probe}: {self._step_summary.result(probe_found == probe_expected)}")
         self._log_stage(name, actual, passed)
         self._assert_stage_passed(name, passed)
 
@@ -450,10 +442,8 @@ class ArtifactHasher:
 
     def _write_hashes_summary(self, hashes: dict[Path, str]) -> None:
         self._step_summary.card("Build artifacts")
-        self._step_summary.table(
-            ("File", "SHA256"),
-            [(file_path.name, f"`{sha256}`") for file_path, sha256 in hashes.items()],
-        )
+        for file_path, sha256 in hashes.items():
+            self._step_summary.add_summary(f"- {file_path.name}: `{sha256}`")
 
     def prepare_build_artifacts(self) -> None:
         log("Collecting files", level="STEP")
@@ -481,7 +471,6 @@ class Build:
         "qfluentwidgets",
         "requests",
         "selectolax",
-        "toml",
         "urllib3",
         "urllib3_future",
         "qh3",
