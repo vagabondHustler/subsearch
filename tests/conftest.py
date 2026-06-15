@@ -1,17 +1,16 @@
 import importlib
+import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
 
-
 import pytest
-import toml
 
-from subsearch.globals import constants
-from subsearch.utils import io_app
+# Qt must render offscreen under pytest; set before any QApplication is created.
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-
-
+from subsearch.runtime.config import composition, defaults
 
 
 @pytest.fixture(scope="session")
@@ -38,21 +37,21 @@ def tests_path() -> Path:
 @pytest.fixture
 def fake_language_data_file(tmp_path) -> Any:
     fake_data = {
-        "english": {"name": "English", "alpha_1": "en", "alpha_2b": "eng", "incompatibility": []}
+        "english": {"name": "English", "two_letter_code": "en", "three_letter_code": "eng", "incompatibility": []}
     }
 
-    fake_file = tmp_path / "fake_language_datag.toml"
+    fake_file = tmp_path / "fake_language_datag.json"
     with fake_file.open("w") as f:
-        toml.dump(fake_data, f)
+        json.dump(fake_data, f)
     return fake_file
 
 
 @pytest.fixture
 def fake_config_file(tmp_path) -> Any:
-    fake_data = io_app.get_default_app_config()
-    fake_file = tmp_path / "fake_subsearch_config.toml"
+    fake_data = defaults.get_default_app_config()
+    fake_file = tmp_path / "fake_subsearch_config.json"
     with fake_file.open("w") as f:
-        toml.dump(fake_data, f)
+        json.dump(fake_data, f)
 
     return fake_file
 
@@ -66,17 +65,32 @@ def fake_log_file(tmp_path) -> Any:
 
 @pytest.fixture(autouse=True)
 def override_constants(fake_language_data_file, fake_config_file, fake_log_file) -> None:
-    io_app.DEVICE_INFO = io_app.get_system_info()
-    io_app.VIDEO_FILE = io_app.get_video_file_data()
-    io_app.APP_PATHS = io_app.get_app_paths()
-    io_app.FILE_PATHS = io_app.get_file_paths()
-    io_app.SUPPORTED_FILE_EXT = io_app.get_supported_file_ext()
-    io_app.SUPPORTED_PROVIDERS = io_app.get_supported_providers()
-    constants.FILE_PATHS.config = fake_config_file
-    constants.FILE_PATHS.language_data = fake_language_data_file
-    constants.FILE_PATHS.log = fake_log_file
+    composition.FILE_PATHS.config = fake_config_file
+    composition.FILE_PATHS.subtitle_languages = fake_language_data_file
+    composition.FILE_PATHS.log = fake_log_file
+
+
+@pytest.fixture(autouse=True)
+def redirect_logger_to_temp_log(override_constants) -> Any:
+    from subsearch.runtime.logging import logger
+
+    logger.log._file_logger = None
+    yield
+    if logger.log._file_logger is not None:
+        for handler in logger.log._file_logger.handlers:
+            handler.close()
+    logger.log._file_logger = None
 
 
 @pytest.fixture(autouse=True)
 def reset_constants() -> None:
-    importlib.reload(io_app)
+    importlib.reload(defaults)
+
+
+@pytest.fixture(autouse=True)
+def reset_config_session() -> Any:
+    from subsearch.runtime.config import session as config_session
+
+    config_session.reset_config_session()
+    yield
+    config_session.reset_config_session()
