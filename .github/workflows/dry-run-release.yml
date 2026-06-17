@@ -37,12 +37,9 @@ jobs:
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
-
       - uses: ./.github/actions/setup-python
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/install-commitizen
 
@@ -59,10 +56,6 @@ jobs:
       msi_hash: ${{ steps.run.outputs.msi_hash }}
       exe_hash: ${{ steps.run.outputs.exe_hash }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
       - uses: ./.github/actions/setup-python
 
       - uses: ./.github/actions/install-build-deps
@@ -87,10 +80,6 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
       - uses: ./.github/actions/setup-python
 
       - uses: actions/download-artifact@v4
@@ -108,12 +97,9 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
-
       - uses: ./.github/actions/setup-python
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/install-commitizen
 
