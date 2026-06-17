@@ -6,7 +6,7 @@ from subsearch.core.pipeline import SearchPipeline
 from subsearch.decorators import process_guard
 from subsearch.runtime.models import AppMode
 
- 
+
 class Subsearch:
     def __init__(self) -> None:
         self.pipeline = SearchPipeline(PREF_COUNTER)

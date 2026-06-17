@@ -1,6 +1,6 @@
 from typing import Any
 
-from PySide6.QtCore import QSize, Qt, QTimer, Signal
+from PySide6.QtCore import QLocale, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import (
     QFrame,
@@ -278,6 +278,7 @@ class FloatInput(LineEdit):
         self.setClearButtonEnabled(False)
         validator = QDoubleValidator(minimum, maximum, decimals, self)
         validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        validator.setLocale(QLocale(QLocale.Language.C))
         self.setValidator(validator)
         apply_token_value_font(self)
         flatten_line_edit(self)
@@ -289,7 +290,8 @@ class FloatInput(LineEdit):
 
     def value(self) -> float:
         try:
-            return self.clamp(round(float(self.text().strip()), self._decimals))
+            normalized = self.text().strip().replace(",", ".")
+            return self.clamp(round(float(normalized), self._decimals))
         except ValueError:
             return self._minimum
 

@@ -49,12 +49,15 @@ from subsearch.ui.compat.qfluent import (
     force_fixed_accent_color,
     forward_navigation_wheel_to_page,
 )
-from subsearch.ui.icons.lucide import LucideIcon
+from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.qt_application import get_application
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import (
     PostProcessingService,
     PostProcessingServiceProtocol,
+)
+from subsearch.ui.services.season_episode_suggestions import (
+    SeasonEpisodeSuggestionService,
 )
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.services.subtitle_downloads import (
@@ -65,11 +68,14 @@ from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
+from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 from subsearch.ui.widgets.tray_icon import WindowTrayIcon
 
 NAVIGATION_EXPAND_WIDTH = 180
 NAVIGATION_TOP_MARGIN = 8
+SAVE_CLEAN_COLOR = palette.NEUTRAL_3
+SAVE_DIRTY_COLOR = palette.NEUTRAL_1
 
 
 def _collapsible(*cards: SettingsCard) -> list[SettingsCard]:
@@ -79,22 +85,33 @@ def _collapsible(*cards: SettingsCard) -> list[SettingsCard]:
 
 
 class SettingsInterface(SingleDirectionScrollArea):
-    def __init__(self, object_name: str, cards: Sequence[QWidget]) -> None:
+    def __init__(self, object_name: str, build_cards: Callable[[], Sequence[QWidget]]) -> None:
         super().__init__(orient=Qt.Orientation.Vertical)
         self.setObjectName(object_name)
         self.setWidgetResizable(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._build_cards = build_cards
+        self._cards_built = False
 
-        container = QWidget(self)
-        layout = QVBoxLayout(container)
-        layout.setContentsMargins(36, 24, 36, 24)
-        layout.setSpacing(16)
-        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        for card in cards:
-            layout.addWidget(card)
+        self._container = QWidget(self)
+        self._layout = QVBoxLayout(self._container)
+        self._layout.setContentsMargins(36, 24, 36, 24)
+        self._layout.setSpacing(16)
+        self._layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.setWidget(container)
+        self.setWidget(self._container)
         self.enableTransparentBackground()
+
+    def showEvent(self, event) -> None:
+        self.build_cards()
+        super().showEvent(event)
+
+    def build_cards(self) -> None:
+        if self._cards_built:
+            return
+        self._cards_built = True
+        for card in self._build_cards():
+            self._layout.addWidget(card)
 
 
 class SettingsWindow(FluentWindow):
@@ -129,65 +146,71 @@ class SettingsWindow(FluentWindow):
         console_view_sink = ConsoleViewSink(self) if in_search_mode else None
         self.console_view_sink = console_view_sink
 
-        subtitle_handling_card = SubtitleHandlingCard(store)
-        paths_card = PathsCard(store)
-        self.register_close_validator(paths_card.commit_path_or_revert)
-
-        search_interface = SettingsInterface(
-            "searchInterface",
-            _collapsible(
+        def build_search_cards() -> Sequence[QWidget]:
+            return _collapsible(
                 LanguageCard(store),
                 SubtitleFiltersCard(store),
                 SearchThresholdCard(store),
-            ),
-        )
-        subtitle_handling_interface = SettingsInterface(
-            "subtitleHandlingInterface",
-            _collapsible(subtitle_handling_card, paths_card),
-        )
-        providers_interface = SettingsInterface(
-            "providersInterface",
-            _collapsible(
+            )
+
+        def build_subtitle_handling_cards() -> Sequence[QWidget]:
+            paths_card = PathsCard(store)
+            self.register_close_validator(paths_card.commit_path_or_revert)
+            return _collapsible(SubtitleHandlingCard(store), paths_card)
+
+        def build_providers_cards() -> Sequence[QWidget]:
+            return _collapsible(
                 SearchModeCard(store),
                 ProvidersCard(store),
                 ProviderDiagnosticsCard(store),
-            ),
-        )
-        integration_interface = SettingsInterface(
-            "integrationInterface",
-            _collapsible(
+            )
+
+        def build_integration_cards() -> Sequence[QWidget]:
+            return _collapsible(
                 ShellIntegrationCard(store, shell_service),
                 FileExtensionsCard(store, shell_service),
                 NotificationsCard(store),
-            ),
-        )
-        application_interface = SettingsInterface(
-            "applicationInterface",
-            _collapsible(
+            )
+
+        def build_application_cards() -> Sequence[QWidget]:
+            return _collapsible(
                 UpdateCard(self.task_runner),
                 ApplicationCard(store, shell_service),
                 NetworkCard(store),
-            ),
-        )
+            )
 
-        api_interface = SettingsInterface(
-            "apiInterface",
-            _collapsible(
-                ApiCard(store),
-            ),
-        )
+        def build_api_cards() -> Sequence[QWidget]:
+            return _collapsible(ApiCard(store))
 
-        about_interface = SettingsInterface(
-            "aboutInterface",
-            [
+        def build_about_cards() -> Sequence[QWidget]:
+            return [
                 *_collapsible(ResourcesCard()),
                 SubsearchLicenseCard(),
                 ThirdPartyLicenseCard(),
-            ],
+            ]
+
+        search_interface = SettingsInterface("searchInterface", build_search_cards)
+        subtitle_handling_interface = SettingsInterface(
+            "subtitleHandlingInterface", build_subtitle_handling_cards
         )
+        providers_interface = SettingsInterface("providersInterface", build_providers_cards)
+        integration_interface = SettingsInterface("integrationInterface", build_integration_cards)
+        application_interface = SettingsInterface("applicationInterface", build_application_cards)
+        api_interface = SettingsInterface("apiInterface", build_api_cards)
+        about_interface = SettingsInterface("aboutInterface", build_about_cards)
+        self._lazy_interfaces = [
+            search_interface,
+            subtitle_handling_interface,
+            providers_interface,
+            integration_interface,
+            application_interface,
+            api_interface,
+            about_interface,
+        ]
 
         video_file_service = VideoFileService(self)
         title_suggestion_service = TitleSuggestionService(self.task_runner, self)
+        season_episode_suggestion_service = SeasonEpisodeSuggestionService(self.task_runner, self)
         self.manual_search_interface = ManualSearchInterface(
             store,
             download_service,
@@ -196,6 +219,7 @@ class SettingsWindow(FluentWindow):
             subtitles,
             console_view_sink,
             title_suggestion_service,
+            season_episode_suggestion_service,
         )
         manual_search_interface = self.manual_search_interface
 
@@ -228,6 +252,17 @@ class SettingsWindow(FluentWindow):
             position=NavigationItemPosition.BOTTOM,
         )
 
+        self._save_item = self.navigationInterface.addItem(
+            routeKey="saveSettings",
+            icon=LucideIcon.SAVE,
+            text="Save settings",
+            onClick=self.store.commit,
+            selectable=False,
+            position=NavigationItemPosition.BOTTOM,
+        )
+        self.store.dirty_changed.connect(self._render_save_item_dirty_state)
+        self._render_save_item_dirty_state(self.store.has_uncommitted_changes)
+
         self._configure_navigation()
         self._tray_icon = self._build_tray_icon()
         self._apply_tray_icon_visibility(self.store.read(ConfigKey.APPLICATION_SHOW_TRAY_ICON))
@@ -236,7 +271,7 @@ class SettingsWindow(FluentWindow):
     def _build_tray_icon(self) -> WindowTrayIcon | None:
         if not QSystemTrayIcon.isSystemTrayAvailable():
             return None
-        return WindowTrayIcon(self)
+        return WindowTrayIcon(self, on_save_config=self.store.commit)
 
     def _on_setting_changed(self, key: str, value: object) -> None:
         if key == ConfigKey.APPLICATION_SHOW_TRAY_ICON:
@@ -285,6 +320,11 @@ class SettingsWindow(FluentWindow):
     def _on_search_failed(self, message: str) -> None:
         self._search_running = False
         self.manual_search_interface.populate([], [f"Search failed: {message}"])
+
+    def _render_save_item_dirty_state(self, dirty: bool) -> None:
+        color = SAVE_DIRTY_COLOR if dirty else SAVE_CLEAN_COLOR
+        self._save_item.setIcon(lucide_qicon(LucideIcon.SAVE, color))
+        self._save_item.setEnabled(dirty)
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):

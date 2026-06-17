@@ -1,4 +1,5 @@
 import re
+from urllib.parse import quote
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
@@ -20,6 +21,23 @@ _SUBTITLE_HREF_PATTERN = re.compile(r"subtitle-(\d+)\.html")
 _EPISODE_LABEL_PATTERN = re.compile(r"(\d{1,2})x(\d{1,4})")
 # matches a trailing year range like " (2008-2013)" or " (2015)" on a show title, to strip it off
 _YEAR_SUFFIX_PATTERN = re.compile(r"\s*\(\d{4}(?:-\d{4})?\)\s*$")
+# matches JS string-fragment vars like: var s1= 'files/B'; — capturing the fragment value
+_JS_FRAGMENT_PATTERN = re.compile(r"var\s+s\d+\s*=\s*'([^']*)'")
+
+
+def _resolve_download_url(download_page_url: str, referer: str, timeout: tuple[int, int]) -> str | None:
+    session = http.get_session()
+    try:
+        response = session.get(download_page_url, headers={"Referer": referer}, timeout=timeout)
+    except Exception:
+        return None
+    if not 200 <= response.status_code < 300:
+        return None
+    fragments = _JS_FRAGMENT_PATTERN.findall(response.text)
+    if not fragments:
+        return None
+    relative_path = "".join(fragments)
+    return f"{DOMAIN}/{quote(relative_path, safe='/')}"
 
 
 class TvSubtitlesScraper(provider_helper.ProviderHelper):
@@ -119,9 +137,12 @@ class TvSubtitlesScraper(provider_helper.ProviderHelper):
         return heading.text().strip() if heading is not None else ""
 
     def _prepare_subtitle(self, subtitle_id: str, release_name: str) -> None:
-        download_url = f"{DOMAIN}/download-{subtitle_id}.html"
-        download_headers = {"Referer": f"{DOMAIN}/subtitle-{subtitle_id}.html"}
-        self.prepare_subtitle(self.provider_name, release_name, download_url, {}, download_headers)
+        download_page_url = f"{DOMAIN}/download-{subtitle_id}.html"
+        referer = f"{DOMAIN}/subtitle-{subtitle_id}.html"
+        download_url = _resolve_download_url(download_page_url, referer, self.request_timeout)
+        if download_url is None:
+            return
+        self.prepare_subtitle(self.provider_name, release_name, download_url, {})
 
 
 class TvSubtitles(TvSubtitlesScraper):

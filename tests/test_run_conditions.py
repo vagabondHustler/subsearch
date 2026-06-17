@@ -68,6 +68,31 @@ def test_conditions_subsource(fake_cls: FakeBootstrap) -> None:
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
 
+def test_conditions_tvsubtitles(fake_cls: FakeBootstrap) -> None:
+    fake_cls.release_data.tvseries = True
+    fake_cls.release_data.season = "01"
+    fake_cls.release_data.episode = "05"
+    fake_cls.provider_urls.tvsubtitles = ["fake_url"]
+    fake_cls.app_config.providers["tvsubtitles_site"] = True
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.release_data.season = ""
+    fake_cls.release_data.episode = ""
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+
+def test_conditions_gestdown(fake_cls: FakeBootstrap) -> None:
+    fake_cls.release_data.tvseries = True
+    fake_cls.release_data.season = "01"
+    fake_cls.release_data.episode = "05"
+    fake_cls.app_config.providers["gestdown_site"] = True
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.release_data.episode = ""
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+    assert "has_season_and_episode" in fake_cls.call_conditions.unmet_condition_labels("gestdown")
+
+
 def test_conditions_download_files(fake_cls: FakeBootstrap) -> None:
     fake_cls.accepted_subtitles = []
     fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC

@@ -1,3 +1,5 @@
+from typing import Protocol
+
 from PySide6.QtCore import QEvent, QObject, Qt, Signal
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
@@ -13,7 +15,12 @@ from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
 ROW_PADDING = "4px 10px"
 ACCEPT_KEYS = (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Tab)
-NAVIGATION_HINT = "↑↓ navigate    Enter accept    Esc search as typed"
+TITLE_NAVIGATION_HINT = "↑↓ navigate    Enter accept    Esc search as typed"
+SEASON_NAVIGATION_HINT = "↑↓ navigate    Enter accept    Esc skip"
+
+
+class Displayable(Protocol):
+    def display_text(self) -> str: ...
 
 
 class SuggestionRow(QLabel):
@@ -41,14 +48,15 @@ class SuggestionRow(QLabel):
         self.hovered.emit(self.index)
 
 
-class TitleSuggestionPopup(AnchoredPopup):
-    suggestion_accepted = Signal(object)
+class SuggestionPopup(AnchoredPopup):
+    accepted_index = Signal(int)
     dismissed = Signal()
 
-    def __init__(self, anchor: QWidget) -> None:
+    def __init__(self, anchor: QWidget, navigation_hint: str) -> None:
         super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=True)
         self._anchor_widget = anchor
-        self._suggestions: list[TitleSuggestion] = []
+        self._navigation_hint = navigation_hint
+        self._row_count = 0
         self._rows: list[SuggestionRow] = []
         self._selected_index = 0
 
@@ -56,26 +64,28 @@ class TitleSuggestionPopup(AnchoredPopup):
         self._layout.setContentsMargins(6, 6, 6, 6)
         self._layout.setSpacing(2)
 
-        self._hint_label = QLabel(NAVIGATION_HINT, self)
+        self._hint_label = QLabel(navigation_hint, self)
         apply_caption_font(self._hint_label)
         self._hint_label.setStyleSheet(f"color: {palette.NEUTRAL_3}; padding: {ROW_PADDING};")
 
         anchor.installEventFilter(self)
 
-    def show_suggestions(self, suggestions: list[TitleSuggestion]) -> None:
+    def show_rows(self, labels: list[str]) -> None:
         self._teardown_rows()
-        self._suggestions = suggestions
-        self._rows = [
-            SuggestionRow(index, suggestion.display_text(), self) for index, suggestion in enumerate(suggestions)
-        ]
+        self._rows = [SuggestionRow(index, label, self) for index, label in enumerate(labels)]
         for row in self._rows:
             row.clicked.connect(self._accept_index)
             row.hovered.connect(self._select_index)
             self._layout.addWidget(row)
+        self._build_extra_widgets()
         self._layout.addWidget(self._hint_label)
-        self._select_index(0)
+        if self._rows:
+            self._select_index(0)
         self.setMinimumWidth(self._anchor_widget.width())
         self.show_below()
+
+    def _build_extra_widgets(self) -> None:
+        return None
 
     def _teardown_rows(self) -> None:
         for row in self._rows:
@@ -91,7 +101,7 @@ class TitleSuggestionPopup(AnchoredPopup):
 
     def _accept_index(self, index: int) -> None:
         self.hide()
-        self.suggestion_accepted.emit(self._suggestions[index])
+        self.accepted_index.emit(index)
 
     def _dismiss(self) -> None:
         self.hide()
@@ -108,6 +118,11 @@ class TitleSuggestionPopup(AnchoredPopup):
         return self._handle_key(event.key())
 
     def _handle_key(self, key: int) -> bool:
+        if not self._rows:
+            if key == Qt.Key.Key_Escape:
+                self._dismiss()
+                return True
+            return False
         if key == Qt.Key.Key_Down:
             self._select_index((self._selected_index + 1) % len(self._rows))
             return True
@@ -121,3 +136,35 @@ class TitleSuggestionPopup(AnchoredPopup):
             self._dismiss()
             return True
         return False
+
+
+class TitleSuggestionPopup(SuggestionPopup):
+    suggestion_accepted = Signal(object)
+
+    def __init__(self, anchor: QWidget) -> None:
+        super().__init__(anchor, TITLE_NAVIGATION_HINT)
+        self._suggestions: list[TitleSuggestion] = []
+        self.accepted_index.connect(self._emit_suggestion)
+
+    def show_suggestions(self, suggestions: list[TitleSuggestion]) -> None:
+        self._suggestions = suggestions
+        self.show_rows([suggestion.display_text() for suggestion in suggestions])
+
+    def _emit_suggestion(self, index: int) -> None:
+        self.suggestion_accepted.emit(self._suggestions[index])
+
+
+class NumberSuggestionPopup(SuggestionPopup):
+    number_chosen = Signal(int)
+
+    def __init__(self, anchor: QWidget) -> None:
+        super().__init__(anchor, SEASON_NAVIGATION_HINT)
+        self._numbers: list[int] = []
+        self.accepted_index.connect(self._emit_listed_number)
+
+    def show_numbers(self, numbers: list[int], labels: list[str]) -> None:
+        self._numbers = numbers
+        self.show_rows(labels)
+
+    def _emit_listed_number(self, index: int) -> None:
+        self.number_chosen.emit(self._numbers[index])

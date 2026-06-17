@@ -8,7 +8,13 @@ from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
-from subsearch.providers import gestdown, opensubtitles, subsource, tvsubtitles, yifysubtitles
+from subsearch.providers import (
+    gestdown,
+    opensubtitles,
+    subsource,
+    tvsubtitles,
+    yifysubtitles,
+)
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -38,6 +44,7 @@ PROVIDER_SKIP_EXPLANATIONS = {
     "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
     "not_tvseries": "does not support tv series",
     "is_tvseries": "only supports tv series",
+    "has_season_and_episode": "needs a season and episode number and this search has none",
     "url_not_empty": "needs an IMDb match and none was found for this search",
 }
 
@@ -167,13 +174,19 @@ class SearchPipeline:
 
     def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        downloaded = file_system.download_subtitle(subtitle, subtitle_number, total_count, WORKSPACE.download_directory)
+        downloaded = file_system.download_subtitle(
+            subtitle, subtitle_number, total_count, WORKSPACE.download_directory, WORKSPACE.extraction_directory
+        )
         subtitle.status = SubtitleStatus.AUTO_DOWNLOAD if downloaded else SubtitleStatus.DOWNLOAD_FAILED
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
     @run_if_conditions_met
     def download_files(self) -> None:
-        accepted = sorted(self.bootstrap.accepted_subtitles, key=lambda subtitle: subtitle.token_result, reverse=True)
+        accepted = sorted(
+            self.bootstrap.accepted_subtitles,
+            key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
+            reverse=True,
+        )
         for subtitle in accepted:
             if self._provider_at_download_limit(subtitle.provider_name):
                 continue

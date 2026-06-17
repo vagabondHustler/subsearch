@@ -48,7 +48,7 @@ class PathsCard(SettingsCard):
         )
         self._video_file_section = self._build_video_file_section(store)
         self.body_layout.addWidget(self._video_file_section)
-        self._video_file_section.setEnabled(SEARCH_SUBJECT.file_exists)
+        self.video_file_directory.setEnabled(SEARCH_SUBJECT.file_exists)
 
     def _build_video_file_section(self, store: SettingsStore) -> QWidget:
         container = QWidget(self)
@@ -75,7 +75,7 @@ class PathsCard(SettingsCard):
         self.store.write(ConfigKey.PATHS_PATH_RESOLUTION, path_resolution)
 
     def commit_path_or_revert(self) -> bool:
-        if not self._video_file_section.isEnabled():
+        if not self.video_file_directory.isEnabled():
             return True
         if self.video_file_directory.is_valid():
             self.video_file_directory.save_if_valid()

@@ -94,6 +94,7 @@ class ProviderHelper:
         download_headers: dict[str, str] | None = None,
         percentage_override: int | None = None,
         hash_match: bool = False,
+        download_count: int = 0,
     ) -> None:
         if percentage_override is not None:
             token_score = percentage_override
@@ -120,6 +121,7 @@ class ProviderHelper:
                 download_headers=download_headers or {},
                 status=status,
                 hash_match=hash_match,
+                download_count=download_count,
             )
         elif request_data:
             subtitle = Subtitle(
@@ -130,6 +132,7 @@ class ProviderHelper:
                 request_data=request_data,
                 status=status,
                 hash_match=hash_match,
+                download_count=download_count,
             )
         else:
             raise ValueError(f"Subtitle has neither download_url nor request_data: {subtitle_name!r}")

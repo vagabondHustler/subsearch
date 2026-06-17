@@ -65,6 +65,10 @@ class RunConditions:
         return self.app_config.subtitle_workspace_manual_post_processing
 
     @property
+    def has_season_and_episode(self) -> bool:
+        return bool(self.release_data.season) and bool(self.release_data.episode)
+
+    @property
     def is_search_mode(self) -> bool:
         return self.app_mode in (
             AppMode.SEARCH_MANUAL,
@@ -146,6 +150,7 @@ class RunConditions:
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_tvsubtitles", lambda: self.language_supports_provider("tvsubtitles")),
                 ("is_tvseries", self.release_data.tvseries),
+                ("has_season_and_episode", self.has_season_and_episode),
                 ("url_not_empty", len(self.provider_urls.tvsubtitles) > 0),
                 ("provider_enabled", self.app_config.providers["tvsubtitles_site"]),
             ],
@@ -153,6 +158,7 @@ class RunConditions:
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_gestdown", lambda: self.language_supports_provider("gestdown")),
                 ("is_tvseries", self.release_data.tvseries),
+                ("has_season_and_episode", self.has_season_and_episode),
                 ("provider_enabled", self.app_config.providers["gestdown_site"]),
             ],
             PipelineStep.DOWNLOAD_FILES: [

@@ -75,6 +75,8 @@ class LucideIcon(FluentIconBase, Enum):
     FILE_PEN = "file-pen"
     X = "x"
     PICTURE_IN_PICTURE_2 = "picture-in-picture-2"
+    SAVE = "save"
+
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

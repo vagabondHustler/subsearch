@@ -65,6 +65,11 @@ class AnchoredPopup(QFrame):
         self.raise_()
 
     def show_below(self, centered: bool = False) -> None:
+        self.reposition_below(centered)
+        self.show()
+        self.raise_()
+
+    def reposition_below(self, centered: bool = False) -> None:
         self.adjustSize()
         anchor_top_left = self._anchor.mapToGlobal(QPoint(0, 0))
         anchor_bottom = anchor_top_left.y() + self._anchor.height()
@@ -86,8 +91,6 @@ class AnchoredPopup(QFrame):
         y = max(screen_area.top(), min(y, screen_area.bottom() - self.height() + 1))
 
         self.move(QPoint(x, y))
-        self.show()
-        self.raise_()
 
     def _screen_area(self, anchor_top_left: QPoint):
         screen = self.screen() or QApplication.screenAt(anchor_top_left)

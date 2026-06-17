@@ -1,7 +1,6 @@
 import io
 import logging
 import traceback
-from logging.handlers import RotatingFileHandler
 from types import TracebackType
 from typing import Callable, Optional
 
@@ -11,7 +10,7 @@ from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.models import DataclassInstance
 
 LOG_MAX_BYTES = 1_000_000
-LOG_SESSIONS_TO_KEEP = 3
+CRASH_CLEAR_EVERY_RUNS = 5
 LOG_FORMAT = "%(asctime)s %(levelname)-8s %(module)s:%(lineno)d  %(message)s"
 LOG_DATE_FORMAT = "%H:%M:%S"
 
@@ -27,24 +26,10 @@ LEVELS = {
 ConsoleSink = Callable[[str], None]
 
 
-def _rotate_session_logs() -> None:
-    log_path = FILE_PATHS.log
-    for index in range(LOG_SESSIONS_TO_KEEP - 1, 0, -1):
-        older = log_path.with_suffix(f".{index}.log")
-        newer = log_path.with_suffix(f".{index - 1}.log") if index > 1 else log_path
-        if newer.exists():
-            try:
-                older.unlink(missing_ok=True)
-                newer.rename(older)
-            except PermissionError:
-                # another process holds the log open; keep writing without rotating
-                return
-
-
 class SessionBufferHandler(logging.Handler):
     # Holds the current session's records in memory so a crash can copy the
     # session into the durable crash.log without re-reading the open (and
-    # rotation-prone) log.log file on disk.
+    # truncated-on-startup) log.log file on disk.
     def __init__(self) -> None:
         super().__init__()
         self._buffer = io.StringIO()
@@ -64,12 +49,12 @@ _session_buffer = SessionBufferHandler()
 
 def _build_file_logger() -> logging.Logger:
     APP_PATHS.appdata_subsearch.mkdir(parents=True, exist_ok=True)
-    _rotate_session_logs()
+    _clear_crash_log_periodically()
     logger = logging.getLogger("subsearch")
     logger.handlers.clear()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
-    file_handler = RotatingFileHandler(FILE_PATHS.log, mode="w", maxBytes=LOG_MAX_BYTES, encoding="utf-8")
+    file_handler = logging.FileHandler(FILE_PATHS.log, mode="w", encoding="utf-8")
     file_handler.setFormatter(formatter)
     _session_buffer.setFormatter(formatter)
     _session_buffer.reset()
@@ -79,7 +64,19 @@ def _build_file_logger() -> logging.Logger:
     return logger
 
 
-def _write_session_header(handler: RotatingFileHandler) -> None:
+def _clear_crash_log_periodically() -> None:
+    counter_path = FILE_PATHS.crash.with_suffix(".count")
+    try:
+        run_count = int(counter_path.read_text(encoding="utf-8")) + 1
+    except (FileNotFoundError, ValueError):
+        run_count = 1
+    if run_count >= CRASH_CLEAR_EVERY_RUNS:
+        FILE_PATHS.crash.unlink(missing_ok=True)
+        run_count = 0
+    counter_path.write_text(str(run_count), encoding="utf-8")
+
+
+def _write_session_header(handler: logging.FileHandler) -> None:
     if handler.stream is not None:
         handler.stream.write(rendering.session_header())
         handler.flush()

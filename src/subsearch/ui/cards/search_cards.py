@@ -433,7 +433,7 @@ class ProvidersCard(SettingsCard):
             apply_body_font(check_box)
             check_box.setChecked(bool(providers.get(provider_key, False)))
             check_box.toggled.connect(lambda checked, key=provider_key: self._on_provider_toggled(key, checked))
-            grid.addWidget(check_box, row, column, alignment=Qt.AlignmentFlag.AlignHCenter)
+            grid.addWidget(check_box, row, column)
             self.check_boxes[provider_key] = check_box
 
         self.body_layout.addLayout(grid)

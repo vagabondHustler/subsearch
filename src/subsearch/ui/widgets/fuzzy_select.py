@@ -136,7 +136,7 @@ class FuzzyFinderPopup(AnchoredPopup):
     def _refilter(self, query: str) -> None:
         self._rebuild_rows(matching_labels(self._search_terms_by_label, query))
         if self.isVisible():
-            self.show_below(centered=True)
+            self.reposition_below(centered=True)
 
     def _rebuild_rows(self, labels: list[str], preferred_label: str | None = None) -> None:
         self._teardown_rows()
@@ -144,7 +144,7 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._rows = [SuggestionRow(index, label, self._rows_container) for index, label in enumerate(labels)]
         for row in self._rows:
             row.clicked.connect(self._accept_index)
-            row.hovered.connect(self._select_index)
+            row.hovered.connect(self._highlight_index)
             self._rows_layout.addWidget(row)
         self._cap_scroll_height()
         if self._rows:
@@ -155,11 +155,9 @@ class FuzzyFinderPopup(AnchoredPopup):
         self.adjustSize()
 
     def _cap_scroll_height(self) -> None:
-        self._rows_container.adjustSize()
-        content_height = self._rows_container.sizeHint().height()
+        self._rows_layout.activate()
         visible_count = min(len(self._rows), MAX_VISIBLE_RESULTS)
-        capped_height = visible_count * ROW_HEIGHT_ESTIMATE if self._rows else 0
-        self._scroll_area.setFixedHeight(min(content_height, capped_height))
+        self._scroll_area.setFixedHeight(visible_count * ROW_HEIGHT_ESTIMATE)
 
     def _teardown_rows(self) -> None:
         for row in self._rows:
@@ -169,10 +167,13 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._rows = []
         self._visible_labels = []
 
-    def _select_index(self, index: int) -> None:
+    def _highlight_index(self, index: int) -> None:
         self._selected_index = index
         for row in self._rows:
             row.render_selected(row.index == index)
+
+    def _select_index(self, index: int) -> None:
+        self._highlight_index(index)
         if 0 <= index < len(self._rows):
             self._scroll_area.ensureWidgetVisible(self._rows[index])
 

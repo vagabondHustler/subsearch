@@ -60,6 +60,12 @@ class LogEvent(StrEnum):
     IMDB_SUGGESTIONS_FAILED = "imdb.suggestions_failed"
     IMDB_NO_SUGGESTIONS = "imdb.no_suggestions"
     IMDB_SUGGESTIONS = "imdb.suggestions"
+    IMDB_EPISODES_FAILED = "imdb.episodes_failed"
+    IMDB_EPISODES = "imdb.episodes"
+    GESTDOWN_SEASONS_FAILED = "gestdown.seasons_failed"
+    GESTDOWN_SEASONS = "gestdown.seasons"
+    GESTDOWN_EPISODES_FAILED = "gestdown.episodes_failed"
+    GESTDOWN_EPISODES = "gestdown.episodes"
     IMDB_LOOKUP_FAILED = "imdb.lookup_failed"
     IMDB_NO_RESULTS = "imdb.no_results"
     IMDB_MATCHED = "imdb.matched"
@@ -214,6 +220,12 @@ EVENTS: dict[LogEvent, str] = {
     LogEvent.IMDB_SUGGESTIONS_FAILED: "IMDb connection failed while fetching suggestions for {term!r}",
     LogEvent.IMDB_NO_SUGGESTIONS: "IMDb returned no suggestions for {term!r}",
     LogEvent.IMDB_SUGGESTIONS: "IMDb returned {count} title suggestion(s) for {term!r}",
+    LogEvent.IMDB_EPISODES_FAILED: "IMDb connection failed while fetching episodes for {imdb_id} season {season}",
+    LogEvent.IMDB_EPISODES: "IMDb returned {seasons} season(s) and {episodes} episode(s) for {imdb_id}",
+    LogEvent.GESTDOWN_SEASONS_FAILED: "Gestdown returned no seasons for '{title}'",
+    LogEvent.GESTDOWN_SEASONS: "Gestdown returned {seasons} season(s) for '{title}'",
+    LogEvent.GESTDOWN_EPISODES_FAILED: "Gestdown returned no episodes for '{title}' season {season}",
+    LogEvent.GESTDOWN_EPISODES: "Gestdown returned {episodes} episode(s) for '{title}' season {season}",
     LogEvent.IMDB_LOOKUP_FAILED: "IMDb connection failed while looking up {title!r}",
     LogEvent.IMDB_NO_RESULTS: "IMDb returned no results for {title!r}",
     LogEvent.IMDB_MATCHED: "IMDb matched {title!r} -> {imdb_id}",

@@ -19,7 +19,7 @@ class FileTracker:
             return set()
         try:
             return set(json.loads(self.manifest_path.read_text(encoding="utf-8")))
-        except (json.JSONDecodeError, OSError):
+        except json.JSONDecodeError, OSError:
             log.event(LogEvent.TRACKER_MANIFEST_UNREADABLE, level="warning", path=self.manifest_path)
             return set()
 

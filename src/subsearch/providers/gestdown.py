@@ -1,11 +1,10 @@
-import re
 from typing import Any
 from urllib.parse import quote
 
 from curl_cffi import requests as curl_requests
 from curl_cffi.requests import Response
 
-from subsearch.parsing import release_parser
+from subsearch.parsing.gestdown_names import normalize_show_name
 from subsearch.providers import provider_helper
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
@@ -13,18 +12,6 @@ from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.models.exceptions import ProviderResponseUnrecognized
 
 API_BASE_URL = "https://api.gestdown.info"
-
-# matches a trailing parenthetical qualifier like "(US)", "(uk)" or "(2017)" at the end of a show name
-_TRAILING_QUALIFIER_PATTERN = re.compile(r"\s*\([^)]*\)\s*$")
-# matches runs of separators (dash, dot, colon) left in a show name after punctuation normalization
-_SEPARATOR_RUN_PATTERN = re.compile(r"[-.:]+")
-
-
-def normalize_show_name(name: str) -> str:
-    normalized = release_parser.normalize_typed_punctuation(name.lower())
-    normalized = _TRAILING_QUALIFIER_PATTERN.sub("", normalized)
-    normalized = _SEPARATOR_RUN_PATTERN.sub(" ", normalized)
-    return " ".join(normalized.split())
 
 
 class GestdownApi:
@@ -129,12 +116,16 @@ class Gestdown(provider_helper.ProviderHelper):
             raise ProviderResponseUnrecognized("subtitles response missing 'matchingSubtitles'")
         for subtitle in data["matchingSubtitles"]:
             reason = self._skip_reason(subtitle)
-            release_name = subtitle.get("version") or str(subtitle.get("subtitleId", ""))
+            release_name = self._release_name(subtitle)
             if reason:
                 self.record_filtered_out(self.provider_name, release_name, reason)
                 continue
             download_url = api.download_url(subtitle["downloadUri"])
-            self.prepare_subtitle(self.provider_name, release_name, download_url, {})
+            self.prepare_subtitle(self.provider_name, release_name, download_url, {}, download_count=subtitle.get("downloadCount", 0))
+
+    def _release_name(self, subtitle: dict[str, Any]) -> str:
+        version = subtitle.get("version") or str(subtitle.get("subtitleId", ""))
+        return f"{self.release_data.release} {version}".strip()
 
     def _skip_reason(self, subtitle: dict[str, Any]) -> str:
         keys = ["downloadUri", "version", "language", "hearingImpaired"]

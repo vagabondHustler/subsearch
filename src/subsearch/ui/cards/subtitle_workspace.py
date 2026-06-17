@@ -21,9 +21,13 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qfluentwidgets import BodyLabel, LineEdit, ListWidget
+from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButton
 
-from subsearch.parsing.imdb_lookup import TitleSuggestion
+from subsearch.parsing.imdb_lookup import (
+    EpisodeSuggestion,
+    SeasonSuggestion,
+    TitleSuggestion,
+)
 from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config import SEARCH_SUBJECT, SUPPORTED_FILE_EXT, WORKSPACE
 from subsearch.runtime.config.defaults import ConfigKey
@@ -39,6 +43,9 @@ from subsearch.ui.compat.qfluent import flatten_line_edit, inset_list_highlight_
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
+from subsearch.ui.services.season_episode_suggestions import (
+    SeasonEpisodeSuggestionService,
+)
 from subsearch.ui.services.subtitle_downloads import DownloadServiceProtocol
 from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
@@ -48,6 +55,7 @@ from subsearch.ui.theme.metrics import (
     LIST_SCROLLBAR_WIDTH,
     ROW_INSET,
     SMALL_ICON_SIZE,
+    TOOL_BUTTON_SIZE,
 )
 from subsearch.ui.theme.separators import SEPARATOR_INSET
 from subsearch.ui.theme.typography import (
@@ -65,7 +73,10 @@ from subsearch.ui.widgets.ripple_spinner import (
 )
 from subsearch.ui.widgets.row_icon_button import RowIconButton
 from subsearch.ui.widgets.search_line_edit import SearchLineEdit
-from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
+from subsearch.ui.widgets.suggestion_popup import (
+    NumberSuggestionPopup,
+    TitleSuggestionPopup,
+)
 
 CARD_BODY_MARGINS = (12, 8, 12, 12)
 
@@ -203,18 +214,26 @@ class SubtitleSearchBar(QWidget):
         store: SettingsStore,
         video_file_service: VideoFileService,
         title_suggestion_service: TitleSuggestionService | None = None,
+        season_episode_suggestion_service: SeasonEpisodeSuggestionService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.store = store
         self._video_file_service = video_file_service
         self._title_suggestion_service = title_suggestion_service
+        self._season_episode_suggestion_service = season_episode_suggestion_service
         self._awaiting_suggestions = False
         self._term_without_suggestions = ""
         self._committed_filename = SEARCH_SUBJECT.name if SEARCH_SUBJECT.file_exists else ""
+        self._pending_series: TitleSuggestion | None = None
+        self._pending_season = 0
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
+        if season_episode_suggestion_service is not None:
+            season_episode_suggestion_service.seasons_ready.connect(self._on_seasons_ready)
+            season_episode_suggestion_service.episodes_ready.connect(self._on_episodes_ready)
+            season_episode_suggestion_service.lookup_failed.connect(self._on_season_episode_lookup_failed)
 
         self._build_video_file_section()
         store.subscribe(ConfigKey.SEARCH_PROVIDERS, self._on_providers_changed)
@@ -309,11 +328,86 @@ class SubtitleSearchBar(QWidget):
         return popup
 
     def _on_suggestion_accepted(self, suggestion: TitleSuggestion) -> None:
-        accepted_term = suggestion.search_term()
-        self._filename_edit.setText(accepted_term)
-        self._term_without_suggestions = accepted_term
+        if suggestion.tvseries and self._season_episode_suggestion_service is not None:
+            self._pending_series = suggestion
+            self.start_spinner()
+            self._season_episode_suggestion_service.request_seasons(suggestion.title, suggestion.imdb_id)
+            return
+        self._commit_term_and_search(suggestion.search_term(), suggestion.imdb_id, suggestion.tvseries)
+
+    def _on_seasons_ready(self, seasons: list[SeasonSuggestion]) -> None:
+        if self._pending_series is None:
+            return
+        self.stop_spinner()
+        numbers = [season.number for season in seasons]
+        labels = [season.display_text() for season in seasons]
+        popup = self._number_popup()
+        popup.number_chosen.connect(self._on_season_chosen, Qt.ConnectionType.UniqueConnection)
+        popup.show_numbers(numbers, labels)
+
+    def _on_season_chosen(self, season: int) -> None:
+        if self._pending_series is None or self._season_episode_suggestion_service is None:
+            return
+        self._pending_season = season
+        self.start_spinner()
+        self._season_episode_suggestion_service.request_episodes(
+            self._pending_series.title, self._pending_series.imdb_id, season, self._selected_language_name()
+        )
+
+    def _on_episodes_ready(self, season: int, episodes: list[EpisodeSuggestion]) -> None:
+        if self._pending_series is None or season != self._pending_season:
+            return
+        self.stop_spinner()
+        numbers = [episode.number for episode in episodes]
+        labels = [episode.display_text() for episode in episodes]
+        popup = self._number_popup()
+        popup.number_chosen.connect(self._on_episode_chosen, Qt.ConnectionType.UniqueConnection)
+        popup.show_numbers(numbers, labels)
+
+    def _on_episode_chosen(self, episode: int) -> None:
+        if self._pending_series is None:
+            return
+        series = self._pending_series
+        term = f"{series.title} S{self._pending_season:02d}E{episode:02d}"
+        self._reset_pending_series()
+        self._commit_term_and_search(term, series.imdb_id, True)
+
+    def _on_season_episode_lookup_failed(self, _message: str) -> None:
+        if self._pending_series is None:
+            return
+        # IMDb is unreachable: fall back to a series-level search the user can refine.
+        series = self._pending_series
+        self._reset_pending_series()
+        self._commit_term_and_search(series.search_term(), series.imdb_id, True)
+
+    def _selected_language_name(self) -> str:
+        selected = self.store.read(ConfigKey.LANGUAGE_SELECTED)
+        return self.store.language_data()[selected]["name"]
+
+    def _reset_pending_series(self) -> None:
+        self._pending_series = None
+        self._pending_season = 0
+
+    def _number_popup(self) -> NumberSuggestionPopup:
+        popup = getattr(self, "_season_episode_popup", None)
+        if popup is None:
+            popup = NumberSuggestionPopup(self._filename_edit)
+            popup.dismissed.connect(self._on_season_episode_dismissed)
+            self._season_episode_popup = popup
+        return popup
+
+    def _on_season_episode_dismissed(self) -> None:
+        if self._pending_series is None:
+            return
+        series = self._pending_series
+        self._reset_pending_series()
+        self._commit_term_and_search(series.search_term(), series.imdb_id, True)
+
+    def _commit_term_and_search(self, term: str, imdb_id: str, tvseries: bool) -> None:
+        self._filename_edit.setText(term)
+        self._term_without_suggestions = term
         self._on_filename_edited()
-        self.research_requested.emit(suggestion.imdb_id, suggestion.tvseries)
+        self.research_requested.emit(imdb_id, tvseries)
 
     def _on_suggestions_dismissed(self) -> None:
         self._search_as_typed(self._filename_edit.text().strip())
@@ -365,8 +459,20 @@ class SubtitleCard(SettingsCard):
         super().__init__(description.title, parent=parent)
         self.add_header_help(description.explanation)
         self.viewLayout.setContentsMargins(*CARD_BODY_MARGINS)
+        self._add_dead_chevron()
         self._search_bar = self._build_search_bar()
         self.add_header_button(self._search_bar)
+
+    def _add_dead_chevron(self) -> None:
+        # Purely decorative: the other cards carry a collapse chevron, so this card
+        # shows the same expanded-state chevron for header consistency. It is disabled
+        # and wired to nothing, so the card cannot collapse.
+        chevron = TransparentToolButton(self)
+        chevron.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
+        chevron.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
+        chevron.setIcon(lucide_qicon(LucideIcon.CHEVRON_DOWN, palette.NEUTRAL_3))
+        chevron.setEnabled(False)
+        self.headerLayout.insertWidget(0, chevron)
 
     def _build_search_bar(self) -> LineEdit:
         bar = LineEdit(self)
@@ -551,6 +657,7 @@ class ManualSearchInterface(QWidget):
         subtitles: list[Subtitle] | None = None,
         console_view_sink: ConsoleViewSink | None = None,
         title_suggestion_service: TitleSuggestionService | None = None,
+        season_episode_suggestion_service: SeasonEpisodeSuggestionService | None = None,
     ) -> None:
         super().__init__()
         self.setObjectName("manualSearchInterface")
@@ -576,7 +683,9 @@ class ManualSearchInterface(QWidget):
         layout.setContentsMargins(36, 24, 36, 24)
         layout.setSpacing(8)
 
-        self._search_bar = SubtitleSearchBar(store, video_file_service, title_suggestion_service, self)
+        self._search_bar = SubtitleSearchBar(
+            store, video_file_service, title_suggestion_service, season_episode_suggestion_service, self
+        )
         self._search_bar.research_requested.connect(self.research_requested)
         layout.addWidget(self._search_bar)
 

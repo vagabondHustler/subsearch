@@ -39,18 +39,18 @@ def _identity_patterns() -> list[re.Pattern[str]]:
 
 _IDENTITY_PATTERNS = _identity_patterns()
 
-_REDACTED = "***"
+REDACTED = "***"
 _REDACTED_USERNAME = "USERNAME"
 
 
 def sanitize(text: str) -> str:
-    text = API_KEY_PATTERN.sub(_REDACTED, text)
-    text = EMAIL_PATTERN.sub(_REDACTED, text)
+    text = API_KEY_PATTERN.sub(REDACTED, text)
+    text = EMAIL_PATTERN.sub(REDACTED, text)
     if GUID:
-        text = text.replace(GUID, _REDACTED)
+        text = text.replace(GUID, REDACTED)
     for pattern in _IDENTITY_PATTERNS:
         text = pattern.sub(_REDACTED_USERNAME, text)
-    return IP_ADDRESS_PATTERN.sub(_REDACTED, text)
+    return IP_ADDRESS_PATTERN.sub(REDACTED, text)
 
 
 SESSION_SEPARATOR = "\x1c"

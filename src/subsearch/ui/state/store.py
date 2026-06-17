@@ -10,6 +10,7 @@ from subsearch.runtime.config.defaults import ConfigKey
 
 class SettingsStore(QObject):
     value_changed = Signal(str, object)
+    dirty_changed = Signal(bool)
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -23,6 +24,11 @@ class SettingsStore(QObject):
             return
         self._session.write(key, value)
         self.value_changed.emit(str(key), value)
+        self.dirty_changed.emit(True)
+
+    @property
+    def has_uncommitted_changes(self) -> bool:
+        return self._session.has_uncommitted_changes
 
     def subscribe(self, key: ConfigKey | str, callback: Callable[[Any], None]) -> None:
         def relay_matching_key(changed_key: str, value: Any) -> None:
@@ -33,6 +39,7 @@ class SettingsStore(QObject):
 
     def commit(self) -> None:
         self._session.commit()
+        self.dirty_changed.emit(False)
 
     def resolved_default_directory(self, key: ConfigKey | str) -> str:
         defaults_by_key = {

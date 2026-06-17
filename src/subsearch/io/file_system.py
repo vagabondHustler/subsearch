@@ -1,3 +1,4 @@
+import re
 import shutil
 import struct
 import tempfile
@@ -65,7 +66,9 @@ def _cloudflare_block_reason(response: CurlResponse) -> str:
     return "none"
 
 
-def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> bool:
+def download_subtitle(
+    subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path, extraction_dir: Path
+) -> bool:
     log.event(
         LogEvent.DOWNLOAD_SUBTITLE,
         provider=subtitle.provider_name,
@@ -77,17 +80,26 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
-    if not is_zip_payload(first_chunk):
-        log.event(
-            LogEvent.DOWNLOAD_NOT_ZIP,
-            level="warning",
-            provider=subtitle.provider_name,
-            subtitle_name=subtitle.subtitle_name,
-            status_code=response.status_code,
-            cloudflare=_cloudflare_block_reason(response),
-            url=subtitle.download_url,
-        )
-        return False
+    if is_zip_payload(first_chunk):
+        _save_zip_archive(subtitle, tmp_dir, first_chunk, chunks)
+        return True
+    raw_extension = _raw_subtitle_extension(response)
+    if raw_extension is not None:
+        _save_raw_subtitle(subtitle, extraction_dir, raw_extension, first_chunk, chunks)
+        return True
+    log.event(
+        LogEvent.DOWNLOAD_NOT_ZIP,
+        level="warning",
+        provider=subtitle.provider_name,
+        subtitle_name=subtitle.subtitle_name,
+        status_code=response.status_code,
+        cloudflare=_cloudflare_block_reason(response),
+        url=subtitle.download_url,
+    )
+    return False
+
+
+def _save_zip_archive(subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chunks: Iterable[bytes]) -> None:
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     tmp_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -98,11 +110,50 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
         fd.write(first_chunk)
         for chunk in chunks:
             fd.write(chunk)
-    return True
+
+
+def _save_raw_subtitle(
+    subtitle: Subtitle, extraction_dir: Path, extension: str, first_chunk: bytes, chunks: Iterable[bytes]
+) -> None:
+    extraction_dir.mkdir(parents=True, exist_ok=True)
+    name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
+    stem = f"{name_prefix}{subtitle.subtitle_name}"
+    download_path = _next_available_path(extraction_dir, stem, extension)
+    get_file_tracker().track(download_path)
+    with download_path.open("wb") as fd:
+        fd.write(first_chunk)
+        for chunk in chunks:
+            fd.write(chunk)
 
 
 _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
 _MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024  # 50 MB , generous for any subtitle archive
+
+_CONTENT_TYPE_EXTENSIONS = {
+    "text/srt": ".srt",
+    "application/x-subrip": ".srt",
+    "text/vtt": ".vtt",
+    "text/x-ssa": ".ass",
+}
+
+# matches a content-disposition filename, e.g. filename=Show.S01E01.en.srt or filename*=UTF-8''Show.srt
+_CONTENT_DISPOSITION_FILENAME_PATTERN = re.compile(r"filename\*?=(?:UTF-8\'\')?\"?([^\";]+)\"?", re.IGNORECASE)
+
+
+def _content_disposition_filename(response: CurlResponse) -> str | None:
+    disposition = response.headers.get("content-disposition", "")
+    match = _CONTENT_DISPOSITION_FILENAME_PATTERN.search(disposition)
+    return match.group(1).strip() if match else None
+
+
+def _raw_subtitle_extension(response: CurlResponse) -> str | None:
+    filename = _content_disposition_filename(response)
+    if filename:
+        suffix = Path(filename).suffix.lower()
+        if suffix in _SUBTITLE_EXTENSIONS:
+            return suffix
+    content_type = response.headers.get("content-type", "").split(";")[0].strip().lower()
+    return _CONTENT_TYPE_EXTENSIONS.get(content_type)
 
 
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
@@ -165,6 +216,16 @@ def _subtitle_files_in(directory: Path) -> list[Path]:
 
 def count_subtitle_files(directory: Path) -> int:
     return len(_subtitle_files_in(directory))
+
+
+def count_raw_subtitles_by_name(subtitle_name: str, directory: Path) -> int:
+    if not directory.is_dir():
+        return 0
+    return sum(
+        1
+        for file in directory.iterdir()
+        if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS and file.stem.startswith(subtitle_name)
+    )
 
 
 def find_best_subtitle_match(release_name: str, subs_dir: Path) -> Path:

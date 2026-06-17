@@ -29,6 +29,52 @@ class TitleSuggestion:
         return f"{self.title} ({self.year})"
 
 
+@dataclass(frozen=True)
+class SeasonSuggestion:
+    number: int
+
+    def display_text(self) -> str:
+        return f"Season {self.number}"
+
+
+@dataclass(frozen=True)
+class EpisodeSuggestion:
+    season: int
+    number: int
+    title: str
+
+    def display_text(self) -> str:
+        title_suffix = f"  ·  {self.title}" if self.title else ""
+        return f"Episode {self.number}{title_suffix}"
+
+
+def find_season_suggestions(imdb_id: str) -> list[SeasonSuggestion]:
+    try:
+        season_episodes = imdbinfo.get_episodes(imdb_id, season=1)
+    except ImdbinfoError:
+        log.event(LogEvent.IMDB_EPISODES_FAILED, level="warning", imdb_id=imdb_id, season=1)
+        return []
+    total_seasons = season_episodes.total_series_seasons or 0
+    suggestions = [SeasonSuggestion(number=season) for season in range(1, total_seasons + 1)]
+    log.event(LogEvent.IMDB_EPISODES, imdb_id=imdb_id, seasons=len(suggestions), episodes=0)
+    return suggestions
+
+
+def find_episode_suggestions(imdb_id: str, season: int) -> list[EpisodeSuggestion]:
+    try:
+        season_episodes = imdbinfo.get_episodes(imdb_id, season=season)
+    except ImdbinfoError:
+        log.event(LogEvent.IMDB_EPISODES_FAILED, level="warning", imdb_id=imdb_id, season=season)
+        return []
+    suggestions = [
+        EpisodeSuggestion(season=season, number=episode.episode, title=episode.title or "")
+        for episode in season_episodes.episodes
+        if episode.episode
+    ]
+    log.event(LogEvent.IMDB_EPISODES, imdb_id=imdb_id, seasons=0, episodes=len(suggestions))
+    return suggestions
+
+
 def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> list[TitleSuggestion]:
     log.event(LogEvent.IMDB_CONNECTING, term=typed_term)
     try:

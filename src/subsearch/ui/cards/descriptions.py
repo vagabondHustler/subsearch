@@ -124,7 +124,7 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     CardKey.AVAILABLE_SUBTITLES: SettingDescription(
         "Subtitles",
-        "Every subtitle found for this video, closest matches first. Click one to download it. "
+        "Every subtitle found for this video, closest matches first. Double click one to download it. "
         "With automatic downloads on, the best ones are already ticked.",
     ),
     ConfigKey.POST_PROCESSING_RENEAME: SettingDescription(

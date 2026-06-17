@@ -57,7 +57,11 @@ def test_collect_subtitles_reads_release_name_and_builds_download_url(monkeypatc
     scraper = _build_tvsubtitles()
     captured: list[tuple[str, str, dict[str, str]]] = []
     monkeypatch.setattr(
-        scraper, "prepare_subtitle", lambda *args, **kwargs: captured.append((args[1], args[2], args[4]))
+        scraper, "prepare_subtitle", lambda *args, **kwargs: captured.append((args[1], args[2], args[3]))
+    )
+    monkeypatch.setattr(
+        "subsearch.providers.tvsubtitles._resolve_download_url",
+        lambda *args, **kwargs: "https://www.tvsubtitles.net/files/Breaking%20Bad_5x06.en.zip",
     )
 
     episode_tree = HTMLParser(
@@ -72,8 +76,8 @@ def test_collect_subtitles_reads_release_name_and_builds_download_url(monkeypatc
     assert captured == [
         (
             "Breaking Bad 5x06 (HDTV.EVOLVE)",
-            "https://www.tvsubtitles.net/download-225955.html",
-            {"Referer": "https://www.tvsubtitles.net/subtitle-225955.html"},
+            "https://www.tvsubtitles.net/files/Breaking%20Bad_5x06.en.zip",
+            {},
         )
     ]
 

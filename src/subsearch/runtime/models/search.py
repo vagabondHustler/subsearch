@@ -23,6 +23,7 @@ class Subtitle:
     download_headers: dict[str, str] = field(default_factory=dict)
     status: SubtitleStatus = SubtitleStatus.BELOW_THRESHOLD
     hash_match: bool = False
+    download_count: int = 0
     subtitle_id: str = field(default_factory=lambda: uuid4().hex[:5])
 
 
