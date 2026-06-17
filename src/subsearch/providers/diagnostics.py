@@ -2,10 +2,10 @@ import sys
 
 from subsearch.io.language_data import load_language_data
 from subsearch.parsing import imdb_lookup, release_parser
-from subsearch.providers import opensubtitles, subsource, yifysubtitles
+from subsearch.providers import gestdown, opensubtitles, subsource, tvsubtitles, yifysubtitles
 from subsearch.runtime.config import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
@@ -20,6 +20,8 @@ PROVIDER_CLASSES = {
     "opensubtitles": opensubtitles.OpenSubtitles,
     "yifysubtitles": yifysubtitles.YifySubtitles,
     "subsource": subsource.Subsource,
+    "tvsubtitles": tvsubtitles.TvSubtitles,
+    "gestdown": gestdown.Gestdown,
 }
 
 

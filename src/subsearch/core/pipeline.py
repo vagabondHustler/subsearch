@@ -8,9 +8,15 @@ from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
-from subsearch.providers import opensubtitles, subsource, yifysubtitles
-from subsearch.runtime.config import APP_PATHS, DEVICE_INFO, SEARCH_SUBJECT, WORKSPACE
-from subsearch.runtime.keys import LogEvent
+from subsearch.providers import gestdown, opensubtitles, subsource, tvsubtitles, yifysubtitles
+from subsearch.runtime.config import (
+    APP_PATHS,
+    DEVICE_INFO,
+    PATH_RESOLVER,
+    SEARCH_SUBJECT,
+    WORKSPACE,
+)
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     ProviderDiagnosticStatus,
@@ -27,26 +33,33 @@ PROVIDER_SKIP_EXPLANATIONS = {
     "language_supports_opensubtitles": "does not support the selected language",
     "language_supports_yifysubtitles": "does not support the selected language",
     "language_supports_subsource": "does not support the selected language",
+    "language_supports_tvsubtitles": "does not support the selected language",
+    "language_supports_gestdown": "does not support the selected language",
     "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
     "not_tvseries": "does not support tv series",
+    "is_tvseries": "only supports tv series",
     "url_not_empty": "needs an IMDb match and none was found for this search",
 }
 
 
 class SearchWorker(Worker):
-    def __init__(self, pipeline: "SearchPipeline", imdb_id: str = "") -> None:
+    def __init__(self, pipeline: "SearchPipeline", imdb_id: str = "", tvseries: bool | None = None) -> None:
         super().__init__()
         self._pipeline = pipeline
         self._imdb_id = imdb_id
+        self._tvseries = tvseries
 
     def execute(self) -> SearchOutcome:
         self._pipeline.bootstrap.ensure_search_mode()
         self._pipeline.bootstrap.resync_app_config()
-        self._pipeline.bootstrap.rebuild_search_inputs(self._imdb_id)
+        self._pipeline.bootstrap.rebuild_search_inputs(self._imdb_id, self._tvseries)
+        log.event(LogEvent.BANNER, title="Searching")
         self._pipeline.init_search(
             self._pipeline.opensubtitles,
             self._pipeline.yifysubtitles,
             self._pipeline.subsource,
+            self._pipeline.tvsubtitles,
+            self._pipeline.gestdown,
         )
         skipped_providers = self._pipeline.provider_skip_reasons()
         for skip_reason in skipped_providers:
@@ -64,18 +77,17 @@ class SearchPipeline:
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
 
-    def _make_search_worker(self, imdb_id: str = "") -> "SearchWorker":
-        return SearchWorker(self, imdb_id)
+    def _make_search_worker(self, imdb_id: str = "", tvseries: bool | None = None) -> "SearchWorker":
+        return SearchWorker(self, imdb_id, tvseries)
 
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
         parallel_tasks.run_in_threads(*providers)
-        log.event(LogEvent.TASK_COMPLETED)
-        log.event(LogEvent.BANNER, title="Search completed")
+        log.event(LogEvent.SEARCH_COMPLETED)
 
     def provider_skip_reasons(self) -> list[str]:
         reasons = []
-        for provider_step in ("opensubtitles", "yifysubtitles", "subsource"):
+        for provider_step in ("opensubtitles", "yifysubtitles", "subsource", "tvsubtitles", "gestdown"):
             unmet_labels = self.call_conditions.unmet_condition_labels(provider_step)
             if not unmet_labels:
                 continue
@@ -91,7 +103,7 @@ class SearchPipeline:
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
         self._run_due_diagnostics()
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.DIAGNOSTICS_COMPLETED)
 
     def _run_due_diagnostics(self) -> None:
         from subsearch.providers import diagnostics
@@ -102,7 +114,7 @@ class SearchPipeline:
         reports = diagnostics.diagnose_providers(due_providers)
         diagnostics.record_health_reports(reports)
         self._notify_unhealthy_providers(reports)
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.DIAGNOSTICS_DUE_COMPLETED)
 
     def _notify_unhealthy_providers(self, reports: list[ProviderResult]) -> None:
         unhealthy = [
@@ -140,6 +152,14 @@ class SearchPipeline:
     def subsource(self) -> None:
         self._start_search(provider=subsource.Subsource, flag="site")
 
+    @run_if_conditions_met
+    def tvsubtitles(self) -> None:
+        self._start_search(provider=tvsubtitles.TvSubtitles, flag="site")
+
+    @run_if_conditions_met
+    def gestdown(self) -> None:
+        self._start_search(provider=gestdown.Gestdown, flag="site")
+
     def _provider_at_download_limit(self, provider_name: str) -> bool:
         if provider_name not in self.bootstrap.api_calls_made:
             self.bootstrap.api_calls_made[provider_name] = 0
@@ -158,7 +178,7 @@ class SearchPipeline:
             if self._provider_at_download_limit(subtitle.provider_name):
                 continue
             self._download_accepted_subtitle(subtitle, len(accepted))
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.DOWNLOADS_COMPLETED)
 
     @run_if_conditions_met
     def subtitle_workspace(self) -> None:
@@ -170,16 +190,10 @@ class SearchPipeline:
             subtitles, search_worker_factory=self._make_search_worker
         )
         self.bootstrap.resync_app_config()
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.BOOT_WORKSPACE_CLOSED)
 
     def _resolve_post_processing_target(self) -> Path:
-        paths = self.bootstrap.app_config.paths
-        target = paths["video_file_directory"]
-        resolution = paths["path_resolution"]
-        create_missing_directory = paths["create_missing_directory"]
-        return file_system.create_path_from_string(
-            target, resolution, WORKSPACE.file_directory, create_missing_directory
-        )
+        return PATH_RESOLVER.resolve_post_processing_target(self.bootstrap.app_config, WORKSPACE.file_directory)
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
@@ -194,23 +208,23 @@ class SearchPipeline:
     @run_if_conditions_met
     def extract_files(self) -> None:
         file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.EXTRACT_COMPLETED)
 
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
         new_name = file_system.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
         self.bootstrap.autoload_src = new_name
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.RENAME_COMPLETED)
 
     @run_if_conditions_met
     def subtitle_move_best(self, target: Path) -> None:
         file_system.move_and_replace(self.bootstrap.autoload_src, target)
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.MOVE_BEST_COMPLETED)
 
     @run_if_conditions_met
     def subtitle_move_all(self, target: Path) -> None:
         file_system.move_all(WORKSPACE.extraction_directory, target)
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.MOVE_ALL_COMPLETED)
 
     def _log_provider_diagnostics_warnings(self) -> None:
         for report in self.bootstrap.health_reports:
@@ -226,19 +240,42 @@ class SearchPipeline:
         )
         return downloaded, len(evaluated)
 
-    def _dispatch_summary_toast(self, matches_downloaded: str, elapsed_summary: str, succeeded: bool) -> None:
+    def _dispatch_finish_toast(self, summary_line: str, elapsed_summary: str, succeeded: bool) -> None:
         title = "Search Succeeded" if succeeded else "Search Failed"
         event_key = LogEvent.PIPELINE_SUMMARY_SUCCEEDED if succeeded else LogEvent.PIPELINE_SUMMARY_FAILED
-        log.event(event_key, summary=matches_downloaded)
-        self.bootstrap.system_tray.display_toast(title, f"{matches_downloaded}\n{elapsed_summary}")
+        log.event(event_key, summary=summary_line)
+        self.bootstrap.system_tray.display_toast(title, f"{summary_line}\n{elapsed_summary}")
+
+    def _failure_reason(self, total_count: int) -> str:
+        if self.bootstrap.all_providers_disabled():
+            return "Every provider is disabled in settings"
+        reports = self.bootstrap.health_reports
+        provider_reports = [report for report in reports if report.provider_name != "imdb"]
+        if provider_reports and all(
+            report.diagnostic_status is ProviderDiagnosticStatus.NO_RESPONSE for report in provider_reports
+        ):
+            return "No providers were reachable"
+        if any(report.diagnostic_status is ProviderDiagnosticStatus.STRUCTURE_INVALID for report in provider_reports):
+            return "A provider's site changed and could not be parsed"
+        skipped = self.provider_skip_reasons()
+        if skipped and len(skipped) >= len(provider_reports or skipped):
+            return "Every provider was skipped for this search"
+        if total_count == 0:
+            return "No matching subtitles were found"
+        return "No subtitles cleared the search threshold"
 
     @run_if_conditions_met
-    def summary_notification(self) -> None:
+    def finish_notification(self) -> None:
         self._log_provider_diagnostics_warnings()
         downloaded_count, total_count = self._count_downloaded_subtitles()
-        matches_downloaded = f"Downloaded: {downloaded_count}/{total_count}"
+        succeeded = downloaded_count > 0
+        if succeeded:
+            # summary_line = f"Downloaded: {downloaded_count}/{total_count}"
+            summary_line = f"All tasks done!"
+        else:
+            summary_line = self._failure_reason(total_count)
         elapsed_summary = f"Finished in {self._elapsed()} seconds"
-        self._dispatch_summary_toast(matches_downloaded, elapsed_summary, succeeded=downloaded_count > 0)
+        self._dispatch_finish_toast(summary_line, elapsed_summary, succeeded=succeeded)
 
     def _elapsed(self) -> float:
         return time.perf_counter() - self.bootstrap.start
@@ -256,7 +293,7 @@ class SearchPipeline:
                 WORKSPACE.extraction_directory
             ):
                 tracker.delete_if_tracked(WORKSPACE.extraction_directory)
-        log.event(LogEvent.TASK_COMPLETED)
+        log.event(LogEvent.CLEANUP_COMPLETED)
 
     def _wait_for_terminal_input(self) -> None:
         if not self.bootstrap.app_config.show_terminal:
@@ -269,7 +306,7 @@ class SearchPipeline:
             pass
 
     def on_exit(self) -> None:
-        log.event(LogEvent.BANNER, title="Exiting")
+        log.event(LogEvent.EXITING)
         self.bootstrap.system_tray.stop()
         log.event(LogEvent.PIPELINE_FINISHED, seconds=self._elapsed())
         self._wait_for_terminal_input()

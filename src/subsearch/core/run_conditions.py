@@ -1,9 +1,30 @@
+from enum import StrEnum
 from typing import Callable
 
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.runtime.keys import LogEvent, PipelineStep
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppMode
+
+
+class PipelineStep(StrEnum):
+    INIT_SEARCH = "init_search"
+    OPENSUBTITLES = "opensubtitles"
+    YIFYSUBTITLES = "yifysubtitles"
+    SUBSOURCE = "subsource"
+    TVSUBTITLES = "tvsubtitles"
+    GESTDOWN = "gestdown"
+    DOWNLOAD_FILES = "download_files"
+    SUBTITLE_WORKSPACE = "subtitle_workspace"
+    SUBTITLE_POST_PROCESSING = "subtitle_post_processing"
+    EXTRACT_FILES = "extract_files"
+    SUBTITLE_RENAME = "subtitle_rename"
+    SUBTITLE_MOVE_BEST = "subtitle_move_best"
+    SUBTITLE_MOVE_ALL = "subtitle_move_all"
+    FINISH_NOTIFICATION = "finish_notification"
+    RUN_PROVIDER_DIAGNOSTICS = "run_provider_diagnostics"
+    CLEAN_UP = "clean_up"
+
 
 ConditionList = list[tuple[str, "bool | Callable[[], bool]"]]
 
@@ -39,11 +60,17 @@ class RunConditions:
 
     @property
     def manual_post_processing(self) -> bool:
+        if not self.should_open_subtitle_workspace:
+            return False
         return self.app_config.subtitle_workspace_manual_post_processing
 
     @property
     def is_search_mode(self) -> bool:
-        return self.app_mode in (AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID, AppMode.SEARCH_AUTOMATIC, AppMode.DEV)
+        return self.app_mode in (
+            AppMode.SEARCH_MANUAL,
+            AppMode.SEARCH_HYBRID,
+            AppMode.SEARCH_AUTOMATIC,
+        )
 
     @property
     def is_pipeline_post_processing_mode(self) -> bool:
@@ -61,7 +88,7 @@ class RunConditions:
 
     @property
     def should_open_subtitle_workspace(self) -> bool:
-        if self.app_mode is AppMode.SEARCH_MANUAL or self.app_mode is AppMode.DEV:
+        if self.app_mode is AppMode.SEARCH_MANUAL:
             return True
         if self.app_mode is AppMode.SEARCH_HYBRID and not self.has_accepted:
             return True
@@ -115,6 +142,19 @@ class RunConditions:
                 ("language_supports_subsource", lambda: self.language_supports_provider("subsource")),
                 ("provider_enabled", self.app_config.providers["subsource_site"]),
             ],
+            PipelineStep.TVSUBTITLES: [
+                ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
+                ("language_supports_tvsubtitles", lambda: self.language_supports_provider("tvsubtitles")),
+                ("is_tvseries", self.release_data.tvseries),
+                ("url_not_empty", len(self.provider_urls.tvsubtitles) > 0),
+                ("provider_enabled", self.app_config.providers["tvsubtitles_site"]),
+            ],
+            PipelineStep.GESTDOWN: [
+                ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
+                ("language_supports_gestdown", lambda: self.language_supports_provider("gestdown")),
+                ("is_tvseries", self.release_data.tvseries),
+                ("provider_enabled", self.app_config.providers["gestdown_site"]),
+            ],
             PipelineStep.DOWNLOAD_FILES: [
                 not_manual_handled,
                 ("should_download_files", self.should_download_files),
@@ -150,9 +190,8 @@ class RunConditions:
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_all_enabled", post_processing["move_all"]),
             ],
-            PipelineStep.SUMMARY_NOTIFICATION: [
+            PipelineStep.FINISH_NOTIFICATION: [
                 ("app_mode_search", self.is_search_mode),
-                ("summary_notification_enabled", self.app_config.summary_notification),
             ],
             PipelineStep.RUN_PROVIDER_DIAGNOSTICS: [
                 ("app_mode_search", self.is_search_mode),

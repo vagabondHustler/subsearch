@@ -3,7 +3,7 @@ from collections.abc import Callable
 from typing import Any
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
@@ -79,6 +79,7 @@ class ProviderHelper:
 
         self.request_timeout = (app_config.request_connect_timeout, app_config.request_read_timeout)
         self.season_no_padding = release_parser.remove_padded_zero(release_data.season)
+        self.episode_no_padding = release_parser.remove_padded_zero(release_data.episode)
 
         self.provider_name = ""
         self.reported_health: list[ProviderResult] = []
