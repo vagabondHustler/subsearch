@@ -10,6 +10,8 @@ APP_NAME: str = "Subsearch"
 EXE_NAME: str = f"{APP_NAME}.exe"
 HASHES_NAME: str = "hashes.sha256"
 CHANGELOG_NAME: str = "changelog.md"
+# Must match subsearch.runtime.config.APP_USER_MODEL_ID so toasts inherit the shortcut's icon.
+APP_USER_MODEL_ID: str = "Subsearch.Subsearch"
 
 
 class Paths:

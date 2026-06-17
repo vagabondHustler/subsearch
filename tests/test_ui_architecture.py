@@ -100,16 +100,15 @@ def test_private_qfluentwidgets_access_only_in_compat() -> None:
 
 
 def test_description_keys_are_all_enum_members() -> None:
-    from subsearch.runtime.keys import CardKey, ConfigKey
-    from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+    from subsearch.runtime.config.defaults import ConfigKey
+    from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 
     stray = [key for key in SETTING_DESCRIPTIONS if not isinstance(key, (ConfigKey, CardKey))]
     assert not stray, f"SETTING_DESCRIPTIONS keys must be ConfigKey or CardKey members: {stray}"
 
 
 def test_every_card_key_has_a_description() -> None:
-    from subsearch.runtime.keys import CardKey
-    from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+    from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 
     missing = [card_key.name for card_key in CardKey if card_key not in SETTING_DESCRIPTIONS]
     assert not missing, f"CardKey members without a SettingDescription: {missing}"

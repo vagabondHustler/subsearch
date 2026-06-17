@@ -10,7 +10,7 @@ from subsearch.io.nested_dict import (
     set_nested_value,
 )
 from subsearch.runtime.config.composition import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

@@ -5,7 +5,8 @@ from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, TransparentToolButton
 
-from subsearch.runtime.keys import CardKey, ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.ui.cards.descriptions import CardKey
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette

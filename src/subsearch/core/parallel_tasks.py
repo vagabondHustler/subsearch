@@ -2,7 +2,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable
 
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

@@ -7,7 +7,6 @@ class AppMode(Enum):
     SEARCH_MANUAL = "search_manual"
     SEARCH_HYBRID = "search_hybrid"
     SEARCH_AUTOMATIC = "search_automatic"
-    DEV = "dev"
 
 
 @dataclass(slots=True, frozen=True)

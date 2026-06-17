@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

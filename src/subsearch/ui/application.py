@@ -4,7 +4,7 @@ from typing import Callable
 
 from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
 from PySide6.QtGui import QCloseEvent, QColor, QIcon
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QSystemTrayIcon, QVBoxLayout, QWidget
 from qfluentwidgets import (
     FluentWindow,
     NavigationItemPosition,
@@ -16,7 +16,8 @@ from qfluentwidgets import (
 
 from subsearch.io import windows_registry
 from subsearch.runtime.config import APP_PATHS
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import SearchOutcome, Subtitle
 from subsearch.ui import warmup
@@ -50,7 +51,7 @@ from subsearch.ui.compat.qfluent import (
 )
 from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.qt_application import get_application
-from subsearch.ui.services.log_panel import LogPanelSink
+from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import (
     PostProcessingService,
     PostProcessingServiceProtocol,
@@ -65,6 +66,7 @@ from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
+from subsearch.ui.widgets.tray_icon import WindowTrayIcon
 
 NAVIGATION_EXPAND_WIDTH = 180
 NAVIGATION_TOP_MARGIN = 8
@@ -99,7 +101,7 @@ class SettingsWindow(FluentWindow):
     def __init__(
         self,
         subtitles: list[Subtitle] | None = None,
-        search_worker_factory: Callable[[str], Worker] | None = None,
+        search_worker_factory: Callable[..., Worker] | None = None,
         download_service: DownloadServiceProtocol | None = None,
         post_processing_service: PostProcessingServiceProtocol | None = None,
         start_search_immediately: bool = False,
@@ -124,7 +126,8 @@ class SettingsWindow(FluentWindow):
         if post_processing_service is None:
             post_processing_service = PostProcessingService(self.task_runner, self)
         in_search_mode = subtitles is not None or search_worker_factory is not None
-        log_panel_sink = LogPanelSink(self) if in_search_mode else None
+        console_view_sink = ConsoleViewSink(self) if in_search_mode else None
+        self.console_view_sink = console_view_sink
 
         subtitle_handling_card = SubtitleHandlingCard(store)
         paths_card = PathsCard(store)
@@ -191,7 +194,7 @@ class SettingsWindow(FluentWindow):
             post_processing_service,
             video_file_service,
             subtitles,
-            log_panel_sink,
+            console_view_sink,
             title_suggestion_service,
         )
         manual_search_interface = self.manual_search_interface
@@ -226,6 +229,22 @@ class SettingsWindow(FluentWindow):
         )
 
         self._configure_navigation()
+        self._tray_icon = self._build_tray_icon()
+        self._apply_tray_icon_visibility(self.store.read(ConfigKey.APPLICATION_SHOW_TRAY_ICON))
+        self.store.value_changed.connect(self._on_setting_changed)
+
+    def _build_tray_icon(self) -> WindowTrayIcon | None:
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            return None
+        return WindowTrayIcon(self)
+
+    def _on_setting_changed(self, key: str, value: object) -> None:
+        if key == ConfigKey.APPLICATION_SHOW_TRAY_ICON:
+            self._apply_tray_icon_visibility(bool(value))
+
+    def _apply_tray_icon_visibility(self, visible: bool) -> None:
+        if self._tray_icon is not None:
+            self._tray_icon.setVisible(visible)
 
     def _clear_title_bar(self) -> None:
         getattr(self.titleBar, "iconLabel").hide()
@@ -249,12 +268,12 @@ class SettingsWindow(FluentWindow):
     def register_close_validator(self, validator: Callable[[], bool]) -> None:
         self._close_validators.append(validator)
 
-    def _start_search(self, imdb_id: str = "") -> None:
+    def _start_search(self, imdb_id: str = "", tvseries: bool | None = None) -> None:
         if self._search_worker_factory is None or self._search_running:
             return
         self._search_running = True
         self.manual_search_interface.reset_for_search()
-        worker = self._search_worker_factory(imdb_id)
+        worker = self._search_worker_factory(imdb_id, tvseries)
         worker.finished.connect(self._on_search_finished)
         worker.failed.connect(self._on_search_failed)
         self.task_runner.submit(worker)
@@ -269,6 +288,8 @@ class SettingsWindow(FluentWindow):
 
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):
+            if self._tray_icon is not None:
+                self._tray_icon.hide()
             self.task_runner.shutdown()
             self.store.commit()
             windows_registry.reconcile_shell_integration()
@@ -285,10 +306,9 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
 
 def open_settings_window(
     subtitles: list[Subtitle] | None = None,
-    search_worker_factory: Callable[[str], Worker] | None = None,
-    download_service: DownloadServiceProtocol | None = None,
-    post_processing_service: PostProcessingServiceProtocol | None = None,
+    search_worker_factory: Callable[..., Worker] | None = None,
     start_search_immediately: bool = False,
+    on_window_shown: Callable[[], None] | None = None,
 ) -> list[Subtitle]:
     warmup.await_warmup()
     qInstallMessageHandler(_suppress_point_size_warning)
@@ -303,11 +323,11 @@ def open_settings_window(
         f"HeaderCardWidget, CardWidget, SimpleCardWidget, ElevatedCardWidget "
         f"{{ background-color: transparent; border: none; }}"
     )
-    window = SettingsWindow(
-        subtitles, search_worker_factory, download_service, post_processing_service, start_search_immediately
-    )
-    log.event(LogEvent.BOOT_GUI_OPENED)
+    window = SettingsWindow(subtitles, search_worker_factory, start_search_immediately=start_search_immediately)
+    log.event(LogEvent.BOOT_UI_OPENED)
     window.show()
+    if on_window_shown is not None:
+        on_window_shown()
     application.exec()
-    log.event(LogEvent.BOOT_GUI_CLOSED, level="debug")
+    log.event(LogEvent.BOOT_UI_CLOSED, level="debug")
     return window.manual_search_interface.downloaded

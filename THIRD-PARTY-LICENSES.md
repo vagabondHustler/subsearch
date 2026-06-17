@@ -31,3 +31,13 @@ required by the LGPL.
 
 A separate commercial license for this component is offered by its author; see
 the project page above.
+
+## Windows-Toasts
+
+- Component: windows-toasts (and its winrt-* runtime dependencies)
+- License: Apache License 2.0
+- Project: <https://github.com/DatGuy1/Windows-Toasts>
+- Source and license text: <https://github.com/DatGuy1/Windows-Toasts>
+
+Used to deliver native Windows notifications. Apache 2.0 is compatible with the
+GPL v3 under which Subsearch as a whole is distributed.

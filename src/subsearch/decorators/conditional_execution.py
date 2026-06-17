@@ -1,7 +1,7 @@
 import functools
 from typing import Any, Callable
 
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

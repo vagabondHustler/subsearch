@@ -106,10 +106,13 @@ def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_post_proces
         row = interface.list_widget.itemWidget(item)
         assert isinstance(row, SubtitleActionRow)
         buttons = row.findChildren(TransparentToolButton)
-        assert len(buttons) == 2
-        move_button, place_button = buttons
+        assert len(buttons) == 3
+        move_button, place_button, open_location_button = buttons
         assert "move this subtitle to" in move_button.toolTip().lower()
         assert place_button.isEnabled() == composition.SEARCH_SUBJECT.file_exists
+        # The open-location button stays disabled until a subtitle is delivered.
+        assert "open the folder" in open_location_button.toolTip().lower()
+        assert not open_location_button.isEnabled()
         # The item keeps its native icon and text so the row stays aligned with
         # every other row; the widget only adds the trailing action buttons.
         assert "Auto.Sub" in item.text()

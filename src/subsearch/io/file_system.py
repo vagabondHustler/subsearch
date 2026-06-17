@@ -1,5 +1,6 @@
 import shutil
 import struct
+import tempfile
 import time
 import traceback
 import zipfile
@@ -14,7 +15,8 @@ from subsearch.io.file_tracker import get_file_tracker
 from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.keys import ConfigKey, LogEvent
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import MatchTier, Subtitle, classify_match_tier
 
@@ -73,9 +75,6 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
     )
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
-    prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
-    file_name = f"{prefix}{subtitle.subtitle_id}_{subtitle.provider_name}_{subtitle.subtitle_name}_{index_position}.zip"
-    download_path = tmp_dir / file_name
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if not is_zip_payload(first_chunk):
@@ -89,8 +88,13 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
             url=subtitle.download_url,
         )
         return False
-    get_file_tracker().track(download_path)
-    with open(download_path, "wb") as fd:
+    name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        dir=tmp_dir, prefix=f"{name_prefix}{subtitle.subtitle_id}_", suffix=".zip", delete=False
+    ) as fd:
+        download_path = Path(fd.name)
+        get_file_tracker().track(download_path)
         fd.write(first_chunk)
         for chunk in chunks:
             fd.write(chunk)

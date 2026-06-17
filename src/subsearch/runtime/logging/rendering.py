@@ -3,25 +3,22 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from subsearch.runtime.keys import LogEvent
 from subsearch.runtime.logging import events
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.models import DataclassInstance
-
-
-class LogColor:
-    BANNER = "#fab387"  # orange — section banners / selections
-    MATCH = "#a6e3a1"  # green — accepted subtitle / success
-    SUCCESS = "#89b4fa"  # blue — task completed / done
-    WARN = "#f9e2af"  # yellow — soft warnings
-    FAIL = "#f38ba8"  # red — failures
-    FINISH = "#f2cdcd"  # peach — run summary line
 
 
 def render(event_key: LogEvent, **values: Any) -> str:
     template = events.EVENTS[event_key]
     if event_key in events.FILESYSTEM_EVENTS:
         return template.format(**_filesystem_values(values))
+    if event_key in events.PATH_EVENTS:
+        return template.format(**_shortened_paths(values))
     return template.format(**values)
+
+
+def _shortened_paths(values: dict[str, Any]) -> dict[str, Any]:
+    return {key: _shorten(value) if isinstance(value, Path) else value for key, value in values.items()}
 
 
 def _filesystem_values(values: dict[str, Any]) -> dict[str, Any]:
@@ -44,13 +41,12 @@ def _path_kind(path: Path) -> str:
     return "item"
 
 
-def _shorten(path: Optional[Path]) -> Optional[Path]:
+def _shorten(path: Optional[Path]) -> Optional[str]:
     if path is None:
         return None
-    try:
-        return path.relative_to(path.parent.parent)
-    except ValueError:
-        return path
+    if path.parent == path.parent.parent or not path.parent.name:
+        return str(path)
+    return f"...\\{Path(path.parent.name, path.name)}"
 
 
 def format_change(key: str, old: Any, new: Any) -> str:

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from subsearch.runtime.keys import LogEvent
 from subsearch.runtime.logging import events, rendering
+from subsearch.runtime.logging.events import LogEvent
 
 _REPRESENTATIVE_VALUES = {
     "title": "Example",
@@ -87,28 +87,6 @@ def test_log_event_enum_matches_events_table() -> None:
     assert set(LogEvent) == set(events.EVENTS)
 
 
-# The console is a plain-language progress feed: phase markers, the found subtitle
-# list, downloads, and a handful of saved/restored/failed lines the user can act on.
-# Everything else is forensic detail that belongs only in the log file. This set is the
-# contract; promoting a new event to the console is a deliberate edit to this list.
-CONSOLE_FACING_EVENTS = {
-    LogEvent.BANNER,
-    LogEvent.VIDEO_FILE_SELECTED,
-    LogEvent.SUBTITLE_MATCH,
-    LogEvent.SUBTITLE_REJECTED,
-    LogEvent.RENAME,
-    LogEvent.EXTRACT,
-    LogEvent.CONFIG_COMMITTED,
-    LogEvent.CONFIG_REVERTED,
-    LogEvent.CONFIG_RESET,
-    LogEvent.CONFIG_RESTORED,
-    LogEvent.IMDB_CONNECTING,
-    LogEvent.DOWNLOAD_SUBTITLE,
-    LogEvent.UPDATE_FAILED,
-    LogEvent.BOOT_LONG_PATHS_DISABLED,
-    LogEvent.BOOT_LONG_PATHS_HELP,
-}
-
-
-def test_console_facing_events_match_contract() -> None:
-    assert events.CONSOLE_EVENTS == CONSOLE_FACING_EVENTS
+def test_extract_renders_archive_name() -> None:
+    archive = Path("36e8699881f347168fb7ee414bee7c11_yifysubtitles_mortal.kombat.2021.webrip.x264-ion10_2.zip")
+    assert rendering.render(LogEvent.EXTRACT, src=archive, dst=Path("out")) == f"Extracting {archive.name}"

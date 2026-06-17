@@ -28,12 +28,12 @@ _PATHS_DEFAULTS = {
 
 _NOTIFICATIONS_DEFAULTS = {
     "notifications.system_tray": True,
-    "notifications.summary_notification": False,
 }
 
 
 _APPLICATION_DEFAULTS = {
     "application.show_terminal": False,
+    "application.show_tray_icon": True,
     "application.single_instance": True,
 }
 
@@ -218,15 +218,85 @@ def test_notifications_restore_defaults(qtbot) -> None:
     switch_rows = _collect_switch_rows(card)
 
     store.write("notifications.system_tray", False)
-    store.write("notifications.summary_notification", True)
     assert switch_rows["notifications.system_tray"].switch.isChecked() is False
-    assert switch_rows["notifications.summary_notification"].switch.isChecked() is True
 
     card._restore_defaults()
 
     for key, default in _NOTIFICATIONS_DEFAULTS.items():
         assert session.read(key) == default
         assert switch_rows[key].switch.isChecked() == default
+
+
+def test_notification_duration_row(qtbot) -> None:
+    from subsearch.ui.cards.system_cards import NotificationsCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    store.write("notifications.display_duration", 2.5)
+    card = NotificationsCard(store)
+    qtbot.addWidget(card)
+
+    assert card.display_duration.value() == 2.5
+
+    store.write("notifications.display_duration", 3.0)
+    assert card.display_duration.value() == 3.0
+
+    card.display_duration.input.set_value_silent(4.5)
+    card.display_duration.input.value_committed.emit(4.5)
+    assert store.read("notifications.display_duration") == 4.5
+
+
+def test_notification_duration_disabled_with_tray(qtbot) -> None:
+    from subsearch.ui.cards.system_cards import NotificationsCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    card = NotificationsCard(store)
+    qtbot.addWidget(card)
+
+    card.system_tray.set_checked_silently(True)
+    card.system_tray.toggled.emit(True)
+    assert card.display_duration.isEnabled()
+
+    card.system_tray.set_checked_silently(False)
+    card.system_tray.toggled.emit(False)
+    assert not card.display_duration.isEnabled()
+
+
+def test_notification_preview_success_button_shows_succeeded_toast(qtbot) -> None:
+    from subsearch.ui.cards.system_cards import NotificationsCard
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.theme import palette
+
+    store = SettingsStore()
+    card = NotificationsCard(store)
+    qtbot.addWidget(card)
+
+    store.write("notifications.display_duration", 4.2)
+    card.preview_success_button.button.click()
+
+    assert card._preview_toast is not None
+    assert card._preview_toast._hold_duration_ms == 4200
+    assert card._preview_toast._status_color == palette.GREEN
+    card._preview_toast.dismiss()
+    assert card._preview_toast is None
+
+
+def test_notification_preview_failure_button_shows_failed_toast(qtbot) -> None:
+    from subsearch.ui.cards.system_cards import NotificationsCard
+    from subsearch.ui.state.store import SettingsStore
+    from subsearch.ui.theme import palette
+
+    store = SettingsStore()
+    card = NotificationsCard(store)
+    qtbot.addWidget(card)
+
+    card.preview_failure_button.button.click()
+
+    assert card._preview_toast is not None
+    assert card._preview_toast._status_color == palette.RED
+    card._preview_toast.dismiss()
+    assert card._preview_toast is None
 
 
 def test_search_mode_restore_defaults(qtbot) -> None:
@@ -333,32 +403,34 @@ def test_slider_edit_enter_commits_and_clamps(qtbot) -> None:
 
 
 def test_int_input_row_writes_committed_value_to_store(qtbot) -> None:
+    from subsearch.runtime.config.defaults import ConfigKey
     from subsearch.ui.state.store import SettingsStore
     from subsearch.ui.widgets.setting_rows import IntInputRow
 
     store = SettingsStore()
-    row = IntInputRow("search.downloads_per_provider", store, 1, 99)
+    row = IntInputRow(ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER, store, 1, 99)
     qtbot.addWidget(row)
 
     row.input.setText("250")
     row.input._commit()
 
     assert row.input.value() == 99
-    assert store.read("search.downloads_per_provider") == 99
+    assert store.read(ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER) == 99
 
 
 def test_extraction_directory_accepts_empty_and_rejects_invalid_path(qtbot) -> None:
+    from subsearch.runtime.config.defaults import ConfigKey
     from subsearch.ui.state.store import SettingsStore
     from subsearch.ui.widgets.setting_rows import DirectoryPathRow
 
     store = SettingsStore()
-    row = DirectoryPathRow("paths.extraction_directory", store, allow_empty=True)
+    row = DirectoryPathRow(ConfigKey.PATHS_EXTRACTION_DIRECTORY, store, allow_empty=True)
     qtbot.addWidget(row)
 
     row.path_edit.setText("")
     assert row.is_valid()
     row.save_if_valid()
-    assert store.read("paths.extraction_directory") == ""
+    assert store.read(ConfigKey.PATHS_EXTRACTION_DIRECTORY) == ""
 
     row.path_edit.setText("::not a path::")
     assert not row.is_valid()

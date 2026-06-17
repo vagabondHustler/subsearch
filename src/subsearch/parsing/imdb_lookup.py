@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import imdbinfo
 from imdbinfo.exceptions import ImdbinfoError
 
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
 

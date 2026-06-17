@@ -2,7 +2,7 @@ import pytest
 
 from subsearch.io.nested_dict import get_keys_recursively
 from subsearch.runtime.config import defaults
-from subsearch.runtime.keys import ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 
 # Runtime health counters Subsearch manages itself, not user-facing settings. They are
 # created per provider, so they have no stable ConfigKey and are excluded from the

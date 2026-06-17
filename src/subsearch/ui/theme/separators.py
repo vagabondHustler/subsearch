@@ -29,11 +29,16 @@ def _stacked_lines(opacity: float) -> QWidget:
     return stack
 
 
-def make_fading_separator(opacity: float = 1.0, width_fraction: float = 1.0, vertical_margin: int = 0) -> QWidget:
+def make_fading_separator(
+    opacity: float = 1.0,
+    width_fraction: float = 1.0,
+    vertical_margin: int = 0,
+    inset: int = SEPARATOR_INSET,
+) -> QWidget:
     container = QWidget()
     container.setFixedHeight(2 + vertical_margin * 2)
     layout = QHBoxLayout(container)
-    layout.setContentsMargins(SEPARATOR_INSET, vertical_margin, SEPARATOR_INSET, vertical_margin)
+    layout.setContentsMargins(inset, vertical_margin, inset, vertical_margin)
     layout.setSpacing(0)
     side = round((1 - width_fraction) * 100 / 2)
     layout.addStretch(side)

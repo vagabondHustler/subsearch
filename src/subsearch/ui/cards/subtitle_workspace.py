@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QRect, QSize, Qt, QTimer, Signal
+from PySide6.QtCore import QByteArray, QRect, QSize, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
     QColor,
+    QDesktopServices,
     QDragEnterEvent,
     QDropEvent,
     QFont,
@@ -20,12 +21,12 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qfluentwidgets import BodyLabel, LineEdit, ListWidget, TransparentToolButton
+from qfluentwidgets import BodyLabel, LineEdit, ListWidget
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config import SEARCH_SUBJECT, SUPPORTED_FILE_EXT, WORKSPACE
-from subsearch.runtime.keys import CardKey, ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.models import (
     MatchTier,
     Subtitle,
@@ -33,10 +34,10 @@ from subsearch.runtime.models import (
     classify_match_tier,
 )
 from subsearch.ui.cards.base import SettingsCard
-from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
-from subsearch.ui.compat.qfluent import flatten_line_edit
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
+from subsearch.ui.compat.qfluent import flatten_line_edit, inset_list_highlight_right
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.services.log_panel import LogPanelSink
+from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
 from subsearch.ui.services.subtitle_downloads import DownloadServiceProtocol
 from subsearch.ui.services.title_suggestions import TitleSuggestionService
@@ -44,10 +45,9 @@ from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.metrics import (
-    PATH_ROW_BUTTON_GAP,
+    LIST_SCROLLBAR_WIDTH,
     ROW_INSET,
     SMALL_ICON_SIZE,
-    TOOL_BUTTON_SIZE,
 )
 from subsearch.ui.theme.separators import SEPARATOR_INSET
 from subsearch.ui.theme.typography import (
@@ -56,13 +56,14 @@ from subsearch.ui.theme.typography import (
     TEXT_COLOR,
     apply_body_font,
 )
+from subsearch.ui.widgets.console_view import ConsoleView
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
-from subsearch.ui.widgets.log_panel import LogPanel
 from subsearch.ui.widgets.ripple_spinner import (
     CYCLE_MS,
     FRAME_INTERVAL_MS,
     ripple_pixmap,
 )
+from subsearch.ui.widgets.row_icon_button import RowIconButton
 from subsearch.ui.widgets.search_line_edit import SearchLineEdit
 from subsearch.ui.widgets.suggestion_popup import TitleSuggestionPopup
 
@@ -131,7 +132,7 @@ class _StyledSplitter(QSplitter):
         return _SplitterHandle(self.orientation(), self)
 
 
-def _build_splitter(top: QWidget, bottom: LogPanel) -> QSplitter:
+def _build_splitter(top: QWidget, bottom: ConsoleView) -> QSplitter:
     splitter = _StyledSplitter(Qt.Orientation.Vertical)
     splitter.setChildrenCollapsible(False)
     splitter.addWidget(top)
@@ -168,6 +169,10 @@ ListWidget::item:selected {
 }
 """
 
+# The two trailing action icons sit tight together as one control group; the
+# rightmost one is inset by ROW_INSET so it lines up with the card header's lamp.
+ACTION_BUTTON_GAP = 0
+
 PENDING_COLOR = palette.NEUTRAL_1
 DOWNLOADING_COLOR = palette.BLUE
 SUCCESS_COLOR = palette.GREEN
@@ -191,7 +196,7 @@ NO_RESULTS_PLACEHOLDER_TEXT = "No subtitles found"
 
 
 class SubtitleSearchBar(QWidget):
-    research_requested = Signal(str)
+    research_requested = Signal(str, object)
 
     def __init__(
         self,
@@ -206,9 +211,7 @@ class SubtitleSearchBar(QWidget):
         self._title_suggestion_service = title_suggestion_service
         self._awaiting_suggestions = False
         self._term_without_suggestions = ""
-        self._committed_filename = (
-            SEARCH_SUBJECT.search_term + SEARCH_SUBJECT.file_extension if SEARCH_SUBJECT.file_exists else ""
-        )
+        self._committed_filename = SEARCH_SUBJECT.name if SEARCH_SUBJECT.file_exists else ""
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
@@ -263,7 +266,7 @@ class SubtitleSearchBar(QWidget):
             self.start_spinner()
             suggestion_service.request(typed_term)
             return
-        self.research_requested.emit("")
+        self.research_requested.emit("", None)
 
     def start_spinner(self) -> None:
         self._filename_edit.start_spinner()
@@ -310,7 +313,7 @@ class SubtitleSearchBar(QWidget):
         self._filename_edit.setText(accepted_term)
         self._term_without_suggestions = accepted_term
         self._on_filename_edited()
-        self.research_requested.emit(suggestion.imdb_id)
+        self.research_requested.emit(suggestion.imdb_id, suggestion.tvseries)
 
     def _on_suggestions_dismissed(self) -> None:
         self._search_as_typed(self._filename_edit.text().strip())
@@ -318,7 +321,7 @@ class SubtitleSearchBar(QWidget):
     def _search_as_typed(self, typed_term: str) -> None:
         self._term_without_suggestions = typed_term
         self._on_filename_edited()
-        self.research_requested.emit("")
+        self.research_requested.emit("", None)
 
     def _on_filename_edited(self) -> None:
         filename = self._filename_edit.text().strip()
@@ -419,44 +422,65 @@ class SubtitleActionRow(QWidget):
         self._subtitle = subtitle
         self._store = store
         self._post_processing_service = post_processing_service
-        self._active_button: TransparentToolButton | None = None
-        self._idle_icons: dict[TransparentToolButton, LucideIcon] = {}
+        self._active_button: RowIconButton | None = None
+        self._idle_icons: dict[RowIconButton, LucideIcon] = {}
         self._spinner_progress = 0.0
         self._spinner_timer = QTimer(self)
         self._spinner_timer.setInterval(FRAME_INTERVAL_MS)
         self._spinner_timer.timeout.connect(self._advance_spinner)
 
+        self._delivered_directory: str = ""
+
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 4, 0)
-        layout.setSpacing(PATH_ROW_BUTTON_GAP)
+        layout.setContentsMargins(0, 0, ROW_INSET, 0)
+        layout.setSpacing(ACTION_BUTTON_GAP)
         layout.addStretch(1)
 
-        move_tooltip = f"Unpack and move this subtitle to: {self._target_path_text()}"
-        self._move_button = self._make_action_button(LucideIcon.FILES, move_tooltip, self._unpack_and_move)
+        self._move_button = self._make_action_button(LucideIcon.FILES, self._move_tooltip(), self._unpack_and_move)
         layout.addWidget(self._move_button)
 
-        self._place_button = self._make_action_button(
+        self._move_rename = self._make_action_button(
             LucideIcon.FILE_PEN,
-            "Unpack, rename to match the video file and place it next to the video",
+            self._place_tooltip(),
             self._unpack_rename_and_place,
         )
         if not SEARCH_SUBJECT.file_exists:
-            self._place_button.setEnabled(False)
-            self._place_button.setToolTip("Select a video file to rename and place a subtitle next to it")
-        layout.addWidget(self._place_button)
+            self._move_rename.setEnabled(False)
+        layout.addWidget(self._move_rename)
+
+        self._open_location = self._make_action_button(
+            LucideIcon.FOLDER_SEARCH,
+            "Open the folder this subtitle was delivered to",
+            self._open_delivered_directory,
+        )
+        self._open_location.setIcon(lucide_qicon(LucideIcon.FOLDER_SEARCH, palette.NEUTRAL_3))
+        self._open_location.setEnabled(False)
+        layout.addWidget(self._open_location)
 
         self._post_processing_service.succeeded.connect(self._on_succeeded)
         self._post_processing_service.failed.connect(self._on_failed)
 
-    def _target_path_text(self) -> str:
-        return str(self._store.read(ConfigKey.PATHS_VIDEO_FILE_DIRECTORY))
+    def _move_tooltip(self) -> str:
+        return f"Move this subtitle to {self._extraction_directory()}"
 
-    def _make_action_button(self, icon: LucideIcon, tooltip: str, slot) -> TransparentToolButton:
-        button = TransparentToolButton(self)
-        button.setIcon(lucide_qicon(icon, TEXT_COLOR))
-        button.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
-        button.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
+    def _place_tooltip(self) -> str:
+        if not SEARCH_SUBJECT.file_exists:
+            return "Unpack and rename subtitle to video file directory, when file exists"
+        return f"Unpack subtitle to match {SEARCH_SUBJECT.name} in {self._video_file_directory()}"
+
+    def _extraction_directory(self) -> str:
+        configured = str(self._store.read(ConfigKey.PATHS_EXTRACTION_DIRECTORY)).strip()
+        return configured or self._store.resolved_default_directory(ConfigKey.PATHS_EXTRACTION_DIRECTORY)
+
+    def _video_file_directory(self) -> str:
+        configured = str(self._store.read(ConfigKey.PATHS_VIDEO_FILE_DIRECTORY)).strip()
+        if configured in ("", "."):
+            return str(WORKSPACE.file_directory)
+        return configured
+
+    def _make_action_button(self, icon: LucideIcon, tooltip: str, slot) -> RowIconButton:
+        button = RowIconButton(lucide_qicon(icon, TEXT_COLOR), ROW_HEIGHT, self)
         button.setToolTip(tooltip)
         self._idle_icons[button] = icon
         button.clicked.connect(slot)
@@ -467,13 +491,13 @@ class SubtitleActionRow(QWidget):
         self._post_processing_service.unpack_and_move(self._store, self._subtitle)
 
     def _unpack_rename_and_place(self) -> None:
-        self._begin_operation(self._place_button)
+        self._begin_operation(self._move_rename)
         self._post_processing_service.unpack_rename_and_place(self._store, self._subtitle)
 
-    def _begin_operation(self, button: TransparentToolButton) -> None:
+    def _begin_operation(self, button: RowIconButton) -> None:
         self._active_button = button
         self._move_button.setEnabled(False)
-        self._place_button.setEnabled(False)
+        self._move_rename.setEnabled(False)
         self._spinner_progress = 0.0
         self._spinner_timer.start()
 
@@ -484,29 +508,39 @@ class SubtitleActionRow(QWidget):
                 QIcon(ripple_pixmap(SMALL_ICON_SIZE, DOWNLOADING_COLOR, self._spinner_progress))
             )
 
-    def _on_succeeded(self, _delivered_count: int) -> None:
+    def _open_delivered_directory(self) -> None:
+        if not self._delivered_directory:
+            return
+        QDesktopServices.openUrl(QUrl.fromLocalFile(self._delivered_directory))
+
+    def _on_succeeded(self, delivered_directory: str) -> None:
         button = self._take_active_button()
-        if button is not None:
-            button.setIcon(lucide_qicon(LucideIcon.FILES, SUCCESS_COLOR))
+        if button is None:
+            return
+        button.setIcon(lucide_qicon(self._idle_icons[button], SUCCESS_COLOR))
+        self._delivered_directory = delivered_directory
+        self._open_location.setIcon(lucide_qicon(LucideIcon.FOLDER_SEARCH, TEXT_COLOR))
+        self._open_location.setEnabled(True)
 
     def _on_failed(self, _reason: str) -> None:
         button = self._take_active_button()
         if button is not None:
             button.setIcon(lucide_qicon(self._idle_icons[button], FAILED_COLOR))
+        self._open_location.setIcon(lucide_qicon(LucideIcon.FOLDER_SEARCH, FAILED_COLOR))
 
-    def _take_active_button(self) -> TransparentToolButton | None:
+    def _take_active_button(self) -> RowIconButton | None:
         button = self._active_button
         if button is None:
             return None
         self._spinner_timer.stop()
         self._active_button = None
         self._move_button.setEnabled(True)
-        self._place_button.setEnabled(SEARCH_SUBJECT.file_exists)
+        self._move_rename.setEnabled(SEARCH_SUBJECT.file_exists)
         return button
 
 
 class ManualSearchInterface(QWidget):
-    research_requested = Signal(str)
+    research_requested = Signal(str, object)
 
     def __init__(
         self,
@@ -515,7 +549,7 @@ class ManualSearchInterface(QWidget):
         post_processing_service: PostProcessingServiceProtocol,
         video_file_service: VideoFileService,
         subtitles: list[Subtitle] | None = None,
-        log_panel_sink: LogPanelSink | None = None,
+        console_view_sink: ConsoleViewSink | None = None,
         title_suggestion_service: TitleSuggestionService | None = None,
     ) -> None:
         super().__init__()
@@ -550,9 +584,9 @@ class ManualSearchInterface(QWidget):
         self._card.search_text_changed.connect(self._filter_list)
         self._card.search_confirmed.connect(self._select_first_visible)
 
-        if log_panel_sink is not None:
-            self._log_panel = LogPanel(log_panel_sink, self)
-            self._splitter = _build_splitter(self._card, self._log_panel)
+        if console_view_sink is not None:
+            self._console_view = ConsoleView(console_view_sink, self)
+            self._splitter = _build_splitter(self._card, self._console_view)
             layout.addWidget(self._splitter, stretch=1)
         else:
             layout.addWidget(self._card, stretch=1)
@@ -588,7 +622,7 @@ class ManualSearchInterface(QWidget):
             return
         event.acceptProposedAction()
         self._search_bar.select_dropped_video(video_file)
-        self.research_requested.emit("")
+        self.research_requested.emit("", None)
 
     @staticmethod
     def _dropped_video_file(event: QDragEnterEvent | QDropEvent) -> Path | None:
@@ -654,8 +688,13 @@ class ManualSearchInterface(QWidget):
 
         self.list_widget = ListWidget(self)
         self.list_widget.setStyleSheet(LIST_STYLE_SHEET)
+        inset_list_highlight_right(self.list_widget, LIST_SCROLLBAR_WIDTH)
         self.list_widget.setFont(self._list_font())
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
+        # The ::item:hover stylesheet repaints only the row being entered, so the
+        # previously hovered row keeps its highlight when the cursor crosses into
+        # the selected row. Repaint the whole viewport on every hover change.
+        self.list_widget.entered.connect(lambda _index: self.list_widget.viewport().update())
         self._card.viewLayout.addWidget(self.list_widget, stretch=1)
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
@@ -670,7 +709,7 @@ class ManualSearchInterface(QWidget):
                 self.downloaded.append(subtitle)
                 self._render_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
                 self._attach_action_buttons(item, subtitle)
-        self.list_widget.itemClicked.connect(self._on_item_clicked)
+        self.list_widget.itemDoubleClicked.connect(self._on_item_clicked)
 
     @staticmethod
     def _list_font() -> QFont:
@@ -757,7 +796,8 @@ class ManualSearchInterface(QWidget):
             self._stop_spinning(item)
             item.setIcon(lucide_qicon(icon, color))
         item.setText(self._row_text(subtitle))
-        item.setForeground(QColor(color))
+        # Only the status icon carries the state color; the row text stays neutral.
+        item.setForeground(QColor(TEXT_COLOR))
 
     def _start_spinning(self, item: QListWidgetItem, color: str) -> None:
         self.spinning_rows[self.list_widget.row(item)] = (item, color)

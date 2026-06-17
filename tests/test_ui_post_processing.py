@@ -70,11 +70,12 @@ def test_unpack_extracts_only_the_selected_subtitle(monkeypatch, captured_events
 
     subtitle = _make_subtitle()
     seen_calls: list[tuple[str, Path, Path]] = []
-    monkeypatch.setattr(
-        post_processing.file_system,
-        "extract_subtitle_by_id",
-        lambda subtitle_id, src, dst: (seen_calls.append((subtitle_id, src, dst)), 1)[1],
-    )
+
+    def record_extraction(subtitle_id: str, src: Path, dst: Path) -> int:
+        seen_calls.append((subtitle_id, src, dst))
+        return 1
+
+    monkeypatch.setattr(post_processing.file_system, "extract_subtitle_by_id", record_extraction)
     worker = post_processing._PostProcessWorker(rename=False, store=SettingsStore(), subtitle=subtitle)
     worker.execute()
 

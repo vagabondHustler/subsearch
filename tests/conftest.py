@@ -1,4 +1,3 @@
-import importlib
 import json
 import os
 import sys
@@ -80,11 +79,6 @@ def redirect_logger_to_temp_log(override_constants) -> Any:
         for handler in logger.log._file_logger.handlers:
             handler.close()
     logger.log._file_logger = None
-
-
-@pytest.fixture(autouse=True)
-def reset_constants() -> None:
-    importlib.reload(defaults)
 
 
 @pytest.fixture(autouse=True)

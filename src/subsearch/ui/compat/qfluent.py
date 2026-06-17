@@ -11,9 +11,17 @@ from typing import cast
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QRectF, Qt
 from PySide6.QtGui import QColor, QCursor, QPainter, QPen
 from PySide6.QtWidgets import QAbstractScrollArea, QApplication, QWidget
-from qfluentwidgets import LineEdit, NavigationPanel, Slider, SwitchButton, ThemeColor
+from qfluentwidgets import (
+    LineEdit,
+    ListWidget,
+    NavigationPanel,
+    Slider,
+    SwitchButton,
+    ThemeColor,
+)
 from qfluentwidgets.common.color import autoFallbackThemeColor
 from qfluentwidgets.common.icon import drawIcon, isDarkTheme
+from qfluentwidgets.components.widgets.list_view import ListItemDelegate
 from qfluentwidgets.components.widgets.slider import SliderHandle
 
 from subsearch.ui.icons.lucide import LucideIcon
@@ -154,7 +162,9 @@ def forward_navigation_wheel_to_page(panel: NavigationPanel, page_provider) -> N
 UNCHECKED_BORDER_WIDTH = 2
 
 
-SWITCH_HANDLE_FILL = QColor(palette.SWITCH_HANDLE_FILL)
+SWITCH_HANDLE_FILL_CHECKED = QColor(palette.SWITCH_HANDLE_FILL_CHECKED)
+SWITCH_HANDLE_FILL_UNCHECKED = QColor(palette.SWITCH_HANDLE_FILL_UNCHECKED)
+SWITCH_HANDLE_FILL_DISABLED = QColor(palette.SWITCH_HANDLE_FILL_DISABLED)
 
 
 def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
@@ -173,7 +183,12 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
 
     def draw_circle(painter) -> None:
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(SWITCH_HANDLE_FILL)
+        if not switch.isEnabled():
+            painter.setBrush(SWITCH_HANDLE_FILL_DISABLED)
+        elif indicator.isChecked():
+            painter.setBrush(SWITCH_HANDLE_FILL_CHECKED)
+        else:
+            painter.setBrush(SWITCH_HANDLE_FILL_UNCHECKED)
         painter.drawEllipse(int(indicator.sliderX), 5, 12, 12)
 
     indicator._drawBackground = draw_background
@@ -358,3 +373,24 @@ class CircleDotSlider(Slider):
         self.setValue(value)
         self._adjustHandlePos()
         self.blockSignals(False)
+
+
+# --- List item highlight inset --------------------------------------------------
+# ListItemDelegate paints the hover/selected rounded rect from option.rect (the
+# full viewport width), so a QSS "margin-right" on ::item is ignored and the
+# highlight runs under the overlay scrollbar. The only hook is _drawBackground,
+# so it is overridden to inset the rect on the right before painting.
+
+
+class _RightInsetListItemDelegate(ListItemDelegate):
+    def __init__(self, parent: ListWidget, right_inset: int) -> None:
+        super().__init__(parent)
+        self._right_inset = right_inset
+
+    def _drawBackground(self, painter: QPainter, option, index) -> None:
+        option.rect.adjust(0, 0, -self._right_inset, 0)
+        super()._drawBackground(painter, option, index)
+
+
+def inset_list_highlight_right(list_widget: ListWidget, right_inset: int) -> None:
+    list_widget.setItemDelegate(_RightInsetListItemDelegate(list_widget, right_inset))

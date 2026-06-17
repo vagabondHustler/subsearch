@@ -12,10 +12,10 @@ from subsearch.parsing.release_parser import score_subtitle_tokens
 from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
+    ConfigKey,
 )
-from subsearch.runtime.keys import CardKey, ConfigKey
 from subsearch.ui.cards.base import SettingsCard
-from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
@@ -53,6 +53,8 @@ PROVIDER_INCOMPATIBILITY_NAMES = {
     "opensubtitles": "opensubtitles",
     "yifysubtitles_site": "yifysubtitles",
     "subsource_site": "subsource",
+    "tvsubtitles_site": "tvsubtitles",
+    "gestdown_site": "gestdown",
 }
 
 
@@ -410,6 +412,8 @@ class ProvidersCard(SettingsCard):
             "opensubtitles": "Opensubtitles",
             "yifysubtitles_site": "Yifysubtitles",
             "subsource_site": "Subsource",
+            "tvsubtitles_site": "Tvsubtitles",
+            "gestdown_site": "Gestdown",
         }
         self._language_data = store.language_data()
         providers = store.read(ConfigKey.SEARCH_PROVIDERS)

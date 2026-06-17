@@ -18,5 +18,9 @@ FAKE_SEARCH_SUBJECT_SERIES = SearchSubject(
 )
 
 FAKE_PROVIDER_URLS = ProviderUrls(
-    opensubtitles=["fake_url"], opensubtitles_hash=["fake_url"], yifysubtitles=["fake_url"], subsource=["fake_url"]
+    opensubtitles=["fake_url"],
+    opensubtitles_hash=["fake_url"],
+    yifysubtitles=["fake_url"],
+    subsource=["fake_url"],
+    tvsubtitles=["fake_url"],
 )

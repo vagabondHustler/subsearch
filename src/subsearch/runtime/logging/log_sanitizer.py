@@ -5,7 +5,16 @@ from pathlib import Path
 
 from subsearch.runtime.config import COMPUTER_NAME, FILE_PATHS, GUID
 
-REDACTED = "[REDACTED]"
+# def _redact_literal(secret: str, show: int = 0,) -> str:
+#     # * •
+#     visible_prefix = secret[:show]
+#     hidden_length = max(len(secret) - show, 1)
+#     return f"{visible_prefix}{'*' * hidden_length}"
+
+
+# def _redact(match: re.Match[str]) -> str:
+#     return _redact_literal(match.group(0))
+
 
 # matches IPv4 addresses e.g. "192.168.1.1" matches, "1234.1.1.1" does not
 IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
@@ -30,15 +39,18 @@ def _identity_patterns() -> list[re.Pattern[str]]:
 
 _IDENTITY_PATTERNS = _identity_patterns()
 
+_REDACTED = "***"
+_REDACTED_USERNAME = "USERNAME"
+
 
 def sanitize(text: str) -> str:
-    text = API_KEY_PATTERN.sub(REDACTED, text)
-    text = EMAIL_PATTERN.sub(REDACTED, text)
+    text = API_KEY_PATTERN.sub(_REDACTED, text)
+    text = EMAIL_PATTERN.sub(_REDACTED, text)
     if GUID:
-        text = text.replace(GUID, REDACTED)
+        text = text.replace(GUID, _REDACTED)
     for pattern in _IDENTITY_PATTERNS:
-        text = pattern.sub(REDACTED, text)
-    return IP_ADDRESS_PATTERN.sub(REDACTED, text)
+        text = pattern.sub(_REDACTED_USERNAME, text)
+    return IP_ADDRESS_PATTERN.sub(_REDACTED, text)
 
 
 SESSION_SEPARATOR = "\x1c"

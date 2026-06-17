@@ -4,7 +4,7 @@ from curl_cffi import requests as curl_requests
 from curl_cffi.requests import Response
 
 from subsearch.providers import provider_helper
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.models.exceptions import (

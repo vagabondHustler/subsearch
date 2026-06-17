@@ -7,3 +7,16 @@ IN_FIELD_BUTTON_SIZE = 24
 PATH_ROW_BUTTON_GAP = 6
 PATH_ROW_BUTTON_AREA_WIDTH = 100
 PATH_ROW_TRAILING_WIDTH = PATH_ROW_BUTTON_AREA_WIDTH + PATH_ROW_BUTTON_GAP + TOOL_BUTTON_SIZE
+
+# Width the qfluentwidgets overlay scrollbar occupies; list-item highlights inset
+# by this on the right so they stop just before the scrollbar instead of under it.
+LIST_SCROLLBAR_WIDTH = 10
+
+TOAST_WIDTH = 320
+TOAST_MARGIN = 16
+TOAST_PADDING = 14
+TOAST_CONTENT_GAP = 8
+TOAST_ICON_SIZE = 20
+TOAST_CLOSE_BUTTON_SIZE = 20
+TOAST_CORNER_RADIUS = 8
+TOAST_SCREEN_INSET = 12

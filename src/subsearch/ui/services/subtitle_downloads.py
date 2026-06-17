@@ -6,6 +6,8 @@ from PySide6.QtCore import QObject, Signal, SignalInstance
 from subsearch.io import file_system
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import WORKSPACE
+from subsearch.runtime.logging.events import LogEvent
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import Subtitle, SubtitleStatus
 from subsearch.ui.state.tasks import TaskRunner, Worker
 
@@ -54,6 +56,7 @@ class SubtitleDownloadService(QObject):
         self._active: Subtitle | None = None
         self._download_number = 1
         self._download_total = 0
+        self._processing_announced = False
 
     def set_download_total(self, download_total: int) -> None:
         self._download_total = download_total
@@ -65,8 +68,12 @@ class SubtitleDownloadService(QObject):
         self._start_next()
 
     def _start_next(self) -> None:
-        if self._active is not None or not self._queue:
+        if self._active is not None:
             return
+        if not self._queue:
+            self._end_processing_phase()
+            return
+        self._begin_processing_phase()
         subtitle = self._queue.pop(0)
         self._active = subtitle
         self.started.emit(subtitle)
@@ -74,6 +81,17 @@ class SubtitleDownloadService(QObject):
         worker.finished.connect(self._on_worker_finished)
         worker.failed.connect(self._on_worker_failed)
         self._task_runner.submit(worker)
+
+    def _begin_processing_phase(self) -> None:
+        # Mirror the automatic flow: a burst of downloads is announced once,
+        # opened after search (downloads only start once results exist).
+        if self._processing_announced:
+            return
+        log.event(LogEvent.BANNER, title="Processing subtitles")
+        self._processing_announced = True
+
+    def _end_processing_phase(self) -> None:
+        self._processing_announced = False
 
     def _on_worker_finished(self, subtitle: Subtitle) -> None:
         subtitle.status = SubtitleStatus.MANUAL_DOWNLOAD
@@ -87,5 +105,6 @@ class SubtitleDownloadService(QObject):
         self._active = None
         if subtitle is not None:
             subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
+            log.event(LogEvent.DOWNLOAD_FAILED, level="error", reason=message)
             self.failed.emit(subtitle, message)
         self._start_next()

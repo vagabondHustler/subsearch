@@ -3,8 +3,9 @@ from typing import Any, Callable
 from PySide6.QtCore import QObject, Signal
 
 from subsearch.io.language_data import load_language_data
+from subsearch.runtime.config import PATH_RESOLVER
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.keys import ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 
 
 class SettingsStore(QObject):
@@ -32,6 +33,14 @@ class SettingsStore(QObject):
 
     def commit(self) -> None:
         self._session.commit()
+
+    def resolved_default_directory(self, key: ConfigKey | str) -> str:
+        defaults_by_key = {
+            ConfigKey.PATHS_DOWNLOAD_DIRECTORY: PATH_RESOLVER.default_download_directory,
+            ConfigKey.PATHS_EXTRACTION_DIRECTORY: PATH_RESOLVER.default_extraction_directory,
+        }
+        resolve_default = defaults_by_key.get(ConfigKey(key))
+        return str(resolve_default()) if resolve_default is not None else ""
 
     def language_data(self) -> dict[str, Any]:
         return load_language_data()

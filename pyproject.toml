@@ -24,6 +24,7 @@
         "PySide6-Fluent-Widgets==1.11.2",
         "requests==2.34.2",
         "selectolax==0.4.10",
+        "yaspin==3.4.0",
     ]
     description = "Subsearch"
     dynamic = ["version"]
@@ -118,3 +119,12 @@
     ignore_missing_imports = false
     mypy_path = "src"
     warn_no_return = true
+
+[[tool.mypy.overrides]]
+    module = [
+        "imdbinfo.*",
+        "num2words.*",
+        "qfluentwidgets.*",
+        "setuptools.*",
+    ]
+    ignore_missing_imports = true

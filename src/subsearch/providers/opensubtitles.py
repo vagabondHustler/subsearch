@@ -4,7 +4,7 @@ from typing import Any
 from subsearch.io import http
 from subsearch.providers import provider_helper
 from subsearch.providers.provider_helper import combine_provider_diagnostic_status
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
 

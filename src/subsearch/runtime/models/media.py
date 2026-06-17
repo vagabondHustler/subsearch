@@ -10,6 +10,10 @@ class SearchSubject:
     file_extension: str
     file_path: Path | None
 
+    @property
+    def name(self) -> str:
+        return f"{self.search_term}{self.file_extension}"
+
     def copy_from(self, other: "SearchSubject") -> None:
         for field_name in self.__slots__:
             setattr(self, field_name, getattr(other, field_name))

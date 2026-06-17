@@ -2,9 +2,9 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import MessageBox
 
 from subsearch.runtime.config import SEARCH_SUBJECT
-from subsearch.runtime.keys import CardKey, ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.ui.cards.base import SettingsCard
-from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.theme.separators import make_fading_separator
 from subsearch.ui.widgets.setting_rows import DirectoryPathRow, SwitchRow
@@ -32,7 +32,7 @@ class PathsCard(SettingsCard):
             DirectoryPathRow(
                 ConfigKey.PATHS_DOWNLOAD_DIRECTORY,
                 store,
-                placeholder_text="%TEMP%/tmp_subsearch",
+                placeholder_text=store.resolved_default_directory(ConfigKey.PATHS_DOWNLOAD_DIRECTORY),
                 dialog_title="Select download directory",
                 allow_empty=True,
             )
@@ -41,7 +41,7 @@ class PathsCard(SettingsCard):
             DirectoryPathRow(
                 ConfigKey.PATHS_EXTRACTION_DIRECTORY,
                 store,
-                placeholder_text="Downloads/subs",
+                placeholder_text=store.resolved_default_directory(ConfigKey.PATHS_EXTRACTION_DIRECTORY),
                 dialog_title="Select extraction directory",
                 allow_empty=True,
             )

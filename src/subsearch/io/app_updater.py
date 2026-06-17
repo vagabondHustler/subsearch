@@ -11,7 +11,7 @@ from packaging.version import Version
 from subsearch.io import file_system
 from subsearch.io.http import get_session
 from subsearch.runtime.config import APP_PATHS, VERSION
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 # matches version strings like "1.2.3" or "1.2.3a4" from lines of the form __version__ = "..."

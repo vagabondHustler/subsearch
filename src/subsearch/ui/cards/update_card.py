@@ -3,10 +3,9 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, ProgressBar
 
 from subsearch.runtime.config import VERSION
-from subsearch.runtime.keys import CardKey
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
-from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.app_updates import (
     UpdateAvailability,

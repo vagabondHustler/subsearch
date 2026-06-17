@@ -43,6 +43,7 @@ class LucideIcon(FluentIconBase, Enum):
     CIRCLE_CHECK_BIG = "circle-check-big"
     HEART_HANDSHAKE = "heart-handshake"
     CIRCLE = "circle"
+    CIRCLE_SMALL = "circle-small"
     CIRCLE_X = "circle-x"
     CIRCLE_DOT_DASHED = "circle-dot-dashed"
     GRIP_HORIZONTAL = "grip-horizontal"
@@ -72,6 +73,8 @@ class LucideIcon(FluentIconBase, Enum):
     LOGS = "logs"
     FILES = "files"
     FILE_PEN = "file-pen"
+    X = "x"
+    PICTURE_IN_PICTURE_2 = "picture-in-picture-2"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]

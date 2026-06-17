@@ -10,7 +10,8 @@ from subsearch.runtime.config import (
     REGISTRY_PATHS,
 )
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.keys import ConfigKey, LogEvent
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

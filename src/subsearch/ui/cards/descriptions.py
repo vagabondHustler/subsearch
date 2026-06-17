@@ -1,6 +1,25 @@
 from dataclasses import dataclass
+from enum import StrEnum
 
-from subsearch.runtime.keys import CardKey, ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
+
+
+class CardKey(StrEnum):
+    SUBTITLE_FILTERS = "card.subtitle_filters"
+    SUBTITLE_HANDLING = "card.subtitle_handling"
+    PATHS = "card.paths"
+    SHELL_INTEGRATION = "card.shell_integration"
+    NOTIFICATIONS = "card.notifications"
+    APPLICATION = "card.application"
+    NETWORK = "card.network"
+    UPDATE = "card.update"
+    RESOURCES = "card.resources"
+
+    DIAGNOSTICS_HEADER = "diagnostics.header"
+    AVAILABLE_SUBTITLES = "subtitle_workspace.available_subtitles"
+    SUBSOURCE_API_KEY = "credentials.subsource_api_key"
+    SUBSOURCE_REQUEST_LIMITS = "credentials.subsource_request_limits"
+    SUBSOURCE_GETTING_API_KEY = "credentials.subsource_getting_api_key"
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,33 +31,26 @@ class SettingDescription:
 SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ConfigKey.LANGUAGE_SELECTED: SettingDescription(
         "Subtitle language",
-        "The language you want subtitles in.\n\n"
-        "Start typing to narrow the list, e.g. ml, mal or Malayalam all find Malayalam.\n"
-        "Press Enter to pick the highlighted language.",
+        "The language you want subtitles in. Start typing to filter, then press Enter to pick.",
     ),
     ConfigKey.SEARCH_ACCEPT_THRESHOLD: SettingDescription(
         "Filename match threshold",
-        "How closely a subtitle's filename has to match your video before Subsearch accepts it. "
-        "Higher means stricter matching; lower lets through looser ones.\n\n"
-        "The examples below show how three sample subtitles score against your video, "
-        "and which ones the current threshold accepts.",
+        "How closely a subtitle's filename must match your video to be accepted. "
+        "Higher is stricter; lower lets looser matches through.",
     ),
     ConfigKey.SEARCH_TOKEN_WEIGHTS: SettingDescription(
         "Weights",
-        "How much each part of the filename counts towards the match score: the title, "
-        "the source like BluRay or WEB, and the release group.\n\n"
-        "Raise a weight to let that part sway the score more, lower it to make it matter less.",
+        "How much the title, source (BluRay, WEB), and release group each count towards the match score. "
+        "Raise one to give it more say.",
     ),
     ConfigKey.SEARCH_TOKEN_MULTIPLIERS: SettingDescription(
         "Mismatch multiplier",
-        "How hard the score is cut when a part clearly disagrees: a different year, a different "
-        "season or episode, or a different edition.\n\n"
-        "The score is multiplied by this value, so 1.0 keeps the score untouched and 0.01 "
-        "collapses it almost to nothing. Lower rejects the mismatch harder.",
+        "How hard to cut the score when a part clearly disagrees (year, season, episode, edition). "
+        "1.0 keeps it as is; lower rejects mismatches harder.",
     ),
     ConfigKey.SEARCH_HEARING_IMPAIRED: SettingDescription(
         "Hearing impaired",
-        "Include subtitles that also describe sounds and note who is speaking, " "in addition to the dialogue.",
+        "Include subtitles that also describe sounds and note who is speaking.",
     ),
     ConfigKey.SEARCH_NON_HEARING_IMPAIRED: SettingDescription(
         "Non-hearing impaired",
@@ -46,12 +58,12 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SEARCH_ONLY_FOREIGN_PARTS: SettingDescription(
         "Foreign parts only",
-        "Only look for subtitles that translate the foreign-language sections of a video, " "not the whole thing.",
+        "Only fetch subtitles for the foreign-language sections of a video, not the whole thing.",
     ),
     ConfigKey.SEARCH_PROVIDERS: SettingDescription(
         "Subtitle providers",
-        "The subtitle sites Subsearch looks through. Turn one off to skip it.\n\n"
-        "A greyed-out provider doesn't offer subtitles in {language}.",
+        "The subtitle sites Subsearch searches. Turn one off to skip it. "
+        "Greyed-out providers have no subtitles in {language}.",
     ),
     ConfigKey.SHELL_INTEGRATION_CONTEXT_MENU: SettingDescription(
         "Context menu",
@@ -59,46 +71,48 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SHELL_INTEGRATION_CONTEXT_MENU_ICON: SettingDescription(
         "Context menu icon",
-        "Show the Subsearch icon in the right-click menu. Needs the context menu turned on.",
+        "Show the Subsearch icon in the right-click menu. Requires the context menu.",
     ),
     ConfigKey.SHELL_INTEGRATION_FILE_EXTENSIONS: SettingDescription(
         "File extensions",
-        "Which video file types show the Subsearch entry when right-clicked. " "Needs the context menu turned on.",
+        "Which video file types show the Subsearch entry when right-clicked. Requires the context menu.",
     ),
     ConfigKey.NOTIFICATIONS_SYSTEM_TRAY: SettingDescription(
-        "System tray icon",
-        "Show a Subsearch icon next to the clock while it runs. "
-        "Status updates and the finished notification appear there.",
+        "Desktop notifications",
+        "Show Windows notifications with status updates and the finished notification while Subsearch runs.",
     ),
-    ConfigKey.NOTIFICATIONS_SUMMARY_NOTIFICATION: SettingDescription(
-        "Summary notification",
-        "Pop up a notification when a search finishes. Needs the system tray icon turned on.",
+    ConfigKey.NOTIFICATIONS_DISPLAY_DURATION: SettingDescription(
+        "Display duration",
+        "How long, in seconds, a notification stays on screen before it fades out. "
+        "Use Test to preview the current duration.",
+    ),
+    ConfigKey.NOTIFICATIONS_PLAY_SOUND: SettingDescription(
+        "Notification sound",
+        "Play the Windows notification chime when a notification appears.",
     ),
     ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: SettingDescription(
         "Search mode",
-        "Manual: always open the download manager so you pick the subtitle yourself. "
-        "Hybrid: auto-download the best match; open the manager only when nothing qualifies. "
-        "Automatic: always auto-download silently, never open the manager.",
+        "Manual opens the download manager so you choose. Hybrid auto-downloads the best match and only "
+        "opens the manager when nothing qualifies. Automatic downloads silently.",
     ),
     ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING: SettingDescription(
         "Disable automatic post-processing",
-        "You pick and process subtitles yourself from the search results. "
-        "The automatic rename and move options above are disabled while this is active.",
+        "Pick and process subtitles yourself from the results. Disables the rename and move options above.",
     ),
     ConfigKey.PATHS_DOWNLOAD_DIRECTORY: SettingDescription(
         "Download subtitles to",
-        "Where subtitle archives are downloaded to before they are extracted. "
-        "Leave empty to use the system temporary directory, which is cleaned up automatically.",
+        "Where archives are downloaded before extraction. "
+        "Leave empty for the system temp directory, which is cleaned up automatically.",
     ),
     ConfigKey.PATHS_EXTRACTION_DIRECTORY: SettingDescription(
-        "Exctract subtitles to",
-        "Where downloaded archives are extracted to when searching without a video file. "
+        "Extract subtitles to",
+        "Where archives are extracted when searching without a video file. "
         "Leave empty to use your Downloads directory.",
     ),
     ConfigKey.PATHS_VIDEO_FILE_DIRECTORY: SettingDescription(
         "Rename and move subtitles to",
-        "The directory the best match is renamed and moved to. Can be relative to the video's "
-        "directory or a fixed path on your drive. Ignored when no video file backs the search.",
+        "Where the best match is renamed and moved to, relative to the video or a fixed path. "
+        "Ignored when no video file backs the search.",
     ),
     ConfigKey.PATHS_PATH_RESOLUTION: SettingDescription(
         "Path resolution",
@@ -110,26 +124,28 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     CardKey.AVAILABLE_SUBTITLES: SettingDescription(
         "Subtitles",
-        "Every subtitle found for this video, closest matches at the top. Click one to download it. "
-        "If automatic downloads are on, the best ones are already downloaded and ticked.",
+        "Every subtitle found for this video, closest matches first. Click one to download it. "
+        "With automatic downloads on, the best ones are already ticked.",
     ),
     ConfigKey.POST_PROCESSING_RENEAME: SettingDescription(
         "Rename subtitle",
-        "Rename the subtitle to match your video's filename. Most media players need this to find it automatically.",
+        "Rename the subtitle to match your video so media players find it automatically.",
     ),
     ConfigKey.POST_PROCESSING_MOVE_BEST: SettingDescription(
         "Move best subtitle",
-        "Move only the single best subtitle to the directory you choose. "
-        "Can't be used together with moving all of them.",
+        "Move only the single best subtitle to your chosen directory. Can't combine with moving all.",
     ),
     ConfigKey.POST_PROCESSING_MOVE_ALL: SettingDescription(
         "Move all subtitles",
-        "Move every downloaded subtitle to the folder you choose. "
-        "Can't be used together with moving only the best one.",
+        "Move every downloaded subtitle to your chosen directory. Can't combine with moving the best one.",
     ),
     ConfigKey.APPLICATION_SHOW_TERMINAL: SettingDescription(
         "Show terminal while searching",
-        "Keep the console window open during a search. Only works when running from Python, not the installed app.",
+        "Keep the console window open during a search. Only when running from Python, not the installed app.",
+    ),
+    ConfigKey.APPLICATION_SHOW_TRAY_ICON: SettingDescription(
+        "Show system tray icon",
+        "Show the Subsearch icon in the Windows system tray while the window is open.",
     ),
     ConfigKey.APPLICATION_SINGLE_INSTANCE: SettingDescription(
         "Single instance",
@@ -137,36 +153,32 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER: SettingDescription(
         "Downloads per provider",
-        "How many subtitles Subsearch downloads from a single provider per search. "
-        "It keeps the {limit} best matches and skips the rest. "
-        "Setting this too high may get your connection temporarily blocked.",
+        "How many subtitles to download from each provider per search, keeping the {limit} best. "
+        "Too high may get your connection temporarily blocked.",
     ),
     ConfigKey.NETWORK_REQUEST_CONNECT_TIMEOUT: SettingDescription(
         "Connect timeout",
-        "How many seconds to wait for a site to respond before giving up.",
+        "Seconds to wait for a site to respond before giving up.",
     ),
     ConfigKey.NETWORK_REQUEST_READ_TIMEOUT: SettingDescription(
         "Read timeout",
-        "How many seconds to wait for a site to finish sending its reply before giving up.",
+        "Seconds to wait for a site to finish replying before giving up.",
     ),
     CardKey.DIAGNOSTICS_HEADER: SettingDescription(
         "Provider diagnostics",
-        "Health checks run locally and nothing is sent anywhere automatically. "
-        "Reporting issues to the developer is entirely up to you.",
+        "Health checks run locally; nothing is sent anywhere automatically. Reporting issues is up to you.",
     ),
     ConfigKey.DIAGNOSTICS_ENABLED: SettingDescription(
         "Provider diagnostics checks",
-        "Run a health check on a provider after it fails several searches in a row, "
-        "then notify you with the result.",
+        "Run a health check after a provider fails several searches in a row, then notify you with the result.",
     ),
     ConfigKey.DIAGNOSTICS_FAILED_ATTEMPTS_THRESHOLD: SettingDescription(
         "Failed attempts before check",
-        "How many searches in a row with no results trigger a health check for that provider. "
-        "Resets as soon as the provider finds something.",
+        "How many searches in a row with no results trigger a check. Resets once the provider finds something.",
     ),
     CardKey.SUBSOURCE_API_KEY: SettingDescription(
         "Subsource API key",
-        "Your Subsource API key. Without it, Subsearch skips Subsource entirely. " "Stored only on this computer.",
+        "Your Subsource API key, stored only on this computer. Without it, Subsource is skipped.",
     ),
     CardKey.SUBSOURCE_REQUEST_LIMITS: SettingDescription(
         "Request limits",
@@ -174,53 +186,42 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     CardKey.SUBSOURCE_GETTING_API_KEY: SettingDescription(
         "Getting an API key",
-        'Go to your Subsource profile, open "My Profile", and generate a key. ' "Keep it secret.",
+        'Open "My Profile" on Subsource and generate a key. Keep it secret.',
     ),
     CardKey.SUBTITLE_FILTERS: SettingDescription(
         "Subtitle filters",
-        "Control which subtitle types Subsearch fetches. "
-        "You can combine hearing-impaired and non-hearing-impaired to accept both, "
-        "or enable foreign-parts-only to target films with untranslated sections.",
+        "Which subtitle types to fetch. Combine hearing-impaired and non-hearing-impaired to accept both.",
     ),
     CardKey.SUBTITLE_HANDLING: SettingDescription(
         "Subtitle handling",
-        "What Subsearch does with a subtitle after finding it. "
-        "Automatically rename and move it to the video file directory, "
-        "or take over and process subtitles yourself from the search results.",
+        "What to do with a subtitle after finding it: rename and move it automatically, or process it yourself.",
     ),
     CardKey.PATHS: SettingDescription(
         "Paths",
-        "Where Subsearch downloads, extracts, and places subtitles. " "Leave a folder empty to use its default.",
+        "Where Subsearch downloads, extracts, and places subtitles. Leave a folder empty for its default.",
     ),
     CardKey.SHELL_INTEGRATION: SettingDescription(
         "Shell integration",
-        "Adds Subsearch to the Windows right-click context menu for video files. "
-        "Requires administrator privileges to write to the registry.",
+        "Adds Subsearch to the Windows right-click menu for video files. Requires administrator privileges.",
     ),
     CardKey.NOTIFICATIONS: SettingDescription(
         "Notifications",
-        "Controls the system tray icon and the pop-up that appears when a search finishes. "
-        "The summary notification requires the tray icon to be turned on.",
+        "Windows notifications shown while Subsearch runs and when a search finishes.",
     ),
     CardKey.APPLICATION: SettingDescription(
         "Application",
-        "General application behaviour. "
-        "Show the terminal window during a search (Python only), "
-        "and prevent more than one instance of Subsearch from running at once.",
+        "General behaviour: show the terminal during a search (Python only) and limit Subsearch to one instance.",
     ),
     CardKey.NETWORK: SettingDescription(
         "Network",
-        "Caps how many subtitle files are fetched from each provider per search, "
-        "and sets how long Subsearch waits for a site to respond before giving up.",
+        "How many subtitles to fetch per provider and how long to wait for a site before giving up.",
     ),
     CardKey.UPDATE: SettingDescription(
         "Update",
-        "Check whether a newer version of Subsearch is available and install it. "
-        "The installer runs automatically after the download finishes.",
+        "Check for a newer version and install it. The installer runs automatically once downloaded.",
     ),
     CardKey.RESOURCES: SettingDescription(
         "Resources",
-        "Shortcuts for reporting bugs, sharing crash logs with the developer, "
-        "viewing third-party licenses, and browsing the source code on GitHub.",
+        "Report bugs, share crash logs, view third-party licenses, and browse the source on GitHub.",
     ),
 }

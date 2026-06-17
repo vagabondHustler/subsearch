@@ -108,6 +108,7 @@ def test_yifysubtitles_download_url_follows_responding_mirror(monkeypatch) -> No
             "https://yifysubtitles.mx/movie-imdb/tt0000001",
         ],
         subsource=["fake_url"],
+        tvsubtitles=["fake_url"],
     )
     scraper = yifysubtitles.YifySubtitles(**kwargs)
 
@@ -144,6 +145,7 @@ def test_yifysubtitles_fallback_past_malformed_mirror(monkeypatch) -> None:
             "https://yifysubtitles.mx/movie-imdb/tt0000001",
         ],
         subsource=["fake_url"],
+        tvsubtitles=["fake_url"],
     )
     scraper = yifysubtitles.YifySubtitles(**kwargs)
 

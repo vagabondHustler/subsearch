@@ -8,6 +8,7 @@ class Language:
     two_letter_code: str
     three_letter_code: str
     incompatibility: list[str]
+    tvsubtitles_code: str = ""
 
 
 @dataclass(slots=True)
@@ -25,12 +26,15 @@ class AppConfig:
     context_menu_icon: bool
     file_extensions: dict[str, bool]
     system_tray: bool
-    summary_notification: bool
+
+    notification_display_duration: float
+    notification_play_sound: bool
     search_mode: str
     subtitle_workspace_manual_post_processing: bool
     post_processing: dict[str, Any]
     paths: dict[str, Any]
     show_terminal: bool
+    show_tray_icon: bool
     single_instance: bool
     request_connect_timeout: int
     request_read_timeout: int

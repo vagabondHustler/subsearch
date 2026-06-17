@@ -28,6 +28,7 @@ class ProviderUrls:
     opensubtitles_hash: list[str]
     yifysubtitles: list[str]
     subsource: list[str]
+    tvsubtitles: list[str]
 
 
 @dataclass(slots=True, frozen=True)

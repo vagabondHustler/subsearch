@@ -18,7 +18,7 @@ from qfluentwidgets import (
 
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import DEFAULT_CONFIG
-from subsearch.runtime.keys import ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
 from subsearch.ui.compat.qfluent import (
     flatten_line_edit,
@@ -47,6 +47,7 @@ from subsearch.ui.theme.typography import (
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.browse_line_edit import BrowseLineEdit
 from subsearch.ui.widgets.fuzzy_select import FuzzySelect
+from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -301,6 +302,34 @@ class FloatInput(LineEdit):
         self.value_committed.emit(value)
 
 
+class FloatInputRow(SettingRow):
+    def __init__(
+        self,
+        config_key: ConfigKey,
+        store: SettingsStore,
+        minimum: float,
+        maximum: float,
+        decimals: int,
+        parent: QWidget | None = None,
+    ) -> None:
+        self.input = FloatInput(minimum, maximum, decimals)
+        self.input.set_value_silent(float(store.read(config_key)))
+        super().__init__(config_key, self.input, store, parent)
+        self.input.value_committed.connect(self._on_value_committed)
+        store.value_changed.connect(self._on_store_changed)
+
+    def value(self) -> float:
+        return self.input.value()
+
+    def _on_value_committed(self, value: float) -> None:
+        self.store.write(self.config_key, value)
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key != self.config_key:
+            return
+        self.input.set_value_silent(float(value))
+
+
 class IntInputRow(SettingRow):
     def __init__(
         self, config_key: ConfigKey, store: SettingsStore, minimum: int, maximum: int, parent: QWidget | None = None
@@ -325,6 +354,85 @@ class IntInputRow(SettingRow):
     def _update_help(self, value: int) -> None:
         if self.help_button is not None:
             self.help_button.set_explanation(SETTING_DESCRIPTIONS[self.config_key].explanation.format(limit=value))
+
+
+class IntInputWithButtonRow(SettingRow):
+    button_clicked = Signal()
+
+    def __init__(
+        self,
+        config_key: ConfigKey,
+        store: SettingsStore,
+        minimum: int,
+        maximum: int,
+        button_caption: str,
+        button_icon: LucideIcon,
+        parent: QWidget | None = None,
+    ) -> None:
+        self.input = IntInput(minimum, maximum)
+        self.input.set_value_silent(int(store.read(config_key)))
+        self.button = CaptionedToolButton(button_caption, icon=lucide_qicon(button_icon, TEXT_COLOR))
+        control = QWidget()
+        control_layout = QHBoxLayout(control)
+        control_layout.setContentsMargins(0, 0, 0, 0)
+        control_layout.setSpacing(8)
+        control_layout.addWidget(self.button)
+        control_layout.addWidget(self.input)
+        super().__init__(config_key, control, store, parent)
+        self.input.value_committed.connect(self._on_value_committed)
+        self.button.clicked.connect(self.button_clicked)
+        store.value_changed.connect(self._on_store_changed)
+
+    def value(self) -> int:
+        return self.input.value()
+
+    def _on_value_committed(self, value: int) -> None:
+        self.store.write(self.config_key, value)
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key != self.config_key:
+            return
+        self.input.set_value_silent(int(value))
+
+
+class FloatInputWithButtonRow(SettingRow):
+    button_clicked = Signal()
+
+    def __init__(
+        self,
+        config_key: ConfigKey,
+        store: SettingsStore,
+        minimum: float,
+        maximum: float,
+        decimals: int,
+        button_caption: str,
+        button_icon: LucideIcon,
+        parent: QWidget | None = None,
+    ) -> None:
+        self.input = FloatInput(minimum, maximum, decimals)
+        self.input.set_value_silent(float(store.read(config_key)))
+        self.button = CaptionedToolButton(button_caption, icon=lucide_qicon(button_icon, TEXT_COLOR))
+        control = QWidget()
+        control_layout = QHBoxLayout(control)
+        control_layout.setContentsMargins(0, 0, 0, 0)
+        control_layout.setSpacing(8)
+        control_layout.addWidget(self.button)
+        control_layout.addWidget(self.input)
+        super().__init__(config_key, control, store, parent)
+        self.input.value_committed.connect(self._on_value_committed)
+        self.button.clicked.connect(self.button_clicked)
+        store.value_changed.connect(self._on_store_changed)
+
+    def value(self) -> float:
+        return self.input.value()
+
+    def _on_value_committed(self, value: float) -> None:
+        self.store.write(self.config_key, value)
+
+    def _on_store_changed(self, key: str, value: Any) -> None:
+        if key != self.config_key:
+            return
+        self.input.set_value_silent(float(value))
 
 
 class FuzzySelectRow(SettingRow):

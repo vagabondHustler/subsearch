@@ -5,7 +5,8 @@ from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
 from subsearch.runtime.config import SEARCH_SUBJECT, WORKSPACE
-from subsearch.runtime.keys import ConfigKey, LogEvent
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import Subtitle
 from subsearch.ui.state.store import SettingsStore
@@ -21,11 +22,11 @@ class _PostProcessWorker(Worker):
         self._download_dir = WORKSPACE.download_directory
         self._extraction_dir = WORKSPACE.extraction_directory
 
-    def execute(self) -> int:
+    def execute(self) -> str:
         extracted_count = self._unpack_subtitle()
         if extracted_count == 0:
             self._log_no_files(self._extraction_dir, extracted_count)
-            return 0
+            return ""
         if self._rename:
             return self._rename_and_place()
         log.event(
@@ -34,21 +35,21 @@ class _PostProcessWorker(Worker):
             source=self._download_dir,
             moved=extracted_count,
         )
-        return extracted_count
+        return str(self._extraction_dir)
 
     def _unpack_subtitle(self) -> int:
         return file_system.extract_subtitle_by_id(self._subtitle_id, self._download_dir, self._extraction_dir)
 
-    def _rename_and_place(self) -> int:
+    def _rename_and_place(self) -> str:
         target_path = self._resolve_target_path()
         renamed = file_system.autoload_rename(SEARCH_SUBJECT.search_term, self._extraction_dir)
         file_system.move_and_replace(renamed, target_path)
         placed = (target_path / renamed.name).exists()
         if not placed:
             self._log_no_files(target_path, 0)
-            return 0
+            return ""
         log.event(LogEvent.POST_PROCESSING_COMPLETED, destination=target_path, source=self._extraction_dir, moved=1)
-        return 1
+        return str(target_path)
 
     def _log_no_files(self, destination: Path, moved: int) -> None:
         log.event(
@@ -76,7 +77,7 @@ class PostProcessingServiceProtocol(Protocol):
 
 
 class PostProcessingService(QObject):
-    succeeded = Signal(int)
+    succeeded = Signal(str)
     failed = Signal(str)
 
     def __init__(self, task_runner: TaskRunner, parent: QObject | None = None) -> None:
@@ -95,9 +96,9 @@ class PostProcessingService(QObject):
         worker.failed.connect(self._on_failed)
         self._task_runner.submit(worker)
 
-    def _on_finished(self, delivered_count: object) -> None:
-        if isinstance(delivered_count, int) and delivered_count > 0:
-            self.succeeded.emit(delivered_count)
+    def _on_finished(self, destination: object) -> None:
+        if isinstance(destination, str) and destination:
+            self.succeeded.emit(destination)
         else:
             self.failed.emit("No subtitles were delivered to the destination")
 

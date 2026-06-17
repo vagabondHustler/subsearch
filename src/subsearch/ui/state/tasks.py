@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject, QThread, Signal
 
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 

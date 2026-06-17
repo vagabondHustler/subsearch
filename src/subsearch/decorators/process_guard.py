@@ -3,14 +3,15 @@ from typing import Any, Callable
 
 from subsearch.runtime.config import GUID
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.keys import ConfigKey, LogEvent
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import exceptions
 
 
 def apply_mutex(func: Callable) -> Callable:
     def inner(*args, **kwargs) -> Any:
-        log.event(LogEvent.BANNER, title="Initializing Subsearch")
+        log.event(LogEvent.BANNER, title="Initializing")
         try:
             single_instance = config_session.get_config_session().read(ConfigKey.APPLICATION_SINGLE_INSTANCE)
             log.event(LogEvent.GUARD_SINGLE_INSTANCE, level="debug", single_instance=single_instance)

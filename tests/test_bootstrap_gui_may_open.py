@@ -11,23 +11,19 @@ def make_bootstrap(app_mode: AppMode) -> Bootstrap:
 
 
 def test_gui_may_open_when_settings_mode():
-    assert make_bootstrap(AppMode.SETTINGS).gui_may_open is True
+    assert make_bootstrap(AppMode.SETTINGS).ui_may_open is True
 
 
 def test_gui_may_open_when_search_manual():
-    assert make_bootstrap(AppMode.SEARCH_MANUAL).gui_may_open is True
+    assert make_bootstrap(AppMode.SEARCH_MANUAL).ui_may_open is True
 
 
 def test_gui_may_open_when_search_hybrid():
-    assert make_bootstrap(AppMode.SEARCH_HYBRID).gui_may_open is True
-
-
-def test_gui_may_open_when_dev_mode():
-    assert make_bootstrap(AppMode.DEV).gui_may_open is True
+    assert make_bootstrap(AppMode.SEARCH_HYBRID).ui_may_open is True
 
 
 def test_gui_may_not_open_for_automatic_mode():
-    assert make_bootstrap(AppMode.SEARCH_AUTOMATIC).gui_may_open is False
+    assert make_bootstrap(AppMode.SEARCH_AUTOMATIC).ui_may_open is False
 
 
 if __name__ == "__main__":

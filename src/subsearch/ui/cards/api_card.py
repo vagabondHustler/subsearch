@@ -6,9 +6,9 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, CaptionLabel, LineEdit, TransparentToolButton
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.keys import CardKey, ConfigKey
+from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.ui.cards.base import SettingsCard
-from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 from subsearch.ui.compat.qfluent import embed_trailing_widget, flatten_line_edit
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.state.store import SettingsStore

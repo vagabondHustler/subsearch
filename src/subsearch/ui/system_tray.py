@@ -1,45 +1,48 @@
-from PySide6.QtCore import QEventLoop
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QSystemTrayIcon
+from PySide6.QtCore import QEventLoop, QObject
 
-from subsearch.runtime.config import APP_PATHS, VERSION
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.ui.qt_application import get_application
+from subsearch.ui.widgets.notification_gate import notifications_allowed
+from subsearch.ui.widgets.notification_toast import NotificationToast
 
-TOAST_DURATION_MS = 5000
-TOAST_REGISTRATION_TIMEOUT_MS = 1000
+SUCCESS_TITLE = "Search Succeeded"
 
 
-class SystemTray:
-    def __init__(self, enabled: bool) -> None:
+class SystemTray(QObject):
+    def __init__(self, enabled: bool, display_duration_ms: int, play_sound: bool) -> None:
+        super().__init__()
         self.enabled = enabled
-        if not self.enabled:
-            return
-        self.application = get_application()
-        icon = QIcon(str(APP_PATHS.ui_assets / "subsearch.ico"))
-        self.tray = QSystemTrayIcon(icon)
-        self.tray.setToolTip(f"Subsearch {VERSION}")
+        self.display_duration_ms = display_duration_ms
+        self.play_sound = play_sound
 
-    def display_toast(self, title: str, msg: str) -> None:
+    def display_toast(self, title: str, message: str) -> None:
         if not self.enabled:
             return
-        self.tray.showMessage(title, msg, QSystemTrayIcon.MessageIcon.Information, TOAST_DURATION_MS)
-        # The core pipeline runs without QApplication.exec, so the balloon only
-        # reaches the shell if events are pumped over its registration window;
-        # a single processEvents fires showMessage before Windows can render it.
-        self.application.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, TOAST_REGISTRATION_TIMEOUT_MS)
+        if not notifications_allowed():
+            return
+        get_application()
+        toast = NotificationToast(
+            title,
+            message,
+            succeeded=title == SUCCESS_TITLE,
+            hold_duration_ms=self.display_duration_ms,
+            play_sound=self.play_sound,
+        )
+        self._show_and_wait(toast)
+
+    def _show_and_wait(self, toast: NotificationToast) -> None:
+        loop = QEventLoop()
+        toast.dismissed.connect(loop.quit)
+        toast.show_above_clock()
+        loop.exec()
 
     def start(self) -> None:
         if not self.enabled:
             return
-        self.tray.show()
-        self.application.processEvents()
         log.event(LogEvent.TRAY_ADDED, level="debug")
 
     def stop(self) -> None:
         if not self.enabled:
             return
-        self.application.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, TOAST_REGISTRATION_TIMEOUT_MS)
-        self.tray.hide()
         log.event(LogEvent.TRAY_REMOVED, level="debug")

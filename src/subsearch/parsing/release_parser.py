@@ -9,7 +9,7 @@ from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
 )
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
@@ -134,16 +134,23 @@ class CreateProviderUrls:
             opensubtitles_hash=self.opensubtitles_hash,
             yifysubtitles=self.yifysubtitles,
             subsource=self.subsource,
+            tvsubtitles=self.tvsubtitles,
         )
         return urls
 
     @classmethod
     def no_urls(cls) -> ProviderUrls:
-        return ProviderUrls([], [], [], [])
+        return ProviderUrls([], [], [], [], [])
 
     @property
     def subsource(self) -> list[str]:
         return ["https://api.subsource.net/api"]
+
+    @property
+    def tvsubtitles(self) -> list[str]:
+        if not self.release_data.tvseries:
+            return []
+        return ["https://www.tvsubtitles.net"]
 
     @property
     def opensubtitles(self) -> list[str]:

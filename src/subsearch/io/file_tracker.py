@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 
 from subsearch.runtime.config import APP_PATHS
-from subsearch.runtime.keys import LogEvent
+from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 
 TEMP_DIRECTORY_NAME = "tmp_subsearch"
@@ -19,7 +19,7 @@ class FileTracker:
             return set()
         try:
             return set(json.loads(self.manifest_path.read_text(encoding="utf-8")))
-        except json.JSONDecodeError, OSError:
+        except (json.JSONDecodeError, OSError):
             log.event(LogEvent.TRACKER_MANIFEST_UNREADABLE, level="warning", path=self.manifest_path)
             return set()
 

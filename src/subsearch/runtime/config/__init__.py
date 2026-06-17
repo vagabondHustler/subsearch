@@ -1,10 +1,12 @@
 from subsearch.runtime.config.composition import (
     APP_PATHS,
+    APP_USER_MODEL_ID,
     COMPUTER_NAME,
     DEFAULT_CONFIG,
     DEVICE_INFO,
     FILE_PATHS,
     GUID,
+    PATH_RESOLVER,
     REGISTRY_PATHS,
     SEARCH_RESOLVER,
     SEARCH_SUBJECT,
@@ -13,6 +15,8 @@ from subsearch.runtime.config.composition import (
     VERSION,
     WORKSPACE,
 )
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.config.resolved_paths import PathResolver, ResolvedDirectories
 from subsearch.runtime.config.session import (
     ConfigSession,
     diagnostics_enabled,
@@ -20,16 +24,19 @@ from subsearch.runtime.config.session import (
     read_config_value,
     reset_config_session,
 )
-from subsearch.runtime.keys import ConfigKey
 
 __all__ = [
     "APP_PATHS",
+    "APP_USER_MODEL_ID",
     "COMPUTER_NAME",
     "DEFAULT_CONFIG",
     "DEVICE_INFO",
     "FILE_PATHS",
     "GUID",
+    "PATH_RESOLVER",
+    "PathResolver",
     "REGISTRY_PATHS",
+    "ResolvedDirectories",
     "SEARCH_RESOLVER",
     "SEARCH_SUBJECT",
     "SUPPORTED_FILE_EXT",
