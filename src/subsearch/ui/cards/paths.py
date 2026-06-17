@@ -1,0 +1,98 @@
+from PySide6.QtWidgets import QVBoxLayout, QWidget
+from qfluentwidgets import MessageBox
+
+from subsearch.runtime.config import SEARCH_SUBJECT
+from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.ui.cards.base import SettingsCard
+from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.separators import make_fading_separator
+from subsearch.ui.widgets.setting_rows import DirectoryPathRow, SwitchRow
+
+DEFAULT_VIDEO_FILE_DIRECTORY = "."
+DEFAULT_PATH_RESOLUTION = "relative"
+DEFAULT_DIRECTORY = ""
+
+
+class PathsCard(SettingsCard):
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
+        super().__init__("Paths", store, parent=parent)
+        self.store = store
+        self.add_header_help(SETTING_DESCRIPTIONS[CardKey.PATHS].explanation)
+        self.register_restore_defaults(
+            [
+                (ConfigKey.PATHS_DOWNLOAD_DIRECTORY, DEFAULT_DIRECTORY),
+                (ConfigKey.PATHS_EXTRACTION_DIRECTORY, DEFAULT_DIRECTORY),
+                (ConfigKey.PATHS_VIDEO_FILE_DIRECTORY, DEFAULT_VIDEO_FILE_DIRECTORY),
+                (ConfigKey.PATHS_PATH_RESOLUTION, DEFAULT_PATH_RESOLUTION),
+            ]
+        )
+
+        self.body_layout.addWidget(
+            DirectoryPathRow(
+                ConfigKey.PATHS_DOWNLOAD_DIRECTORY,
+                store,
+                placeholder_text=store.resolved_default_directory(ConfigKey.PATHS_DOWNLOAD_DIRECTORY),
+                dialog_title="Select download directory",
+                allow_empty=True,
+            )
+        )
+        self.body_layout.addWidget(
+            DirectoryPathRow(
+                ConfigKey.PATHS_EXTRACTION_DIRECTORY,
+                store,
+                placeholder_text=store.resolved_default_directory(ConfigKey.PATHS_EXTRACTION_DIRECTORY),
+                dialog_title="Select extraction directory",
+                allow_empty=True,
+            )
+        )
+        self._video_file_section = self._build_video_file_section(store)
+        self.body_layout.addWidget(self._video_file_section)
+        self.video_file_directory.setEnabled(SEARCH_SUBJECT.file_exists)
+
+    def _build_video_file_section(self, store: SettingsStore) -> QWidget:
+        container = QWidget(self)
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(4)
+
+        self.video_file_directory = DirectoryPathRow(
+            ConfigKey.PATHS_VIDEO_FILE_DIRECTORY,
+            store,
+            placeholder_text=".",
+            dialog_title="Select video file directory",
+            allow_empty=True,
+        )
+        self.video_file_directory.path_saved.connect(self._on_video_file_directory_saved)
+        layout.addWidget(self.video_file_directory)
+
+        create_missing_directory = SwitchRow(ConfigKey.PATHS_CREATE_MISSING_DIRECTORY, store, container)
+        layout.addWidget(create_missing_directory)
+        self.register_restore_defaults([(create_missing_directory.config_key, create_missing_directory.default_value)])
+        return container
+
+    def _on_video_file_directory_saved(self, _path: str, path_resolution: str) -> None:
+        self.store.write(ConfigKey.PATHS_PATH_RESOLUTION, path_resolution)
+
+    def commit_path_or_revert(self) -> bool:
+        if not self.video_file_directory.isEnabled():
+            return True
+        if self.video_file_directory.is_valid():
+            self.video_file_directory.save_if_valid()
+            return True
+        return self._prompt_invalid_path_on_exit()
+
+    def _prompt_invalid_path_on_exit(self) -> bool:
+        confirmation = MessageBox(
+            "Video file directory is not valid",
+            f'The video file directory\n\n"{self.video_file_directory.text()}"\n\nis not valid. '
+            f'Exit anyway and reset it to the default ("{DEFAULT_VIDEO_FILE_DIRECTORY}"), '
+            "or stay and fix it?",
+            self.window(),
+        )
+        confirmation.yesButton.setText("Reset and exit")
+        confirmation.cancelButton.setText("Stay and fix")
+        if not confirmation.exec():
+            return False
+        self.video_file_directory.set_path(DEFAULT_VIDEO_FILE_DIRECTORY)
+        return True

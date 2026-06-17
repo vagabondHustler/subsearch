@@ -1,6 +1,6 @@
 [build-system]
     build-backend = "setuptools.build_meta"
-    requires = ["setuptools>=65.5", "wheel"]
+    requires = ["setuptools>=82.0"]
 
 [project]
     authors = [
@@ -11,19 +11,20 @@
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
         "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.14",
         "Topic :: Multimedia :: Video",
         "Topic :: Utilities",
     ]
     dependencies = [
-        "cloudscraper==1.2.71",
+        "curl_cffi==0.15.0",
+        "imdbinfo==0.9.1",
         "num2words==0.5.14",
-        "packaging==24.2",
-        "pillow==11.1.0",
-        "pystray==0.19.5",
-        "requests==2.32.4",
-        "selectolax==0.3.28",
-        "toml==0.10.2",
+        "packaging==26.2",
+        "PySide6==6.11.1",
+        "PySide6-Fluent-Widgets==1.11.2",
+        "requests==2.34.2",
+        "selectolax==0.4.10",
+        "yaspin==3.4.0",
     ]
     description = "Subsearch"
     dynamic = ["version"]
@@ -42,10 +43,11 @@
         "subsearch",
         "yifysubtitles",
     ]
-    license = {text = "MIT license"}
+    license = "GPL-3.0-or-later"
+    license-files = ["LICENSE", "THIRD-PARTY-LICENSES.md"]
     name = "Subsearch"
     readme = "README.md"
-    requires-python = ">=3.12"
+    requires-python = ">=3.14"
 
 [project.urls]
     repository = "https://github.com/vagabondHustler/subsearch"
@@ -63,24 +65,25 @@
     where = ["src"]
 
 [tool.setuptools.dynamic]
-    version = {attr = "subsearch.data.__version__"}
+    version = {attr = "subsearch.runtime.config.version.__version__"}
 
 [project.optional-dependencies]
     build = [
-        "build==1.2.2.post1",
-        "cx_Freeze==8.1.0",
-        "twine==6.1.0",
-        "psutil==7.0.0",
+        "build==1.5.0",
+        "cx_Freeze==8.6.4",
+        "twine==6.2.0",
+        "psutil==7.2.2",
     ]
-    lint = ["black==25.1.0", "isort==6.0.1"]
+    lint = ["black==26.5.1", "isort==8.0.1"]
     tests = [
-        "pytest-cov==6.1.1",
-        "pytest==8.3.5",
-        "tox==4.25.0",
-        "python-dotenv==1.1.0",
+        "pytest-cov==7.1.0",
+        "pytest==9.1.0",
+        "pytest-qt==4.5.0",
+        "tox==4.55.1",
+        "python-dotenv==1.2.2",
     ]
-    tools = ["pyperclip==1.9.0"]
-    type = ["mypy==1.15.0"]
+    tools = ["commitizen==4.16.3", "pre-commit==4.6.0"]
+    type = ["mypy==2.1.0"]
 
 
 [tool.pytest.ini_options]
@@ -90,6 +93,21 @@
     log_cli_level = 'DEBUG'
     testpaths = ["tests"]
 
+[project.entry-points."commitizen.plugin"]
+    SubsearchCz = "tools.cz_subsearch:SubsearchCz"
+
+[tool.commitizen]
+    name = "SubsearchCz"
+    template = "changelog_template.md.j2"
+    version = "2.47.7"
+    tag_format = "$version"
+    ignored_tag_pattern = ".*[^0-9.].*"
+    update_changelog_on_bump = false
+    annotated_tag = true
+    version_files = [
+        "src/subsearch/runtime/config/version.py:__version__",
+    ]
+
 [tool.black]
     line-length = 120
 
@@ -98,6 +116,15 @@
 
 [tool.mypy]
     check_untyped_defs = true
-    ignore_missing_imports = true
+    ignore_missing_imports = false
     mypy_path = "src"
-    warn_no_return = false
+    warn_no_return = true
+
+[[tool.mypy.overrides]]
+    module = [
+        "imdbinfo.*",
+        "num2words.*",
+        "qfluentwidgets.*",
+        "setuptools.*",
+    ]
+    ignore_missing_imports = true

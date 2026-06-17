@@ -1,0 +1,716 @@
+{
+  "abkhazian": {
+    "name": "Abkhazian",
+    "two_letter_code": "ab",
+    "three_letter_code": "abk",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "afrikaans": {
+    "name": "Afrikaans",
+    "two_letter_code": "af",
+    "three_letter_code": "afr",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "albanian": {
+    "name": "Albanian",
+    "two_letter_code": "sq",
+    "three_letter_code": "alb",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "amharic": {
+    "name": "Amharic",
+    "two_letter_code": "am",
+    "three_letter_code": "amh",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "arabic": {
+    "name": "Arabic",
+    "two_letter_code": "ar",
+    "three_letter_code": "ara",
+    "incompatibility": [],
+    "tvsubtitles_code": "ar"
+  },
+  "aragonese": {
+    "name": "Aragonese",
+    "two_letter_code": "an",
+    "three_letter_code": "arg",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "arakanese": {
+    "name": "Arakanese",
+    "two_letter_code": "rk",
+    "three_letter_code": "rki",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "armenian": {
+    "name": "Armenian",
+    "two_letter_code": "hy",
+    "three_letter_code": "arm",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "assamese": {
+    "name": "Assamese",
+    "two_letter_code": "as",
+    "three_letter_code": "asm",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "asturian": {
+    "name": "Asturian",
+    "two_letter_code": "at",
+    "three_letter_code": "ast",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "azerbaijani": {
+    "name": "Azerbaijani",
+    "two_letter_code": "az",
+    "three_letter_code": "aze",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "basque": {
+    "name": "Basque",
+    "two_letter_code": "eu",
+    "three_letter_code": "baq",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "belarusian": {
+    "name": "Belarusian",
+    "two_letter_code": "be",
+    "three_letter_code": "bel",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "bengali": {
+    "name": "Bengali",
+    "two_letter_code": "bn",
+    "three_letter_code": "ben",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "bosnian": {
+    "name": "Bosnian",
+    "two_letter_code": "bs",
+    "three_letter_code": "bos",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "brazillian_portuguese": {
+    "name": "Brazillian-Portuguese",
+    "two_letter_code": "pt",
+    "three_letter_code": "pob",
+    "incompatibility": [],
+    "tvsubtitles_code": "br"
+  },
+  "breton": {
+    "name": "Breton",
+    "two_letter_code": "br",
+    "three_letter_code": "bre",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "bulgarian": {
+    "name": "Bulgarian",
+    "two_letter_code": "bg",
+    "three_letter_code": "bul",
+    "incompatibility": [],
+    "tvsubtitles_code": "bg"
+  },
+  "bulgarian_english": {
+    "name": "Bulgarian-English",
+    "two_letter_code": "",
+    "three_letter_code": "",
+    "incompatibility": ["opensubtitles", "tvsubtitles"]
+  },
+  "burmese": {
+    "name": "Burmese",
+    "two_letter_code": "my",
+    "three_letter_code": "bur",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "cambodian_khmer": {
+    "name": "Cambodian-Khmer",
+    "two_letter_code": "km",
+    "three_letter_code": "khm",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "catalan": {
+    "name": "Catalan",
+    "two_letter_code": "ca",
+    "three_letter_code": "cat",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "chinese": {
+    "name": "Chinese",
+    "two_letter_code": "zh",
+    "three_letter_code": "chi",
+    "incompatibility": ["yifysubtitles", "subsource", "gestdown"],
+    "tvsubtitles_code": "cn"
+  },
+  "chinese_bg_code": {
+    "name": "Chinese-BG-Code",
+    "two_letter_code": "",
+    "three_letter_code": "zht",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "chinese_bilingual": {
+    "name": "Chinese-Bilingual",
+    "two_letter_code": "ze",
+    "three_letter_code": "zhe",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "chinese_simplified": {
+    "name": "Chinese-Simplified",
+    "two_letter_code": "zh",
+    "three_letter_code": "zhc",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "chuvash": {
+    "name": "Chuvash",
+    "two_letter_code": "cv",
+    "three_letter_code": "chv",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "croatian": {
+    "name": "Croatian",
+    "two_letter_code": "hr",
+    "three_letter_code": "hrv",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "czech": {
+    "name": "Czech",
+    "two_letter_code": "cs",
+    "three_letter_code": "cze",
+    "incompatibility": [],
+    "tvsubtitles_code": "cz"
+  },
+  "danish": {
+    "name": "Danish",
+    "two_letter_code": "da",
+    "three_letter_code": "dan",
+    "incompatibility": [],
+    "tvsubtitles_code": "da"
+  },
+  "dari": {
+    "name": "Dari",
+    "two_letter_code": "pr",
+    "three_letter_code": "prs",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "dutch": {
+    "name": "Dutch",
+    "two_letter_code": "nl",
+    "three_letter_code": "dut",
+    "incompatibility": [],
+    "tvsubtitles_code": "nl"
+  },
+  "dutch_english": {
+    "name": "Dutch-English",
+    "two_letter_code": "",
+    "three_letter_code": "",
+    "incompatibility": ["opensubtitles", "tvsubtitles"]
+  },
+  "english": {
+    "name": "English",
+    "two_letter_code": "en",
+    "three_letter_code": "eng",
+    "incompatibility": [],
+    "tvsubtitles_code": "en"
+  },
+  "english_german": {
+    "name": "English-German",
+    "two_letter_code": "",
+    "three_letter_code": "",
+    "incompatibility": ["opensubtitles", "tvsubtitles"]
+  },
+  "esperanto": {
+    "name": "Esperanto",
+    "two_letter_code": "eo",
+    "three_letter_code": "epo",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "estonian": {
+    "name": "Estonian",
+    "two_letter_code": "et",
+    "three_letter_code": "est",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "extremaduran": {
+    "name": "Extremaduran",
+    "two_letter_code": "ex",
+    "three_letter_code": "ext",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "finnish": {
+    "name": "Finnish",
+    "two_letter_code": "fi",
+    "three_letter_code": "fin",
+    "incompatibility": [],
+    "tvsubtitles_code": "fi"
+  },
+  "french": {
+    "name": "French",
+    "two_letter_code": "fr",
+    "three_letter_code": "fre",
+    "incompatibility": [],
+    "tvsubtitles_code": "fr"
+  },
+  "gaelic": {
+    "name": "Gaelic",
+    "two_letter_code": "gd",
+    "three_letter_code": "gla",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "galician": {
+    "name": "Galician",
+    "two_letter_code": "gl",
+    "three_letter_code": "glg",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "georgian": {
+    "name": "Georgian",
+    "two_letter_code": "ka",
+    "three_letter_code": "geo",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "german": {
+    "name": "German",
+    "two_letter_code": "de",
+    "three_letter_code": "ger",
+    "incompatibility": [],
+    "tvsubtitles_code": "de"
+  },
+  "greek": {
+    "name": "Greek",
+    "two_letter_code": "el",
+    "three_letter_code": "ell",
+    "incompatibility": ["yifysubtitles", "subsource", "gestdown"],
+    "tvsubtitles_code": "gr"
+  },
+  "greenlandic": {
+    "name": "Greenlandic",
+    "two_letter_code": "kl",
+    "three_letter_code": "kal",
+    "incompatibility": ["opensubtitles", "tvsubtitles"]
+  },
+  "hebrew": {
+    "name": "Hebrew",
+    "two_letter_code": "he",
+    "three_letter_code": "heb",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "hindi": {
+    "name": "Hindi",
+    "two_letter_code": "hi",
+    "three_letter_code": "hin",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "hungarian": {
+    "name": "Hungarian",
+    "two_letter_code": "hu",
+    "three_letter_code": "hun",
+    "incompatibility": [],
+    "tvsubtitles_code": "hu"
+  },
+  "icelandic": {
+    "name": "Icelandic",
+    "two_letter_code": "is",
+    "three_letter_code": "ice",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "igbo": {
+    "name": "Igbo",
+    "two_letter_code": "ig",
+    "three_letter_code": "ibo",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "indonesian": {
+    "name": "Indonesian",
+    "two_letter_code": "id",
+    "three_letter_code": "ind",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "interlingua": {
+    "name": "Interlingua",
+    "two_letter_code": "ia",
+    "three_letter_code": "ina",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "irish": {
+    "name": "Irish",
+    "two_letter_code": "ga",
+    "three_letter_code": "gle",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "italian": {
+    "name": "Italian",
+    "two_letter_code": "it",
+    "three_letter_code": "ita",
+    "incompatibility": [],
+    "tvsubtitles_code": "it"
+  },
+  "japanese": {
+    "name": "Japanese",
+    "two_letter_code": "ja",
+    "three_letter_code": "jpn",
+    "incompatibility": [],
+    "tvsubtitles_code": "jp"
+  },
+  "kannada": {
+    "name": "Kannada",
+    "two_letter_code": "kn",
+    "three_letter_code": "kan",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "kazakh": {
+    "name": "Kazakh",
+    "two_letter_code": "kk",
+    "three_letter_code": "kaz",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "korean": {
+    "name": "Korean",
+    "two_letter_code": "ko",
+    "three_letter_code": "kor",
+    "incompatibility": [],
+    "tvsubtitles_code": "ko"
+  },
+  "kurdish": {
+    "name": "Kurdish",
+    "two_letter_code": "ku",
+    "three_letter_code": "kur",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "kyrgyz": {
+    "name": "Kyrgyz",
+    "two_letter_code": "ky",
+    "three_letter_code": "kir",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "latvian": {
+    "name": "Latvian",
+    "two_letter_code": "lv",
+    "three_letter_code": "lav",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "lithuanian": {
+    "name": "Lithuanian",
+    "two_letter_code": "lt",
+    "three_letter_code": "lit",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "luxembourgish": {
+    "name": "Luxembourgish",
+    "two_letter_code": "lb",
+    "three_letter_code": "ltz",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "macedonian": {
+    "name": "Macedonian",
+    "two_letter_code": "mk",
+    "three_letter_code": "mac",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "malay": {
+    "name": "Malay",
+    "two_letter_code": "ms",
+    "three_letter_code": "may",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "malayalam": {
+    "name": "Malayalam",
+    "two_letter_code": "ml",
+    "three_letter_code": "mal",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "manipuri": {
+    "name": "Manipuri",
+    "two_letter_code": "mni",
+    "three_letter_code": "mni",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "marathi": {
+    "name": "Marathi",
+    "two_letter_code": "mr",
+    "three_letter_code": "mar",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "mongolian": {
+    "name": "Mongolian",
+    "two_letter_code": "mn",
+    "three_letter_code": "mon",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "montenegrin": {
+    "name": "Montenegrin",
+    "two_letter_code": "me",
+    "three_letter_code": "mne",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "navajo": {
+    "name": "Navajo",
+    "two_letter_code": "nv",
+    "three_letter_code": "nav",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "nepali": {
+    "name": "Nepali",
+    "two_letter_code": "ne",
+    "three_letter_code": "nep",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "northern_sami": {
+    "name": "Northern-Sami",
+    "two_letter_code": "se",
+    "three_letter_code": "sme",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "norwegian": {
+    "name": "Norwegian",
+    "two_letter_code": "no",
+    "three_letter_code": "nor",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "occitan": {
+    "name": "Occitan",
+    "two_letter_code": "oc",
+    "three_letter_code": "oci",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "odia": {
+    "name": "Odia",
+    "two_letter_code": "or",
+    "three_letter_code": "ori",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "pashto": {
+    "name": "Pashto",
+    "two_letter_code": "ps",
+    "three_letter_code": "pus",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "persian": {
+    "name": "Persian",
+    "two_letter_code": "fa",
+    "three_letter_code": "per",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "polish": {
+    "name": "Polish",
+    "two_letter_code": "pl",
+    "three_letter_code": "pol",
+    "incompatibility": ["yifysubtitles", "subsource", "gestdown"],
+    "tvsubtitles_code": "pl"
+  },
+  "portuguese": {
+    "name": "Portuguese",
+    "two_letter_code": "pt",
+    "three_letter_code": "por",
+    "incompatibility": ["yifysubtitles", "subsource", "gestdown"],
+    "tvsubtitles_code": "pt"
+  },
+  "portuguese_mz": {
+    "name": "Portuguese-MZ",
+    "two_letter_code": "pm",
+    "three_letter_code": "pom",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "romanian": {
+    "name": "Romanian",
+    "two_letter_code": "ro",
+    "three_letter_code": "rum",
+    "incompatibility": [],
+    "tvsubtitles_code": "ro"
+  },
+  "russian": {
+    "name": "Russian",
+    "two_letter_code": "ru",
+    "three_letter_code": "rus",
+    "incompatibility": [],
+    "tvsubtitles_code": "ru"
+  },
+  "santali": {
+    "name": "Santali",
+    "two_letter_code": "sx",
+    "three_letter_code": "sat",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "serbian": {
+    "name": "Serbian",
+    "two_letter_code": "sr",
+    "three_letter_code": "scc",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "sindhi": {
+    "name": "Sindhi",
+    "two_letter_code": "sd",
+    "three_letter_code": "snd",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "sinhala": {
+    "name": "Sinhala",
+    "two_letter_code": "si",
+    "three_letter_code": "sin",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "slovak": {
+    "name": "Slovak",
+    "two_letter_code": "sk",
+    "three_letter_code": "slo",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "slovenian": {
+    "name": "Slovenian",
+    "two_letter_code": "sl",
+    "three_letter_code": "slv",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "somali": {
+    "name": "Somali",
+    "two_letter_code": "so",
+    "three_letter_code": "som",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "sorbian": {
+    "name": "Sorbian",
+    "two_letter_code": "sp",
+    "three_letter_code": "wen",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "south_azerbaijani": {
+    "name": "South-Azerbaijani",
+    "two_letter_code": "tz",
+    "three_letter_code": "azb",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "spanish": {
+    "name": "Spanish",
+    "two_letter_code": "es",
+    "three_letter_code": "spa",
+    "incompatibility": [],
+    "tvsubtitles_code": "es"
+  },
+  "spanish_eu": {
+    "name": "Spanish-EU",
+    "two_letter_code": "sn",
+    "three_letter_code": "spn",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "spanish_la": {
+    "name": "Spanish-LA",
+    "two_letter_code": "ea",
+    "three_letter_code": "spl",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "sundanese": {
+    "name": "Sundanese",
+    "two_letter_code": "su",
+    "three_letter_code": "sun",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "swahili": {
+    "name": "Swahili",
+    "two_letter_code": "sw",
+    "three_letter_code": "swa",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "swedish": {
+    "name": "Swedish",
+    "two_letter_code": "sv",
+    "three_letter_code": "swe",
+    "incompatibility": [],
+    "tvsubtitles_code": "sv"
+  },
+  "syriac": {
+    "name": "Syriac",
+    "two_letter_code": "sy",
+    "three_letter_code": "syr",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "tagalog": {
+    "name": "Tagalog",
+    "two_letter_code": "tl",
+    "three_letter_code": "tgl",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "tamazight": {
+    "name": "Tamazight",
+    "two_letter_code": "zt",
+    "three_letter_code": "zgh",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "tamil": {
+    "name": "Tamil",
+    "two_letter_code": "ta",
+    "three_letter_code": "tam",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "tatar": {
+    "name": "Tatar",
+    "two_letter_code": "tt",
+    "three_letter_code": "tat",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "telugu": {
+    "name": "Telugu",
+    "two_letter_code": "te",
+    "three_letter_code": "tel",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "tetum": {
+    "name": "Tetum",
+    "two_letter_code": "tm",
+    "three_letter_code": "tet",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "thai": {
+    "name": "Thai",
+    "two_letter_code": "th",
+    "three_letter_code": "tha",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "toki_pona": {
+    "name": "Toki-Pona",
+    "two_letter_code": "tp",
+    "three_letter_code": "tok",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "turkish": {
+    "name": "Turkish",
+    "two_letter_code": "tr",
+    "three_letter_code": "tur",
+    "incompatibility": [],
+    "tvsubtitles_code": "tr"
+  },
+  "turkmen": {
+    "name": "Turkmen",
+    "two_letter_code": "tk",
+    "three_letter_code": "tuk",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "ukrainian": {
+    "name": "Ukrainian",
+    "two_letter_code": "uk",
+    "three_letter_code": "ukr",
+    "incompatibility": [],
+    "tvsubtitles_code": "ua"
+  },
+  "urdu": {
+    "name": "Urdu",
+    "two_letter_code": "ur",
+    "three_letter_code": "urd",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "uzbek": {
+    "name": "Uzbek",
+    "two_letter_code": "uz",
+    "three_letter_code": "uzb",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "vietnamese": {
+    "name": "Vietnamese",
+    "two_letter_code": "vi",
+    "three_letter_code": "vie",
+    "incompatibility": ["tvsubtitles"]
+  },
+  "welsh": {
+    "name": "Welsh",
+    "two_letter_code": "cy",
+    "three_letter_code": "wel",
+    "incompatibility": ["tvsubtitles"]
+  }
+}

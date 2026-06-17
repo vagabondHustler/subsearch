@@ -1,42 +1,51 @@
+import os
 import sys
+import threading
 import time
 from pathlib import Path
 
-from subsearch import core
-from subsearch.globals import decorators
+# Silence the FFmpeg backend banner QtMultimedia logs on first init; must be set
+# before any Qt module imports.
+os.environ.setdefault("QT_LOGGING_RULES", "qt.multimedia.ffmpeg=false")
 
 PREF_COUNTER = time.perf_counter()
 PACKAGE_PATH = Path(__file__).resolve().parent.as_posix()
 HOME_PATH = Path(PACKAGE_PATH).parent.as_posix()
 sys.path.append(HOME_PATH)
-sys.path.append(PACKAGE_PATH)
+
+from typing import Callable, Optional
+
+from subsearch.runtime.logging.logger import log
+
+_crash_notifier: Optional[Callable[[], None]] = None
 
 
-class Subsearch:
-    def __init__(self) -> None:
-        self.subsearch_core = core.SubsearchCore(PREF_COUNTER)
-
-    def start_app(self) -> None:
-        self.subsearch_core.init_search(
-            self.subsearch_core.opensubtitles,
-            self.subsearch_core.yifysubtitles,
-            self.subsearch_core.subsource,
-        )
-        self.subsearch_core.download_files()
-        self.subsearch_core.download_manager()
-        self.subsearch_core.subtitle_post_processing()
-        self.subsearch_core.clean_up()
-
-    def exit_app(self) -> None:
-        self.subsearch_core.core_on_exit()
+def set_crash_notifier(notifier: Optional[Callable[[], None]]) -> None:
+    global _crash_notifier
+    _crash_notifier = notifier
 
 
-@decorators.apply_mutex
-def main() -> None:
-    subsearch = Subsearch()
-    subsearch.start_app()
-    subsearch.exit_app()
+def _notify_crash() -> None:
+    if _crash_notifier is not None:
+        _crash_notifier()
 
 
-if __name__ == "__main__":
-    main()
+def _route_uncaught_to_log(exc_type, exc_value, exc_traceback) -> None:
+    log.uncaught_exception(exc_type, exc_value, exc_traceback)
+    _notify_crash()
+    sys.__excepthook__(exc_type, exc_value, exc_traceback)
+
+
+def _route_uncaught_thread_to_log(args: threading.ExceptHookArgs) -> None:
+    thread_name = args.thread.name if args.thread else "unknown"
+    log.uncaught_exception(args.exc_type, args.exc_value, args.exc_traceback, origin=f"thread {thread_name}")
+    _notify_crash()
+    threading.__excepthook__(args)
+
+
+sys.excepthook = _route_uncaught_to_log
+threading.excepthook = _route_uncaught_thread_to_log
+
+from subsearch.__main__ import Subsearch, main
+
+__all__ = ["Subsearch", "main", "set_crash_notifier", "PREF_COUNTER", "PACKAGE_PATH", "HOME_PATH"]
