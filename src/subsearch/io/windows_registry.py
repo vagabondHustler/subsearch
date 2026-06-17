@@ -145,9 +145,6 @@ def _write_registry_value(sub_key: str, value_name: str, value: str) -> None:
 
 
 def reconcile_shell_integration() -> None:
-    if DEVICE_INFO.mode == "executable":
-        log.event(LogEvent.REGISTRY_RECONCILE_SKIPPED, level="debug")
-        return
     context_menu_enabled = config_session.read_config_value(ConfigKey.SHELL_INTEGRATION_CONTEXT_MENU)
     if not context_menu_enabled:
         if _context_menu_key_exists():

@@ -24,15 +24,24 @@ def test_changed_value_names_reports_everything_when_keys_absent():
     assert windows_registry.changed_value_names(desired, current) == ["subsearch", "icon"]
 
 
-def test_reconcile_skips_in_executable_mode(monkeypatch):
+def test_reconcile_writes_in_executable_mode(monkeypatch):
     monkeypatch.setattr(
         windows_registry, "DEVICE_INFO", dataclasses.replace(windows_registry.DEVICE_INFO, mode="executable")
     )
+    monkeypatch.setattr(windows_registry.config_session, "read_config_value", lambda key: True)
+    monkeypatch.setattr(windows_registry, "desired_registry_values", lambda: {"command": "run"})
+    monkeypatch.setattr(windows_registry, "current_registry_values", lambda: {"command": None})
+    monkeypatch.setattr(windows_registry, "_create_context_menu_keys", lambda: None)
+    written = []
     monkeypatch.setattr(
-        windows_registry, "current_registry_values", lambda: (_ for _ in ()).throw(AssertionError("touched registry"))
+        windows_registry,
+        "_write_registry_value",
+        lambda sub_key, value_name, value: written.append((sub_key, value_name, value)),
     )
 
     windows_registry.reconcile_shell_integration()
+
+    assert written == [(*windows_registry.VALUE_LOCATIONS["command"], "run")]
 
 
 def test_reconcile_disabled_and_absent_does_not_touch_registry(monkeypatch):

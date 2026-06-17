@@ -48,7 +48,6 @@ class LogEvent(StrEnum):
     REGISTRY_KEY_DELETING = "registry.key_deleting"
     REGISTRY_CONTEXT_MENU_REMOVING = "registry.context_menu_removing"
     REGISTRY_KEY_MISSING = "registry.key_missing"
-    REGISTRY_RECONCILE_SKIPPED = "registry.reconcile_skipped"
     REGISTRY_MATCHES_ABSENT = "registry.matches_absent"
     REGISTRY_MATCHES_CURRENT = "registry.matches_current"
     REGISTRY_VALUE_UPDATED = "registry.value_updated"
@@ -209,7 +208,6 @@ EVENTS: dict[LogEvent, str] = {
     LogEvent.REGISTRY_KEY_DELETING: "Deleting registry key: {key}",
     LogEvent.REGISTRY_CONTEXT_MENU_REMOVING: "Removing Subsearch context menu from registry",
     LogEvent.REGISTRY_KEY_MISSING: "Registry key missing, could not write {sub_key}\\{value_name}",
-    LogEvent.REGISTRY_RECONCILE_SKIPPED: "Skipping registry reconcile: MSI installer owns the context menu keys",
     LogEvent.REGISTRY_MATCHES_ABSENT: "Registry matches config: context menu absent",
     LogEvent.REGISTRY_MATCHES_CURRENT: "Registry matches config: context menu up to date",
     LogEvent.REGISTRY_VALUE_UPDATED: "Registry updated: {name}",

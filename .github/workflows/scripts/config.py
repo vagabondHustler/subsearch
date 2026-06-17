@@ -23,6 +23,9 @@ class Paths:
     installed_executable: Path = install_directory / EXE_NAME
     log_file: Path = user_data_directory / "log.log"
     config_file: Path = user_data_directory / "config.json"
+    start_menu_shortcut: Path = (
+        home_directory / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / f"{APP_NAME}.lnk"
+    )
 
     working_directory: Path = Path.cwd()
     pyproject: Path = working_directory / "pyproject.toml"
