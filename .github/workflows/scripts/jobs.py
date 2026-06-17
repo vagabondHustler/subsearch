@@ -23,15 +23,9 @@ from config import CHANGELOG_NAME, EXE_NAME, Paths
 LICENSE_PATH = Paths.working_directory / "LICENSE"
 
 
-def release_branch() -> str:
-    # On pull_request events GITHUB_REF_NAME is the merge ref (e.g. "925/merge"), not a
-    # branch, so the release workflow passes the real target branch via RELEASE_BRANCH.
-    return os.environ.get("RELEASE_BRANCH") or os.environ["GITHUB_REF_NAME"]
-
-
 class Init:
     def run(self) -> None:
-        ref_name = release_branch()
+        ref_name = os.environ["GITHUB_REF_NAME"]
         run_id = os.environ["GITHUB_RUN_ID"]
 
         commitizen = Commitizen()
@@ -57,7 +51,7 @@ class Init:
 
 
 class MakeMsi:
-    _VERSION_FILE = Paths.working_directory / "src" / "subsearch" / "runtime" / "config" / "version.py"
+    _VERSION_FILE = Paths.working_directory / "src" / "subsearch" / "runtime" / "config" /"version.py"
 
     def run(self) -> None:
         dry_run_version = os.environ.get("DRY_RUN_VERSION")
@@ -91,7 +85,7 @@ class TestBinaries:
 class BuildChangelog:
     def _read_env(self) -> tuple[str, str, str, str, str, str]:
         return (
-            release_branch(),
+            os.environ["GITHUB_REF_NAME"],
             os.environ["CURRENT_TAG"],
             os.environ["PREVIOUS_TAG"],
             os.environ["MSI_NAME"],
@@ -135,18 +129,9 @@ class Prepare:
         commitizen.render_unreleased_changelog(predicted_version, Paths.artifacts / CHANGELOG_NAME)
 
     def _append_comparison_link(self, changelog: Changelog, previous_version: str, next_version: str) -> None:
-        from datetime import datetime
-
         comparison = changelog.compare_link(previous_tag=previous_version, current_tag=next_version)
-        username = (
-            subprocess.run(["git", "config", "user.name"], capture_output=True, text=True).stdout.strip()
-            or os.environ.get("GITHUB_ACTOR")
-            or "unknown"
-        )
-        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")
         with open(Paths.artifacts / CHANGELOG_NAME, "a") as changelog_file:
-            changelog_file.write(f"###### Full changelog: {comparison}\n")
-            changelog_file.write(f"###### _last edited {timestamp} by @{username}_\n")
+            changelog_file.write(f"###### Full changelog: {comparison}")
 
     def run(self) -> None:
         ref_name = os.environ["GITHUB_REF_NAME"]
@@ -172,70 +157,25 @@ class OpenMainPullRequest:
 
     def _read_pr_content(self) -> tuple[str, str]:
         predicted_version = os.environ["PREDICTED_VERSION"]
-        title = f"chore(release): {predicted_version}"
+        title = f"Release {predicted_version}"
         body = (Paths.artifacts / CHANGELOG_NAME).read_text()
         return title, body
 
     def _edit_pull_request(self, number: str, title: str, body: str) -> None:
         subprocess.run(
-            [
-                "gh",
-                "pr",
-                "edit",
-                number,
-                "--title",
-                title,
-                "--body",
-                body,
-                "--add-assignee",
-                self.OWNER,
-                "--add-reviewer",
-                self.OWNER,
-            ],
+            ["gh", "pr", "edit", number, "--title", title, "--body", body, "--add-assignee", self.OWNER, "--add-reviewer", self.OWNER],
             check=True,
         )
 
     def _create_pull_request(self, title: str, body: str) -> None:
         subprocess.run(
-            [
-                "gh",
-                "pr",
-                "create",
-                "--base",
-                self.TARGET_BRANCH,
-                "--head",
-                self.SOURCE_BRANCH,
-                "--title",
-                title,
-                "--body",
-                body,
-                "--label",
-                self.RELEASE_LABEL,
-                "--assignee",
-                self.OWNER,
-                "--reviewer",
-                self.OWNER,
-            ],
+            ["gh", "pr", "create", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--title", title, "--body", body, "--label", self.RELEASE_LABEL, "--assignee", self.OWNER, "--reviewer", self.OWNER],
             check=True,
         )
 
     def _existing_pull_request_number(self) -> str | None:
         completed = subprocess.run(
-            [
-                "gh",
-                "pr",
-                "list",
-                "--base",
-                self.TARGET_BRANCH,
-                "--head",
-                self.SOURCE_BRANCH,
-                "--state",
-                "open",
-                "--json",
-                "number",
-                "--jq",
-                ".[0].number",
-            ],
+            ["gh", "pr", "list", "--base", self.TARGET_BRANCH, "--head", self.SOURCE_BRANCH, "--state", "open", "--json", "number", "--jq", ".[0].number"],
             check=True,
             capture_output=True,
             text=True,
@@ -278,7 +218,8 @@ class DryRunInit:
 
 class SyncDev:
     def run(self) -> None:
-        Git().fast_forward_branch(source_branch=release_branch(), target_branch="dev")
+        release_branch = os.environ["GITHUB_REF_NAME"]
+        Git().fast_forward_branch(source_branch=release_branch, target_branch="dev")
 
 
 class UpdateLicenseYear:

@@ -11,6 +11,6 @@ Include a description of the bug, steps to reproduce, and what you tried.
 ## Submitting a Pull Request
 
 - Run pre-commit hooks before submitting (enforces black, isort, commitizen).
-- Keep PRs focused , one feature or fix per PR.
+- Keep PRs focused — one feature or fix per PR.
 - Write a clear description of what the change does and why.
 - Do not include license headers; the project is GPL v3.

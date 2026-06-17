@@ -1,9 +1,6 @@
-from subsearch.io.language_data import load_language_data
-from subsearch.parsing import release_parser
-from subsearch.runtime.config import defaults
-from subsearch.runtime.config import session as config_session
-from subsearch.runtime.config.defaults import get_default_app_config
-from tests import fixture_data
+from subsearch.globals.constants import FILE_PATHS
+from subsearch.utils import imdb_lookup, io_toml, string_parser
+from tests import globals_test
 
 
 def test_str_parser_movie() -> None:
@@ -13,138 +10,24 @@ def test_str_parser_movie() -> None:
     show_720p = "the.foo.bar.s01e01.720p.web.h264-foobar"
     no_match = "then.fooing.baring.2022.720p.webby.h265-f00bar"
 
-    # resolution-only difference normalises to exact match
-    assert release_parser.score_subtitle_tokens(movie_1080p, movie_720p) == 100
-    assert release_parser.score_subtitle_tokens(show_1080p, show_720p) == 100
-    # identical input
-    assert release_parser.score_subtitle_tokens(movie_1080p, movie_1080p) == 100
-    # movie vs show: same title/group/source, one side missing year or SE — no penalty
-    assert release_parser.score_subtitle_tokens(movie_1080p, show_1080p) == 100
-    assert release_parser.score_subtitle_tokens(show_1080p, movie_1080p) == 100
-    # completely different titles, groups, and years
-    assert release_parser.score_subtitle_tokens(movie_1080p, no_match) <= 5
+    pct0 = string_parser.calculate_match(movie_1080p, movie_720p)
+    pct1 = string_parser.calculate_match(show_1080p, show_720p)
+    pct2 = string_parser.calculate_match(movie_1080p, show_1080p)
+    pct3 = string_parser.calculate_match(show_1080p, movie_1080p)
+    pct4 = string_parser.calculate_match(movie_1080p, movie_1080p)
+    pct5 = string_parser.calculate_match(movie_1080p, no_match)
 
-
-def test_str_parser_year_mismatch_collapses_score() -> None:
-    movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
-    movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(movie_2021, movie_1993) <= 10
-
-
-def test_str_parser_season_episode_mismatch_collapses_score() -> None:
-    show_s01e01 = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    show_s01e02 = "the.foo.bar.s01e02.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(show_s01e01, show_s01e02) <= 10
-
-
-def test_str_parser_group_boosts_score() -> None:
-    same_group = "the.foo.bar.2021.1080p.web.h264-foobar"
-    diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
-    score_same = release_parser.score_subtitle_tokens(same_group, same_group)
-    score_diff = release_parser.score_subtitle_tokens(same_group, diff_group)
-    assert score_same > score_diff
-
-
-def test_str_parser_default_weights_match_passed_defaults() -> None:
-    same_group = "the.foo.bar.2021.1080p.web.h264-foobar"
-    diff_group = "the.foo.bar.2021.1080p.web.h264-othgrp"
-    assert release_parser.score_subtitle_tokens(same_group, diff_group) == release_parser.score_subtitle_tokens(
-        same_group, diff_group, defaults.DEFAULT_TOKEN_WEIGHTS, defaults.DEFAULT_TOKEN_MULTIPLIERS
-    )
-
-
-def test_str_parser_title_dominant_weights_raise_source_mismatch_score() -> None:
-    base_release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    diff_source = "the.foo.bar.2021.1080p.hdtv.h264-foobar"
-    title_dominant_weights = {"title": 90.0, "group": 5.0, "source": 5.0}
-    default_score = release_parser.score_subtitle_tokens(base_release, diff_source)
-    title_dominant_score = release_parser.score_subtitle_tokens(base_release, diff_source, title_dominant_weights)
-    assert title_dominant_score > default_score
-
-
-def test_str_parser_custom_year_multiplier_softens_penalty() -> None:
-    movie_2021 = "the.foo.bar.2021.1080p.web.h264-foobar"
-    movie_1993 = "the.foo.bar.1993.1080p.web.h264-foobar"
-    lenient_weights = {"title": 60.0, "group": 30.0, "source": 10.0}
-    lenient_multipliers = {"year": 1.0, "season_episode": 1.0, "edition": 1.0}
-    assert release_parser.score_subtitle_tokens(movie_2021, movie_1993, lenient_weights, lenient_multipliers) == 100
-
-
-def test_str_parser_4k_stripped_like_2160p() -> None:
-    release_2160p = "the.foo.bar.2021.2160p.web.h264-foobar"
-    release_4k = "the.foo.bar.2021.4k.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(release_2160p, release_4k) == 100
-
-
-def test_str_parser_audio_codec_stripped() -> None:
-    release_dts = "the.foo.bar.2021.1080p.web.h264.dts-foobar"
-    release_ac3 = "the.foo.bar.2021.1080p.web.h264.ac3-foobar"
-    assert release_parser.score_subtitle_tokens(release_dts, release_ac3) == 100
-
-
-def test_str_parser_edition_mismatch_collapses_score() -> None:
-    extended = "the.foo.bar.2021.extended.1080p.web.h264-foobar"
-    theatrical = "the.foo.bar.2021.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(extended, theatrical) == 100
-    extended_uncut = "the.foo.bar.2021.uncut.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(extended, extended_uncut) <= 10
-
-
-def test_str_parser_matching_edition_no_penalty() -> None:
-    extended = "the.foo.bar.2021.extended.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(extended, extended) == 100
-
-
-def test_str_parser_proper_repack_not_edition_gate() -> None:
-    proper = "the.foo.bar.2021.proper.1080p.web.h264-foobar"
-    repack = "the.foo.bar.2021.repack.1080p.web.h264-foobar"
-    assert release_parser.score_subtitle_tokens(proper, repack) == 100
-
-
-def test_str_parser_new_source_tokens_leave_title() -> None:
-    remux = release_parser._normalize_tokens("the.foo.bar.2021.1080p.remux-foobar")
-    assert remux["source"] == "remux"
-    assert "remux" not in remux["title"]
-
-
-def test_str_parser_same_source_family_full_credit() -> None:
-    web = "the.foo.bar.2021.1080p.web.h264-foobar"
-    webdl = "the.foo.bar.2021.1080p.webdl.h264-foobar"
-    assert release_parser.score_subtitle_tokens(web, webdl) == 100
-
-
-def test_str_parser_compatible_source_families_partial_credit() -> None:
-    web = "the.foo.bar.2021.1080p.web.h264-foobar"
-    bluray = "the.foo.bar.2021.1080p.bluray.h264-foobar"
-    hdtv = "the.foo.bar.2021.1080p.hdtv.h264-foobar"
-    same = release_parser.score_subtitle_tokens(web, web)
-    compatible = release_parser.score_subtitle_tokens(web, bluray)
-    incompatible = release_parser.score_subtitle_tokens(web, hdtv)
-    assert incompatible < compatible < same
-
-
-def test_str_parser_dvd_broadcast_compatible() -> None:
-    dvdrip = "the.foo.bar.2021.1080p.dvdrip.h264-foobar"
-    hdtv = "the.foo.bar.2021.1080p.hdtv.h264-foobar"
-    web = "the.foo.bar.2021.1080p.web.h264-foobar"
-    compatible = release_parser.score_subtitle_tokens(dvdrip, hdtv)
-    incompatible = release_parser.score_subtitle_tokens(dvdrip, web)
-    assert incompatible < compatible
-
-
-def test_str_parser_cam_never_syncs() -> None:
-    cam = "the.foo.bar.2021.1080p.cam.h264-foobar"
-    bluray = "the.foo.bar.2021.1080p.bluray.h264-foobar"
-    web = "the.foo.bar.2021.1080p.web.h264-foobar"
-    cam_vs_bluray = release_parser.score_subtitle_tokens(cam, bluray)
-    same_source = release_parser.score_subtitle_tokens(web, web)
-    assert release_parser._source_compatibility("cam", "cam") == 0.0
-    assert cam_vs_bluray < same_source
+    assert pct0 == 100
+    assert pct1 == 100
+    assert pct2 == 83
+    assert pct3 == 83
+    assert pct4 == 100
+    assert pct5 == 0
 
 
 def test_string_parser_movie() -> None:
     filename = "the.foo.bar.2021.1080p.web.h264-foobar"
-    release_data = release_parser.get_release_info(filename)
+    release_data = string_parser.get_release_data(filename)
 
     assert release_data.title == "the foo bar"
     assert release_data.year == 2021
@@ -159,7 +42,7 @@ def test_string_parser_movie() -> None:
 
 def test_string_parser_show() -> None:
     filename = "the.foo.bar.s01e01.1080p.web.h264-foobar"
-    release_data = release_parser.get_release_info(filename)
+    release_data = string_parser.get_release_data(filename)
 
     assert release_data.title == "the foo bar"
     assert release_data.year == 0
@@ -174,9 +57,9 @@ def test_string_parser_show() -> None:
 
 def test_string_parser_bad_filename() -> None:
     filename = "the foo bar 1080p web h264"
-    release_data = release_parser.get_release_info(filename)
+    release_data = string_parser.get_release_data(filename)
 
-    assert release_data.title == "the foo bar"
+    assert release_data.title == "the foo bar 1080p web h264"
     assert release_data.year == 0
     assert release_data.season == ""
     assert release_data.season_ordinal == ""
@@ -184,147 +67,55 @@ def test_string_parser_bad_filename() -> None:
     assert release_data.episode_ordinal == ""
     assert release_data.tvseries is False
     assert release_data.release == "the foo bar 1080p web h264"
-    assert release_data.group == ""
+    assert release_data.group == "the foo bar 1080p web h264"
 
 
-def test_string_parser_typed_hyphenated_title() -> None:
-    release_data = release_parser.get_release_info("spider-man")
-
-    assert release_data.title == "spider man"
-    assert release_data.group == ""
-
-
-def test_string_parser_typed_punctuation_stripped() -> None:
-    assert release_parser.get_release_info("don't look up").title == "dont look up"
-    assert release_parser.get_release_info("matrix: reloaded (2003)").title == "matrix reloaded"
-    assert release_parser.get_release_info("tom & jerry").title == "tom and jerry"
-
-
-def test_str_parser_typed_term_typo_scores_high() -> None:
-    provider = "the.matrix.1999.1080p.web.h264-foobar"
-    typo_score = release_parser.score_subtitle_tokens("the matix", provider)
-    exact_score = release_parser.score_subtitle_tokens("the matrix", provider)
-    assert typo_score >= 75
-    assert exact_score >= typo_score
-
-
-def test_str_parser_typed_apostrophe_matches_release() -> None:
-    provider = "dont.look.up.2021.1080p.web.h264-foobar"
-    score = release_parser.score_subtitle_tokens("don't look up", provider)
-    assert score >= 80
-
-
-def test_str_parser_typed_term_not_penalized_for_missing_group() -> None:
-    provider = "the.matrix.1999.1080p.web.h264-foobar"
-    typed = release_parser.score_subtitle_tokens("the matrix", provider)
-    assert typed >= 80
-
-
-def test_string_parser_typed_show_with_dotted_season_episode() -> None:
-    release_data = release_parser.get_release_info("Breakingbad.s01.e01")
-
-    assert release_data.title == "breakingbad"
-    assert release_data.year == 0
-    assert release_data.season == "01"
-    assert release_data.episode == "01"
-    assert release_data.tvseries is True
-
-
-def test_string_parser_typed_term_with_year() -> None:
-    release_data = release_parser.get_release_info("the matrix 1999")
-
-    assert release_data.title == "the matrix"
-    assert release_data.year == 1999
-    assert release_data.tvseries is False
-
-
-def test_string_parser_typed_term_with_parenthesized_year() -> None:
-    release_data = release_parser.get_release_info("the matrix (1999)")
-
-    assert release_data.title == "the matrix"
-    assert release_data.year == 1999
-
-
-def test_str_parser_dotted_season_episode_normalizes_for_scoring() -> None:
-    assert release_parser._normalize_tokens("breakingbad.s01.e01")["season_episode"] == "s01e01"
-    provider = "breakingbad.s01e01.1080p.web.h264-foobar"
-    dotted_score = release_parser.score_subtitle_tokens("breakingbad.s01.e01", provider)
-    joined_score = release_parser.score_subtitle_tokens("breakingbad.s01e01", provider)
-    assert dotted_score == joined_score
-
-
-def test_str_parser_nxnn_season_episode_normalizes_for_scoring() -> None:
-    assert release_parser._normalize_tokens("Prison Break - 1x03")["season_episode"] == "s01e03"
-    assert release_parser._normalize_tokens("Prison Break - [1x03]")["season_episode"] == "s01e03"
-
-
-def test_str_parser_nxnn_episode_number_excluded_from_title() -> None:
-    assert "1x03" not in release_parser._normalize_tokens("Prison Break - 1x03 - Cell Test")["title"]
-
-
-def test_str_parser_nxnn_episode_mismatch_collapses_score() -> None:
-    reference = "Prison.Break.S01E03"
-    correct_episode = release_parser.score_subtitle_tokens(reference, "Prison Break - 1x03 - Cell Test")
-    wrong_episode = release_parser.score_subtitle_tokens(reference, "Prison Break - 1x14 - The Rat")
-    assert correct_episode > wrong_episode
-
-
-def test_str_parser_resolution_is_not_a_season_episode() -> None:
-    assert release_parser._normalize_tokens("movie.title.2023.1920x1080.bluray")["season_episode"] is None
-
-
-def test_provider_urls_movie() -> None:
-    app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
-    release_data = release_parser.get_release_info(filename)
-    language_data = load_language_data()
-    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
-    provider_url = create_provider_urls.retrieve_urls()
-
-    assert provider_url.opensubtitles == [
-        "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
-    ]
-    assert provider_url.opensubtitles_hash == []
-    assert provider_url.yifysubtitles == []
-
-
-def test_provider_urls_movie_with_hash() -> None:
-    app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term
-    release_data = release_parser.get_release_info(filename)
-    language_data = load_language_data()
-    create_provider_urls = release_parser.CreateProviderUrls(
-        app_config, release_data, language_data, file_hash="abc123"
+def test_provider_urls_movie(monkeypatch) -> None:
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_MOVIE)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    filename = globals_test.FAKE_VIDEO_FILE_MOVIE.filename
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+    create_provider_urls = string_parser.CreateProviderUrls(
+        app_config,
+        release_data,
+        language_data,
     )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert provider_url.opensubtitles_hash == [
-        "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-abc123"
-    ]
+    assert (
+        provider_url.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlymovies-on/moviename-the%20foo%20bar%20(2021)/rss_2_00"
+    )
+    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
+    assert provider_url.yifysubtitles == ""
 
 
-def test_provider_urls_typed_term_without_year() -> None:
-    app_config = config_session.get_app_config_from_data(get_default_app_config())
-    release_data = release_parser.get_release_info("the matrix")
-    language_data = load_language_data()
-    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
+def test_provider_urls_series(monkeypatch) -> None:
+    monkeypatch.setattr(string_parser, "VIDEO_FILE", globals_test.FAKE_VIDEO_FILE_SERIES)
+    app_config = io_toml.get_app_config(FILE_PATHS.config)
+    filename = globals_test.FAKE_VIDEO_FILE_SERIES.filename
+    release_data = string_parser.get_release_data(filename)
+    language_data = io_toml.load_toml_data(FILE_PATHS.language_data)
+    create_provider_urls = string_parser.CreateProviderUrls(
+        app_config,
+        release_data,
+        language_data,
+    )
     provider_url = create_provider_urls.retrieve_urls()
 
-    assert provider_url.opensubtitles == [
-        "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviename-the%20matrix/rss_2_00"
-    ]
+    assert (
+        provider_url.opensubtitles
+        == "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
+    )
+    assert provider_url.opensubtitles_hash == "https://www.opensubtitles.org/en/search/sublanguageid-eng/moviehash-"
+    assert provider_url.yifysubtitles == ""
 
 
-def test_provider_urls_series() -> None:
-    app_config = config_session.get_app_config_from_data(get_default_app_config())
-    filename = fixture_data.FAKE_SEARCH_SUBJECT_SERIES.search_term
-    release_data = release_parser.get_release_info(filename)
-    language_data = load_language_data()
-    create_provider_urls = release_parser.CreateProviderUrls(app_config, release_data, language_data)
-    provider_url = create_provider_urls.retrieve_urls()
+def test_imdb_movie() -> None:
+    imdb = imdb_lookup.FindImdbID("Arctic", 2019, False)
+    assert imdb.imdb_id == "tt6820256"
 
-    assert provider_url.opensubtitles == [
-        "https://www.opensubtitles.org/en/search/sublanguageid-eng/searchonlytvseries-on/season-01/episode-01/moviename-the%20foo%20bar/rss_2_00"
-    ]
-    assert provider_url.opensubtitles_hash == []
-    assert provider_url.yifysubtitles == []
+def test_imdb_tvseries() -> None:
+    imdb = imdb_lookup.FindImdbID("Breaking bad", 0, True)
+    assert imdb.imdb_id == "tt0903747"

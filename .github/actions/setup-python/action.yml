@@ -1,9 +1,23 @@
-name: Setup Python
-description: Configure Python with pip cache
+name: Checkout and setup Python
+description: Checkout the repository and configure Python with pip cache
+
+inputs:
+  fetch-depth:
+    description: Number of commits to fetch (0 = full history)
+    default: "1"
+  token:
+    description: GitHub token for checkout (uses github.token if omitted)
+    default: ""
 
 runs:
   using: composite
   steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref_name }}
+        fetch-depth: ${{ inputs.fetch-depth }}
+        token: ${{ inputs.token || github.token }}
+
     - uses: actions/setup-python@v6
       with:
         python-version-file: .python-version
