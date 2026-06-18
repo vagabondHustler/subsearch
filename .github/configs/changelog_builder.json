@@ -1,0 +1,32 @@
+{
+  "categories": [
+    {
+      "title": "#### ✨ Features:",
+      "labels": ["feat"]
+    },
+    {
+      "title": "#### 🐛 Fixes:",
+      "labels": ["fix"]
+    },
+    {
+      "title": "#### 📚 Docs:",
+      "labels": ["test"]
+    },
+    {
+      "title": "#### ⚙️ Other:",
+      "labels": [
+        "build",
+        "ci",
+        "perf",
+        "refactor",
+        "style",
+        "test",
+        "other",
+        "dependency"
+      ]
+    }
+  ],
+  "template": "${{CHANGELOG}}\n\n",
+  "empty_template": "No changes\n\n",
+  "pr_template": "- ${{TITLE}} - [PR${{NUMBER}}](${{URL}})"
+}
