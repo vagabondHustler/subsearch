@@ -181,3 +181,4 @@ CLAUDE.md
 memory/**
 .claude/**
 .github/workflows/release_v2.yml
+AGENTS.md

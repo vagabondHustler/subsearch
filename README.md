@@ -13,18 +13,31 @@
 
 ---
 
-Subsearch is a Windows subtitle downloader that integrates with the right-click context menu. Select a media file, click **Search subtitles**, and matching subtitles are downloaded and extracted automatically.
+Subsearch is a Windows subtitle downloader with File Explorer integration, a PySide6 desktop UI, and a live
+Subtitle Workspace for searching, reviewing, downloading, and post-processing subtitles.
 
-#### Features
+It can run as a quiet right-click workflow, a fully manual download manager, or a hybrid of both: Subsearch tries to
+download the best match automatically, then opens the workspace only when you need to choose.
 
-- Right-click any media file to trigger a search
-- 70+ languages supported
-- Filters: hearing-impaired, non-HI, foreign parts only
-- Configurable via a GUI 
-- Available as an MSI installer, PyPI package, or source
+#### Highlights
 
-Links: [Supported languages](https://github.com/vagabondHustler/subsearch/discussions/558) · [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md) · [Security](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
+- Right-click video files in File Explorer, drag videos into the app, or search by title from the workspace
+- Search modes for manual, hybrid, or automatic downloads
+- Providers: OpenSubtitles, YIFY Subtitles, Subsource, TVsubtitles, and Gestdown
+- 115 subtitle languages, with provider compatibility handled per language
+- Movie and TV matching with IMDb title suggestions plus season and episode selection
+- Tunable filename scoring for title, source, release group, year, season/episode, and edition mismatches
+- Filters for hearing-impaired, non-HI, and foreign-parts-only subtitles
+- Post-processing options to extract, rename, and move the best subtitle or every downloaded subtitle
+- Configurable download, extraction, and destination paths, including relative paths beside the video
+- Windows notifications, system tray support, single-instance mode, update checks, crash logs, and provider diagnostics
+- Available as a Windows MSI installer, PyPI package, or source install
 
+<div align="center">
+
+#### [False positives](https://github.com/vagabondHustler/subsearch/discussions/557) · [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md) · [Security](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
+
+</div>
 ---
 
 ## Preview
@@ -57,8 +70,6 @@ Requires Windows 10/11.
 
 </details>
 
-Development builds are available as artifacts in the [release action](https://github.com/vagabondHustler/subsearch/actions/workflows/release.yml).
-
 #### PyPI
 
 ```
@@ -73,7 +84,7 @@ git clone https://github.com/vagabondHustler/subsearch.git
 pip install -e .
 ```
 
-Use `pip install -e .[build,lint,tests,tools,type]` to include optional dev dependencies. Run `python -m tools.cx_freeze_build bdist_msi` to build the MSI.
+Use `pip install -e .[build,lint,tests,tools,type]` to include optional dev dependencies. Run `python .github/workflows/scripts/jobs.py make_msi` to build the MSI with cx_Freeze.
 
 ## License
 

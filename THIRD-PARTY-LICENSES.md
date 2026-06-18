@@ -4,10 +4,9 @@ Subsearch is licensed under the GNU General Public License v3.0 (or later);
 see `LICENSE`.
 
 The Subsearch application also includes the third-party components listed
-below. One of them, PySide6-Fluent-Widgets, is licensed under the GPL v3, which
-is why Subsearch as a whole is distributed under the GPL v3. The complete
-corresponding source is publicly available at
-<https://github.com/vagabondHustler/subsearch>.
+below. One of them, PySide6-Fluent-Widgets, is licensed under the GPL v3. 
+Subsearch as a whole is distributed under the GPL v3. The complete
+corresponding source is publicly available at <https://github.com/vagabondHustler/subsearch>.
 
 ---
 
