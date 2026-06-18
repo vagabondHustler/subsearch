@@ -99,7 +99,7 @@
 [tool.commitizen]
     name = "SubsearchCz"
     template = "changelog_template.md.j2"
-    version = "2.47.7"
+    version = "3.0.0"
     tag_format = "$version"
     ignored_tag_pattern = ".*[^0-9.].*"
     update_changelog_on_bump = false
