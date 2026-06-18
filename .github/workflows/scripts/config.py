@@ -10,6 +10,8 @@ APP_NAME: str = "Subsearch"
 EXE_NAME: str = f"{APP_NAME}.exe"
 HASHES_NAME: str = "hashes.sha256"
 CHANGELOG_NAME: str = "changelog.md"
+# Must match subsearch.runtime.config.APP_USER_MODEL_ID so toasts inherit the shortcut's icon.
+APP_USER_MODEL_ID: str = "Subsearch.Subsearch"
 
 
 class Paths:
@@ -20,7 +22,10 @@ class Paths:
     user_data_directory: Path = local_app_data / APP_NAME
     installed_executable: Path = install_directory / EXE_NAME
     log_file: Path = user_data_directory / "log.log"
-    config_file: Path = user_data_directory / "config.toml"
+    config_file: Path = user_data_directory / "config.json"
+    start_menu_shortcut: Path = (
+        home_directory / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / f"{APP_NAME}.lnk"
+    )
 
     working_directory: Path = Path.cwd()
     pyproject: Path = working_directory / "pyproject.toml"

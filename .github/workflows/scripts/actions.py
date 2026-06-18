@@ -1,7 +1,6 @@
 import hashlib
 import os
 import re
-import socket
 import subprocess
 import sys
 import time
@@ -10,6 +9,7 @@ from pathlib import Path
 
 from config import (
     APP_NAME,
+    APP_USER_MODEL_ID,
     CHANGELOG_NAME,
     EXE_NAME,
     REPOSITORY_URL,
@@ -40,7 +40,7 @@ def msi_freeze_path() -> Path:
 
 
 class StepSummary:
-    CHECK, CROSS = ":heavy_check_mark:", ":x:"
+    PASSED, FAILED = "PASSED", "FAILED"
 
     def set_output(self, name: str, value: str) -> None:
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as github_output:
@@ -52,21 +52,15 @@ class StepSummary:
             github_step_summary.write(f"{markdown}\n")
 
     def card(self, title: str, passed: bool | None = None) -> None:
-        badge = "" if passed is None else f" {self.CHECK if passed else self.CROSS}"
+        badge = "" if passed is None else f" {self.PASSED if passed else self.FAILED}"
         self.add_summary(f"### {title}{badge}")
-
-    def table(self, headers: tuple[str, ...], rows: list[tuple[str, ...]]) -> None:
-        self.add_summary("| " + " | ".join(headers) + " |")
-        self.add_summary("|" + "|".join(["---"] * len(headers)) + "|")
-        for row in rows:
-            self.add_summary("| " + " | ".join(row) + " |")
 
     def fields(self, items: list[tuple[str, str]]) -> None:
         for label, value in items:
             self.add_summary(f"- **{label}:** {value}")
 
-    def emoji(self, condition: bool) -> str:
-        return self.CHECK if condition else self.CROSS
+    def result(self, condition: bool) -> str:
+        return self.PASSED if condition else self.FAILED
 
 
 class Git:
@@ -204,11 +198,34 @@ def registry_key_exists() -> bool:
     import winreg  # Windows-only; imported lazily so this module loads on the Linux CI runner.
 
     try:
-        with winreg.ConnectRegistry(socket.gethostname(), winreg.HKEY_CURRENT_USER) as registry_root:
-            winreg.OpenKey(registry_root, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_WRITE)
-            return True
+        winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Classes\*\shell\Subsearch", 0, winreg.KEY_READ)
+        return True
     except FileNotFoundError:
         return False
+
+
+def read_registry_value(sub_key: str, value_name: str) -> str | None:
+    import winreg  # Windows-only; imported lazily so this module loads on the Linux CI runner.
+
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_READ) as key:
+            value, _ = winreg.QueryValueEx(key, value_name)
+            return str(value)
+    except FileNotFoundError:
+        return None
+
+
+# (label, sub_key, value_name) for the context-menu entries the app populates on first launch.
+REGISTRY_VALUE_PROBES = (
+    ("Subsearch", r"Software\Classes\*\shell\Subsearch", ""),
+    ("Icon", r"Software\Classes\*\shell\Subsearch", "Icon"),
+    ("AppliesTo", r"Software\Classes\*\shell\Subsearch", "AppliesTo"),
+    ("command", r"Software\Classes\*\shell\Subsearch\command", ""),
+)
+
+
+def read_registry_values() -> list[tuple[str, str | None]]:
+    return [(label, read_registry_value(sub_key, value_name)) for label, sub_key, value_name in REGISTRY_VALUE_PROBES]
 
 
 class BinaryTester:
@@ -375,27 +392,85 @@ class BinaryTester:
         self.end_process(EXE_NAME)
 
 
-class BinaryTestReport:
-    _PROBES = ("Exe", "Log", "Config", "Registry key")
+class Check:
+    def __init__(self, label: str, expected: bool, actual: bool, detail: str) -> None:
+        self.label = label
+        self.expected = expected
+        self.actual = actual
+        self.detail = detail
 
-    # Per stage, the expected presence of (exe, log, config, registry key).
-    _EXPECTED_STATE = {
-        "install": (True, False, False, True),
-        "executable": (True, True, True, True),
-        "uninstall": (False, True, True, False),
+    @property
+    def passed(self) -> bool:
+        return self.actual == self.expected
+
+
+class BinaryTestReport:
+    _TITLES = {
+        "install": "MSI install",
+        "executable": "Subsearch ran",
+        "uninstall": "MSI uninstall",
     }
 
     def __init__(self, step_summary: StepSummary) -> None:
         self._step_summary = step_summary
 
-    def _current_state(self) -> tuple[bool, bool, bool, bool]:
-        return Paths.installed_executable.is_file(), Paths.log_file.is_file(), Paths.config_file.is_file(), registry_key_exists()
+    def _path_check(self, label: str, path: Path, expected: bool) -> Check:
+        present = path.is_file()
+        detail = path.as_posix() if present else f"missing ({path.as_posix()})"
+        return Check(label, expected, present, detail)
 
-    def _build_table_rows(self, actual: tuple[bool, ...], expected: tuple[bool, ...]) -> list[tuple[str, ...]]:
+    def _registry_value_checks(self, expected_populated: bool) -> list[Check]:
+        checks = []
+        for label, value in read_registry_values():
+            populated = value not in (None, "")
+            if value is None:
+                detail = "key absent"
+            elif value == "":
+                detail = "empty placeholder"
+            else:
+                detail = f"`{value}`"
+            checks.append(Check(f"Registry {label}", expected_populated, populated, detail))
+        return checks
+
+    def _checks_for_install(self) -> list[Check]:
         return [
-            (probe, self._step_summary.emoji(probe_found), self._step_summary.emoji(probe_expected))
-            for probe, probe_found, probe_expected in zip(self._PROBES, actual, expected)
+            self._path_check("Executable", Paths.installed_executable, expected=True),
+            self._path_check("Start Menu shortcut", Paths.start_menu_shortcut, expected=True),
+            *self._registry_value_checks(expected_populated=False),
         ]
+
+    def _checks_for_executable(self) -> list[Check]:
+        return [
+            self._path_check("Executable", Paths.installed_executable, expected=True),
+            self._path_check("Log", Paths.log_file, expected=True),
+            self._path_check("Config", Paths.config_file, expected=True),
+            *self._registry_value_checks(expected_populated=True),
+        ]
+
+    def _checks_for_uninstall(self) -> list[Check]:
+        return [
+            self._path_check("Executable removed", Paths.installed_executable, expected=False),
+            self._path_check("Start Menu shortcut removed", Paths.start_menu_shortcut, expected=False),
+            Check("Registry key removed", expected=False, actual=registry_key_exists(), detail="HKCU context-menu key"),
+        ]
+
+    def _checks_for_stage(self, name: str) -> list[Check]:
+        return {
+            "install": self._checks_for_install,
+            "executable": self._checks_for_executable,
+            "uninstall": self._checks_for_uninstall,
+        }[name]()
+
+    def add_stage_card(self, name: str) -> None:
+        checks = self._checks_for_stage(name)
+        passed = all(check.passed for check in checks)
+        self._step_summary.card(f"{self._TITLES[name]}: {self._step_summary.result(passed)}", passed=passed)
+        self._step_summary.add_summary("Reason:")
+        for check in checks:
+            mark = self._step_summary.result(check.passed)
+            self._step_summary.add_summary(f"- {check.label}: {mark} - {check.detail}")
+        self._log_stage(name, checks, passed)
+        self._assert_stage_passed(name, passed)
 
     def _assert_stage_passed(self, name: str, passed: bool) -> None:
         if not passed:
@@ -403,18 +478,10 @@ class BinaryTestReport:
             list_files_in_directory(Paths.log_file.parent)
             raise RuntimeError(f"{name} test failed")
 
-    def add_stage_card(self, name: str) -> None:
-        actual = self._current_state()
-        expected = self._EXPECTED_STATE[name]
-        passed = actual == expected
-        self._step_summary.card(f"{name.capitalize()} test", passed=passed)
-        self._step_summary.table(("Probe", "Found", "Expected"), self._build_table_rows(actual, expected))
-        self._log_stage(name, actual, passed)
-        self._assert_stage_passed(name, passed)
-
-    def _log_stage(self, name: str, actual: tuple[bool, bool, bool, bool], passed: bool) -> None:
-        log(", ".join(f"{probe}: {present}" for probe, present in zip(self._PROBES, actual)))
-        log(f"{name.capitalize()} test {'passed' if passed else 'failed'}", level="PASS" if passed else "FAIL")
+    def _log_stage(self, name: str, checks: list[Check], passed: bool) -> None:
+        for check in checks:
+            log(f"{check.label}: {'OK' if check.passed else 'BAD'} ({check.detail})")
+        log(f"{self._TITLES[name]} {'passed' if passed else 'failed'}", level="PASS" if passed else "FAIL")
         print(STYLE_SEPARATOR)
 
 
@@ -450,10 +517,8 @@ class ArtifactHasher:
 
     def _write_hashes_summary(self, hashes: dict[Path, str]) -> None:
         self._step_summary.card("Build artifacts")
-        self._step_summary.table(
-            ("File", "SHA256"),
-            [(file_path.name, f"`{sha256}`") for file_path, sha256 in hashes.items()],
-        )
+        for file_path, sha256 in hashes.items():
+            self._step_summary.add_summary(f"- {file_path.name}: `{sha256}`")
 
     def prepare_build_artifacts(self) -> None:
         log("Collecting files", level="STEP")
@@ -481,7 +546,8 @@ class Build:
         "qfluentwidgets",
         "requests",
         "selectolax",
-        "toml",
+        "yaspin",
+        "termcolor",
         "urllib3",
         "urllib3_future",
         "qh3",
@@ -580,7 +646,36 @@ class Build:
         log(f"Created msi at {msi_freeze_path().as_posix()}", level="PASS")
         print(STYLE_SEPARATOR)
 
+    def _set_shortcut_app_user_model_id(self) -> None:
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", "'msilib' is deprecated")
+            import msilib
+
+        msi_path = msi_freeze_path()
+        database = msilib.OpenDatabase(str(msi_path), msilib.MSIDBOPEN_TRANSACT)
+        # MsiShortcutProperty is a standard MSI table but is absent from msilib.schema, so the
+        # build never creates it; create it before inserting the AUMID that links toasts to the
+        # Start Menu shortcut (cx_Freeze names the first executable's shortcut row "S_APP_0").
+        database.OpenView(
+            "CREATE TABLE `MsiShortcutProperty` ("
+            "`MsiShortcutProperty` CHAR(72) NOT NULL, "
+            "`Shortcut_` CHAR(72) NOT NULL, "
+            "`PropertyKey` CHAR(72) NOT NULL, "
+            "`PropVariantValue` CHAR(255) NOT NULL "
+            "PRIMARY KEY `MsiShortcutProperty`)"
+        ).Execute(None)
+        msilib.add_data(
+            database,
+            "MsiShortcutProperty",
+            [("AppUserModelID", "S_APP_0", "System.AppUserModel.ID", APP_USER_MODEL_ID)],
+        )
+        database.Commit()
+        log(f"Set shortcut AppUserModelID to {APP_USER_MODEL_ID}", level="PASS")
+
     def make_msi(self) -> None:
         self._log_build_start()
         self._run_cx_freeze()
+        self._set_shortcut_app_user_model_id()
         self._log_build_result()

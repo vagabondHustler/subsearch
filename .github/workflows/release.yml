@@ -1,9 +1,11 @@
 name: Release
-run-name: Release ${{ github.ref_name }}
+run-name: Release ${{ github.event.pull_request.title }}
 
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
 
@@ -17,11 +19,12 @@ concurrency:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
+  RELEASE_BRANCH: main
 
 jobs:
   init:
     name: Version control
-    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && !startsWith(github.event.head_commit.message, 'chore(license):') }}
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release') }}
     runs-on: windows-latest
     timeout-minutes: 10
     outputs:
@@ -31,18 +34,17 @@ jobs:
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
     steps:
-      - uses: crazy-max/ghaction-import-gpg@v6
+      - uses: ./.github/actions/configure-signing
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
+          signing-key: ${{ secrets.SSH_SIGNING_KEY }}
 
-      - uses: ./.github/actions/setup-python
+      - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/setup-python
 
       - uses: ./.github/actions/install-commitizen
 
@@ -60,10 +62,14 @@ jobs:
       msi_hash: ${{ steps.run.outputs.msi_hash }}
       exe_hash: ${{ steps.run.outputs.exe_hash }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - uses: ./.github/actions/setup-python
 
       - name: Fetch latest tag
-        run: git fetch origin ${{ github.ref_name }}
+        run: git fetch origin main
         shell: pwsh
 
       - uses: ./.github/actions/install-build-deps
@@ -86,6 +92,10 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - uses: ./.github/actions/setup-python
 
       - uses: actions/download-artifact@v4
@@ -106,7 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: main
 
       - uses: actions/download-artifact@v4
         with:
@@ -130,9 +140,12 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup-python
+      - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
+
+      - uses: ./.github/actions/setup-python
 
       - uses: ./.github/actions/install-commitizen
 
@@ -161,7 +174,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: main
 
       - uses: actions/download-artifact@v4
         with:
@@ -187,7 +200,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: main
 
       - uses: actions/setup-python@v6
         with:
@@ -195,7 +208,7 @@ jobs:
 
       - name: Install build and twine
         run: |
-          git fetch origin ${{ github.ref_name }}
+          git fetch origin main
           python -m pip install --upgrade --disable-pip-version-check pip build twine
 
       - name: Build wheel and source distributions
@@ -213,9 +226,12 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
-      - uses: ./.github/actions/setup-python
+      - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/setup-python
 
       - run: python .github/workflows/scripts/jobs.py sync_dev
