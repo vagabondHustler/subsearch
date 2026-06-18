@@ -6,6 +6,6 @@ runs:
   steps:
     - uses: actions/setup-python@v6
       with:
-        python-version-file: .python-version
+        python-version: "3.14"
         cache: pip
         cache-dependency-path: pyproject.toml
