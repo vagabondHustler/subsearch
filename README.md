@@ -13,25 +13,25 @@
 
 ---
 
-Subsearch is a Windows subtitle downloader with File Explorer integration, a PySide6 desktop UI, and a live
-Subtitle Workspace for searching, reviewing, downloading, and post-processing subtitles.
+Subsearch is a Windows subtitle downloader with File Explorer integration, a PySide6 desktop UI, and a Subtitle
+Workspace for searching, reviewing, downloading, and post-processing subtitles.
 
-It can run as a quiet right-click workflow, a fully manual download manager, or a hybrid of both: Subsearch tries to
-download the best match automatically, then opens the workspace only when you need to choose.
+Use it as a quiet right-click workflow, a fully manual download manager, or a mix of both. Subsearch tries to download
+the best match automatically and opens the workspace only when you need to choose one yourself.
 
 #### Highlights
 
-- Right-click video files in File Explorer, drag videos into the app, or search by title from the workspace
-- Search modes for manual, hybrid, or automatic downloads
+- Right-click video files in File Explorer, drag files into the app, or search by title from the workspace
+- Manual, hybrid, and automatic search modes
 - Providers: OpenSubtitles, YIFY Subtitles, Subsource, TVsubtitles, and Gestdown
-- 115 subtitle languages, with provider compatibility handled per language
-- Movie and TV matching with IMDb title suggestions plus season and episode selection
-- Tunable filename scoring for title, source, release group, year, season/episode, and edition mismatches
+- 115 subtitle languages, with provider compatibility handled for each language
+- Movie and TV matching with IMDb title suggestions and season and episode selection
+- Adjustable filename scoring for title, source, release group, year, season/episode, and edition mismatches
 - Filters for hearing-impaired, non-HI, and foreign-parts-only subtitles
-- Post-processing options to extract, rename, and move the best subtitle or every downloaded subtitle
-- Configurable download, extraction, and destination paths, including relative paths beside the video
+- Post-processing to extract, rename, and move the best subtitle or every downloaded subtitle
+- Configurable download, extraction, and destination paths, including relative paths next to the video
 - Windows notifications, system tray support, single-instance mode, update checks, crash logs, and provider diagnostics
-- Available as a Windows MSI installer, PyPI package, or source install
+- Available as a Windows MSI installer, a PyPI package, or a source install
 
 <div align="center">
 
@@ -54,13 +54,13 @@ download the best match automatically, then opens the workspace only when you ne
 
 ## Installation
 
-#### Windows installer (recommended)
+#### Windows installer
 
-Requires Windows 10/11.
+Requires Windows 10 or 11. It may also work on Windows 8.
 
 1. Download the installer from the [releases page](https://github.com/vagabondHustler/subsearch/releases).
-2. Run the installer. If a SmartScreen / PUA warning appears, click **More info → Run anyway** ([why?](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e))
-3. Launch Subsearch once to register the context menu entries.
+2. Run the installer. If a SmartScreen or PUA warning appears, select **More info**, then **Run anyway**. ([More information](https://support.microsoft.com/en-us/windows/protect-your-pc-from-potentially-unwanted-applications-c7668a25-174e-3b78-0191-faf0607f7a6e))
+3. Launch Subsearch once to register its File Explorer context-menu entries.
 
 <details>
 <summary>PUA warning screenshots</summary>
@@ -70,24 +70,34 @@ Requires Windows 10/11.
 
 </details>
 
-#### PyPI
+#### Install from PyPI
 
 ```
 pip install subsearch
 subsearch
 ```
 
-#### Source
+#### Clone from GitHub
 
 ```
 git clone https://github.com/vagabondHustler/subsearch.git
+cd subsearch
 pip install -e .
 ```
 
-Use `pip install -e .[build,lint,tests,tools,type]` to include optional dev dependencies. Run `python .github/workflows/scripts/jobs.py make_msi` to build the MSI with cx_Freeze.
+To install the optional development dependencies, run:
+
+```
+pip install -e .[build,lint,tests,tools,type]
+```
+
+Build the MSI with cx_Freeze:
+
+```
+python .github/workflows/scripts/jobs.py make_msi
+```
 
 ## License
 
-Subsearch is licensed under the GNU General Public License v3.0 (or later); see `LICENSE` for the full text.
-
-The distributed application bundles third-party components listed in `THIRD-PARTY-LICENSES.md`. Notably PySide6 (Qt for Python) under LGPL v3 and PySide6-Fluent-Widgets under GPL v3, the latter is why Subsearch as a whole is distributed under GPL v3.
+- Subsearch is licensed under the GNU General Public License v3.0 or later. See `LICENSE` for the full text.
+- Third-party notices are listed in `THIRD-PARTY-LICENSES.md`.
