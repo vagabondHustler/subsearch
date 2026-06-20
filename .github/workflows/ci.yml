@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Dependency Review"
         uses: actions/dependency-review-action@v4
@@ -22,7 +22,7 @@ jobs:
     outputs:
       src: "${{ steps.filter.outputs.src }}"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -38,7 +38,7 @@ jobs:
     if: ${{ needs.paths_filter.outputs.src == 'true' }}
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
 
@@ -59,7 +59,7 @@ jobs:
     if: ${{ needs.paths_filter.outputs.src == 'true' }}
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
