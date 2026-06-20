@@ -160,12 +160,43 @@ class OpenMainPullRequest:
     SOURCE_BRANCH = "dev"
     TARGET_BRANCH = "main"
     OWNER = "vagabondHustler"
+    MANUAL_SUMMARY_START = "<!-- manual-summary:start -->"
+    MANUAL_SUMMARY_END = "<!-- manual-summary:end -->"
+    MANUAL_SUMMARY_PLACEHOLDER = "<!-- Write a concise release summary here. -->"
 
     def _read_pr_content(self) -> tuple[str, str]:
         predicted_version = os.environ["PREDICTED_VERSION"]
         title = f"chore(release): {predicted_version}"
         body = (Paths.artifacts / CHANGELOG_NAME).read_text()
         return title, body
+
+    def _manual_summary(self, body: str) -> str | None:
+        start = body.find(self.MANUAL_SUMMARY_START)
+        if start == -1:
+            return None
+        end = body.find(self.MANUAL_SUMMARY_END, start)
+        if end == -1:
+            return None
+        return body[start : end + len(self.MANUAL_SUMMARY_END)]
+
+    def _default_manual_summary(self) -> str:
+        return "\n".join(
+            [
+                self.MANUAL_SUMMARY_START,
+                self.MANUAL_SUMMARY_PLACEHOLDER,
+                self.MANUAL_SUMMARY_END,
+            ]
+        )
+
+    def _has_manual_summary(self, summary: str) -> bool:
+        content = summary.removeprefix(self.MANUAL_SUMMARY_START).removesuffix(self.MANUAL_SUMMARY_END).strip()
+        return content != self.MANUAL_SUMMARY_PLACEHOLDER
+
+    def _pr_body(self, changelog: str, existing_body: str = "") -> str:
+        manual_summary = self._manual_summary(existing_body) or self._default_manual_summary()
+        if not self._has_manual_summary(manual_summary):
+            return f"{manual_summary}\n\n{changelog}"
+        return f"###### TL;DR  <p><p>\n{manual_summary}\n\n<p>\n\n{changelog}"
 
     def _edit_pull_request(self, number: str, title: str, body: str) -> None:
         subprocess.run(
@@ -200,6 +231,7 @@ class OpenMainPullRequest:
                 title,
                 "--body",
                 body,
+                "--draft",
                 "--label",
                 self.RELEASE_LABEL,
                 "--assignee",
@@ -234,12 +266,32 @@ class OpenMainPullRequest:
         number = completed.stdout.strip()
         return number or None
 
+    def _existing_pull_request_body(self, number: str) -> str:
+        completed = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "view",
+                number,
+                "--json",
+                "body",
+                "--jq",
+                ".body",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed.stdout
+
     def run(self) -> None:
-        title, body = self._read_pr_content()
+        title, changelog = self._read_pr_content()
         existing_number = self._existing_pull_request_number()
         if existing_number:
+            body = self._pr_body(changelog, self._existing_pull_request_body(existing_number))
             self._edit_pull_request(existing_number, title, body)
         else:
+            body = self._pr_body(changelog)
             self._create_pull_request(title, body)
 
 
