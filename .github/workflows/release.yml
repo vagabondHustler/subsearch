@@ -33,6 +33,8 @@ jobs:
       previous_tag: ${{ steps.run.outputs.previous_tag }}
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
+      validation_run_id: ${{ steps.gate.outputs.validation_run_id }}
+      src_tree_hash: ${{ steps.gate.outputs.src_tree_hash }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -48,12 +50,19 @@ jobs:
 
       - uses: ./.github/actions/install-commitizen
 
+      - name: Require a passing validation for the merged source
+        id: gate
+        run: python .github/workflows/scripts/jobs.py release_gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
       - name: Bump version, tag, and push
         id: run
         run: python .github/workflows/scripts/jobs.py init
 
-  build_binaries:
-    name: Build binaries
+  fetch_binaries:
+    name: Fetch validated binaries
     needs: init
     if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
@@ -68,15 +77,17 @@ jobs:
 
       - uses: ./.github/actions/setup-python
 
-      - name: Fetch latest tag
-        run: git fetch origin main
-        shell: pwsh
+      - name: Download the validated binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: validated_${{ needs.init.outputs.src_tree_hash }}
+          path: artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ needs.init.outputs.validation_run_id }}
 
-      - uses: ./.github/actions/install-build-deps
-
-      - name: Hash and collect artifacts
+      - name: Read hashes from the validated artifact
         id: run
-        run: python .github/workflows/scripts/jobs.py build_binaries
+        run: python .github/workflows/scripts/jobs.py read_validated_hashes
 
       - uses: actions/upload-artifact@v4
         with:
@@ -85,31 +96,9 @@ jobs:
           if-no-files-found: error
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
-  test_binaries:
-    name: Test binaries
-    needs: [init, build_binaries]
-    if: ${{ needs.init.outputs.bumped == 'true' }}
-    runs-on: windows-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: main
-
-      - uses: ./.github/actions/setup-python
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: build_${{ needs.init.outputs.artifact_id }}
-          path: artifacts
-
-      - uses: ./.github/actions/install-test-deps
-
-      - run: python .github/workflows/scripts/jobs.py test_binaries
-
   upload_binaries:
     name: Upload binaries to virustotal
-    needs: [init, build_binaries]
+    needs: [init, fetch_binaries]
     if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
@@ -135,7 +124,7 @@ jobs:
 
   changelog:
     name: Changelog
-    needs: [init, build_binaries]
+    needs: [init, fetch_binaries]
     if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
@@ -155,8 +144,8 @@ jobs:
           CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
           PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
           MSI_NAME: ${{ needs.init.outputs.msi_name }}
-          MSI_HASH: ${{ needs.build_binaries.outputs.msi_hash }}
-          EXE_HASH: ${{ needs.build_binaries.outputs.exe_hash }}
+          MSI_HASH: ${{ needs.fetch_binaries.outputs.msi_hash }}
+          EXE_HASH: ${{ needs.fetch_binaries.outputs.exe_hash }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -167,7 +156,7 @@ jobs:
 
   publish_github:
     name: Publish to github
-    needs: [init, test_binaries, changelog]
+    needs: [init, fetch_binaries, changelog]
     if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10
@@ -193,7 +182,7 @@ jobs:
 
   publish_pypi:
     name: Publish to pypi
-    needs: [init, test_binaries]
+    needs: [init, fetch_binaries]
     if: ${{ needs.init.outputs.bumped == 'true' }}
     runs-on: windows-latest
     timeout-minutes: 10

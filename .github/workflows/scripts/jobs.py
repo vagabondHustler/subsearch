@@ -16,9 +16,10 @@ from actions import (
     Commitizen,
     Git,
     LicenseYear,
+    ReleaseValidation,
     StepSummary,
 )
-from config import CHANGELOG_NAME, EXE_NAME, Paths
+from config import CHANGELOG_NAME, EXE_NAME, HASHES_NAME, Paths
 
 LICENSE_PATH = Paths.working_directory / "LICENSE"
 
@@ -295,7 +296,7 @@ class OpenMainPullRequest:
             self._create_pull_request(title, body)
 
 
-class DryRunInit:
+class ValidateInit:
     def run(self) -> None:
         ref_name = os.environ["GITHUB_REF_NAME"]
         run_id = os.environ["GITHUB_RUN_ID"]
@@ -316,7 +317,71 @@ class DryRunInit:
         step_summary.set_output("previous_tag", previous_version)
         step_summary.set_output("msi_name", actions.msi_name(predicted_version))
         step_summary.set_output("artifact_id", identifier)
-        step_summary.card(f"Dry run of Subsearch {predicted_version} ({previous_version} → {predicted_version})")
+        step_summary.card(f"Validate release Subsearch {predicted_version} ({previous_version} → {predicted_version})")
+
+
+class ValidateGate:
+    def run(self) -> None:
+        validation = ReleaseValidation()
+        step_summary = StepSummary()
+
+        number = validation.open_release_pr()
+        if number is None:
+            step_summary.set_output("proceed", "false")
+            return
+
+        forced = os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
+        proceed = forced or validation.should_validate(number)
+
+        step_summary.set_output("proceed", "true" if proceed else "false")
+        step_summary.set_output("pr_number", number)
+        step_summary.set_output("src_tree_hash", validation.src_tree_hash(validation.pr_head_sha(number)))
+
+
+class ValidateRecord:
+    _REQUIRED_RESULTS = ("INIT_RESULT", "BUILD_RESULT", "CHANGELOG_RESULT")
+    _ACCEPTABLE = {"success", "skipped"}
+
+    def run(self) -> None:
+        validation = ReleaseValidation()
+        number = os.environ["PR_NUMBER"]
+        src_tree_hash = os.environ["SRC_TREE_HASH"]
+        run_id = os.environ["GITHUB_RUN_ID"]
+
+        required_passed = all(os.environ.get(name) == "success" for name in self._REQUIRED_RESULTS)
+        # Binary tests are optional (skip_binary_tests dispatch input); a skipped run is acceptable, a failed one is not.
+        tests_passed = os.environ.get("TEST_RESULT") in self._ACCEPTABLE
+        passed = required_passed and tests_passed
+        result = validation.RESULT_PASSED if passed else validation.RESULT_FAILED
+        validation.record_validation(number, src_tree_hash, result, run_id)
+
+
+class ReleaseGate:
+    def run(self) -> None:
+        validation = ReleaseValidation()
+        step_summary = StepSummary()
+
+        number = os.environ["PR_NUMBER"]
+        merge_src_tree_hash = validation.src_tree_hash("HEAD")
+        previous = validation.last_validation(number)
+
+        if previous is None or previous[1] != validation.RESULT_PASSED or previous[0] != merge_src_tree_hash:
+            step_summary.card(f"No validated artifact matching src tree {merge_src_tree_hash}", passed=False)
+            raise SystemExit(f"No validated artifact matching src tree {merge_src_tree_hash}")
+
+        step_summary.set_output("src_tree_hash", merge_src_tree_hash)
+        step_summary.set_output("validation_run_id", previous[2])
+        step_summary.card(f"Validated artifact found for src tree {merge_src_tree_hash}", passed=True)
+
+
+class ReadValidatedHashes:
+    def run(self) -> None:
+        step_summary = StepSummary()
+        hashes_file = Paths.artifacts / HASHES_NAME
+        for line in hashes_file.read_text().splitlines():
+            sha256, _, file_name = line.partition(" *")
+            suffix = file_name.rsplit(".", 1)[-1]
+            step_summary.set_output(f"{suffix}_hash", sha256)
 
 
 class SyncDev:
@@ -345,7 +410,11 @@ class _Job(Protocol):
 
 JOBS: dict[str, type[_Job]] = {
     "init": Init,
-    "dry_run_init": DryRunInit,
+    "validate_init": ValidateInit,
+    "validate_gate": ValidateGate,
+    "validate_record": ValidateRecord,
+    "release_gate": ReleaseGate,
+    "read_validated_hashes": ReadValidatedHashes,
     "make_msi": MakeMsi,
     "build_binaries": BuildBinaries,
     "test_binaries": TestBinaries,
