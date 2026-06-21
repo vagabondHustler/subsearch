@@ -13,7 +13,6 @@ from PySide6.QtGui import (
 )
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
-    QFileDialog,
     QHBoxLayout,
     QListWidgetItem,
     QSplitter,
@@ -259,9 +258,6 @@ class SubtitleSearchBar(QWidget):
         self._filename_edit.returnPressed.connect(self._on_search_clicked)
         self._filename_edit.button_clicked.connect(self._on_search_clicked)
 
-        # browse_video = CaptionedToolButton("Browse", icon=lucide_qicon(LucideIcon.FOLDER_OPEN, TEXT_COLOR), parent=self)
-        # browse_video.clicked.connect(self._browse_for_video_file)
-
         file_row = QHBoxLayout()
         file_row.setContentsMargins(SEPARATOR_INSET, 0, SEPARATOR_INSET, 10)
         file_row.setSpacing(0)
@@ -269,7 +265,6 @@ class SubtitleSearchBar(QWidget):
         file_row.addStretch(side_stretch)
         file_row.addWidget(self._filename_edit, stretch=round(SEARCH_BAR_WIDTH_FRACTION * 100))
         file_row.addStretch(side_stretch)
-        # file_row.addWidget(TrailingButtonArea([browse_video], parent=self))
         section_layout.addLayout(file_row)
 
     def _on_search_clicked(self) -> None:
@@ -440,25 +435,6 @@ class SubtitleSearchBar(QWidget):
         self._term_without_suggestions = file_path.name
         self._committed_filename = file_path.name
         self._video_file_service.select_video(file_path)
-
-    def _browse_for_video_file(self) -> None:
-        from subsearch.runtime.config import DEFAULT_CONFIG
-
-        extensions = DEFAULT_CONFIG.get("shell_integration", {}).get("file_extensions", {})
-        enabled_exts = [ext for ext, enabled in extensions.items() if enabled]
-        filter_string = "Video files ({})".format(" ".join(f"*.{ext}" for ext in enabled_exts))
-        selected, _ = QFileDialog.getOpenFileName(
-            self.window(),
-            "Select video file",
-            str(WORKSPACE.file_directory) if WORKSPACE.file_directory != Path("") else "",
-            filter_string,
-        )
-        if not selected:
-            return
-        selected_path = Path(selected)
-        self._filename_edit.setText(selected_path.name)
-        self._committed_filename = selected_path.name
-        self._video_file_service.select_video(selected_path)
 
 
 class SubtitleCard(SettingsCard):

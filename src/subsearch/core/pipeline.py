@@ -284,8 +284,7 @@ class SearchPipeline:
         downloaded_count, total_count = self._count_downloaded_subtitles()
         succeeded = downloaded_count > 0
         if succeeded:
-            # summary_line = f"Downloaded: {downloaded_count}/{total_count}"
-            summary_line = f"All tasks done!"
+            summary_line = "All tasks done!"
         else:
             summary_line = self._failure_reason(total_count)
         elapsed_summary = f"Finished in {self._elapsed()} seconds"
