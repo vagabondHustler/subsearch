@@ -342,7 +342,7 @@ class SubtitleSearchBar(QWidget):
         numbers = [season.number for season in seasons]
         labels = [season.display_text() for season in seasons]
         popup = self._number_popup()
-        popup.number_chosen.connect(self._on_season_chosen, Qt.ConnectionType.UniqueConnection)
+        self._reconnect_number_chosen(popup, self._on_season_chosen)
         popup.show_numbers(numbers, labels)
 
     def _on_season_chosen(self, season: int) -> None:
@@ -361,7 +361,7 @@ class SubtitleSearchBar(QWidget):
         numbers = [episode.number for episode in episodes]
         labels = [episode.display_text() for episode in episodes]
         popup = self._number_popup()
-        popup.number_chosen.connect(self._on_episode_chosen, Qt.ConnectionType.UniqueConnection)
+        self._reconnect_number_chosen(popup, self._on_episode_chosen)
         popup.show_numbers(numbers, labels)
 
     def _on_episode_chosen(self, episode: int) -> None:
@@ -387,6 +387,17 @@ class SubtitleSearchBar(QWidget):
     def _reset_pending_series(self) -> None:
         self._pending_series = None
         self._pending_season = 0
+
+    @staticmethod
+    def _reconnect_number_chosen(popup: NumberSuggestionPopup, slot) -> None:
+        # The popup is reused across the season then episode step. Drop the prior
+        # step's slot first, otherwise choosing the episode also fires the season
+        # handler and clobbers _pending_season with the episode number.
+        try:
+            popup.number_chosen.disconnect()
+        except RuntimeError:
+            pass
+        popup.number_chosen.connect(slot)
 
     def _number_popup(self) -> NumberSuggestionPopup:
         popup = getattr(self, "_season_episode_popup", None)
