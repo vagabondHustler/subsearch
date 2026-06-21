@@ -5,17 +5,6 @@ from pathlib import Path
 
 from subsearch.runtime.config import COMPUTER_NAME, FILE_PATHS, GUID
 
-# def _redact_literal(secret: str, show: int = 0,) -> str:
-#     # * •
-#     visible_prefix = secret[:show]
-#     hidden_length = max(len(secret) - show, 1)
-#     return f"{visible_prefix}{'*' * hidden_length}"
-
-
-# def _redact(match: re.Match[str]) -> str:
-#     return _redact_literal(match.group(0))
-
-
 # matches IPv4 addresses e.g. "192.168.1.1" matches, "1234.1.1.1" does not
 IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 # matches email addresses e.g. "user.name+tag@sub.domain.org"
