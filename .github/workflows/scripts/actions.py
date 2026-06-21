@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -17,6 +18,22 @@ from config import (
     VIRUSTOTAL_FILE_URL,
     Paths,
 )
+
+_OCTICON_PASSED = (
+    '<svg viewBox="0 0 16 16" width="16" height="16" fill="#1a7f37" aria-hidden="true">'
+    '<path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 '
+    '5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path></svg>'
+)
+_OCTICON_FAILED = (
+    '<svg viewBox="0 0 16 16" width="16" height="16" fill="#cf222e" aria-hidden="true">'
+    '<path d="M2.343 13.657A8 8 0 1 1 13.658 2.343 8 8 0 0 1 2.343 13.657ZM6.03 4.97a.751.751 0 0 0-1.042.018.751.751 0 0 '
+    "0-.018 1.042L6.94 8 4.97 9.97a.749.749 0 0 0 .326 1.275.749.749 0 0 0 .734-.215L8 9.06l1.97 1.97a.749.749 0 0 0 "
+    '1.275-.326.749.749 0 0 0-.215-.734L9.06 8l1.97-1.97a.749.749 0 0 0-.326-1.275.749.749 0 0 0-.734.215L8 6.94Z"></path></svg>'
+)
+
+
+def octicon(passed: bool) -> str:
+    return _OCTICON_PASSED if passed else _OCTICON_FAILED
 
 
 def log(message: str, level: str = "INFO") -> None:
@@ -52,8 +69,11 @@ class StepSummary:
             github_step_summary.write(f"{markdown}\n")
 
     def card(self, title: str, passed: bool | None = None) -> None:
-        badge = "" if passed is None else f" {self.PASSED if passed else self.FAILED}"
-        self.add_summary(f"### {title}{badge}")
+        if passed is None:
+            self.add_summary(f"### {title}")
+            return
+        glyph = octicon(passed)
+        self.add_summary(f"### {glyph} {title} {self.PASSED if passed else self.FAILED}")
 
     def fields(self, items: list[tuple[str, str]]) -> None:
         for label, value in items:
@@ -679,3 +699,108 @@ class Build:
         self._run_cx_freeze()
         self._set_shortcut_app_user_model_id()
         self._log_build_result()
+
+
+class ReleaseValidation:
+    SOURCE_TREE = "src/subsearch"
+    MARKER = "release-validation"
+    RESULT_PASSED = "passed"
+    RESULT_FAILED = "failed"
+
+    # Matches the marker HTML comment: <!-- release-validation:result=passed;src=<hash>;run=<id> -->
+    _STATE_PATTERN = re.compile(
+        r"<!--\s*release-validation:result=(?P<result>\w+);src=(?P<src>[0-9a-f]+);run=(?P<run>\d+)\s*-->"
+    )
+
+    def open_release_pr(self) -> str | None:
+        completed = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "list",
+                "--base",
+                "main",
+                "--head",
+                "dev",
+                "--state",
+                "open",
+                "--draft",
+                "--label",
+                "release",
+                "--json",
+                "number",
+                "--jq",
+                ".[0].number",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        number = completed.stdout.strip()
+        return number or None
+
+    def src_tree_hash(self, commit: str = "HEAD") -> str:
+        completed = subprocess.run(
+            ["git", "rev-parse", f"{commit}:{self.SOURCE_TREE}"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed.stdout.strip()
+
+    def pr_head_sha(self, number: str) -> str:
+        completed = subprocess.run(
+            ["gh", "pr", "view", number, "--json", "headRefOid", "--jq", ".headRefOid"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed.stdout.strip()
+
+    def last_validation(self, number: str) -> tuple[str, str, str] | None:
+        completed = subprocess.run(
+            ["gh", "pr", "view", number, "--json", "comments", "--jq", ".comments[].body"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        match = None
+        for line in completed.stdout.splitlines():
+            found = self._STATE_PATTERN.search(line)
+            if found:
+                match = found
+        if match is None:
+            return None
+        return match.group("src"), match.group("result"), match.group("run")
+
+    def should_validate(self, number: str) -> bool:
+        previous = self.last_validation(number)
+        if previous is None:
+            return True
+        validated_src, result, _ = previous
+        if result != self.RESULT_PASSED:
+            return True
+        return validated_src != self.src_tree_hash(self.pr_head_sha(number))
+
+    def _marker_body(self, src_tree_hash: str, result: str, run_id: str) -> str:
+        comment = f"<!-- {self.MARKER}:result={result};src={src_tree_hash};run={run_id} -->"
+        passed = result == self.RESULT_PASSED
+        status = "Release validation passed" if passed else "Release validation failed"
+        return f"{comment}\n{octicon(passed)} **{status}** — src tree `{src_tree_hash}` (run {run_id})"
+
+    def _has_marker_comment(self, number: str) -> bool:
+        completed = subprocess.run(
+            ["gh", "pr", "view", number, "--json", "comments"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        comments = json.loads(completed.stdout)["comments"]
+        return any(f"<!-- {self.MARKER}:" in comment["body"] for comment in comments)
+
+    def record_validation(self, number: str, src_tree_hash: str, result: str, run_id: str) -> None:
+        body = self._marker_body(src_tree_hash, result, run_id)
+        command = ["gh", "pr", "comment", number, "--body", body]
+        if self._has_marker_comment(number):
+            command.append("--edit-last")
+        subprocess.run(command, check=True)

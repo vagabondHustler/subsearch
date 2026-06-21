@@ -1,0 +1,228 @@
+name: Validate release
+run-name: Validate release
+
+
+on:
+  push:
+    branches:
+      - dev
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_binary_tests:
+        description: "Skip binary install/run/uninstall tests"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: validate-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ARTIFACT_RETENTION_DAYS: 90
+  JOBS: python .github/workflows/scripts/jobs.py
+
+jobs:
+  prepare:
+    name: Open pull request to main
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Install commitizen
+        run: |
+          python -m pip install --upgrade pip commitizen
+          python -m pip install -e . --no-deps
+
+      - name: Render preview changelog
+        id: preview
+        run: ${{ env.JOBS }} prepare
+
+      - name: Open or update the release pull request
+        if: ${{ steps.preview.outputs.releasable == 'true' }}
+        run: ${{ env.JOBS }} open_main_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREDICTED_VERSION: ${{ steps.preview.outputs.predicted_version }}
+
+  gate:
+    name: Decide whether to validate
+    needs: prepare
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      proceed: ${{ steps.run.outputs.proceed }}
+      pr_number: ${{ steps.run.outputs.pr_number }}
+      src_tree_hash: ${{ steps.run.outputs.src_tree_hash }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Decide whether validation is needed
+        id: run
+        run: ${{ env.JOBS }} validate_gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  init:
+    name: Version control (validate)
+    needs: gate
+    if: ${{ needs.gate.outputs.proceed == 'true' }}
+    runs-on: windows-2025
+    timeout-minutes: 10
+    outputs:
+      bumped: ${{ steps.run.outputs.bumped }}
+      current_tag: ${{ steps.run.outputs.current_tag }}
+      previous_tag: ${{ steps.run.outputs.previous_tag }}
+      msi_name: ${{ steps.run.outputs.msi_name }}
+      artifact_id: ${{ steps.run.outputs.artifact_id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-python
+
+      - uses: ./.github/actions/install-commitizen
+
+      - name: Set fake version outputs (no bump, no push)
+        id: run
+        run: ${{ env.JOBS }} validate_init
+
+  build_binaries:
+    name: Build binaries
+    needs: [gate, init]
+    if: ${{ needs.gate.outputs.proceed == 'true' }}
+    runs-on: windows-2025
+    timeout-minutes: 10
+    outputs:
+      msi_hash: ${{ steps.run.outputs.msi_hash }}
+      exe_hash: ${{ steps.run.outputs.exe_hash }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: ./.github/actions/setup-python
+
+      - uses: ./.github/actions/install-build-deps
+        with:
+          dry-run-version: ${{ needs.init.outputs.current_tag }}
+
+      - name: Hash and collect artifacts
+        id: run
+        run: ${{ env.JOBS }} build_binaries
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validated_${{ needs.gate.outputs.src_tree_hash }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  test_binaries:
+    name: Test binaries
+    needs: [gate, init, build_binaries]
+    if: ${{ needs.gate.outputs.proceed == 'true' && inputs.skip_binary_tests != 'true' }}
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: ./.github/actions/setup-python
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: validated_${{ needs.gate.outputs.src_tree_hash }}
+          path: artifacts
+
+      - uses: ./.github/actions/install-test-deps
+
+      - run: ${{ env.JOBS }} test_binaries
+
+  changelog:
+    name: Changelog
+    needs: [gate, init, build_binaries]
+    if: ${{ needs.gate.outputs.proceed == 'true' }}
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-python
+
+      - uses: ./.github/actions/install-commitizen
+
+      - name: Render changelog and append links
+        run: ${{ env.JOBS }} changelog
+        env:
+          CURRENT_TAG: ${{ needs.init.outputs.current_tag }}
+          PREVIOUS_TAG: ${{ needs.init.outputs.previous_tag }}
+          MSI_NAME: ${{ needs.init.outputs.msi_name }}
+          MSI_HASH: ${{ needs.build_binaries.outputs.msi_hash }}
+          EXE_HASH: ${{ needs.build_binaries.outputs.exe_hash }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: changelog_${{ needs.init.outputs.artifact_id }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  record:
+    name: Record validation result
+    needs: [gate, init, build_binaries, test_binaries, changelog]
+    if: ${{ always() && needs.gate.outputs.proceed == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Record validation result on the release pull request
+        run: ${{ env.JOBS }} validate_record
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.gate.outputs.pr_number }}
+          SRC_TREE_HASH: ${{ needs.gate.outputs.src_tree_hash }}
+          INIT_RESULT: ${{ needs.init.result }}
+          BUILD_RESULT: ${{ needs.build_binaries.result }}
+          TEST_RESULT: ${{ needs.test_binaries.result }}
+          CHANGELOG_RESULT: ${{ needs.changelog.result }}
