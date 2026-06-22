@@ -1,6 +1,6 @@
 import sys
 
-from subsearch import PREF_COUNTER, set_crash_notifier
+from subsearch import PERF_COUNTER, set_crash_notifier
 from subsearch.core.flows import create_flow
 from subsearch.core.pipeline import SearchPipeline
 from subsearch.decorators import process_guard
@@ -9,7 +9,7 @@ from subsearch.runtime.models import AppMode
 
 class Subsearch:
     def __init__(self) -> None:
-        self.pipeline = SearchPipeline(PREF_COUNTER)
+        self.pipeline = SearchPipeline(PERF_COUNTER)
         self.flow = create_flow(self.pipeline)
         set_crash_notifier(self._notify_crash)
 

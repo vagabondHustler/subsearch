@@ -28,6 +28,43 @@ class PipelineStep(StrEnum):
 
 ConditionList = list[tuple[str, "bool | Callable[[], bool]"]]
 
+SKIP_LABEL_EXPLANATIONS = {
+    "provider_enabled": "disabled in settings",
+    "language_supports_opensubtitles": "does not support the selected language",
+    "language_supports_yifysubtitles": "does not support the selected language",
+    "language_supports_subsource": "does not support the selected language",
+    "language_supports_tvsubtitles": "does not support the selected language",
+    "language_supports_gestdown": "does not support the selected language",
+    "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
+    "not_tvseries": "does not support tv series",
+    "is_tvseries": "only supports tv series",
+    "has_season_and_episode": "needs a season and episode number and this search has none",
+    "url_not_empty": "needs an IMDb match and none was found for this search",
+    "not_manual_post_processing": "post-processing is handled manually in the results window",
+    "app_mode_pipeline_post_processing": "only runs in hybrid or automatic mode",
+    "app_mode_search": "only runs during a search",
+    "should_download_files": "no subtitles were accepted to download",
+    "should_open_subtitle_workspace": "the results window is not opened in this mode",
+    "downloaded_archives_gte_1": "no subtitle archives were downloaded",
+    "extracted_archives_gte_1": "no subtitle files were extracted",
+    "rename_enabled": "renaming is disabled in settings",
+    "move_best_enabled": "moving the best subtitle is disabled in settings",
+    "move_all_enabled": "moving all subtitles is disabled in settings",
+    "not_move_all": "superseded by 'move all subtitles'",
+    "diagnostics_enabled": "diagnostics are disabled in settings",
+}
+
+STEP_DISPLAY_NAMES = {
+    PipelineStep.SUBTITLE_POST_PROCESSING: "Post-processing",
+    PipelineStep.EXTRACT_FILES: "Extracting subtitles",
+    PipelineStep.SUBTITLE_RENAME: "Renaming subtitle",
+    PipelineStep.SUBTITLE_MOVE_BEST: "Moving best subtitle",
+    PipelineStep.SUBTITLE_MOVE_ALL: "Moving all subtitles",
+    PipelineStep.RUN_PROVIDER_DIAGNOSTICS: "Provider diagnostics",
+    PipelineStep.FINISH_NOTIFICATION: "Finish notification",
+    PipelineStep.DOWNLOAD_FILES: "Downloading subtitles",
+}
+
 
 class RunConditions:
     def __init__(self, bootstrap: Bootstrap) -> None:
@@ -122,6 +159,17 @@ class RunConditions:
             for label, condition in self._conditions_for(pipeline_step)
             if not (condition() if callable(condition) else condition)
         ]
+
+    def skip_explanation(self, pipeline_step: PipelineStep | str) -> str | None:
+        step = PipelineStep(pipeline_step)
+        display_name = STEP_DISPLAY_NAMES.get(step)
+        if display_name is None:
+            return None
+        unmet_labels = self.unmet_condition_labels(step)
+        if not unmet_labels:
+            return None
+        reason = "; ".join(SKIP_LABEL_EXPLANATIONS.get(label, label) for label in unmet_labels)
+        return f"{display_name} skipped: {reason}"
 
     def _conditions_for(self, pipeline_step: PipelineStep | str) -> ConditionList:
         post_processing = self.app_config.post_processing
