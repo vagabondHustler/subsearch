@@ -287,6 +287,24 @@ def test_unmet_condition_labels_empty_when_provider_runs(fake_cls: FakeBootstrap
     assert fake_cls.call_conditions.unmet_condition_labels("opensubtitles") == []
 
 
+def test_skip_explanation_for_mode_gate(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_mode = AppMode.SEARCH_MANUAL
+
+    explanation = fake_cls.call_conditions.skip_explanation("subtitle_post_processing")
+    assert explanation is not None
+    assert "Post-processing skipped" in explanation
+
+
+def test_skip_explanation_shown_for_actionable_skip(fake_cls: FakeBootstrap) -> None:
+    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.post_processing["rename"] = False
+
+    explanation = fake_cls.call_conditions.skip_explanation("subtitle_rename")
+    assert explanation is not None
+    assert "renaming is disabled" in explanation
+
+
 def test_conditions_finish_notification(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_mode = AppMode.SEARCH_HYBRID
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True

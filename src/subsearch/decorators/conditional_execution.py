@@ -6,6 +6,9 @@ from subsearch.runtime.logging.logger import log
 
 
 def run_if_conditions_met(func: Callable[..., Any]) -> Callable[..., Any]:
+    # The guard's skip/call/explanation lines are diagnostics for the file log
+    # only (debug level), never the console. Meaningful skips a user should see
+    # are reported explicitly by the step's caller, swallowed by its banner.
 
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -16,7 +19,7 @@ def run_if_conditions_met(func: Callable[..., Any]) -> Callable[..., Any]:
             log.event(LogEvent.GUARD_STEP_SKIPPED, level="debug", qualified_name=qualified_name)
             skip_explanation = instance.call_conditions.skip_explanation(func.__name__)
             if skip_explanation is not None:
-                log.event(LogEvent.PIPELINE_STEP_SKIPPED, message=skip_explanation)
+                log.event(LogEvent.PIPELINE_STEP_SKIPPED, level="debug", message=skip_explanation)
             return None
         log.event(LogEvent.GUARD_STEP_CALLED, level="debug", qualified_name=qualified_name)
         return func(*args, **kwargs)

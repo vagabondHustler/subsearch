@@ -96,7 +96,7 @@ def _clear_crash_log_periodically() -> None:
     counter_path = FILE_PATHS.crash.with_suffix(".count")
     try:
         run_count = int(counter_path.read_text(encoding="utf-8")) + 1
-    except (FileNotFoundError, ValueError):
+    except FileNotFoundError, ValueError:
         run_count = 1
     if run_count >= CRASH_CLEAR_EVERY_RUNS:
         FILE_PATHS.crash.unlink(missing_ok=True)
@@ -179,6 +179,10 @@ class Logger:
         is_last: bool = False,
     ) -> None:
         self.file_logger.log(LEVELS[level], message, stacklevel=3)
+        # Debug lines are diagnostics for the file log only; the console (terminal
+        # banner and GUI mirror) shows the user-facing run, so they never reach a sink.
+        if LEVELS[level] < logging.INFO:
+            return
         self._console_history.append(
             ConsoleRecord(
                 message=message,

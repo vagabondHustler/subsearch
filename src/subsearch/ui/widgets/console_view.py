@@ -15,7 +15,6 @@ LABEL_TO_LIST_SPACING = 4
 # animates with the same glyphs the terminal shows.
 SPINNER_FRAMES = ("◜", "◠", "◝", "◞", "◡", "◟")
 SPINNER_INTERVAL_MS = 100
-SPINNER_DONE_MARK = "✔"
 
 CONSOLE_STYLE_SHEET = """
 QListWidget {
@@ -129,10 +128,19 @@ class ConsoleView(QWidget):
         if self._banner_item is None:
             return
         self._spinner_timer.stop()
-        self._banner_item.setText(f"{SPINNER_DONE_MARK} {done_title}")
+        # The transient status line is cleared on finish, exactly as the terminal
+        # console drops its in-place line; the spinner glyph is replaced by the
+        # plain done-title the terminal prints (no decoration), so both match.
+        self._remove_status_item()
+        self._banner_item.setText(done_title)
         self._banner_item = None
-        self._status_item = None
         self._banner_title = ""
+
+    def _remove_status_item(self) -> None:
+        if self._status_item is None:
+            return
+        self._list.takeItem(self._list.row(self._status_item))
+        self._status_item = None
 
     def _tick_spinner(self) -> None:
         if self._banner_item is None:
