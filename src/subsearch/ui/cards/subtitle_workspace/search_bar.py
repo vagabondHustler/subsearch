@@ -50,6 +50,7 @@ class SubtitleSearchBar(QWidget):
         self._committed_filename = SEARCH_SUBJECT.name if SEARCH_SUBJECT.file_exists else ""
         self._pending_series: TitleSuggestion | None = None
         self._pending_season = 0
+        self._number_chosen_slot: Callable[..., None] | None = None
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
             title_suggestion_service.lookup_failed.connect(self._on_suggestion_lookup_failed)
@@ -214,16 +215,16 @@ class SubtitleSearchBar(QWidget):
         self._pending_series = None
         self._pending_season = 0
 
-    @staticmethod
-    def _reconnect_number_chosen(popup: NumberSuggestionPopup, slot: Callable[..., None]) -> None:
+    def _reconnect_number_chosen(self, popup: NumberSuggestionPopup, slot: Callable[..., None]) -> None:
         # The popup is reused across the season then episode step. Drop the prior
         # step's slot first, otherwise choosing the episode also fires the season
-        # handler and clobbers _pending_season with the episode number.
-        try:
-            popup.number_chosen.disconnect()
-        except RuntimeError:
-            pass
+        # handler and clobbers _pending_season with the episode number. Only
+        # disconnect a slot we actually connected; disconnecting an empty signal
+        # makes PySide emit a "Failed to disconnect (None)" RuntimeWarning.
+        if self._number_chosen_slot is not None:
+            popup.number_chosen.disconnect(self._number_chosen_slot)
         popup.number_chosen.connect(slot)
+        self._number_chosen_slot = slot
 
     def _number_popup(self) -> NumberSuggestionPopup:
         popup = getattr(self, "_season_episode_popup", None)
