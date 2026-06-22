@@ -1,3 +1,4 @@
+from packaging.version import Version
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, ProgressBar
@@ -104,13 +105,15 @@ class UpdateCard(SettingsCard):
     def _on_check_finished(self, availability: UpdateAvailability) -> None:
         self.check_button.setEnabled(True)
         self._latest_version = availability.latest_version
-        self.latest_version_label.setText(f"Latest version  {availability.latest_version}")
+        self.latest_version_label.setText(f"Latest release  {availability.latest_version}")
         self.latest_version_label.show()
         self.changelog_button.set_changelog(availability.changelog)
         if availability.update_available:
             prerelease = " (pre-release)" if availability.is_prerelease else ""
             self.status_label.setText(f"A new version is available{prerelease}.")
             self._apply_install_button_state(True)
+        elif Version(availability.current_version) > Version(availability.latest_version):
+            self.status_label.setText("You are running a newer development version.")
         else:
             self.status_label.setText("You are running the latest version.")
 

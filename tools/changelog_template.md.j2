@@ -1,15 +1,22 @@
-{# merge all tree entries first so each section heading appears exactly once #}
-{% set merged = {} %}
-{% for entry in tree %}
-{% for change_key, changes in entry.changes.items() %}
-{% if merged.update({change_key: merged.get(change_key, []) + changes}) %}{% endif %}
+{# Render only the target version (the first tree entry). With --unreleased-version
+   the tree still contains every past release; merging them all would fold already
+   released commits back into the new section, so restrict rendering to tree[0]. #}
+{% set entry = tree | first %}
+{% set sections = entry.changes if entry else {} %}
+{# Emit sections in change_type_order so headings keep a stable, intended order
+   instead of the commit-walk order. Any unlisted keys follow, in tree order. #}
+{% set ordered_keys = [] %}
+{% for change_key in change_type_order %}
+{% if change_key in sections and ordered_keys.append(change_key) %}{% endif %}
 {% endfor %}
+{% for change_key in sections %}
+{% if change_key not in ordered_keys and ordered_keys.append(change_key) %}{% endif %}
 {% endfor %}
-{% for change_key, changes in merged.items() %}
+{% for change_key in ordered_keys %}
 {% if change_key %}
 #### {{ change_key }}
 {% endif %}
-{% for change in changes %}
+{% for change in sections[change_key] %}
 {% if change.scope %}
 - **{{ change.scope }}**: {{ change.message }}
 {% elif change.message %}

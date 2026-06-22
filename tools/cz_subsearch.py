@@ -32,6 +32,10 @@ class SubsearchCz(ConventionalCommitsCz):
         "⚙️ Other:",
     ]
 
+    @property
+    def template_extras(self) -> dict:
+        return {"change_type_order": self.change_type_order}
+
     def changelog_message_builder_hook(self, message: dict, commit) -> dict:  # type: ignore[override]
         sha = commit.rev
         message["message"] += f" - [{sha[:7]}]({REPO}/commit/{sha})"
