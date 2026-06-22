@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 from selectolax.parser import HTMLParser
 
 from subsearch.io.language_data import load_language_data
@@ -121,7 +123,7 @@ def test_yifysubtitles_download_url_follows_responding_mirror(monkeypatch) -> No
     )
 
     def fake_request(url: str, timeout) -> object | None:
-        if url.startswith("https://yifysubtitles.ch"):
+        if urlsplit(url).netloc == "yifysubtitles.ch":
             return None
         return HTMLParser(well_formed_row)
 
@@ -150,7 +152,7 @@ def test_yifysubtitles_fallback_past_malformed_mirror(monkeypatch) -> None:
     scraper = yifysubtitles.YifySubtitles(**kwargs)
 
     def fake_request(url: str, timeout) -> object:
-        if url.startswith("https://yifysubtitles.ch"):
+        if urlsplit(url).netloc == "yifysubtitles.ch":
             return HTMLParser("<html><body>captcha</body></html>")
         return HTMLParser("<html><table><tr><th>head</th></tr></table></html>")
 

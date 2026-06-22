@@ -7,13 +7,13 @@ import traceback
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Callable, Iterable, Optional
 
-import requests
-from curl_cffi.requests import Response as CurlResponse
+if TYPE_CHECKING:
+    import requests
+    from curl_cffi.requests import Response as CurlResponse
 
 from subsearch.io.file_tracker import get_file_tracker
-from subsearch.io.http import get_session
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import session as config_session
 from subsearch.runtime.config.defaults import ConfigKey
@@ -56,7 +56,7 @@ def is_zip_payload(chunk: bytes) -> bool:
 _HASH_MATCH_PREFIX = "hashmatch__"
 
 
-def _cloudflare_block_reason(response: CurlResponse) -> str:
+def _cloudflare_block_reason(response: "CurlResponse") -> str:
     headers = response.headers
     mitigated = headers.get("cf-mitigated")
     if mitigated:
@@ -69,6 +69,8 @@ def _cloudflare_block_reason(response: CurlResponse) -> str:
 def download_subtitle(
     subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path, extraction_dir: Path
 ) -> bool:
+    from subsearch.io.http import get_session
+
     log.event(
         LogEvent.DOWNLOAD_SUBTITLE,
         provider=subtitle.provider_name,
@@ -140,13 +142,13 @@ _CONTENT_TYPE_EXTENSIONS = {
 _CONTENT_DISPOSITION_FILENAME_PATTERN = re.compile(r"filename\*?=(?:UTF-8\'\')?\"?([^\";]+)\"?", re.IGNORECASE)
 
 
-def _content_disposition_filename(response: CurlResponse) -> str | None:
+def _content_disposition_filename(response: "CurlResponse") -> str | None:
     disposition = response.headers.get("content-disposition", "")
     match = _CONTENT_DISPOSITION_FILENAME_PATTERN.search(disposition)
     return match.group(1).strip() if match else None
 
 
-def _raw_subtitle_extension(response: CurlResponse) -> str | None:
+def _raw_subtitle_extension(response: "CurlResponse") -> str | None:
     filename = _content_disposition_filename(response)
     if filename:
         suffix = Path(filename).suffix.lower()
@@ -374,7 +376,7 @@ class MPCHashAlgorithm:
 
 def download_response(
     msi_package_path: Path,
-    response: requests.Response | CurlResponse,
+    response: "requests.Response | CurlResponse",
     on_progress: Callable[[float], None] | None = None,
 ) -> None:
     start_time = time.time()

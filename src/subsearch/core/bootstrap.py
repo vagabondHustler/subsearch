@@ -1,9 +1,7 @@
 import sys
 from pathlib import Path
 
-from subsearch.io import file_system, file_tracker, language_data, windows_registry
-from subsearch.parsing import imdb_lookup, release_parser
-from subsearch.providers.provider_helper import SubtitleResults
+from subsearch.io import windows_registry
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -18,8 +16,21 @@ from subsearch.runtime.models import (
     AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,
+    ProviderUrls,
+    ReleaseInfo,
     Subtitle,
 )
+
+
+class HeadlessNotificationSink:
+    def display_toast(self, title: str, message: str) -> None:
+        return None
+
+    def start(self) -> None:
+        return None
+
+    def stop(self) -> None:
+        return None
 
 
 class Bootstrap:
@@ -36,14 +47,16 @@ class Bootstrap:
 
     def _init_state(self) -> None:
         self.api_calls_made: dict[str, int] = {}
-        self.subtitle_results = SubtitleResults()
+        self.subtitle_results = None
         self.manual_accepted_subtitles: list[Subtitle] = []
         self.health_reports: list[ProviderResult] = []
-        self.release_data = release_parser.no_release_data()
-        self.provider_urls = release_parser.CreateProviderUrls.no_urls()
+        self.language_data: dict[str, object] = {}
+        self.release_data = ReleaseInfo("", 0, "", "", "", "", False, "", "", "")
+        self.provider_urls = ProviderUrls([], [], [], [], [])
         self.autoload_src: Path = Path("")
         self.downloaded_subtitle_archives: int = 0
         self.extracted_subtitle_archives: int = 0
+        self._search_runtime_ready = False
 
     def _log_boot_environment(self) -> None:
         log.event(LogEvent.BOOT_ARGV, level="debug", argv=sys.argv)
@@ -56,8 +69,6 @@ class Bootstrap:
 
     def _prepare_runtime(self) -> None:
         log.event(LogEvent.BOOT_VERIFYING)
-        self.setup_file_system()
-        self.language_data = language_data.load_language_data()
         self.app_config = config_session.get_config_session().snapshot()
         windows_registry.reconcile_shell_integration()
         self.app_mode = self._resolve_app_mode()
@@ -68,6 +79,9 @@ class Bootstrap:
 
     def _start_system_tray(self) -> None:
         log.event(LogEvent.BOOT_TRAY_INIT, level="debug")
+        if not self.ui_may_open:
+            self.system_tray = HeadlessNotificationSink()
+            return
         from subsearch.ui.system_tray import SystemTray
 
         self.system_tray = SystemTray(
@@ -82,6 +96,11 @@ class Bootstrap:
             self.app_mode = AppMode.SEARCH_MANUAL
 
     def rebuild_search_inputs(self, imdb_id: str = "", tvseries: bool | None = None) -> None:
+        self._prepare_search_runtime()
+        from subsearch.io import file_system
+        from subsearch.parsing import release_parser
+        from subsearch.providers.provider_helper import SubtitleResults
+
         self._anchor_working_directory()
         file_path = SEARCH_SUBJECT.file_path
         SEARCH_SUBJECT.file_hash = file_system.get_file_hash(file_path) if file_path is not None else ""
@@ -111,6 +130,15 @@ class Bootstrap:
             subtitle_results=self.subtitle_results,
         )
 
+    def _prepare_search_runtime(self) -> None:
+        if self._search_runtime_ready:
+            return
+        from subsearch.io import language_data
+
+        self.setup_file_system()
+        self.language_data = language_data.load_language_data()
+        self._search_runtime_ready = True
+
     def _lazy_load_ui(self) -> None:
         if not self.ui_may_open:
             return
@@ -125,6 +153,8 @@ class Bootstrap:
             self.release_data.imdb_id = imdb_id
             self.health_reports.append(ProviderResult("imdb", ProviderDiagnosticStatus.OK, 1))
             return
+        from subsearch.parsing import imdb_lookup
+
         find_id = imdb_lookup.ImdbIdLookup(
             self.release_data.title,
             self.release_data.year,
@@ -135,6 +165,8 @@ class Bootstrap:
         self.health_reports.append(ProviderResult("imdb", find_id.diagnostic_status, found_subtitles))
 
     def setup_file_system(self) -> None:
+        from subsearch.io import file_system, file_tracker
+
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
         file_tracker.get_file_tracker().reclaim_after_crash()
@@ -143,6 +175,8 @@ class Bootstrap:
             self._create_search_directories()
 
     def _create_search_directories(self) -> None:
+        from subsearch.io import file_system, file_tracker
+
         tracker = file_tracker.get_file_tracker()
         for directory in (WORKSPACE.extraction_directory, WORKSPACE.download_directory):
             if file_system.create_directory(directory):
@@ -158,10 +192,14 @@ class Bootstrap:
 
     @property
     def accepted_subtitles(self) -> list[Subtitle]:
+        if self.subtitle_results is None:
+            return []
         return self.subtitle_results.accepted
 
     @property
     def rejected_subtitles(self) -> list[Subtitle]:
+        if self.subtitle_results is None:
+            return []
         return self.subtitle_results.rejected
 
     def _resolve_app_mode(self) -> AppMode:

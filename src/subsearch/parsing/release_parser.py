@@ -3,8 +3,6 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
-from num2words import num2words
-
 from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
@@ -83,6 +81,8 @@ def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:
         season, season_ordinal, episode, episode_ordinal = "", "", "", ""
         show_bool = False
     else:
+        from num2words import num2words
+
         season, episode = string.replace("s", "").replace("e", " ").split(" ")
         season_ordinal = num2words(int(season), lang="en", to="ordinal")
         episode_ordinal = num2words(int(episode), lang="en", to="ordinal")

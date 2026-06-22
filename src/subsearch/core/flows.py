@@ -1,4 +1,4 @@
-from subsearch.core.pipeline import SearchPipeline, SearchWorker
+from subsearch.core.pipeline import SearchJob, SearchPipeline
 from subsearch.runtime.config import SEARCH_SUBJECT
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
@@ -27,8 +27,8 @@ class Flow:
         self.pipeline.finish_notification()
         self.pipeline.clean_up()
 
-    def _make_search_worker(self, imdb_id: str = "", tvseries: bool | None = None) -> SearchWorker:
-        return SearchWorker(self.pipeline, imdb_id, tvseries)
+    def _make_search_job(self, imdb_id: str = "", tvseries: bool | None = None) -> SearchJob:
+        return self.pipeline.create_search_job(imdb_id, tvseries)
 
 
 class SettingsFlow(Flow):
@@ -36,7 +36,7 @@ class SettingsFlow(Flow):
         from subsearch.ui.application import open_settings_window
 
         manual_accepted = open_settings_window(
-            search_worker_factory=self._make_search_worker,
+            search_job_factory=self._make_search_job,
             on_window_shown=self._end_initializing,
         )
         self._record_gui_results(manual_accepted)
@@ -49,7 +49,7 @@ class ManualSearchFlow(Flow):
 
         manual_accepted = open_settings_window(
             subtitles=None,
-            search_worker_factory=self._make_search_worker,
+            search_job_factory=self._make_search_job,
             start_search_immediately=True,
             on_window_shown=self._end_initializing,
         )

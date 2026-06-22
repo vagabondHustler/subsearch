@@ -59,6 +59,7 @@ from subsearch.ui.services.post_processing import (
 from subsearch.ui.services.season_episode_suggestions import (
     SeasonEpisodeSuggestionService,
 )
+from subsearch.ui.services.search import SearchJobProtocol, SearchJobWorker
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.services.subtitle_downloads import (
     DownloadServiceProtocol,
@@ -67,7 +68,7 @@ from subsearch.ui.services.subtitle_downloads import (
 from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.state.tasks import TaskRunner, Worker
+from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 from subsearch.ui.widgets.tray_icon import WindowTrayIcon
@@ -118,13 +119,13 @@ class SettingsWindow(FluentWindow):
     def __init__(
         self,
         subtitles: list[Subtitle] | None = None,
-        search_worker_factory: Callable[..., Worker] | None = None,
+        search_job_factory: Callable[..., SearchJobProtocol] | None = None,
         download_service: DownloadServiceProtocol | None = None,
         post_processing_service: PostProcessingServiceProtocol | None = None,
         start_search_immediately: bool = False,
     ) -> None:
         super().__init__()
-        self._search_worker_factory = search_worker_factory
+        self._search_job_factory = search_job_factory
         self._search_running = False
         self.setWindowTitle("Subsearch")
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
@@ -142,7 +143,7 @@ class SettingsWindow(FluentWindow):
             download_service = SubtitleDownloadService(self.task_runner, self)  # type: ignore
         if post_processing_service is None:
             post_processing_service = PostProcessingService(self.task_runner, self)
-        in_search_mode = subtitles is not None or search_worker_factory is not None
+        in_search_mode = subtitles is not None or search_job_factory is not None
         console_view_sink = ConsoleViewSink(self) if in_search_mode else None
         self.console_view_sink = console_view_sink
 
@@ -223,7 +224,7 @@ class SettingsWindow(FluentWindow):
         )
         manual_search_interface = self.manual_search_interface
 
-        if search_worker_factory is not None:
+        if search_job_factory is not None:
             self.manual_search_interface.research_requested.connect(self._start_search)
             if start_search_immediately:
                 self._start_search("")
@@ -304,11 +305,12 @@ class SettingsWindow(FluentWindow):
         self._close_validators.append(validator)
 
     def _start_search(self, imdb_id: str = "", tvseries: bool | None = None) -> None:
-        if self._search_worker_factory is None or self._search_running:
+        if self._search_job_factory is None or self._search_running:
             return
         self._search_running = True
         self.manual_search_interface.reset_for_search()
-        worker = self._search_worker_factory(imdb_id, tvseries)
+        search_job = self._search_job_factory(imdb_id, tvseries)
+        worker = SearchJobWorker(search_job)
         worker.finished.connect(self._on_search_finished)
         worker.failed.connect(self._on_search_failed)
         self.task_runner.submit(worker)
@@ -346,7 +348,7 @@ def _suppress_point_size_warning(message_type: QtMsgType, context, message: str)
 
 def open_settings_window(
     subtitles: list[Subtitle] | None = None,
-    search_worker_factory: Callable[..., Worker] | None = None,
+    search_job_factory: Callable[..., SearchJobProtocol] | None = None,
     start_search_immediately: bool = False,
     on_window_shown: Callable[[], None] | None = None,
 ) -> list[Subtitle]:
@@ -363,7 +365,7 @@ def open_settings_window(
         f"HeaderCardWidget, CardWidget, SimpleCardWidget, ElevatedCardWidget "
         f"{{ background-color: transparent; border: none; }}"
     )
-    window = SettingsWindow(subtitles, search_worker_factory, start_search_immediately=start_search_immediately)
+    window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
     log.event(LogEvent.BOOT_UI_OPENED)
     window.show()
     if on_window_shown is not None:

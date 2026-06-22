@@ -8,13 +8,6 @@ from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
-from subsearch.providers import (
-    gestdown,
-    opensubtitles,
-    subsource,
-    tvsubtitles,
-    yifysubtitles,
-)
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -32,7 +25,6 @@ from subsearch.runtime.models import (
     SubtitleStatus,
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
-from subsearch.ui.state.tasks import Worker
 
 PROVIDER_SKIP_EXPLANATIONS = {
     "provider_enabled": "disabled in settings",
@@ -49,9 +41,8 @@ PROVIDER_SKIP_EXPLANATIONS = {
 }
 
 
-class SearchWorker(Worker):
+class SearchJob:
     def __init__(self, pipeline: "SearchPipeline", imdb_id: str = "", tvseries: bool | None = None) -> None:
-        super().__init__()
         self._pipeline = pipeline
         self._imdb_id = imdb_id
         self._tvseries = tvseries
@@ -84,8 +75,8 @@ class SearchPipeline:
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
 
-    def _make_search_worker(self, imdb_id: str = "", tvseries: bool | None = None) -> "SearchWorker":
-        return SearchWorker(self, imdb_id, tvseries)
+    def create_search_job(self, imdb_id: str = "", tvseries: bool | None = None) -> "SearchJob":
+        return SearchJob(self, imdb_id, tvseries)
 
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
@@ -149,22 +140,32 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def opensubtitles(self) -> None:
+        from subsearch.providers import opensubtitles
+
         self._start_search(provider=opensubtitles.OpenSubtitles, flag="site")
 
     @run_if_conditions_met
     def yifysubtitles(self) -> None:
+        from subsearch.providers import yifysubtitles
+
         self._start_search(provider=yifysubtitles.YifySubtitles, flag="site")
 
     @run_if_conditions_met
     def subsource(self) -> None:
+        from subsearch.providers import subsource
+
         self._start_search(provider=subsource.Subsource, flag="site")
 
     @run_if_conditions_met
     def tvsubtitles(self) -> None:
+        from subsearch.providers import tvsubtitles
+
         self._start_search(provider=tvsubtitles.TvSubtitles, flag="site")
 
     @run_if_conditions_met
     def gestdown(self) -> None:
+        from subsearch.providers import gestdown
+
         self._start_search(provider=gestdown.Gestdown, flag="site")
 
     def _provider_at_download_limit(self, provider_name: str) -> bool:
@@ -200,7 +201,7 @@ class SearchPipeline:
         from subsearch.ui.application import open_settings_window
 
         self.bootstrap.manual_accepted_subtitles = open_settings_window(
-            subtitles, search_worker_factory=self._make_search_worker
+            subtitles, search_job_factory=self.create_search_job
         )
         self.bootstrap.resync_app_config()
         log.event(LogEvent.BOOT_WORKSPACE_CLOSED)
