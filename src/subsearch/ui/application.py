@@ -2,8 +2,8 @@ import sys
 from collections.abc import Sequence
 from typing import Callable
 
-from PySide6.QtCore import Qt, QtMsgType, qInstallMessageHandler
-from PySide6.QtGui import QCloseEvent, QColor, QIcon
+from PySide6.QtCore import QMessageLogContext, Qt, QtMsgType, qInstallMessageHandler
+from PySide6.QtGui import QCloseEvent, QColor, QIcon, QShowEvent
 from PySide6.QtWidgets import QSystemTrayIcon, QVBoxLayout, QWidget
 from qfluentwidgets import (
     FluentWindow,
@@ -56,10 +56,10 @@ from subsearch.ui.services.post_processing import (
     PostProcessingService,
     PostProcessingServiceProtocol,
 )
+from subsearch.ui.services.search import SearchJobProtocol, SearchJobWorker
 from subsearch.ui.services.season_episode_suggestions import (
     SeasonEpisodeSuggestionService,
 )
-from subsearch.ui.services.search import SearchJobProtocol, SearchJobWorker
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.services.subtitle_downloads import (
     DownloadServiceProtocol,
@@ -103,7 +103,7 @@ class SettingsInterface(SingleDirectionScrollArea):
         self.setWidget(self._container)
         self.enableTransparentBackground()
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event: QShowEvent) -> None:
         self.build_cards()
         super().showEvent(event)
 
@@ -191,9 +191,7 @@ class SettingsWindow(FluentWindow):
             ]
 
         search_interface = SettingsInterface("searchInterface", build_search_cards)
-        subtitle_handling_interface = SettingsInterface(
-            "subtitleHandlingInterface", build_subtitle_handling_cards
-        )
+        subtitle_handling_interface = SettingsInterface("subtitleHandlingInterface", build_subtitle_handling_cards)
         providers_interface = SettingsInterface("providersInterface", build_providers_cards)
         integration_interface = SettingsInterface("integrationInterface", build_integration_cards)
         application_interface = SettingsInterface("applicationInterface", build_application_cards)
@@ -318,10 +316,12 @@ class SettingsWindow(FluentWindow):
     def _on_search_finished(self, outcome: SearchOutcome) -> None:
         self._search_running = False
         self.manual_search_interface.populate(outcome.subtitles, outcome.skipped_providers)
+        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
 
     def _on_search_failed(self, message: str) -> None:
         self._search_running = False
         self.manual_search_interface.populate([], [f"Search failed: {message}"])
+        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
 
     def _render_save_item_dirty_state(self, dirty: bool) -> None:
         color = SAVE_DIRTY_COLOR if dirty else SAVE_CLEAN_COLOR
@@ -340,7 +340,7 @@ class SettingsWindow(FluentWindow):
             e.ignore()
 
 
-def _suppress_point_size_warning(message_type: QtMsgType, context, message: str) -> None:
+def _suppress_point_size_warning(message_type: QtMsgType, context: QMessageLogContext, message: str) -> None:
     if "setPointSize" in message:
         return
     sys.stderr.write(f"{message}\n")
@@ -367,9 +367,15 @@ def open_settings_window(
     )
     window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
     log.event(LogEvent.BOOT_UI_OPENED)
+    if not start_search_immediately:
+        # When a search runs immediately the search worker owns the banner sequence
+        # ("Searching" -> "Searched" -> "Waiting for user inputs"); starting one here
+        # would be torn down by it and emit a spurious "Processed user inputs".
+        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
     window.show()
     if on_window_shown is not None:
         on_window_shown()
     application.exec()
     log.event(LogEvent.BOOT_UI_CLOSED, level="debug")
+    log.end_banner()
     return window.manual_search_interface.downloaded

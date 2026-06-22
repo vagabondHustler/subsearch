@@ -90,7 +90,7 @@ class SubtitleDownloadService(QObject):
         # opened after search (downloads only start once results exist).
         if self._processing_announced:
             return
-        log.event(LogEvent.BANNER, title="Processing subtitles")
+        log.event(LogEvent.SPINNER, title="Processing subtitles", done_title="Processed subtitles")
         self._processing_announced = True
 
     def _end_processing_phase(self) -> None:

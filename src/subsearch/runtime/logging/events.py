@@ -2,10 +2,11 @@ from enum import StrEnum
 
 
 class LogEvent(StrEnum):
-    BANNER = "banner"
-    EXITING = "exiting"
+    SPINNER = "spinner"
     VIDEO_FILE_SELECTED = "video_file_selected"
     SEARCH_TERM_SET = "search_term_set"
+    SEARCH_FUZZY_MATCHING = "search_fuzzy_matching"
+    SEARCH_SEASON_EPISODE_CHOSEN = "search_season_episode_chosen"
     SUBTITLE_MATCH = "subtitle_match"
     SUBTITLE_REJECTED = "subtitle_rejected"
     PROVIDER_SKIPS = "provider_skips"
@@ -100,6 +101,8 @@ class LogEvent(StrEnum):
     FS_ARCHIVE_OVERSIZE = "fs.archive_oversize"
     FS_ARCHIVE_UNSAFE_PATH = "fs.archive_unsafe_path"
     FS_ARCHIVE_UNREADABLE = "fs.archive_unreadable"
+    FS_ARCHIVE_CONTENTS = "fs.archive_contents"
+    FS_ARCHIVE_MEMBER_IGNORED = "fs.archive_member_ignored"
 
     DOWNLOAD_SUBTITLE = "download.subtitle"
     DOWNLOAD_NOT_ZIP = "download.not_zip"
@@ -118,6 +121,7 @@ class LogEvent(StrEnum):
     PIPELINE_SUMMARY_SUCCEEDED = "pipeline.summary_succeeded"
     PIPELINE_SUMMARY_FAILED = "pipeline.summary_failed"
     PIPELINE_FINISHED = "pipeline.finished"
+    PIPELINE_CRASHED = "pipeline.crashed"
 
     BOOT_ARGV = "boot.argv"
     BOOT_VIDEO_FILE = "boot.video_file"
@@ -146,6 +150,7 @@ class LogEvent(StrEnum):
 
     GUARD_STEP_SKIPPED = "guard.step_skipped"
     GUARD_STEP_CALLED = "guard.step_called"
+    PIPELINE_STEP_SKIPPED = "pipeline.step_skipped"
     GUARD_SINGLE_INSTANCE = "guard.single_instance"
     GUARD_SINGLE_INSTANCE_DISABLED = "guard.single_instance_disabled"
     GUARD_MUTEX_ACQUIRED = "guard.mutex_acquired"
@@ -165,10 +170,11 @@ class LogEvent(StrEnum):
 
 
 EVENTS: dict[LogEvent, str] = {
-    LogEvent.BANNER: "--- [{title}] ---",
-    LogEvent.EXITING: "Exiting",
+    LogEvent.SPINNER: "--- [{title}] ---",
     LogEvent.VIDEO_FILE_SELECTED: "Selected {filename}",
     LogEvent.SEARCH_TERM_SET: "Search term set: {term}",
+    LogEvent.SEARCH_FUZZY_MATCHING: "Fuzzy matching search inputs",
+    LogEvent.SEARCH_SEASON_EPISODE_CHOSEN: "Chose season {season}, episode {episode} for {title!r}",
     LogEvent.SUBTITLE_MATCH: "{subtitle_name}",
     LogEvent.SUBTITLE_REJECTED: "{subtitle_name}",
     LogEvent.PROVIDER_SKIPS: "{provider:<14}skipped {total} ({breakdown})",
@@ -260,6 +266,8 @@ EVENTS: dict[LogEvent, str] = {
     LogEvent.FS_ARCHIVE_OVERSIZE: "Archive uncompressed size {size} exceeds limit, skipping",
     LogEvent.FS_ARCHIVE_UNSAFE_PATH: "Skipping unsafe path in archive: {filename}",
     LogEvent.FS_ARCHIVE_UNREADABLE: "Skipping unreadable archive {name}\n{traceback}",
+    LogEvent.FS_ARCHIVE_CONTENTS: "Archive {name}: {member_count} entries, {size} bytes uncompressed\n{listing}",
+    LogEvent.FS_ARCHIVE_MEMBER_IGNORED: "Ignoring {filename} ({reason})",
     LogEvent.DOWNLOAD_SUBTITLE: "Downloading {subtitle_name}",
     LogEvent.DOWNLOAD_NOT_ZIP: (
         "{provider}: {subtitle_name} is not a zip (status {status_code}, cloudflare {cloudflare}) "
@@ -277,7 +285,8 @@ EVENTS: dict[LogEvent, str] = {
     LogEvent.PIPELINE_PROVIDER_CHANGED: "{provider} may have changed, unrecognized response",
     LogEvent.PIPELINE_SUMMARY_SUCCEEDED: "{summary}",
     LogEvent.PIPELINE_SUMMARY_FAILED: "{summary}",
-    LogEvent.PIPELINE_FINISHED: "Finished in {seconds} seconds",
+    LogEvent.PIPELINE_FINISHED: "Exited cleanly after {seconds:.2f} seconds",
+    LogEvent.PIPELINE_CRASHED: "Exited after {seconds:.2f} seconds following an unhandled exception",
     LogEvent.BOOT_ARGV: "sys.argv: {argv}",
     LogEvent.BOOT_VIDEO_FILE: "Video file {presence}: {path}",
     LogEvent.BOOT_VERIFYING: "Verifying files and paths",
@@ -302,6 +311,7 @@ EVENTS: dict[LogEvent, str] = {
     LogEvent.TASK_FAILED: "{reason}",
     LogEvent.GUARD_STEP_SKIPPED: "skipped {qualified_name}",
     LogEvent.GUARD_STEP_CALLED: "called {qualified_name}",
+    LogEvent.PIPELINE_STEP_SKIPPED: "{message}",
     LogEvent.GUARD_SINGLE_INSTANCE: "Single-instance enforcement: {single_instance}",
     LogEvent.GUARD_SINGLE_INSTANCE_DISABLED: "Single-instance disabled, skipping mutex",
     LogEvent.GUARD_MUTEX_ACQUIRED: "Mutex acquired: {guid}",
