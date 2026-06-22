@@ -16,6 +16,8 @@ from PySide6.QtGui import (
     QMouseEvent,
     QPainter,
     QPainterPath,
+    QPaintEvent,
+    QShowEvent,
 )
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import (
@@ -154,7 +156,7 @@ class NotificationToast(QWidget):
 
     window_opacity = Property(float, _window_opacity, _set_window_opacity)
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event: QShowEvent) -> None:
         # Reapplied on every show: hiding can recreate the native window, and the
         # compositor effect is bound to the old window handle.
         if self._acrylic and not apply_popup_acrylic(self):
@@ -191,7 +193,7 @@ class NotificationToast(QWidget):
             return
         super().mousePressEvent(event)
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         radius = metrics.TOAST_CORNER_RADIUS

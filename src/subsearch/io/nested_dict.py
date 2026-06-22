@@ -40,7 +40,7 @@ def changed_leaves(key: str, previous_value: Any, new_value: Any) -> list[tuple[
     return [(key, previous_value, new_value)]
 
 
-def get_keys_recursively(dictionary: dict, prefix="", keys=None) -> list[str]:
+def get_keys_recursively(dictionary: dict, prefix: str = "", keys: list[str] | None = None) -> list[str]:
     if keys is None:
         keys = []
 

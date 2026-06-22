@@ -45,7 +45,7 @@ class GestdownLookup:
         response = self.session.get(f"{API_BASE_URL}/shows/search/{quote(title)}")
         if response.status_code != 200:
             return None
-        shows = response.json().get("shows", [])
+        shows: list[dict[str, Any]] = response.json().get("shows", [])
         target = normalize_show_name(title)
         exact = [show for show in shows if normalize_show_name(show["name"]) == target]
         if exact:

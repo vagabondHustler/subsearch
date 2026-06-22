@@ -7,7 +7,7 @@ import traceback
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 
 if TYPE_CHECKING:
     import requests
@@ -60,7 +60,7 @@ def _cloudflare_block_reason(response: "CurlResponse") -> str:
     headers = response.headers
     mitigated = headers.get("cf-mitigated")
     if mitigated:
-        return mitigated
+        return str(mitigated)
     if "cloudflare" in headers.get("server", "").lower() and response.status_code == 403:
         return "blocked"
     return "none"
@@ -158,20 +158,39 @@ def _raw_subtitle_extension(response: "CurlResponse") -> str | None:
     return _CONTENT_TYPE_EXTENSIONS.get(content_type)
 
 
+def _archive_listing(archive: zipfile.ZipFile) -> str:
+    return "\n".join(f"  {info.filename} ({info.file_size} bytes)" for info in archive.infolist())
+
+
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
-    total_uncompressed = sum(info.file_size for info in archive.infolist())
+    members = archive.infolist()
+    total_uncompressed = sum(info.file_size for info in members)
+    log.event(
+        LogEvent.FS_ARCHIVE_CONTENTS,
+        level="debug",
+        name=archive.filename or "archive",
+        member_count=len(members),
+        size=total_uncompressed,
+        listing=_archive_listing(archive),
+    )
     if total_uncompressed > _MAX_UNCOMPRESSED_BYTES:
         log.event(LogEvent.FS_ARCHIVE_OVERSIZE, level="warning", size=total_uncompressed)
         return 0
 
     extracted_count = 0
     dst_resolved = dst.resolve()
-    for member in archive.infolist():
+    for member in members:
         member_path = (dst / member.filename).resolve()
         if not str(member_path).startswith(str(dst_resolved)):
             log.event(LogEvent.FS_ARCHIVE_UNSAFE_PATH, level="warning", filename=member.filename)
             continue
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
+            log.event(
+                LogEvent.FS_ARCHIVE_MEMBER_IGNORED,
+                level="debug",
+                filename=member.filename,
+                reason="not a subtitle file",
+            )
             continue
         extracted_path = Path(archive.extract(member, dst))
         if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
@@ -339,7 +358,7 @@ def count_files_in_directory(path: Path, extensions: Optional[Iterable[str]] = N
 
 
 class MPCHashAlgorithm:
-    def __init__(self, file_path: Path, **kwargs) -> None:
+    def __init__(self, file_path: Path, **kwargs: Any) -> None:
         file_size = file_path.stat().st_size
         self.file_path = file_path
         self.chunk_size = kwargs.get("chunk_size", 65536)

@@ -1,4 +1,6 @@
-from PySide6.QtCore import QSize, Qt
+from typing import cast
+
+from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, TransparentToolButton
@@ -34,5 +36,5 @@ class CaptionedToolButton(QWidget):
         column.addWidget(self.caption_label, alignment=Qt.AlignmentFlag.AlignHCenter)
 
     @property
-    def clicked(self):
-        return self.button.clicked
+    def clicked(self) -> SignalInstance:
+        return cast(SignalInstance, self.button.clicked)

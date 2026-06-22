@@ -2,7 +2,7 @@ import functools
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
@@ -11,7 +11,7 @@ from subsearch.runtime.logging.logger import log
 def load_json_data(json_file_path: Path) -> dict[str, Any]:
     log.event(LogEvent.CONFIG_READ, level="debug", filename=json_file_path.name)
     with open(json_file_path, "r", encoding="utf-8") as file:
-        return json.load(file)
+        return cast(dict[str, Any], json.load(file))
 
 
 def load_json_value(json_file_path: Path, key: str) -> Any:

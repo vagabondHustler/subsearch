@@ -1,4 +1,5 @@
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import QApplication, QFrame, QWidget
 
 from subsearch.ui.compat.qfluent import apply_popup_acrylic
@@ -29,7 +30,7 @@ class AnchoredPopup(QFrame):
             f" }}"
         )
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event: QShowEvent) -> None:
         # Reapplied on every show: hiding a popup can recreate its native window,
         # and the compositor effect is bound to the old window handle.
         if self._acrylic:
@@ -92,7 +93,7 @@ class AnchoredPopup(QFrame):
 
         self.move(QPoint(x, y))
 
-    def _screen_area(self, anchor_top_left: QPoint):
+    def _screen_area(self, anchor_top_left: QPoint) -> QRect | None:
         screen = self.screen() or QApplication.screenAt(anchor_top_left)
         if screen is None:
             return None

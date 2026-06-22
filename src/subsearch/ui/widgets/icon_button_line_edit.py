@@ -1,3 +1,5 @@
+from typing import cast
+
 from PySide6.QtCore import QSize, SignalInstance
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import LineEdit, TransparentToolButton
@@ -29,7 +31,7 @@ class IconButtonLineEdit(LineEdit):
 
     @property
     def button_clicked(self) -> SignalInstance:
-        return self._button.clicked
+        return cast(SignalInstance, self._button.clicked)
 
     def set_button_enabled(self, enabled: bool) -> None:
         self._button.setEnabled(enabled)

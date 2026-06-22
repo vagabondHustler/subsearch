@@ -1,5 +1,5 @@
 from PySide6.QtCore import QEvent, QObject, QRegularExpression, QSize, Qt, Signal
-from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtGui import QRegularExpressionValidator, QResizeEvent
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import CaptionLabel, LineEdit
 
@@ -45,7 +45,7 @@ class SliderWithValueLabel(QWidget):
         self._edit.setFixedWidth(self._edit_width_for_text(str(self._slider.maximum())))
         self._update_edit_pos()
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         edit_h = self._edit.sizeHint().height()
         inset = self._track_side_inset()
@@ -57,7 +57,7 @@ class SliderWithValueLabel(QWidget):
         return max(0, self._edit_width_for_text(widest_text) // 2 - HANDLE_CENTER)
 
     def _edit_width_for_text(self, text: str) -> int:
-        return self._edit.fontMetrics().horizontalAdvance(text) + EDIT_TEXT_PADDING
+        return int(self._edit.fontMetrics().horizontalAdvance(text)) + EDIT_TEXT_PADDING
 
     def _fit_edit_to_text(self) -> None:
         self._edit.setFixedWidth(self._edit_width_for_text(self._edit.text()))
@@ -81,7 +81,7 @@ class SliderWithValueLabel(QWidget):
     def _suffix_center_shift(self) -> int:
         if not self._suffix or self._edit.hasFocus():
             return 0
-        return self._edit.fontMetrics().horizontalAdvance(f" {self._suffix}") // 2
+        return int(self._edit.fontMetrics().horizontalAdvance(f" {self._suffix}")) // 2
 
     def _format_value(self, value: int) -> str:
         return f"{value} {self._suffix}" if self._suffix else str(value)
@@ -118,7 +118,7 @@ class SliderWithValueLabel(QWidget):
         self._update_edit_pos()
 
     def value(self) -> int:
-        return self._slider.value()
+        return int(self._slider.value())
 
     def setRange(self, minimum: int, maximum: int) -> None:
         self._slider.setRange(minimum, maximum)
@@ -127,7 +127,7 @@ class SliderWithValueLabel(QWidget):
         self._update_edit_pos()
 
     def track_top_offset(self) -> int:
-        return self._edit.sizeHint().height() + 4
+        return int(self._edit.sizeHint().height()) + 4
 
     def commit_edit(self) -> None:
         self._on_edit_finished()

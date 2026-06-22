@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 from PySide6.QtCore import QElapsedTimer, QEvent, QObject, QSize, Qt, Signal
-from PySide6.QtGui import QKeyEvent
+from PySide6.QtGui import QHideEvent, QKeyEvent, QMouseEvent
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -207,7 +207,7 @@ class FuzzyFinderPopup(AnchoredPopup):
             return True
         return False
 
-    def hideEvent(self, event) -> None:
+    def hideEvent(self, event: QHideEvent) -> None:
         self._time_since_hidden.restart()
         super().hideEvent(event)
 
@@ -270,12 +270,12 @@ class FuzzySelect(QFrame):
     def open_finder(self) -> None:
         self._popup.open(self.currentText())
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         if self._popup.closed_recently():
             return
         self.open_finder()
 
-    def keyPressEvent(self, event) -> None:
+    def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() in OPEN_KEYS:
             self.open_finder()
             return

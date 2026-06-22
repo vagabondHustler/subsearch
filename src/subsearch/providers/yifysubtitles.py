@@ -11,7 +11,7 @@ from subsearch.runtime.models import ProviderDiagnosticStatus
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
         self.download_domain = ""
@@ -57,7 +57,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         node = item.css_first("a")
         return node.text().strip() if node else ""
 
-    def parse_item(self, item) -> None:
+    def parse_item(self, item: LexborNode) -> None:
         node = item.css_first("a")
         titles = node.text().strip().split("subtitle ")[-1].split("\n")
         _href = node.attributes["href"].split("/")  # type: ignore
@@ -79,9 +79,9 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
 
 
 class YifySubtitles(YifySubtitlesScraper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         YifySubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         self.run_search(self.get_subtitles)

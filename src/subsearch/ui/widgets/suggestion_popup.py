@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from PySide6.QtCore import QEvent, QObject, Qt, Signal
-from PySide6.QtGui import QKeyEvent
+from PySide6.QtGui import QEnterEvent, QKeyEvent, QMouseEvent
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
@@ -41,10 +41,10 @@ class SuggestionRow(QLabel):
             f" border-radius: 4px; padding: {ROW_PADDING}; }}"
         )
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         self.clicked.emit(self.index)
 
-    def enterEvent(self, event) -> None:
+    def enterEvent(self, event: QEnterEvent) -> None:
         self.hovered.emit(self.index)
 
 

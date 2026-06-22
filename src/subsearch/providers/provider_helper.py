@@ -176,7 +176,7 @@ class ProviderHelper:
         breakdown = ", ".join(f"{reason}: {count}" for reason, count in self.skip_counts.items())
         log.event(LogEvent.PROVIDER_SKIPS, provider=self.provider_name, total=total, breakdown=breakdown)
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         raise NotImplementedError
 
     def run_search(self, search_fn: Callable[[], ProviderDiagnosticStatus]) -> None:

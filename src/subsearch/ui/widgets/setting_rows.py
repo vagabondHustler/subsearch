@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Callable
 
-from PySide6.QtCore import QLocale, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QDoubleValidator, QIntValidator
+from PySide6.QtCore import QEvent, QLocale, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QDoubleValidator, QEnterEvent, QIntValidator
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -104,11 +104,11 @@ class HelpButton(TransparentToolButton):
     def set_explanation(self, explanation: str) -> None:
         self._popup.set_explanation(explanation)
 
-    def enterEvent(self, e) -> None:
+    def enterEvent(self, e: QEnterEvent) -> None:
         self._hover_timer.start()
         super().enterEvent(e)
 
-    def leaveEvent(self, e) -> None:
+    def leaveEvent(self, e: QEvent) -> None:
         self._hover_timer.stop()
         self._popup.hide()
         super().leaveEvent(e)
@@ -179,7 +179,7 @@ class SettingRow(QFrame):
 
 
 def make_switches_mutually_exclusive(first: "SwitchRow", second: "SwitchRow") -> None:
-    def uncheck_other_when_enabled(other_row: "SwitchRow"):
+    def uncheck_other_when_enabled(other_row: "SwitchRow") -> Callable[[bool], None]:
         def on_toggled(checked: bool) -> None:
             if checked and other_row.switch.isChecked():
                 other_row.set_checked_silently(False)
@@ -564,7 +564,7 @@ class DirectoryPathRow(QWidget):
         return row
 
     def text(self) -> str:
-        return self.path_edit.text()
+        return str(self.path_edit.text())
 
     def set_path(self, path: str) -> None:
         self.path_edit.setText(path)

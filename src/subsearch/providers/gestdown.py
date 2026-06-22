@@ -45,11 +45,11 @@ class GestdownApi:
 
 
 class Gestdown(provider_helper.ProviderHelper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         self.run_search(self._search_and_collect)
 
     def _search_and_collect(self) -> ProviderDiagnosticStatus:
@@ -76,7 +76,7 @@ class Gestdown(provider_helper.ProviderHelper):
 
     @property
     def _language_name(self) -> str:
-        return self.language_data[self.app_config.selected_language]["name"]  # type: ignore[index]
+        return str(self.language_data[self.app_config.selected_language]["name"])  # type: ignore[index]
 
     def _matching_show_id(self, response: Response) -> str | None:
         data = response.json()
@@ -87,7 +87,7 @@ class Gestdown(provider_helper.ProviderHelper):
         if show is None:
             return None
         log.event(LogEvent.PROVIDER_SEARCHING, level="debug", provider=self.provider_name)
-        return show["id"]
+        return str(show["id"])
 
     def _select_show(self, shows: list[dict[str, Any]], target: str) -> dict[str, Any] | None:
         exact = [show for show in shows if normalize_show_name(show["name"]) == target]
@@ -121,7 +121,9 @@ class Gestdown(provider_helper.ProviderHelper):
                 self.record_filtered_out(self.provider_name, release_name, reason)
                 continue
             download_url = api.download_url(subtitle["downloadUri"])
-            self.prepare_subtitle(self.provider_name, release_name, download_url, {}, download_count=subtitle.get("downloadCount", 0))
+            self.prepare_subtitle(
+                self.provider_name, release_name, download_url, {}, download_count=subtitle.get("downloadCount", 0)
+            )
 
     def _release_name(self, subtitle: dict[str, Any]) -> str:
         version = subtitle.get("version") or str(subtitle.get("subtitleId", ""))

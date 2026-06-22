@@ -1,7 +1,7 @@
 import webbrowser
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QKeyEvent, QKeySequence
+from PySide6.QtGui import QKeyEvent, QKeySequence, QMouseEvent
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, CaptionLabel, LineEdit, TransparentToolButton
 
@@ -129,7 +129,7 @@ class MaskedApiKeyLineEdit(LineEdit):
             return
         super().keyPressEvent(event)
 
-    def mouseDoubleClickEvent(self, event) -> None:
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         event.accept()
 
 
