@@ -44,10 +44,10 @@ def test_await_warmup_joins_the_thread():
     assert warmup._warmup_thread.is_alive() is False
 
 
-def test_start_warmup_imports_the_application_module():
+def test_start_warmup_imports_the_entrypoint_module():
     import sys
 
-    sys.modules.pop("subsearch.ui.application", None)
+    sys.modules.pop("subsearch.ui.entrypoint", None)
     warmup.start_warmup()
     warmup.await_warmup()
-    assert "subsearch.ui.application" in sys.modules
+    assert "subsearch.ui.entrypoint" in sys.modules

@@ -7,7 +7,7 @@ def _spinner_titles(events):
 
 def _patch_window(monkeypatch, events):
     from subsearch.runtime.logging.logger import log
-    from subsearch.ui.application import entrypoint
+    from subsearch.ui import entrypoint
 
     class FakeWindow:
         def __init__(self, *args, **kwargs) -> None:

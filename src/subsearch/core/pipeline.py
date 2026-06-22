@@ -193,7 +193,7 @@ class SearchPipeline:
         # open_settings_window owns the "Waiting for user inputs" banner; starting
         # one here too would be torn down and re-created identically by it.
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
-        from subsearch.ui.application import open_settings_window
+        from subsearch.ui.entrypoint import open_settings_window
 
         self.bootstrap.manual_accepted_subtitles = open_settings_window(
             subtitles, search_job_factory=self.create_search_job

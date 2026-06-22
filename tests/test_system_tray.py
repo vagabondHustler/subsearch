@@ -2,9 +2,9 @@ import threading
 
 import pytest
 
-from subsearch.ui import system_tray
-from subsearch.ui.qt_application import get_application
-from subsearch.ui.system_tray import SystemTray
+from subsearch.ui.core import system_tray
+from subsearch.ui.core.qt_application import get_application
+from subsearch.ui.core.system_tray import SystemTray
 
 
 @pytest.fixture

@@ -34,7 +34,7 @@ class Flow:
 
 class SettingsFlow(Flow):
     def run(self) -> None:
-        from subsearch.ui.application import open_settings_window
+        from subsearch.ui.entrypoint import open_settings_window
 
         manual_accepted = open_settings_window(
             search_job_factory=self._make_search_job,
@@ -46,7 +46,7 @@ class SettingsFlow(Flow):
 
 class ManualSearchFlow(Flow):
     def run(self) -> None:
-        from subsearch.ui.application import open_settings_window
+        from subsearch.ui.entrypoint import open_settings_window
 
         manual_accepted = open_settings_window(
             subtitles=None,

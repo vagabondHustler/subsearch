@@ -6,7 +6,7 @@ from subsearch.io import windows_registry
 
 if TYPE_CHECKING:
     from subsearch.providers.provider_helper import SubtitleResults
-    from subsearch.ui.system_tray import SystemTray
+    from subsearch.ui.core.system_tray import SystemTray
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -89,7 +89,7 @@ class Bootstrap:
         if not self.ui_may_open:
             self.system_tray = HeadlessNotificationSink()
             return
-        from subsearch.ui.system_tray import SystemTray
+        from subsearch.ui.core.system_tray import SystemTray
 
         self.system_tray = SystemTray(
             enabled=self.app_config.system_tray,

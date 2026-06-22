@@ -13,7 +13,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 
 def __getattr__(name: str) -> Any:
     if name == "open_settings_window":
-        from subsearch.ui.application import open_settings_window
+        from subsearch.ui.entrypoint import open_settings_window
 
         return open_settings_window
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

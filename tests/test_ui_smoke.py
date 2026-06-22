@@ -57,7 +57,7 @@ def _collect_slider_rows(card):
 
 @pytest.fixture
 def settings_window(qtbot):
-    from subsearch.ui.application import SettingsWindow
+    from subsearch.ui.core import SettingsWindow
 
     window = SettingsWindow()
     qtbot.addWidget(window)

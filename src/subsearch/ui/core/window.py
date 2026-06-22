@@ -12,13 +12,13 @@ from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import SearchOutcome, Subtitle
-from subsearch.ui.application._constants import (
+from subsearch.ui.core._constants import (
     NAVIGATION_EXPAND_WIDTH,
     NAVIGATION_TOP_MARGIN,
     SAVE_CLEAN_COLOR,
     SAVE_DIRTY_COLOR,
 )
-from subsearch.ui.application.settings_interface import SettingsInterface, _collapsible
+from subsearch.ui.core.settings_interface import SettingsInterface, _collapsible
 from subsearch.ui.cards import (
     ApiCard,
     ApplicationCard,

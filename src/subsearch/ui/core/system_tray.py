@@ -2,7 +2,7 @@ from PySide6.QtCore import QEventLoop, QObject, QThread
 
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
-from subsearch.ui.qt_application import get_application
+from subsearch.ui.core.qt_application import get_application
 from subsearch.ui.widgets.notification_gate import notifications_allowed
 from subsearch.ui.widgets.notification_toast import NotificationToast
 

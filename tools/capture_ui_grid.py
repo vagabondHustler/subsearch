@@ -16,7 +16,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from subsearch.runtime.config.defaults import ConfigKey  # noqa: E402
 from subsearch.ui import warmup  # noqa: E402
-from subsearch.ui.application import SettingsWindow, open_settings_window  # noqa: E402
+from subsearch.ui.core import SettingsWindow, open_settings_window  # noqa: E402
 
 GRID_COLUMNS = 3
 

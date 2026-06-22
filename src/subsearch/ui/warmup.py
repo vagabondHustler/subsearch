@@ -10,7 +10,7 @@ def start_warmup() -> None:
         return
     _warmup_thread = threading.Thread(
         target=importlib.import_module,
-        args=("subsearch.ui.application",),
+        args=("subsearch.ui.entrypoint",),
         daemon=True,
     )
     _warmup_thread.start()
