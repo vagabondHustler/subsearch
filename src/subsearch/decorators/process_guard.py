@@ -38,7 +38,7 @@ def _release_mutex(kernel32: Any, mutex: Any) -> None:
 def _log_single_instance_setting() -> None:
     try:
         single_instance = config_session.get_config_session().read(ConfigKey.APPLICATION_SINGLE_INSTANCE)
-    except (FileNotFoundError, KeyError, TypeError):
+    except FileNotFoundError, KeyError, TypeError:
         return
 
     log.event(

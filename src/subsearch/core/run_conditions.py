@@ -28,6 +28,17 @@ class PipelineStep(StrEnum):
 
 ConditionList = list[tuple[str, "bool | Callable[[], bool]"]]
 
+STEP_DISPLAY_NAMES = {
+    PipelineStep.SUBTITLE_POST_PROCESSING: "Post-processing",
+    PipelineStep.EXTRACT_FILES: "Extracting subtitles",
+    PipelineStep.SUBTITLE_RENAME: "Renaming subtitle",
+    PipelineStep.SUBTITLE_MOVE_BEST: "Moving best subtitle",
+    PipelineStep.SUBTITLE_MOVE_ALL: "Moving all subtitles",
+    PipelineStep.RUN_PROVIDER_DIAGNOSTICS: "Provider diagnostics",
+    PipelineStep.FINISH_NOTIFICATION: "Finish notification",
+    PipelineStep.DOWNLOAD_FILES: "Downloading subtitles",
+}
+
 SKIP_LABEL_EXPLANATIONS = {
     "provider_enabled": "disabled in settings",
     "language_supports_opensubtitles": "does not support the selected language",
@@ -53,17 +64,6 @@ SKIP_LABEL_EXPLANATIONS = {
     "move_all_enabled": "moving all subtitles is disabled in settings",
     "not_move_all": "superseded by 'move all subtitles'",
     "diagnostics_enabled": "diagnostics are disabled in settings",
-}
-
-STEP_DISPLAY_NAMES = {
-    PipelineStep.SUBTITLE_POST_PROCESSING: "Post-processing",
-    PipelineStep.EXTRACT_FILES: "Extracting subtitles",
-    PipelineStep.SUBTITLE_RENAME: "Renaming subtitle",
-    PipelineStep.SUBTITLE_MOVE_BEST: "Moving best subtitle",
-    PipelineStep.SUBTITLE_MOVE_ALL: "Moving all subtitles",
-    PipelineStep.RUN_PROVIDER_DIAGNOSTICS: "Provider diagnostics",
-    PipelineStep.FINISH_NOTIFICATION: "Finish notification",
-    PipelineStep.DOWNLOAD_FILES: "Downloading subtitles",
 }
 
 
