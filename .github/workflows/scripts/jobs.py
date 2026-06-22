@@ -164,6 +164,10 @@ class OpenMainPullRequest:
     MANUAL_SUMMARY_START = "<!-- manual-summary:start -->"
     MANUAL_SUMMARY_END = "<!-- manual-summary:end -->"
     MANUAL_SUMMARY_PLACEHOLDER = "<!-- Write a concise release summary here. -->"
+    # Written by the validation workflow (actions.py); preserved here so body
+    # regeneration keeps the latest result block at the top of the PR.
+    VALIDATION_BLOCK_START = "<!-- release-validation:start -->"
+    VALIDATION_BLOCK_END = "<!-- release-validation:end -->"
 
     def _read_pr_content(self) -> tuple[str, str]:
         predicted_version = os.environ["PREDICTED_VERSION"]
@@ -193,11 +197,25 @@ class OpenMainPullRequest:
         content = summary.removeprefix(self.MANUAL_SUMMARY_START).removesuffix(self.MANUAL_SUMMARY_END).strip()
         return content != self.MANUAL_SUMMARY_PLACEHOLDER
 
+    def _validation_block(self, body: str) -> str | None:
+        start = body.find(self.VALIDATION_BLOCK_START)
+        if start == -1:
+            return None
+        end = body.find(self.VALIDATION_BLOCK_END, start)
+        if end == -1:
+            return None
+        return body[start : end + len(self.VALIDATION_BLOCK_END)]
+
     def _pr_body(self, changelog: str, existing_body: str = "") -> str:
         manual_summary = self._manual_summary(existing_body) or self._default_manual_summary()
         if not self._has_manual_summary(manual_summary):
-            return f"{manual_summary}\n\n{changelog}"
-        return f"###### TL;DR  <p><p>\n{manual_summary}\n\n<p>\n\n{changelog}"
+            body = f"{manual_summary}\n\n{changelog}"
+        else:
+            body = f"###### TL;DR  <p><p>\n{manual_summary}\n\n<p>\n\n{changelog}"
+        validation_block = self._validation_block(existing_body)
+        if validation_block is not None:
+            return f"{validation_block}\n\n{body}"
+        return body
 
     def _edit_pull_request(self, number: str, title: str, body: str) -> None:
         subprocess.run(

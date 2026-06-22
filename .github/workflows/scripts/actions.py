@@ -690,6 +690,11 @@ class ReleaseValidation:
     RESULT_PASSED = "passed"
     RESULT_FAILED = "failed"
 
+    # The result is mirrored into a block in the PR body so it renders above the
+    # commit/CI timeline. jobs.py preserves this block across body regeneration.
+    BODY_BLOCK_START = "<!-- release-validation:start -->"
+    BODY_BLOCK_END = "<!-- release-validation:end -->"
+
     # Matches the marker HTML comment: <!-- release-validation:result=passed;src=<hash>;run=<id> -->
     _STATE_PATTERN = re.compile(
         r"<!--\s*release-validation:result=(?P<result>\w+);src=(?P<src>[0-9a-f]+);run=(?P<run>\d+)\s*-->"
@@ -782,9 +787,36 @@ class ReleaseValidation:
         comments = json.loads(completed.stdout)["comments"]
         return any(f"<!-- {self.MARKER}:" in comment["body"] for comment in comments)
 
+    def _body_block(self, src_tree_hash: str, result: str, run_id: str) -> str:
+        outcome = "passed" if result == self.RESULT_PASSED else "failed"
+        line = f"###### Release validation {outcome} — src tree `{src_tree_hash}` (run {run_id})"
+        return "\n".join([self.BODY_BLOCK_START, line, self.BODY_BLOCK_END])
+
+    def _replace_body_block(self, body: str, block: str) -> str:
+        start = body.find(self.BODY_BLOCK_START)
+        if start == -1:
+            return f"{block}\n\n{body}" if body else block
+        end = body.find(self.BODY_BLOCK_END, start)
+        if end == -1:
+            return f"{block}\n\n{body}"
+        return body[:start] + block + body[end + len(self.BODY_BLOCK_END) :]
+
+    def _update_body(self, number: str, src_tree_hash: str, result: str, run_id: str) -> None:
+        completed = subprocess.run(
+            ["gh", "pr", "view", number, "--json", "body", "--jq", ".body"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        existing_body = completed.stdout.rstrip("\n")
+        block = self._body_block(src_tree_hash, result, run_id)
+        new_body = self._replace_body_block(existing_body, block)
+        subprocess.run(["gh", "pr", "edit", number, "--body", new_body], check=True)
+
     def record_validation(self, number: str, src_tree_hash: str, result: str, run_id: str) -> None:
         body = self._marker_body(src_tree_hash, result, run_id)
         command = ["gh", "pr", "comment", number, "--body", body]
         if self._has_marker_comment(number):
             command.append("--edit-last")
         subprocess.run(command, check=True)
+        self._update_body(number, src_tree_hash, result, run_id)
