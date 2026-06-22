@@ -108,7 +108,7 @@ class SearchPipeline:
             return None
         message = ", ".join(unhealthy)
         log.event(LogEvent.PIPELINE_DIAGNOSTICS_FLAGGED, level="warning", message=message)
-        self.bootstrap.system_tray.display_toast("Provider diagnostics", f"May have changed: {message}")
+        self.bootstrap.pending_notifications.append(("Provider diagnostics", f"May have changed: {message}"))
 
     def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
         search_provider = provider(**self.bootstrap.search_kwargs)
@@ -119,10 +119,17 @@ class SearchPipeline:
         self.bootstrap.health_reports.extend(search_provider.reported_health)
 
     def _notify_missing_api_key(self, provider_name: str) -> None:
-        self.bootstrap.system_tray.display_toast(
-            f"{provider_name} skipped",
-            f"Add your {provider_name} API key in settings to search {provider_name}.",
+        self.bootstrap.pending_notifications.append(
+            (
+                f"{provider_name} skipped",
+                f"Add your {provider_name} API key in settings to search {provider_name}.",
+            )
         )
+
+    def present_pending_notifications(self) -> None:
+        for title, message in self.bootstrap.pending_notifications:
+            self.bootstrap.system_tray.display_toast(title, message)
+        self.bootstrap.pending_notifications.clear()
 
     @run_if_conditions_met
     def opensubtitles(self) -> None:

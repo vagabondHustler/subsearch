@@ -1,4 +1,4 @@
-from PySide6.QtCore import QEventLoop, QObject
+from PySide6.QtCore import QEventLoop, QObject, QThread
 
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
@@ -21,21 +21,25 @@ class SystemTray(QObject):
             return
         if not notifications_allowed():
             return
-        get_application()
-        toast = NotificationToast(
+        application = get_application()
+        # The toast nests its own QEventLoop and is a QWidget; calling it off the GUI
+        # thread deadlocks the loop. Notifications are collected during the search and
+        # presented after provider workers join, so this must run on the GUI thread.
+        assert QThread.currentThread() is application.thread()
+        toast = self._build_toast(title, message)
+        loop = QEventLoop()
+        toast.dismissed.connect(loop.quit)
+        toast.show_above_clock()
+        loop.exec()
+
+    def _build_toast(self, title: str, message: str) -> NotificationToast:
+        return NotificationToast(
             title,
             message,
             succeeded=title == SUCCESS_TITLE,
             hold_duration_ms=self.display_duration_ms,
             play_sound=self.play_sound,
         )
-        self._show_and_wait(toast)
-
-    def _show_and_wait(self, toast: NotificationToast) -> None:
-        loop = QEventLoop()
-        toast.dismissed.connect(loop.quit)
-        toast.show_above_clock()
-        loop.exec()
 
     def start(self) -> None:
         if not self.enabled:

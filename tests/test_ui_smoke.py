@@ -163,6 +163,29 @@ def test_file_extensions_card_follows_context_menu_setting_via_store(qtbot) -> N
     assert all(check_box.isEnabled() for check_box in card.check_boxes.values())
 
 
+def test_subsource_checkbox_greys_out_without_api_key(qtbot) -> None:
+    from subsearch.runtime.config.defaults import ConfigKey
+    from subsearch.ui.cards.search_cards import SUBSOURCE_PROVIDER_KEY, ProvidersCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    store.write(ConfigKey.CREDENTIALS_SUBSOURCE_API_KEY_EXISTS, False)
+    card = ProvidersCard(store)
+    qtbot.addWidget(card)
+    subsource = card.check_boxes[SUBSOURCE_PROVIDER_KEY]
+    other = card.check_boxes["opensubtitles"]
+
+    assert not subsource.isEnabled()
+    assert other.isEnabled()
+
+    store.write(ConfigKey.CREDENTIALS_SUBSOURCE_API_KEY_EXISTS, True)
+    assert subsource.isEnabled()
+
+    store.write(ConfigKey.CREDENTIALS_SUBSOURCE_API_KEY_EXISTS, False)
+    assert not subsource.isEnabled()
+    assert other.isEnabled()
+
+
 def test_subtitle_filters_restore_defaults(qtbot) -> None:
     from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.search_cards import SubtitleFiltersCard

@@ -24,6 +24,7 @@ class Flow:
         self.pipeline.subtitle_post_processing()
         log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
         self.pipeline.run_provider_diagnostics()
+        self.pipeline.present_pending_notifications()
         self.pipeline.clean_up()
         self.pipeline.finish_notification()
 
@@ -84,6 +85,7 @@ class PipelineSearchFlow(Flow):
         pipeline.subtitle_post_processing()
         log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
         pipeline.run_provider_diagnostics()
+        pipeline.present_pending_notifications()
         pipeline.clean_up()
         pipeline.finish_notification()
 

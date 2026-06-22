@@ -49,6 +49,8 @@ _TOKEN_TUNING_DEFAULTS: DefaultsMap = [
 
 PROVIDER_GRID_COLUMNS = 3
 
+SUBSOURCE_PROVIDER_KEY = "subsource_site"
+
 PROVIDER_INCOMPATIBILITY_NAMES = {
     "opensubtitles": "opensubtitles",
     "yifysubtitles_site": "yifysubtitles",
@@ -440,8 +442,12 @@ class ProvidersCard(SettingsCard):
 
         self.add_row(IntInputRow(ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER, store, 1, 10))
 
+        self._language_compatible: dict[str, bool] = {key: True for key in self.check_boxes}
+        self._subsource_api_key_exists = bool(store.read(ConfigKey.CREDENTIALS_SUBSOURCE_API_KEY_EXISTS))
+
         self.apply_language_compatibility(store.read(ConfigKey.LANGUAGE_SELECTED))
         store.subscribe(ConfigKey.LANGUAGE_SELECTED, self.apply_language_compatibility)
+        store.subscribe(ConfigKey.CREDENTIALS_SUBSOURCE_API_KEY_EXISTS, self._on_subsource_api_key_changed)
         store.value_changed.connect(self._on_store_changed)
 
     def _on_store_changed(self, key: str, value: Any) -> None:
@@ -459,15 +465,27 @@ class ProvidersCard(SettingsCard):
 
     def apply_language_compatibility(self, language: str) -> None:
         incompatible_providers = self._language_data.get(language, {}).get("incompatibility", [])
-        for provider_key, check_box in self.check_boxes.items():
-            compatible = PROVIDER_INCOMPATIBILITY_NAMES[provider_key] not in incompatible_providers
-            self._apply_provider_compatibility_style(check_box, compatible)
+        for provider_key in self.check_boxes:
+            self._language_compatible[provider_key] = (
+                PROVIDER_INCOMPATIBILITY_NAMES[provider_key] not in incompatible_providers
+            )
+            self._refresh_provider_enabled(provider_key)
         language_name = self._language_data.get(language, {}).get("name", language)
         self._help_button.set_explanation(
             SETTING_DESCRIPTIONS[ConfigKey.SEARCH_PROVIDERS].explanation.format(language=language_name)
         )
 
-    def _apply_provider_compatibility_style(self, check_box: CheckBox, compatible: bool) -> None:
-        check_box.setEnabled(compatible)
-        text_color = TEXT_COLOR if compatible else DISABLED_TEXT_COLOR
+    def _on_subsource_api_key_changed(self, exists: bool) -> None:
+        self._subsource_api_key_exists = bool(exists)
+        self._refresh_provider_enabled(SUBSOURCE_PROVIDER_KEY)
+
+    def _refresh_provider_enabled(self, provider_key: str) -> None:
+        enabled = self._language_compatible[provider_key]
+        if provider_key == SUBSOURCE_PROVIDER_KEY and not self._subsource_api_key_exists:
+            enabled = False
+        self._apply_provider_enabled_style(self.check_boxes[provider_key], enabled)
+
+    def _apply_provider_enabled_style(self, check_box: CheckBox, enabled: bool) -> None:
+        check_box.setEnabled(enabled)
+        text_color = TEXT_COLOR if enabled else DISABLED_TEXT_COLOR
         check_box.setStyleSheet(f"CheckBox {{ color: {text_color}; }}")

@@ -62,10 +62,15 @@ def test_conditions_subsource(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.only_foreign_parts = True
     fake_cls.release_data.tvseries = True
     fake_cls.app_config.providers["subsource_site"] = True
+    fake_cls.app_config.subsource_api_key = "sk_test"
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
     fake_cls.app_config.only_foreign_parts = False
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
+
+    fake_cls.app_config.subsource_api_key = ""
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+    assert fake_cls.call_conditions.unmet_condition_labels("subsource") == ["subsource_api_key_configured"]
 
 
 def test_conditions_tvsubtitles(fake_cls: FakeBootstrap) -> None:
