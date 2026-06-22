@@ -1,7 +1,8 @@
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QCursor
+from PySide6.QtGui import QCursor, QTextOption
 from PySide6.QtWidgets import QFrame, QTextBrowser, QVBoxLayout, QWidget
 
+from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import CAPTION_FONT_SIZE, TEXT_COLOR, body_font
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
@@ -9,6 +10,7 @@ POPUP_MIN_WIDTH = 580
 POPUP_MAX_WIDTH = 1100
 POPUP_MAX_HEIGHT = 420
 CONTENT_MARGIN = 20
+CONTENT_HEIGHT_MARGIN = 4
 HIDE_GRACE_MS = 300
 
 
@@ -24,9 +26,27 @@ class MarkdownPopup(AnchoredPopup):
         self._browser.setFont(caption_font)
         self._browser.setOpenExternalLinks(True)
         self._browser.setFrameShape(QFrame.Shape.NoFrame)
-        self._browser.setLineWrapMode(QTextBrowser.LineWrapMode.NoWrap)
-        self._browser.setMaximumHeight(POPUP_MAX_HEIGHT)
-        self._browser.setStyleSheet(f"QTextBrowser {{ background: transparent; color: {TEXT_COLOR}; }}")
+        self._browser.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
+        self._browser.setWordWrapMode(QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere)
+        self._browser.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._browser.setStyleSheet(
+            f"QTextBrowser {{ background: transparent; color: {TEXT_COLOR}; }}"
+            "QScrollBar:vertical {"
+            " background: transparent;"
+            " width: 8px;"
+            " margin: 4px 2px 4px 0;"
+            "}"
+            "QScrollBar::handle:vertical {"
+            f" background: {palette.NEUTRAL_4};"
+            " min-height: 24px;"
+            " border-radius: 4px;"
+            "}"
+            "QScrollBar::handle:vertical:hover {"
+            f" background: {palette.NEUTRAL_3};"
+            "}"
+            "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }"
+            "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }"
+        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 8)
@@ -46,6 +66,9 @@ class MarkdownPopup(AnchoredPopup):
         content_width = int(self._browser.document().idealWidth()) + CONTENT_MARGIN
         width = max(POPUP_MIN_WIDTH, min(content_width, POPUP_MAX_WIDTH))
         self._browser.setFixedWidth(width)
+        self._browser.document().setTextWidth(self._browser.viewport().width())
+        content_height = int(self._browser.document().size().height()) + CONTENT_HEIGHT_MARGIN
+        self._browser.setFixedHeight(min(content_height, POPUP_MAX_HEIGHT))
 
     def show_above(self) -> None:
         super().show_above()

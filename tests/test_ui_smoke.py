@@ -73,6 +73,49 @@ def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
         qtbot.waitUntil(lambda current=interface: stacked.currentWidget() is current, timeout=2000)
 
 
+def test_update_card_renders_the_scraped_release(qtbot) -> None:
+    from subsearch.io.app_updater import UpdateAvailability
+    from subsearch.ui.cards.update_card import UpdateCard
+    from subsearch.ui.state.tasks import TaskRunner
+
+    card = UpdateCard(TaskRunner())
+    qtbot.addWidget(card)
+
+    card._on_check_finished(
+        UpdateAvailability(
+            current_version="3.0.0",
+            latest_version="3.1.0",
+            update_available=True,
+            is_prerelease=False,
+            changelog="New update details",
+        )
+    )
+
+    assert card.latest_version_label.text() == "Latest release  3.1.0"
+    assert card.status_label.text() == "A new version is available."
+    assert card.install_button.isEnabled()
+
+
+def test_changelog_popup_wraps_long_unbroken_lines(qtbot) -> None:
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QTextOption
+    from PySide6.QtWidgets import QTextBrowser, QWidget
+
+    from subsearch.ui.widgets.text_popup import POPUP_MAX_WIDTH, MarkdownPopup
+
+    anchor = QWidget()
+    qtbot.addWidget(anchor)
+    popup = MarkdownPopup(anchor)
+    qtbot.addWidget(popup)
+    popup.set_markdown("a" * 5000)
+
+    assert popup._browser.lineWrapMode() is QTextBrowser.LineWrapMode.WidgetWidth
+    assert popup._browser.wordWrapMode() is QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere
+    assert popup._browser.horizontalScrollBarPolicy() is Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+    assert popup._browser.width() <= POPUP_MAX_WIDTH
+    assert popup._browser.document().size().height() > popup._browser.height()
+
+
 def test_search_threshold_restore_defaults_resets_all_tuning_values(qtbot) -> None:
     from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.search_cards import SearchThresholdCard

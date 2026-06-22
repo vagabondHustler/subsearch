@@ -374,7 +374,7 @@ class MPCHashAlgorithm:
 
 def download_response(
     msi_package_path: Path,
-    response: requests.Response,
+    response: requests.Response | CurlResponse,
     on_progress: Callable[[float], None] | None = None,
 ) -> None:
     start_time = time.time()
