@@ -1,18 +1,10 @@
-import sys
 from collections.abc import Sequence
 from typing import Callable
 
-from PySide6.QtCore import QMessageLogContext, Qt, QtMsgType, qInstallMessageHandler
-from PySide6.QtGui import QCloseEvent, QColor, QIcon, QShowEvent
-from PySide6.QtWidgets import QSystemTrayIcon, QVBoxLayout, QWidget
-from qfluentwidgets import (
-    FluentWindow,
-    NavigationItemPosition,
-    SingleDirectionScrollArea,
-    Theme,
-    setTheme,
-    setThemeColor,
-)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCloseEvent, QColor, QIcon
+from PySide6.QtWidgets import QSystemTrayIcon, QWidget
+from qfluentwidgets import FluentWindow, NavigationItemPosition
 
 from subsearch.io import windows_registry
 from subsearch.runtime.config import APP_PATHS
@@ -20,7 +12,13 @@ from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import SearchOutcome, Subtitle
-from subsearch.ui import warmup
+from subsearch.ui.application._constants import (
+    NAVIGATION_EXPAND_WIDTH,
+    NAVIGATION_TOP_MARGIN,
+    SAVE_CLEAN_COLOR,
+    SAVE_DIRTY_COLOR,
+)
+from subsearch.ui.application.settings_interface import SettingsInterface, _collapsible
 from subsearch.ui.cards import (
     ApiCard,
     ApplicationCard,
@@ -34,7 +32,6 @@ from subsearch.ui.cards import (
     ResourcesCard,
     SearchModeCard,
     SearchThresholdCard,
-    SettingsCard,
     ShellIntegrationCard,
     SubsearchLicenseCard,
     SubtitleFiltersCard,
@@ -44,13 +41,10 @@ from subsearch.ui.cards import (
 )
 from subsearch.ui.cards.subtitle_workspace import ManualSearchInterface
 from subsearch.ui.compat.qfluent import (
-    ACCENT_COLOR,
     enlarge_navigation_icons,
-    force_fixed_accent_color,
     forward_navigation_wheel_to_page,
 )
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.qt_application import get_application
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import (
     PostProcessingService,
@@ -69,50 +63,8 @@ from subsearch.ui.services.title_suggestions import TitleSuggestionService
 from subsearch.ui.services.video_file import VideoFileService
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner
-from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import TEXT_COLOR, apply_body_font
 from subsearch.ui.widgets.tray_icon import WindowTrayIcon
-
-NAVIGATION_EXPAND_WIDTH = 180
-NAVIGATION_TOP_MARGIN = 8
-SAVE_CLEAN_COLOR = palette.NEUTRAL_3
-SAVE_DIRTY_COLOR = palette.NEUTRAL_1
-
-
-def _collapsible(*cards: SettingsCard) -> list[SettingsCard]:
-    for card in cards:
-        card.make_collapsible()
-    return list(cards)
-
-
-class SettingsInterface(SingleDirectionScrollArea):
-    def __init__(self, object_name: str, build_cards: Callable[[], Sequence[QWidget]]) -> None:
-        super().__init__(orient=Qt.Orientation.Vertical)
-        self.setObjectName(object_name)
-        self.setWidgetResizable(True)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self._build_cards = build_cards
-        self._cards_built = False
-
-        self._container = QWidget(self)
-        self._layout = QVBoxLayout(self._container)
-        self._layout.setContentsMargins(36, 24, 36, 24)
-        self._layout.setSpacing(16)
-        self._layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        self.setWidget(self._container)
-        self.enableTransparentBackground()
-
-    def showEvent(self, event: QShowEvent) -> None:
-        self.build_cards()
-        super().showEvent(event)
-
-    def build_cards(self) -> None:
-        if self._cards_built:
-            return
-        self._cards_built = True
-        for card in self._build_cards():
-            self._layout.addWidget(card)
 
 
 class SettingsWindow(FluentWindow):
@@ -338,44 +290,3 @@ class SettingsWindow(FluentWindow):
             super().closeEvent(e)
         else:
             e.ignore()
-
-
-def _suppress_point_size_warning(message_type: QtMsgType, context: QMessageLogContext, message: str) -> None:
-    if "setPointSize" in message:
-        return
-    sys.stderr.write(f"{message}\n")
-
-
-def open_settings_window(
-    subtitles: list[Subtitle] | None = None,
-    search_job_factory: Callable[..., SearchJobProtocol] | None = None,
-    start_search_immediately: bool = False,
-    on_window_shown: Callable[[], None] | None = None,
-) -> list[Subtitle]:
-    warmup.await_warmup()
-    qInstallMessageHandler(_suppress_point_size_warning)
-    application = get_application()
-    setTheme(Theme.DARK)
-    setThemeColor(ACCENT_COLOR)
-    force_fixed_accent_color()
-    application.setStyleSheet(
-        f"QLabel, CheckBox, RadioButton, BodyLabel, CaptionLabel, SubtitleLabel, "
-        f"TitleLabel, StrongBodyLabel, SpinBox, ComboBox, LineEdit, "
-        f"#headerLabel, #titleLabel {{ color: {TEXT_COLOR}; }}"
-        f"HeaderCardWidget, CardWidget, SimpleCardWidget, ElevatedCardWidget "
-        f"{{ background-color: transparent; border: none; }}"
-    )
-    window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
-    log.event(LogEvent.BOOT_UI_OPENED)
-    if not start_search_immediately:
-        # When a search runs immediately the search worker owns the banner sequence
-        # ("Searching" -> "Searched" -> "Waiting for user inputs"); starting one here
-        # would be torn down by it and emit a spurious "Processed user inputs".
-        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
-    window.show()
-    if on_window_shown is not None:
-        on_window_shown()
-    application.exec()
-    log.event(LogEvent.BOOT_UI_CLOSED, level="debug")
-    log.end_banner()
-    return window.manual_search_interface.downloaded
