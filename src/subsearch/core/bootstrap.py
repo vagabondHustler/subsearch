@@ -56,6 +56,7 @@ class Bootstrap:
         self.system_tray: "SystemTray | HeadlessNotificationSink"
         self.manual_accepted_subtitles: list[Subtitle] = []
         self.health_reports: list[ProviderResult] = []
+        self.pending_notifications: list[tuple[str, str]] = []
         self.language_data: dict[str, Any] = {}
         self.release_data = ReleaseInfo("", 0, "", "", "", "", False, "", "", "")
         self.provider_urls = ProviderUrls([], [], [], [], [])

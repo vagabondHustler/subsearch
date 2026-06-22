@@ -33,6 +33,7 @@ SKIP_LABEL_EXPLANATIONS = {
     "language_supports_opensubtitles": "does not support the selected language",
     "language_supports_yifysubtitles": "does not support the selected language",
     "language_supports_subsource": "does not support the selected language",
+    "subsource_api_key_configured": "no API key configured",
     "language_supports_tvsubtitles": "does not support the selected language",
     "language_supports_gestdown": "does not support the selected language",
     "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
@@ -193,6 +194,7 @@ class RunConditions:
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_subsource", lambda: self.language_supports_provider("subsource")),
                 ("provider_enabled", self.app_config.providers["subsource_site"]),
+                ("subsource_api_key_configured", bool(self.app_config.subsource_api_key)),
             ],
             PipelineStep.TVSUBTITLES: [
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
