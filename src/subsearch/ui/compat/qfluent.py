@@ -6,10 +6,18 @@ reaches into private internals. When upgrading the library, re-verify this file
 first - nothing outside ui/compat/ may touch a private qfluentwidgets attribute.
 """
 
-from typing import cast
+from typing import Any, Callable, cast
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QRectF, Qt
-from PySide6.QtGui import QColor, QCursor, QPainter, QPen
+from PySide6.QtGui import (
+    QColor,
+    QCursor,
+    QEnterEvent,
+    QMouseEvent,
+    QPainter,
+    QPaintEvent,
+    QPen,
+)
 from PySide6.QtWidgets import QAbstractScrollArea, QApplication, QWidget
 from qfluentwidgets import (
     LineEdit,
@@ -66,7 +74,7 @@ NAVIGATION_ICON_SIZE = 24
 NAVIGATION_ITEM_HEIGHT = 36
 
 
-def _paint_navigation_item_with_large_icon(item, _event) -> None:
+def _paint_navigation_item_with_large_icon(item: Any, _event: QPaintEvent) -> None:
     painter = QPainter(item)
     try:
         painter.setRenderHints(
@@ -134,11 +142,11 @@ def enlarge_navigation_icons(panel: NavigationPanel) -> None:
 
 
 class _NavigationWheelForwarder(QObject):
-    def __init__(self, panel: NavigationPanel, page_provider) -> None:
+    def __init__(self, panel: NavigationPanel, page_provider: Callable[[], QWidget | None]) -> None:
         super().__init__(panel)
         self._page_provider = page_provider
 
-    def eventFilter(self, _watched, event) -> bool:
+    def eventFilter(self, _watched: QObject, event: QEvent) -> bool:
         if event.type() != QEvent.Type.Wheel:
             return False
         page = self._page_provider()
@@ -149,7 +157,7 @@ class _NavigationWheelForwarder(QObject):
         return True
 
 
-def forward_navigation_wheel_to_page(panel: NavigationPanel, page_provider) -> None:
+def forward_navigation_wheel_to_page(panel: NavigationPanel, page_provider: Callable[[], QWidget | None]) -> None:
     forwarder = _NavigationWheelForwarder(panel, page_provider)
     panel.installEventFilter(forwarder)
 
@@ -171,7 +179,7 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
     indicator = switch.indicator
     radius = indicator.height() / 2
 
-    def draw_background(painter) -> None:
+    def draw_background(painter: QPainter) -> None:
         if indicator.isChecked():
             painter.setPen(indicator._borderColor())
         else:
@@ -181,7 +189,7 @@ def thicken_unchecked_switch_border(switch: SwitchButton) -> None:
         painter.setBrush(indicator._backgroundColor())
         painter.drawRoundedRect(indicator.rect().adjusted(1, 1, -1, -1), radius, radius)
 
-    def draw_circle(painter) -> None:
+    def draw_circle(painter: QPainter) -> None:
         painter.setPen(Qt.PenStyle.NoPen)
         if not switch.isEnabled():
             painter.setBrush(SWITCH_HANDLE_FILL_DISABLED)
@@ -250,7 +258,7 @@ _DWMWA_WINDOW_CORNER_PREFERENCE = 33
 _DWMWCP_ROUND = 2
 
 
-def apply_popup_acrylic(popup) -> bool:
+def apply_popup_acrylic(popup: QWidget) -> bool:
     # The caller must set WA_TranslucentBackground before the native window exists
     # (i.e. in __init__): toggling it on a live window leaves the surface without an
     # alpha channel while disabling background erase, so repaints smear over each other.
@@ -295,22 +303,22 @@ PRESSED_DISC_COLOR = QColor(255, 255, 255, 12)
 
 
 class CircleDotHandle(SliderHandle):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
         self.setFixedSize(HANDLE_SIZE, HANDLE_SIZE)
         self._hovered = False
         self._pressed = False
         self._press_offset = QPoint()
 
-    def enterEvent(self, e) -> None:
+    def enterEvent(self, e: QEnterEvent) -> None:
         self._hovered = True
         self.update()
 
-    def leaveEvent(self, e) -> None:
+    def leaveEvent(self, e: QEvent) -> None:
         self._hovered = False
         self.update()
 
-    def mousePressEvent(self, e) -> None:
+    def mousePressEvent(self, e: QMouseEvent) -> None:
         self._pressed = True
         # Remember where on the handle the press landed so an off-center grab
         # does not jump the value; only drags move it.
@@ -318,16 +326,16 @@ class CircleDotHandle(SliderHandle):
         self.update()
         self.pressed.emit()
 
-    def mouseMoveEvent(self, e) -> None:
+    def mouseMoveEvent(self, e: QMouseEvent) -> None:
         slider = cast("CircleDotSlider", self.parent())
         slider.update_value_from_handle(e.position().toPoint() - self._press_offset)
 
-    def mouseReleaseEvent(self, e) -> None:
+    def mouseReleaseEvent(self, e: QMouseEvent) -> None:
         self._pressed = False
         self.update()
         self.released.emit()
 
-    def paintEvent(self, e) -> None:
+    def paintEvent(self, e: QPaintEvent) -> None:
         center = QPoint(HANDLE_CENTER, HANDLE_CENTER)
         painter = QPainter(self)
         painter.setRenderHints(QPainter.RenderHint.Antialiasing)
@@ -387,7 +395,7 @@ class _RightInsetListItemDelegate(ListItemDelegate):
         super().__init__(parent)
         self._right_inset = right_inset
 
-    def _drawBackground(self, painter: QPainter, option, index) -> None:
+    def _drawBackground(self, painter: QPainter, option: Any, index: Any) -> None:
         option.rect.adjust(0, 0, -self._right_inset, 0)
         super()._drawBackground(painter, option, index)
 

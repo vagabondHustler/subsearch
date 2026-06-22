@@ -3,9 +3,6 @@ run-name: Validate release
 
 
 on:
-  push:
-    branches:
-      - dev
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
@@ -24,23 +21,24 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: validate-release-${{ github.ref }}
+  group: validate-release-dev
   cancel-in-progress: true
 
 env:
   ARTIFACT_RETENTION_DAYS: 90
   JOBS: python .github/workflows/scripts/jobs.py
+  # Scheduled/manual runs start from the default branch; validation always targets the dev branch.
+  VALIDATION_REF: dev
 
 jobs:
   prepare:
     name: Open pull request to main
-    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v6
@@ -76,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v6
@@ -104,7 +102,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
       - uses: ./.github/actions/setup-python
@@ -127,7 +125,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
 
       - uses: ./.github/actions/setup-python
 
@@ -155,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
 
       - uses: ./.github/actions/setup-python
 
@@ -177,7 +175,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
       - uses: ./.github/actions/setup-python
@@ -209,7 +207,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v6

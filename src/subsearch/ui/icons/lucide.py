@@ -1,5 +1,6 @@
 from enum import Enum
 from functools import lru_cache
+from typing import Any
 
 from PySide6.QtCore import QByteArray, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap, QTransform
@@ -77,7 +78,6 @@ class LucideIcon(FluentIconBase, Enum):
     PICTURE_IN_PICTURE_2 = "picture-in-picture-2"
     SAVE = "save"
 
-
     def source(self) -> str:
         return ICON_SOURCES[self.value]
 
@@ -88,7 +88,7 @@ class LucideIcon(FluentIconBase, Enum):
         stroke_color = QColor(color).name() if color else getIconColor(theme)
         return QIcon(SvgIconEngine(_recolored_svg(self.source(), stroke_color).decode()))
 
-    def render(self, painter, rect, theme=Theme.AUTO, indexes=None, **attributes) -> None:
+    def render(self, painter: Any, rect: Any, theme: Any = Theme.AUTO, indexes: Any = None, **attributes: Any) -> None:
         stroke_color = attributes.get("fill") or attributes.get("stroke") or getIconColor(theme)
         drawSvgIcon(QByteArray(_recolored_svg(self.source(), stroke_color)), painter, rect)
 

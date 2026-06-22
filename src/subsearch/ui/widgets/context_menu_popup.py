@@ -1,8 +1,16 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPainterPath
+from PySide6.QtCore import QEvent, QPoint, Qt
+from PySide6.QtGui import (
+    QColor,
+    QEnterEvent,
+    QKeyEvent,
+    QMouseEvent,
+    QPainter,
+    QPainterPath,
+    QPaintEvent,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -68,13 +76,13 @@ class ContextMenuRow(QWidget):
         background = palette.NEUTRAL_4 if selected else "transparent"
         self.setStyleSheet(f"ContextMenuRow {{ background-color: {background}; border-radius: 4px; }}")
 
-    def enterEvent(self, event) -> None:
+    def enterEvent(self, event: QEnterEvent) -> None:
         self.render_selected(True)
 
-    def leaveEvent(self, event) -> None:
+    def leaveEvent(self, event: QEvent) -> None:
         self.render_selected(False)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         self._item.on_triggered()
 
 
@@ -127,7 +135,7 @@ class ContextMenuPopup(AnchoredPopup):
             return
         super().keyPressEvent(event)
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         rect = self.rect().adjusted(0, 0, -1, -1)

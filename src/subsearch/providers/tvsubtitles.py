@@ -1,4 +1,5 @@
 import re
+from typing import Any
 from urllib.parse import quote
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
@@ -41,7 +42,7 @@ def _resolve_download_url(download_page_url: str, referer: str, timeout: tuple[i
 
 
 class TvSubtitlesScraper(provider_helper.ProviderHelper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
@@ -77,7 +78,7 @@ class TvSubtitlesScraper(provider_helper.ProviderHelper):
     @property
     def language_code(self) -> str:
         language = self.language_data[self.app_config.selected_language]  # type: ignore[index]
-        return language.get("tvsubtitles_code") or language["two_letter_code"]
+        return str(language.get("tvsubtitles_code") or language["two_letter_code"])
 
     def response_is_well_formed(self, tree: LexborHTMLParser) -> bool:
         return tree.css_first("table") is not None
@@ -146,9 +147,9 @@ class TvSubtitlesScraper(provider_helper.ProviderHelper):
 
 
 class TvSubtitles(TvSubtitlesScraper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         TvSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         self.run_search(self.get_subtitles)

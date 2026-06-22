@@ -50,12 +50,12 @@ class SubsourceApi:
 
 
 class Subsource(provider_helper.ProviderHelper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
         self.api_key = self.app_config.subsource_api_key
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         if not self.api_key:
             log.event(LogEvent.PROVIDER_SKIPPED_NO_API_KEY, level="warning", provider=self.provider_name)
             self.report_diagnostic_status(ProviderDiagnosticStatus.NO_RESPONSE, 0)
@@ -87,7 +87,7 @@ class Subsource(provider_helper.ProviderHelper):
         for movie in data["data"]:
             if self._skip_movie(movie):
                 continue
-            return movie["movieId"]
+            return int(movie["movieId"])
         return None
 
     def _collect_subtitles(self, api: SubsourceApi, response: Response) -> None:

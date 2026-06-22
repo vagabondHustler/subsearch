@@ -1,5 +1,5 @@
 from PySide6.QtCore import QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QPainter, QPen, QPixmap
+from PySide6.QtGui import QColor, QPainter, QPaintEvent, QPen, QPixmap
 from PySide6.QtWidgets import QWidget
 
 from subsearch.ui.theme.typography import TEXT_COLOR
@@ -65,7 +65,7 @@ class RippleSpinner(QWidget):
         self._progress = (self._progress + FRAME_INTERVAL_MS / CYCLE_MS) % 1.0
         self.update()
 
-    def paintEvent(self, _event) -> None:
+    def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
         paint_ripple(painter, self.width(), self.height(), self._color, self._progress)
         painter.end()

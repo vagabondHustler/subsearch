@@ -1,15 +1,19 @@
 from pathlib import Path
+from typing import Callable
 
-from PySide6.QtCore import QByteArray, QRect, QSize, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QByteArray, QEvent, QRect, QSize, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
     QColor,
     QDesktopServices,
     QDragEnterEvent,
     QDropEvent,
+    QEnterEvent,
     QFont,
     QIcon,
     QPainter,
+    QPaintEvent,
     QPen,
+    QResizeEvent,
 )
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
@@ -30,6 +34,8 @@ from subsearch.parsing.imdb_lookup import (
 from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config import SEARCH_SUBJECT, SUPPORTED_FILE_EXT, WORKSPACE
 from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.logging.events import LogEvent
+from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     MatchTier,
     Subtitle,
@@ -64,7 +70,6 @@ from subsearch.ui.theme.typography import (
     apply_body_font,
 )
 from subsearch.ui.widgets.console_view import ConsoleView
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.ripple_spinner import (
     CYCLE_MS,
     FRAME_INTERVAL_MS,
@@ -102,15 +107,15 @@ class _SplitterHandle(QSplitterHandle):
     def sizeHint(self) -> QSize:
         return QSize(0, _HANDLE_HEIGHT)
 
-    def enterEvent(self, _event) -> None:
+    def enterEvent(self, _event: QEnterEvent) -> None:
         self._hovered = True
         self.update()
 
-    def leaveEvent(self, _event) -> None:
+    def leaveEvent(self, _event: QEvent) -> None:
         self._hovered = False
         self.update()
 
-    def paintEvent(self, _event) -> None:
+    def paintEvent(self, _event: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
@@ -363,6 +368,13 @@ class SubtitleSearchBar(QWidget):
         if self._pending_series is None:
             return
         series = self._pending_series
+        log.event(
+            LogEvent.SEARCH_SEASON_EPISODE_CHOSEN,
+            level="debug",
+            title=series.title,
+            season=self._pending_season,
+            episode=episode,
+        )
         term = f"{series.title} S{self._pending_season:02d}E{episode:02d}"
         self._reset_pending_series()
         self._commit_term_and_search(term, series.imdb_id, True)
@@ -377,14 +389,14 @@ class SubtitleSearchBar(QWidget):
 
     def _selected_language_name(self) -> str:
         selected = self.store.read(ConfigKey.LANGUAGE_SELECTED)
-        return self.store.language_data()[selected]["name"]
+        return str(self.store.language_data()[selected]["name"])
 
     def _reset_pending_series(self) -> None:
         self._pending_series = None
         self._pending_season = 0
 
     @staticmethod
-    def _reconnect_number_chosen(popup: NumberSuggestionPopup, slot) -> None:
+    def _reconnect_number_chosen(popup: NumberSuggestionPopup, slot: Callable[..., None]) -> None:
         # The popup is reused across the season then episode step. Drop the prior
         # step's slot first, otherwise choosing the episode also fires the season
         # handler and clobbers _pending_season with the episode number.
@@ -472,7 +484,7 @@ class SubtitleCard(SettingsCard):
         bar.returnPressed.connect(self.search_confirmed)
         return bar
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         self._align_filter_bar_to_search_bar()
 
@@ -572,7 +584,7 @@ class SubtitleActionRow(QWidget):
             return str(WORKSPACE.file_directory)
         return configured
 
-    def _make_action_button(self, icon: LucideIcon, tooltip: str, slot) -> RowIconButton:
+    def _make_action_button(self, icon: LucideIcon, tooltip: str, slot: Callable[..., None]) -> RowIconButton:
         button = RowIconButton(lucide_qicon(icon, TEXT_COLOR), ROW_HEIGHT, self)
         button.setToolTip(tooltip)
         self._idle_icons[button] = icon

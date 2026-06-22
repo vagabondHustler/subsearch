@@ -10,7 +10,7 @@ from subsearch.runtime.models import ProviderDiagnosticStatus
 
 
 class OpenSubtitlesScraper(provider_helper.ProviderHelper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         provider_helper.ProviderHelper.__init__(self, *args, **kwargs)
         self.provider_name = ""
 
@@ -25,7 +25,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
         if tree.css_matches("pre"):
             pre_text = tree.css_first("pre").text()
             if pre_text.startswith("Site will be online soon"):
-                return pre_text
+                return str(pre_text)
         body = tree.css_first("body")
         body_text = body.text() if body is not None else ""
         if "CANNOT CONNECT TO DB" in body_text or "problem with network connection to database" in body_text:
@@ -82,7 +82,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
 
 
 class OpenSubtitles(OpenSubtitlesScraper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         OpenSubtitlesScraper.__init__(self, *args, **kwargs)
         self.provider_name = self.__class__.__name__.lower()
 
@@ -93,5 +93,5 @@ class OpenSubtitles(OpenSubtitlesScraper):
         hash_health = self.with_hash(self.provider_urls.opensubtitles_hash[0], self.release_data.release)
         return combine_provider_diagnostic_status(hash_health, site_health)
 
-    def start_search(self, *args, **kwargs) -> None:
+    def start_search(self, *args: Any, **kwargs: Any) -> None:
         self.run_search(self._do_search)

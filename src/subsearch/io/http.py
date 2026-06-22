@@ -11,13 +11,17 @@ def get_session() -> requests.Session:
     return requests.Session(impersonate="chrome")
 
 
-def send_request(url: str, session: requests.Session, timeout: tuple[int, int], header=None) -> Response:
+def send_request(
+    url: str, session: requests.Session, timeout: tuple[int, int], header: dict[str, str] | None = None
+) -> Response:
     if header is None:
         return session.get(url, timeout=timeout)
     return session.get(url, timeout=timeout, headers=header)
 
 
-def request_parsed_response(url: str, timeout: tuple[int, int], header=None) -> LexborHTMLParser | None:
+def request_parsed_response(
+    url: str, timeout: tuple[int, int], header: dict[str, str] | None = None
+) -> LexborHTMLParser | None:
     session = get_session()
     try:
         response = send_request(url, session, timeout=timeout, header=header)

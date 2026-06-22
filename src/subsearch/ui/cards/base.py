@@ -1,7 +1,7 @@
 from typing import Protocol, runtime_checkable
 
 from PySide6.QtCore import QSize, QTimer
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QColor, QPainter, QPaintEvent
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, HeaderCardWidget, TransparentToolButton
 
@@ -95,7 +95,7 @@ class SettingsCard(HeaderCardWidget):
             # the event loop runs it (e.g. short-lived cards in tests).
             QTimer.singleShot(0, self, self._wire_restore_button)
 
-    def paintEvent(self, e) -> None:
+    def paintEvent(self, e: QPaintEvent) -> None:
         painter = QPainter(self)
         painter.setRenderHints(QPainter.RenderHint.Antialiasing)
         painter.setOpacity(CARD_PANEL_OPACITY)
@@ -130,7 +130,7 @@ class SettingsCard(HeaderCardWidget):
 
     def is_collapsed(self) -> bool:
         # isHidden (not isVisible) so the answer is right before the card is first shown.
-        return self.view.isHidden()
+        return bool(self.view.isHidden())
 
     def _toggle_collapsed(self) -> None:
         self.set_collapsed(not self.is_collapsed())

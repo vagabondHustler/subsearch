@@ -392,7 +392,7 @@ def _normalize_tokens(filename: str) -> dict:
     }
 
 
-def _fields_conflict(value_a, value_b) -> bool:
+def _fields_conflict(value_a: Any, value_b: Any) -> bool:
     return bool(value_a) and bool(value_b) and value_a != value_b
 
 
@@ -479,19 +479,19 @@ def score_subtitle_tokens(
     return score
 
 
-def valid_filename(input_string) -> bool:
+def valid_filename(input_string: str) -> bool:
     # matches any Windows-forbidden filename character: < > : " / \ | ? * or null byte
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return bool(re.search(forbidden_characters_pattern, input_string))
 
 
-def fix_filename(input_string) -> str:
+def fix_filename(input_string: str) -> str:
     # replaces any Windows-forbidden filename character with a dot
     forbidden_characters_pattern = r'[<>:"/\\|?*\x00]'
     return re.sub(forbidden_characters_pattern, ".", input_string)
 
 
-def valid_path(input_str, path_resolution) -> bool:
+def valid_path(input_str: str, path_resolution: str) -> bool:
     if input_str == "":
         return False
     patterns = {

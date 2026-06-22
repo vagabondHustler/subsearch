@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QCursor, QTextOption
+from PySide6.QtGui import QCursor, QMouseEvent, QTextOption
 from PySide6.QtWidgets import QFrame, QTextBrowser, QVBoxLayout, QWidget
 
 from subsearch.ui.theme import palette
@@ -86,6 +86,6 @@ class MarkdownPopup(AnchoredPopup):
         elif not self._hide_timer.isActive():
             self._hide_timer.start()
 
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
         self._update_hide_timer()
         super().mouseMoveEvent(event)
