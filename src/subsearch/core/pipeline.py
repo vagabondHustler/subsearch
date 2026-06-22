@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from subsearch.core import parallel_tasks
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.core.run_conditions import RunConditions
+from subsearch.core.run_conditions import SKIP_LABEL_EXPLANATIONS, RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
 from subsearch.io import file_system, file_tracker
 from subsearch.runtime.config import (
@@ -26,20 +26,6 @@ from subsearch.runtime.models import (
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
 
-PROVIDER_SKIP_EXPLANATIONS = {
-    "provider_enabled": "disabled in settings",
-    "language_supports_opensubtitles": "does not support the selected language",
-    "language_supports_yifysubtitles": "does not support the selected language",
-    "language_supports_subsource": "does not support the selected language",
-    "language_supports_tvsubtitles": "does not support the selected language",
-    "language_supports_gestdown": "does not support the selected language",
-    "not_only_foreign_parts": "skipped while 'only foreign parts' is enabled",
-    "not_tvseries": "does not support tv series",
-    "is_tvseries": "only supports tv series",
-    "has_season_and_episode": "needs a season and episode number and this search has none",
-    "url_not_empty": "needs an IMDb match and none was found for this search",
-}
-
 
 class SearchJob:
     def __init__(self, pipeline: "SearchPipeline", imdb_id: str = "", tvseries: bool | None = None) -> None:
@@ -50,8 +36,9 @@ class SearchJob:
     def execute(self) -> SearchOutcome:
         self._pipeline.bootstrap.ensure_search_mode()
         self._pipeline.bootstrap.resync_app_config()
+        log.event(LogEvent.SEARCH_FUZZY_MATCHING)
         self._pipeline.bootstrap.rebuild_search_inputs(self._imdb_id, self._tvseries)
-        log.event(LogEvent.BANNER, title="Searching")
+        log.event(LogEvent.SPINNER, title="Searching", done_title="Searched")
         self._pipeline.init_search(
             self._pipeline.opensubtitles,
             self._pipeline.yifysubtitles,
@@ -89,13 +76,12 @@ class SearchPipeline:
             unmet_labels = self.call_conditions.unmet_condition_labels(provider_step)
             if not unmet_labels:
                 continue
-            explanation = "; ".join(PROVIDER_SKIP_EXPLANATIONS.get(label, label) for label in unmet_labels)
+            explanation = "; ".join(SKIP_LABEL_EXPLANATIONS.get(label, label) for label in unmet_labels)
             reasons.append(f"{provider_step} skipped: {explanation}")
         return reasons
 
     @run_if_conditions_met
     def run_provider_diagnostics(self) -> None:
-        log.event(LogEvent.BANNER, title="Running diagnostics")
         from subsearch.providers import diagnostics
 
         diagnostics.record_health_reports(self.bootstrap.health_reports)
@@ -183,6 +169,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def download_files(self) -> None:
+        log.event(LogEvent.SPINNER, title="Downloading subtitles", done_title="Downloaded subtitles")
         accepted = sorted(
             self.bootstrap.accepted_subtitles,
             key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
@@ -196,7 +183,8 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def subtitle_workspace(self) -> None:
-        log.event(LogEvent.BANNER, title="Presenting results")
+        # open_settings_window owns the "Waiting for user inputs" banner; starting
+        # one here too would be torn down and re-created identically by it.
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.application import open_settings_window
 
@@ -211,6 +199,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
+        log.event(LogEvent.SPINNER, title="Processing subtitles", done_title="Processed subtitles")
         target_path = self._resolve_post_processing_target()
         self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(WORKSPACE.download_directory)
         self.extract_files()
@@ -295,7 +284,6 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def clean_up(self) -> None:
-        log.event(LogEvent.BANNER, title="Cleaning up")
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         tracker = file_tracker.get_file_tracker()
         if WORKSPACE.download_directory != Path(""):
@@ -319,7 +307,5 @@ class SearchPipeline:
             pass
 
     def on_exit(self) -> None:
-        log.event(LogEvent.EXITING)
         self.bootstrap.system_tray.stop()
-        log.event(LogEvent.PIPELINE_FINISHED, seconds=self._elapsed())
         self._wait_for_terminal_input()

@@ -1,7 +1,12 @@
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from subsearch.io import windows_registry
+
+if TYPE_CHECKING:
+    from subsearch.providers.provider_helper import SubtitleResults
+    from subsearch.ui.system_tray import SystemTray
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -47,10 +52,11 @@ class Bootstrap:
 
     def _init_state(self) -> None:
         self.api_calls_made: dict[str, int] = {}
-        self.subtitle_results = None
+        self.subtitle_results: "SubtitleResults | None" = None
+        self.system_tray: "SystemTray | HeadlessNotificationSink"
         self.manual_accepted_subtitles: list[Subtitle] = []
         self.health_reports: list[ProviderResult] = []
-        self.language_data: dict[str, object] = {}
+        self.language_data: dict[str, Any] = {}
         self.release_data = ReleaseInfo("", 0, "", "", "", "", False, "", "", "")
         self.provider_urls = ProviderUrls([], [], [], [], [])
         self.autoload_src: Path = Path("")

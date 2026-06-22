@@ -22,10 +22,10 @@ class Flow:
 
     def _finish(self) -> None:
         self.pipeline.subtitle_post_processing()
-        log.event(LogEvent.BANNER, title="Running final checks")
+        log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
         self.pipeline.run_provider_diagnostics()
-        self.pipeline.finish_notification()
         self.pipeline.clean_up()
+        self.pipeline.finish_notification()
 
     def _make_search_job(self, imdb_id: str = "", tvseries: bool | None = None) -> SearchJob:
         return self.pipeline.create_search_job(imdb_id, tvseries)
@@ -71,7 +71,7 @@ class PipelineSearchFlow(Flow):
         self._end_initializing()
         self._warn_if_filename_has_spaces()
         pipeline = self.pipeline
-        log.event(LogEvent.BANNER, title=self._search_banner())
+        log.event(LogEvent.SPINNER, title=self._search_banner(), done_title=self._search_done_banner())
         pipeline.init_search(
             pipeline.opensubtitles,
             pipeline.yifysubtitles,
@@ -79,10 +79,10 @@ class PipelineSearchFlow(Flow):
             pipeline.tvsubtitles,
             pipeline.gestdown,
         )
-        log.event(LogEvent.BANNER, title="Processing subtitles")
+        pipeline.subtitle_workspace()
         pipeline.download_files()
         pipeline.subtitle_post_processing()
-        log.event(LogEvent.BANNER, title="Running final checks")
+        log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
         pipeline.run_provider_diagnostics()
         pipeline.clean_up()
         pipeline.finish_notification()
@@ -91,6 +91,11 @@ class PipelineSearchFlow(Flow):
         if self.bootstrap.all_providers_disabled():
             return "Searching"
         return f"Searching on {self._enabled_provider_names()}"
+
+    def _search_done_banner(self) -> str:
+        if self.bootstrap.all_providers_disabled():
+            return "Searched"
+        return f"Searched on {self._enabled_provider_names()}"
 
     def _enabled_provider_names(self) -> str:
         providers = self.bootstrap.app_config.providers
