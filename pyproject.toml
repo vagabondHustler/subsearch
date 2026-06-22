@@ -22,7 +22,6 @@
         "packaging==26.2",
         "PySide6==6.11.1",
         "PySide6-Fluent-Widgets==1.11.2",
-        "requests==2.34.2",
         "selectolax==0.4.10",
         "yaspin==3.4.0",
     ]
@@ -39,9 +38,11 @@
         "shows",
         "scrape",
         "opensubtitles",
-        "subscene",
         "subsearch",
+        "subsource",
         "yifysubtitles",
+        "tvsubtitles",
+        "gestdown",
     ]
     license = "GPL-3.0-or-later"
     license-files = ["LICENSE", "THIRD-PARTY-LICENSES.md"]
@@ -68,6 +69,7 @@
     version = {attr = "subsearch.runtime.config.version.__version__"}
 
 [project.optional-dependencies]
+    all = ["Subsearch[build,lint,tests,tools,type]"]
     build = [
         "build==1.5.0",
         "cx_Freeze==8.6.4",

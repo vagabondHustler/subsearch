@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 
 if TYPE_CHECKING:
-    import requests
     from curl_cffi.requests import Response as CurlResponse
 
 from subsearch.io.file_tracker import get_file_tracker
@@ -395,7 +394,7 @@ class MPCHashAlgorithm:
 
 def download_response(
     msi_package_path: Path,
-    response: "requests.Response | CurlResponse",
+    response: "CurlResponse",
     on_progress: Callable[[float], None] | None = None,
 ) -> None:
     start_time = time.time()
