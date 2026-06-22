@@ -1,13 +1,18 @@
 import io
 import logging
+import sys
 import traceback
+from dataclasses import dataclass
 from types import TracebackType
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 from subsearch.runtime.config.composition import APP_PATHS, FILE_PATHS
 from subsearch.runtime.logging import rendering
 from subsearch.runtime.logging.events import LogEvent
 from subsearch.runtime.models import DataclassInstance
+
+if TYPE_CHECKING:
+    from subsearch.runtime.logging.spinner_console import SpinnerConsole
 
 LOG_MAX_BYTES = 1_000_000
 CRASH_CLEAR_EVERY_RUNS = 5
@@ -22,8 +27,31 @@ LEVELS = {
     "critical": logging.CRITICAL,
 }
 
-# Sink signature: (message)
-ConsoleSink = Callable[[str], None]
+# Sink signature: (message, *, is_banner, title, done_title, is_last). Plain sinks accept and ignore the keywords.
+ConsoleSink = Callable[..., None]
+
+
+@dataclass(frozen=True)
+class ConsoleRecord:
+    # One console write, captured with the full spinner/banner protocol so a sink
+    # attached mid-run (the GUI console) can replay every line through the same
+    # state machine the terminal sink used, not just the flat text.
+    message: str
+    is_banner: bool = False
+    title: Optional[str] = None
+    done_title: Optional[str] = None
+    is_last: bool = False
+
+
+def _print_sink(
+    message: str,
+    *,
+    is_banner: bool = False,
+    title: Optional[str] = None,
+    done_title: Optional[str] = None,
+    is_last: bool = False,
+) -> None:
+    print(message)
 
 
 class SessionBufferHandler(logging.Handler):
@@ -98,8 +126,22 @@ def _append_crash_session(session_text: str) -> None:
 class Logger:
     def __init__(self) -> None:
         self._file_logger: Optional[logging.Logger] = None
-        self._sinks: list[ConsoleSink] = [print]
-        self._console_history: list[str] = []
+        self._spinner_console = self._build_terminal_sink()
+        terminal_sink: ConsoleSink = self._spinner_console.write if self._spinner_console else _print_sink
+        self._sinks: list[ConsoleSink] = [terminal_sink]
+        self._console_history: list[ConsoleRecord] = []
+
+    @staticmethod
+    def _build_terminal_sink() -> Optional["SpinnerConsole"]:
+        if not (hasattr(sys.stdout, "isatty") and sys.stdout.isatty()):
+            return None
+        from subsearch.runtime.logging.spinner_console import SpinnerConsole
+
+        return SpinnerConsole()
+
+    def close_console(self) -> None:
+        if self._spinner_console is not None:
+            self._spinner_console.close()
 
     @property
     def file_logger(self) -> logging.Logger:
@@ -110,21 +152,52 @@ class Logger:
         return self._file_logger
 
     def add_sink(self, sink: ConsoleSink) -> None:
-        # Replay this session's console lines so a sink attached after the run has
+        # Replay this session's console records so a sink attached after the run has
         # already begun (the GUI console) mirrors what has been logged since
-        # startup, rather than starting empty.
-        for message in self._console_history:
-            sink(message)
+        # startup — through the same banner/spinner protocol, not as flat text.
+        for record in self._console_history:
+            sink(
+                record.message,
+                is_banner=record.is_banner,
+                title=record.title,
+                done_title=record.done_title,
+                is_last=record.is_last,
+            )
         self._sinks.append(sink)
 
     def remove_sink(self, sink: ConsoleSink) -> None:
         self._sinks.remove(sink)
 
-    def write(self, message: str, level: str = "info") -> None:
+    def write(
+        self,
+        message: str,
+        level: str = "info",
+        *,
+        is_banner: bool = False,
+        title: Optional[str] = None,
+        done_title: Optional[str] = None,
+        is_last: bool = False,
+    ) -> None:
         self.file_logger.log(LEVELS[level], message, stacklevel=3)
-        self._console_history.append(message)
+        self._console_history.append(
+            ConsoleRecord(
+                message=message,
+                is_banner=is_banner,
+                title=title,
+                done_title=done_title,
+                is_last=is_last,
+            )
+        )
         for sink in self._sinks:
-            sink(message)
+            sink(message, is_banner=is_banner, title=title, done_title=done_title, is_last=is_last)
+
+    def end_banner(self) -> None:
+        # Closes the active spinner without opening another. Used after the final
+        # banner of a run (e.g. cleanup) so its spinner stops instead of ticking
+        # forever waiting for a next banner that never comes.
+        self._console_history.append(ConsoleRecord(message="", is_last=True))
+        for sink in self._sinks:
+            sink("", is_last=True)
 
     def debug(self, message: str) -> None:
         self.write(message, "debug")
@@ -142,7 +215,16 @@ class Logger:
         self.write(message, "critical")
 
     def event(self, event_key: LogEvent, level: str = "info", **values: object) -> None:
-        self.write(rendering.render(event_key, **values), level)
+        is_banner = event_key == LogEvent.SPINNER
+        title = str(values["title"]) if is_banner and "title" in values else None
+        done_title = str(values["done_title"]) if is_banner and "done_title" in values else None
+        self.write(
+            rendering.render(event_key, **values),
+            level,
+            is_banner=is_banner,
+            title=title,
+            done_title=done_title,
+        )
 
     def dataclass(self, instance: DataclassInstance, level: str = "info") -> None:
         for line in rendering.dataclass_lines(instance):
