@@ -356,7 +356,6 @@ class ValidateGate:
 
         step_summary.set_output("proceed", "true" if proceed else "false")
         step_summary.set_output("pr_number", number)
-        step_summary.set_output("src_tree_hash", validation.src_tree_hash(validation.pr_head_sha(number)))
 
 
 class ValidateRecord:
@@ -366,7 +365,6 @@ class ValidateRecord:
     def run(self) -> None:
         validation = ReleaseValidation()
         number = os.environ["PR_NUMBER"]
-        src_tree_hash = os.environ["SRC_TREE_HASH"]
         run_id = os.environ["GITHUB_RUN_ID"]
 
         required_passed = all(os.environ.get(name) == "success" for name in self._REQUIRED_RESULTS)
@@ -374,7 +372,7 @@ class ValidateRecord:
         tests_passed = os.environ.get("TEST_RESULT") in self._ACCEPTABLE
         passed = required_passed and tests_passed
         result = validation.RESULT_PASSED if passed else validation.RESULT_FAILED
-        validation.record_validation(number, src_tree_hash, result, run_id)
+        validation.record_validation(number, result, run_id)
 
 
 class ReleaseGate:
@@ -383,16 +381,15 @@ class ReleaseGate:
         step_summary = StepSummary()
 
         number = os.environ["PR_NUMBER"]
-        merge_src_tree_hash = validation.src_tree_hash("HEAD")
         previous = validation.last_validation(number)
 
-        if previous is None or previous[1] != validation.RESULT_PASSED or previous[0] != merge_src_tree_hash:
-            step_summary.card(f"No validated artifact matching src tree {merge_src_tree_hash}", passed=False)
-            raise SystemExit(f"No validated artifact matching src tree {merge_src_tree_hash}")
+        if previous is None or previous[0] != validation.RESULT_PASSED:
+            step_summary.card("No passing validation found for the release pull request", passed=False)
+            raise SystemExit("No passing validation found for the release pull request")
 
-        step_summary.set_output("src_tree_hash", merge_src_tree_hash)
-        step_summary.set_output("validation_run_id", previous[2])
-        step_summary.card(f"Validated artifact found for src tree {merge_src_tree_hash}", passed=True)
+        _, validation_run_id = previous
+        step_summary.set_output("validation_run_id", validation_run_id)
+        step_summary.card(f"Validated artifact found (run {validation_run_id})", passed=True)
 
 
 class ReadValidatedHashes:

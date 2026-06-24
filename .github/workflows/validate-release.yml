@@ -37,7 +37,6 @@ jobs:
     outputs:
       proceed: ${{ steps.run.outputs.proceed }}
       pr_number: ${{ steps.run.outputs.pr_number }}
-      src_tree_hash: ${{ steps.run.outputs.src_tree_hash }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -106,7 +105,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: validated_${{ needs.gate.outputs.src_tree_hash }}
+          name: validated_${{ github.run_id }}
           path: artifacts
           if-no-files-found: error
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -126,7 +125,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: validated_${{ needs.gate.outputs.src_tree_hash }}
+          name: validated_${{ github.run_id }}
           path: artifacts
 
       - uses: ./.github/actions/install-test-deps
@@ -186,7 +185,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ needs.gate.outputs.pr_number }}
-          SRC_TREE_HASH: ${{ needs.gate.outputs.src_tree_hash }}
           INIT_RESULT: ${{ needs.init.result }}
           BUILD_RESULT: ${{ needs.build_binaries.result }}
           TEST_RESULT: ${{ needs.test_binaries.result }}

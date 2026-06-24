@@ -34,7 +34,6 @@ jobs:
       msi_name: ${{ steps.run.outputs.msi_name }}
       artifact_id: ${{ steps.run.outputs.artifact_id }}
       validation_run_id: ${{ steps.gate.outputs.validation_run_id }}
-      src_tree_hash: ${{ steps.gate.outputs.src_tree_hash }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -80,7 +79,7 @@ jobs:
       - name: Download the validated binaries
         uses: actions/download-artifact@v4
         with:
-          name: validated_${{ needs.init.outputs.src_tree_hash }}
+          name: validated_${{ needs.init.outputs.validation_run_id }}
           path: artifacts
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ needs.init.outputs.validation_run_id }}
