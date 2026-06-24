@@ -37,16 +37,13 @@
 {% else %}
 {% set important = sections[change_key] | selectattr("important") | list %}
 {% set normal = sections[change_key] | rejectattr("important") | list %}
-{% set above_fold_count = [fold_limit - important | length, 0] | max %}
-{% set above_fold = normal[:above_fold_count] %}
-{% set collapsed = normal[above_fold_count:] %}
+{% set collapsed = normal %}
 {% for change in important %}{{ render_commit(change) }}{% endfor %}
-{% for change in above_fold %}{{ render_commit(change) }}{% endfor %}
 {% if collapsed %}
-<details><summary>Show all {{ section_labels.get(change_key, change_key) }}</summary>
-
-{% for change in collapsed %}{{ render_commit(change) }}{% endfor %}
-</details>
+> <details><summary>Show all {{ section_labels.get(change_key, change_key) }}</summary>
+>
+{% for change in collapsed %}> {{ render_commit(change) }}{% endfor %}>
+> </details>
 {% endif %}
 {% endif %}
 

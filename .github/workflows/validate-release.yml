@@ -3,6 +3,9 @@ run-name: Validate release
 
 
 on:
+  push:
+    branches:
+      - dev
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
