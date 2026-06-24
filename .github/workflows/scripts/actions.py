@@ -328,9 +328,13 @@ class BinaryTester:
                 pids.add(process.info["pid"])
         return pids
 
-    def assert_window_rendered(self, process_name: str = EXE_NAME, timeout: int = 60) -> None:
+    def assert_window_rendered(self, process_name: str = EXE_NAME, timeout: int = 60, process: "subprocess.Popen | None" = None) -> None:
         log(f"Waiting up to {timeout}s for a visible window owned by {process_name}", level="STEP")
         for elapsed in range(timeout):
+            if process is not None and process.poll() is not None:
+                stderr_output = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
+                detail = f"\nstderr:\n{stderr_output}" if stderr_output.strip() else ""
+                raise RuntimeError(f"{process_name} exited with code {process.returncode} before a window appeared{detail}")
             if self.visible_window_owned_by(self.process_tree_pids(process_name)):
                 log(f"Visible GUI window for '{process_name}' present after {elapsed}s", level="PASS")
                 return
@@ -370,11 +374,11 @@ class BinaryTester:
 
     def _launch_executable(self) -> "subprocess.Popen":
         log(f"{EXE_NAME} has been initiated for testing", level="STEP")
-        return subprocess.Popen([Paths.installed_executable.as_posix()])
+        return subprocess.Popen([Paths.installed_executable.as_posix()], stderr=subprocess.PIPE)
 
     def _verify_startup(self, process: "subprocess.Popen", test_length: int) -> int:
         self.wait_for_process_start(process, EXE_NAME)
-        self.assert_window_rendered()
+        self.assert_window_rendered(process=process)
         return self.wait_for_process(process, EXE_NAME, test_length)
 
     def _verify_runtime_artifacts(self, test_length: int) -> None:
@@ -574,7 +578,6 @@ class Build:
         "sqlite3",
         "curses",
         "email",
-        "html",
     ]
 
     def _data_table(self) -> dict:
