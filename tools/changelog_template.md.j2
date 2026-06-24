@@ -1,3 +1,6 @@
+{# A commit is marked important by placing U+3164 (Hangul filler) alone on the last
+   line of the commit body. Important commits always render above the fold, displacing
+   normal commits into <details> if needed. Grep: git log --grep=$'ㅤ' #}
 {# Render only the target version (the first tree entry). With --unreleased-version
    the tree still contains every past release; merging them all would fold already
    released commits back into the new section, so restrict rendering to tree[0]. #}
@@ -12,16 +15,39 @@
 {% for change_key in sections %}
 {% if change_key not in ordered_keys and ordered_keys.append(change_key) %}{% endif %}
 {% endfor %}
+{# Per-section above-fold limits; breaking changes are never collapsed #}
+{% set fold_limits = {
+    "‼️ Breaking changes:": none,
+    "✨ Features:": 5,
+    "🐛 Fixes:": 5,
+    "⚙️ Other:": 3
+} %}
+{% macro render_commit(change) %}
+{% if change.scope %}- {{ change.sha }} - **{{ change.scope }}**: {{ change.message }}
+{% elif change.message %}- {{ change.sha }} - {{ change.message }}
+{% endif %}
+{% endmacro %}
 {% for change_key in ordered_keys %}
 {% if change_key %}
 #### {{ change_key }}
 {% endif %}
-{% for change in sections[change_key] %}
-{% if change.scope %}
-- {{ change.sha }} - **{{ change.scope }}**: {{ change.message }}
-{% elif change.message %}
-- {{ change.sha }} - {{ change.message }}
+{% set fold_limit = fold_limits.get(change_key, 3) %}
+{% if fold_limit is none %}
+{% for change in sections[change_key] %}{{ render_commit(change) }}{% endfor %}
+{% else %}
+{% set important = sections[change_key] | selectattr("important") | list %}
+{% set normal = sections[change_key] | rejectattr("important") | list %}
+{% set above_fold_count = [fold_limit - important | length, 0] | max %}
+{% set above_fold = normal[:above_fold_count] %}
+{% set collapsed = normal[above_fold_count:] %}
+{% for change in important %}{{ render_commit(change) }}{% endfor %}
+{% for change in above_fold %}{{ render_commit(change) }}{% endfor %}
+{% if collapsed %}
+<details><summary>Show all {{ section_labels.get(change_key, change_key) }}</summary>
+
+{% for change in collapsed %}{{ render_commit(change) }}{% endfor %}
+</details>
 {% endif %}
-{% endfor %}
+{% endif %}
 
 {% endfor %}

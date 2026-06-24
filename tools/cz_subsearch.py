@@ -34,9 +34,16 @@ class SubsearchCz(ConventionalCommitsCz):
 
     @property
     def template_extras(self) -> dict:
-        return {"change_type_order": self.change_type_order}
+        section_labels = {key: self._strip_section_label(key) for key in self.change_type_order}
+        return {"change_type_order": self.change_type_order, "section_labels": section_labels}
+
+    @staticmethod
+    def _strip_section_label(key: str) -> str:
+        return "".join(char for char in key if char.isalpha() or char.isspace()).strip()
 
     def changelog_message_builder_hook(self, message: dict, commit) -> dict:  # type: ignore[override]
-        sha = commit.rev
-        message["sha"] = sha[:7]
+        message["sha"] = commit.rev[:7]
+        body = commit.body or ""
+        last_line = body.strip().splitlines()[-1] if body.strip() else ""
+        message["important"] = last_line.strip() == "ㅤ"
         return message
