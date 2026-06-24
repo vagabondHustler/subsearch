@@ -1,8 +1,7 @@
 from subsearch.core.pipeline import SearchJob, SearchPipeline
 from subsearch.runtime.config import SEARCH_SUBJECT
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppMode, Subtitle
+from subsearch.runtime.recorder import LogLevel, capture, phase
 
 
 class Flow:
@@ -22,7 +21,7 @@ class Flow:
 
     def _finish(self) -> None:
         self.pipeline.subtitle_post_processing()
-        log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
+        phase("Application maintenance")
         self.pipeline.run_provider_diagnostics()
         self.pipeline.present_pending_notifications()
         self.pipeline.clean_up()
@@ -72,7 +71,7 @@ class PipelineSearchFlow(Flow):
         self._end_initializing()
         self._warn_if_filename_has_spaces()
         pipeline = self.pipeline
-        log.event(LogEvent.SPINNER, title=self._search_banner(), done_title=self._search_done_banner())
+        phase(self._search_banner())
         pipeline.init_search(
             pipeline.opensubtitles,
             pipeline.yifysubtitles,
@@ -83,7 +82,7 @@ class PipelineSearchFlow(Flow):
         pipeline.subtitle_workspace()
         pipeline.download_files()
         pipeline.subtitle_post_processing()
-        log.event(LogEvent.SPINNER, title="Application maintenance", done_title="Application maintenance done")
+        phase("Application maintenance")
         pipeline.run_provider_diagnostics()
         pipeline.present_pending_notifications()
         pipeline.clean_up()
@@ -94,11 +93,6 @@ class PipelineSearchFlow(Flow):
             return "Searching"
         return f"Searching on {self._enabled_provider_names()}"
 
-    def _search_done_banner(self) -> str:
-        if self.bootstrap.all_providers_disabled():
-            return "Searched"
-        return f"Searched on {self._enabled_provider_names()}"
-
     def _enabled_provider_names(self) -> str:
         providers = self.bootstrap.app_config.providers
         enabled = [name for key, name in _PROVIDER_DISPLAY_NAMES.items() if providers[key]]
@@ -106,7 +100,7 @@ class PipelineSearchFlow(Flow):
 
     def _warn_if_filename_has_spaces(self) -> None:
         if " " in SEARCH_SUBJECT.search_term:
-            log.event(LogEvent.FLOW_FILENAME_HAS_SPACES, level="warning", filename=SEARCH_SUBJECT.search_term)
+            capture(f"{SEARCH_SUBJECT.search_term} contains spaces, result may vary", level=LogLevel.WARNING)
 
 
 FLOW_BY_APP_MODE: dict[AppMode, type[Flow]] = {

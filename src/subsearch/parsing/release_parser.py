@@ -7,14 +7,15 @@ from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
 )
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
     Language,
+    MatchTier,
     ProviderUrls,
     ReleaseInfo,
+    classify_match_tier,
 )
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 def remove_padded_zero(x: str) -> str:
@@ -460,7 +461,7 @@ def score_subtitle_tokens(
 
     if reference_tokens == provider_tokens:
         if log_match:
-            log.event(LogEvent.SCORE_EXACT_TOKEN_MATCH, level="debug", from_provider=from_provider)
+            capture(f"Fuzzy match: exact token match for {from_provider!r}", level=LogLevel.DEBUG)
         return 100
 
     base_score = _get_base_score(reference_tokens, provider_tokens, token_weights)
@@ -468,15 +469,35 @@ def score_subtitle_tokens(
     score = round(base_score * mismatch_multiplier)
 
     if log_match:
-        log.event(
-            LogEvent.SCORE_BREAKDOWN,
-            level="debug",
-            score=score,
-            from_provider=from_provider,
-            base=base_score,
-            mismatch=f"{mismatch_multiplier:.2f}",
+        capture(
+            f"Fuzzy match: {score}% for {from_provider!r} " f"(base {base_score}, mismatch ×{mismatch_multiplier:.2f})",
+            level=LogLevel.DEBUG,
         )
     return score
+
+
+_HASH_MATCH_PREFIX = "hashmatch__"
+
+
+def rank_best_subtitle(
+    files: list[Path],
+    release_name: str,
+    token_weights: dict[str, float],
+    token_multipliers: dict[str, float],
+    accept_threshold: int,
+) -> Path:
+    best_rank: tuple[MatchTier, int] = (MatchTier.C, 0)
+    best_match = Path(".")
+    for file in files:
+        is_hash_match = file.name.startswith(_HASH_MATCH_PREFIX)
+        token_name = file.name.removeprefix(_HASH_MATCH_PREFIX)
+        token_score = score_subtitle_tokens(token_name, release_name, token_weights, token_multipliers)
+        tier = classify_match_tier(is_hash_match, token_score, accept_threshold)
+        rank = (tier, token_score)
+        if rank > best_rank:
+            best_rank = rank
+            best_match = file
+    return best_match
 
 
 def valid_filename(input_string: str) -> bool:

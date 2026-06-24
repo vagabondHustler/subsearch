@@ -3,15 +3,17 @@ from pathlib import Path
 from typing import Any
 
 from subsearch.io import json_file
-from subsearch.io.nested_dict import changed_leaves, read_nested_value, set_nested_value
 from subsearch.runtime.config import integrity
 from subsearch.runtime.config.composition import FILE_PATHS
 from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.config.mapper import get_app_config_from_data
-from subsearch.runtime.logging import rendering
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config.nested_dict import (
+    changed_leaves,
+    read_nested_value,
+    set_nested_value,
+)
 from subsearch.runtime.models import AppConfig
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class ConfigSession:
@@ -52,18 +54,18 @@ class ConfigSession:
         json_file.dump_json_data(self.config_file_path, self.in_memory_data)
         self.log_tracked_changes()
 
-        log.event(LogEvent.CONFIG_COMMITTED, level="debug", filename=self.config_file_path.name)
+        capture("Settings saved", level=LogLevel.DEBUG)
         self.has_uncommitted_changes = False
         self.backup_file_path.unlink(missing_ok=True)
         self.last_known_good_backed_up = False
 
     def log_tracked_changes(self) -> None:
         for key, (old_value, new_value) in self.tracked_changes.items():
-            log.event(LogEvent.CONFIG_CHANGED, level="debug", change=rendering.format_change(key, old_value, new_value))
+            capture(f"Config change: {key}: {old_value!r} → {new_value!r}", level=LogLevel.DEBUG)
         self.tracked_changes.clear()
 
     def revert(self) -> None:
-        log.event(LogEvent.CONFIG_REVERTED, level="warning")
+        capture("Discarded unsaved settings", level=LogLevel.WARNING)
         self.in_memory_data = json_file.load_json_data(self.config_file_path)
         self.has_uncommitted_changes = False
         self.tracked_changes.clear()

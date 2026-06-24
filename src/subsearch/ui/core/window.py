@@ -6,19 +6,10 @@ from PySide6.QtGui import QCloseEvent, QColor, QIcon
 from PySide6.QtWidgets import QSystemTrayIcon, QWidget
 from qfluentwidgets import FluentWindow, NavigationItemPosition
 
-from subsearch.io import windows_registry
-from subsearch.runtime.config import APP_PATHS
+from subsearch.runtime.config import APP_PATHS, shell_integration
 from subsearch.runtime.config.defaults import ConfigKey
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import SearchOutcome, Subtitle
-from subsearch.ui.core._constants import (
-    NAVIGATION_EXPAND_WIDTH,
-    NAVIGATION_TOP_MARGIN,
-    SAVE_CLEAN_COLOR,
-    SAVE_DIRTY_COLOR,
-)
-from subsearch.ui.core.settings_interface import SettingsInterface, _collapsible
+from subsearch.runtime.recorder import phase
 from subsearch.ui.cards import (
     ApiCard,
     ApplicationCard,
@@ -44,6 +35,13 @@ from subsearch.ui.compat.qfluent import (
     enlarge_navigation_icons,
     forward_navigation_wheel_to_page,
 )
+from subsearch.ui.core._constants import (
+    NAVIGATION_EXPAND_WIDTH,
+    NAVIGATION_TOP_MARGIN,
+    SAVE_CLEAN_COLOR,
+    SAVE_DIRTY_COLOR,
+)
+from subsearch.ui.core.settings_interface import SettingsInterface, _collapsible
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import (
@@ -268,12 +266,12 @@ class SettingsWindow(FluentWindow):
     def _on_search_finished(self, outcome: SearchOutcome) -> None:
         self._search_running = False
         self.manual_search_interface.populate(outcome.subtitles, outcome.skipped_providers)
-        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
+        phase("Idle")
 
     def _on_search_failed(self, message: str) -> None:
         self._search_running = False
         self.manual_search_interface.populate([], [f"Search failed: {message}"])
-        log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
+        phase("Idle")
 
     def _render_save_item_dirty_state(self, dirty: bool) -> None:
         color = SAVE_DIRTY_COLOR if dirty else SAVE_CLEAN_COLOR
@@ -286,7 +284,7 @@ class SettingsWindow(FluentWindow):
                 self._tray_icon.hide()
             self.task_runner.shutdown()
             self.store.commit()
-            windows_registry.reconcile_shell_integration()
+            shell_integration.reconcile_shell_integration()
             super().closeEvent(e)
         else:
             e.ignore()

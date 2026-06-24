@@ -6,8 +6,8 @@ import pytest
 _SCRIPTS = Path(__file__).parent.parent / ".github" / "workflows" / "scripts"
 sys.path.insert(0, str(_SCRIPTS))
 
-from actions import ReleaseValidation  # noqa: E402
-from jobs import OpenMainPullRequest  # noqa: E402
+from actions import ReleaseValidation  # pyright: ignore[reportMissingImports] # noqa: E402
+from jobs import OpenMainPullRequest  # pyright: ignore[reportMissingImports] # noqa: E402
 
 
 @pytest.fixture

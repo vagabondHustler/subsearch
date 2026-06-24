@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import struct
@@ -12,13 +13,15 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 if TYPE_CHECKING:
     from curl_cffi.requests import Response as CurlResponse
 
-from subsearch.io.file_tracker import get_file_tracker
-from subsearch.parsing import release_parser
-from subsearch.runtime.config import session as config_session
-from subsearch.runtime.config.defaults import ConfigKey
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
-from subsearch.runtime.models import MatchTier, Subtitle, classify_match_tier
+from subsearch.runtime.models import Subtitle
+from subsearch.runtime.recorder import LogLevel, capture
+
+
+def _track(path: Path) -> None:
+    # lazy import: file_tracking lives in runtime and depends back on this module
+    from subsearch.runtime.recorder.standard_in import get_file_tracker
+
+    get_file_tracker().track(path)
 
 
 def create_path_from_string(
@@ -38,7 +41,10 @@ def create_path_from_string(
         path = Path(string)
 
     if not path.is_dir() and not create_missing_directory:
-        log.event(LogEvent.FS_DESTINATION_MISSING, level="warning", path=path, fallback=file_directory)
+        capture(
+            f"Destination directory {path} does not exist, moving to {file_directory} instead",
+            level=LogLevel.WARNING,
+        )
         return file_directory
 
     path.mkdir(parents=True, exist_ok=True)
@@ -70,13 +76,7 @@ def download_subtitle(
 ) -> bool:
     from subsearch.io.http import get_session
 
-    log.event(
-        LogEvent.DOWNLOAD_SUBTITLE,
-        provider=subtitle.provider_name,
-        position=index_position,
-        size=index_size,
-        subtitle_name=subtitle.subtitle_name,
-    )
+    capture(f"Downloading {subtitle.subtitle_name}")
     session = get_session()
     response = session.get(subtitle.download_url, headers=subtitle.download_headers, stream=True)
     chunks = response.iter_content(chunk_size=1024)
@@ -88,14 +88,11 @@ def download_subtitle(
     if raw_extension is not None:
         _save_raw_subtitle(subtitle, extraction_dir, raw_extension, first_chunk, chunks)
         return True
-    log.event(
-        LogEvent.DOWNLOAD_NOT_ZIP,
-        level="warning",
-        provider=subtitle.provider_name,
-        subtitle_name=subtitle.subtitle_name,
-        status_code=response.status_code,
-        cloudflare=_cloudflare_block_reason(response),
-        url=subtitle.download_url,
+    capture(
+        f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip "
+        f"(status {response.status_code}, cloudflare {_cloudflare_block_reason(response)}) "
+        f"from {subtitle.download_url}, skipping download",
+        level=LogLevel.WARNING,
     )
     return False
 
@@ -107,7 +104,7 @@ def _save_zip_archive(subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chu
         dir=tmp_dir, prefix=f"{name_prefix}{subtitle.subtitle_id}_", suffix=".zip", delete=False
     ) as fd:
         download_path = Path(fd.name)
-        get_file_tracker().track(download_path)
+        _track(download_path)
         fd.write(first_chunk)
         for chunk in chunks:
             fd.write(chunk)
@@ -120,7 +117,7 @@ def _save_raw_subtitle(
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     stem = f"{name_prefix}{subtitle.subtitle_name}"
     download_path = _next_available_path(extraction_dir, stem, extension)
-    get_file_tracker().track(download_path)
+    _track(download_path)
     with download_path.open("wb") as fd:
         fd.write(first_chunk)
         for chunk in chunks:
@@ -164,16 +161,13 @@ def _archive_listing(archive: zipfile.ZipFile) -> str:
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
     members = archive.infolist()
     total_uncompressed = sum(info.file_size for info in members)
-    log.event(
-        LogEvent.FS_ARCHIVE_CONTENTS,
-        level="debug",
-        name=archive.filename or "archive",
-        member_count=len(members),
-        size=total_uncompressed,
-        listing=_archive_listing(archive),
+    capture(
+        f"Archive {archive.filename or 'archive'}: {len(members)} entries, "
+        f"{total_uncompressed} bytes uncompressed\n{_archive_listing(archive)}",
+        level=LogLevel.DEBUG,
     )
     if total_uncompressed > _MAX_UNCOMPRESSED_BYTES:
-        log.event(LogEvent.FS_ARCHIVE_OVERSIZE, level="warning", size=total_uncompressed)
+        capture(f"Archive uncompressed size {total_uncompressed} exceeds limit, skipping", level=LogLevel.WARNING)
         return 0
 
     extracted_count = 0
@@ -181,33 +175,28 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
     for member in members:
         member_path = (dst / member.filename).resolve()
         if not str(member_path).startswith(str(dst_resolved)):
-            log.event(LogEvent.FS_ARCHIVE_UNSAFE_PATH, level="warning", filename=member.filename)
+            capture(f"Skipping unsafe path in archive: {member.filename}", level=LogLevel.WARNING)
             continue
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
-            log.event(
-                LogEvent.FS_ARCHIVE_MEMBER_IGNORED,
-                level="debug",
-                filename=member.filename,
-                reason="not a subtitle file",
-            )
+            capture(f"Ignoring {member.filename} (not a subtitle file)", level=LogLevel.DEBUG)
             continue
         extracted_path = Path(archive.extract(member, dst))
         if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
             renamed_path = extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}")
             extracted_path.rename(renamed_path)
             extracted_path = renamed_path
-        get_file_tracker().track(extracted_path)
+        _track(extracted_path)
         extracted_count += 1
     return extracted_count
 
 
 def _extract_archive_file(file: Path, dst: Path) -> int:
-    log.event(LogEvent.EXTRACT, src=file, dst=dst)
+    capture(f"Extracting {file.name}")
     try:
         with zipfile.ZipFile(file) as archive:
             return _safe_extract_archive(archive, dst, hash_match=file.name.startswith(_HASH_MATCH_PREFIX))
     except zipfile.BadZipFile, OSError:
-        log.event(LogEvent.FS_ARCHIVE_UNREADABLE, level="error", name=file.name, traceback=traceback.format_exc())
+        capture(f"Skipping unreadable archive {file.name}\n{traceback.format_exc()}", level=LogLevel.ERROR)
         return 0
 
 
@@ -226,7 +215,7 @@ def extract_subtitle_by_id(subtitle_id: str, src: Path, dst: Path, extension: st
     return extracted_count
 
 
-def _subtitle_files_in(directory: Path) -> list[Path]:
+def subtitle_files_in(directory: Path) -> list[Path]:
     if not directory.is_dir():
         return []
     return sorted(
@@ -235,7 +224,7 @@ def _subtitle_files_in(directory: Path) -> list[Path]:
 
 
 def count_subtitle_files(directory: Path) -> int:
-    return len(_subtitle_files_in(directory))
+    return len(subtitle_files_in(directory))
 
 
 def count_raw_subtitles_by_name(subtitle_name: str, directory: Path) -> int:
@@ -246,25 +235,6 @@ def count_raw_subtitles_by_name(subtitle_name: str, directory: Path) -> int:
         for file in directory.iterdir()
         if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS and file.stem.startswith(subtitle_name)
     )
-
-
-def find_best_subtitle_match(release_name: str, subs_dir: Path) -> Path:
-    config = config_session.get_config_session()
-    weights = config.read(ConfigKey.SEARCH_TOKEN_WEIGHTS)
-    multipliers = config.read(ConfigKey.SEARCH_TOKEN_MULTIPLIERS)
-    accept_threshold = config.read(ConfigKey.SEARCH_ACCEPT_THRESHOLD)
-    best_rank = (MatchTier.C, 0)
-    best_match = Path(".")
-    for file in _subtitle_files_in(subs_dir):
-        is_hash_match = file.name.startswith(_HASH_MATCH_PREFIX)
-        token_name = file.name.removeprefix(_HASH_MATCH_PREFIX)
-        token_score = release_parser.score_subtitle_tokens(token_name, release_name, weights, multipliers)
-        tier = classify_match_tier(is_hash_match, token_score, accept_threshold)
-        rank = (tier, token_score)
-        if rank > best_rank:
-            best_rank = rank
-            best_match = file
-    return best_match
 
 
 def _next_available_path(directory: Path, stem: str, extension: str) -> Path:
@@ -278,23 +248,18 @@ def _next_available_path(directory: Path, stem: str, extension: str) -> Path:
 
 def rename_subtitle_to_release(file_path: Path, release_name: str, extension: str = ".srt") -> Path:
     new_file_path = _next_available_path(file_path.parent, release_name, extension)
-    log.event(LogEvent.RENAME, src=file_path, dst=new_file_path)
+    capture(f"Renamed to {new_file_path.name}")
     file_path.rename(new_file_path)
     return new_file_path
-
-
-def autoload_rename(release_name: str, subs_dir: Path) -> Path:
-    matched_file = find_best_subtitle_match(release_name, subs_dir)
-    return rename_subtitle_to_release(matched_file, release_name, matched_file.suffix)
 
 
 def move_all(src: Path, dst: Path) -> int:
     if src.resolve() == dst.resolve():
         return 0
     moved_count = 0
-    for file in _subtitle_files_in(src):
+    for file in subtitle_files_in(src):
         destination = _next_available_path(dst, file.stem, file.suffix)
-        log.event(LogEvent.MOVE, src=file, dst=destination)
+        capture(f"Moving file: {file} -> {destination}")
         file.absolute().replace(destination)
         moved_count += 1
     return moved_count
@@ -302,18 +267,40 @@ def move_all(src: Path, dst: Path) -> int:
 
 def move_and_replace(source_file: Path, destination_directory: Path) -> None:
     source_file.replace(destination_directory / source_file.name)
-    log.event(LogEvent.MOVE, src=source_file, dst=destination_directory)
+    capture(f"Moving file: {source_file} -> {destination_directory}")
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
     for file in Path(cwd).glob(f"*{extension}"):
-        log.event(LogEvent.REMOVE, src=file)
+        capture(f"Removing file: {file}")
         file.unlink()
 
 
 def del_directory(directory: Path) -> None:
-    log.event(LogEvent.REMOVE, src=directory)
+    capture(f"Removing directory: {directory}")
     shutil.rmtree(directory)
+
+
+def delete_path(path: Path) -> None:
+    if path.is_dir():
+        shutil.rmtree(path, ignore_errors=True)
+    elif path.exists():
+        path.unlink(missing_ok=True)
+
+
+def read_json_list(path: Path) -> list[Any]:
+    if not path.exists():
+        return []
+    try:
+        return list(json.loads(path.read_text(encoding="utf-8")))
+    except json.JSONDecodeError, OSError:
+        capture(f"Unreadable list file at {path.name}, starting empty", level=LogLevel.WARNING)
+        return []
+
+
+def write_json_list(path: Path, items: list[Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(items, indent=2), encoding="utf-8")
 
 
 def directory_is_empty(directory: Path) -> bool:
@@ -324,7 +311,8 @@ def directory_is_empty(directory: Path) -> bool:
 
 def del_directory_content(directory: Path) -> None:
     for item in directory.iterdir():
-        log.event(LogEvent.REMOVE, src=item)
+        kind = "directory" if item.is_dir() else "file"
+        capture(f"Removing {kind}: {item}")
         if item.is_file():
             item.unlink()
         elif item.is_dir():
@@ -334,13 +322,13 @@ def del_directory_content(directory: Path) -> None:
 def create_directory(path: Path) -> bool:
     if path.exists():
         return False
-    log.event(LogEvent.FS_CREATING, level="debug", path=path)
+    capture(f"Creating {path}", level=LogLevel.DEBUG)
     path.mkdir(parents=True, exist_ok=True)
     return True
 
 
 def get_file_hash(file_path: Path) -> str:
-    log.event(LogEvent.FS_HASHING, level="debug")
+    capture("Calculating hash of video file", level=LogLevel.DEBUG)
     if not file_path.exists():
         return ""
 
@@ -377,7 +365,7 @@ class MPCHashAlgorithm:
 
     def valid_file_size(self) -> bool:
         if self.file_size < self.chunk_size * 2:
-            log.event(LogEvent.FS_INVALID_FILE_SIZE, level="warning", size=self.file_size)
+            capture(f"Invalid file size, {self.file_size} bytes", level=LogLevel.WARNING)
             return False
         return True
 
@@ -401,8 +389,8 @@ def download_response(
     with open(msi_package_path, "wb") as msi_file:
         total_size = int(response.headers.get("content-length", 0))
         downloaded_size = 0
-        log.event(LogEvent.DOWNLOAD_STARTED, filename=msi_package_path.name)
-        log.event(LogEvent.DOWNLOAD_PROGRESS, percentage="0.00")
+        capture(f"Download started for {msi_package_path.name}")
+        capture("Downloading 0.00%")
         for chunk in response.iter_content(chunk_size=128):
             msi_file.write(chunk)
             downloaded_size += len(chunk)
@@ -412,8 +400,8 @@ def download_response(
                     on_progress(progress_percentage)
                 elapsed_time = time.time() - start_time
                 if elapsed_time >= 0.5:
-                    log.event(LogEvent.DOWNLOAD_PROGRESS, percentage=f"{progress_percentage:.2f}")
+                    capture(f"Downloading {progress_percentage:.2f}%")
                     start_time = time.time()
         if on_progress is not None:
             on_progress(100.0)
-        log.event(LogEvent.DOWNLOAD_COMPLETED)
+        capture("Download complete")

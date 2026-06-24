@@ -5,13 +5,12 @@ from PySide6.QtCore import QMessageLogContext, QtMsgType, qInstallMessageHandler
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import Theme, setTheme, setThemeColor
 
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import Subtitle
+from subsearch.runtime.recorder import LogLevel, capture, phase
 from subsearch.ui import warmup
-from subsearch.ui.core.window import SettingsWindow
 from subsearch.ui.compat.qfluent import ACCENT_COLOR, force_fixed_accent_color
 from subsearch.ui.core.qt_application import get_application
+from subsearch.ui.core.window import SettingsWindow
 from subsearch.ui.services.search import SearchJobProtocol
 from subsearch.ui.theme.typography import TEXT_COLOR
 
@@ -41,11 +40,10 @@ def _build_application() -> QApplication:
 
 def _start_waiting_banner_unless_search_owns_it(start_search_immediately: bool) -> None:
     if start_search_immediately:
-        # The search worker owns the banner sequence ("Searching" -> "Searched" ->
-        # "Waiting for user inputs"); starting one here would be torn down by it and
-        # emit a spurious "Processed user inputs".
+        # The search worker owns the banner sequence ("Searching" -> "Idle");
+        # starting one here would be torn down by it.
         return
-    log.event(LogEvent.SPINNER, title="Waiting for user inputs", done_title="Processed user inputs")
+    phase("Idle")
 
 
 def open_settings_window(
@@ -56,11 +54,10 @@ def open_settings_window(
 ) -> list[Subtitle]:
     application = _build_application()
     window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
-    log.event(LogEvent.BOOT_UI_OPENED)
+    capture("UI opened")
     _start_waiting_banner_unless_search_owns_it(start_search_immediately)
     window.show()
     on_window_shown()
     application.exec()
-    log.event(LogEvent.BOOT_UI_CLOSED, level="debug")
-    log.end_banner()
+    capture("UI closed", level=LogLevel.DEBUG)
     return window.manual_search_interface.downloaded

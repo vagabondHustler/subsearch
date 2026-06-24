@@ -3,8 +3,6 @@ from collections.abc import Callable
 from typing import Any
 
 from subsearch.parsing import release_parser
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
     Language,
@@ -15,6 +13,7 @@ from subsearch.runtime.models import (
     Subtitle,
     SubtitleStatus,
 )
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 def combine_provider_diagnostic_status(*statuses: ProviderDiagnosticStatus) -> ProviderDiagnosticStatus:
@@ -55,7 +54,7 @@ def _sanitize_subtitle_filename(filename: str) -> str:
         sanitized = sanitized.replace(char, "_")
     sanitized = sanitized.replace("'", "")
     if sanitized != filename:
-        log.event(LogEvent.PROVIDER_FILENAME_SANITIZED, level="debug", original=filename, sanitized=sanitized)
+        capture(f"Filename sanitized: {filename!r} -> {sanitized!r}", level=LogLevel.DEBUG)
     return sanitized
 
 
@@ -138,20 +137,7 @@ class ProviderHelper:
             raise ValueError(f"Subtitle has neither download_url nor request_data: {subtitle_name!r}")
         if not self.subtitle_results.add(subtitle):
             return
-        if status is SubtitleStatus.ACCEPTED:
-            log.event(
-                LogEvent.SUBTITLE_MATCH,
-                provider=provider_name,
-                subtitle_name=subtitle_name,
-                percentage=token_score,
-            )
-        else:
-            log.event(
-                LogEvent.SUBTITLE_REJECTED,
-                provider=provider_name,
-                subtitle_name=subtitle_name,
-                percentage=token_score,
-            )
+        capture(subtitle_name)
 
     def record_filtered_out(self, provider_name: str, subtitle_name: str, reason: str) -> None:
         subtitle = Subtitle(
@@ -174,7 +160,7 @@ class ProviderHelper:
         if not total:
             return
         breakdown = ", ".join(f"{reason}: {count}" for reason, count in self.skip_counts.items())
-        log.event(LogEvent.PROVIDER_SKIPS, provider=self.provider_name, total=total, breakdown=breakdown)
+        capture(f"{self.provider_name:<14}skipped {total} ({breakdown})")
 
     def start_search(self, *args: Any, **kwargs: Any) -> None:
         raise NotImplementedError
@@ -182,25 +168,19 @@ class ProviderHelper:
     def run_search(self, search_fn: Callable[[], ProviderDiagnosticStatus]) -> None:
         accepted_before = len(self.accepted_subtitles)
         rejected_before = len(self.rejected_subtitles)
-        log.event(LogEvent.PROVIDER_SEARCHING, level="debug", provider=self.provider_name)
+        capture(f"{self.provider_name}: searching", level=LogLevel.DEBUG)
         try:
             diagnostic_status = search_fn()
-        except Exception as error:
-            log.event(
-                LogEvent.PROVIDER_UNRECOGNIZED_RESPONSE, level="error", provider=self.provider_name, reason=str(error)
-            )
+        except Exception as search_error:
+            capture(f"{self.provider_name} response was unrecognized: {search_error}", level=LogLevel.ERROR)
             self.report_diagnostic_status(ProviderDiagnosticStatus.STRUCTURE_INVALID, 0)
             return
         accepted = len(self.accepted_subtitles) - accepted_before
         rejected = len(self.rejected_subtitles) - rejected_before
         self.log_provider_skips()
-        log.event(
-            LogEvent.PROVIDER_SEARCH_RESULT,
-            level="debug",
-            provider=self.provider_name,
-            found=accepted + rejected,
-            accepted=accepted,
-            rejected=rejected,
+        capture(
+            f"{self.provider_name}: found {accepted + rejected} ({accepted} accepted, {rejected} rejected)",
+            level=LogLevel.DEBUG,
         )
         self.report_diagnostic_status(diagnostic_status, accepted + rejected)
 

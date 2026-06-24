@@ -4,11 +4,11 @@ from typing import Protocol
 from PySide6.QtCore import QObject, Signal, SignalInstance
 
 from subsearch.io import file_system
+from subsearch.parsing import subtitle_selection
 from subsearch.runtime.config import SEARCH_SUBJECT, WORKSPACE
 from subsearch.runtime.config.defaults import ConfigKey
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import Subtitle
+from subsearch.runtime.recorder import LogLevel, capture
 from subsearch.ui.state.store import SettingsStore
 from subsearch.ui.state.tasks import TaskRunner, Worker
 
@@ -29,16 +29,11 @@ class _PostProcessWorker(Worker):
         if extracted_count == 0:
             extracted_count = self._count_already_placed()
         if extracted_count == 0:
-            self._log_no_files(self._extraction_dir, extracted_count)
+            self._log_no_files(extracted_count)
             return 0
         if self._rename:
             return self._rename_and_place()
-        log.event(
-            LogEvent.POST_PROCESSING_COMPLETED,
-            destination=self._extraction_dir,
-            source=self._download_dir,
-            moved=extracted_count,
-        )
+        capture(f"Moved {extracted_count} subtitles to {self._extraction_dir}")
         self.delivered_directory = str(self._extraction_dir)
         return extracted_count
 
@@ -50,24 +45,18 @@ class _PostProcessWorker(Worker):
 
     def _rename_and_place(self) -> int:
         target_path = self._resolve_target_path()
-        renamed = file_system.autoload_rename(SEARCH_SUBJECT.search_term, self._extraction_dir)
+        renamed = subtitle_selection.autoload_rename(SEARCH_SUBJECT.search_term, self._extraction_dir)
         file_system.move_and_replace(renamed, target_path)
         placed = (target_path / renamed.name).exists()
         if not placed:
-            self._log_no_files(target_path, 0)
+            self._log_no_files(0)
             return 0
-        log.event(LogEvent.POST_PROCESSING_COMPLETED, destination=target_path, source=self._extraction_dir, moved=1)
+        capture(f"Moved 1 subtitles to {target_path}")
         self.delivered_directory = str(target_path)
         return 1
 
-    def _log_no_files(self, destination: Path, moved: int) -> None:
-        log.event(
-            LogEvent.POST_PROCESSING_NO_FILES,
-            level="warning",
-            destination=destination,
-            source=self._download_dir,
-            moved=moved,
-        )
+    def _log_no_files(self, moved: int) -> None:
+        capture(f"No subtitles unpacked or moved (moved {moved})", level=LogLevel.WARNING)
 
     def _resolve_target_path(self) -> Path:
         target = str(self._store.read(ConfigKey.PATHS_VIDEO_FILE_DIRECTORY))
@@ -112,5 +101,5 @@ class PostProcessingService(QObject):
             self.failed.emit("No subtitles were delivered to the destination")
 
     def _on_failed(self, reason: str) -> None:
-        log.event(LogEvent.POST_PROCESSING_FAILED, level="error", reason=reason)
+        capture(f"Could not unpack subtitles: {reason}", level=LogLevel.ERROR)
         self.failed.emit(reason)

@@ -1,7 +1,7 @@
 from typing import Any
 
-from subsearch.io.nested_dict import read_nested_value
 from subsearch.runtime.config.defaults import ConfigKey
+from subsearch.runtime.config.nested_dict import read_nested_value
 from subsearch.runtime.models import AppConfig
 
 

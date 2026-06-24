@@ -5,9 +5,8 @@ from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class YifySubtitlesScraper(provider_helper.ProviderHelper):
@@ -23,7 +22,7 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
     def _select_responding_mirror(self) -> tuple[LexborHTMLParser, str] | None:
         self.any_mirror_responded = False
         for url in self.provider_urls.yifysubtitles:
-            log.event(LogEvent.PROVIDER_MIRROR_TRIED, level="debug", provider=self.provider_name, url=url)
+            capture(f"{self.provider_name}: trying mirror {url}", level=LogLevel.DEBUG)
             tree = http.request_parsed_response(url=url, timeout=self.request_timeout)
             if not tree:
                 continue
@@ -36,9 +35,12 @@ class YifySubtitlesScraper(provider_helper.ProviderHelper):
         selected = self._select_responding_mirror()
         if selected is None:
             if self.any_mirror_responded:
-                log.event(LogEvent.PROVIDER_STRUCTURE_INVALID, level="warning", provider=self.provider_name)
+                capture(
+                    f"{self.provider_name}: mirror responded but page structure was invalid",
+                    level=LogLevel.WARNING,
+                )
                 return ProviderDiagnosticStatus.STRUCTURE_INVALID
-            log.event(LogEvent.PROVIDER_NO_MIRROR_RESPONDED, level="warning", provider=self.provider_name)
+            capture(f"{self.provider_name}: no mirror responded", level=LogLevel.WARNING)
             return ProviderDiagnosticStatus.NO_RESPONSE
         tree, responding_url = selected
         split_url = urlsplit(responding_url)

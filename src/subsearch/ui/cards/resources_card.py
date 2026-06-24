@@ -6,8 +6,8 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 
+from subsearch.runtime import crash_report
 from subsearch.runtime.config import FILE_PATHS
-from subsearch.runtime.logging import log_sanitizer
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
@@ -37,7 +37,7 @@ def _build_prefilled_feature_body() -> str:
 
 
 def _copy_sanitized_log_to_clipboard() -> None:
-    QApplication.clipboard().setText(log_sanitizer.read_sanitized_crash_sessions())
+    QApplication.clipboard().setText(crash_report.read_sanitized_crash_sessions())
 
 
 def _open_feature_request() -> None:

@@ -1,12 +1,11 @@
-from subsearch.runtime.logging.events import LogEvent
+from subsearch.runtime.recorder import LogLevel
 
 
-def _spinner_titles(events):
-    return [title for event_key, title in events if event_key == LogEvent.SPINNER]
+def _banner_messages(records):
+    return [message for message, level in records if level is LogLevel.PHASE]
 
 
-def _patch_window(monkeypatch, events):
-    from subsearch.runtime.logging.logger import log
+def _patch_window(monkeypatch, records):
     from subsearch.ui import entrypoint
 
     class FakeWindow:
@@ -31,32 +30,30 @@ def _patch_window(monkeypatch, events):
     monkeypatch.setattr(entrypoint, "qInstallMessageHandler", lambda *_a: None)
     monkeypatch.setattr(entrypoint.warmup, "await_warmup", lambda: None)
 
-    original_event = log.event
+    def record_capture(*lines, level=LogLevel.INFO):
+        for line in lines:
+            records.append((line, level))
 
-    def record_event(event_key, level="info", **values):
-        events.append((event_key, values.get("title")))
-        if event_key != LogEvent.SPINNER:
-            return original_event(event_key, level, **values)
-
-    monkeypatch.setattr(log, "event", record_event)
+    monkeypatch.setattr(entrypoint, "capture", record_capture)
+    monkeypatch.setattr(entrypoint, "phase", lambda *lines: record_capture(*lines, level=LogLevel.PHASE))
     return entrypoint
 
 
 def test_open_settings_window_starts_waiting_banner_when_not_searching_immediately(monkeypatch) -> None:
-    events: list[tuple] = []
-    entrypoint = _patch_window(monkeypatch, events)
+    records: list[tuple] = []
+    entrypoint = _patch_window(monkeypatch, records)
 
     entrypoint.open_settings_window(search_job_factory=lambda *_: None, start_search_immediately=False)
 
-    assert "Waiting for user inputs" in _spinner_titles(events)
+    assert "Idle" in _banner_messages(records)
 
 
 def test_open_settings_window_defers_waiting_banner_to_search_worker_on_immediate_search(monkeypatch) -> None:
-    events: list[tuple] = []
-    entrypoint = _patch_window(monkeypatch, events)
+    records: list[tuple] = []
+    entrypoint = _patch_window(monkeypatch, records)
 
     entrypoint.open_settings_window(search_job_factory=lambda *_: None, start_search_immediately=True)
 
     # The search worker owns the banner sequence; the entrypoint must not start its
-    # own "Waiting for user inputs" or it gets torn down with a spurious done-title.
-    assert "Waiting for user inputs" not in _spinner_titles(events)
+    # own "Idle" banner or it gets torn down.
+    assert "Idle" not in _banner_messages(records)

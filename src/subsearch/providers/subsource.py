@@ -4,13 +4,12 @@ from curl_cffi import requests as curl_requests
 from curl_cffi.requests import Response
 
 from subsearch.providers import provider_helper
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.models.exceptions import (
     MissingApiKey,
     ProviderResponseUnrecognized,
 )
+from subsearch.runtime.recorder import LogLevel, capture
 
 API_BASE_URL = "https://api.subsource.net/api/v1"
 
@@ -39,13 +38,7 @@ class SubsourceApi:
         return {"X-API-Key": self.api_key}
 
     def response_status_ok(self, response: Response) -> bool:
-        log.event(
-            LogEvent.PROVIDER_SUBSOURCE_STATUS,
-            level="debug",
-            url=response.url,
-            status_code=response.status_code,
-            reason=response.reason,
-        )
+        capture(f"{response.url} status_code: {response.status_code} {response.reason}", level=LogLevel.DEBUG)
         return response.status_code == 200
 
 
@@ -57,7 +50,10 @@ class Subsource(provider_helper.ProviderHelper):
 
     def start_search(self, *args: Any, **kwargs: Any) -> None:
         if not self.api_key:
-            log.event(LogEvent.PROVIDER_SKIPPED_NO_API_KEY, level="warning", provider=self.provider_name)
+            capture(
+                f"{self.provider_name} skipped: no API key configured. Add your Subsource API key in settings.",
+                level=LogLevel.WARNING,
+            )
             self.report_diagnostic_status(ProviderDiagnosticStatus.NO_RESPONSE, 0)
             raise MissingApiKey(self.provider_name)
         self.run_search(self._search_and_collect)

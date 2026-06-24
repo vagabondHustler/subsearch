@@ -7,6 +7,7 @@ from subsearch.io import windows_registry
 if TYPE_CHECKING:
     from subsearch.providers.provider_helper import SubtitleResults
     from subsearch.ui.core.system_tray import SystemTray
+
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -15,8 +16,9 @@ from subsearch.runtime.config import (
     WORKSPACE,
 )
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.config import (
+    shell_integration,
+)
 from subsearch.runtime.models import (
     AppMode,
     ProviderDiagnosticStatus,
@@ -25,6 +27,7 @@ from subsearch.runtime.models import (
     ReleaseInfo,
     Subtitle,
 )
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class HeadlessNotificationSink:
@@ -48,7 +51,7 @@ class Bootstrap:
         self._lazy_load_ui()
         if self.app_mode is not AppMode.SETTINGS:
             self.rebuild_search_inputs()
-        log.event(LogEvent.BOOT_COMPLETED)
+        capture("Boot completed")
 
     def _init_state(self) -> None:
         self.api_calls_made: dict[str, int] = {}
@@ -66,26 +69,22 @@ class Bootstrap:
         self._search_runtime_ready = False
 
     def _log_boot_environment(self) -> None:
-        log.event(LogEvent.BOOT_ARGV, level="debug", argv=sys.argv)
-        log.event(
-            LogEvent.BOOT_VIDEO_FILE,
-            level="debug",
-            presence="found" if SEARCH_SUBJECT.file_exists else "not found",
-            path=SEARCH_SUBJECT.file_path or "none",
-        )
+        capture(f"sys.argv: {sys.argv}", level=LogLevel.DEBUG)
+        presence = "found" if SEARCH_SUBJECT.file_exists else "not found"
+        capture(f"Video file {presence}: {SEARCH_SUBJECT.file_path or 'none'}", level=LogLevel.DEBUG)
 
     def _prepare_runtime(self) -> None:
-        log.event(LogEvent.BOOT_VERIFYING)
+        capture("Verifying files and paths")
         self.app_config = config_session.get_config_session().snapshot()
-        windows_registry.reconcile_shell_integration()
+        shell_integration.reconcile_shell_integration()
         self.app_mode = self._resolve_app_mode()
         if not windows_registry.check_long_paths_enabled():
             self._notify_user()
-        log.dataclass(DEVICE_INFO, level="debug")
-        log.dataclass(self.app_config, level="debug")
+        capture(repr(DEVICE_INFO), level=LogLevel.DEBUG)
+        capture(repr(self.app_config), level=LogLevel.DEBUG)
 
     def _start_system_tray(self) -> None:
-        log.event(LogEvent.BOOT_TRAY_INIT, level="debug")
+        capture("Initializing system tray icon", level=LogLevel.DEBUG)
         if not self.ui_may_open:
             self.system_tray = HeadlessNotificationSink()
             return
@@ -111,8 +110,8 @@ class Bootstrap:
         self._anchor_working_directory()
         file_path = SEARCH_SUBJECT.file_path
         SEARCH_SUBJECT.file_hash = file_system.get_file_hash(file_path) if file_path is not None else ""
-        log.dataclass(SEARCH_SUBJECT, level="debug")
-        log.dataclass(WORKSPACE, level="debug")
+        capture(repr(SEARCH_SUBJECT), level=LogLevel.DEBUG)
+        capture(repr(WORKSPACE), level=LogLevel.DEBUG)
         if WORKSPACE.file_directory != Path(""):
             file_system.create_directory(WORKSPACE.file_directory)
             self._create_search_directories()
@@ -122,12 +121,12 @@ class Bootstrap:
         if tvseries is not None:
             self.release_data.tvseries = tvseries
         self.update_imdb_id(imdb_id)
-        log.dataclass(self.release_data, level="debug")
+        capture(repr(self.release_data), level=LogLevel.DEBUG)
         provider_urls = release_parser.CreateProviderUrls(
             self.app_config, self.release_data, self.language_data, SEARCH_SUBJECT.file_hash
         )
         self.provider_urls = provider_urls.retrieve_urls()
-        log.dataclass(self.provider_urls, level="debug")
+        capture(repr(self.provider_urls), level=LogLevel.DEBUG)
         self.search_kwargs = dict(
             release_data=self.release_data,
             app_config=self.app_config,
@@ -149,11 +148,11 @@ class Bootstrap:
     def _lazy_load_ui(self) -> None:
         if not self.ui_may_open:
             return
-        log.event(LogEvent.BOOT_UI_LAZY, level="debug")
+        capture("Lazy loading UI", level=LogLevel.DEBUG)
         from subsearch.ui import warmup
 
         warmup.start_warmup()
-        log.event(LogEvent.BOOT_UI_LAZY_DONE, level="debug")
+        capture("Lazy loading UI done", level=LogLevel.DEBUG)
 
     def update_imdb_id(self, imdb_id: str = "") -> None:
         if imdb_id:
@@ -172,19 +171,21 @@ class Bootstrap:
         self.health_reports.append(ProviderResult("imdb", find_id.diagnostic_status, found_subtitles))
 
     def setup_file_system(self) -> None:
-        from subsearch.io import file_system, file_tracker
+        from subsearch.io import file_system
+        from subsearch.runtime.recorder import get_file_tracker
 
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
-        file_tracker.get_file_tracker().reclaim_after_crash()
+        get_file_tracker().reclaim_after_crash()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         if SEARCH_SUBJECT.file_exists:
             self._create_search_directories()
 
     def _create_search_directories(self) -> None:
-        from subsearch.io import file_system, file_tracker
+        from subsearch.io import file_system
+        from subsearch.runtime.recorder import get_file_tracker
 
-        tracker = file_tracker.get_file_tracker()
+        tracker = get_file_tracker()
         for directory in (WORKSPACE.extraction_directory, WORKSPACE.download_directory):
             if file_system.create_directory(directory):
                 tracker.track(directory)
@@ -242,5 +243,5 @@ class Bootstrap:
         self.app_config = config_session.get_config_session().snapshot()
 
     def _notify_user(self) -> None:
-        log.event(LogEvent.BOOT_LONG_PATHS_DISABLED)
-        log.event(LogEvent.BOOT_LONG_PATHS_HELP)
+        capture("Win32 long paths disabled; paths >260 chars may fail. Set LongPathsEnabled=1 and reboot.")
+        capture("https://github.com/vagabondHustler/Win32LongPaths")

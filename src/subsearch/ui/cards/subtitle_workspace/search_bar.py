@@ -12,8 +12,7 @@ from subsearch.parsing.imdb_lookup import (
 from subsearch.parsing.release_parser import get_release_info
 from subsearch.runtime.config import SEARCH_SUBJECT
 from subsearch.runtime.config.defaults import ConfigKey
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture
 from subsearch.ui.cards.subtitle_workspace._constants import SEARCH_BAR_WIDTH_FRACTION
 from subsearch.ui.services.season_episode_suggestions import (
     SeasonEpisodeSuggestionService,
@@ -188,12 +187,9 @@ class SubtitleSearchBar(QWidget):
         if self._pending_series is None:
             return
         series = self._pending_series
-        log.event(
-            LogEvent.SEARCH_SEASON_EPISODE_CHOSEN,
-            level="debug",
-            title=series.title,
-            season=self._pending_season,
-            episode=episode,
+        capture(
+            f"Chose season {self._pending_season}, episode {episode} for {series.title!r}",
+            level=LogLevel.DEBUG,
         )
         term = f"{series.title} S{self._pending_season:02d}E{episode:02d}"
         self._reset_pending_series()

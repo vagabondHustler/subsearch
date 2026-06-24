@@ -45,36 +45,6 @@ def test_classify_match_tier_ladder() -> None:
     assert MatchTier.S > MatchTier.A > MatchTier.B > MatchTier.C
 
 
-def test_find_best_subtitle_match_prefers_hash_over_equal_token_score(tmp_path) -> None:
-    release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    _make_srt(tmp_path, f"{release}.srt")
-    _make_srt(tmp_path, f"{file_system._HASH_MATCH_PREFIX}{release}.srt")
-
-    best = file_system.find_best_subtitle_match(release, tmp_path)
-
-    assert best.name.startswith(file_system._HASH_MATCH_PREFIX)
-
-
-def test_find_best_subtitle_match_picks_highest_token_score(tmp_path) -> None:
-    release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    _make_srt(tmp_path, "completely.unrelated.movie.1999.dvdrip-xyz.srt")
-    _make_srt(tmp_path, f"{release}.srt")
-
-    best = file_system.find_best_subtitle_match(release, tmp_path)
-
-    assert best.name == f"{release}.srt"
-
-
-def test_find_best_subtitle_match_breaks_ties_on_first_file(tmp_path) -> None:
-    release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    _make_srt(tmp_path, f"a.{release}.srt")
-    _make_srt(tmp_path, f"b.{release}.srt")
-
-    best = file_system.find_best_subtitle_match(release, tmp_path)
-
-    assert best.name == f"a.{release}.srt"
-
-
 def test_rename_subtitle_to_release_versions_on_collision(tmp_path) -> None:
     release = "the.foo.bar.2021.1080p.web.h264-foobar"
     _make_srt(tmp_path, f"{release}.srt")
@@ -129,26 +99,6 @@ def test_count_subtitle_files_ignores_non_subtitles(tmp_path) -> None:
     _make_subtitle(tmp_path, "notes.nfo")
 
     assert file_system.count_subtitle_files(tmp_path) == 2
-
-
-def test_find_best_subtitle_match_considers_non_srt_extensions(tmp_path) -> None:
-    release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    _make_subtitle(tmp_path, "completely.unrelated.movie.1999.dvdrip-xyz.srt")
-    _make_subtitle(tmp_path, f"{release}.ass")
-
-    best = file_system.find_best_subtitle_match(release, tmp_path)
-
-    assert best.name == f"{release}.ass"
-
-
-def test_autoload_rename_keeps_matched_extension(tmp_path) -> None:
-    release = "the.foo.bar.2021.1080p.web.h264-foobar"
-    _make_subtitle(tmp_path, f"downloaded.{release}.ass")
-
-    renamed = file_system.autoload_rename(release, tmp_path)
-
-    assert renamed.name == f"{release}.ass"
-    assert renamed.exists()
 
 
 def test_extract_files_in_dir_returns_extracted_subtitle_count(tmp_path) -> None:

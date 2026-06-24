@@ -38,5 +38,5 @@ class SubsearchCz(ConventionalCommitsCz):
 
     def changelog_message_builder_hook(self, message: dict, commit) -> dict:  # type: ignore[override]
         sha = commit.rev
-        message["message"] += f" - [{sha[:7]}]({REPO}/commit/{sha})"
+        message["sha"] = sha[:7]
         return message

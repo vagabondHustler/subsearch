@@ -6,9 +6,8 @@ from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from subsearch.io import http
 from subsearch.providers import provider_helper
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
+from subsearch.runtime.recorder import LogLevel, capture
 
 DOMAIN = "https://www.tvsubtitles.net"
 
@@ -84,7 +83,7 @@ class TvSubtitlesScraper(provider_helper.ProviderHelper):
         return tree.css_first("table") is not None
 
     def _search_show(self) -> LexborHTMLParser | None:
-        log.event(LogEvent.PROVIDER_SEARCHING, level="debug", provider=self.provider_name)
+        capture(f"{self.provider_name}: searching", level=LogLevel.DEBUG)
         return http.request_parsed_post(
             url=f"{DOMAIN}/search1.php", data={"qs": self.release_data.title}, timeout=self.request_timeout
         )

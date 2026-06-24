@@ -4,9 +4,8 @@ from typing import Any
 from subsearch.io import http
 from subsearch.providers import provider_helper
 from subsearch.providers.provider_helper import combine_provider_diagnostic_status
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class OpenSubtitlesScraper(provider_helper.ProviderHelper):
@@ -18,7 +17,7 @@ class OpenSubtitlesScraper(provider_helper.ProviderHelper):
         outage_text = self._outage_text(tree)
         if not outage_text:
             return False
-        log.event(LogEvent.PROVIDER_OPENSUBTITLES_DOWN, level="error", reason=outage_text)
+        capture(f"opensubtitles is down: {outage_text}", level=LogLevel.ERROR)
         return True
 
     def _outage_text(self, tree: Any) -> str:

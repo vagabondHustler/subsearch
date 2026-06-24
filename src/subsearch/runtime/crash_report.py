@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from subsearch.runtime.config import COMPUTER_NAME, FILE_PATHS, GUID
+from subsearch.runtime.recorder.config import SESSION_SEPARATOR
 
 # matches IPv4 addresses e.g. "192.168.1.1" matches, "1234.1.1.1" does not
 IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
@@ -11,6 +12,9 @@ IP_ADDRESS_PATTERN = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 EMAIL_PATTERN = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 # matches subsource API keys e.g. "sk_AbcDef123", case-insensitive
 API_KEY_PATTERN = re.compile(r"\bsk_[A-Za-z0-9_-]+", re.IGNORECASE)
+
+REDACTED = "***"
+_REDACTED_USERNAME = "USERNAME"
 
 
 def _username_candidates() -> list[str]:
@@ -28,9 +32,6 @@ def _identity_patterns() -> list[re.Pattern[str]]:
 
 _IDENTITY_PATTERNS = _identity_patterns()
 
-REDACTED = "***"
-_REDACTED_USERNAME = "USERNAME"
-
 
 def sanitize(text: str) -> str:
     text = API_KEY_PATTERN.sub(REDACTED, text)
@@ -40,9 +41,6 @@ def sanitize(text: str) -> str:
     for pattern in _IDENTITY_PATTERNS:
         text = pattern.sub(_REDACTED_USERNAME, text)
     return IP_ADDRESS_PATTERN.sub(REDACTED, text)
-
-
-SESSION_SEPARATOR = "\x1c"
 
 
 def _sessions(raw_log: str) -> list[str]:

@@ -18,9 +18,9 @@
 {% endif %}
 {% for change in sections[change_key] %}
 {% if change.scope %}
-- **{{ change.scope }}**: {{ change.message }}
+- {{ change.sha }} - **{{ change.scope }}**: {{ change.message }}
 {% elif change.message %}
-- {{ change.message }}
+- {{ change.sha }} - {{ change.message }}
 {% endif %}
 {% endfor %}
 

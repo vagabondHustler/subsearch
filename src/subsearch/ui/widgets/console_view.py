@@ -3,17 +3,16 @@ from PySide6.QtGui import QColor, QFont, QResizeEvent
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel
 
+from subsearch.runtime.recorder import ConsoleGroup, ConsoleSnapshot, ConsoleTheme
 from subsearch.ui.services.console_view import ConsoleViewSink
-from subsearch.ui.theme.palette import NEUTRAL_1
 from subsearch.ui.theme.typography import BODY_FONT_SIZE, SEMI_BOLD, apply_body_font
 
 CONSOLE_FONT_FAMILY = "Consolas"
 CONSOLE_LINE_HEIGHT = BODY_FONT_SIZE + 2
 LABEL_TO_LIST_SPACING = 4
 
-# Matches yaspin's "arc" spinner used by the terminal console, so the GUI banner
-# animates with the same glyphs the terminal shows.
-SPINNER_FRAMES = ("◜", "◠", "◝", "◞", "◡", "◟")
+# rich "dots" spinner the terminal console draws, one frame per name
+SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 SPINNER_INTERVAL_MS = 100
 
 CONSOLE_STYLE_SHEET = """
@@ -30,10 +29,24 @@ QListWidget::item {
 """
 
 
+def _color_from_style(style: str) -> QColor:
+    # rich style strings carry optional modifiers (e.g. "bold #f38ba8"); the UI only needs the color token.
+    for token in style.split():
+        if token.startswith("#") or token not in {"bold", "italic", "dim", "normal"}:
+            color = QColor(token)
+            if color.isValid():
+                return color
+    return QColor()
+
+
 class ConsoleView(QWidget):
     def __init__(self, sink: ConsoleViewSink, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._sink = sink
+        self._theme = ConsoleTheme()  # the same default the terminal console renders, so both stay 1:1
+        self._active_item: QListWidgetItem | None = None
+        self._active_title = ""
+        self._spinner_frame = 0
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -51,28 +64,22 @@ class ConsoleView(QWidget):
         self._list.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         layout.addWidget(self._list)
 
-        # The banner header animates while active; the status row is the single
-        # transient line that updates in place beneath it, mirroring the terminal.
-        self._banner_item: QListWidgetItem | None = None
-        self._banner_title = ""
-        self._status_item: QListWidgetItem | None = None
-        self._spinner_frame = 0
+        latest = sink.latest()
+        if latest is not None:
+            self._render(latest)
+
+        # Queued so the slot runs on the GUI thread even when the recorder drain
+        # thread emits the signal directly.
+        sink.snapshot_received.connect(self._render, Qt.ConnectionType.QueuedConnection)
 
         self._spinner_timer = QTimer(self)
         self._spinner_timer.setInterval(SPINNER_INTERVAL_MS)
-        self._spinner_timer.timeout.connect(self._tick_spinner)
-
-        self._replay_history()
-        # Queued so slots run on the GUI thread even when the worker thread emits
-        # the signals directly from Logger.write.
-        connection = Qt.ConnectionType.QueuedConnection
-        sink.line_appended.connect(self._append, connection)
-        sink.banner_started.connect(self._start_banner, connection)
-        sink.banner_finished.connect(self._finish_banner, connection)
-        sink.status_updated.connect(self._update_status, connection)
+        self._spinner_timer.timeout.connect(self._advance_spinner)
+        self._spinner_timer.start()
 
     def height_for_lines(self, line_count: int) -> int:
-        return int(self._label.sizeHint().height()) + LABEL_TO_LIST_SPACING + line_count * CONSOLE_LINE_HEIGHT
+        label_height: int = self._label.sizeHint().height()
+        return label_height + LABEL_TO_LIST_SPACING + line_count * CONSOLE_LINE_HEIGHT
 
     @staticmethod
     def _console_font() -> QFont:
@@ -85,68 +92,42 @@ class ConsoleView(QWidget):
         super().resizeEvent(event)
         self._list.scrollToBottom()
 
-    def _replay_history(self) -> None:
-        dispatch = {
-            "line": self._append,
-            "banner": self._start_banner,
-            "finish": self._finish_banner,
-            "status": self._update_status,
-        }
-        for kind, payload in self._sink.history():
-            dispatch[kind](payload)
-
-    def _new_item(self, message: str) -> QListWidgetItem:
-        item = QListWidgetItem(message)
-        item.setForeground(QColor(NEUTRAL_1))
-        item.setFont(self._console_font())
-        item.setSizeHint(QSize(0, CONSOLE_LINE_HEIGHT))
-        return item
-
-    def _append(self, message: str) -> None:
-        self._list.addItem(self._new_item(message))
+    def _render(self, snapshot: ConsoleSnapshot) -> None:
+        self._list.clear()
+        self._active_item = None
+        if snapshot.summary_pinned_at_top:
+            for summary in snapshot.pinned_summaries:
+                self._append(summary.text, _color_from_style(summary.color))
+        for group in snapshot.groups:
+            self._render_group(group, snapshot)
         self._list.scrollToBottom()
 
-    def _start_banner(self, title: str) -> None:
-        self._banner_title = title
-        self._spinner_frame = 0
-        self._banner_item = self._new_item(self._banner_text())
-        self._list.addItem(self._banner_item)
-        self._list.scrollToBottom()
-        self._spinner_timer.start()
+    def _render_group(self, group: ConsoleGroup, snapshot: ConsoleSnapshot) -> None:
+        if group.active:
+            self._active_item = self._append(group.title, _color_from_style(self._theme.active_title_style))
+            self._active_title = group.title
+            self._paint_spinner()
+            for line in group.transient_lines:
+                self._append(line.text, _color_from_style(line.color))
+        else:
+            self._append(f"{snapshot.done_marker} {group.title}", _color_from_style(group.marker_color))
+        if not snapshot.summary_pinned_at_top and group.summary is not None:
+            self._append(group.summary, _color_from_style(group.marker_color))
 
-    def _update_status(self, message: str) -> None:
-        if self._banner_item is None:
-            self._append(message)
-            return
-        if self._status_item is None:
-            self._status_item = self._new_item("")
-            self._list.addItem(self._status_item)
-        self._status_item.setText(f"  {message}")
-        self._list.scrollToBottom()
-
-    def _finish_banner(self, done_title: str) -> None:
-        if self._banner_item is None:
-            return
-        self._spinner_timer.stop()
-        # The transient status line is cleared on finish, exactly as the terminal
-        # console drops its in-place line; the spinner glyph is replaced by the
-        # plain done-title the terminal prints (no decoration), so both match.
-        self._remove_status_item()
-        self._banner_item.setText(done_title)
-        self._banner_item = None
-        self._banner_title = ""
-
-    def _remove_status_item(self) -> None:
-        if self._status_item is None:
-            return
-        self._list.takeItem(self._list.row(self._status_item))
-        self._status_item = None
-
-    def _tick_spinner(self) -> None:
-        if self._banner_item is None:
+    def _advance_spinner(self) -> None:
+        if self._active_item is None:
             return
         self._spinner_frame = (self._spinner_frame + 1) % len(SPINNER_FRAMES)
-        self._banner_item.setText(self._banner_text())
+        self._paint_spinner()
 
-    def _banner_text(self) -> str:
-        return f"{SPINNER_FRAMES[self._spinner_frame]} {self._banner_title}"
+    def _paint_spinner(self) -> None:
+        if self._active_item is not None:
+            self._active_item.setText(f"{SPINNER_FRAMES[self._spinner_frame]} {self._active_title}")
+
+    def _append(self, message: str, color: QColor) -> QListWidgetItem:
+        item = QListWidgetItem(message)
+        item.setForeground(color)
+        item.setFont(self._console_font())
+        item.setSizeHint(QSize(0, CONSOLE_LINE_HEIGHT))
+        self._list.addItem(item)
+        return item

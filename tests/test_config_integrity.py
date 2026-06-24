@@ -1,8 +1,8 @@
 import json
 
 from subsearch.io import json_file
-from subsearch.io.nested_dict import get_keys_recursively
 from subsearch.runtime.config import composition, defaults, integrity
+from subsearch.runtime.config.nested_dict import get_keys_recursively
 
 
 def write_config(path, data):

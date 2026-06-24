@@ -2,9 +2,8 @@ from enum import StrEnum
 from typing import Callable
 
 from subsearch.core.bootstrap import Bootstrap
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import AppMode
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class PipelineStep(StrEnum):
@@ -140,13 +139,8 @@ class RunConditions:
         results = [(label, condition() if callable(condition) else condition) for label, condition in condition_list]
         passed = all(value for _, value in results)
         detail = ", ".join(f"{label}={value}" for label, value in results)
-        log.event(
-            LogEvent.RUN_CONDITIONS_EVALUATED,
-            level="debug",
-            step=pipeline_step,
-            detail=detail,
-            decision="run" if passed else "skip",
-        )
+        decision = "run" if passed else "skip"
+        capture(f"run_conditions [{pipeline_step}]: {detail} -> {decision}", level=LogLevel.DEBUG)
         return passed
 
     def conditions_met(self, pipeline_step: PipelineStep | str) -> bool:

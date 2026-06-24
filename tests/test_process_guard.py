@@ -3,22 +3,21 @@ from unittest.mock import patch
 import pytest
 
 from subsearch.decorators import process_guard
-from subsearch.runtime.logging.events import LogEvent
 
 
-def _terminal_events(recorded_events: list[LogEvent]) -> list[LogEvent]:
-    return [event for event in recorded_events if event in (LogEvent.PIPELINE_FINISHED, LogEvent.PIPELINE_CRASHED)]
+def _terminal_messages(messages: list[str]) -> list[str]:
+    return [message for message in messages if message.startswith("Exited")]
 
 
-def _run_guarded(func):
-    recorded: list[LogEvent] = []
+def _run_guarded(func) -> list[str]:
+    recorded: list[str] = []
 
-    def record(event, *args, **kwargs):
-        recorded.append(event)
+    def record(*lines, **kwargs):
+        recorded.extend(lines)
 
     with (
-        patch.object(process_guard.log, "event", side_effect=record),
-        patch.object(process_guard.log, "end_banner"),
+        patch.object(process_guard, "capture", side_effect=record),
+        patch.object(process_guard, "flush_crash"),
         patch.object(process_guard, "_run_with_mutex", side_effect=lambda f, *a, **k: f()),
     ):
         guarded = process_guard.apply_mutex(func)
@@ -29,17 +28,35 @@ def _run_guarded(func):
     return recorded
 
 
-def test_clean_exit_logs_pipeline_finished() -> None:
+def test_clean_exit_records_no_terminal_message() -> None:
+    # the elapsed run time is now reported by the recorder's "Exiting" phase, not here
     recorded = _run_guarded(lambda: None)
-    assert _terminal_events(recorded) == [LogEvent.PIPELINE_FINISHED]
+    assert _terminal_messages(recorded) == []
 
 
-def test_unhandled_exception_logs_pipeline_crashed() -> None:
+def test_unhandled_exception_records_crash_message() -> None:
     def boom() -> None:
         raise RuntimeError("boom")
 
     recorded = _run_guarded(boom)
-    assert _terminal_events(recorded) == [LogEvent.PIPELINE_CRASHED]
+    terminal = _terminal_messages(recorded)
+    assert len(terminal) == 1
+    assert terminal[0].endswith("following an unhandled exception")
+
+
+def test_unhandled_exception_flushes_crash() -> None:
+    def boom() -> None:
+        raise RuntimeError("boom")
+
+    with (
+        patch.object(process_guard, "capture"),
+        patch.object(process_guard, "flush_crash") as flush_crash,
+        patch.object(process_guard, "_run_with_mutex", side_effect=lambda f, *a, **k: f()),
+    ):
+        guarded = process_guard.apply_mutex(boom)
+        with pytest.raises(RuntimeError):
+            guarded()
+    flush_crash.assert_called_once()
 
 
 def test_unhandled_exception_propagates() -> None:
@@ -47,8 +64,8 @@ def test_unhandled_exception_propagates() -> None:
         raise RuntimeError("boom")
 
     with (
-        patch.object(process_guard.log, "event"),
-        patch.object(process_guard.log, "end_banner"),
+        patch.object(process_guard, "capture"),
+        patch.object(process_guard, "flush_crash"),
         patch.object(process_guard, "_run_with_mutex", side_effect=lambda f, *a, **k: f()),
     ):
         guarded = process_guard.apply_mutex(boom)

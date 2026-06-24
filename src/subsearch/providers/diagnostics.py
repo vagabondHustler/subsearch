@@ -11,14 +11,13 @@ from subsearch.providers import (
 )
 from subsearch.runtime.config import DEFAULT_CONFIG, FILE_PATHS
 from subsearch.runtime.config import session as config_session
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     AppConfig,
     ProviderDiagnosticStatus,
     ProviderResult,
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.recorder import LogLevel, capture
 
 KNOWN_GOOD_RELEASE = "The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv"
 
@@ -38,19 +37,15 @@ def record_health_reports(reports: list[ProviderResult]) -> None:
     for report in reports:
         key = f"diagnostics.provider_diagnostics.{report.provider_name}.failed_attempts"
         if report.diagnostic_status is ProviderDiagnosticStatus.OK and report.subtitles_found > 0:
-            log.event(LogEvent.DIAGNOSTICS_HEALTHY, level="debug", provider=report.provider_name)
+            capture(f"{report.provider_name}: healthy, resetting failed_attempts to 0", level=LogLevel.DEBUG)
             session.write(key, 0)
         else:
             current = session.read(key) or 0
             updated = current + 1
-            log.event(
-                LogEvent.DIAGNOSTICS_UNHEALTHY,
-                level="warning",
-                provider=report.provider_name,
-                status=report.diagnostic_status.value,
-                found=report.subtitles_found,
-                previous=current,
-                updated=updated,
+            capture(
+                f"{report.provider_name}: unhealthy ({report.diagnostic_status.value}, "
+                f"found {report.subtitles_found}), failed_attempts {current} -> {updated}",
+                level=LogLevel.WARNING,
             )
             session.write(key, updated)
     session.commit()
@@ -65,24 +60,24 @@ def providers_due_for_diagnostic(app_config: AppConfig) -> list[str]:
         if health["failed_attempts"] >= threshold
     ]
     if due:
-        log.event(LogEvent.DIAGNOSTICS_DUE, threshold=threshold, providers=", ".join(due))
+        capture(f"Providers due for diagnostic (threshold={threshold}): {', '.join(due)}")
     return due
 
 
 def diagnose_providers(provider_names: list[str]) -> list[ProviderResult]:
-    log.event(LogEvent.DIAGNOSTICS_RUNNING, providers=", ".join(provider_names))
+    capture(f"Running diagnostics for: {', '.join(provider_names)}")
     search_kwargs = _known_good_search_kwargs()
     reports = [_diagnose_imdb(search_kwargs)] if "imdb" in provider_names else []
     for provider_name in provider_names:
         provider_class = PROVIDER_CLASSES.get(provider_name)
         if provider_class is None:
             continue
-        log.event(LogEvent.DIAGNOSTICS_PROBING, level="debug", provider=provider_name)
+        capture(f"Probing {provider_name}", level=LogLevel.DEBUG)
         provider = provider_class(**search_kwargs)
         try:
             provider.start_search(flag="site")
         except MissingApiKey:
-            log.event(LogEvent.DIAGNOSTICS_SKIPPED_NO_API_KEY, level="warning", provider=provider_name)
+            capture(f"{provider_name}: skipped, missing API key", level=LogLevel.WARNING)
         reports.extend(provider.reported_health)
     return reports
 
@@ -128,12 +123,8 @@ def main() -> int:
     unhealthy = [report for report in reports if _provider_is_unhealthy(report)]
     for report in reports:
         status = "unhealthy" if _provider_is_unhealthy(report) else "healthy"
-        log.event(
-            LogEvent.DIAGNOSTICS_RESULT,
-            provider=report.provider_name,
-            status=status,
-            diagnostic_status=report.diagnostic_status.value,
-            found=report.subtitles_found,
+        capture(
+            f"{report.provider_name}: {status} " f"({report.diagnostic_status.value}, found {report.subtitles_found})"
         )
     return 1 if unhealthy else 0
 

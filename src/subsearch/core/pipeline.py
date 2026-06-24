@@ -7,7 +7,8 @@ from subsearch.core import parallel_tasks
 from subsearch.core.bootstrap import Bootstrap
 from subsearch.core.run_conditions import SKIP_LABEL_EXPLANATIONS, RunConditions
 from subsearch.decorators.conditional_execution import run_if_conditions_met
-from subsearch.io import file_system, file_tracker
+from subsearch.io import file_system
+from subsearch.parsing import subtitle_selection
 from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
@@ -15,8 +16,6 @@ from subsearch.runtime.config import (
     SEARCH_SUBJECT,
     WORKSPACE,
 )
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import (
     ProviderDiagnosticStatus,
     ProviderResult,
@@ -25,6 +24,7 @@ from subsearch.runtime.models import (
     SubtitleStatus,
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
+from subsearch.runtime.recorder import LogLevel, capture, get_file_tracker, phase
 
 
 class SearchJob:
@@ -36,9 +36,9 @@ class SearchJob:
     def execute(self) -> SearchOutcome:
         self._pipeline.bootstrap.ensure_search_mode()
         self._pipeline.bootstrap.resync_app_config()
-        log.event(LogEvent.SEARCH_FUZZY_MATCHING)
+        capture("Fuzzy matching search inputs")
         self._pipeline.bootstrap.rebuild_search_inputs(self._imdb_id, self._tvseries)
-        log.event(LogEvent.SPINNER, title="Searching", done_title="Searched")
+        phase("Searching")
         self._pipeline.init_search(
             self._pipeline.opensubtitles,
             self._pipeline.yifysubtitles,
@@ -48,7 +48,7 @@ class SearchJob:
         )
         skipped_providers = self._pipeline.provider_skip_reasons()
         for skip_reason in skipped_providers:
-            log.event(LogEvent.PROVIDER_SKIP_REASON, level="warning", reason=skip_reason)
+            capture(skip_reason, level=LogLevel.WARNING)
         subtitles = self._pipeline.bootstrap.accepted_subtitles + self._pipeline.bootstrap.rejected_subtitles
         return SearchOutcome(subtitles, skipped_providers)
 
@@ -68,7 +68,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def init_search(self, *providers: Callable[..., None]) -> None:
         parallel_tasks.run_in_threads(*providers)
-        log.event(LogEvent.SEARCH_COMPLETED)
+        capture("Search completed")
 
     def provider_skip_reasons(self) -> list[str]:
         reasons = []
@@ -87,7 +87,7 @@ class SearchPipeline:
         diagnostics.record_health_reports(self.bootstrap.health_reports)
         self.bootstrap.resync_app_config()
         self._run_due_diagnostics()
-        log.event(LogEvent.DIAGNOSTICS_COMPLETED)
+        capture("Diagnostics completed")
 
     def _run_due_diagnostics(self) -> None:
         from subsearch.providers import diagnostics
@@ -98,7 +98,7 @@ class SearchPipeline:
         reports = diagnostics.diagnose_providers(due_providers)
         diagnostics.record_health_reports(reports)
         self._notify_unhealthy_providers(reports)
-        log.event(LogEvent.DIAGNOSTICS_DUE_COMPLETED)
+        capture("Due diagnostics completed")
 
     def _notify_unhealthy_providers(self, reports: list[ProviderResult]) -> None:
         unhealthy = [
@@ -107,7 +107,7 @@ class SearchPipeline:
         if not unhealthy:
             return None
         message = ", ".join(unhealthy)
-        log.event(LogEvent.PIPELINE_DIAGNOSTICS_FLAGGED, level="warning", message=message)
+        capture(f"Provider diagnostics flagged: {message}", level=LogLevel.WARNING)
         self.bootstrap.pending_notifications.append(("Provider diagnostics", f"May have changed: {message}"))
 
     def _start_search(self, provider: Callable[..., Any], flag: str) -> None:
@@ -176,7 +176,7 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def download_files(self) -> None:
-        log.event(LogEvent.SPINNER, title="Downloading subtitles", done_title="Downloaded subtitles")
+        phase("Downloading subtitles")
         accepted = sorted(
             self.bootstrap.accepted_subtitles,
             key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
@@ -186,12 +186,10 @@ class SearchPipeline:
             if self._provider_at_download_limit(subtitle.provider_name):
                 continue
             self._download_accepted_subtitle(subtitle, len(accepted))
-        log.event(LogEvent.DOWNLOADS_COMPLETED)
+        capture("Downloads completed")
 
     @run_if_conditions_met
     def subtitle_workspace(self) -> None:
-        # open_settings_window owns the "Waiting for user inputs" banner; starting
-        # one here too would be torn down and re-created identically by it.
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.entrypoint import open_settings_window
 
@@ -199,14 +197,14 @@ class SearchPipeline:
             subtitles, search_job_factory=self.create_search_job
         )
         self.bootstrap.resync_app_config()
-        log.event(LogEvent.BOOT_WORKSPACE_CLOSED)
+        capture("Results window closed")
 
     def _resolve_post_processing_target(self) -> Path:
         return PATH_RESOLVER.resolve_post_processing_target(self.bootstrap.app_config, WORKSPACE.file_directory)
 
     @run_if_conditions_met
     def subtitle_post_processing(self) -> None:
-        log.event(LogEvent.SPINNER, title="Processing subtitles", done_title="Processed subtitles")
+        phase("Processing subtitles")
         target_path = self._resolve_post_processing_target()
         self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(WORKSPACE.download_directory)
         self.extract_files()
@@ -218,28 +216,28 @@ class SearchPipeline:
     @run_if_conditions_met
     def extract_files(self) -> None:
         file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
-        log.event(LogEvent.EXTRACT_COMPLETED)
+        capture("Extraction completed")
 
     @run_if_conditions_met
     def subtitle_rename(self) -> None:
-        new_name = file_system.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
+        new_name = subtitle_selection.autoload_rename(SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory)
         self.bootstrap.autoload_src = new_name
-        log.event(LogEvent.RENAME_COMPLETED)
+        capture("Rename completed")
 
     @run_if_conditions_met
     def subtitle_move_best(self, target: Path) -> None:
         file_system.move_and_replace(self.bootstrap.autoload_src, target)
-        log.event(LogEvent.MOVE_BEST_COMPLETED)
+        capture("Best subtitle moved")
 
     @run_if_conditions_met
     def subtitle_move_all(self, target: Path) -> None:
         file_system.move_all(WORKSPACE.extraction_directory, target)
-        log.event(LogEvent.MOVE_ALL_COMPLETED)
+        capture("All subtitles moved")
 
     def _log_provider_diagnostics_warnings(self) -> None:
         for report in self.bootstrap.health_reports:
             if report.diagnostic_status is ProviderDiagnosticStatus.STRUCTURE_INVALID:
-                log.event(LogEvent.PIPELINE_PROVIDER_CHANGED, level="warning", provider=report.provider_name)
+                capture(f"{report.provider_name} may have changed, unrecognized response", level=LogLevel.WARNING)
 
     def _count_downloaded_subtitles(self) -> tuple[int, int]:
         evaluated = self.bootstrap.accepted_subtitles + self.bootstrap.rejected_subtitles
@@ -252,8 +250,7 @@ class SearchPipeline:
 
     def _dispatch_finish_toast(self, summary_line: str, elapsed_summary: str, succeeded: bool) -> None:
         title = "Search Succeeded" if succeeded else "Search Failed"
-        event_key = LogEvent.PIPELINE_SUMMARY_SUCCEEDED if succeeded else LogEvent.PIPELINE_SUMMARY_FAILED
-        log.event(event_key, summary=summary_line)
+        capture(summary_line)
         self.bootstrap.system_tray.display_toast(title, f"{summary_line}\n{elapsed_summary}")
 
     def _failure_reason(self, total_count: int) -> str:
@@ -292,7 +289,7 @@ class SearchPipeline:
     @run_if_conditions_met
     def clean_up(self) -> None:
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        tracker = file_tracker.get_file_tracker()
+        tracker = get_file_tracker()
         if WORKSPACE.download_directory != Path(""):
             tracker.delete_tracked_within(WORKSPACE.extraction_directory, "*.nfo")
             tracker.delete_tracked_within(WORKSPACE.download_directory)
@@ -301,7 +298,7 @@ class SearchPipeline:
                 WORKSPACE.extraction_directory
             ):
                 tracker.delete_if_tracked(WORKSPACE.extraction_directory)
-        log.event(LogEvent.CLEANUP_COMPLETED)
+        capture("Cleanup completed")
 
     def _wait_for_terminal_input(self) -> None:
         if not self.bootstrap.app_config.show_terminal:

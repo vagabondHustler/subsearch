@@ -74,7 +74,7 @@ def test_settings_window_builds_every_interface(settings_window, qtbot) -> None:
 
 
 def test_update_card_renders_the_scraped_release(qtbot) -> None:
-    from subsearch.io.app_updater import UpdateAvailability
+    from subsearch.parsing.release_updates import UpdateAvailability
     from subsearch.ui.cards.update_card import UpdateCard
     from subsearch.ui.state.tasks import TaskRunner
 

@@ -1,7 +1,9 @@
+import threading
+import traceback
+
 from PySide6.QtCore import QObject, QThread, Signal
 
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture, flush_crash
 
 
 class Worker(QObject):
@@ -15,7 +17,8 @@ class Worker(QObject):
         try:
             self.finished.emit(self.execute())
         except Exception as error:
-            log.event(LogEvent.TASK_FAILED, level="error", reason=str(error))
+            capture(str(error), level=LogLevel.ERROR)
+            flush_crash(threading.current_thread().name, traceback.format_exc())
             self.failed.emit(str(error))
 
 

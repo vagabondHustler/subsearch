@@ -6,9 +6,8 @@ from PySide6.QtCore import QObject, Signal, SignalInstance
 from subsearch.io import file_system
 from subsearch.parsing import release_parser
 from subsearch.runtime.config import WORKSPACE
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import Subtitle, SubtitleStatus
+from subsearch.runtime.recorder import LogLevel, capture, phase
 from subsearch.ui.state.tasks import TaskRunner, Worker
 
 
@@ -90,7 +89,7 @@ class SubtitleDownloadService(QObject):
         # opened after search (downloads only start once results exist).
         if self._processing_announced:
             return
-        log.event(LogEvent.SPINNER, title="Processing subtitles", done_title="Processed subtitles")
+        phase("Processing subtitles")
         self._processing_announced = True
 
     def _end_processing_phase(self) -> None:
@@ -108,6 +107,6 @@ class SubtitleDownloadService(QObject):
         self._active = None
         if subtitle is not None:
             subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
-            log.event(LogEvent.DOWNLOAD_FAILED, level="error", reason=message)
+            capture(f"Download failed: {message}", level=LogLevel.ERROR)
             self.failed.emit(subtitle, message)
         self._start_next()

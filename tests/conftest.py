@@ -70,15 +70,19 @@ def override_constants(fake_language_data_file, fake_config_file, fake_log_file)
 
 
 @pytest.fixture(autouse=True)
-def redirect_logger_to_temp_log(override_constants) -> Any:
-    from subsearch.runtime.logging import logger
+def redirect_recorder_to_temp(override_constants, tmp_path) -> Any:
+    from subsearch.runtime import recorder
+    from subsearch.runtime.recorder import RecorderConfig
 
-    logger.log._file_logger = None
+    recorder.shutdown()
+    recorder.init(
+        RecorderConfig(
+            log_file_path=tmp_path / "log.log",
+            crash_file_path=tmp_path / "crash.log",
+        )
+    )
     yield
-    if logger.log._file_logger is not None:
-        for handler in logger.log._file_logger.handlers:
-            handler.close()
-    logger.log._file_logger = None
+    recorder.shutdown()
 
 
 @pytest.fixture(autouse=True)

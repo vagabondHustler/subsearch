@@ -6,10 +6,9 @@ from curl_cffi.requests import Response
 
 from subsearch.parsing.gestdown_names import normalize_show_name
 from subsearch.providers import provider_helper
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.models.exceptions import ProviderResponseUnrecognized
+from subsearch.runtime.recorder import LogLevel, capture
 
 API_BASE_URL = "https://api.gestdown.info"
 
@@ -34,13 +33,7 @@ class GestdownApi:
         return f"{API_BASE_URL}{download_uri}"
 
     def response_status_ok(self, response: Response) -> bool:
-        log.event(
-            LogEvent.PROVIDER_GESTDOWN_STATUS,
-            level="debug",
-            url=response.url,
-            status_code=response.status_code,
-            reason=response.reason,
-        )
+        capture(f"{response.url} status_code: {response.status_code} {response.reason}", level=LogLevel.DEBUG)
         return response.status_code == 200
 
 
@@ -86,7 +79,7 @@ class Gestdown(provider_helper.ProviderHelper):
         show = self._select_show(data["shows"], target)
         if show is None:
             return None
-        log.event(LogEvent.PROVIDER_SEARCHING, level="debug", provider=self.provider_name)
+        capture(f"{self.provider_name}: searching", level=LogLevel.DEBUG)
         return str(show["id"])
 
     def _select_show(self, shows: list[dict[str, Any]], target: str) -> dict[str, Any] | None:

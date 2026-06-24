@@ -1,7 +1,6 @@
 from PySide6.QtCore import QEventLoop, QObject, QThread
 
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture
 from subsearch.ui.core.qt_application import get_application
 from subsearch.ui.widgets.notification_gate import notifications_allowed
 from subsearch.ui.widgets.notification_toast import NotificationToast
@@ -44,9 +43,9 @@ class SystemTray(QObject):
     def start(self) -> None:
         if not self.enabled:
             return
-        log.event(LogEvent.TRAY_ADDED, level="debug")
+        capture("Subsearch was added to the system tray", level=LogLevel.DEBUG)
 
     def stop(self) -> None:
         if not self.enabled:
             return
-        log.event(LogEvent.TRAY_REMOVED, level="debug")
+        capture("Subsearch was removed from the system tray", level=LogLevel.DEBUG)

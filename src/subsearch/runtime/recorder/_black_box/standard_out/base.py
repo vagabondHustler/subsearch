@@ -1,0 +1,9 @@
+from typing import Protocol
+
+
+class RecorderOutput(Protocol):
+    def write(self, text: str) -> None: ...
+
+    def tick(self) -> None: ...
+
+    def close(self) -> None: ...

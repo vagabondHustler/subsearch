@@ -4,14 +4,13 @@ from pathlib import Path
 from typing import Any
 
 from subsearch.io import json_file
-from subsearch.io.nested_dict import (
+from subsearch.runtime.config.composition import DEFAULT_CONFIG, FILE_PATHS
+from subsearch.runtime.config.nested_dict import (
     delete_nested_value,
     get_keys_recursively,
     set_nested_value,
 )
-from subsearch.runtime.config.composition import DEFAULT_CONFIG, FILE_PATHS
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 class ConfigResolution:
@@ -21,17 +20,17 @@ class ConfigResolution:
 
 
 def repair_config(config_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    log.event(LogEvent.CONFIG_SCHEMA_MISMATCH, level="warning")
+    capture("Config schema mismatch, repairing", level=LogLevel.WARNING)
     config_data = json_file.load_json_data(config_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]
     for key in obsolete_keys:
-        log.event(LogEvent.CONFIG_KEY_REMOVED, key=key)
+        capture(f"Removing obsolete config key {key}")
         delete_nested_value(config_data, key)
 
     missing_keys = [key for key in valid_config_keys if key not in config_keys]
     for key in missing_keys:
-        log.event(LogEvent.CONFIG_KEY_ADDED, key=key)
+        capture(f"Adding missing config key {key}")
         keys = key.split(".")
         value = functools.reduce(dict.get, keys, DEFAULT_CONFIG)  # type: ignore
         set_nested_value(config_data, key, value)
@@ -58,7 +57,7 @@ def remove_stale_backup_file() -> None:
 
 
 def reset_to_default_config() -> None:
-    log.event(LogEvent.CONFIG_RESET, level="warning", path=FILE_PATHS.config)
+    capture("Settings reset to defaults", level=LogLevel.WARNING)
     FILE_PATHS.config.unlink(missing_ok=True)
     json_file.dump_json_data(FILE_PATHS.config, DEFAULT_CONFIG)
 
@@ -67,7 +66,7 @@ def restore_last_known_good_config() -> None:
     backup_file_path = FILE_PATHS.config.with_suffix(f"{FILE_PATHS.config.suffix}.bak")
     if not backup_file_path.exists():
         return None
-    log.event(LogEvent.CONFIG_RESTORED, path=backup_file_path)
+    capture("Restored settings from backup")
     os.replace(backup_file_path, FILE_PATHS.config)
 
 
@@ -78,7 +77,7 @@ def resolve_on_integrity_failure() -> ConfigResolution:
         config_data = json_file.load_json_data(FILE_PATHS.config)
         config_keys = get_keys_recursively(config_data)
     except Exception:
-        log.event(LogEvent.CONFIG_RESTORE_ATTEMPT, level="warning")
+        capture("Config missing or unreadable, attempting restore from backup", level=LogLevel.WARNING)
         restore_last_known_good_config()
         remove_stale_backup_file()
         if not FILE_PATHS.config.exists():
@@ -88,18 +87,18 @@ def resolve_on_integrity_failure() -> ConfigResolution:
             config_data = json_file.load_json_data(FILE_PATHS.config)
             config_keys = get_keys_recursively(config_data)
         except Exception:
-            log.event(LogEvent.CONFIG_UNREADABLE_AFTER_RESTORE, level="warning")
+            capture("Config is unreadable after restore, resetting to defaults", level=LogLevel.WARNING)
             reset_to_default_config()
             return ConfigResolution(json_file.load_json_data(FILE_PATHS.config), is_fresh=True)
     else:
         remove_stale_backup_file()
     if valid_config(valid_config_keys, config_keys):
-        log.event(LogEvent.CONFIG_INTEGRITY_PASSED, level="debug")
+        capture("Config integrity check passed", level=LogLevel.DEBUG)
         return ConfigResolution(config_data, is_fresh=False)
     try:
         repair_config(FILE_PATHS.config, valid_config_keys, config_keys)
-        log.event(LogEvent.CONFIG_REPAIR_SUCCEEDED)
+        capture("Config repair succeeded")
     except Exception:
-        log.event(LogEvent.CONFIG_REPAIR_FAILED, level="error")
+        capture("Config repair failed, resetting to defaults", level=LogLevel.ERROR)
         reset_to_default_config()
     return ConfigResolution(json_file.load_json_data(FILE_PATHS.config), is_fresh=True)

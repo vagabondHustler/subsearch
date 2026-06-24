@@ -4,12 +4,11 @@ import os
 from pathlib import Path
 from typing import Any, cast
 
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture
 
 
 def load_json_data(json_file_path: Path) -> dict[str, Any]:
-    log.event(LogEvent.CONFIG_READ, level="debug", filename=json_file_path.name)
+    capture(f"Read json file from {json_file_path.name}", level=LogLevel.DEBUG)
     with open(json_file_path, "r", encoding="utf-8") as file:
         return cast(dict[str, Any], json.load(file))
 
@@ -30,7 +29,7 @@ def dump_json_data(json_file_path: Path, json_data: dict) -> None:
             os.fsync(file.fileno())
         os.replace(temp_file_path, json_file_path)
 
-        log.event(LogEvent.CONFIG_WROTE, level="debug", filename=json_file_path.name)
-    except Exception as e:
-        log.event(LogEvent.CONFIG_WRITE_FAILED, level="error", filename=json_file_path.name, reason=str(e))
+        capture(f"Wrote config to {json_file_path.name}", level=LogLevel.DEBUG)
+    except Exception as write_error:
+        capture(f"Failed to write config to {json_file_path.name}: {write_error}", level=LogLevel.ERROR)
         raise

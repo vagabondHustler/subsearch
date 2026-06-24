@@ -5,8 +5,7 @@ from curl_cffi import requests as curl_requests
 
 from subsearch.parsing.gestdown_names import normalize_show_name
 from subsearch.parsing.imdb_lookup import EpisodeSuggestion, SeasonSuggestion
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
+from subsearch.runtime.recorder import LogLevel, capture
 
 API_BASE_URL = "https://api.gestdown.info"
 
@@ -18,27 +17,27 @@ class GestdownLookup:
     def find_season_suggestions(self, title: str) -> list[SeasonSuggestion]:
         show = self._matching_show(title)
         if show is None:
-            log.event(LogEvent.GESTDOWN_SEASONS_FAILED, level="warning", title=title)
+            capture(f"Gestdown returned no seasons for '{title}'", level=LogLevel.WARNING)
             return []
         suggestions = [SeasonSuggestion(number=season) for season in sorted(show.get("seasons", []))]
-        log.event(LogEvent.GESTDOWN_SEASONS, title=title, seasons=len(suggestions))
+        capture(f"Gestdown returned {len(suggestions)} season(s) for '{title}'")
         return suggestions
 
     def find_episode_suggestions(self, title: str, season: int, language_name: str) -> list[EpisodeSuggestion]:
         show = self._matching_show(title)
         if show is None:
-            log.event(LogEvent.GESTDOWN_EPISODES_FAILED, level="warning", title=title, season=season)
+            capture(f"Gestdown returned no episodes for '{title}' season {season}", level=LogLevel.WARNING)
             return []
         response = self.session.get(f"{API_BASE_URL}/shows/{show['id']}/{season}/{quote(language_name)}")
         if response.status_code != 200:
-            log.event(LogEvent.GESTDOWN_EPISODES_FAILED, level="warning", title=title, season=season)
+            capture(f"Gestdown returned no episodes for '{title}' season {season}", level=LogLevel.WARNING)
             return []
         suggestions = [
             EpisodeSuggestion(season=season, number=episode["number"], title=episode.get("title") or "")
             for episode in response.json().get("episodes", [])
             if episode.get("number")
         ]
-        log.event(LogEvent.GESTDOWN_EPISODES, title=title, season=season, episodes=len(suggestions))
+        capture(f"Gestdown returned {len(suggestions)} episode(s) for '{title}' season {season}")
         return suggestions
 
     def _matching_show(self, title: str) -> dict[str, Any] | None:

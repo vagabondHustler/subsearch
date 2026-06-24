@@ -1,15 +1,14 @@
 import ctypes
 import functools
-import time
+import threading
+import traceback
 from typing import Any, Callable
 
 from subsearch.runtime.config import GUID
 from subsearch.runtime.config import session as config_session
 from subsearch.runtime.config.defaults import ConfigKey
-from subsearch.runtime.logging.events import LogEvent
-from subsearch.runtime.logging.logger import log
 from subsearch.runtime.models import exceptions
-from subsearch.runtime.startup import PERF_COUNTER
+from subsearch.runtime.recorder import LogLevel, capture, flush_crash, phase
 
 ERROR_ALREADY_EXISTS = 183
 WAIT_INFINITE = -1
@@ -27,12 +26,12 @@ def _create_mutex() -> Any:
 
 def _wait_for_mutex(kernel32: Any, mutex: Any) -> None:
     kernel32.WaitForSingleObject(mutex, WAIT_INFINITE)
-    log.event(LogEvent.GUARD_MUTEX_ACQUIRED, level="debug", guid=GUID)
+    capture(f"Mutex acquired: {GUID}", level=LogLevel.DEBUG)
 
 
 def _release_mutex(kernel32: Any, mutex: Any) -> None:
     kernel32.ReleaseMutex(mutex)
-    log.event(LogEvent.GUARD_MUTEX_RELEASED, level="debug", guid=GUID)
+    capture(f"Mutex released: {GUID}", level=LogLevel.DEBUG)
 
 
 def _log_single_instance_setting() -> None:
@@ -41,14 +40,10 @@ def _log_single_instance_setting() -> None:
     except FileNotFoundError, KeyError, TypeError:
         return
 
-    log.event(
-        LogEvent.GUARD_SINGLE_INSTANCE,
-        level="debug",
-        single_instance=single_instance,
-    )
+    capture(f"Single-instance enforcement: {single_instance}", level=LogLevel.DEBUG)
 
     if not single_instance:
-        log.event(LogEvent.GUARD_SINGLE_INSTANCE_DISABLED, level="debug")
+        capture("Single-instance disabled, skipping mutex", level=LogLevel.DEBUG)
 
 
 def _run_with_mutex(func: Callable, *args: Any, **kwargs: Any) -> Any:
@@ -65,17 +60,16 @@ def _run_with_mutex(func: Callable, *args: Any, **kwargs: Any) -> Any:
 def apply_mutex(func: Callable) -> Callable:
     @functools.wraps(func)
     def inner(*args: Any, **kwargs: Any) -> Any:
-        log.event(LogEvent.SPINNER, title="Initializing", done_title="Initialized")
+        phase("Initializing")
         crashed = False
         try:
             return _run_with_mutex(func, *args, **kwargs)
         except BaseException:
             crashed = True
+            flush_crash(threading.current_thread().name, traceback.format_exc())
             raise
         finally:
-            log.event(LogEvent.SPINNER, title="Finishing up", done_title="Finished up")
-            log.end_banner()
-            event = LogEvent.PIPELINE_CRASHED if crashed else LogEvent.PIPELINE_FINISHED
-            log.event(event, seconds=time.perf_counter() - PERF_COUNTER)
+            if crashed:
+                capture("Exited following an unhandled exception", level=LogLevel.WARNING)
 
     return inner

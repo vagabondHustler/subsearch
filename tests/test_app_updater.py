@@ -20,45 +20,23 @@ class FakeSession:
         return self.response
 
 
-def test_fetch_latest_release_scrapes_github_release_page(monkeypatch) -> None:
-    response = FakeResponse(
-        status_code=200,
-        url="https://github.com/vagabondHustler/subsearch/releases/tag/3.1.0",
-        text="""
-            <article>
-              <div class="markdown-body"><h2>Added</h2><p>Automatic updates</p></div>
-            </article>
-        """,
-    )
+def test_fetch_latest_release_page_returns_the_final_url_and_html(monkeypatch) -> None:
+    response = FakeResponse(status_code=200, url="https://example.test/releases/tag/3.1.0", text="<html>body</html>")
     session = FakeSession(response)
     monkeypatch.setattr(app_updater, "get_session", lambda: session)
 
-    release = app_updater.fetch_latest_release()
+    page = app_updater.fetch_latest_release_page()
 
     assert session.urls == [app_updater.LATEST_RELEASE_PAGE]
-    assert release.version == "3.1.0"
-    assert release.changelog == "Added\nAutomatic updates"
+    assert page.final_url == "https://example.test/releases/tag/3.1.0"
+    assert page.html == "<html>body</html>"
 
 
-def test_fetch_latest_release_rejects_a_page_without_a_tag(monkeypatch) -> None:
-    response = FakeResponse(status_code=200, url="https://github.com/vagabondHustler/subsearch/releases")
-    monkeypatch.setattr(app_updater, "get_session", lambda: FakeSession(response))
+def test_fetch_latest_release_page_raises_on_a_non_success_status(monkeypatch) -> None:
+    monkeypatch.setattr(app_updater, "get_session", lambda: FakeSession(FakeResponse(status_code=404)))
 
-    with pytest.raises(app_updater.VersionUnavailable, match="release tag"):
-        app_updater.fetch_latest_release()
-
-
-def test_check_for_update_uses_the_scraped_release_version(monkeypatch) -> None:
-    release = app_updater.GitHubRelease(version="3.1.0", changelog="Changes")
-    monkeypatch.setattr(app_updater, "VERSION", "3.0.0")
-    monkeypatch.setattr(app_updater, "fetch_latest_release", lambda: release)
-
-    availability = app_updater.check_for_update()
-
-    assert availability.current_version == "3.0.0"
-    assert availability.latest_version == "3.1.0"
-    assert availability.update_available is True
-    assert availability.changelog == "Changes"
+    with pytest.raises(app_updater.ReleasePageError, match="HTTP 404"):
+        app_updater.fetch_latest_release_page()
 
 
 def test_installer_url_uses_the_same_release_tag() -> None:

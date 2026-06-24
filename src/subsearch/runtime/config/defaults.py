@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Any
 
-from subsearch.io.nested_dict import insert_nested_value
+from subsearch.runtime.config.nested_dict import insert_nested_value
 
 
 class ConfigKey(StrEnum):

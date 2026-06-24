@@ -1,4 +1,4 @@
-from subsearch.io import nested_dict
+from subsearch.runtime.config import nested_dict
 
 
 def test_nested_value_read_set_delete():
