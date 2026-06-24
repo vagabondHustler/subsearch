@@ -348,8 +348,10 @@ class ValidateGate:
             step_summary.set_output("proceed", "false")
             return
 
-        forced = os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
-        proceed = forced or validation.should_validate(number)
+        event = os.environ["GITHUB_EVENT_NAME"]
+        forced = event == "workflow_dispatch"
+        scheduled = event == "schedule"
+        proceed = forced or (scheduled and validation.should_validate(number))
 
         step_summary.set_output("proceed", "true" if proceed else "false")
         step_summary.set_output("pr_number", number)
