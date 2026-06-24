@@ -710,7 +710,6 @@ class ReleaseValidation:
                 "dev",
                 "--state",
                 "open",
-                "--draft",
                 "--label",
                 "release",
                 "--json",

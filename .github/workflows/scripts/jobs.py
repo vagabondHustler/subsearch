@@ -343,15 +343,16 @@ class ValidateGate:
         validation = ReleaseValidation()
         step_summary = StepSummary()
 
+        forced = os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
+
         number = validation.open_release_pr()
         if number is None:
+            if forced:
+                raise SystemExit("No open release PR found; cannot validate on manual dispatch.")
             step_summary.set_output("proceed", "false")
             return
 
-        event = os.environ["GITHUB_EVENT_NAME"]
-        forced = event == "workflow_dispatch"
-        scheduled = event == "schedule"
-        proceed = forced or (scheduled and validation.should_validate(number))
+        proceed = forced or validation.should_validate(number)
 
         step_summary.set_output("proceed", "true" if proceed else "false")
         step_summary.set_output("pr_number", number)
