@@ -549,8 +549,6 @@ class Build:
         "qfluentwidgets",
         "requests",
         "selectolax",
-        "yaspin",
-        "termcolor",
         "urllib3",
         "urllib3_future",
         "qh3",

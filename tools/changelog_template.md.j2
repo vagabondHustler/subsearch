@@ -37,8 +37,10 @@
 {% else %}
 {% set important = sections[change_key] | selectattr("important") | list %}
 {% set normal = sections[change_key] | rejectattr("important") | list %}
-{% set collapsed = normal %}
+{% set above_fold = normal[:fold_limit] %}
+{% set collapsed = normal[fold_limit:] %}
 {% for change in important %}{{ render_commit(change) }}{% endfor %}
+{% for change in above_fold %}{{ render_commit(change) }}{% endfor %}
 {% if collapsed %}
 > <details><summary>Show all {{ section_labels.get(change_key, change_key) }}</summary>
 >
