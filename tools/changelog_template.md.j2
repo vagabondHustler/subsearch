@@ -27,6 +27,11 @@
 {% elif change.message %}- {{ change.sha }} - {{ change.message }}
 {% endif %}
 {% endmacro %}
+{% macro render_fold_commit(change) %}
+{%- if change.scope %}• {{ change.sha }} - **{{ change.scope }}**: {{ change.message }}<br>
+{%- elif change.message %}• {{ change.sha }} - {{ change.message }}<br>
+{%- endif %}
+{%- endmacro %}
 {% for change_key in ordered_keys %}
 {% if change_key %}
 #### {{ change_key }}
@@ -42,10 +47,7 @@
 {% for change in important %}{{ render_commit(change) }}{% endfor %}
 {% for change in above_fold %}{{ render_commit(change) }}{% endfor %}
 {% if collapsed %}
-> <details><summary>Show all {{ section_labels.get(change_key, change_key) }}</summary>
->
-{% for change in collapsed %}> {{ render_commit(change) }}{% endfor %}>
-> </details>
+    ###### <details><summary> Show all {{ section_labels.get(change_key, change_key) }}</summary><br>{% for change in collapsed %}{{ render_fold_commit(change) }}{% endfor %}</details>
 {% endif %}
 {% endif %}
 
