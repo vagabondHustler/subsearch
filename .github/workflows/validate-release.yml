@@ -3,9 +3,6 @@ run-name: Validate release
 
 
 on:
-  push:
-    branches:
-      - dev
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
@@ -30,44 +27,11 @@ concurrency:
 env:
   ARTIFACT_RETENTION_DAYS: 90
   JOBS: python .github/workflows/scripts/jobs.py
-  # Scheduled/manual runs start from the default branch; validation always targets the dev branch.
   VALIDATION_REF: dev
 
 jobs:
-  prepare:
-    name: Open pull request to main
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ env.VALIDATION_REF }}
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version-file: .python-version
-
-      - name: Install commitizen
-        run: |
-          python -m pip install --upgrade pip commitizen
-          python -m pip install -e . --no-deps
-
-      - name: Render preview changelog
-        id: preview
-        run: ${{ env.JOBS }} prepare
-
-      - name: Open or update the release pull request
-        if: ${{ steps.preview.outputs.releasable == 'true' }}
-        run: ${{ env.JOBS }} open_main_pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PREDICTED_VERSION: ${{ steps.preview.outputs.predicted_version }}
-
   gate:
     name: Decide whether to validate
-    needs: prepare
-    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
