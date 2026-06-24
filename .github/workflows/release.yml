@@ -40,7 +40,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_TOKEN }}
 
       - uses: ./.github/actions/configure-signing
         with:
