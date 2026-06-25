@@ -143,6 +143,228 @@ def test_extract_versions_same_name_different_content(tmp_path) -> None:
     assert sorted(path.name for path in destination.iterdir()) == ["movie.srt", "movie_v1.srt"]
 
 
+def test_extract_moves_loose_raw_subtitle_into_destination(tmp_path) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    (download_directory / "movie.srt").write_bytes(b"raw subtitle\n")
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 1
+    assert [path.name for path in destination.iterdir()] == ["movie.srt"]
+    assert not (download_directory / "movie.srt").exists()
+
+
+def test_extract_skips_identical_loose_raw_subtitle(tmp_path) -> None:
+    body = b"raw subtitle\n"
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    (download_directory / "movie.srt").write_bytes(body)
+    destination = tmp_path / "subs"
+    destination.mkdir()
+    (destination / "movie.srt").write_bytes(body)
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 0
+    assert [path.name for path in destination.iterdir()] == ["movie.srt"]
+
+
+def _write_srt(directory: Path, name: str, body: bytes) -> Path:
+    file_path = directory / name
+    file_path.write_bytes(body)
+    return file_path
+
+
+def _zip_with(directory: Path, name: str, members: dict[str, bytes]) -> Path:
+    archive_path = directory / name
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for member_name, body in members.items():
+            archive.writestr(member_name, body)
+    return archive_path
+
+
+def test_extract_mixes_archives_and_raw_subtitles_in_one_pass(tmp_path) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    _zip_with(download_directory, "pack_one.zip", {"alpha.srt": b"alpha\n", "beta.ass": b"beta\n"})
+    _zip_with(download_directory, "pack_two.zip", {"gamma.srt": b"gamma\n"})
+    _write_srt(download_directory, "delta.srt", b"delta\n")
+    _write_srt(download_directory, "epsilon.srt", b"epsilon\n")
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 5
+    assert sorted(path.name for path in destination.iterdir()) == [
+        "alpha.srt",
+        "beta.ass",
+        "delta.srt",
+        "epsilon.srt",
+        "gamma.srt",
+    ]
+    assert sorted(path.name for path in download_directory.iterdir()) == ["pack_one.zip", "pack_two.zip"]
+
+
+def test_extract_dedups_raw_against_archive_with_same_name_and_sha(tmp_path) -> None:
+    body = b"identical subtitle body\n"
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    _zip_with(download_directory, "pack.zip", {"shared.srt": body})
+    _write_srt(download_directory, "shared.srt", body)
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 1
+    assert [path.name for path in destination.iterdir()] == ["shared.srt"]
+    assert (destination / "shared.srt").read_bytes() == body
+
+
+def test_extract_versions_raw_against_archive_with_same_name_different_sha(tmp_path) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    _zip_with(download_directory, "pack.zip", {"shared.srt": b"from archive\n"})
+    _write_srt(download_directory, "shared.srt", b"from raw download\n")
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 2
+    assert sorted(path.name for path in destination.iterdir()) == ["shared.srt", "shared_v1.srt"]
+
+
+def test_extract_keeps_same_sha_differently_named_raw_subtitles(tmp_path) -> None:
+    body = b"identical content across two names\n"
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    _write_srt(download_directory, "ensure_same_sha_different_name_1.srt", body)
+    _write_srt(download_directory, "ensure_same_sha_different_name_2.srt", body)
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 2
+    assert sorted(path.name for path in destination.iterdir()) == [
+        "ensure_same_sha_different_name_1.srt",
+        "ensure_same_sha_different_name_2.srt",
+    ]
+    assert file_system.file_content_hash(
+        destination / "ensure_same_sha_different_name_1.srt"
+    ) == file_system.file_content_hash(destination / "ensure_same_sha_different_name_2.srt")
+
+
+class _FakeResponse:
+    def __init__(self, body: bytes, headers: dict[str, str]) -> None:
+        self._body = body
+        self.headers = headers
+        self.status_code = 200
+
+    def iter_content(self, chunk_size: int):
+        for start in range(0, len(self._body), chunk_size):
+            yield self._body[start : start + chunk_size]
+
+
+class _FakeSession:
+    def __init__(self, responses: dict[str, _FakeResponse]) -> None:
+        self._responses = responses
+
+    def get(self, url: str, headers=None, stream=False) -> _FakeResponse:
+        return self._responses[url]
+
+
+def _gestdown_subtitle(name: str, url: str) -> Subtitle:
+    return Subtitle(
+        token_result=100,
+        provider_name="gestdown",
+        subtitle_name=name,
+        download_url=url,
+        request_data={},
+    )
+
+
+def test_gestdown_raw_download_lands_in_tmp_then_moves_to_subs(tmp_path, monkeypatch) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    body = b"1\n00:00:00,000 --> 00:00:01,000\ngestdown\n"
+    url = "https://api.gestdown.info/subtitles/download/abc"
+    session = _FakeSession({url: _FakeResponse(body, {"content-type": "text/srt"})})
+    monkeypatch.setattr("subsearch.io.http.get_session", lambda: session)
+
+    subtitle = _gestdown_subtitle("the.show.s01e01.gestdown", url)
+    downloaded = file_system.download_subtitle(subtitle, 1, 1, download_directory)
+
+    assert downloaded is True
+    staged = list(download_directory.iterdir())
+    assert [path.suffix for path in staged] == [".srt"]
+    assert not list(destination.iterdir())
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    assert extracted_count == 1
+    assert [path.suffix for path in destination.iterdir()] == [".srt"]
+    assert (next(destination.iterdir())).read_bytes() == body
+    assert not list(download_directory.glob("*.srt"))
+
+
+def test_gestdown_raw_dedups_against_identical_archive_member(tmp_path, monkeypatch) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    shared_body = b"shared subtitle body\n"
+    raw_url = "https://api.gestdown.info/subtitles/download/raw"
+    zip_url = "https://opensubtitles.test/download/zip"
+    zip_bytes_path = tmp_path / "source.zip"
+    with zipfile.ZipFile(zip_bytes_path, "w") as archive:
+        archive.writestr("shared.srt", shared_body)
+        archive.writestr("extra.srt", b"only in archive\n")
+    zip_bytes = zip_bytes_path.read_bytes()
+    zip_bytes_path.unlink()
+
+    session = _FakeSession(
+        {
+            raw_url: _FakeResponse(shared_body, {"content-type": "text/srt"}),
+            zip_url: _FakeResponse(zip_bytes, {"content-type": "application/zip"}),
+        }
+    )
+    monkeypatch.setattr("subsearch.io.http.get_session", lambda: session)
+
+    raw_subtitle = _gestdown_subtitle("shared", raw_url)
+    archive_subtitle = Subtitle(
+        token_result=90,
+        provider_name="opensubtitles",
+        subtitle_name="opensub.pack",
+        download_url=zip_url,
+        request_data={},
+    )
+
+    assert file_system.download_subtitle(raw_subtitle, 1, 2, download_directory) is True
+    assert file_system.download_subtitle(archive_subtitle, 2, 2, download_directory) is True
+
+    extracted_count = file_system.extract_files_in_dir(download_directory, destination)
+
+    # archive members extract first; the byte-identical raw "shared.srt" is sha-deduped, not versioned
+    names = sorted(path.name for path in destination.iterdir())
+    assert extracted_count == 2
+    assert names == ["extra.srt", "shared.srt"]
+    assert (destination / "shared.srt").read_bytes() == shared_body
+
+
 def test_move_best_uses_video_name_and_preserves_existing_into_subs(tmp_path) -> None:
     video_directory = tmp_path / "video"
     subs_directory = tmp_path / "subs"

@@ -23,7 +23,7 @@ def download_environment(monkeypatch, tmp_path):
 
     downloaded = []
 
-    def fake_download(subtitle, number, total, tmp_dir, extraction_dir):
+    def fake_download(subtitle, number, total, tmp_dir):
         downloaded.append(subtitle)
         return True
 
