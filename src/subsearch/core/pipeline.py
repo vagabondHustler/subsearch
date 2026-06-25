@@ -226,7 +226,9 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def subtitle_move_best(self, target: Path) -> None:
-        file_system.move_and_replace(self.bootstrap.autoload_src, target)
+        file_system.move_best_next_to_video(
+            self.bootstrap.autoload_src, target, SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory
+        )
         capture("Best subtitle moved")
 
     @run_if_conditions_met
@@ -288,16 +290,12 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def clean_up(self) -> None:
+        # subs/ is the kept extraction archive; only tmp_subsearch and its downloads are removed.
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         tracker = get_file_tracker()
         if WORKSPACE.download_directory != Path(""):
-            tracker.delete_tracked_within(WORKSPACE.extraction_directory, "*.nfo")
             tracker.delete_tracked_within(WORKSPACE.download_directory)
             tracker.delete_if_tracked(WORKSPACE.download_directory)
-            if WORKSPACE.extraction_directory.is_dir() and file_system.directory_is_empty(
-                WORKSPACE.extraction_directory
-            ):
-                tracker.delete_if_tracked(WORKSPACE.extraction_directory)
         capture("Cleanup completed")
 
     def _wait_for_terminal_input(self) -> None:

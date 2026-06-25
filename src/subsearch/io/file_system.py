@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import shutil
@@ -59,6 +60,9 @@ def is_zip_payload(chunk: bytes) -> bool:
 
 
 _HASH_MATCH_PREFIX = "hashmatch__"
+
+# marks a subtitle that was already placed next to the video and later displaced, so it is not re-selected
+_TESTED_MARKER = "_tested"
 
 
 def _cloudflare_block_reason(response: "CurlResponse") -> str:
@@ -158,6 +162,24 @@ def _archive_listing(archive: zipfile.ZipFile) -> str:
     return "\n".join(f"  {info.filename} ({info.file_size} bytes)" for info in archive.infolist())
 
 
+def content_hash(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def file_content_hash(path: Path) -> str:
+    return content_hash(path.read_bytes())
+
+
+def _resolve_extraction_target(destination: Path, filename: str, payload: bytes) -> Path | None:
+    target = destination / Path(filename).name
+    if not target.exists():
+        return target
+    if file_content_hash(target) == content_hash(payload):
+        capture(f"Skipping {target.name} (identical copy already extracted)", level=LogLevel.DEBUG)
+        return None
+    return _next_available_path(destination, target.stem, target.suffix)
+
+
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
     members = archive.infolist()
     total_uncompressed = sum(info.file_size for info in members)
@@ -180,12 +202,15 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
             capture(f"Ignoring {member.filename} (not a subtitle file)", level=LogLevel.DEBUG)
             continue
-        extracted_path = Path(archive.extract(member, dst))
-        if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
-            renamed_path = extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}")
-            extracted_path.rename(renamed_path)
-            extracted_path = renamed_path
-        _track(extracted_path)
+        payload = archive.read(member)
+        member_name = Path(member.filename).name
+        if hash_match and not member_name.startswith(_HASH_MATCH_PREFIX):
+            member_name = f"{_HASH_MATCH_PREFIX}{member_name}"
+        target = _resolve_extraction_target(dst, member_name, payload)
+        if target is None:
+            continue
+        target.write_bytes(payload)
+        _track(target)
         extracted_count += 1
     return extracted_count
 
@@ -215,11 +240,17 @@ def extract_subtitle_by_id(subtitle_id: str, src: Path, dst: Path, extension: st
     return extracted_count
 
 
+def _is_tested_subtitle(stem: str) -> bool:
+    return stem.endswith(_TESTED_MARKER) or f"{_TESTED_MARKER}_v" in stem
+
+
 def subtitle_files_in(directory: Path) -> list[Path]:
     if not directory.is_dir():
         return []
     return sorted(
-        file for file in directory.iterdir() if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS
+        file
+        for file in directory.iterdir()
+        if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS and not _is_tested_subtitle(file.stem)
     )
 
 
@@ -265,9 +296,21 @@ def move_all(src: Path, dst: Path) -> int:
     return moved_count
 
 
-def move_and_replace(source_file: Path, destination_directory: Path) -> None:
-    source_file.replace(destination_directory / source_file.name)
-    capture(f"Moving file: {source_file} -> {destination_directory}")
+def move_best_next_to_video(
+    source_file: Path, destination_directory: Path, video_stem: str, extraction_directory: Path
+) -> None:
+    if _is_tested_subtitle(source_file.stem):
+        capture(f"Refusing to move already-tested subtitle: {source_file}", level=LogLevel.DEBUG)
+        return
+    target = destination_directory / f"{video_stem}{source_file.suffix}"
+    if target.exists():
+        preserved = _next_available_path(extraction_directory, f"{video_stem}{_TESTED_MARKER}", target.suffix)
+        capture(f"Preserving existing subtitle: {target} -> {preserved}")
+        target.replace(preserved)
+        _track(preserved)
+    capture(f"Moving file: {source_file} -> {target}")
+    source_file.replace(target)
+    _track(target)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:

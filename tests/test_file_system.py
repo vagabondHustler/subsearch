@@ -116,6 +116,74 @@ def test_extract_files_in_dir_returns_extracted_subtitle_count(tmp_path) -> None
     assert sorted(path.name for path in destination.iterdir()) == ["movie.ass", "movie.srt"]
 
 
+def test_extract_skips_identical_content_already_in_destination(tmp_path) -> None:
+    body = b"1\n00:00:00,000 --> 00:00:01,000\nfoo\n"
+    destination = tmp_path / "subs"
+    destination.mkdir()
+    (destination / "movie.srt").write_bytes(body)
+    with zipfile.ZipFile(tmp_path / "download.zip", "w") as archive:
+        archive.writestr("movie.srt", body)
+
+    extracted_count = file_system.extract_files_in_dir(tmp_path, destination)
+
+    assert extracted_count == 0
+    assert [path.name for path in destination.iterdir()] == ["movie.srt"]
+
+
+def test_extract_versions_same_name_different_content(tmp_path) -> None:
+    destination = tmp_path / "subs"
+    destination.mkdir()
+    (destination / "movie.srt").write_bytes(b"existing content\n")
+    with zipfile.ZipFile(tmp_path / "download.zip", "w") as archive:
+        archive.writestr("movie.srt", b"different content\n")
+
+    extracted_count = file_system.extract_files_in_dir(tmp_path, destination)
+
+    assert extracted_count == 1
+    assert sorted(path.name for path in destination.iterdir()) == ["movie.srt", "movie_v1.srt"]
+
+
+def test_move_best_uses_video_name_and_preserves_existing_into_subs(tmp_path) -> None:
+    video_directory = tmp_path / "video"
+    subs_directory = tmp_path / "subs"
+    video_directory.mkdir()
+    subs_directory.mkdir()
+    video_stem = "the.foo.bar.2021.1080p.web.h264-foobar"
+    (video_directory / f"{video_stem}.srt").write_text("old subtitle\n", encoding="utf-8")
+    source = _make_srt(subs_directory, "downloaded.srt")
+
+    file_system.move_best_next_to_video(source, video_directory, video_stem, subs_directory)
+
+    assert [path.name for path in video_directory.glob("*.srt")] == [f"{video_stem}.srt"]
+    assert (video_directory / f"{video_stem}.srt").read_text(encoding="utf-8").startswith("1\n")
+    assert (subs_directory / f"{video_stem}_tested.srt").read_text(encoding="utf-8") == "old subtitle\n"
+
+
+def test_move_best_refuses_to_move_a_tested_subtitle(tmp_path) -> None:
+    video_directory = tmp_path / "video"
+    subs_directory = tmp_path / "subs"
+    video_directory.mkdir()
+    subs_directory.mkdir()
+    video_stem = "the.foo.bar.2021.1080p.web.h264-foobar"
+    tested_source = _make_srt(subs_directory, f"{video_stem}_tested_v1.srt")
+
+    file_system.move_best_next_to_video(tested_source, video_directory, video_stem, subs_directory)
+
+    assert list(video_directory.glob("*.srt")) == []
+    assert tested_source.exists()
+
+
+def test_tested_subtitles_are_excluded_from_candidates(tmp_path) -> None:
+    video_stem = "the.foo.bar.2021.1080p.web.h264-foobar"
+    _make_srt(tmp_path, f"{video_stem}.srt")
+    _make_srt(tmp_path, f"{video_stem}_tested.srt")
+    _make_srt(tmp_path, f"{video_stem}_tested_v1.srt")
+
+    candidates = [path.name for path in file_system.subtitle_files_in(tmp_path)]
+
+    assert candidates == [f"{video_stem}.srt"]
+
+
 def test_extract_subtitle_by_id_unpacks_only_the_matching_archive(tmp_path) -> None:
     downloads = tmp_path / "downloads"
     downloads.mkdir()
