@@ -84,7 +84,13 @@
         "tox==4.56.1",
         "python-dotenv==1.2.2",
     ]
-    tools = ["commitizen==4.16.4", "pre-commit==4.6.0", "pillow==12.2.0"]
+    tools = [
+        "commitizen==4.16.4",
+        "pre-commit==4.6.0",
+        "pillow==12.2.0",
+        "pyinstrument==5.1.2",
+        "viztracer==1.1.1",
+    ]
     type = ["mypy==2.1.0"]
 
 
