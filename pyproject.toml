@@ -22,7 +22,7 @@
         "packaging==26.2",
         "PySide6==6.11.1",
         "PySide6-Fluent-Widgets==1.11.2",
-        "rich==14.1.0",
+        "rich==15.0.0",
         "selectolax==0.4.10",
     ]
     description = "Subsearch"
