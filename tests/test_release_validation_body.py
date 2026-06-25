@@ -16,7 +16,7 @@ def validation() -> ReleaseValidation:
 
 
 def test_block_inserted_into_empty_body(validation: ReleaseValidation) -> None:
-    block = validation._body_block("abc123", "passed", "999")
+    block = validation._body_block("passed", "999")
     body = validation._replace_body_block("", block)
     assert body.startswith(validation.BODY_BLOCK_START)
     assert "passed" in body
@@ -24,27 +24,27 @@ def test_block_inserted_into_empty_body(validation: ReleaseValidation) -> None:
 
 def test_block_prepended_above_existing_body(validation: ReleaseValidation) -> None:
     existing = "#### Features:\n- thing"
-    body = validation._replace_body_block(existing, validation._body_block("abc123", "passed", "999"))
+    body = validation._replace_body_block(existing, validation._body_block("passed", "999"))
     assert body.startswith(validation.BODY_BLOCK_START)
     assert body.rstrip().endswith("- thing")
 
 
 def test_block_replaced_in_place_without_duplication(validation: ReleaseValidation) -> None:
-    first = validation._replace_body_block("- thing", validation._body_block("abc123", "passed", "999"))
-    second = validation._replace_body_block(first, validation._body_block("def456", "failed", "1000"))
+    first = validation._replace_body_block("- thing", validation._body_block("passed", "999"))
+    second = validation._replace_body_block(first, validation._body_block("failed", "1000"))
     assert second.count(validation.BODY_BLOCK_START) == 1
-    assert "def456" in second and "failed" in second
-    assert "abc123" not in second
+    assert "1000" in second and "failed" in second
+    assert "999" not in second
     assert second.rstrip().endswith("- thing")
 
 
 def test_jobs_preserves_validation_block_across_regeneration(validation: ReleaseValidation) -> None:
     pull_request = OpenMainPullRequest()
-    existing = validation._replace_body_block("old changelog", validation._body_block("abc123", "passed", "999"))
+    existing = validation._replace_body_block("old changelog", validation._body_block("passed", "999"))
     regenerated = pull_request._pr_body("#### NEW CHANGELOG", existing)
     assert regenerated.startswith(pull_request.VALIDATION_BLOCK_START)
     assert regenerated.count(pull_request.VALIDATION_BLOCK_START) == 1
-    assert "abc123" in regenerated
+    assert "999" in regenerated
     assert "#### NEW CHANGELOG" in regenerated
 
 
