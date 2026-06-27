@@ -15,19 +15,21 @@ from subsearch.ui.services.app_updates import (
     launch_installer,
 )
 from subsearch.ui.state.tasks import TaskRunner
-from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET
+from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET, TOOL_BUTTON_SIZE
 from subsearch.ui.theme.typography import (
     DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_caption_font,
 )
 from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.slider import TRACK_ALIGNED_LABEL_WIDTH
 
 UPDATE_IDLE_STATUS = "Check for updates to see if a newer version is available."
 UPDATE_BUTTON_ICON_SIZE = 24
 UPDATE_BUTTON_SIZE = 32
 UPDATE_BUTTON_GROUP_GAP = 16
 INSTALLER_HANDOFF_DELAY_MS = 1500
+SLIDER_ROW_SPACING = 12
 
 
 class UpdateCard(SettingsCard):
@@ -83,8 +85,11 @@ class UpdateCard(SettingsCard):
         self.progress_bar.setRange(0, 100)
         self.progress_bar.hide()
         progress_row = QHBoxLayout()
-        progress_row.setContentsMargins(ROW_INSET, 0, ROW_INSET, 10)
+        progress_row.setContentsMargins(CARD_CONTENT_INSET, 10, ROW_INSET, 10)
+        progress_row.setSpacing(SLIDER_ROW_SPACING)
+        progress_row.addSpacing(TRACK_ALIGNED_LABEL_WIDTH)
         progress_row.addWidget(self.progress_bar, stretch=1)
+        progress_row.addSpacing(TOOL_BUTTON_SIZE)
         self.body_layout.addLayout(progress_row)
 
     def _apply_install_button_state(self, enabled: bool) -> None:
