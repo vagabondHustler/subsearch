@@ -1,3 +1,4 @@
+import winsound
 from pathlib import Path
 
 from PySide6.QtCore import (
@@ -7,7 +8,6 @@ from PySide6.QtCore import (
     QPropertyAnimation,
     QSequentialAnimationGroup,
     Qt,
-    QUrl,
     Signal,
 )
 from PySide6.QtGui import (
@@ -19,7 +19,6 @@ from PySide6.QtGui import (
     QPaintEvent,
     QShowEvent,
 )
-from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import (
     QGraphicsOpacityEffect,
     QHBoxLayout,
@@ -39,9 +38,6 @@ TOAST_ACRYLIC_ALPHA = 179
 
 # The same chime the native Windows toast plays; shipped with every Windows install.
 NOTIFICATION_SOUND_FILE = Path(r"C:\Windows\Media\Windows Notify System Generic.wav")
-
-# QSoundEffect volume is linear amplitude; half of full scale.
-NOTIFICATION_VOLUME = 0.2
 
 FADE_IN_DURATION_MS = 220
 HOLD_DURATION_MS = 1200
@@ -69,7 +65,7 @@ class NotificationToast(QWidget):
         self._hold_duration_ms = max(0, hold_duration_ms)
         self._is_dismissed = False
         self._acrylic = True
-        self._sound_effect = self._build_sound_effect() if play_sound else None
+        self._play_sound = play_sound
         self._build_layout(title, summary)
         self._opacity_effect = QGraphicsOpacityEffect(self)
         self._opacity_effect.setOpacity(0.0)
@@ -120,13 +116,16 @@ class NotificationToast(QWidget):
         close_button.clicked.connect(self.dismiss)
         return close_button
 
-    def _build_sound_effect(self) -> QSoundEffect | None:
+    def _play_notification_sound(self) -> None:
         if not NOTIFICATION_SOUND_FILE.exists():
-            return None
-        effect = QSoundEffect(self)
-        effect.setSource(QUrl.fromLocalFile(str(NOTIFICATION_SOUND_FILE)))
-        effect.setVolume(NOTIFICATION_VOLUME)
-        return effect
+            return
+        try:
+            winsound.PlaySound(
+                str(NOTIFICATION_SOUND_FILE),
+                winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT,
+            )
+        except RuntimeError:
+            return
 
     def _build_animation(self) -> QSequentialAnimationGroup:
         fade_in = QPropertyAnimation(self, b"window_opacity")
@@ -166,8 +165,8 @@ class NotificationToast(QWidget):
     def show_above_clock(self) -> None:
         self._move_above_clock()
         self.show()
-        if self._sound_effect is not None:
-            self._sound_effect.play()
+        if self._play_sound:
+            self._play_notification_sound()
         self._animation.start()
 
     def _move_above_clock(self) -> None:

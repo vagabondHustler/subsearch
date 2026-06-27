@@ -1,11 +1,6 @@
-import os
 import sys
 import threading
 from pathlib import Path
-
-# Silence the FFmpeg backend banner QtMultimedia logs on first init; must be set
-# before any Qt module imports.
-os.environ.setdefault("QT_LOGGING_RULES", "qt.multimedia.ffmpeg=false")
 
 from subsearch.runtime.startup import PERF_COUNTER
 
