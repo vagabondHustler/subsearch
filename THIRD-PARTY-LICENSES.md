@@ -18,7 +18,7 @@ Subsearch is available at <https://github.com/vagabondHustler/subsearch>.
 | imdbinfo | 0.9.1 | MIT |
 | num2words | 0.5.14 | LGPL-2.1-only |
 | packaging | 26.2 | Apache-2.0 OR BSD-2-Clause |
-| PySide6 | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only |
+| PySide6-Essentials | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only |
 | PySide6-Fluent-Widgets | 1.11.2 | GPL-3.0-only |
 | requests | 2.34.2 | Apache-2.0 |
 | selectolax | 0.4.10 | MIT |
@@ -59,7 +59,7 @@ Subsearch is available at <https://github.com/vagabondHustler/subsearch>.
 - Source: <https://github.com/pypa/packaging>
 - License text: <https://github.com/pypa/packaging/tree/main/LICENSE>
 
-### PySide6
+### PySide6-Essentials
 
 - Version: 6.11.1
 - License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
@@ -68,9 +68,9 @@ Subsearch is available at <https://github.com/vagabondHustler/subsearch>.
 - Documentation: <https://doc.qt.io/qtforpython>
 - Source and license text: <https://code.qt.io/cgit/pyside/pyside-setup.git/>
 
-Subsearch uses PySide6 under the LGPL-3.0 option. PySide6 and the Qt libraries
-are shipped as separate dynamic libraries and may be replaced by the user with a
-compatible version, as required by the LGPL.
+Subsearch uses PySide6-Essentials under the LGPL-3.0 option. PySide6-Essentials
+and the Qt libraries are shipped as separate dynamic libraries and may be
+replaced by the user with a compatible version, as required by the LGPL.
 
 ### PySide6-Fluent-Widgets
 
