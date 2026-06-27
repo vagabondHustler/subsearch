@@ -54,9 +54,18 @@ class StepSummary:
 
     def card(self, title: str, passed: bool | None = None) -> None:
         if passed is None:
-            self.add_summary(f"### {title}")
+            self.add_summary(f"##### {title}")
             return
-        self.add_summary(f"### {title} {self.PASSED if passed else self.FAILED}")
+        self.add_summary(f"##### {title} - **{self.PASSED if passed else self.FAILED}**")
+
+    def checklist(self, items: list[tuple[bool, str]]) -> None:
+        for passed, label in items:
+            box = "x" if passed else " "
+            text = label if passed else f"***{label}***"
+            self.add_summary(f"- [{box}] {text}")
+
+    def rule(self) -> None:
+        self.add_summary("\n---\n")
 
     def fields(self, items: list[tuple[str, str]]) -> None:
         for label, value in items:
@@ -413,9 +422,9 @@ class Check:
 
 class BinaryTestReport:
     _TITLES = {
-        "install": "MSI install",
-        "executable": "Subsearch ran",
-        "uninstall": "MSI uninstall",
+        "install": "MSI installation",
+        "executable": "Application launch",
+        "uninstall": "MSI uninstallation",
     }
 
     def __init__(self, step_summary: StepSummary) -> None:
@@ -423,7 +432,7 @@ class BinaryTestReport:
 
     def _path_check(self, label: str, path: Path, expected: bool) -> Check:
         present = path.is_file()
-        detail = path.as_posix() if present else f"missing ({path.as_posix()})"
+        detail = f"`{path.as_posix()}`" if present else f"missing (`{path.as_posix()}`)"
         return Check(label, expected, present, detail)
 
     def _registry_value_checks(self, expected_populated: bool) -> list[Check]:
@@ -436,7 +445,7 @@ class BinaryTestReport:
                 detail = "empty placeholder"
             else:
                 detail = f"`{value}`"
-            checks.append(Check(f"Registry {label}", expected_populated, populated, detail))
+            checks.append(Check(f"Registry value {label}", expected_populated, populated, detail))
         return checks
 
     def _checks_for_install(self) -> list[Check]:
@@ -471,11 +480,9 @@ class BinaryTestReport:
     def add_stage_card(self, name: str) -> None:
         checks = self._checks_for_stage(name)
         passed = all(check.passed for check in checks)
-        self._step_summary.card(f"{self._TITLES[name]}: {self._step_summary.result(passed)}", passed=passed)
-        self._step_summary.add_summary("Reason:")
-        for check in checks:
-            mark = self._step_summary.result(check.passed)
-            self._step_summary.add_summary(f"- {check.label}: {mark} - {check.detail}")
+        self._step_summary.card(self._TITLES[name], passed=passed)
+        self._step_summary.checklist([(check.passed, f"{check.label} {check.detail}") for check in checks])
+        self._step_summary.rule()
         self._log_stage(name, checks, passed)
         self._assert_stage_passed(name, passed)
 
@@ -487,7 +494,7 @@ class BinaryTestReport:
 
     def _log_stage(self, name: str, checks: list[Check], passed: bool) -> None:
         for check in checks:
-            log(f"{check.label}: {'OK' if check.passed else 'BAD'} ({check.detail})")
+            log(f"{check.label}: {'OK' if check.passed else 'BAD'} ({check.detail.replace('`', '')})")
         log(f"{self._TITLES[name]} {'passed' if passed else 'failed'}", level="PASS" if passed else "FAIL")
         print(STYLE_SEPARATOR)
 
