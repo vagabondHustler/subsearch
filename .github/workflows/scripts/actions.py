@@ -337,13 +337,17 @@ class BinaryTester:
                 pids.add(process.info["pid"])
         return pids
 
-    def assert_window_rendered(self, process_name: str = EXE_NAME, timeout: int = 60, process: "subprocess.Popen | None" = None) -> None:
+    def assert_window_rendered(
+        self, process_name: str = EXE_NAME, timeout: int = 60, process: "subprocess.Popen | None" = None
+    ) -> None:
         log(f"Waiting up to {timeout}s for a visible window owned by {process_name}", level="STEP")
         for elapsed in range(timeout):
             if process is not None and process.poll() is not None:
                 stderr_output = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
                 detail = f"\nstderr:\n{stderr_output}" if stderr_output.strip() else ""
-                raise RuntimeError(f"{process_name} exited with code {process.returncode} before a window appeared{detail}")
+                raise RuntimeError(
+                    f"{process_name} exited with code {process.returncode} before a window appeared{detail}"
+                )
             if self.visible_window_owned_by(self.process_tree_pids(process_name)):
                 log(f"Visible GUI window for '{process_name}' present after {elapsed}s", level="PASS")
                 return
@@ -801,12 +805,18 @@ class ReleaseValidation:
         result, _ = previous
         return result != self.RESULT_PASSED
 
+    def _run_link(self, run_id: str) -> str:
+        return f"[run {run_id}]({REPOSITORY_URL}/actions/runs/{run_id})"
+
+    def _timestamp(self) -> str:
+        return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
     def _marker_body(self, result: str, run_id: str) -> str:
         comment = f"<!-- {self.MARKER}:result={result};run={run_id} -->"
         passed = result == self.RESULT_PASSED
         validation_outcome = "passed" if passed else "failed"
         status = f"Release validation {validation_outcome}"
-        return f"{comment}\n**{status}** (run {run_id})"
+        return f"{comment}\n**{status}** ({self._run_link(run_id)} · {self._timestamp()})"
 
     def _has_marker_comment(self, number: str) -> bool:
         completed = subprocess.run(
@@ -820,7 +830,7 @@ class ReleaseValidation:
 
     def _body_block(self, result: str, run_id: str) -> str:
         outcome = "passed" if result == self.RESULT_PASSED else "failed"
-        line = f"###### Release validation {outcome} (run {run_id})"
+        line = f"###### Release validation {outcome} ({self._run_link(run_id)} · {self._timestamp()})"
         return "\n".join([self.BODY_BLOCK_START, line, self.BODY_BLOCK_END])
 
     def _replace_body_block(self, body: str, block: str) -> str:

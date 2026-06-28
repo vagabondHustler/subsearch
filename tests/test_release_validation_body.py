@@ -6,8 +6,12 @@ import pytest
 _SCRIPTS = Path(__file__).parent.parent / ".github" / "workflows" / "scripts"
 sys.path.insert(0, str(_SCRIPTS))
 
-from actions import ReleaseValidation  # pyright: ignore[reportMissingImports] # noqa: E402
-from jobs import OpenMainPullRequest  # pyright: ignore[reportMissingImports] # noqa: E402
+from actions import (  # pyright: ignore[reportMissingImports] # noqa: E402
+    ReleaseValidation,
+)
+from jobs import (  # pyright: ignore[reportMissingImports] # noqa: E402
+    OpenMainPullRequest,
+)
 
 
 @pytest.fixture
@@ -36,6 +40,19 @@ def test_block_replaced_in_place_without_duplication(validation: ReleaseValidati
     assert "1000" in second and "failed" in second
     assert "999" not in second
     assert second.rstrip().endswith("- thing")
+
+
+def test_body_block_links_run_and_includes_timestamp(validation: ReleaseValidation) -> None:
+    block = validation._body_block("passed", "28168774223")
+    assert "/actions/runs/28168774223)" in block
+    assert "UTC" in block
+
+
+def test_marker_body_links_run_and_keeps_parseable_comment(validation: ReleaseValidation) -> None:
+    body = validation._marker_body("passed", "28168774223")
+    assert validation._STATE_PATTERN.search(body) is not None
+    assert "/actions/runs/28168774223)" in body
+    assert "UTC" in body
 
 
 def test_jobs_preserves_validation_block_across_regeneration(validation: ReleaseValidation) -> None:
