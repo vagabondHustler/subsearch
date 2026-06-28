@@ -9,6 +9,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.parsing.release_parser import score_subtitle_tokens
+from subsearch.runtime.config import PROVIDER_DISPLAY_NAMES, Provider
 from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
@@ -49,15 +50,7 @@ _TOKEN_TUNING_DEFAULTS: DefaultsMap = [
 
 PROVIDER_GRID_COLUMNS = 3
 
-SUBSOURCE_PROVIDER_KEY = "subsource_site"
-
-PROVIDER_INCOMPATIBILITY_NAMES = {
-    "opensubtitles": "opensubtitles",
-    "yifysubtitles_site": "yifysubtitles",
-    "subsource_site": "subsource",
-    "tvsubtitles_site": "tvsubtitles",
-    "gestdown_site": "gestdown",
-}
+SUBSOURCE_PROVIDER_KEY = Provider.SUBSOURCE.value
 
 
 class SearchModeCard(SettingsCard):
@@ -410,13 +403,7 @@ class ProvidersCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle providers", show_restore_button=False, parent=parent)
         self.store = store
-        provider_labels = {
-            "opensubtitles": "Opensubtitles",
-            "yifysubtitles_site": "Yifysubtitles",
-            "subsource_site": "Subsource",
-            "tvsubtitles_site": "Tvsubtitles",
-            "gestdown_site": "Gestdown",
-        }
+        provider_labels = PROVIDER_DISPLAY_NAMES
         self._language_data = store.language_data()
         providers = store.read(ConfigKey.SEARCH_PROVIDERS)
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS[ConfigKey.SEARCH_PROVIDERS].explanation)
@@ -466,9 +453,7 @@ class ProvidersCard(SettingsCard):
     def apply_language_compatibility(self, language: str) -> None:
         incompatible_providers = self._language_data.get(language, {}).get("incompatibility", [])
         for provider_key in self.check_boxes:
-            self._language_compatible[provider_key] = (
-                PROVIDER_INCOMPATIBILITY_NAMES[provider_key] not in incompatible_providers
-            )
+            self._language_compatible[provider_key] = provider_key not in incompatible_providers
             self._refresh_provider_enabled(provider_key)
         language_name = self._language_data.get(language, {}).get("name", language)
         self._help_button.set_explanation(

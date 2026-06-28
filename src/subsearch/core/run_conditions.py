@@ -182,12 +182,12 @@ class RunConditions:
                 ("language_supports_yifysubtitles", lambda: self.language_supports_provider("yifysubtitles")),
                 ("not_tvseries", not self.release_data.tvseries),
                 ("url_not_empty", len(self.provider_urls.yifysubtitles) > 0),
-                ("provider_enabled", self.app_config.providers["yifysubtitles_site"]),
+                ("provider_enabled", self.app_config.providers["yifysubtitles"]),
             ],
             PipelineStep.SUBSOURCE: [
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_subsource", lambda: self.language_supports_provider("subsource")),
-                ("provider_enabled", self.app_config.providers["subsource_site"]),
+                ("provider_enabled", self.app_config.providers["subsource"]),
                 ("subsource_api_key_configured", bool(self.app_config.subsource_api_key)),
             ],
             PipelineStep.TVSUBTITLES: [
@@ -196,14 +196,14 @@ class RunConditions:
                 ("is_tvseries", self.release_data.tvseries),
                 ("has_season_and_episode", self.has_season_and_episode),
                 ("url_not_empty", len(self.provider_urls.tvsubtitles) > 0),
-                ("provider_enabled", self.app_config.providers["tvsubtitles_site"]),
+                ("provider_enabled", self.app_config.providers["tvsubtitles"]),
             ],
             PipelineStep.GESTDOWN: [
                 ("not_only_foreign_parts", not self.app_config.only_foreign_parts),
                 ("language_supports_gestdown", lambda: self.language_supports_provider("gestdown")),
                 ("is_tvseries", self.release_data.tvseries),
                 ("has_season_and_episode", self.has_season_and_episode),
-                ("provider_enabled", self.app_config.providers["gestdown_site"]),
+                ("provider_enabled", self.app_config.providers["gestdown"]),
             ],
             PipelineStep.DOWNLOAD_FILES: [
                 not_manual_handled,

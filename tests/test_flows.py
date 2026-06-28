@@ -18,10 +18,10 @@ def make_pipeline(app_mode: AppMode) -> MagicMock:
     pipeline.bootstrap.all_providers_disabled.return_value = False
     pipeline.bootstrap.app_config.providers = {
         "opensubtitles": True,
-        "yifysubtitles_site": False,
-        "subsource_site": False,
-        "tvsubtitles_site": False,
-        "gestdown_site": False,
+        "yifysubtitles": False,
+        "subsource": False,
+        "tvsubtitles": False,
+        "gestdown": False,
     }
     return pipeline
 

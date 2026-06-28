@@ -1,5 +1,5 @@
 from subsearch.core.pipeline import SearchJob, SearchPipeline
-from subsearch.runtime.config import SEARCH_SUBJECT
+from subsearch.runtime.config import PROVIDER_DISPLAY_NAMES, SEARCH_SUBJECT
 from subsearch.runtime.models import AppMode, Subtitle
 from subsearch.runtime.recorder import LogLevel, capture, phase
 
@@ -57,15 +57,6 @@ class ManualSearchFlow(Flow):
         self._finish()
 
 
-_PROVIDER_DISPLAY_NAMES = {
-    "opensubtitles": "OpenSubtitles",
-    "yifysubtitles_site": "YIFYSubtitles",
-    "subsource_site": "Subsource",
-    "tvsubtitles_site": "TVsubtitles",
-    "gestdown_site": "Gestdown",
-}
-
-
 class PipelineSearchFlow(Flow):
     def run(self) -> None:
         self._end_initializing()
@@ -95,7 +86,7 @@ class PipelineSearchFlow(Flow):
 
     def _enabled_provider_names(self) -> str:
         providers = self.bootstrap.app_config.providers
-        enabled = [name for key, name in _PROVIDER_DISPLAY_NAMES.items() if providers[key]]
+        enabled = [name for key, name in PROVIDER_DISPLAY_NAMES.items() if providers[key]]
         return ", ".join(enabled)
 
     def _warn_if_filename_has_spaces(self) -> None:

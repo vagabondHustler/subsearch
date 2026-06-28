@@ -13,6 +13,7 @@ from subsearch.runtime.config import (
     DEVICE_INFO,
     PATH_RESOLVER,
     SEARCH_SUBJECT,
+    SUPPORTED_PROVIDERS,
     WORKSPACE,
 )
 from subsearch.runtime.config import session as config_session
@@ -230,14 +231,7 @@ class Bootstrap:
         return self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID)
 
     def all_providers_disabled(self) -> bool:
-        if (
-            self.app_config.providers["opensubtitles"] is False
-            and self.app_config.providers["yifysubtitles_site"] is False
-            and self.app_config.providers["subsource_site"] is False
-            and self.app_config.providers["tvsubtitles_site"] is False
-        ):
-            return True
-        return False
+        return not any(self.app_config.providers.get(provider, False) for provider in SUPPORTED_PROVIDERS)
 
     def resync_app_config(self) -> None:
         self.app_config = config_session.get_config_session().snapshot()

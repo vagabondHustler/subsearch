@@ -49,7 +49,7 @@ def test_conditions_yifysubtitles(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.only_foreign_parts = True
     fake_cls.release_data.tvseries = True
     fake_cls.provider_urls.yifysubtitles = []
-    fake_cls.app_config.providers["yifysubtitles_site"] = True
+    fake_cls.app_config.providers["yifysubtitles"] = True
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
     fake_cls.app_config.only_foreign_parts = False
@@ -61,7 +61,7 @@ def test_conditions_yifysubtitles(fake_cls: FakeBootstrap) -> None:
 def test_conditions_subsource(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.only_foreign_parts = True
     fake_cls.release_data.tvseries = True
-    fake_cls.app_config.providers["subsource_site"] = True
+    fake_cls.app_config.providers["subsource"] = True
     fake_cls.app_config.subsource_api_key = "sk_test"
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
@@ -78,7 +78,7 @@ def test_conditions_tvsubtitles(fake_cls: FakeBootstrap) -> None:
     fake_cls.release_data.season = "01"
     fake_cls.release_data.episode = "05"
     fake_cls.provider_urls.tvsubtitles = ["fake_url"]
-    fake_cls.app_config.providers["tvsubtitles_site"] = True
+    fake_cls.app_config.providers["tvsubtitles"] = True
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.release_data.season = ""
@@ -90,7 +90,7 @@ def test_conditions_gestdown(fake_cls: FakeBootstrap) -> None:
     fake_cls.release_data.tvseries = True
     fake_cls.release_data.season = "01"
     fake_cls.release_data.episode = "05"
-    fake_cls.app_config.providers["gestdown_site"] = True
+    fake_cls.app_config.providers["gestdown"] = True
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.release_data.episode = ""
@@ -276,7 +276,7 @@ def test_unmet_condition_labels_yifysubtitles_without_imdb_match(fake_cls: FakeB
     fake_cls.app_config.only_foreign_parts = False
     fake_cls.release_data.tvseries = False
     fake_cls.provider_urls.yifysubtitles = []
-    fake_cls.app_config.providers["yifysubtitles_site"] = True
+    fake_cls.app_config.providers["yifysubtitles"] = True
 
     assert fake_cls.call_conditions.unmet_condition_labels("yifysubtitles") == ["url_not_empty"]
 

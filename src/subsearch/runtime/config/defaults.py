@@ -1,6 +1,7 @@
 from enum import StrEnum
 from typing import Any
 
+from subsearch.runtime.config import providers
 from subsearch.runtime.config.nested_dict import insert_nested_value
 
 
@@ -83,22 +84,11 @@ DEFAULT_TOKEN_MULTIPLIERS: dict[str, float] = {
     "edition": 0.1,
 }
 
-SUPPORTED_PROVIDERS: list[str] = [
-    "opensubtitles",
-    "yifysubtitles_site",
-    "subsource_site",
-    "tvsubtitles_site",
-    "gestdown_site",
-]
+# Provider identities, display names, and content-type support are the single source of
+# truth in providers.py; the lists below are derived from that registry.
+SUPPORTED_PROVIDERS = providers.SUPPORTED_PROVIDERS
 
-HEALTH_TRACKED_PROVIDERS: list[str] = [
-    "imdb",
-    "opensubtitles",
-    "yifysubtitles",
-    "subsource",
-    "tvsubtitles",
-    "gestdown",
-]
+HEALTH_TRACKED_PROVIDERS = providers.HEALTH_TRACKED_PROVIDERS
 
 # Per-provider runtime health counters Subsearch manages itself. They live under a section
 # with no single ConfigKey, so they are seeded by their dotted path rather than the enum.
