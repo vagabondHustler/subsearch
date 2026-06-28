@@ -1,6 +1,5 @@
 from subsearch.runtime.config.composition import (
     APP_PATHS,
-    APP_USER_MODEL_ID,
     COMPUTER_NAME,
     DEFAULT_CONFIG,
     DEVICE_INFO,
@@ -33,7 +32,6 @@ from subsearch.runtime.config.session import (
 
 __all__ = [
     "APP_PATHS",
-    "APP_USER_MODEL_ID",
     "COMPUTER_NAME",
     "DEFAULT_CONFIG",
     "DEVICE_INFO",

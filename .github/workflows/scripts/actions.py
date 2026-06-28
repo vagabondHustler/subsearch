@@ -10,7 +10,6 @@ from pathlib import Path
 
 from config import (
     APP_NAME,
-    APP_USER_MODEL_ID,
     CHANGELOG_NAME,
     EXE_NAME,
     REPOSITORY_URL,
@@ -708,38 +707,9 @@ class Build:
         log(f"Created msi at {msi_freeze_path().as_posix()}", level="PASS")
         print(STYLE_SEPARATOR)
 
-    def _set_shortcut_app_user_model_id(self) -> None:
-        import warnings
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", "'msilib' is deprecated")
-            import msilib
-
-        msi_path = msi_freeze_path()
-        database = msilib.OpenDatabase(str(msi_path), msilib.MSIDBOPEN_TRANSACT)
-        # MsiShortcutProperty is a standard MSI table but is absent from msilib.schema, so the
-        # build never creates it; create it before inserting the AUMID that links toasts to the
-        # Start Menu shortcut (cx_Freeze names the first executable's shortcut row "S_APP_0").
-        database.OpenView(
-            "CREATE TABLE `MsiShortcutProperty` ("
-            "`MsiShortcutProperty` CHAR(72) NOT NULL, "
-            "`Shortcut_` CHAR(72) NOT NULL, "
-            "`PropertyKey` CHAR(72) NOT NULL, "
-            "`PropVariantValue` CHAR(255) NOT NULL "
-            "PRIMARY KEY `MsiShortcutProperty`)"
-        ).Execute(None)
-        msilib.add_data(
-            database,
-            "MsiShortcutProperty",
-            [("AppUserModelID", "S_APP_0", "System.AppUserModel.ID", APP_USER_MODEL_ID)],
-        )
-        database.Commit()
-        log(f"Set shortcut AppUserModelID to {APP_USER_MODEL_ID}", level="PASS")
-
     def make_msi(self) -> None:
         self._log_build_start()
         self._run_cx_freeze()
-        self._set_shortcut_app_user_model_id()
         self._log_build_result()
 
 

@@ -9,6 +9,7 @@ Run from the repository root:  python tools/build_local.py
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -43,6 +44,15 @@ def run_step(description: str, command: list[str], environment: dict[str, str] |
 
 def install_build_dependencies() -> None:
     run_step("Installing build extras", [sys.executable, "-m", "pip", "install", "-e", ".[build]"])
+
+
+def clean_build_output(dist_directory: Path) -> None:
+    # cx_Freeze reuses a leftover dist/ msi instead of recreating it, so packaging fails on
+    # the stale build; remove both output trees first.
+    for stale_directory in (dist_directory, REPOSITORY_ROOT / "build"):
+        if stale_directory.exists():
+            print(f"\n>>> Removing stale build output: {stale_directory}")
+            shutil.rmtree(stale_directory)
 
 
 def make_msi(version: str) -> None:
@@ -98,6 +108,7 @@ def main() -> None:
 
     if not arguments.skip_install:
         install_build_dependencies()
+    clean_build_output(Paths.dist)
     make_msi(arguments.version)
 
     frozen_executable = Paths.frozen_executable

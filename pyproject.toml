@@ -24,6 +24,8 @@
         "PySide6-Fluent-Widgets==1.11.2",
         "rich==15.0.0",
         "selectolax==0.4.10",
+        "winrt-runtime==3.2.1",
+        "winrt-Windows.UI.Notifications==3.2.1",
     ]
     description = "Subsearch"
     dynamic = ["version"]

@@ -32,6 +32,7 @@ from subsearch.ui.compat.qfluent import apply_popup_acrylic
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme import metrics, palette, typography
 from subsearch.ui.theme.separators import make_fading_separator
+from subsearch.ui.widgets.notification_gate import notifications_allowed
 
 # Tint painted over the blurred backdrop; POPUP_BACKGROUND at ~70% opacity.
 TOAST_ACRYLIC_ALPHA = 179
@@ -117,6 +118,8 @@ class NotificationToast(QWidget):
         return close_button
 
     def _play_notification_sound(self) -> None:
+        if not notifications_allowed():
+            return
         if not NOTIFICATION_SOUND_FILE.exists():
             return
         try:
