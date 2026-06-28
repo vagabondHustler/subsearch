@@ -33,6 +33,7 @@ class AppConfig:
     subtitle_workspace_manual_post_processing: bool
     post_processing: dict[str, Any]
     paths: dict[str, Any]
+    mica_effect: bool
     show_terminal: bool
     show_tray_icon: bool
     single_instance: bool

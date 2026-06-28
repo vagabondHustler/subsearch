@@ -29,6 +29,7 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         subtitle_workspace_manual_post_processing=value(ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING),
         post_processing=value(ConfigKey.POST_PROCESSING),
         paths=value(ConfigKey.PATHS),
+        mica_effect=value(ConfigKey.APPLICATION_MICA_EFFECT),
         show_terminal=value(ConfigKey.APPLICATION_SHOW_TERMINAL),
         show_tray_icon=value(ConfigKey.APPLICATION_SHOW_TRAY_ICON),
         single_instance=value(ConfigKey.APPLICATION_SINGLE_INSTANCE),

@@ -139,6 +139,10 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
         "Move all subtitles",
         "Move every downloaded subtitle to your chosen directory. Can't combine with moving the best one.",
     ),
+    ConfigKey.APPLICATION_MICA_EFFECT: SettingDescription(
+        "Mica background effect",
+        "Blend the window background with the desktop using the Windows Mica material.",
+    ),
     ConfigKey.APPLICATION_SHOW_TERMINAL: SettingDescription(
         "Show terminal while searching",
         "Keep the console window open during a search. Only when running from Python, not the installed app.",

@@ -40,6 +40,7 @@ class ConfigKey(StrEnum):
     PATHS_PATH_RESOLUTION = "paths.path_resolution"
     PATHS_CREATE_MISSING_DIRECTORY = "paths.create_missing_directory"
 
+    APPLICATION_MICA_EFFECT = "application.mica_effect"
     APPLICATION_SHOW_TERMINAL = "application.show_terminal"
     APPLICATION_SHOW_TRAY_ICON = "application.show_tray_icon"
     APPLICATION_SINGLE_INSTANCE = "application.single_instance"
@@ -122,6 +123,7 @@ def get_default_app_config() -> dict[str, Any]:
         ConfigKey.PATHS_VIDEO_FILE_DIRECTORY: ".",
         ConfigKey.PATHS_PATH_RESOLUTION: "relative",
         ConfigKey.PATHS_CREATE_MISSING_DIRECTORY: True,
+        ConfigKey.APPLICATION_MICA_EFFECT: True,
         ConfigKey.APPLICATION_SHOW_TERMINAL: False,
         ConfigKey.APPLICATION_SHOW_TRAY_ICON: True,
         ConfigKey.APPLICATION_SINGLE_INSTANCE: True,

@@ -81,10 +81,10 @@ class SettingsWindow(FluentWindow):
         self.setWindowIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.setMinimumSize(860, 865)
         self.resize(900, 865)
-        self.setMicaEffectEnabled(True)
         self._clear_title_bar()
 
         self.store = SettingsStore(self)
+        self.setMicaEffectEnabled(self.store.read(ConfigKey.APPLICATION_MICA_EFFECT))
         self.task_runner = TaskRunner(self)
         self._close_validators: list[Callable[[], bool]] = []
         store = self.store
@@ -225,6 +225,8 @@ class SettingsWindow(FluentWindow):
     def _on_setting_changed(self, key: str, value: object) -> None:
         if key == ConfigKey.APPLICATION_SHOW_TRAY_ICON:
             self._apply_tray_icon_visibility(bool(value))
+        elif key == ConfigKey.APPLICATION_MICA_EFFECT:
+            self.setMicaEffectEnabled(bool(value))
 
     def _apply_tray_icon_visibility(self, visible: bool) -> None:
         if self._tray_icon is not None:

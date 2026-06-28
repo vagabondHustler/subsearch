@@ -107,6 +107,7 @@ class ApplicationCard(SettingsCard):
         self.store = store
         self.shell_service = shell_service
         self.add_header_help(SETTING_DESCRIPTIONS[CardKey.APPLICATION].explanation)
+        self.add_row(SwitchRow(ConfigKey.APPLICATION_MICA_EFFECT, store))
         show_terminal = SwitchRow(ConfigKey.APPLICATION_SHOW_TERMINAL, store)
         show_terminal.toggled.connect(self._on_show_terminal_toggled)
         if DEVICE_INFO.mode != "executable":
