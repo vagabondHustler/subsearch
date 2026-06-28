@@ -6,8 +6,10 @@ from rich.live import Live
 from rich.spinner import Spinner
 from rich.text import Text
 
+from subsearch.runtime.recorder._black_box.standard_out.severity_summary import (
+    severity_summary,
+)
 from subsearch.runtime.recorder.config import ConsoleGroup, ConsoleLine, ConsoleSnapshot
-from subsearch.runtime.recorder._black_box.standard_out.severity_summary import severity_summary
 from subsearch.runtime.recorder.console_theme import ConsoleTheme
 
 _RESERVED_LEVELS = frozenset({"warning", "error", "critical"})

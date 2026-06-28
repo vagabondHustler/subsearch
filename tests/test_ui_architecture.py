@@ -143,10 +143,9 @@ def test_ui_does_not_import_pyside6_addons() -> None:
         for module in PYSIDE6_ADDONS_MODULES:
             if f"PySide6.{module}" in source:
                 offenders.append(f"{path.relative_to(UI_ROOT)}: PySide6.{module}")
-    assert not offenders, (
-        "PySide6-Addons modules pull in a much larger install; use an Essentials-only path:\n"
-        + "\n".join(offenders)
-    )
+    assert (
+        not offenders
+    ), "PySide6-Addons modules pull in a much larger install; use an Essentials-only path:\n" + "\n".join(offenders)
 
 
 def test_description_keys_are_all_enum_members() -> None:

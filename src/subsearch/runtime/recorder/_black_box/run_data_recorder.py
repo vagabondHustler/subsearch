@@ -3,13 +3,19 @@ import threading
 import traceback
 from datetime import datetime
 
-from subsearch.runtime.recorder.config import RecorderConfig
 from subsearch.runtime.recorder._black_box.formatting import EntryFormatter
-from subsearch.runtime.recorder._black_box.standard_out.console_output import ConsoleOutput
-from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import CrashFileOutput
-from subsearch.runtime.recorder._black_box.standard_out.log_file_output import RotatingLogFileOutput
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
 from subsearch.runtime.recorder._black_box.routing import EntryRouter
+from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import (
+    CrashFileOutput,
+)
+from subsearch.runtime.recorder._black_box.standard_out.console_output import (
+    ConsoleOutput,
+)
+from subsearch.runtime.recorder._black_box.standard_out.log_file_output import (
+    RotatingLogFileOutput,
+)
+from subsearch.runtime.recorder.config import RecorderConfig
 
 _QUEUE_MAX_SIZE = 10_000
 

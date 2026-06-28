@@ -29,8 +29,8 @@ class Subsearch:
 
     def _exit_app(self) -> None:
         self.pipeline.on_exit()
-        
-    def run(self)-> None:
+
+    def run(self) -> None:
         try:
             self._start_app()
         except KeyboardInterrupt:
