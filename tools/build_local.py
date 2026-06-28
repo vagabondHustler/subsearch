@@ -18,10 +18,17 @@ REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 BUILD_SCRIPTS = REPOSITORY_ROOT / ".github" / "workflows" / "scripts"
 
 
+def current_version() -> str:
+    sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
+    from subsearch.runtime.config.version import __version__
+
+    return __version__
+
+
 def load_build_paths() -> tuple[Path, object]:
     sys.path.insert(0, str(BUILD_SCRIPTS))
-    from actions import msi_freeze_path
-    from config import Paths
+    from actions import msi_freeze_path  # pyright: ignore[reportMissingImports]
+    from config import Paths  # pyright: ignore[reportMissingImports]
 
     return Paths, msi_freeze_path
 
@@ -38,8 +45,8 @@ def install_build_dependencies() -> None:
     run_step("Installing build extras", [sys.executable, "-m", "pip", "install", "-e", ".[build]"])
 
 
-def make_msi(dry_run_version: str) -> None:
-    environment = {**os.environ, "DRY_RUN_VERSION": dry_run_version}
+def make_msi(version: str) -> None:
+    environment = {**os.environ, "DRY_RUN_VERSION": version}
     run_step(
         "Freezing exe and packaging msi",
         [sys.executable, str(BUILD_SCRIPTS / "jobs.py"), "make_msi"],
@@ -76,7 +83,9 @@ def report_artifacts(frozen_executable: Path, msi_path: Path) -> None:
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build Subsearch locally and smoke-test the frozen exe.")
-    parser.add_argument("--version", default="0.0.0", help="version stamped into the dry-run build")
+    parser.add_argument(
+        "--version", default=current_version(), help="version stamped into the build (defaults to __version__)"
+    )
     parser.add_argument("--skip-install", action="store_true", help="skip installing the .[build] extras")
     parser.add_argument("--skip-smoke-test", action="store_true", help="do not launch the frozen exe afterwards")
     parser.add_argument("--smoke-test-seconds", type=int, default=8, help="how long to keep the app open")
