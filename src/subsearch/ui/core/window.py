@@ -38,11 +38,9 @@ from subsearch.ui.compat.qfluent import (
 from subsearch.ui.core._constants import (
     NAVIGATION_EXPAND_WIDTH,
     NAVIGATION_TOP_MARGIN,
-    SAVE_CLEAN_COLOR,
-    SAVE_DIRTY_COLOR,
 )
 from subsearch.ui.core.settings_interface import SettingsInterface, _collapsible
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import (
     PostProcessingService,
@@ -201,17 +199,6 @@ class SettingsWindow(FluentWindow):
             position=NavigationItemPosition.BOTTOM,
         )
 
-        self._save_item = self.navigationInterface.addItem(
-            routeKey="saveSettings",
-            icon=LucideIcon.SAVE,
-            text="Save settings",
-            onClick=self.store.commit,
-            selectable=False,
-            position=NavigationItemPosition.BOTTOM,
-        )
-        self.store.dirty_changed.connect(self._render_save_item_dirty_state)
-        self._render_save_item_dirty_state(self.store.has_uncommitted_changes)
-
         self._configure_navigation()
         self._tray_icon = self._build_tray_icon()
         self._apply_tray_icon_visibility(self.store.read(ConfigKey.APPLICATION_SHOW_TRAY_ICON))
@@ -220,7 +207,7 @@ class SettingsWindow(FluentWindow):
     def _build_tray_icon(self) -> WindowTrayIcon | None:
         if not QSystemTrayIcon.isSystemTrayAvailable():
             return None
-        return WindowTrayIcon(self, on_save_config=self.store.commit)
+        return WindowTrayIcon(self)
 
     def _on_setting_changed(self, key: str, value: object) -> None:
         if key == ConfigKey.APPLICATION_SHOW_TRAY_ICON:
@@ -275,17 +262,12 @@ class SettingsWindow(FluentWindow):
         self.manual_search_interface.populate([], [f"Search failed: {message}"])
         phase("Idle")
 
-    def _render_save_item_dirty_state(self, dirty: bool) -> None:
-        color = SAVE_DIRTY_COLOR if dirty else SAVE_CLEAN_COLOR
-        self._save_item.setIcon(lucide_qicon(LucideIcon.SAVE, color))
-        self._save_item.setEnabled(dirty)
-
     def closeEvent(self, e: QCloseEvent) -> None:
         if all(validator() for validator in self._close_validators):
             if self._tray_icon is not None:
                 self._tray_icon.hide()
             self.task_runner.shutdown()
-            self.store.commit()
+            self.store.flush()
             shell_integration.reconcile_shell_integration()
             super().closeEvent(e)
         else:
