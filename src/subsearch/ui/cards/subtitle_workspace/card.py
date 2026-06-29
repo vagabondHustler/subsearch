@@ -1,7 +1,7 @@
-from PySide6.QtCore import QSize, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import LineEdit, TransparentToolButton
+from qfluentwidgets import LineEdit
 
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
@@ -10,10 +10,12 @@ from subsearch.ui.cards.subtitle_workspace._constants import (
     FILTER_BAR_WIDTH,
     SEARCH_BAR_WIDTH_FRACTION,
 )
+from subsearch.ui.cards.subtitle_workspace.post_processing_toggle import (
+    PostProcessingToggle,
+)
 from subsearch.ui.compat.qfluent import flatten_line_edit
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
-from subsearch.ui.theme import palette
-from subsearch.ui.theme.metrics import ROW_INSET, SMALL_ICON_SIZE, TOOL_BUTTON_SIZE
+from subsearch.ui.state.store import SettingsStore
+from subsearch.ui.theme.metrics import ROW_INSET
 from subsearch.ui.theme.separators import SEPARATOR_INSET
 from subsearch.ui.theme.typography import apply_body_font
 
@@ -22,25 +24,18 @@ class SubtitleCard(SettingsCard):
     search_text_changed = Signal(str)
     search_confirmed = Signal()
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         description = SETTING_DESCRIPTIONS[CardKey.AVAILABLE_SUBTITLES]
         super().__init__(description.title, parent=parent)
         self.add_header_help(description.explanation)
         self.viewLayout.setContentsMargins(*CARD_BODY_MARGINS)
-        self._add_dead_chevron()
+        self._add_post_processing_toggle(store)
         self._search_bar = self._build_search_bar()
         self.add_header_button(self._search_bar)
 
-    def _add_dead_chevron(self) -> None:
-        # Purely decorative: the other cards carry a collapse chevron, so this card
-        # shows the same expanded-state chevron for header consistency. It is disabled
-        # and wired to nothing, so the card cannot collapse.
-        chevron = TransparentToolButton(self)
-        chevron.setFixedSize(TOOL_BUTTON_SIZE, TOOL_BUTTON_SIZE)
-        chevron.setIconSize(QSize(SMALL_ICON_SIZE, SMALL_ICON_SIZE))
-        chevron.setIcon(lucide_qicon(LucideIcon.CHEVRON_DOWN, palette.NEUTRAL_3))
-        chevron.setEnabled(False)
-        self.headerLayout.insertWidget(0, chevron)
+    def _add_post_processing_toggle(self, store: SettingsStore) -> None:
+        toggle = PostProcessingToggle(store, self)
+        self.headerLayout.insertWidget(0, toggle)
 
     def _build_search_bar(self) -> LineEdit:
         bar = LineEdit(self)

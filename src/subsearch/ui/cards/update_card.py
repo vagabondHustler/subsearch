@@ -7,7 +7,7 @@ from subsearch.runtime.config import VERSION
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.changelog_popup import ChangelogButton
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.services.app_updates import (
     UpdateAvailability,
     UpdateCheckWorker,
@@ -16,12 +16,13 @@ from subsearch.ui.services.app_updates import (
 )
 from subsearch.ui.state.tasks import TaskRunner
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET, ROW_INSET, TOOL_BUTTON_SIZE
-from subsearch.ui.theme.typography import (
-    DISABLED_TEXT_COLOR,
-    TEXT_COLOR,
-    apply_caption_font,
+from subsearch.ui.theme.typography import apply_caption_font
+from subsearch.ui.widgets.icon_caption_button import (
+    CaptionToolButton,
+    CaptionToolButtonStyle,
+    MutableCaptionToolButton,
+    MutableCaptionToolButtonStyle,
 )
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
 from subsearch.ui.widgets.slider import TRACK_ALIGNED_LABEL_WIDTH
 
 UPDATE_IDLE_STATUS = "Check for updates to see if a newer version is available."
@@ -57,28 +58,25 @@ class UpdateCard(SettingsCard):
         text_column.addWidget(self.latest_version_label)
         text_column.addWidget(self.status_label)
 
-        install_column = CaptionedToolButton("Install", parent=self)
-        self.install_button = install_column.button
+        self.install_button = MutableCaptionToolButton(
+            MutableCaptionToolButtonStyle(LucideIcon.ARROW_DOWN_TO_LINE, "Install"), parent=self
+        )
         self.install_button.clicked.connect(self._download_and_install)
         self._apply_install_button_state(False)
 
-        check_column = CaptionedToolButton(
-            "Search", icon=lucide_qicon(LucideIcon.REFRESH_CW_DOT, TEXT_COLOR), parent=self
-        )
-        self.check_button = check_column.button
+        self.check_button = CaptionToolButton(CaptionToolButtonStyle(LucideIcon.REFRESH_CW_DOT, "Search"), parent=self)
         self.check_button.clicked.connect(self._check_for_update)
 
         self.changelog_button = ChangelogButton(self)
-        changelog_column = CaptionedToolButton("Changelog", button=self.changelog_button, parent=self)
 
         content_row = QHBoxLayout()
         content_row.setContentsMargins(CARD_CONTENT_INSET, 8, ROW_INSET, 4)
         content_row.setSpacing(8)
         content_row.addLayout(text_column, stretch=1)
-        content_row.addWidget(check_column, alignment=Qt.AlignmentFlag.AlignVCenter)
+        content_row.addWidget(self.check_button, alignment=Qt.AlignmentFlag.AlignVCenter)
         content_row.addSpacing(UPDATE_BUTTON_GROUP_GAP)
-        content_row.addWidget(changelog_column, alignment=Qt.AlignmentFlag.AlignVCenter)
-        content_row.addWidget(install_column, alignment=Qt.AlignmentFlag.AlignVCenter)
+        content_row.addWidget(self.changelog_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+        content_row.addWidget(self.install_button, alignment=Qt.AlignmentFlag.AlignVCenter)
         self.body_layout.addLayout(content_row)
 
         self.progress_bar = ProgressBar(self)
@@ -93,8 +91,6 @@ class UpdateCard(SettingsCard):
         self.body_layout.addLayout(progress_row)
 
     def _apply_install_button_state(self, enabled: bool) -> None:
-        color = TEXT_COLOR if enabled else DISABLED_TEXT_COLOR
-        self.install_button.setIcon(lucide_qicon(LucideIcon.ARROW_DOWN_TO_LINE, color))
         self.install_button.setEnabled(enabled)
 
     def _check_for_update(self) -> None:

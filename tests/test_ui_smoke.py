@@ -339,7 +339,7 @@ def test_notification_preview_success_button_shows_succeeded_toast(qtbot) -> Non
     qtbot.addWidget(card)
 
     store.write("notifications.display_duration", 4.2)
-    card.preview_success_button.button.click()
+    card.preview_success_button.click()
 
     assert card._preview_toast is not None
     assert card._preview_toast._hold_duration_ms == 4200
@@ -357,7 +357,7 @@ def test_notification_preview_failure_button_shows_failed_toast(qtbot) -> None:
     card = NotificationsCard(store)
     qtbot.addWidget(card)
 
-    card.preview_failure_button.button.click()
+    card.preview_failure_button.click()
 
     assert card._preview_toast is not None
     assert card._preview_toast._status_color == palette.RED

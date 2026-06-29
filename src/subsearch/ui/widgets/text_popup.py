@@ -3,7 +3,7 @@ from PySide6.QtGui import QCursor, QMouseEvent, QTextOption
 from PySide6.QtWidgets import QFrame, QTextBrowser, QVBoxLayout, QWidget
 
 from subsearch.ui.theme import palette
-from subsearch.ui.theme.typography import CAPTION_FONT_SIZE, TEXT_COLOR, body_font
+from subsearch.ui.theme.typography import POPUP_FONT_SIZE, TEXT_COLOR, body_font
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 
 POPUP_MIN_WIDTH = 580
@@ -20,7 +20,7 @@ class MarkdownPopup(AnchoredPopup):
         self.setMouseTracking(True)
 
         caption_font = body_font()
-        caption_font.setPixelSize(CAPTION_FONT_SIZE)
+        caption_font.setPixelSize(POPUP_FONT_SIZE)
 
         self._browser = QTextBrowser(self)
         self._browser.setFont(caption_font)

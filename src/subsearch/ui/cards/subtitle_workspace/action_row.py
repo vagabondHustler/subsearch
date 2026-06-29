@@ -1,7 +1,7 @@
 from typing import Callable
 
-from PySide6.QtCore import Qt, QTimer, QUrl
-from PySide6.QtGui import QDesktopServices, QIcon
+from PySide6.QtCore import QEvent, Qt, QTimer, QUrl
+from PySide6.QtGui import QDesktopServices, QEnterEvent, QIcon, QMouseEvent
 from PySide6.QtWidgets import QHBoxLayout, QWidget
 
 from subsearch.runtime.config import SEARCH_SUBJECT, WORKSPACE
@@ -50,6 +50,10 @@ class SubtitleActionRow(QWidget):
         self._delivered_directory: str = ""
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        # This widget covers the whole list row, so the list viewport stops
+        # receiving the mouse moves that clear the ::item:hover highlight. Track
+        # moves here and repaint the viewport so the hovered row follows the cursor.
+        self.setMouseTracking(True)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, ROW_INSET, 0)
         layout.setSpacing(ACTION_BUTTON_GAP)
@@ -63,8 +67,6 @@ class SubtitleActionRow(QWidget):
             self._place_tooltip(),
             self._unpack_rename_and_place,
         )
-        if not SEARCH_SUBJECT.file_exists:
-            self._move_rename.setEnabled(False)
         layout.addWidget(self._move_rename)
 
         self._open_location = self._make_action_button(
@@ -78,6 +80,29 @@ class SubtitleActionRow(QWidget):
 
         self._post_processing_service.succeeded.connect(self._on_succeeded)
         self._post_processing_service.failed.connect(self._on_failed)
+
+        self._apply_manual_state(bool(store.read(ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING)))
+        store.subscribe(ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING, self._apply_manual_state)
+
+    def enterEvent(self, event: QEnterEvent) -> None:
+        self._repaint_list_viewport()
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        self._repaint_list_viewport()
+
+    def leaveEvent(self, event: QEvent) -> None:
+        self._repaint_list_viewport()
+
+    def _repaint_list_viewport(self) -> None:
+        parent = self.parentWidget()
+        if parent is not None:
+            parent.update()
+
+    def _apply_manual_state(self, manual_enabled: bool) -> None:
+        # When automatic post-processing handles delivery, the manual move/rename
+        # buttons stay visible but disabled; Open Containing Folder stays usable.
+        self._move_button.setEnabled(manual_enabled and self._active_button is None)
+        self._move_rename.setEnabled(manual_enabled and SEARCH_SUBJECT.file_exists and self._active_button is None)
 
     def _move_tooltip(self) -> str:
         return f"Move this subtitle to {self._extraction_directory()}"
@@ -103,6 +128,21 @@ class SubtitleActionRow(QWidget):
         self._idle_icons[button] = icon
         button.clicked.connect(slot)
         return button
+
+    def trigger_move(self) -> None:
+        if self._move_button.isEnabled():
+            self._move_button.click()
+
+    def trigger_rename_and_place(self) -> None:
+        if self._move_rename.isEnabled():
+            self._move_rename.click()
+
+    def trigger_open_location(self) -> None:
+        if self._open_location.isEnabled():
+            self._open_location.click()
+
+    def has_delivered_directory(self) -> bool:
+        return bool(self._delivered_directory)
 
     def _unpack_and_move(self) -> None:
         self._begin_operation(self._move_button)
@@ -152,6 +192,5 @@ class SubtitleActionRow(QWidget):
             return None
         self._spinner_timer.stop()
         self._active_button = None
-        self._move_button.setEnabled(True)
-        self._move_rename.setEnabled(SEARCH_SUBJECT.file_exists)
+        self._apply_manual_state(bool(self._store.read(ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING)))
         return button

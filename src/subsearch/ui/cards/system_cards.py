@@ -5,11 +5,13 @@ from subsearch.runtime.config import DEVICE_INFO
 from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.services.shell_integration import ShellIntegrationService
 from subsearch.ui.state.store import SettingsStore
-from subsearch.ui.theme.typography import TEXT_COLOR
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.icon_caption_button import (
+    MutableCaptionToolButton,
+    MutableCaptionToolButtonStyle,
+)
 from subsearch.ui.widgets.notification_toast import NotificationToast
 from subsearch.ui.widgets.setting_rows import (
     FloatInputRow,
@@ -41,11 +43,11 @@ class NotificationsCard(SettingsCard):
         self.add_row(self.play_sound)
         self.add_row(self.display_duration)
 
-        self.preview_success_button = CaptionedToolButton(
-            "Preview success", icon=lucide_qicon(LucideIcon.PICTURE_IN_PICTURE_2, TEXT_COLOR), parent=self
+        self.preview_success_button = MutableCaptionToolButton(
+            MutableCaptionToolButtonStyle(LucideIcon.PICTURE_IN_PICTURE_2, "Preview success"), parent=self
         )
-        self.preview_failure_button = CaptionedToolButton(
-            "Preview failure", icon=lucide_qicon(LucideIcon.PICTURE_IN_PICTURE_2, TEXT_COLOR), parent=self
+        self.preview_failure_button = MutableCaptionToolButton(
+            MutableCaptionToolButtonStyle(LucideIcon.PICTURE_IN_PICTURE_2, "Preview failure"), parent=self
         )
         self.body_layout.addLayout(self._build_preview_buttons())
 

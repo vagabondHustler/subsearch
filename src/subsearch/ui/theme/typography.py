@@ -5,7 +5,9 @@ from qfluentwidgets import CustomStyleSheet, setCustomStyleSheet, setFont
 from subsearch.ui.theme import palette
 
 BODY_FONT_SIZE = 12
-CAPTION_FONT_SIZE = 12
+CAPTION_FONT_SIZE = 8
+POPUP_FONT_SIZE = 12
+POST_PROCESSING_FONT_SIZE = 8
 SUBSECTION_FONT_SIZE = 10
 TOKEN_HEADER_FONT_SIZE = 12
 TOKEN_VALUE_FONT_SIZE = 12
@@ -65,7 +67,7 @@ def apply_body_font(widget: QWidget) -> None:
 
 
 def apply_caption_font(widget: QWidget) -> None:
-    setFont(widget, CAPTION_FONT_SIZE, SEMI_BOLD)
+    setFont(widget, POPUP_FONT_SIZE, SEMI_BOLD)
     apply_text_color(widget)
 
 
@@ -80,7 +82,7 @@ def apply_title_font(widget: QWidget) -> None:
 
 
 def apply_section_label_font(widget: QWidget) -> None:
-    setFont(widget, CAPTION_FONT_SIZE, QFont.Weight.Normal)
+    setFont(widget, POPUP_FONT_SIZE, QFont.Weight.Normal)
     apply_text_color(widget)
 
 
