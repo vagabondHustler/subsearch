@@ -28,7 +28,7 @@ class SubtitleDownloadWorker(Worker):
         if release_parser.valid_filename(subtitle.subtitle_name):
             subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
         downloaded = file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
-        if not downloaded:
+        if downloaded is None:
             raise DownloadFailed(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a downloadable subtitle")
         return subtitle
 

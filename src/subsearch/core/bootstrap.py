@@ -173,11 +173,13 @@ class Bootstrap:
 
     def setup_file_system(self) -> None:
         from subsearch.io import file_system
+        from subsearch.runtime.download_history import get_download_history
         from subsearch.runtime.recorder import get_file_tracker
 
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
         get_file_tracker().reclaim_after_crash()
+        get_download_history().increment_run_count()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         if SEARCH_SUBJECT.file_exists:
             self._create_search_directories()

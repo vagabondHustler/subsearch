@@ -16,6 +16,7 @@ from subsearch.runtime.config import (
     SEARCH_SUBJECT,
     WORKSPACE,
 )
+from subsearch.runtime.download_history import DownloadHistory, get_download_history
 from subsearch.runtime.models import (
     ProviderDiagnosticStatus,
     ProviderResult,
@@ -166,15 +167,24 @@ class SearchPipeline:
             self.bootstrap.api_calls_made[provider_name] = 0
         return self.bootstrap.api_calls_made[provider_name] == self.bootstrap.app_config.downloads_per_provider
 
-    def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
+    def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int, history: DownloadHistory) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
         downloaded = file_system.download_subtitle(subtitle, subtitle_number, total_count, WORKSPACE.download_directory)
-        subtitle.status = SubtitleStatus.AUTO_DOWNLOAD if downloaded else SubtitleStatus.DOWNLOAD_FAILED
+        if downloaded is None:
+            subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
+            return
+        if history.was_downloaded_hash(downloaded.content_hash):
+            capture(f"Skipping duplicate download: {subtitle.subtitle_name}")
+            history.mark_pending_deletion(downloaded.path)
+            return
+        history.record(downloaded.content_hash, subtitle.download_url, downloaded.path)
+        subtitle.status = SubtitleStatus.AUTO_DOWNLOAD
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
     @run_if_conditions_met
     def download_files(self) -> None:
         phase("Downloading subtitles")
+        history = get_download_history()
         accepted = sorted(
             self.bootstrap.accepted_subtitles,
             key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
@@ -183,7 +193,10 @@ class SearchPipeline:
         for subtitle in accepted:
             if self._provider_at_download_limit(subtitle.provider_name):
                 continue
-            self._download_accepted_subtitle(subtitle, len(accepted))
+            if history.was_downloaded_url(subtitle.download_url):
+                capture(f"Skipping already-downloaded subtitle: {subtitle.subtitle_name}")
+                continue
+            self._download_accepted_subtitle(subtitle, len(accepted), history)
         capture("Downloads completed")
 
     @run_if_conditions_met
@@ -291,6 +304,10 @@ class SearchPipeline:
         # subs/ is the kept extraction archive; only tmp_subsearch and its downloads are removed.
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         tracker = get_file_tracker()
+        history = get_download_history()
+        for path in history.take_pending_deletion():
+            tracker.delete_if_tracked(path)
+        history.prune()
         if WORKSPACE.download_directory != Path(""):
             tracker.delete_tracked_within(WORKSPACE.download_directory)
             tracker.delete_if_tracked(WORKSPACE.download_directory)

@@ -307,7 +307,7 @@ def test_gestdown_raw_download_lands_in_tmp_then_moves_to_subs(tmp_path, monkeyp
     subtitle = _gestdown_subtitle("the.show.s01e01.gestdown", url)
     downloaded = file_system.download_subtitle(subtitle, 1, 1, download_directory)
 
-    assert downloaded is True
+    assert downloaded is not None
     staged = list(download_directory.iterdir())
     assert [path.suffix for path in staged] == [".srt"]
     assert not list(destination.iterdir())
@@ -318,6 +318,32 @@ def test_gestdown_raw_download_lands_in_tmp_then_moves_to_subs(tmp_path, monkeyp
     assert [path.suffix for path in destination.iterdir()] == [".srt"]
     assert (next(destination.iterdir())).read_bytes() == body
     assert not list(download_directory.glob("*.srt"))
+
+
+def test_download_subtitle_returns_stable_content_hash(tmp_path, monkeypatch) -> None:
+    download_directory = tmp_path / "tmp_subsearch"
+    download_directory.mkdir()
+
+    body = b"1\n00:00:00,000 --> 00:00:01,000\nhash stability\n"
+    url_one = "https://api.gestdown.info/subtitles/download/one"
+    url_two = "https://api.gestdown.info/subtitles/download/two"
+    different_url = "https://api.gestdown.info/subtitles/download/diff"
+    session = _FakeSession(
+        {
+            url_one: _FakeResponse(body, {"content-type": "text/srt"}),
+            url_two: _FakeResponse(body, {"content-type": "text/srt"}),
+            different_url: _FakeResponse(b"different body\n", {"content-type": "text/srt"}),
+        }
+    )
+    monkeypatch.setattr("subsearch.io.http.get_session", lambda: session)
+
+    first = file_system.download_subtitle(_gestdown_subtitle("first", url_one), 1, 3, download_directory)
+    second = file_system.download_subtitle(_gestdown_subtitle("second", url_two), 2, 3, download_directory)
+    different = file_system.download_subtitle(_gestdown_subtitle("diff", different_url), 3, 3, download_directory)
+
+    assert first is not None and second is not None and different is not None
+    assert first.content_hash == second.content_hash
+    assert first.content_hash != different.content_hash
 
 
 def test_gestdown_raw_dedups_against_identical_archive_member(tmp_path, monkeypatch) -> None:
@@ -353,8 +379,8 @@ def test_gestdown_raw_dedups_against_identical_archive_member(tmp_path, monkeypa
         request_data={},
     )
 
-    assert file_system.download_subtitle(raw_subtitle, 1, 2, download_directory) is True
-    assert file_system.download_subtitle(archive_subtitle, 2, 2, download_directory) is True
+    assert file_system.download_subtitle(raw_subtitle, 1, 2, download_directory) is not None
+    assert file_system.download_subtitle(archive_subtitle, 2, 2, download_directory) is not None
 
     extracted_count = file_system.extract_files_in_dir(download_directory, destination)
 

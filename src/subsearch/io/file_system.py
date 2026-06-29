@@ -75,7 +75,15 @@ def _cloudflare_block_reason(response: "CurlResponse") -> str:
     return "none"
 
 
-def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path) -> bool:
+class DownloadedSubtitle:
+    def __init__(self, path: Path, content_hash: str) -> None:
+        self.path = path
+        self.content_hash = content_hash
+
+
+def download_subtitle(
+    subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path
+) -> DownloadedSubtitle | None:
     from subsearch.io.http import get_session
 
     capture(f"Downloading {subtitle.subtitle_name}")
@@ -84,22 +92,32 @@ def download_subtitle(subtitle: Subtitle, index_position: int, index_size: int, 
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if is_zip_payload(first_chunk):
-        _save_zip_archive(subtitle, tmp_dir, first_chunk, chunks)
-        return True
+        return _save_zip_archive(subtitle, tmp_dir, first_chunk, chunks)
     raw_extension = _raw_subtitle_extension(response)
     if raw_extension is not None:
-        _save_raw_subtitle(subtitle, tmp_dir, raw_extension, first_chunk, chunks)
-        return True
+        return _save_raw_subtitle(subtitle, tmp_dir, raw_extension, first_chunk, chunks)
     capture(
         f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip "
         f"(status {response.status_code}, cloudflare {_cloudflare_block_reason(response)}) "
         f"from {subtitle.download_url}, skipping download",
         level=LogLevel.WARNING,
     )
-    return False
+    return None
 
 
-def _save_zip_archive(subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chunks: Iterable[bytes]) -> None:
+def _write_chunks(file_descriptor: Any, first_chunk: bytes, chunks: Iterable[bytes]) -> str:
+    digest = hashlib.sha256()
+    file_descriptor.write(first_chunk)
+    digest.update(first_chunk)
+    for chunk in chunks:
+        file_descriptor.write(chunk)
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _save_zip_archive(
+    subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chunks: Iterable[bytes]
+) -> DownloadedSubtitle:
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     tmp_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -107,23 +125,21 @@ def _save_zip_archive(subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chu
     ) as fd:
         download_path = Path(fd.name)
         _track(download_path)
-        fd.write(first_chunk)
-        for chunk in chunks:
-            fd.write(chunk)
+        file_hash = _write_chunks(fd, first_chunk, chunks)
+    return DownloadedSubtitle(download_path, file_hash)
 
 
 def _save_raw_subtitle(
     subtitle: Subtitle, download_dir: Path, extension: str, first_chunk: bytes, chunks: Iterable[bytes]
-) -> None:
+) -> DownloadedSubtitle:
     download_dir.mkdir(parents=True, exist_ok=True)
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     stem = f"{name_prefix}{subtitle.subtitle_name}"
     download_path = _next_available_path(download_dir, stem, extension)
     _track(download_path)
     with download_path.open("wb") as fd:
-        fd.write(first_chunk)
-        for chunk in chunks:
-            fd.write(chunk)
+        file_hash = _write_chunks(fd, first_chunk, chunks)
+    return DownloadedSubtitle(download_path, file_hash)
 
 
 _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
@@ -355,6 +371,23 @@ def read_json_list(path: Path) -> list[Any]:
 def write_json_list(path: Path, items: list[Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(items, indent=2), encoding="utf-8")
+
+
+def read_json_dict(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return dict(json.loads(path.read_text(encoding="utf-8")))
+    except json.JSONDecodeError, OSError:
+        capture(f"Unreadable dict file at {path.name}, starting empty", level=LogLevel.WARNING)
+        return {}
+
+
+def write_json_dict(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_suffix(f"{path.suffix}.tmp")
+    temp_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    temp_path.replace(path)
 
 
 def directory_is_empty(directory: Path) -> bool:
