@@ -1,6 +1,6 @@
 from subsearch.core.pipeline import SearchJob, SearchPipeline
 from subsearch.runtime.config import PROVIDER_DISPLAY_NAMES, SEARCH_SUBJECT
-from subsearch.runtime.models import AppMode, Subtitle
+from subsearch.runtime.models import AppMode, WorkspaceOutcome
 from subsearch.runtime.recorder import LogLevel, capture, phase
 
 
@@ -15,8 +15,9 @@ class Flow:
     def _end_initializing(self) -> None:
         return None
 
-    def _record_gui_results(self, manual_accepted: list[Subtitle]) -> None:
-        self.bootstrap.manual_accepted_subtitles = manual_accepted
+    def _record_gui_results(self, outcome: WorkspaceOutcome) -> None:
+        self.bootstrap.manual_accepted_subtitles = outcome.downloaded
+        self.bootstrap.ui_placed_best_next_to_video = outcome.placed_best_next_to_video
         self.bootstrap.resync_app_config()
 
     def _finish(self) -> None:
@@ -35,11 +36,11 @@ class SettingsFlow(Flow):
     def run(self) -> None:
         from subsearch.ui.entrypoint import open_settings_window
 
-        manual_accepted = open_settings_window(
+        outcome = open_settings_window(
             search_job_factory=self._make_search_job,
             on_window_shown=self._end_initializing,
         )
-        self._record_gui_results(manual_accepted)
+        self._record_gui_results(outcome)
         self._finish()
 
 
@@ -47,13 +48,13 @@ class ManualSearchFlow(Flow):
     def run(self) -> None:
         from subsearch.ui.entrypoint import open_settings_window
 
-        manual_accepted = open_settings_window(
+        outcome = open_settings_window(
             subtitles=None,
             search_job_factory=self._make_search_job,
             start_search_immediately=True,
             on_window_shown=self._end_initializing,
         )
-        self._record_gui_results(manual_accepted)
+        self._record_gui_results(outcome)
         self._finish()
 
 

@@ -119,5 +119,5 @@ _download_history: DownloadHistory | None = None
 def get_download_history() -> DownloadHistory:
     global _download_history
     if _download_history is None:
-        _download_history = DownloadHistory(APP_PATHS.appdata_subsearch / "files_tracked.json")
+        _download_history = DownloadHistory(APP_PATHS.appdata_subsearch / "download_history.json")
     return _download_history

@@ -9,20 +9,13 @@ import traceback
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Collection, Iterable, Optional
 
 if TYPE_CHECKING:
     from curl_cffi.requests import Response as CurlResponse
 
 from subsearch.runtime.models import Subtitle
 from subsearch.runtime.recorder import LogLevel, capture
-
-
-def _track(path: Path) -> None:
-    # lazy import: file_tracking lives in runtime and depends back on this module
-    from subsearch.runtime.recorder.standard_in import get_file_tracker
-
-    get_file_tracker().track(path)
 
 
 def create_path_from_string(
@@ -124,7 +117,6 @@ def _save_zip_archive(
         dir=tmp_dir, prefix=f"{name_prefix}{subtitle.subtitle_id}_", suffix=".zip", delete=False
     ) as fd:
         download_path = Path(fd.name)
-        _track(download_path)
         file_hash = _write_chunks(fd, first_chunk, chunks)
     return DownloadedSubtitle(download_path, file_hash)
 
@@ -136,7 +128,6 @@ def _save_raw_subtitle(
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     stem = f"{name_prefix}{subtitle.subtitle_name}"
     download_path = _next_available_path(download_dir, stem, extension)
-    _track(download_path)
     with download_path.open("wb") as fd:
         file_hash = _write_chunks(fd, first_chunk, chunks)
     return DownloadedSubtitle(download_path, file_hash)
@@ -224,7 +215,6 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
         if target is None:
             continue
         target.write_bytes(payload)
-        _track(target)
         extracted_count += 1
     return extracted_count
 
@@ -239,9 +229,13 @@ def _extract_archive_file(file: Path, dst: Path) -> int:
         return 0
 
 
-def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> int:
+def extract_files_in_dir(
+    src: Path, dst: Path, extension: str = ".zip", exclude_ids: Collection[str] = frozenset()
+) -> int:
     extracted_count = 0
     for file in src.glob(f"*{extension}"):
+        if any(f"{excluded_id}_" in file.stem for excluded_id in exclude_ids):
+            continue
         extracted_count += _extract_archive_file(file, dst)
     for file in src.iterdir():
         if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS:
@@ -255,7 +249,6 @@ def _move_raw_subtitle(file: Path, dst: Path) -> int:
         return 0
     dst.mkdir(parents=True, exist_ok=True)
     file.replace(target)
-    _track(target)
     return 1
 
 
@@ -334,10 +327,8 @@ def move_best_next_to_video(
         preserved = _next_available_path(extraction_directory, f"{video_stem}{_TESTED_MARKER}", target.suffix)
         capture(f"Preserving existing subtitle: {target} -> {preserved}")
         target.replace(preserved)
-        _track(preserved)
     capture(f"Moving file: {source_file} -> {target}")
     source_file.replace(target)
-    _track(target)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
@@ -421,6 +412,18 @@ def get_file_hash(file_path: Path) -> str:
 
     hash_algorithm = MPCHashAlgorithm(file_path)
     return hash_algorithm.get_hash()
+
+
+def count_extractable_archives(path: Path, exclude_ids: Collection[str] = frozenset(), extension: str = ".zip") -> int:
+    if not path.is_dir():
+        return 0
+    archives = sum(
+        1
+        for file in path.glob(f"*{extension}")
+        if not any(f"{excluded_id}_" in file.stem for excluded_id in exclude_ids)
+    )
+    raw_subtitles = sum(1 for file in path.iterdir() if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS)
+    return archives + raw_subtitles
 
 
 def count_files_in_directory(path: Path, extensions: Optional[Iterable[str]] = None) -> int:

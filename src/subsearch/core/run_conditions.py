@@ -51,7 +51,6 @@ SKIP_LABEL_EXPLANATIONS = {
     "is_tvseries": "only supports tv series",
     "has_season_and_episode": "needs a season and episode number and this search has none",
     "url_not_empty": "needs an IMDb match and none was found for this search",
-    "not_manual_post_processing": "post-processing is handled manually in the results window",
     "app_mode_pipeline_post_processing": "only runs in hybrid or automatic mode",
     "app_mode_search": "only runs during a search",
     "should_download_files": "no subtitles were accepted to download",
@@ -60,6 +59,7 @@ SKIP_LABEL_EXPLANATIONS = {
     "extracted_archives_gte_1": "no subtitle files were extracted",
     "rename_enabled": "renaming is disabled in settings",
     "move_best_enabled": "moving the best subtitle is disabled in settings",
+    "not_ui_placed_best": "the best subtitle was already placed next to the video from the results window",
     "move_all_enabled": "moving all subtitles is disabled in settings",
     "not_move_all": "superseded by 'move all subtitles'",
     "diagnostics_enabled": "diagnostics are disabled in settings",
@@ -94,12 +94,6 @@ class RunConditions:
     @property
     def has_rejected(self) -> bool:
         return len(self.rejected_subtitles) >= 1
-
-    @property
-    def manual_post_processing(self) -> bool:
-        if not self.should_open_subtitle_workspace:
-            return False
-        return self.app_config.subtitle_workspace_manual_post_processing
 
     @property
     def has_season_and_episode(self) -> bool:
@@ -168,7 +162,6 @@ class RunConditions:
 
     def _conditions_for(self, pipeline_step: PipelineStep | str) -> ConditionList:
         post_processing = self.app_config.post_processing
-        not_manual_handled = ("not_manual_post_processing", not self.manual_post_processing)
         conditions: dict[PipelineStep, ConditionList] = {
             PipelineStep.INIT_SEARCH: [
                 ("app_mode_search", self.is_search_mode),
@@ -206,36 +199,31 @@ class RunConditions:
                 ("provider_enabled", self.app_config.providers["gestdown"]),
             ],
             PipelineStep.DOWNLOAD_FILES: [
-                not_manual_handled,
                 ("should_download_files", self.should_download_files),
             ],
             PipelineStep.SUBTITLE_WORKSPACE: [
                 ("should_open_subtitle_workspace", self.should_open_subtitle_workspace),
             ],
             PipelineStep.SUBTITLE_POST_PROCESSING: [
-                not_manual_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
             ],
             PipelineStep.EXTRACT_FILES: [
-                not_manual_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
             PipelineStep.SUBTITLE_RENAME: [
-                not_manual_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("rename_enabled", post_processing["rename"]),
             ],
             PipelineStep.SUBTITLE_MOVE_BEST: [
-                not_manual_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_best_enabled", post_processing["move_best"]),
                 ("not_move_all", not post_processing["move_all"]),
+                ("not_ui_placed_best", not self.bootstrap.ui_placed_best_next_to_video),
             ],
             PipelineStep.SUBTITLE_MOVE_ALL: [
-                not_manual_handled,
                 ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_all_enabled", post_processing["move_all"]),

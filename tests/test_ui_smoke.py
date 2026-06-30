@@ -385,25 +385,6 @@ def test_search_mode_restore_defaults(qtbot) -> None:
     assert session.read("subtitle_workspace.search_mode") == "hybrid"
 
 
-def test_subtitle_handling_greys_out_automatic_rows_when_manual_post_processing_enabled(qtbot) -> None:
-    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
-    from subsearch.ui.state.store import SettingsStore
-
-    store = SettingsStore()
-    card = SubtitleHandlingCard(store)
-    qtbot.addWidget(card)
-
-    assert card._automatic_handling.isEnabled()
-
-    store.write("subtitle_workspace.manual_post_processing", True)
-    assert not card._automatic_handling.isEnabled()
-    # The card itself stays usable.
-    assert card.isEnabled()
-
-    store.write("subtitle_workspace.manual_post_processing", False)
-    assert card._automatic_handling.isEnabled()
-
-
 def test_application_restore_defaults(qtbot) -> None:
     from subsearch.runtime.config import session as config_session
     from subsearch.ui.cards.system_cards import ApplicationCard

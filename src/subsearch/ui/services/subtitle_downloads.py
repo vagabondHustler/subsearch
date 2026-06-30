@@ -94,6 +94,7 @@ class SubtitleDownloadService(QObject):
 
     def _on_worker_finished(self, subtitle: Subtitle) -> None:
         subtitle.status = SubtitleStatus.MANUAL_DOWNLOAD
+        capture(f"Downloaded {subtitle.subtitle_name}")
         self._download_number += 1
         self._active = None
         self.succeeded.emit(subtitle)

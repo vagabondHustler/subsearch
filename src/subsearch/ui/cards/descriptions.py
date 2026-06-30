@@ -95,10 +95,6 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
         "Manual opens the download manager so you choose. Hybrid auto-downloads the best match and only "
         "opens the manager when nothing qualifies. Automatic downloads silently.",
     ),
-    ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING: SettingDescription(
-        "Disable automatic post-processing",
-        "Pick and process subtitles yourself from the results. Disables the rename and move options above.",
-    ),
     ConfigKey.PATHS_DOWNLOAD_DIRECTORY: SettingDescription(
         "Download subtitles to",
         "Where archives are downloaded before extraction. "
@@ -123,9 +119,10 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
         "Automatically create the video file directory if it doesn't exist yet.",
     ),
     CardKey.AVAILABLE_SUBTITLES: SettingDescription(
-        "Subtitles",
+        "Subtitle workspace",
         "Every subtitle found for this video, closest matches first. Double click one to download it. "
-        "With automatic downloads on, the best ones are already ticked.",
+        "With automatic downloads on, the best ones are already ticked. "
+        "Downloaded subtitles are extracted and placed automatically.",
     ),
     ConfigKey.POST_PROCESSING_RENEAME: SettingDescription(
         "Rename subtitle",
@@ -197,8 +194,8 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
         "Which subtitle types to fetch. Combine hearing-impaired and non-hearing-impaired to accept both.",
     ),
     CardKey.SUBTITLE_HANDLING: SettingDescription(
-        "Subtitle handling",
-        "What to do with a subtitle after finding it: rename and move it automatically, or process it yourself.",
+        "Automatic subtitle handling",
+        "What to do with a subtitle after automatically downloading it.",
     ),
     CardKey.PATHS: SettingDescription(
         "Paths",

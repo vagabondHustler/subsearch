@@ -88,9 +88,7 @@ def test_auto_downloaded_subtitles_render_as_downloaded_without_redownload(qtbot
     assert download_environment == []
 
 
-def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_post_processing_enabled(
-    qtbot, download_environment
-) -> None:
+def test_action_row_overlays_buttons_and_keeps_item_text(qtbot, download_environment) -> None:
     from qfluentwidgets import TransparentToolButton
 
     from subsearch.runtime.config import composition
@@ -99,7 +97,6 @@ def test_action_row_overlays_buttons_and_keeps_item_text_when_manual_post_proces
     auto_downloaded = make_subtitle("Auto.Sub", 96, SubtitleStatus.AUTO_DOWNLOAD)
 
     interface, task_runner = build_interface([auto_downloaded], qtbot)
-    interface._store.write("subtitle_workspace.manual_post_processing", True)
     item = interface.list_widget.item(0)
     interface._attach_action_buttons(item, auto_downloaded)
     try:

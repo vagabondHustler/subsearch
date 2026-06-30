@@ -5,7 +5,7 @@ from subsearch.runtime.download_history import DownloadHistory
 
 
 def _history(tmp_path: Path) -> DownloadHistory:
-    return DownloadHistory(tmp_path / "files_tracked.json")
+    return DownloadHistory(tmp_path / "download_history.json")
 
 
 def test_record_then_url_and_hash_hit(tmp_path) -> None:

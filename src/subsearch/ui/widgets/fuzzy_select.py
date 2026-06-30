@@ -3,6 +3,7 @@ from typing import NamedTuple
 from PySide6.QtCore import QElapsedTimer, QEvent, QObject, QSize, Qt, Signal
 from PySide6.QtGui import QHideEvent, QKeyEvent, QMouseEvent
 from PySide6.QtWidgets import (
+    QApplication,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -71,7 +72,13 @@ class FuzzyFinderPopup(AnchoredPopup):
     label_selected = Signal(str)
 
     def __init__(self, anchor: QWidget, searchable: bool = True) -> None:
-        super().__init__(anchor, Qt.WindowType.Popup, acrylic=True)
+        # Solid (non-acrylic) background: a translucent window hit-tests by pixel
+        # alpha, so the mouse falls through the transparent areas of rows to the
+        # widgets behind. A Mica-like solid fill keeps the look without that.
+        # ToolTip (not Popup) so it doesn't grab the mouse: the rest of the UI
+        # stays hoverable while the dropdown is open, matching the search-bar
+        # suggestion popups. Outside-click dismissal is handled manually below.
+        super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=False)
         self._anchor_widget = anchor
         self._searchable = searchable
         self._search_terms_by_label: dict[str, list[str]] = {}
@@ -128,6 +135,10 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._rebuild_rows(matching_labels(self._search_terms_by_label, ""), preferred_label=current_label)
         self.setMinimumWidth(self._anchor_widget.width())
         self.show_below(centered=True)
+        QApplication.instance().installEventFilter(self)
+        # A ToolTip window does not take focus on show, so claim it explicitly
+        # for type-to-filter to work immediately.
+        self.activateWindow()
         if self._searchable:
             self._search_edit.setFocus()
         else:
@@ -182,6 +193,10 @@ class FuzzyFinderPopup(AnchoredPopup):
         self.label_selected.emit(self._visible_labels[index])
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.MouseButtonPress and isinstance(event, QMouseEvent):
+            if self.isVisible() and not self.geometry().contains(event.globalPosition().toPoint()):
+                self.hide()
+            return False
         if event.type() != QEvent.Type.KeyPress or not isinstance(event, QKeyEvent):
             return False
         return self._handle_key(event.key())
@@ -208,6 +223,7 @@ class FuzzyFinderPopup(AnchoredPopup):
         return False
 
     def hideEvent(self, event: QHideEvent) -> None:
+        QApplication.instance().removeEventFilter(self)
         self._time_since_hidden.restart()
         super().hideEvent(event)
 

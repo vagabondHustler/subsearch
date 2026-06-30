@@ -5,7 +5,7 @@ from PySide6.QtCore import QMessageLogContext, QtMsgType, qInstallMessageHandler
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import Theme, setTheme, setThemeColor
 
-from subsearch.runtime.models import Subtitle
+from subsearch.runtime.models import Subtitle, WorkspaceOutcome
 from subsearch.runtime.recorder import LogLevel, capture, phase
 from subsearch.ui import warmup
 from subsearch.ui.compat.qfluent import ACCENT_COLOR, force_fixed_accent_color
@@ -51,7 +51,7 @@ def open_settings_window(
     search_job_factory: Callable[..., SearchJobProtocol] | None = None,
     start_search_immediately: bool = False,
     on_window_shown: Callable[[], None] = lambda: None,
-) -> list[Subtitle]:
+) -> WorkspaceOutcome:
     application = _build_application()
     window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
     capture("UI opened")
@@ -60,4 +60,5 @@ def open_settings_window(
     on_window_shown()
     application.exec()
     capture("UI closed", level=LogLevel.DEBUG)
-    return window.manual_search_interface.downloaded
+    interface = window.manual_search_interface
+    return WorkspaceOutcome(interface.downloaded, interface.placed_best_next_to_video)

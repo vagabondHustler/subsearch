@@ -22,6 +22,7 @@ class FakeBootstrap:
         self.rejected_subtitles: list[str] = []
         self.downloaded_subtitle_archives = 0
         self.extracted_subtitle_archives = 0
+        self.ui_placed_best_next_to_video = False
         self.call_conditions = RunConditions(self)  # type: ignore[arg-type]
 
     @property
@@ -222,7 +223,18 @@ def test_conditions_subtitle_move_all(fake_cls: FakeBootstrap) -> None:
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
 
-def test_manually_handle_post_processing_disables_download_and_post_processing(fake_cls: FakeBootstrap) -> None:
+def test_subtitle_move_best_skipped_when_ui_placed_best_next_to_video(fake_cls: FakeBootstrap) -> None:
+    fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.post_processing["move_best"] = True
+    fake_cls.app_config.post_processing["move_all"] = False
+
+    assert fake_cls.call_conditions.conditions_met("subtitle_move_best") is True
+
+    fake_cls.ui_placed_best_next_to_video = True
+    assert fake_cls.call_conditions.conditions_met("subtitle_move_best") is False
+
+
+def test_post_processing_runs_in_pipeline_modes(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_mode = AppMode.SEARCH_HYBRID
     fake_cls.accepted_subtitles = []
     fake_cls.downloaded_subtitle_archives = 1
@@ -237,39 +249,12 @@ def test_manually_handle_post_processing_disables_download_and_post_processing(f
         "subtitle_rename",
         "subtitle_move_best",
     )
-
-    fake_cls.app_config.subtitle_workspace_manual_post_processing = False
     for step in gated_steps:
         assert fake_cls.call_conditions.conditions_met(step) is True, step
-
-    fake_cls.app_config.subtitle_workspace_manual_post_processing = True
-    for step in gated_steps:
-        assert fake_cls.call_conditions.conditions_met(step) is False, step
 
     fake_cls.app_config.post_processing["move_best"] = False
     fake_cls.app_config.post_processing["move_all"] = True
-    assert fake_cls.call_conditions.conditions_met("subtitle_move_all") is False
-    fake_cls.app_config.subtitle_workspace_manual_post_processing = False
     assert fake_cls.call_conditions.conditions_met("subtitle_move_all") is True
-
-
-def test_manual_post_processing_ignored_when_workspace_never_opens(fake_cls: FakeBootstrap) -> None:
-    fake_cls.downloaded_subtitle_archives = 1
-    fake_cls.extracted_subtitle_archives = 1
-    fake_cls.app_config.post_processing["rename"] = True
-    fake_cls.app_config.subtitle_workspace_manual_post_processing = True
-
-    post_processing_steps = ("subtitle_post_processing", "extract_files", "subtitle_rename")
-
-    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
-    fake_cls.accepted_subtitles = ["subtitle1"]
-    for step in post_processing_steps:
-        assert fake_cls.call_conditions.conditions_met(step) is True, step
-
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
-    fake_cls.accepted_subtitles = ["subtitle1"]
-    for step in post_processing_steps:
-        assert fake_cls.call_conditions.conditions_met(step) is True, step
 
 
 def test_unmet_condition_labels_yifysubtitles_without_imdb_match(fake_cls: FakeBootstrap) -> None:

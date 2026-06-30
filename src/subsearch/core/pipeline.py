@@ -25,7 +25,7 @@ from subsearch.runtime.models import (
     SubtitleStatus,
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
-from subsearch.runtime.recorder import LogLevel, capture, get_file_tracker, phase
+from subsearch.runtime.recorder import LogLevel, capture, phase
 
 
 class SearchJob:
@@ -178,6 +178,7 @@ class SearchPipeline:
             history.mark_pending_deletion(downloaded.path)
             return
         history.record(downloaded.content_hash, subtitle.download_url, downloaded.path)
+        capture(f"Downloaded {subtitle.subtitle_name}")
         subtitle.status = SubtitleStatus.AUTO_DOWNLOAD
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
@@ -204,9 +205,9 @@ class SearchPipeline:
         subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.entrypoint import open_settings_window
 
-        self.bootstrap.manual_accepted_subtitles = open_settings_window(
-            subtitles, search_job_factory=self.create_search_job
-        )
+        outcome = open_settings_window(subtitles, search_job_factory=self.create_search_job)
+        self.bootstrap.manual_accepted_subtitles = outcome.downloaded
+        self.bootstrap.ui_placed_best_next_to_video = outcome.placed_best_next_to_video
         self.bootstrap.resync_app_config()
         capture("Results window closed")
 
@@ -217,7 +218,9 @@ class SearchPipeline:
     def subtitle_post_processing(self) -> None:
         phase("Processing subtitles")
         target_path = self._resolve_post_processing_target()
-        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(WORKSPACE.download_directory)
+        self.bootstrap.downloaded_subtitle_archives = file_system.count_extractable_archives(
+            WORKSPACE.download_directory, exclude_ids=self.bootstrap.ui_downloaded_subtitle_ids
+        )
         self.extract_files()
         self.bootstrap.extracted_subtitle_archives = file_system.count_subtitle_files(WORKSPACE.extraction_directory)
         self.subtitle_rename()
@@ -226,7 +229,11 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def extract_files(self) -> None:
-        file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
+        file_system.extract_files_in_dir(
+            WORKSPACE.download_directory,
+            WORKSPACE.extraction_directory,
+            exclude_ids=self.bootstrap.ui_downloaded_subtitle_ids,
+        )
         capture("Extraction completed")
 
     @run_if_conditions_met
@@ -303,14 +310,11 @@ class SearchPipeline:
     def clean_up(self) -> None:
         # subs/ is the kept extraction archive; only tmp_subsearch and its downloads are removed.
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        tracker = get_file_tracker()
         history = get_download_history()
         for path in history.take_pending_deletion():
-            tracker.delete_if_tracked(path)
+            if path.exists():
+                file_system.delete_path(path)
         history.prune()
-        if WORKSPACE.download_directory != Path(""):
-            tracker.delete_tracked_within(WORKSPACE.download_directory)
-            tracker.delete_if_tracked(WORKSPACE.download_directory)
         capture("Cleanup completed")
 
     def _wait_for_terminal_input(self) -> None:

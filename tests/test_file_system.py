@@ -432,6 +432,34 @@ def test_tested_subtitles_are_excluded_from_candidates(tmp_path) -> None:
     assert candidates == [f"{video_stem}.srt"]
 
 
+def _write_archive(directory: Path, name: str, member: str) -> Path:
+    archive_path = directory / name
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(member, "1\n00:00:00,000 --> 00:00:01,000\nfoo\n")
+    return archive_path
+
+
+def test_extract_files_in_dir_skips_excluded_ids(tmp_path) -> None:
+    _write_archive(tmp_path, "auto12_random.zip", "auto.srt")
+    _write_archive(tmp_path, "ui9999_random.zip", "ui.srt")
+    destination = tmp_path / "subs"
+    destination.mkdir()
+
+    extracted_count = file_system.extract_files_in_dir(tmp_path, destination, exclude_ids={"ui9999"})
+
+    assert extracted_count == 1
+    assert [path.name for path in destination.iterdir()] == ["auto.srt"]
+
+
+def test_count_extractable_archives_ignores_excluded_ids(tmp_path) -> None:
+    _write_archive(tmp_path, "auto12_random.zip", "auto.srt")
+    _write_archive(tmp_path, "ui9999_random.zip", "ui.srt")
+    _make_subtitle(tmp_path, "loose.srt")
+
+    assert file_system.count_extractable_archives(tmp_path, exclude_ids={"ui9999"}) == 2
+    assert file_system.count_extractable_archives(tmp_path) == 3
+
+
 def test_extract_subtitle_by_id_unpacks_only_the_matching_archive(tmp_path) -> None:
     downloads = tmp_path / "downloads"
     downloads.mkdir()

@@ -59,6 +59,7 @@ class Bootstrap:
         self.subtitle_results: "SubtitleResults | None" = None
         self.system_tray: "SystemTray | HeadlessNotificationSink"
         self.manual_accepted_subtitles: list[Subtitle] = []
+        self.ui_placed_best_next_to_video: bool = False
         self.health_reports: list[ProviderResult] = []
         self.pending_notifications: list[tuple[str, str]] = []
         self.language_data: dict[str, Any] = {}
@@ -174,11 +175,9 @@ class Bootstrap:
     def setup_file_system(self) -> None:
         from subsearch.io import file_system
         from subsearch.runtime.download_history import get_download_history
-        from subsearch.runtime.recorder import get_file_tracker
 
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
-        get_file_tracker().reclaim_after_crash()
         get_download_history().increment_run_count()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         if SEARCH_SUBJECT.file_exists:
@@ -186,12 +185,9 @@ class Bootstrap:
 
     def _create_search_directories(self) -> None:
         from subsearch.io import file_system
-        from subsearch.runtime.recorder import get_file_tracker
 
-        tracker = get_file_tracker()
         for directory in (WORKSPACE.extraction_directory, WORKSPACE.download_directory):
-            if file_system.create_directory(directory):
-                tracker.track(directory)
+            file_system.create_directory(directory)
 
     def _anchor_working_directory(self) -> None:
         if SEARCH_SUBJECT.file_exists:
@@ -212,6 +208,10 @@ class Bootstrap:
         if self.subtitle_results is None:
             return []
         return self.subtitle_results.rejected
+
+    @property
+    def ui_downloaded_subtitle_ids(self) -> set[str]:
+        return {subtitle.subtitle_id for subtitle in self.manual_accepted_subtitles}
 
     def _resolve_app_mode(self) -> AppMode:
         if not self._has_path_argument():
