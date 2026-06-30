@@ -2,7 +2,7 @@ from typing import Protocol
 
 from PySide6.QtCore import QEvent, QObject, Qt, Signal
 from PySide6.QtGui import QEnterEvent, QKeyEvent, QMouseEvent
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QLabel, QSizePolicy, QVBoxLayout, QWidget
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
 from subsearch.ui.theme import palette
@@ -32,6 +32,7 @@ class SuggestionRow(QLabel):
         self.index = index
         apply_body_font(self)
         self.setMouseTracking(True)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.render_selected(False)
 
     def render_selected(self, selected: bool) -> None:
@@ -47,18 +48,25 @@ class SuggestionRow(QLabel):
     def enterEvent(self, event: QEnterEvent) -> None:
         self.hovered.emit(self.index)
 
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        self.hovered.emit(self.index)
+
 
 class SuggestionPopup(AnchoredPopup):
     accepted_index = Signal(int)
     dismissed = Signal()
 
     def __init__(self, anchor: QWidget, navigation_hint: str) -> None:
-        super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=True)
+        # Solid (non-acrylic) background: a translucent window hit-tests by pixel
+        # alpha, so the mouse falls through the transparent areas of rows to the
+        # widgets behind. A Mica-like solid fill keeps the look without that.
+        super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=False)
         self._anchor_widget = anchor
         self._navigation_hint = navigation_hint
         self._row_count = 0
         self._rows: list[SuggestionRow] = []
         self._selected_index = 0
+        self._keep_open_on_accept = False
 
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(6, 6, 6, 6)
@@ -82,7 +90,13 @@ class SuggestionPopup(AnchoredPopup):
         if self._rows:
             self._select_index(0)
         self.setMinimumWidth(self._anchor_widget.width())
-        self.show_below()
+        if self.isVisible():
+            # Already open (e.g. swapping season rows for episode rows): reposition
+            # in place instead of hide/show so the window doesn't flash.
+            self.reposition_below()
+        else:
+            self.show_below()
+        QApplication.instance().installEventFilter(self)
 
     def _build_extra_widgets(self) -> None:
         return None
@@ -99,9 +113,25 @@ class SuggestionPopup(AnchoredPopup):
         for row in self._rows:
             row.render_selected(row.index == index)
 
+    def set_keep_open_on_accept(self, keep_open: bool) -> None:
+        # The season step keeps the window up while episodes load, so the popup
+        # is repopulated in place rather than vanishing and reappearing.
+        self._keep_open_on_accept = keep_open
+
     def _accept_index(self, index: int) -> None:
-        self.hide()
+        if not self._keep_open_on_accept:
+            self.hide()
         self.accepted_index.emit(index)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        # Swallow presses on the popup background (margins, hint, the gap right
+        # of a short row) so they can't fall through to the widgets the popup
+        # covers; a press on a row is handled by the row itself.
+        event.accept()
+
+    def hideEvent(self, event: QEvent) -> None:
+        QApplication.instance().removeEventFilter(self)
+        super().hideEvent(event)
 
     def _dismiss(self) -> None:
         self.hide()
@@ -110,8 +140,12 @@ class SuggestionPopup(AnchoredPopup):
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         if not self.isVisible():
             return False
-        if event.type() == QEvent.Type.FocusOut:
+        if watched is self._anchor_widget and event.type() == QEvent.Type.FocusOut:
             self.hide()
+            return False
+        if event.type() == QEvent.Type.MouseButtonPress and isinstance(event, QMouseEvent):
+            if not self.geometry().contains(event.globalPosition().toPoint()):
+                self._dismiss()
             return False
         if event.type() != QEvent.Type.KeyPress or not isinstance(event, QKeyEvent):
             return False
