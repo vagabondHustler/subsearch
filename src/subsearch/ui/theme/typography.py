@@ -6,6 +6,7 @@ from subsearch.ui.theme import palette
 
 BODY_FONT_SIZE = 12
 CAPTION_FONT_SIZE = 8
+LICENSE_FONT_SIZE = 12
 POPUP_FONT_SIZE = 12
 POST_PROCESSING_FONT_SIZE = 8
 SUBSECTION_FONT_SIZE = 10
@@ -25,6 +26,13 @@ def body_font() -> QFont:
     font = QFont()
     font.setPixelSize(BODY_FONT_SIZE)
     font.setWeight(SEMI_BOLD)
+    return font
+
+
+def license_font() -> QFont:
+    font = QFont()
+    font.setPixelSize(LICENSE_FONT_SIZE)
+    font.setWeight(QFont.Weight.Normal)
     return font
 
 
