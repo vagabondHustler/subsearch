@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from PySide6.QtCore import QEvent, QObject, Qt, Signal
-from PySide6.QtGui import QEnterEvent, QKeyEvent, QMouseEvent
+from PySide6.QtGui import QEnterEvent, QHideEvent, QKeyEvent, QMouseEvent
 from PySide6.QtWidgets import QApplication, QLabel, QSizePolicy, QVBoxLayout, QWidget
 
 from subsearch.parsing.imdb_lookup import TitleSuggestion
@@ -96,7 +96,9 @@ class SuggestionPopup(AnchoredPopup):
             self.reposition_below()
         else:
             self.show_below()
-        QApplication.instance().installEventFilter(self)
+        application = QApplication.instance()
+        if application is not None:
+            application.installEventFilter(self)
 
     def _build_extra_widgets(self) -> None:
         return None
@@ -129,8 +131,10 @@ class SuggestionPopup(AnchoredPopup):
         # covers; a press on a row is handled by the row itself.
         event.accept()
 
-    def hideEvent(self, event: QEvent) -> None:
-        QApplication.instance().removeEventFilter(self)
+    def hideEvent(self, event: QHideEvent) -> None:
+        application = QApplication.instance()
+        if application is not None:
+            application.removeEventFilter(self)
         super().hideEvent(event)
 
     def _dismiss(self) -> None:

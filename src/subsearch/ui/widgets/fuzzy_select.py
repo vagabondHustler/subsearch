@@ -136,7 +136,9 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._rebuild_rows(matching_labels(self._search_terms_by_label, ""), preferred_label=current_label)
         self.setMinimumWidth(self._anchor_widget.width())
         self.show_below(centered=True)
-        QApplication.instance().installEventFilter(self)
+        application = QApplication.instance()
+        if application is not None:
+            application.installEventFilter(self)
         # A ToolTip window does not take focus on show, so claim it explicitly
         # for type-to-filter to work immediately.
         self.activateWindow()
@@ -224,7 +226,9 @@ class FuzzyFinderPopup(AnchoredPopup):
         return False
 
     def hideEvent(self, event: QHideEvent) -> None:
-        QApplication.instance().removeEventFilter(self)
+        application = QApplication.instance()
+        if application is not None:
+            application.removeEventFilter(self)
         self._time_since_hidden.restart()
         super().hideEvent(event)
 
