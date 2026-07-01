@@ -17,6 +17,7 @@ from subsearch.ui.compat.qfluent import hide_line_edit_focus_underline
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
@@ -250,24 +251,39 @@ class FuzzySelect(QFrame):
             f" background-color: {palette.SELECT_FIELD_BACKGROUND_HOVER};"
             f" border: 1px solid {palette.NEUTRAL_3};"
             f" }}"
+            f"#fuzzySelect:disabled {{"
+            f" background-color: {palette.SELECT_FIELD_BACKGROUND};"
+            f" border: 1px solid {palette.POPUP_BORDER};"
+            f" }}"
         )
 
         self._current_label = QLabel("", self)
         apply_token_value_font(self._current_label)
 
-        chevron = QLabel(self)
-        chevron.setPixmap(
-            lucide_qicon(LucideIcon.CHEVRON_DOWN, TEXT_COLOR).pixmap(QSize(CHEVRON_ICON_SIZE, CHEVRON_ICON_SIZE))
-        )
+        self._chevron = QLabel(self)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 8, 0)
         layout.setSpacing(6)
         layout.addWidget(self._current_label, stretch=1)
-        layout.addWidget(chevron, alignment=Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(self._chevron, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         self._popup = FuzzyFinderPopup(self, searchable)
         self._popup.label_selected.connect(self.setCurrentText)
+        self._apply_enabled_appearance()
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.EnabledChange:
+            self._apply_enabled_appearance()
+        super().changeEvent(event)
+
+    def _apply_enabled_appearance(self) -> None:
+        text_color = TEXT_COLOR if self.isEnabled() else DISABLED_TEXT_COLOR
+        self._current_label.setStyleSheet(f"color: {text_color};")
+        self._chevron.setPixmap(
+            lucide_qicon(LucideIcon.CHEVRON_DOWN, text_color).pixmap(QSize(CHEVRON_ICON_SIZE, CHEVRON_ICON_SIZE))
+        )
+        self.setCursor(Qt.CursorShape.PointingHandCursor if self.isEnabled() else Qt.CursorShape.ArrowCursor)
 
     def setItems(self, labels: list[str], aliases_by_label: dict[str, list[str]] | None = None) -> None:
         self._popup.set_items(labels, aliases_by_label)

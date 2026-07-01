@@ -26,6 +26,7 @@ class ConfigKey(StrEnum):
     NOTIFICATIONS_PLAY_SOUND = "notifications.play_sound"
 
     SUBTITLE_WORKSPACE_SEARCH_MODE = "subtitle_workspace.search_mode"
+    SUBTITLE_WORKSPACE_UI_VISIBILITY = "subtitle_workspace.ui_visibility"
 
     POST_PROCESSING = "post_processing"
     POST_PROCESSING_RENEAME = "post_processing.rename"
@@ -112,7 +113,8 @@ def get_default_app_config() -> dict[str, Any]:
         ConfigKey.NOTIFICATIONS_SYSTEM_TRAY: True,
         ConfigKey.NOTIFICATIONS_DISPLAY_DURATION: 3.5,
         ConfigKey.NOTIFICATIONS_PLAY_SOUND: True,
-        ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: "hybrid",
+        ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: "automatic",
+        ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY: "attention_required",
         ConfigKey.POST_PROCESSING_RENEAME: True,
         ConfigKey.POST_PROCESSING_MOVE_BEST: True,
         ConfigKey.POST_PROCESSING_MOVE_ALL: False,

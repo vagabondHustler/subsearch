@@ -1,7 +1,6 @@
 import sys
 
 from subsearch import PERF_COUNTER, set_crash_notifier
-from subsearch.core.flows import create_flow
 from subsearch.core.pipeline import SearchPipeline
 from subsearch.decorators import process_guard
 from subsearch.runtime import recorder
@@ -14,7 +13,6 @@ from subsearch.ui.services.console_bridge import CONSOLE_BRIDGE
 class Subsearch:
     def __init__(self) -> None:
         self.pipeline = SearchPipeline(PERF_COUNTER)
-        self.flow = create_flow(self.pipeline)
 
     def _notify_crash(self) -> None:
         bootstrap = self.pipeline.bootstrap
@@ -25,7 +23,7 @@ class Subsearch:
         bootstrap.system_tray.display_toast("Subsearch crashed", "See crash.log for details")
 
     def _start_app(self) -> None:
-        self.flow.run()
+        self.pipeline.run()
 
     def _exit_app(self) -> None:
         self.pipeline.on_exit()

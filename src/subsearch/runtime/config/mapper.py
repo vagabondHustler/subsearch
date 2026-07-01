@@ -26,6 +26,7 @@ def get_app_config_from_data(data: dict[str, Any]) -> AppConfig:
         notification_display_duration=value(ConfigKey.NOTIFICATIONS_DISPLAY_DURATION),
         notification_play_sound=value(ConfigKey.NOTIFICATIONS_PLAY_SOUND),
         search_mode=value(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE),
+        ui_visibility=value(ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY),
         post_processing=value(ConfigKey.POST_PROCESSING),
         paths=value(ConfigKey.PATHS),
         mica_effect=value(ConfigKey.APPLICATION_MICA_EFFECT),

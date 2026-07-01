@@ -38,7 +38,6 @@ def _drive_boot_until_window_shown() -> float:
 
     from PySide6.QtCore import QTimer
 
-    from subsearch.core.flows import create_flow
     from subsearch.core.pipeline import SearchPipeline
     from subsearch.ui import entrypoint
     from subsearch.ui.core.window import SettingsWindow
@@ -69,7 +68,7 @@ def _drive_boot_until_window_shown() -> float:
     if pipeline.bootstrap.app_mode.name != "SETTINGS":
         raise SystemExit(f"Expected SETTINGS mode, booted into {pipeline.bootstrap.app_mode.name}")
 
-    create_flow(pipeline).run()
+    pipeline.run()
 
     if not shown_at:
         raise SystemExit("Window never reported shown")

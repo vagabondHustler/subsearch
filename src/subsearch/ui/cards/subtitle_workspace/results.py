@@ -84,12 +84,14 @@ class ManualSearchInterface(QWidget):
         console_view_sink: ConsoleViewSink | None = None,
         title_suggestion_service: TitleSuggestionService | None = None,
         season_episode_suggestion_service: SeasonEpisodeSuggestionService | None = None,
+        auto_download_accepted: bool = False,
     ) -> None:
         super().__init__()
         self.setObjectName("manualSearchInterface")
         self.setAcceptDrops(True)
         self._store = store
         self._post_processing_service = post_processing_service
+        self._auto_download_accepted = auto_download_accepted
         self.accept_threshold = store.read(ConfigKey.SEARCH_ACCEPT_THRESHOLD)
         self.download_service = download_service
         self.subtitles = sorted(subtitles or [], key=self._sort_key, reverse=True)
@@ -211,6 +213,29 @@ class ManualSearchInterface(QWidget):
         self.skipped_providers = skipped_providers or []
         self._clear_placeholder()
         self._build_list_widget()
+        if self._auto_download_accepted:
+            self._auto_download_accepted_subtitles()
+
+    def _auto_download_accepted_subtitles(self) -> None:
+        for subtitle in self._accepted_for_auto_download():
+            self.download_service.enqueue(subtitle)
+
+    def _accepted_for_auto_download(self) -> list[Subtitle]:
+        downloads_per_provider = int(self._store.read(ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER))
+        accepted = sorted(
+            (subtitle for subtitle in self.subtitles if subtitle.status is SubtitleStatus.ACCEPTED),
+            key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
+            reverse=True,
+        )
+        downloads_by_provider: dict[str, int] = {}
+        selected: list[Subtitle] = []
+        for subtitle in accepted:
+            taken = downloads_by_provider.get(subtitle.provider_name, 0)
+            if taken >= downloads_per_provider:
+                continue
+            downloads_by_provider[subtitle.provider_name] = taken + 1
+            selected.append(subtitle)
+        return selected
 
     def _no_results_text(self) -> str:
         return "\n".join([NO_RESULTS_PLACEHOLDER_TEXT, *self.skipped_providers])

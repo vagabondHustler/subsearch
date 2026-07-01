@@ -50,10 +50,16 @@ def open_settings_window(
     subtitles: list[Subtitle] | None = None,
     search_job_factory: Callable[..., SearchJobProtocol] | None = None,
     start_search_immediately: bool = False,
+    auto_download_accepted: bool = False,
     on_window_shown: Callable[[], None] = lambda: None,
 ) -> WorkspaceOutcome:
     application = _build_application()
-    window = SettingsWindow(subtitles, search_job_factory, start_search_immediately=start_search_immediately)
+    window = SettingsWindow(
+        subtitles,
+        search_job_factory,
+        start_search_immediately=start_search_immediately,
+        auto_download_accepted=auto_download_accepted,
+    )
     capture("UI opened")
     _start_waiting_banner_unless_search_owns_it(start_search_immediately)
     window.show()

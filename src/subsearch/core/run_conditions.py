@@ -51,8 +51,9 @@ SKIP_LABEL_EXPLANATIONS = {
     "is_tvseries": "only supports tv series",
     "has_season_and_episode": "needs a season and episode number and this search has none",
     "url_not_empty": "needs an IMDb match and none was found for this search",
-    "app_mode_pipeline_post_processing": "only runs in hybrid or automatic mode",
+    "app_mode_automatic": "only runs in automatic mode",
     "app_mode_search": "only runs during a search",
+    "should_run_headless_search": "the search runs in the workspace in this mode",
     "should_download_files": "no subtitles were accepted to download",
     "should_open_subtitle_workspace": "the results window is not opened in this mode",
     "downloaded_archives_gte_1": "no subtitle archives were downloaded",
@@ -74,6 +75,7 @@ class RunConditions:
     def sync_state(self) -> None:
         self.app_config = self.bootstrap.app_config
         self.app_mode = self.bootstrap.app_mode
+        self.ui_visibility = self.bootstrap.app_config.ui_visibility
         self.release_data = self.bootstrap.release_data
         self.provider_urls = self.bootstrap.provider_urls
         self.language_data = self.bootstrap.language_data
@@ -103,30 +105,33 @@ class RunConditions:
     def is_search_mode(self) -> bool:
         return self.app_mode in (
             AppMode.SEARCH_MANUAL,
-            AppMode.SEARCH_HYBRID,
             AppMode.SEARCH_AUTOMATIC,
         )
 
     @property
-    def is_pipeline_post_processing_mode(self) -> bool:
-        return self.app_mode in (AppMode.SEARCH_HYBRID, AppMode.SEARCH_AUTOMATIC)
+    def is_automatic_mode(self) -> bool:
+        return self.app_mode is AppMode.SEARCH_AUTOMATIC
+
+    @property
+    def should_run_headless_search(self) -> bool:
+        # manual and always search inside the workspace; only these modes search headless.
+        return self.is_automatic_mode and self.ui_visibility in ("attention_required", "never")
 
     @property
     def should_download_files(self) -> bool:
-        if not self.has_accepted:
-            return False
-        if self.app_mode is AppMode.SEARCH_AUTOMATIC:
-            return True
-        if self.app_mode is AppMode.SEARCH_HYBRID:
-            return True
-        return False
+        # always mode auto-downloads inside the workspace, not here.
+        return self.has_accepted and self.should_run_headless_search
 
     @property
     def should_open_subtitle_workspace(self) -> bool:
-        if self.app_mode is AppMode.SEARCH_MANUAL:
+        if self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL):
             return True
-        if self.app_mode is AppMode.SEARCH_HYBRID and not self.has_accepted:
+        if not self.is_automatic_mode:
+            return False
+        if self.ui_visibility == "always":
             return True
+        if self.ui_visibility == "attention_required":
+            return not self.has_accepted
         return False
 
     def _evaluate_and_log(self, pipeline_step: PipelineStep | str, condition_list: ConditionList) -> bool:
@@ -164,7 +169,7 @@ class RunConditions:
         post_processing = self.app_config.post_processing
         conditions: dict[PipelineStep, ConditionList] = {
             PipelineStep.INIT_SEARCH: [
-                ("app_mode_search", self.is_search_mode),
+                ("should_run_headless_search", self.should_run_headless_search),
             ],
             PipelineStep.OPENSUBTITLES: [
                 ("language_supports_opensubtitles", lambda: self.language_supports_provider("opensubtitles")),
@@ -205,26 +210,27 @@ class RunConditions:
                 ("should_open_subtitle_workspace", self.should_open_subtitle_workspace),
             ],
             PipelineStep.SUBTITLE_POST_PROCESSING: [
-                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
+                ("app_mode_automatic", self.is_automatic_mode),
             ],
             PipelineStep.EXTRACT_FILES: [
-                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
+                ("app_mode_automatic", self.is_automatic_mode),
                 ("downloaded_archives_gte_1", self.downloaded_subtitle_archives >= 1),
             ],
             PipelineStep.SUBTITLE_RENAME: [
-                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
+                ("app_mode_automatic", self.is_automatic_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("rename_enabled", post_processing["rename"]),
+                ("not_ui_placed_best", not self.bootstrap.ui_placed_best_next_to_video),
             ],
             PipelineStep.SUBTITLE_MOVE_BEST: [
-                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
+                ("app_mode_automatic", self.is_automatic_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_best_enabled", post_processing["move_best"]),
                 ("not_move_all", not post_processing["move_all"]),
                 ("not_ui_placed_best", not self.bootstrap.ui_placed_best_next_to_video),
             ],
             PipelineStep.SUBTITLE_MOVE_ALL: [
-                ("app_mode_pipeline_post_processing", self.is_pipeline_post_processing_mode),
+                ("app_mode_automatic", self.is_automatic_mode),
                 ("extracted_archives_gte_1", self.extracted_subtitle_archives >= 1),
                 ("move_all_enabled", post_processing["move_all"]),
             ],

@@ -13,7 +13,7 @@ from tests import fixture_data
 
 class FakeBootstrap:
     def __init__(self, *args, **kwargs) -> None:
-        self.app_mode = AppMode.SEARCH_HYBRID
+        self.app_mode = AppMode.SEARCH_AUTOMATIC
         self.app_config = config_session.get_app_config_from_data(get_default_app_config())
         self.release_data = release_parser.get_release_info(fixture_data.FAKE_SEARCH_SUBJECT_MOVIE.search_term)
         self.provider_urls = fixture_data.FAKE_PROVIDER_URLS
@@ -100,19 +100,22 @@ def test_conditions_gestdown(fake_cls: FakeBootstrap) -> None:
 
 
 def test_conditions_download_files(fake_cls: FakeBootstrap) -> None:
-    fake_cls.accepted_subtitles = []
     fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
+    fake_cls.accepted_subtitles = []
+    fake_cls.app_config.ui_visibility = "attention_required"
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
+    # automatic + attention_required / never download headless.
     fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
-    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
+    fake_cls.app_config.ui_visibility = "never"
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.accepted_subtitles = ["subtitle1", "subtitle2"]
+    # always auto-downloads inside the workspace, not headless.
+    fake_cls.app_config.ui_visibility = "always"
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
     fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
@@ -121,25 +124,31 @@ def test_conditions_subtitle_workspace(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    # automatic + attention_required opens only when nothing was accepted.
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
+    fake_cls.app_config.ui_visibility = "attention_required"
     fake_cls.accepted_subtitles = []
     fake_cls.rejected_subtitles = ["subtitle1"]
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.accepted_subtitles = []
-    fake_cls.rejected_subtitles = []
+    fake_cls.accepted_subtitles = ["subtitle1"]
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+    # always opens regardless; never stays closed.
+    fake_cls.app_config.ui_visibility = "always"
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
-    fake_cls.accepted_subtitles = ["subtitle1"]
-    fake_cls.rejected_subtitles = []
+    fake_cls.app_config.ui_visibility = "never"
+    fake_cls.accepted_subtitles = []
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
 
-    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
-    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+    # the settings launch always opens the (settings) window.
+    fake_cls.app_mode = AppMode.SETTINGS
+    assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
 
 def test_conditions_subtitle_post_processing(fake_cls: FakeBootstrap) -> None:
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
@@ -173,6 +182,16 @@ def test_conditions_subtitle_rename(fake_cls: FakeBootstrap) -> None:
     fake_cls.app_config.post_processing["rename"] = True
     fake_cls.app_mode = AppMode.SEARCH_MANUAL
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is False
+
+
+def test_subtitle_rename_skipped_when_ui_placed_best_next_to_video(fake_cls: FakeBootstrap) -> None:
+    fake_cls.extracted_subtitle_archives = 1
+    fake_cls.app_config.post_processing["rename"] = True
+
+    assert fake_cls.call_conditions.conditions_met("subtitle_rename") is True
+
+    fake_cls.ui_placed_best_next_to_video = True
+    assert fake_cls.call_conditions.conditions_met("subtitle_rename") is False
 
 
 def test_conditions_subtitle_move_best(fake_cls: FakeBootstrap) -> None:
@@ -235,7 +254,7 @@ def test_subtitle_move_best_skipped_when_ui_placed_best_next_to_video(fake_cls: 
 
 
 def test_post_processing_runs_in_pipeline_modes(fake_cls: FakeBootstrap) -> None:
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     fake_cls.accepted_subtitles = []
     fake_cls.downloaded_subtitle_archives = 1
     fake_cls.extracted_subtitle_archives = 1
@@ -281,7 +300,7 @@ def test_skip_explanation_for_mode_gate(fake_cls: FakeBootstrap) -> None:
 
 
 def test_skip_explanation_shown_for_actionable_skip(fake_cls: FakeBootstrap) -> None:
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     fake_cls.extracted_subtitle_archives = 1
     fake_cls.app_config.post_processing["rename"] = False
 
@@ -291,7 +310,7 @@ def test_skip_explanation_shown_for_actionable_skip(fake_cls: FakeBootstrap) -> 
 
 
 def test_conditions_finish_notification(fake_cls: FakeBootstrap) -> None:
-    fake_cls.app_mode = AppMode.SEARCH_HYBRID
+    fake_cls.app_mode = AppMode.SEARCH_AUTOMATIC
     assert fake_cls.call_conditions.conditions_met(fake_cls.func_name) is True
 
     fake_cls.app_mode = AppMode.SETTINGS

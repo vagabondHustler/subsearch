@@ -220,9 +220,7 @@ class Bootstrap:
             return AppMode.SEARCH_MANUAL
         if self.app_config.search_mode == "manual":
             return AppMode.SEARCH_MANUAL
-        if self.app_config.search_mode == "automatic":
-            return AppMode.SEARCH_AUTOMATIC
-        return AppMode.SEARCH_HYBRID
+        return AppMode.SEARCH_AUTOMATIC
 
     @staticmethod
     def _has_path_argument() -> bool:
@@ -230,7 +228,9 @@ class Bootstrap:
 
     @property
     def ui_may_open(self) -> bool:
-        return self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID)
+        if self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL):
+            return True
+        return self.app_mode is AppMode.SEARCH_AUTOMATIC and self.app_config.ui_visibility != "never"
 
     def all_providers_disabled(self) -> bool:
         return not any(self.app_config.providers.get(provider, False) for provider in SUPPORTED_PROVIDERS)

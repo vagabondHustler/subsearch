@@ -61,8 +61,7 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SEARCH_PROVIDERS: SettingDescription(
         "Subtitle providers",
-        "The sites Subsearch searches. Turn one off to skip it. "
-        "Greyed-out ones have no subtitles in {language}.",
+        "The sites Subsearch searches. Turn one off to skip it. " "Greyed-out ones have no subtitles in {language}.",
     ),
     ConfigKey.SHELL_INTEGRATION_CONTEXT_MENU: SettingDescription(
         "Context menu",
@@ -90,18 +89,20 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: SettingDescription(
         "Search mode",
-        "Manual lets you pick from a list. Hybrid downloads the best match and only asks when none fit. "
-        "Automatic downloads on its own.",
+        "Manual opens the workspace and lets you pick from a list. " "Automatic downloads the best matches on its own.",
+    ),
+    ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY: SettingDescription(
+        "Show the workspace",
+        "For automatic searches: Always opens the workspace and runs the search there, "
+        "On attention required only opens it when nothing matched, and Never stays hidden.",
     ),
     ConfigKey.PATHS_DOWNLOAD_DIRECTORY: SettingDescription(
         "Download subtitles to",
-        "Where downloads are saved before they're unzipped. "
-        "Leave empty to use a temp folder that cleans itself up.",
+        "Where downloads are saved before they're unzipped. " "Leave empty to use a temp folder that cleans itself up.",
     ),
     ConfigKey.PATHS_EXTRACTION_DIRECTORY: SettingDescription(
         "Extract subtitles to",
-        "Where subtitles are unzipped when there's no video file. "
-        "Leave empty to use your Downloads folder.",
+        "Where subtitles are unzipped when there's no video file. " "Leave empty to use your Downloads folder.",
     ),
     ConfigKey.PATHS_VIDEO_FILE_DIRECTORY: SettingDescription(
         "Rename and move subtitles to",
@@ -151,8 +152,7 @@ SETTING_DESCRIPTIONS: dict[ConfigKey | CardKey, SettingDescription] = {
     ),
     ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER: SettingDescription(
         "Downloads per provider",
-        "How many subtitles to download from each provider. "
-        "Too high may get your connection blocked for a while.",
+        "How many subtitles to download from each provider. " "Too high may get your connection blocked for a while.",
     ),
     ConfigKey.NETWORK_REQUEST_CONNECT_TIMEOUT: SettingDescription(
         "Connect timeout",

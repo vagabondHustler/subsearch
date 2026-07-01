@@ -71,6 +71,7 @@ class SettingsWindow(FluentWindow):
         download_service: DownloadServiceProtocol | None = None,
         post_processing_service: PostProcessingServiceProtocol | None = None,
         start_search_immediately: bool = False,
+        auto_download_accepted: bool = False,
     ) -> None:
         super().__init__()
         self._search_job_factory = search_job_factory
@@ -167,6 +168,7 @@ class SettingsWindow(FluentWindow):
             console_view_sink,
             title_suggestion_service,
             season_episode_suggestion_service,
+            auto_download_accepted=auto_download_accepted,
         )
         manual_search_interface = self.manual_search_interface
 

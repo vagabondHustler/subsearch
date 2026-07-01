@@ -57,11 +57,27 @@ class SearchModeCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Search mode", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS[ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE].explanation)
-        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
+        search_mode_values = {"Manual": "manual", "Automatic": "automatic"}
         self.add_row(
             FuzzySelectRow(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, store, search_mode_values, searchable=False)
         )
-        self.register_restore_defaults([(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "hybrid")])
+        visibility_values = {"Always": "always", "On attention required": "attention_required", "Never": "never"}
+        self._visibility_row = FuzzySelectRow(
+            ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY, store, visibility_values, searchable=False
+        )
+        self.add_row(self._visibility_row)
+        self.register_restore_defaults(
+            [
+                (ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic"),
+                (ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY, "attention_required"),
+            ]
+        )
+        self._apply_visibility_enabled(store.read(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE))
+        store.subscribe(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, self._apply_visibility_enabled)
+
+    def _apply_visibility_enabled(self, search_mode: str) -> None:
+        # Visibility only applies to automatic; manual always opens the workspace.
+        self._visibility_row.setEnabled(search_mode != "manual")
 
 
 class LanguageCard(SettingsCard):

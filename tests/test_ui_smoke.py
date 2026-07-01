@@ -382,7 +382,27 @@ def test_search_mode_restore_defaults(qtbot) -> None:
 
     card._restore_defaults()
 
-    assert session.read("subtitle_workspace.search_mode") == "hybrid"
+    assert session.read("subtitle_workspace.search_mode") == "automatic"
+    assert session.read("subtitle_workspace.ui_visibility") == "attention_required"
+
+
+def test_ui_visibility_row_disabled_for_manual_mode(qtbot) -> None:
+    from subsearch.runtime.config.defaults import ConfigKey
+    from subsearch.ui.cards.search_cards import SearchModeCard
+    from subsearch.ui.state.store import SettingsStore
+
+    store = SettingsStore()
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic")
+    card = SearchModeCard(store)
+    qtbot.addWidget(card)
+    assert card._visibility_row.isEnabled() is True
+
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "manual")
+    assert card._visibility_row.isEnabled() is False
+    assert card._visibility_row.combo_box.isEnabled() is False
+
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic")
+    assert card._visibility_row.isEnabled() is True
 
 
 def test_application_restore_defaults(qtbot) -> None:

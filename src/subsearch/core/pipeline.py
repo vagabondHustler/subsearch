@@ -13,11 +13,13 @@ from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
     PATH_RESOLVER,
+    PROVIDER_DISPLAY_NAMES,
     SEARCH_SUBJECT,
     WORKSPACE,
 )
 from subsearch.runtime.download_history import DownloadHistory, get_download_history
 from subsearch.runtime.models import (
+    AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,
     SearchOutcome,
@@ -62,6 +64,40 @@ class SearchPipeline:
 
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
+
+    def run(self) -> None:
+        if self.call_conditions.should_run_headless_search:
+            self._warn_if_filename_has_spaces()
+            phase(self._search_banner())
+        self.init_search(
+            self.opensubtitles,
+            self.yifysubtitles,
+            self.subsource,
+            self.tvsubtitles,
+            self.gestdown,
+        )
+        self.download_files()
+        self.subtitle_workspace()
+        self.subtitle_post_processing()
+        phase("Application maintenance")
+        self.run_provider_diagnostics()
+        self.present_pending_notifications()
+        self.clean_up()
+        self.finish_notification()
+
+    def _search_banner(self) -> str:
+        if self.bootstrap.all_providers_disabled():
+            return "Searching"
+        return f"Searching on {self._enabled_provider_names()}"
+
+    def _enabled_provider_names(self) -> str:
+        providers = self.bootstrap.app_config.providers
+        enabled = [name for key, name in PROVIDER_DISPLAY_NAMES.items() if providers[key]]
+        return ", ".join(enabled)
+
+    def _warn_if_filename_has_spaces(self) -> None:
+        if " " in SEARCH_SUBJECT.search_term:
+            capture(f"{SEARCH_SUBJECT.search_term} contains spaces, result may vary", level=LogLevel.WARNING)
 
     def create_search_job(self, imdb_id: str = "", tvseries: bool | None = None) -> "SearchJob":
         return SearchJob(self, imdb_id, tvseries)
@@ -202,14 +238,37 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def subtitle_workspace(self) -> None:
-        subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.entrypoint import open_settings_window
 
-        outcome = open_settings_window(subtitles, search_job_factory=self.create_search_job)
+        outcome = open_settings_window(**self._workspace_open_kwargs())
         self.bootstrap.manual_accepted_subtitles = outcome.downloaded
         self.bootstrap.ui_placed_best_next_to_video = outcome.placed_best_next_to_video
         self.bootstrap.resync_app_config()
         capture("Results window closed")
+
+    def _workspace_open_kwargs(self) -> dict[str, Any]:
+        factory = dict(search_job_factory=self.create_search_job)
+        if self._workspace_runs_in_ui_search():
+            return dict(
+                subtitles=None,
+                start_search_immediately=True,
+                auto_download_accepted=self._workspace_auto_downloads(),
+                **factory,
+            )
+        if self.bootstrap.app_mode is AppMode.SETTINGS:
+            return factory
+        subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
+        return dict(subtitles=subtitles, **factory)
+
+    def _workspace_runs_in_ui_search(self) -> bool:
+        if self.bootstrap.app_mode is AppMode.SEARCH_MANUAL:
+            return True
+        return self._workspace_auto_downloads()
+
+    def _workspace_auto_downloads(self) -> bool:
+        return (
+            self.bootstrap.app_mode is AppMode.SEARCH_AUTOMATIC and self.bootstrap.app_config.ui_visibility == "always"
+        )
 
     def _resolve_post_processing_target(self) -> Path:
         return PATH_RESOLVER.resolve_post_processing_target(self.bootstrap.app_config, WORKSPACE.file_directory)
