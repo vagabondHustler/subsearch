@@ -42,8 +42,9 @@
 {% else %}
 {% set important = sections[change_key] | selectattr("important") | list %}
 {% set normal = sections[change_key] | rejectattr("important") | list %}
-{% set above_fold = normal[:fold_limit] %}
-{% set collapsed = normal[fold_limit:] %}
+{% set normal_slots = [fold_limit - (important | length), 0] | max %}
+{% set above_fold = normal[:normal_slots] %}
+{% set collapsed = normal[normal_slots:] %}
 {% for change in important %}{{ render_commit(change) }}{% endfor %}
 {% for change in above_fold %}{{ render_commit(change) }}{% endfor %}
 {% if collapsed %}
