@@ -9,6 +9,7 @@ from qfluentwidgets import (
 )
 
 from subsearch.parsing.release_parser import score_subtitle_tokens
+from subsearch.runtime.config import PROVIDER_DISPLAY_NAMES, Provider
 from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
     DEFAULT_TOKEN_WEIGHTS,
@@ -49,26 +50,34 @@ _TOKEN_TUNING_DEFAULTS: DefaultsMap = [
 
 PROVIDER_GRID_COLUMNS = 3
 
-SUBSOURCE_PROVIDER_KEY = "subsource_site"
-
-PROVIDER_INCOMPATIBILITY_NAMES = {
-    "opensubtitles": "opensubtitles",
-    "yifysubtitles_site": "yifysubtitles",
-    "subsource_site": "subsource",
-    "tvsubtitles_site": "tvsubtitles",
-    "gestdown_site": "gestdown",
-}
+SUBSOURCE_PROVIDER_KEY = Provider.SUBSOURCE.value
 
 
 class SearchModeCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Search mode", store, parent=parent)
         self.add_header_help(SETTING_DESCRIPTIONS[ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE].explanation)
-        search_mode_values = {"Manual": "manual", "Hybrid": "hybrid", "Automatic": "automatic"}
+        search_mode_values = {"Manual": "manual", "Automatic": "automatic"}
         self.add_row(
             FuzzySelectRow(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, store, search_mode_values, searchable=False)
         )
-        self.register_restore_defaults([(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "hybrid")])
+        visibility_values = {"Always": "always", "On attention required": "attention_required", "Never": "never"}
+        self._visibility_row = FuzzySelectRow(
+            ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY, store, visibility_values, searchable=False
+        )
+        self.add_row(self._visibility_row)
+        self.register_restore_defaults(
+            [
+                (ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic"),
+                (ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY, "attention_required"),
+            ]
+        )
+        self._apply_visibility_enabled(store.read(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE))
+        store.subscribe(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, self._apply_visibility_enabled)
+
+    def _apply_visibility_enabled(self, search_mode: str) -> None:
+        # Visibility only applies to automatic; manual always opens the workspace.
+        self._visibility_row.setEnabled(search_mode != "manual")
 
 
 class LanguageCard(SettingsCard):
@@ -410,13 +419,7 @@ class ProvidersCard(SettingsCard):
     def __init__(self, store: SettingsStore, parent: QWidget | None = None) -> None:
         super().__init__("Subtitle providers", show_restore_button=False, parent=parent)
         self.store = store
-        provider_labels = {
-            "opensubtitles": "Opensubtitles",
-            "yifysubtitles_site": "Yifysubtitles",
-            "subsource_site": "Subsource",
-            "tvsubtitles_site": "Tvsubtitles",
-            "gestdown_site": "Gestdown",
-        }
+        provider_labels = PROVIDER_DISPLAY_NAMES
         self._language_data = store.language_data()
         providers = store.read(ConfigKey.SEARCH_PROVIDERS)
         self._help_button = self.add_header_help(SETTING_DESCRIPTIONS[ConfigKey.SEARCH_PROVIDERS].explanation)
@@ -466,9 +469,7 @@ class ProvidersCard(SettingsCard):
     def apply_language_compatibility(self, language: str) -> None:
         incompatible_providers = self._language_data.get(language, {}).get("incompatibility", [])
         for provider_key in self.check_boxes:
-            self._language_compatible[provider_key] = (
-                PROVIDER_INCOMPATIBILITY_NAMES[provider_key] not in incompatible_providers
-            )
+            self._language_compatible[provider_key] = provider_key not in incompatible_providers
             self._refresh_provider_enabled(provider_key)
         language_name = self._language_data.get(language, {}).get("name", language)
         self._help_button.set_explanation(

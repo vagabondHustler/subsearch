@@ -339,7 +339,7 @@ def test_notification_preview_success_button_shows_succeeded_toast(qtbot) -> Non
     qtbot.addWidget(card)
 
     store.write("notifications.display_duration", 4.2)
-    card.preview_success_button.button.click()
+    card.preview_success_button.click()
 
     assert card._preview_toast is not None
     assert card._preview_toast._hold_duration_ms == 4200
@@ -357,7 +357,7 @@ def test_notification_preview_failure_button_shows_failed_toast(qtbot) -> None:
     card = NotificationsCard(store)
     qtbot.addWidget(card)
 
-    card.preview_failure_button.button.click()
+    card.preview_failure_button.click()
 
     assert card._preview_toast is not None
     assert card._preview_toast._status_color == palette.RED
@@ -382,26 +382,27 @@ def test_search_mode_restore_defaults(qtbot) -> None:
 
     card._restore_defaults()
 
-    assert session.read("subtitle_workspace.search_mode") == "hybrid"
+    assert session.read("subtitle_workspace.search_mode") == "automatic"
+    assert session.read("subtitle_workspace.ui_visibility") == "attention_required"
 
 
-def test_subtitle_handling_greys_out_automatic_rows_when_manual_post_processing_enabled(qtbot) -> None:
-    from subsearch.ui.cards.subtitle_handling import SubtitleHandlingCard
+def test_ui_visibility_row_disabled_for_manual_mode(qtbot) -> None:
+    from subsearch.runtime.config.defaults import ConfigKey
+    from subsearch.ui.cards.search_cards import SearchModeCard
     from subsearch.ui.state.store import SettingsStore
 
     store = SettingsStore()
-    card = SubtitleHandlingCard(store)
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic")
+    card = SearchModeCard(store)
     qtbot.addWidget(card)
+    assert card._visibility_row.isEnabled() is True
 
-    assert card._automatic_handling.isEnabled()
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "manual")
+    assert card._visibility_row.isEnabled() is False
+    assert card._visibility_row.combo_box.isEnabled() is False
 
-    store.write("subtitle_workspace.manual_post_processing", True)
-    assert not card._automatic_handling.isEnabled()
-    # The card itself stays usable.
-    assert card.isEnabled()
-
-    store.write("subtitle_workspace.manual_post_processing", False)
-    assert card._automatic_handling.isEnabled()
+    store.write(ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE, "automatic")
+    assert card._visibility_row.isEnabled() is True
 
 
 def test_application_restore_defaults(qtbot) -> None:

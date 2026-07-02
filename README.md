@@ -1,13 +1,13 @@
-<h1 align="center"><img src="https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/subsearch_v2.png"/></h1>
+<h1 align="center"><img src="https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/subsearch_v2.png"/></h1>
 
 <div align="center">
 
-![ci](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/ci.yml?style=flat-square&labelColor=1e1e2e&label=ci)
-![commit](https://img.shields.io/github/last-commit/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&label=commit%20activity)
-![python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FvagabondHustler%2Fsubsearch%2Fmain%2Fpyproject.toml&style=flat-square&labelColor=1e1e2e)
-![release](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e&label=latest%20release)
-![downloads](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelColor=%231e1e2e&label=downloads)
-![license](https://img.shields.io/github/license/vagabondhustler/subsearch?style=flat-square&labelColor=1e1e2e)
+![ci](https://img.shields.io/github/actions/workflow/status/vagabondhustler/subsearch/ci.yml?style=flat-square&labelcolor=1e1e2e&label=ci)
+![commit](https://img.shields.io/github/last-commit/vagabondhustler/subsearch?style=flat-square&labelcolor=1e1e2e&label=commit%20activity)
+![python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FvagabondHustler%2Fsubsearch%2Fmain%2Fpyproject.toml&style=flat-square&labelcolor=1e1e2e)
+![release](https://img.shields.io/github/v/tag/vagabondhustler/subsearch?style=flat-square&labelcolor=1e1e2e&label=latest%20release)
+![downloads](https://img.shields.io/github/downloads/vagabondhustler/subsearch/total?style=flat-square&labelcolor=%231e1e2e&label=downloads)
+![license](https://img.shields.io/github/license/vagabondhustler/subsearch?style=flat-square&labelcolor=1e1e2e)
 
 </div>
 
@@ -35,7 +35,7 @@ the best match automatically and opens the workspace only when you need to choos
 
 <div align="center">
 
-#### [False positives](https://github.com/vagabondHustler/subsearch/discussions/557) · [Contributing](https://github.com/vagabondHustler/SubSearch/blob/main/.github/CONTRIBUTING.md) · [Security](https://github.com/vagabondHustler/SubSearch/blob/main/.github/SECURITY.md)
+#### [False positives](https://github.com/vagabondHustler/subsearch/discussions/557) · [Contributing](https://github.com/vagabondHustler/subsearch/blob/main/.github/CONTRIBUTING.md) · [Security](https://github.com/vagabondHustler/subsearch/blob/main/.github/SECURITY.md)
 
 </div>
 ---
@@ -44,7 +44,7 @@ the best match automatically and opens the workspace only when you need to choos
 
 <div align="center">
 
-![example](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/example.gif)
+![example](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/example.gif)
 
 ![ui](https://github.com/vagabondHustler/subsearch/blob/main/assets/ui_full.png?raw=true)
 
@@ -65,8 +65,8 @@ Requires Windows 10 or 11. It may also work on Windows 8.
 <details>
 <summary>PUA warning screenshots</summary>
 
-![moreinfo](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/moreinfo.png)
-![runanyway](https://raw.githubusercontent.com/vagabondHustler/SubSearch/main/assets/runanyway.png)
+![moreinfo](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/moreinfo.png)
+![runanyway](https://raw.githubusercontent.com/vagabondHustler/subsearch/main/assets/runanyway.png)
 
 </details>
 

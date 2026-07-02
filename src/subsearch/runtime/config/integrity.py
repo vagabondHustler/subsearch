@@ -20,7 +20,7 @@ class ConfigResolution:
 
 
 def repair_config(config_file_path: Path, valid_config_keys: list[str], config_keys: list[str]) -> None:
-    capture("Config schema mismatch, repairing", level=LogLevel.WARNING)
+    capture("Config schema mismatch, repairing", level=LogLevel.DEBUG)
     config_data = json_file.load_json_data(config_file_path)
 
     obsolete_keys = [key for key in config_keys if key not in valid_config_keys]

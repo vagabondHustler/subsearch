@@ -5,7 +5,6 @@ from enum import Enum
 class AppMode(Enum):
     SETTINGS = "settings"
     SEARCH_MANUAL = "search_manual"
-    SEARCH_HYBRID = "search_hybrid"
     SEARCH_AUTOMATIC = "search_automatic"
 
 
