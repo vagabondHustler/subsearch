@@ -73,7 +73,7 @@
 [project.optional-dependencies]
     all = ["Subsearch[build,lint,tests,tools,type]"]
     build = [
-        "build==1.5.0",
+        "build==1.5.1",
         "cx_Freeze==8.6.4",
         "twine==6.2.0",
         "psutil==7.2.2",
