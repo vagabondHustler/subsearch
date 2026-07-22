@@ -88,7 +88,7 @@
     ]
     tools = [
         "commitizen==4.16.5",
-        "pre-commit==4.6.0",
+        "pre-commit==4.6.1",
         "pillow==12.3.0",
         "pyinstrument==5.1.2",
         "viztracer==1.1.1",
