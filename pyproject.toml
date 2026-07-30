@@ -90,7 +90,7 @@
         "commitizen==4.17.0",
         "pre-commit==4.6.1",
         "pillow==12.3.0",
-        "pyinstrument==5.1.2",
+        "pyinstrument==5.1.3",
         "viztracer==1.1.1",
     ]
     type = ["mypy==2.3.0"]
