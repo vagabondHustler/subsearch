@@ -21,7 +21,7 @@
         "num2words==0.5.14",
         "packaging==26.2",
         "PySide6-Essentials==6.11.1",
-        "PySide6-Fluent-Widgets==1.11.2",
+        "PySide6-Fluent-Widgets==1.11.3",
         "rich==15.0.0",
         "selectolax==0.4.11",
         "winrt-runtime==3.2.1",
