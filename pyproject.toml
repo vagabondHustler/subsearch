@@ -87,7 +87,7 @@
         "python-dotenv==1.2.3",
     ]
     tools = [
-        "commitizen==4.17.0",
+        "commitizen==4.17.1",
         "pre-commit==4.6.2",
         "pillow==12.3.0",
         "pyinstrument==5.1.3",
