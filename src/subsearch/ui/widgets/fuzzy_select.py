@@ -3,6 +3,7 @@ from typing import NamedTuple
 from PySide6.QtCore import QElapsedTimer, QEvent, QObject, QSize, Qt, Signal
 from PySide6.QtGui import QHideEvent, QKeyEvent, QMouseEvent
 from PySide6.QtWidgets import (
+    QApplication,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -16,6 +17,7 @@ from subsearch.ui.compat.qfluent import hide_line_edit_focus_underline
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.theme import palette
 from subsearch.ui.theme.typography import (
+    DISABLED_TEXT_COLOR,
     TEXT_COLOR,
     apply_body_font,
     apply_caption_font,
@@ -71,7 +73,13 @@ class FuzzyFinderPopup(AnchoredPopup):
     label_selected = Signal(str)
 
     def __init__(self, anchor: QWidget, searchable: bool = True) -> None:
-        super().__init__(anchor, Qt.WindowType.Popup, acrylic=True)
+        # Solid (non-acrylic) background: a translucent window hit-tests by pixel
+        # alpha, so the mouse falls through the transparent areas of rows to the
+        # widgets behind. A Mica-like solid fill keeps the look without that.
+        # ToolTip (not Popup) so it doesn't grab the mouse: the rest of the UI
+        # stays hoverable while the dropdown is open, matching the search-bar
+        # suggestion popups. Outside-click dismissal is handled manually below.
+        super().__init__(anchor, Qt.WindowType.ToolTip, acrylic=False)
         self._anchor_widget = anchor
         self._searchable = searchable
         self._search_terms_by_label: dict[str, list[str]] = {}
@@ -128,6 +136,12 @@ class FuzzyFinderPopup(AnchoredPopup):
         self._rebuild_rows(matching_labels(self._search_terms_by_label, ""), preferred_label=current_label)
         self.setMinimumWidth(self._anchor_widget.width())
         self.show_below(centered=True)
+        application = QApplication.instance()
+        if application is not None:
+            application.installEventFilter(self)
+        # A ToolTip window does not take focus on show, so claim it explicitly
+        # for type-to-filter to work immediately.
+        self.activateWindow()
         if self._searchable:
             self._search_edit.setFocus()
         else:
@@ -182,6 +196,10 @@ class FuzzyFinderPopup(AnchoredPopup):
         self.label_selected.emit(self._visible_labels[index])
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.MouseButtonPress and isinstance(event, QMouseEvent):
+            if self.isVisible() and not self.geometry().contains(event.globalPosition().toPoint()):
+                self.hide()
+            return False
         if event.type() != QEvent.Type.KeyPress or not isinstance(event, QKeyEvent):
             return False
         return self._handle_key(event.key())
@@ -208,6 +226,9 @@ class FuzzyFinderPopup(AnchoredPopup):
         return False
 
     def hideEvent(self, event: QHideEvent) -> None:
+        application = QApplication.instance()
+        if application is not None:
+            application.removeEventFilter(self)
         self._time_since_hidden.restart()
         super().hideEvent(event)
 
@@ -234,24 +255,39 @@ class FuzzySelect(QFrame):
             f" background-color: {palette.SELECT_FIELD_BACKGROUND_HOVER};"
             f" border: 1px solid {palette.NEUTRAL_3};"
             f" }}"
+            f"#fuzzySelect:disabled {{"
+            f" background-color: {palette.SELECT_FIELD_BACKGROUND};"
+            f" border: 1px solid {palette.POPUP_BORDER};"
+            f" }}"
         )
 
         self._current_label = QLabel("", self)
         apply_token_value_font(self._current_label)
 
-        chevron = QLabel(self)
-        chevron.setPixmap(
-            lucide_qicon(LucideIcon.CHEVRON_DOWN, TEXT_COLOR).pixmap(QSize(CHEVRON_ICON_SIZE, CHEVRON_ICON_SIZE))
-        )
+        self._chevron = QLabel(self)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 8, 0)
         layout.setSpacing(6)
         layout.addWidget(self._current_label, stretch=1)
-        layout.addWidget(chevron, alignment=Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(self._chevron, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         self._popup = FuzzyFinderPopup(self, searchable)
         self._popup.label_selected.connect(self.setCurrentText)
+        self._apply_enabled_appearance()
+
+    def changeEvent(self, event: QEvent) -> None:
+        if event.type() == QEvent.Type.EnabledChange:
+            self._apply_enabled_appearance()
+        super().changeEvent(event)
+
+    def _apply_enabled_appearance(self) -> None:
+        text_color = TEXT_COLOR if self.isEnabled() else DISABLED_TEXT_COLOR
+        self._current_label.setStyleSheet(f"color: {text_color};")
+        self._chevron.setPixmap(
+            lucide_qicon(LucideIcon.CHEVRON_DOWN, text_color).pixmap(QSize(CHEVRON_ICON_SIZE, CHEVRON_ICON_SIZE))
+        )
+        self.setCursor(Qt.CursorShape.PointingHandCursor if self.isEnabled() else Qt.CursorShape.ArrowCursor)
 
     def setItems(self, labels: list[str], aliases_by_label: dict[str, list[str]] | None = None) -> None:
         self._popup.set_items(labels, aliases_by_label)

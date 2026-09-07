@@ -33,6 +33,12 @@ class SearchOutcome:
     skipped_providers: list[str]
 
 
+@dataclass(slots=True)
+class WorkspaceOutcome:
+    downloaded: list[Subtitle]
+    placed_best_next_to_video: bool = False
+
+
 class MatchTier(IntEnum):
     C = 0
     B = 1

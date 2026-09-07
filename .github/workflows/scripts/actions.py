@@ -10,7 +10,6 @@ from pathlib import Path
 
 from config import (
     APP_NAME,
-    APP_USER_MODEL_ID,
     CHANGELOG_NAME,
     EXE_NAME,
     REPOSITORY_URL,
@@ -54,9 +53,18 @@ class StepSummary:
 
     def card(self, title: str, passed: bool | None = None) -> None:
         if passed is None:
-            self.add_summary(f"### {title}")
+            self.add_summary(f"##### {title}")
             return
-        self.add_summary(f"### {title} {self.PASSED if passed else self.FAILED}")
+        self.add_summary(f"##### {title} - **{self.PASSED if passed else self.FAILED}**")
+
+    def checklist(self, items: list[tuple[bool, str]]) -> None:
+        for passed, label in items:
+            box = "x" if passed else " "
+            text = label if passed else f"***{label}***"
+            self.add_summary(f"- [{box}] {text}")
+
+    def rule(self) -> None:
+        self.add_summary("\n---\n")
 
     def fields(self, items: list[tuple[str, str]]) -> None:
         for label, value in items:
@@ -328,13 +336,17 @@ class BinaryTester:
                 pids.add(process.info["pid"])
         return pids
 
-    def assert_window_rendered(self, process_name: str = EXE_NAME, timeout: int = 60, process: "subprocess.Popen | None" = None) -> None:
+    def assert_window_rendered(
+        self, process_name: str = EXE_NAME, timeout: int = 60, process: "subprocess.Popen | None" = None
+    ) -> None:
         log(f"Waiting up to {timeout}s for a visible window owned by {process_name}", level="STEP")
         for elapsed in range(timeout):
             if process is not None and process.poll() is not None:
                 stderr_output = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
                 detail = f"\nstderr:\n{stderr_output}" if stderr_output.strip() else ""
-                raise RuntimeError(f"{process_name} exited with code {process.returncode} before a window appeared{detail}")
+                raise RuntimeError(
+                    f"{process_name} exited with code {process.returncode} before a window appeared{detail}"
+                )
             if self.visible_window_owned_by(self.process_tree_pids(process_name)):
                 log(f"Visible GUI window for '{process_name}' present after {elapsed}s", level="PASS")
                 return
@@ -413,9 +425,9 @@ class Check:
 
 class BinaryTestReport:
     _TITLES = {
-        "install": "MSI install",
-        "executable": "Subsearch ran",
-        "uninstall": "MSI uninstall",
+        "install": "MSI installation",
+        "executable": "Application launch",
+        "uninstall": "MSI uninstallation",
     }
 
     def __init__(self, step_summary: StepSummary) -> None:
@@ -423,7 +435,7 @@ class BinaryTestReport:
 
     def _path_check(self, label: str, path: Path, expected: bool) -> Check:
         present = path.is_file()
-        detail = path.as_posix() if present else f"missing ({path.as_posix()})"
+        detail = f"`{path.as_posix()}`" if present else f"missing (`{path.as_posix()}`)"
         return Check(label, expected, present, detail)
 
     def _registry_value_checks(self, expected_populated: bool) -> list[Check]:
@@ -436,7 +448,7 @@ class BinaryTestReport:
                 detail = "empty placeholder"
             else:
                 detail = f"`{value}`"
-            checks.append(Check(f"Registry {label}", expected_populated, populated, detail))
+            checks.append(Check(f"Registry value {label}", expected_populated, populated, detail))
         return checks
 
     def _checks_for_install(self) -> list[Check]:
@@ -471,11 +483,9 @@ class BinaryTestReport:
     def add_stage_card(self, name: str) -> None:
         checks = self._checks_for_stage(name)
         passed = all(check.passed for check in checks)
-        self._step_summary.card(f"{self._TITLES[name]}: {self._step_summary.result(passed)}", passed=passed)
-        self._step_summary.add_summary("Reason:")
-        for check in checks:
-            mark = self._step_summary.result(check.passed)
-            self._step_summary.add_summary(f"- {check.label}: {mark} - {check.detail}")
+        self._step_summary.card(self._TITLES[name], passed=passed)
+        self._step_summary.checklist([(check.passed, f"{check.label} {check.detail}") for check in checks])
+        self._step_summary.rule()
         self._log_stage(name, checks, passed)
         self._assert_stage_passed(name, passed)
 
@@ -487,7 +497,7 @@ class BinaryTestReport:
 
     def _log_stage(self, name: str, checks: list[Check], passed: bool) -> None:
         for check in checks:
-            log(f"{check.label}: {'OK' if check.passed else 'BAD'} ({check.detail})")
+            log(f"{check.label}: {'OK' if check.passed else 'BAD'} ({check.detail.replace('`', '')})")
         log(f"{self._TITLES[name]} {'passed' if passed else 'failed'}", level="PASS" if passed else "FAIL")
         print(STYLE_SEPARATOR)
 
@@ -580,6 +590,53 @@ class Build:
         "email",
     ]
 
+    # Subsearch only imports QtCore/QtGui/QtWidgets/QtSvg/QtXml (qfluentwidgets adds QtNetwork/QtSvgWidgets);
+    # everything below is PySide6-Addons or an unused Essentials module that cx_Freeze would otherwise bundle.
+    _QT_MODULES_TO_EXCLUDE = [
+        "PySide6.Qt3DAnimation",
+        "PySide6.Qt3DCore",
+        "PySide6.Qt3DExtras",
+        "PySide6.Qt3DInput",
+        "PySide6.Qt3DLogic",
+        "PySide6.Qt3DRender",
+        "PySide6.QtBluetooth",
+        "PySide6.QtCharts",
+        "PySide6.QtDataVisualization",
+        "PySide6.QtDesigner",
+        "PySide6.QtGraphs",
+        "PySide6.QtGraphsWidgets",
+        "PySide6.QtHttpServer",
+        "PySide6.QtLocation",
+        "PySide6.QtMultimedia",
+        "PySide6.QtMultimediaWidgets",
+        "PySide6.QtNfc",
+        "PySide6.QtOpenGL",
+        "PySide6.QtOpenGLWidgets",
+        "PySide6.QtPdf",
+        "PySide6.QtPdfWidgets",
+        "PySide6.QtPositioning",
+        "PySide6.QtQml",
+        "PySide6.QtQuick",
+        "PySide6.QtQuick3D",
+        "PySide6.QtQuickControls2",
+        "PySide6.QtQuickWidgets",
+        "PySide6.QtRemoteObjects",
+        "PySide6.QtScxml",
+        "PySide6.QtSensors",
+        "PySide6.QtSerialBus",
+        "PySide6.QtSerialPort",
+        "PySide6.QtSpatialAudio",
+        "PySide6.QtSql",
+        "PySide6.QtStateMachine",
+        "PySide6.QtTest",
+        "PySide6.QtTextToSpeech",
+        "PySide6.QtWebChannel",
+        "PySide6.QtWebEngineCore",
+        "PySide6.QtWebEngineQuick",
+        "PySide6.QtWebEngineWidgets",
+        "PySide6.QtWebSockets",
+    ]
+
     def _data_table(self) -> dict:
         script_component = f"_cx_executable0__Executable_script_src_{APP_NAME.lower()}___main__.py_"
         registry_path = r"Software\Classes\*\shell\Subsearch"
@@ -629,7 +686,7 @@ class Build:
             "include_files": license_files + self._selectolax_namespace_packages(),
             "includes": self._INCLUDES,
             "packages": self._PACKAGES_TO_INCLUDE,
-            "excludes": self._PACKAGES_TO_EXCLUDE,
+            "excludes": self._PACKAGES_TO_EXCLUDE + self._QT_MODULES_TO_EXCLUDE,
         }
 
     def _options(self) -> dict:
@@ -650,38 +707,9 @@ class Build:
         log(f"Created msi at {msi_freeze_path().as_posix()}", level="PASS")
         print(STYLE_SEPARATOR)
 
-    def _set_shortcut_app_user_model_id(self) -> None:
-        import warnings
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", "'msilib' is deprecated")
-            import msilib
-
-        msi_path = msi_freeze_path()
-        database = msilib.OpenDatabase(str(msi_path), msilib.MSIDBOPEN_TRANSACT)
-        # MsiShortcutProperty is a standard MSI table but is absent from msilib.schema, so the
-        # build never creates it; create it before inserting the AUMID that links toasts to the
-        # Start Menu shortcut (cx_Freeze names the first executable's shortcut row "S_APP_0").
-        database.OpenView(
-            "CREATE TABLE `MsiShortcutProperty` ("
-            "`MsiShortcutProperty` CHAR(72) NOT NULL, "
-            "`Shortcut_` CHAR(72) NOT NULL, "
-            "`PropertyKey` CHAR(72) NOT NULL, "
-            "`PropVariantValue` CHAR(255) NOT NULL "
-            "PRIMARY KEY `MsiShortcutProperty`)"
-        ).Execute(None)
-        msilib.add_data(
-            database,
-            "MsiShortcutProperty",
-            [("AppUserModelID", "S_APP_0", "System.AppUserModel.ID", APP_USER_MODEL_ID)],
-        )
-        database.Commit()
-        log(f"Set shortcut AppUserModelID to {APP_USER_MODEL_ID}", level="PASS")
-
     def make_msi(self) -> None:
         self._log_build_start()
         self._run_cx_freeze()
-        self._set_shortcut_app_user_model_id()
         self._log_build_result()
 
 
@@ -747,12 +775,18 @@ class ReleaseValidation:
         result, _ = previous
         return result != self.RESULT_PASSED
 
+    def _run_link(self, run_id: str) -> str:
+        return f"[run {run_id}]({REPOSITORY_URL}/actions/runs/{run_id})"
+
+    def _timestamp(self) -> str:
+        return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
     def _marker_body(self, result: str, run_id: str) -> str:
         comment = f"<!-- {self.MARKER}:result={result};run={run_id} -->"
         passed = result == self.RESULT_PASSED
         validation_outcome = "passed" if passed else "failed"
         status = f"Release validation {validation_outcome}"
-        return f"{comment}\n**{status}** (run {run_id})"
+        return f"{comment}\n**{status}** ({self._run_link(run_id)} · {self._timestamp()})"
 
     def _has_marker_comment(self, number: str) -> bool:
         completed = subprocess.run(
@@ -766,7 +800,7 @@ class ReleaseValidation:
 
     def _body_block(self, result: str, run_id: str) -> str:
         outcome = "passed" if result == self.RESULT_PASSED else "failed"
-        line = f"###### Release validation {outcome} (run {run_id})"
+        line = f"###### Release validation {outcome} ({self._run_link(run_id)} · {self._timestamp()})"
         return "\n".join([self.BODY_BLOCK_START, line, self.BODY_BLOCK_END])
 
     def _replace_body_block(self, body: str, block: str) -> str:

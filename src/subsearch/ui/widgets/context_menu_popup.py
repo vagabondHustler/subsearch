@@ -39,6 +39,7 @@ class ContextMenuItem:
     icon: LucideIcon
     label: str
     on_triggered: Callable[[], None]
+    enabled: bool = True
 
 
 class ContextMenuRow(QWidget):
@@ -46,8 +47,10 @@ class ContextMenuRow(QWidget):
         super().__init__(parent)
         self._item = item
         self.setMouseTracking(True)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        text_color = TEXT_COLOR if item.enabled else palette.NEUTRAL_3
+        if item.enabled:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(
@@ -59,13 +62,13 @@ class ContextMenuRow(QWidget):
         layout.setSpacing(ROW_SPACING)
 
         icon_label = QLabel(self)
-        icon_label.setPixmap(lucide_qicon(item.icon, TEXT_COLOR).pixmap(ROW_ICON_SIZE, ROW_ICON_SIZE))
+        icon_label.setPixmap(lucide_qicon(item.icon, text_color).pixmap(ROW_ICON_SIZE, ROW_ICON_SIZE))
         icon_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         layout.addWidget(icon_label)
 
         text_label = QLabel(item.label, self)
         apply_body_font(text_label)
-        text_label.setStyleSheet(f"color: {TEXT_COLOR}; background: transparent;")
+        text_label.setStyleSheet(f"color: {text_color}; background: transparent;")
         text_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
         layout.addWidget(text_label)
         layout.addStretch(1)
@@ -77,13 +80,15 @@ class ContextMenuRow(QWidget):
         self.setStyleSheet(f"ContextMenuRow {{ background-color: {background}; border-radius: 4px; }}")
 
     def enterEvent(self, event: QEnterEvent) -> None:
-        self.render_selected(True)
+        if self._item.enabled:
+            self.render_selected(True)
 
     def leaveEvent(self, event: QEvent) -> None:
         self.render_selected(False)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        self._item.on_triggered()
+        if self._item.enabled:
+            self._item.on_triggered()
 
 
 class ContextMenuPopup(AnchoredPopup):
@@ -111,15 +116,21 @@ class ContextMenuPopup(AnchoredPopup):
             self.hide()
             item.on_triggered()
 
-        return ContextMenuItem(item.icon, item.label, triggered)
+        return ContextMenuItem(item.icon, item.label, triggered, item.enabled)
 
     def show_above_point(self, global_point: QPoint) -> None:
+        self._show_at(QPoint(global_point.x(), global_point.y() - self.sizeHint().height()))
+
+    def show_at_point(self, global_point: QPoint) -> None:
+        self._show_at(global_point)
+
+    def _show_at(self, top_left: QPoint) -> None:
         self.adjustSize()
-        screen = QApplication.screenAt(global_point) or self.screen()
+        screen = QApplication.screenAt(top_left) or self.screen()
         area = screen.availableGeometry() if screen else None
 
-        x = global_point.x()
-        y = global_point.y() - self.height()
+        x = top_left.x()
+        y = top_left.y()
         if area is not None:
             x = max(area.left(), min(x, area.right() - self.width() + 1))
             y = max(area.top(), min(y, area.bottom() - self.height() + 1))

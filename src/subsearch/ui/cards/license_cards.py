@@ -6,7 +6,7 @@ from qfluentwidgets import SmoothScrollDelegate
 
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
-from subsearch.ui.theme.typography import CAPTION_FONT_SIZE, TEXT_COLOR, body_font
+from subsearch.ui.theme.typography import TEXT_COLOR, license_font
 
 LICENSE_FILENAME = "LICENSE"
 THIRD_PARTY_FILENAME = "THIRD-PARTY-LICENSES.md"
@@ -31,14 +31,14 @@ def _read_license(filename: str) -> str:
 class LicenseView(QTextBrowser):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        caption_font = body_font()
-        caption_font.setPixelSize(CAPTION_FONT_SIZE)
-        self.setFont(caption_font)
+        font = license_font()
+        self.setFont(font)
         self.setOpenExternalLinks(True)
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setFixedHeight(LICENSE_VIEW_HEIGHT)
         self.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
         self.document().setDocumentMargin(0)
+        self.document().setDefaultFont(font)
         self.setStyleSheet(f"QTextBrowser {{ background: transparent; color: {TEXT_COLOR}; }}")
         self._scroll_delegate = SmoothScrollDelegate(self)
 

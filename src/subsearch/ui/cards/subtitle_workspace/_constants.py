@@ -19,12 +19,6 @@ ListWidget::item {
     border: none;
     padding-left: 4px;
 }
-ListWidget::item:hover,
-ListWidget::item:selected {
-    background: rgba(255, 255, 255, 18);
-    border: none;
-    border-radius: 4px;
-}
 """
 
 # The two trailing action icons sit tight together as one control group; the

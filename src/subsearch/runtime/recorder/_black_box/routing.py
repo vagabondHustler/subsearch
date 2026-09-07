@@ -1,9 +1,15 @@
-from subsearch.runtime.recorder.config import LogLevel
 from subsearch.runtime.recorder._black_box.formatting import EntryFormatter
-from subsearch.runtime.recorder._black_box.standard_out.console_output import ConsoleOutput
-from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import CrashFileOutput
-from subsearch.runtime.recorder._black_box.standard_out.log_file_output import RotatingLogFileOutput
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
+from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import (
+    CrashFileOutput,
+)
+from subsearch.runtime.recorder._black_box.standard_out.console_output import (
+    ConsoleOutput,
+)
+from subsearch.runtime.recorder._black_box.standard_out.log_file_output import (
+    RotatingLogFileOutput,
+)
+from subsearch.runtime.recorder.config import LogLevel
 
 # DEBUG is the only log-file-only level; everything else is shown on the console.
 # BANNER opens a phase, INFO is a transient rolling line, WARNING/ERROR/CRITICAL are reserved lines.

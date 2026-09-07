@@ -10,11 +10,13 @@ from subsearch.runtime import crash_report
 from subsearch.runtime.config import FILE_PATHS
 from subsearch.ui.cards.base import SettingsCard
 from subsearch.ui.cards.descriptions import SETTING_DESCRIPTIONS, CardKey
-from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
+from subsearch.ui.icons.lucide import LucideIcon
 from subsearch.ui.services.issue_reporting import ISSUE_TEMPLATE_URL, open_bug_report
 from subsearch.ui.theme.metrics import CARD_CONTENT_INSET
-from subsearch.ui.theme.typography import TEXT_COLOR
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.icon_caption_button import (
+    CaptionToolButton,
+    CaptionToolButtonStyle,
+)
 
 REPOSITORY_URL = "https://github.com/vagabondHustler/subsearch"
 SECURITY_ADVISORY_URL = "https://github.com/vagabondHustler/subsearch/security/advisories/new"
@@ -95,6 +97,6 @@ class ResourcesCard(SettingsCard):
         self.body_layout.addLayout(grid)
 
     def _build_labelled_action(self, icon: LucideIcon, caption: str, on_click: Callable[[], None]) -> QWidget:
-        action_button = CaptionedToolButton(caption, icon=lucide_qicon(icon, TEXT_COLOR), parent=self)
+        action_button = CaptionToolButton(CaptionToolButtonStyle(icon, caption), parent=self)
         action_button.clicked.connect(on_click)
         return action_button
