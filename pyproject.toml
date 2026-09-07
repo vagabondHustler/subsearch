@@ -16,7 +16,7 @@
         "Topic :: Utilities",
     ]
     dependencies = [
-        "curl_cffi==0.16.2",
+        "curl_cffi==0.16.3",
         "imdbinfo==0.9.10",
         "num2words==0.5.14",
         "packaging==26.3",
