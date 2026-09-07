@@ -17,7 +17,7 @@
     ]
     dependencies = [
         "curl_cffi==0.16.3",
-        "imdbinfo==0.9.10",
+        "imdbinfo==0.10.0",
         "num2words==0.5.14",
         "packaging==26.3",
         "PySide6-Essentials==6.11.2",
