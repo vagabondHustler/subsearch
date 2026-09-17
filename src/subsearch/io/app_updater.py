@@ -2,8 +2,6 @@ import subprocess
 from pathlib import Path
 from typing import Callable, NamedTuple
 
-from curl_cffi.requests import exceptions
-
 from subsearch.io import file_system
 from subsearch.io.http import get_session
 from subsearch.runtime.config import APP_PATHS
@@ -25,6 +23,8 @@ class ReleasePage(NamedTuple):
 
 
 def fetch_latest_release_page() -> ReleasePage:
+    from curl_cffi.requests import exceptions
+
     try:
         response = get_session().get(LATEST_RELEASE_PAGE)
     except exceptions.RequestException as error:
@@ -41,6 +41,8 @@ def installer_url(version: str) -> str:
 def download_installer(version: str, on_progress: Callable[[float], None] | None = None) -> Path:
     APP_PATHS.tmp_dir.mkdir(parents=True, exist_ok=True)
     destination = APP_PATHS.tmp_dir / INSTALLER_NAME.format(version=version)
+    from curl_cffi.requests import exceptions
+
     try:
         response = get_session().get(installer_url(version), stream=True)
     except exceptions.RequestException as error:

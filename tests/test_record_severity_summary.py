@@ -1,6 +1,8 @@
 from collections import Counter
 
-from subsearch.runtime.recorder._black_box.standard_out.severity_summary import severity_summary
+from subsearch.runtime.recorder._black_box.standard_out.severity_summary import (
+    severity_summary,
+)
 
 
 def test_no_issues_yields_no_summary() -> None:
