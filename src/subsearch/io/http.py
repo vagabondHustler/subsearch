@@ -1,18 +1,24 @@
-from curl_cffi import requests
-from curl_cffi.requests import Response, exceptions
+from typing import TYPE_CHECKING
+
 from selectolax.lexbor import LexborHTMLParser
 
 from subsearch.parsing.html_parser import parse_html_response
 from subsearch.runtime.recorder import LogLevel, capture
 
+if TYPE_CHECKING:
+    from curl_cffi import requests
+    from curl_cffi.requests import Response
 
-def get_session() -> requests.Session:
+
+def get_session() -> "requests.Session":
+    from curl_cffi import requests
+
     return requests.Session(impersonate="chrome")
 
 
 def send_request(
-    url: str, session: requests.Session, timeout: tuple[int, int], header: dict[str, str] | None = None
-) -> Response:
+    url: str, session: "requests.Session", timeout: tuple[int, int], header: dict[str, str] | None = None
+) -> "Response":
     if header is None:
         return session.get(url, timeout=timeout)
     return session.get(url, timeout=timeout, headers=header)
@@ -21,6 +27,8 @@ def send_request(
 def request_parsed_response(
     url: str, timeout: tuple[int, int], header: dict[str, str] | None = None
 ) -> LexborHTMLParser | None:
+    from curl_cffi.requests import exceptions
+
     session = get_session()
     try:
         response = send_request(url, session, timeout=timeout, header=header)
@@ -34,6 +42,8 @@ def request_parsed_response(
 
 
 def request_parsed_post(url: str, data: dict[str, str], timeout: tuple[int, int]) -> LexborHTMLParser | None:
+    from curl_cffi.requests import exceptions
+
     session = get_session()
     try:
         response = session.post(url, data=data, timeout=timeout)

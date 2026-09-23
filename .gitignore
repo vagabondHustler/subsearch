@@ -183,3 +183,4 @@ memory/**
 .agents/**
 .github/workflows/release_v2.yml
 AGENTS.md
+tools/_boot_profiles/

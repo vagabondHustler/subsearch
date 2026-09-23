@@ -33,7 +33,9 @@ def _run_unpack_worker(monkeypatch, rename: bool, extracted_count: int):
     monkeypatch.setattr(
         post_processing.subtitle_selection, "autoload_rename", lambda search_term, src: src / "renamed.srt"
     )
-    monkeypatch.setattr(post_processing.file_system, "move_and_replace", lambda src, dst: None)
+    monkeypatch.setattr(
+        post_processing.file_system, "move_best_next_to_video", lambda src, dst, video_stem, subs_dir: None
+    )
     monkeypatch.setattr(post_processing.file_system, "create_path_from_string", lambda *args, **kwargs: Path("target"))
     worker = post_processing._PostProcessWorker(rename=rename, store=SettingsStore(), subtitle=_make_subtitle())
     return worker.execute()
@@ -79,16 +81,16 @@ def test_rename_and_place_delivers_to_target(monkeypatch, tmp_path, post_process
     monkeypatch.setattr(
         post_processing.subtitle_selection, "autoload_rename", lambda search_term, src: src / "renamed.srt"
     )
-    placed: list[tuple[Path, Path]] = []
+    placed: list[tuple[Path, Path, str]] = []
 
-    def fake_move(source_file, destination_directory):
-        placed.append((source_file, destination_directory))
-        (destination_directory / source_file.name).write_text("subtitle")
+    def fake_move(source_file, destination_directory, video_stem, subs_dir):
+        placed.append((source_file, destination_directory, video_stem))
+        (destination_directory / f"{video_stem}{source_file.suffix}").write_text("subtitle")
 
-    monkeypatch.setattr(post_processing.file_system, "move_and_replace", fake_move)
+    monkeypatch.setattr(post_processing.file_system, "move_best_next_to_video", fake_move)
     monkeypatch.setattr(post_processing.file_system, "create_path_from_string", lambda *args, **kwargs: target_dir)
     worker = post_processing._PostProcessWorker(rename=True, store=SettingsStore(), subtitle=_make_subtitle())
     delivered = worker.execute()
 
     assert delivered == 1
-    assert placed == [(Path("subs") / "renamed.srt", target_dir)]
+    assert placed == [(Path("subs") / "renamed.srt", target_dir, post_processing.SEARCH_SUBJECT.search_term)]

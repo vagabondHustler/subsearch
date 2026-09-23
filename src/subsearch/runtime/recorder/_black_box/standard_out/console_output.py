@@ -2,9 +2,11 @@ from typing import Callable
 
 from rich.console import Console
 
-from subsearch.runtime.recorder.config import ConsoleSnapshot, LogLevel
-from subsearch.runtime.recorder._black_box.standard_out.spinner_display import SpinnerDisplay
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
+from subsearch.runtime.recorder._black_box.standard_out.spinner_display import (
+    SpinnerDisplay,
+)
+from subsearch.runtime.recorder.config import ConsoleSnapshot, LogLevel
 
 
 class ConsoleOutput:
