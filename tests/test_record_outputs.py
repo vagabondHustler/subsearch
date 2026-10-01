@@ -1,8 +1,12 @@
 from pathlib import Path
 
+from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import (
+    CrashFileOutput,
+)
+from subsearch.runtime.recorder._black_box.standard_out.log_file_output import (
+    RotatingLogFileOutput,
+)
 from subsearch.runtime.recorder.config import SESSION_SEPARATOR
-from subsearch.runtime.recorder._black_box.standard_error.crash_file_output import CrashFileOutput
-from subsearch.runtime.recorder._black_box.standard_out.log_file_output import RotatingLogFileOutput
 
 
 def test_log_file_writes_session_separator_once(tmp_path: Path) -> None:

@@ -13,10 +13,13 @@ from subsearch.runtime.config import (
     APP_PATHS,
     DEVICE_INFO,
     PATH_RESOLVER,
+    PROVIDER_DISPLAY_NAMES,
     SEARCH_SUBJECT,
     WORKSPACE,
 )
+from subsearch.runtime.download_history import DownloadHistory, get_download_history
 from subsearch.runtime.models import (
+    AppMode,
     ProviderDiagnosticStatus,
     ProviderResult,
     SearchOutcome,
@@ -24,7 +27,7 @@ from subsearch.runtime.models import (
     SubtitleStatus,
 )
 from subsearch.runtime.models.exceptions import MissingApiKey
-from subsearch.runtime.recorder import LogLevel, capture, get_file_tracker, phase
+from subsearch.runtime.recorder import LogLevel, capture, phase
 
 
 class SearchJob:
@@ -61,6 +64,40 @@ class SearchPipeline:
 
     def _set_console_title(self) -> None:
         ctypes.windll.kernel32.SetConsoleTitleW(f"subsearch - {DEVICE_INFO.subsearch}")
+
+    def run(self) -> None:
+        if self.call_conditions.should_run_headless_search:
+            self._warn_if_filename_has_spaces()
+            phase(self._search_banner())
+        self.init_search(
+            self.opensubtitles,
+            self.yifysubtitles,
+            self.subsource,
+            self.tvsubtitles,
+            self.gestdown,
+        )
+        self.download_files()
+        self.subtitle_workspace()
+        self.subtitle_post_processing()
+        phase("Application maintenance")
+        self.run_provider_diagnostics()
+        self.present_pending_notifications()
+        self.clean_up()
+        self.finish_notification()
+
+    def _search_banner(self) -> str:
+        if self.bootstrap.all_providers_disabled():
+            return "Searching"
+        return f"Searching on {self._enabled_provider_names()}"
+
+    def _enabled_provider_names(self) -> str:
+        providers = self.bootstrap.app_config.providers
+        enabled = [name for key, name in PROVIDER_DISPLAY_NAMES.items() if providers[key]]
+        return ", ".join(enabled)
+
+    def _warn_if_filename_has_spaces(self) -> None:
+        if " " in SEARCH_SUBJECT.search_term:
+            capture(f"{SEARCH_SUBJECT.search_term} contains spaces, result may vary", level=LogLevel.WARNING)
 
     def create_search_job(self, imdb_id: str = "", tvseries: bool | None = None) -> "SearchJob":
         return SearchJob(self, imdb_id, tvseries)
@@ -166,17 +203,25 @@ class SearchPipeline:
             self.bootstrap.api_calls_made[provider_name] = 0
         return self.bootstrap.api_calls_made[provider_name] == self.bootstrap.app_config.downloads_per_provider
 
-    def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int) -> None:
+    def _download_accepted_subtitle(self, subtitle: Subtitle, total_count: int, history: DownloadHistory) -> None:
         subtitle_number = sum(self.bootstrap.api_calls_made.values(), 1)
-        downloaded = file_system.download_subtitle(
-            subtitle, subtitle_number, total_count, WORKSPACE.download_directory, WORKSPACE.extraction_directory
-        )
-        subtitle.status = SubtitleStatus.AUTO_DOWNLOAD if downloaded else SubtitleStatus.DOWNLOAD_FAILED
+        downloaded = file_system.download_subtitle(subtitle, subtitle_number, total_count, WORKSPACE.download_directory)
+        if downloaded is None:
+            subtitle.status = SubtitleStatus.DOWNLOAD_FAILED
+            return
+        if history.was_downloaded_hash(downloaded.content_hash):
+            capture(f"Skipping duplicate download: {subtitle.subtitle_name}")
+            history.mark_pending_deletion(downloaded.path)
+            return
+        history.record(downloaded.content_hash, subtitle.download_url, downloaded.path)
+        capture(f"Downloaded {subtitle.subtitle_name}")
+        subtitle.status = SubtitleStatus.AUTO_DOWNLOAD
         self.bootstrap.api_calls_made[subtitle.provider_name] += 1
 
     @run_if_conditions_met
     def download_files(self) -> None:
         phase("Downloading subtitles")
+        history = get_download_history()
         accepted = sorted(
             self.bootstrap.accepted_subtitles,
             key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
@@ -185,19 +230,45 @@ class SearchPipeline:
         for subtitle in accepted:
             if self._provider_at_download_limit(subtitle.provider_name):
                 continue
-            self._download_accepted_subtitle(subtitle, len(accepted))
+            if history.was_downloaded_url(subtitle.download_url):
+                capture(f"Skipping already-downloaded subtitle: {subtitle.subtitle_name}")
+                continue
+            self._download_accepted_subtitle(subtitle, len(accepted), history)
         capture("Downloads completed")
 
     @run_if_conditions_met
     def subtitle_workspace(self) -> None:
-        subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
         from subsearch.ui.entrypoint import open_settings_window
 
-        self.bootstrap.manual_accepted_subtitles = open_settings_window(
-            subtitles, search_job_factory=self.create_search_job
-        )
+        outcome = open_settings_window(**self._workspace_open_kwargs())
+        self.bootstrap.manual_accepted_subtitles = outcome.downloaded
+        self.bootstrap.ui_placed_best_next_to_video = outcome.placed_best_next_to_video
         self.bootstrap.resync_app_config()
         capture("Results window closed")
+
+    def _workspace_open_kwargs(self) -> dict[str, Any]:
+        factory = dict(search_job_factory=self.create_search_job)
+        if self._workspace_runs_in_ui_search():
+            return dict(
+                subtitles=None,
+                start_search_immediately=True,
+                auto_download_accepted=self._workspace_auto_downloads(),
+                **factory,
+            )
+        if self.bootstrap.app_mode is AppMode.SETTINGS:
+            return factory
+        subtitles = self.bootstrap.rejected_subtitles + self.bootstrap.accepted_subtitles
+        return dict(subtitles=subtitles, **factory)
+
+    def _workspace_runs_in_ui_search(self) -> bool:
+        if self.bootstrap.app_mode is AppMode.SEARCH_MANUAL:
+            return True
+        return self._workspace_auto_downloads()
+
+    def _workspace_auto_downloads(self) -> bool:
+        return (
+            self.bootstrap.app_mode is AppMode.SEARCH_AUTOMATIC and self.bootstrap.app_config.ui_visibility == "always"
+        )
 
     def _resolve_post_processing_target(self) -> Path:
         return PATH_RESOLVER.resolve_post_processing_target(self.bootstrap.app_config, WORKSPACE.file_directory)
@@ -206,7 +277,9 @@ class SearchPipeline:
     def subtitle_post_processing(self) -> None:
         phase("Processing subtitles")
         target_path = self._resolve_post_processing_target()
-        self.bootstrap.downloaded_subtitle_archives = file_system.count_files_in_directory(WORKSPACE.download_directory)
+        self.bootstrap.downloaded_subtitle_archives = file_system.count_extractable_archives(
+            WORKSPACE.download_directory, exclude_ids=self.bootstrap.ui_downloaded_subtitle_ids
+        )
         self.extract_files()
         self.bootstrap.extracted_subtitle_archives = file_system.count_subtitle_files(WORKSPACE.extraction_directory)
         self.subtitle_rename()
@@ -215,7 +288,11 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def extract_files(self) -> None:
-        file_system.extract_files_in_dir(WORKSPACE.download_directory, WORKSPACE.extraction_directory)
+        file_system.extract_files_in_dir(
+            WORKSPACE.download_directory,
+            WORKSPACE.extraction_directory,
+            exclude_ids=self.bootstrap.ui_downloaded_subtitle_ids,
+        )
         capture("Extraction completed")
 
     @run_if_conditions_met
@@ -226,7 +303,9 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def subtitle_move_best(self, target: Path) -> None:
-        file_system.move_and_replace(self.bootstrap.autoload_src, target)
+        file_system.move_best_next_to_video(
+            self.bootstrap.autoload_src, target, SEARCH_SUBJECT.search_term, WORKSPACE.extraction_directory
+        )
         capture("Best subtitle moved")
 
     @run_if_conditions_met
@@ -288,16 +367,13 @@ class SearchPipeline:
 
     @run_if_conditions_met
     def clean_up(self) -> None:
+        # subs/ is the kept extraction archive; only tmp_subsearch and its downloads are removed.
         file_system.del_directory_content(APP_PATHS.tmp_dir)
-        tracker = get_file_tracker()
-        if WORKSPACE.download_directory != Path(""):
-            tracker.delete_tracked_within(WORKSPACE.extraction_directory, "*.nfo")
-            tracker.delete_tracked_within(WORKSPACE.download_directory)
-            tracker.delete_if_tracked(WORKSPACE.download_directory)
-            if WORKSPACE.extraction_directory.is_dir() and file_system.directory_is_empty(
-                WORKSPACE.extraction_directory
-            ):
-                tracker.delete_if_tracked(WORKSPACE.extraction_directory)
+        history = get_download_history()
+        for path in history.take_pending_deletion():
+            if path.exists():
+                file_system.delete_path(path)
+        history.prune()
         capture("Cleanup completed")
 
     def _wait_for_terminal_input(self) -> None:

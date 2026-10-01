@@ -1,5 +1,3 @@
-from collections.abc import Callable
-
 from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtWidgets import QSystemTrayIcon, QWidget
 
@@ -12,10 +10,9 @@ TOOLTIP = "Subsearch"
 
 
 class WindowTrayIcon(QSystemTrayIcon):
-    def __init__(self, window: QWidget, on_save_config: Callable[[], None] | None = None) -> None:
+    def __init__(self, window: QWidget) -> None:
         super().__init__(window)
         self._window = window
-        self._on_save_config = on_save_config
         self._menu: ContextMenuPopup | None = None
         self.setIcon(QIcon(str(APP_PATHS.ui_assets / "subsearch.ico")))
         self.setToolTip(TOOLTIP)
@@ -30,10 +27,6 @@ class WindowTrayIcon(QSystemTrayIcon):
     def _open_menu(self) -> None:
         items = [
             ContextMenuItem(LucideIcon.EYE, "Show Subsearch", self.show_window),
-        ]
-        if self._on_save_config is not None:
-            items.append(ContextMenuItem(LucideIcon.SAVE, "Save settings", self._on_save_config))
-        items += [
             ContextMenuItem(LucideIcon.BUG, "Report bug", open_bug_report),
             ContextMenuItem(LucideIcon.X, "Exit", self._close_window),
         ]

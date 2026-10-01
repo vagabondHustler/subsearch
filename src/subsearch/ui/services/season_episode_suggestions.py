@@ -1,6 +1,5 @@
 from PySide6.QtCore import QObject, Signal
 
-from subsearch.parsing.gestdown_lookup import GestdownLookup
 from subsearch.parsing.imdb_lookup import (
     EpisodeSuggestion,
     SeasonSuggestion,
@@ -17,6 +16,8 @@ class SeasonSuggestionWorker(Worker):
         self.imdb_id = imdb_id
 
     def execute(self) -> list[SeasonSuggestion]:
+        from subsearch.parsing.gestdown_lookup import GestdownLookup
+
         return GestdownLookup().find_season_suggestions(self.title) or find_season_suggestions(self.imdb_id)
 
 
@@ -29,6 +30,8 @@ class EpisodeSuggestionWorker(Worker):
         self.language_name = language_name
 
     def execute(self) -> list[EpisodeSuggestion]:
+        from subsearch.parsing.gestdown_lookup import GestdownLookup
+
         gestdown = GestdownLookup().find_episode_suggestions(self.title, self.season, self.language_name)
         return gestdown or find_episode_suggestions(self.imdb_id, self.season)
 

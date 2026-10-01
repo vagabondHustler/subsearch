@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import pytest
 from imdbinfo.exceptions import ImdbinfoError
 
 from subsearch.parsing import imdb_lookup
@@ -7,6 +8,11 @@ from subsearch.parsing.imdb_lookup import (
     find_episode_suggestions,
     find_season_suggestions,
 )
+
+
+@pytest.fixture(autouse=True)
+def _load_imdbinfo() -> None:
+    imdb_lookup._load_imdbinfo()
 
 
 @dataclass
