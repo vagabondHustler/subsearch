@@ -17,13 +17,13 @@
     ]
     dependencies = [
         "curl_cffi==0.16.3",
-        "imdbinfo==0.10.0",
+        "imdbinfo==0.11.0",
         "num2words==0.5.14",
         "packaging==26.3",
         "PySide6-Essentials==6.11.2",
         "PySide6-Fluent-Widgets==1.11.3",
         "rich==15.0.0",
-        "selectolax==0.4.11",
+        "selectolax==0.4.12",
         "winrt-runtime==3.2.1",
         "winrt-Windows.UI.Notifications==3.2.1",
     ]
@@ -73,21 +73,21 @@
 [project.optional-dependencies]
     all = ["Subsearch[build,lint,tests,tools,type]"]
     build = [
-        "build==1.6.1",
-        "cx_Freeze==8.7.0",
+        "build==1.6.0",
+        "cx_Freeze==8.7.1",
         "twine==6.2.0",
         "psutil==7.2.2",
     ]
-    lint = ["black==26.5.1", "isort==8.0.1"]
+    lint = ["black==26.5.1", "isort==9.0.2"]
     tests = [
         "pytest-cov==7.1.0",
         "pytest==9.1.1",
         "pytest-qt==4.5.0",
-        "tox==4.61.4",
+        "tox==4.64.4",
         "python-dotenv==1.2.3",
     ]
     tools = [
-        "commitizen==4.18.0",
+        "commitizen==4.19.0",
         "pre-commit==4.6.2",
         "pillow==12.3.0",
         "pyinstrument==5.1.3",
