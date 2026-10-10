@@ -22,16 +22,13 @@ class SubtitleDownloadWorker(Worker):
         self.download_number = download_number
         self.download_total = download_total
         self.tmp_dir: Path = WORKSPACE.download_directory
-        self.extraction_dir: Path = WORKSPACE.extraction_directory
 
     def execute(self) -> Subtitle:
         subtitle = self.subtitle
         if release_parser.valid_filename(subtitle.subtitle_name):
             subtitle.subtitle_name = release_parser.fix_filename(subtitle.subtitle_name)
-        downloaded = file_system.download_subtitle(
-            subtitle, self.download_number, self.download_total, self.tmp_dir, self.extraction_dir
-        )
-        if not downloaded:
+        downloaded = file_system.download_subtitle(subtitle, self.download_number, self.download_total, self.tmp_dir)
+        if downloaded is None:
             raise DownloadFailed(f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a downloadable subtitle")
         return subtitle
 
@@ -97,6 +94,7 @@ class SubtitleDownloadService(QObject):
 
     def _on_worker_finished(self, subtitle: Subtitle) -> None:
         subtitle.status = SubtitleStatus.MANUAL_DOWNLOAD
+        capture(f"Downloaded {subtitle.subtitle_name}")
         self._download_number += 1
         self._active = None
         self.succeeded.emit(subtitle)

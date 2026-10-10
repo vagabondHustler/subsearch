@@ -1,7 +1,7 @@
 import re
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from subsearch.runtime.config.defaults import (
     DEFAULT_TOKEN_MULTIPLIERS,
@@ -30,6 +30,10 @@ def remove_padded_zero(x: str) -> str:
 _RELEASE_YEAR_PATTERN = re.compile(r"(?<=[. (\-])([1-2][0-9]{3})(?=[. )\-]|$)")
 # matches a season/episode token in the forms s01e02, s01.e02, s01 e02 or s01-e02, at a token boundary
 _RELEASE_SEASON_EPISODE_PATTERN = re.compile(r"(?:^|[. (\-])s(\d{1,2})[. \-]?e(\d{1,4})(?=[. )\-]|$)")
+# matches a lone season token (s01) with no episode following, at a token boundary e.g. "breaking bad s01"
+_PARTIAL_SEASON_PATTERN = re.compile(r"(?:^|[. (\-])s(\d{1,2})(?=[. )\-]|$)")
+# matches a lone episode token (e01) with no season preceding, at a token boundary e.g. "breaking bad e01"
+_PARTIAL_EPISODE_PATTERN = re.compile(r"(?:^|[. (\-])e(\d{1,4})(?=[. )\-]|$)")
 # matches the NxNN season/episode form e.g. 1x03 or [1x14], at a token boundary
 _RELEASE_SEASON_EPISODE_X_PATTERN = re.compile(r"(?:^|[. (\[\-])(\d{1,2})x(\d{1,4})(?=[. )\]\-]|$)")
 # matches punctuation users type freely but release names omit: apostrophes, backticks, colons, semicolons, commas, quotes, ! and ?
@@ -75,6 +79,22 @@ def find_season_episode(string: str) -> str:
     if season_episode_match:
         return f"s{season_episode_match.group(1)}e{season_episode_match.group(2)}"
     return ""
+
+
+class PartialSeasonEpisode(NamedTuple):
+    season: int
+    episode: int
+
+
+def find_partial_season_episode(typed_term: str) -> PartialSeasonEpisode:
+    normalized = normalize_typed_punctuation(typed_term.lower())
+    if _RELEASE_SEASON_EPISODE_PATTERN.search(normalized):
+        return PartialSeasonEpisode(0, 0)
+    season_match = _PARTIAL_SEASON_PATTERN.search(normalized)
+    episode_match = _PARTIAL_EPISODE_PATTERN.search(normalized)
+    season = int(season_match.group(1)) if season_match else 0
+    episode = int(episode_match.group(1)) if episode_match else 0
+    return PartialSeasonEpisode(season, episode)
 
 
 def convert_to_ordinal_string(string: str) -> tuple[str, str, str, str, bool]:

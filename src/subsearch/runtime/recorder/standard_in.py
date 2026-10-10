@@ -4,20 +4,15 @@ import threading
 import time
 import traceback
 from collections import deque
-from typing import TYPE_CHECKING
 
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
 from subsearch.runtime.recorder._black_box.run_data_recorder import RunDataRecorder
 from subsearch.runtime.recorder.config import LogLevel, RecorderConfig
 
-if TYPE_CHECKING:
-    from subsearch.runtime.recorder._black_box.file_tracker import FileTracker
-
 _PRE_INIT_BUFFER_SIZE = 1000
 
 _recorder: RunDataRecorder | None = None
 _start_perf_counter: float | None = None
-_file_tracker: "FileTracker | None" = None
 _pre_init_buffer: deque[RecordedEntry] = deque(maxlen=_PRE_INIT_BUFFER_SIZE)
 _lock = threading.Lock()
 
@@ -122,17 +117,6 @@ def _caller_location() -> tuple[str, int]:
     frame = sys._getframe(2)
     module = frame.f_globals.get("__name__", "?").rsplit(".", 1)[-1]
     return module, frame.f_lineno
-
-
-def get_file_tracker() -> "FileTracker":
-    """Return the module-level FileTracker singleton, creating it on first call."""
-    global _file_tracker
-    if _file_tracker is None:
-        from subsearch.runtime.config import APP_PATHS
-        from subsearch.runtime.recorder._black_box.file_tracker import FileTracker
-
-        _file_tracker = FileTracker(APP_PATHS.appdata_subsearch / "tracked_files.json")
-    return _file_tracker
 
 
 def _install_crash_hooks() -> None:

@@ -1,8 +1,8 @@
 import re
 
-from subsearch.runtime.recorder.config import LogLevel
 from subsearch.runtime.recorder._black_box.formatting import EntryFormatter
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
+from subsearch.runtime.recorder.config import LogLevel
 
 
 def _entry(level: LogLevel = LogLevel.INFO) -> RecordedEntry:

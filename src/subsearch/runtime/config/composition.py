@@ -16,4 +16,3 @@ REGISTRY_PATHS = metadata.get_windows_registry_paths()
 COMPUTER_NAME = metadata.COMPUTER_NAME
 VERSION = metadata.APP_VERSION
 GUID = metadata.APP_GUID
-APP_USER_MODEL_ID = "Subsearch.Subsearch"
