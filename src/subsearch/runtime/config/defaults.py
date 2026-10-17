@@ -1,6 +1,7 @@
 from enum import StrEnum
 from typing import Any
 
+from subsearch.runtime.config import providers
 from subsearch.runtime.config.nested_dict import insert_nested_value
 
 
@@ -25,7 +26,7 @@ class ConfigKey(StrEnum):
     NOTIFICATIONS_PLAY_SOUND = "notifications.play_sound"
 
     SUBTITLE_WORKSPACE_SEARCH_MODE = "subtitle_workspace.search_mode"
-    SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING = "subtitle_workspace.manual_post_processing"
+    SUBTITLE_WORKSPACE_UI_VISIBILITY = "subtitle_workspace.ui_visibility"
 
     POST_PROCESSING = "post_processing"
     POST_PROCESSING_RENEAME = "post_processing.rename"
@@ -39,6 +40,7 @@ class ConfigKey(StrEnum):
     PATHS_PATH_RESOLUTION = "paths.path_resolution"
     PATHS_CREATE_MISSING_DIRECTORY = "paths.create_missing_directory"
 
+    APPLICATION_MICA_EFFECT = "application.mica_effect"
     APPLICATION_SHOW_TERMINAL = "application.show_terminal"
     APPLICATION_SHOW_TRAY_ICON = "application.show_tray_icon"
     APPLICATION_SINGLE_INSTANCE = "application.single_instance"
@@ -83,22 +85,11 @@ DEFAULT_TOKEN_MULTIPLIERS: dict[str, float] = {
     "edition": 0.1,
 }
 
-SUPPORTED_PROVIDERS: list[str] = [
-    "opensubtitles",
-    "yifysubtitles_site",
-    "subsource_site",
-    "tvsubtitles_site",
-    "gestdown_site",
-]
+# Provider identities, display names, and content-type support are the single source of
+# truth in providers.py; the lists below are derived from that registry.
+SUPPORTED_PROVIDERS = providers.SUPPORTED_PROVIDERS
 
-HEALTH_TRACKED_PROVIDERS: list[str] = [
-    "imdb",
-    "opensubtitles",
-    "yifysubtitles",
-    "subsource",
-    "tvsubtitles",
-    "gestdown",
-]
+HEALTH_TRACKED_PROVIDERS = providers.HEALTH_TRACKED_PROVIDERS
 
 # Per-provider runtime health counters Subsearch manages itself. They live under a section
 # with no single ConfigKey, so they are seeded by their dotted path rather than the enum.
@@ -122,8 +113,8 @@ def get_default_app_config() -> dict[str, Any]:
         ConfigKey.NOTIFICATIONS_SYSTEM_TRAY: True,
         ConfigKey.NOTIFICATIONS_DISPLAY_DURATION: 3.5,
         ConfigKey.NOTIFICATIONS_PLAY_SOUND: True,
-        ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: "hybrid",
-        ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING: False,
+        ConfigKey.SUBTITLE_WORKSPACE_SEARCH_MODE: "automatic",
+        ConfigKey.SUBTITLE_WORKSPACE_UI_VISIBILITY: "attention_required",
         ConfigKey.POST_PROCESSING_RENEAME: True,
         ConfigKey.POST_PROCESSING_MOVE_BEST: True,
         ConfigKey.POST_PROCESSING_MOVE_ALL: False,
@@ -132,6 +123,7 @@ def get_default_app_config() -> dict[str, Any]:
         ConfigKey.PATHS_VIDEO_FILE_DIRECTORY: ".",
         ConfigKey.PATHS_PATH_RESOLUTION: "relative",
         ConfigKey.PATHS_CREATE_MISSING_DIRECTORY: True,
+        ConfigKey.APPLICATION_MICA_EFFECT: True,
         ConfigKey.APPLICATION_SHOW_TERMINAL: False,
         ConfigKey.APPLICATION_SHOW_TRAY_ICON: True,
         ConfigKey.APPLICATION_SINGLE_INSTANCE: True,

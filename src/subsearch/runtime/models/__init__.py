@@ -27,6 +27,7 @@ from subsearch.runtime.models.search import (
     SearchOutcome,
     Subtitle,
     SubtitleStatus,
+    WorkspaceOutcome,
     classify_match_tier,
 )
 
@@ -57,5 +58,6 @@ __all__ = [
     "SystemInfo",
     "WindowsRegistryPaths",
     "Workspace",
+    "WorkspaceOutcome",
     "classify_match_tier",
 ]

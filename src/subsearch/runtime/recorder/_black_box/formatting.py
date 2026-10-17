@@ -1,7 +1,7 @@
 import logging
 
-from subsearch.runtime.recorder.config import LOG_DATE_FORMAT, LOG_FORMAT
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
+from subsearch.runtime.recorder.config import LOG_DATE_FORMAT, LOG_FORMAT
 
 
 class EntryFormatter:
