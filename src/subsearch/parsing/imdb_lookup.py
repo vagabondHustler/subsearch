@@ -1,13 +1,26 @@
 from dataclasses import dataclass
-
-import imdbinfo
-from imdbinfo.exceptions import ImdbinfoError
+from types import ModuleType
 
 from subsearch.runtime.models import ProviderDiagnosticStatus
 from subsearch.runtime.recorder import LogLevel, capture
 
 SUGGESTION_LIMIT = 5
 _SUGGESTION_KINDS = {"movie", "tvSeries", "tvMiniSeries", "tvMovie"}
+
+imdbinfo: ModuleType
+ImdbinfoError: type[Exception]
+
+
+def _load_imdbinfo() -> None:
+    # Deferred so settings-mode boot, which never runs a lookup, skips the ~0.8s import.
+    global imdbinfo, ImdbinfoError
+    if "imdbinfo" in globals():
+        return
+    import imdbinfo as imdbinfo_module
+    from imdbinfo.exceptions import ImdbinfoError as ImdbinfoErrorType
+
+    imdbinfo = imdbinfo_module
+    ImdbinfoError = ImdbinfoErrorType
 
 
 @dataclass(frozen=True)
@@ -48,6 +61,7 @@ class EpisodeSuggestion:
 
 
 def find_season_suggestions(imdb_id: str) -> list[SeasonSuggestion]:
+    _load_imdbinfo()
     try:
         season_episodes = imdbinfo.get_episodes(imdb_id, season=1)
     except ImdbinfoError:
@@ -60,6 +74,7 @@ def find_season_suggestions(imdb_id: str) -> list[SeasonSuggestion]:
 
 
 def find_episode_suggestions(imdb_id: str, season: int) -> list[EpisodeSuggestion]:
+    _load_imdbinfo()
     try:
         season_episodes = imdbinfo.get_episodes(imdb_id, season=season)
     except ImdbinfoError:
@@ -78,6 +93,7 @@ def find_episode_suggestions(imdb_id: str, season: int) -> list[EpisodeSuggestio
 
 
 def find_title_suggestions(typed_term: str, limit: int = SUGGESTION_LIMIT) -> list[TitleSuggestion]:
+    _load_imdbinfo()
     capture(f"Fuzzy matching {typed_term!r}")
     try:
         search_result = imdbinfo.search_title(typed_term)
@@ -115,6 +131,7 @@ class ImdbIdLookup:
         self.imdb_id = ""
         self.diagnostic_status = ProviderDiagnosticStatus.OK
 
+        _load_imdbinfo()
         try:
             search_result = imdbinfo.search_title(title)
         except ImdbinfoError:

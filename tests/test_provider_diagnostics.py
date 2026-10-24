@@ -118,13 +118,16 @@ def test_yifysubtitles_download_url_follows_responding_mirror(monkeypatch) -> No
         "<html><table>"
         "<tr><th>head</th></tr>"
         "<tr><td><span class='sub-lang'>english</span></td>"
-        "<td><a href='/subtitle/foo-bar'>subtitle foo.bar.2021</a></td></tr>"
+        "<td><a href='/subtitles/foo-bar'>subtitle foo.bar.2021</a></td></tr>"
         "</table></html>"
     )
+    subtitle_page = "<html><body><a href='/subtitle/foo-bar-different.zip'>download</a></body></html>"
 
     def fake_request(url: str, timeout) -> object | None:
         if urlsplit(url).netloc == "yifysubtitles.ch":
             return None
+        if url.endswith("/subtitles/foo-bar"):
+            return HTMLParser(subtitle_page)
         return HTMLParser(well_formed_row)
 
     monkeypatch.setattr(yifysubtitles.http, "request_parsed_response", fake_request)
@@ -134,7 +137,7 @@ def test_yifysubtitles_download_url_follows_responding_mirror(monkeypatch) -> No
     status = scraper.get_subtitles()
     assert status is ProviderDiagnosticStatus.OK
     assert captured
-    assert all(url.startswith("https://yifysubtitles.mx/subtitle/") for url in captured)
+    assert all(url == "https://yifysubtitles.mx/subtitle/foo-bar-different.zip" for url in captured)
 
 
 def test_yifysubtitles_fallback_past_malformed_mirror(monkeypatch) -> None:

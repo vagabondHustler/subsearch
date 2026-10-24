@@ -43,7 +43,7 @@ jobs:
           ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
 
@@ -176,7 +176,7 @@ jobs:
           ref: ${{ env.VALIDATION_REF }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
 
