@@ -24,7 +24,10 @@ from subsearch.ui.theme.typography import (
     apply_caption_font,
     set_error_text,
 )
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.icon_caption_button import (
+    CaptionToolButton,
+    CaptionToolButtonStyle,
+)
 from subsearch.ui.widgets.setting_rows import TrailingButtonArea
 
 VISIBLE_PREFIX_LENGTH = 4
@@ -240,6 +243,6 @@ class ApiCard(SettingsCard):
         return button_row
 
     def _build_labelled_link(self, caption: str, url: str) -> QWidget:
-        link_button = CaptionedToolButton(caption, icon=lucide_qicon(LucideIcon.EXTERNAL_LINK, TEXT_COLOR), parent=self)
+        link_button = CaptionToolButton(CaptionToolButtonStyle(LucideIcon.EXTERNAL_LINK, caption), parent=self)
         link_button.clicked.connect(lambda: webbrowser.open(url))
         return link_button

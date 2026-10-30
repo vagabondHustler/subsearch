@@ -1,6 +1,13 @@
 from types import SimpleNamespace
 
+import pytest
+
 from subsearch.parsing import imdb_lookup
+
+
+@pytest.fixture(autouse=True)
+def _load_imdbinfo() -> None:
+    imdb_lookup._load_imdbinfo()
 
 
 def _fake_search_result(titles: list[SimpleNamespace]) -> SimpleNamespace:
