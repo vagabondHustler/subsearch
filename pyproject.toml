@@ -25,7 +25,7 @@
         "rich==15.0.0",
         "selectolax==0.4.13",
         "winrt-runtime==3.2.1",
-        "winrt-Windows.UI.Notifications==3.2.1",
+        "winrt-Windows.UI.Notifications==4!10.0.28000.2705",
     ]
     description = "Subsearch"
     dynamic = ["version"]
