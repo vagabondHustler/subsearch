@@ -10,7 +10,9 @@ def _patch_window(monkeypatch, records):
 
     class FakeWindow:
         def __init__(self, *args, **kwargs) -> None:
-            self.manual_search_interface = type("Interface", (), {"downloaded": []})()
+            self.manual_search_interface = type(
+                "Interface", (), {"downloaded": [], "placed_best_next_to_video": False}
+            )()
 
         def show(self) -> None:
             pass

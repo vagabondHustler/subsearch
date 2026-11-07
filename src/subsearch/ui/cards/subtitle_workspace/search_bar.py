@@ -9,7 +9,10 @@ from subsearch.parsing.imdb_lookup import (
     SeasonSuggestion,
     TitleSuggestion,
 )
-from subsearch.parsing.release_parser import get_release_info
+from subsearch.parsing.release_parser import (
+    find_partial_season_episode,
+    get_release_info,
+)
 from subsearch.runtime.config import SEARCH_SUBJECT
 from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.recorder import LogLevel, capture
@@ -49,6 +52,8 @@ class SubtitleSearchBar(QWidget):
         self._committed_filename = SEARCH_SUBJECT.name if SEARCH_SUBJECT.file_exists else ""
         self._pending_series: TitleSuggestion | None = None
         self._pending_season = 0
+        self._known_season = 0
+        self._known_episode = 0
         self._number_chosen_slot: Callable[..., None] | None = None
         if title_suggestion_service is not None:
             title_suggestion_service.suggestions_ready.connect(self._on_suggestions_ready)
@@ -98,6 +103,9 @@ class SubtitleSearchBar(QWidget):
         # for a typed search term; commit the field before starting the search.
         self._on_filename_edited()
         typed_term = self._filename_edit.text().strip()
+        partial = find_partial_season_episode(typed_term)
+        self._known_season = partial.season
+        self._known_episode = partial.episode
         suggestion_service = self._title_suggestion_service
         if suggestion_service is not None and self._needs_title_suggestions(typed_term):
             self._awaiting_suggestions = True
@@ -129,7 +137,9 @@ class SubtitleSearchBar(QWidget):
             self._search_as_typed(typed_term)
             return
         self.stop_spinner()
-        self._suggestion_popup().show_suggestions(suggestions)
+        popup = self._suggestion_popup()
+        popup.set_keep_open_on_accept(False)
+        popup.show_suggestions(suggestions)
 
     def _on_suggestion_lookup_failed(self, _message: str) -> None:
         if not self._awaiting_suggestions:
@@ -149,6 +159,18 @@ class SubtitleSearchBar(QWidget):
     def _on_suggestion_accepted(self, suggestion: TitleSuggestion) -> None:
         if suggestion.tvseries and self._season_episode_suggestion_service is not None:
             self._pending_series = suggestion
+            if self._known_season and self._known_episode:
+                self._search_known_episode(suggestion, self._known_season, self._known_episode)
+                return
+            if self._known_season:
+                # Season already typed (e.g. "Breaking Bad S01"): skip the season
+                # picker and load that season's episodes directly.
+                self._suggestion_popup().hide()
+                self._on_season_chosen(self._known_season)
+                return
+            # Keep the title popup up while seasons load, then it is replaced in
+            # place by the season popup, so the dropdown never blinks out.
+            self._suggestion_popup().set_keep_open_on_accept(True)
             self.start_spinner()
             self._season_episode_suggestion_service.request_seasons(suggestion.title, suggestion.imdb_id)
             return
@@ -161,13 +183,21 @@ class SubtitleSearchBar(QWidget):
         numbers = [season.number for season in seasons]
         labels = [season.display_text() for season in seasons]
         popup = self._number_popup()
+        popup.set_keep_open_on_accept(True)
         self._reconnect_number_chosen(popup, self._on_season_chosen)
         popup.show_numbers(numbers, labels)
+        self._suggestion_popup().hide()
 
     def _on_season_chosen(self, season: int) -> None:
         if self._pending_series is None or self._season_episode_suggestion_service is None:
             return
         self._pending_season = season
+        if self._known_episode:
+            # Episode already typed (e.g. "Breaking Bad E01"): the season picker
+            # was the only missing piece, so search now without an episode picker.
+            self._number_popup().hide()
+            self._search_known_episode(self._pending_series, season, self._known_episode)
+            return
         self.start_spinner()
         self._season_episode_suggestion_service.request_episodes(
             self._pending_series.title, self._pending_series.imdb_id, season, self._selected_language_name()
@@ -180,18 +210,21 @@ class SubtitleSearchBar(QWidget):
         numbers = [episode.number for episode in episodes]
         labels = [episode.display_text() for episode in episodes]
         popup = self._number_popup()
+        popup.set_keep_open_on_accept(False)
         self._reconnect_number_chosen(popup, self._on_episode_chosen)
         popup.show_numbers(numbers, labels)
 
     def _on_episode_chosen(self, episode: int) -> None:
         if self._pending_series is None:
             return
-        series = self._pending_series
+        self._search_known_episode(self._pending_series, self._pending_season, episode)
+
+    def _search_known_episode(self, series: TitleSuggestion, season: int, episode: int) -> None:
         capture(
-            f"Chose season {self._pending_season}, episode {episode} for {series.title!r}",
+            f"Chose season {season}, episode {episode} for {series.title!r}",
             level=LogLevel.DEBUG,
         )
-        term = f"{series.title} S{self._pending_season:02d}E{episode:02d}"
+        term = f"{series.title} S{season:02d}E{episode:02d}"
         self._reset_pending_series()
         self._commit_term_and_search(term, series.imdb_id, True)
 

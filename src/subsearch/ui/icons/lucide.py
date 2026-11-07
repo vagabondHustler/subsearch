@@ -77,6 +77,7 @@ class LucideIcon(FluentIconBase, Enum):
     X = "x"
     PICTURE_IN_PICTURE_2 = "picture-in-picture-2"
     SAVE = "save"
+    COLUMNS_3_COG_SPECIAL = "columns-3-cog-special"
 
     def source(self) -> str:
         return ICON_SOURCES[self.value]
@@ -108,6 +109,11 @@ def _upright_pixmap(icon: LucideIcon, color: str, size: int) -> QPixmap:
     renderer.render(painter, QRectF(0, 0, size, size))
     painter.end()
     return pixmap
+
+
+@lru_cache(maxsize=None)
+def lucide_pixmap(icon: LucideIcon, color: str, size: int) -> QPixmap:
+    return _upright_pixmap(icon, color, size)
 
 
 @lru_cache(maxsize=None)

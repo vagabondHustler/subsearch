@@ -13,6 +13,7 @@ from subsearch.runtime.config import (
     DEVICE_INFO,
     PATH_RESOLVER,
     SEARCH_SUBJECT,
+    SUPPORTED_PROVIDERS,
     WORKSPACE,
 )
 from subsearch.runtime.config import session as config_session
@@ -58,6 +59,7 @@ class Bootstrap:
         self.subtitle_results: "SubtitleResults | None" = None
         self.system_tray: "SystemTray | HeadlessNotificationSink"
         self.manual_accepted_subtitles: list[Subtitle] = []
+        self.ui_placed_best_next_to_video: bool = False
         self.health_reports: list[ProviderResult] = []
         self.pending_notifications: list[tuple[str, str]] = []
         self.language_data: dict[str, Any] = {}
@@ -172,23 +174,20 @@ class Bootstrap:
 
     def setup_file_system(self) -> None:
         from subsearch.io import file_system
-        from subsearch.runtime.recorder import get_file_tracker
+        from subsearch.runtime.download_history import get_download_history
 
         file_system.create_directory(APP_PATHS.tmp_dir)
         file_system.create_directory(APP_PATHS.appdata_subsearch)
-        get_file_tracker().reclaim_after_crash()
+        get_download_history().increment_run_count()
         file_system.del_directory_content(APP_PATHS.tmp_dir)
         if SEARCH_SUBJECT.file_exists:
             self._create_search_directories()
 
     def _create_search_directories(self) -> None:
         from subsearch.io import file_system
-        from subsearch.runtime.recorder import get_file_tracker
 
-        tracker = get_file_tracker()
         for directory in (WORKSPACE.extraction_directory, WORKSPACE.download_directory):
-            if file_system.create_directory(directory):
-                tracker.track(directory)
+            file_system.create_directory(directory)
 
     def _anchor_working_directory(self) -> None:
         if SEARCH_SUBJECT.file_exists:
@@ -210,6 +209,10 @@ class Bootstrap:
             return []
         return self.subtitle_results.rejected
 
+    @property
+    def ui_downloaded_subtitle_ids(self) -> set[str]:
+        return {subtitle.subtitle_id for subtitle in self.manual_accepted_subtitles}
+
     def _resolve_app_mode(self) -> AppMode:
         if not self._has_path_argument():
             return AppMode.SETTINGS
@@ -217,9 +220,7 @@ class Bootstrap:
             return AppMode.SEARCH_MANUAL
         if self.app_config.search_mode == "manual":
             return AppMode.SEARCH_MANUAL
-        if self.app_config.search_mode == "automatic":
-            return AppMode.SEARCH_AUTOMATIC
-        return AppMode.SEARCH_HYBRID
+        return AppMode.SEARCH_AUTOMATIC
 
     @staticmethod
     def _has_path_argument() -> bool:
@@ -227,17 +228,12 @@ class Bootstrap:
 
     @property
     def ui_may_open(self) -> bool:
-        return self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL, AppMode.SEARCH_HYBRID)
+        if self.app_mode in (AppMode.SETTINGS, AppMode.SEARCH_MANUAL):
+            return True
+        return self.app_mode is AppMode.SEARCH_AUTOMATIC and self.app_config.ui_visibility != "never"
 
     def all_providers_disabled(self) -> bool:
-        if (
-            self.app_config.providers["opensubtitles"] is False
-            and self.app_config.providers["yifysubtitles_site"] is False
-            and self.app_config.providers["subsource_site"] is False
-            and self.app_config.providers["tvsubtitles_site"] is False
-        ):
-            return True
-        return False
+        return not any(self.app_config.providers.get(provider, False) for provider in SUPPORTED_PROVIDERS)
 
     def resync_app_config(self) -> None:
         self.app_config = config_session.get_config_session().snapshot()

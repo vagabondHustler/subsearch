@@ -29,6 +29,43 @@ FORBIDDEN_IMPORT_PREFIXES_BY_LAYER = {
     "services": ("subsearch.ui.cards", "subsearch.ui.widgets", "subsearch.ui.theme", "subsearch.ui.compat"),
 }
 
+# Modules shipped in PySide6-Addons, not PySide6-Essentials; importing any of these would re-add the dependency.
+PYSIDE6_ADDONS_MODULES = (
+    "Qt3DAnimation",
+    "Qt3DCore",
+    "Qt3DExtras",
+    "Qt3DInput",
+    "Qt3DLogic",
+    "Qt3DRender",
+    "QtBluetooth",
+    "QtCharts",
+    "QtDataVisualization",
+    "QtGraphs",
+    "QtGraphsWidgets",
+    "QtHttpServer",
+    "QtLocation",
+    "QtMultimedia",
+    "QtMultimediaWidgets",
+    "QtNfc",
+    "QtPdf",
+    "QtPdfWidgets",
+    "QtPositioning",
+    "QtQuick3D",
+    "QtRemoteObjects",
+    "QtScxml",
+    "QtSensors",
+    "QtSerialBus",
+    "QtSerialPort",
+    "QtSpatialAudio",
+    "QtStateMachine",
+    "QtTextToSpeech",
+    "QtWebChannel",
+    "QtWebEngineCore",
+    "QtWebEngineQuick",
+    "QtWebEngineWidgets",
+    "QtWebSockets",
+)
+
 # Private qfluentwidgets attributes Subsearch is known to touch; allowed in compat only.
 PRIVATE_QFLUENT_PATTERNS = (
     "_drawBackground",
@@ -97,6 +134,18 @@ def test_private_qfluentwidgets_access_only_in_compat() -> None:
             if pattern in source:
                 offenders.append(f"{path.relative_to(UI_ROOT)}: {pattern}")
     assert not offenders, "Private qfluentwidgets access outside ui/compat:\n" + "\n".join(offenders)
+
+
+def test_ui_does_not_import_pyside6_addons() -> None:
+    offenders = []
+    for path in ui_module_paths():
+        source = path.read_text(encoding="utf-8")
+        for module in PYSIDE6_ADDONS_MODULES:
+            if f"PySide6.{module}" in source:
+                offenders.append(f"{path.relative_to(UI_ROOT)}: PySide6.{module}")
+    assert (
+        not offenders
+    ), "PySide6-Addons modules pull in a much larger install; use an Essentials-only path:\n" + "\n".join(offenders)
 
 
 def test_description_keys_are_all_enum_members() -> None:

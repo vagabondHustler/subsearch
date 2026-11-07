@@ -1,7 +1,7 @@
-from subsearch.runtime.recorder.config import LogLevel
 from subsearch.runtime.recorder._black_box.formatting import EntryFormatter
 from subsearch.runtime.recorder._black_box.recorded_entry import RecordedEntry
 from subsearch.runtime.recorder._black_box.routing import EntryRouter
+from subsearch.runtime.recorder.config import LogLevel
 
 
 class _FakeConsoleOutput:

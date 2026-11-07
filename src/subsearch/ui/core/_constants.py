@@ -1,6 +1,2 @@
-from subsearch.ui.theme import palette
-
 NAVIGATION_EXPAND_WIDTH = 180
 NAVIGATION_TOP_MARGIN = 8
-SAVE_CLEAN_COLOR = palette.NEUTRAL_3
-SAVE_DIRTY_COLOR = palette.NEUTRAL_1

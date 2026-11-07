@@ -402,3 +402,15 @@ class _RightInsetListItemDelegate(ListItemDelegate):
 
 def inset_list_highlight_right(list_widget: ListWidget, right_inset: int) -> None:
     list_widget.setItemDelegate(_RightInsetListItemDelegate(list_widget, right_inset))
+
+
+# --- List hovered-row sync ------------------------------------------------------
+# ListBase updates the item delegate's hovered row only from the view's `entered`
+# signal. That signal is swallowed by a row's action-button widget and never fires
+# for row-to-row moves across the selected row, leaving a stale highlight. Expose
+# the private `_setHoverRow` hook so callers tracking the cursor can drive it.
+
+
+def set_list_hovered_row(list_widget: ListWidget, row: int) -> None:
+    list_widget._setHoverRow(row)
+    list_widget.viewport().update()

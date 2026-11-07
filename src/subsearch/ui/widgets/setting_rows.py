@@ -36,8 +36,8 @@ from subsearch.ui.theme.metrics import (
     TOOL_BUTTON_SIZE,
 )
 from subsearch.ui.theme.typography import (
-    CAPTION_FONT_SIZE,
     DISABLED_TEXT_COLOR,
+    POPUP_FONT_SIZE,
     TEXT_COLOR,
     apply_body_font,
     apply_token_value_font,
@@ -47,7 +47,10 @@ from subsearch.ui.theme.typography import (
 from subsearch.ui.widgets.anchored_popup import AnchoredPopup
 from subsearch.ui.widgets.browse_line_edit import BrowseLineEdit
 from subsearch.ui.widgets.fuzzy_select import FuzzySelect
-from subsearch.ui.widgets.icon_caption_button import CaptionedToolButton
+from subsearch.ui.widgets.icon_caption_button import (
+    CaptionToolButton,
+    CaptionToolButtonStyle,
+)
 
 HELP_POPUP_MAX_WIDTH = 560
 HELP_POPUP_HOVER_DELAY_MS = 300
@@ -69,13 +72,13 @@ class HelpPopup(AnchoredPopup):
         super().__init__(anchor, Qt.WindowType.ToolTip)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
 
-        caption_font = body_font()
-        caption_font.setPixelSize(CAPTION_FONT_SIZE)
+        help_font = body_font()
+        help_font.setPixelSize(POPUP_FONT_SIZE)
 
         self._message = QLabel(explanation, self)
         self._message.setWordWrap(True)
         self._message.setMaximumWidth(HELP_POPUP_MAX_WIDTH)
-        self._message.setFont(caption_font)
+        self._message.setFont(help_font)
         self._message.setStyleSheet(f"color: {TEXT_COLOR};")
 
         layout = QVBoxLayout(self)
@@ -373,7 +376,7 @@ class IntInputWithButtonRow(SettingRow):
     ) -> None:
         self.input = IntInput(minimum, maximum)
         self.input.set_value_silent(int(store.read(config_key)))
-        self.button = CaptionedToolButton(button_caption, icon=lucide_qicon(button_icon, TEXT_COLOR))
+        self.button = CaptionToolButton(CaptionToolButtonStyle(button_icon, button_caption))
         control = QWidget()
         control_layout = QHBoxLayout(control)
         control_layout.setContentsMargins(0, 0, 0, 0)
@@ -413,7 +416,7 @@ class FloatInputWithButtonRow(SettingRow):
     ) -> None:
         self.input = FloatInput(minimum, maximum, decimals)
         self.input.set_value_silent(float(store.read(config_key)))
-        self.button = CaptionedToolButton(button_caption, icon=lucide_qicon(button_icon, TEXT_COLOR))
+        self.button = CaptionToolButton(CaptionToolButtonStyle(button_icon, button_caption))
         control = QWidget()
         control_layout = QHBoxLayout(control)
         control_layout.setContentsMargins(0, 0, 0, 0)

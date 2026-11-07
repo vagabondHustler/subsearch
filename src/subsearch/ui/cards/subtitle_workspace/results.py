@@ -1,11 +1,18 @@
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QFont, QIcon
+from PySide6.QtCore import QEvent, QObject, QPoint, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import (
+    QColor,
+    QDragEnterEvent,
+    QDropEvent,
+    QFont,
+    QIcon,
+    QMouseEvent,
+)
 from PySide6.QtWidgets import QListWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import BodyLabel, ListWidget
 
-from subsearch.runtime.config import SUPPORTED_FILE_EXT
+from subsearch.runtime.config import SEARCH_SUBJECT, SUPPORTED_FILE_EXT
 from subsearch.runtime.config.defaults import ConfigKey
 from subsearch.runtime.models import (
     MatchTier,
@@ -34,7 +41,10 @@ from subsearch.ui.cards.subtitle_workspace.action_row import SubtitleActionRow
 from subsearch.ui.cards.subtitle_workspace.card import SubtitleCard
 from subsearch.ui.cards.subtitle_workspace.search_bar import SubtitleSearchBar
 from subsearch.ui.cards.subtitle_workspace.splitter import _build_splitter
-from subsearch.ui.compat.qfluent import inset_list_highlight_right
+from subsearch.ui.compat.qfluent import (
+    inset_list_highlight_right,
+    set_list_hovered_row,
+)
 from subsearch.ui.icons.lucide import LucideIcon, lucide_qicon
 from subsearch.ui.services.console_view import ConsoleViewSink
 from subsearch.ui.services.post_processing import PostProcessingServiceProtocol
@@ -53,6 +63,7 @@ from subsearch.ui.theme.typography import (
     apply_body_font,
 )
 from subsearch.ui.widgets.console_view import ConsoleView
+from subsearch.ui.widgets.context_menu_popup import ContextMenuItem, ContextMenuPopup
 from subsearch.ui.widgets.ripple_spinner import (
     CYCLE_MS,
     FRAME_INTERVAL_MS,
@@ -73,20 +84,24 @@ class ManualSearchInterface(QWidget):
         console_view_sink: ConsoleViewSink | None = None,
         title_suggestion_service: TitleSuggestionService | None = None,
         season_episode_suggestion_service: SeasonEpisodeSuggestionService | None = None,
+        auto_download_accepted: bool = False,
     ) -> None:
         super().__init__()
         self.setObjectName("manualSearchInterface")
         self.setAcceptDrops(True)
         self._store = store
         self._post_processing_service = post_processing_service
+        self._auto_download_accepted = auto_download_accepted
         self.accept_threshold = store.read(ConfigKey.SEARCH_ACCEPT_THRESHOLD)
         self.download_service = download_service
         self.subtitles = sorted(subtitles or [], key=self._sort_key, reverse=True)
         self.skipped_providers: list[str] = []
         self.downloaded: list[Subtitle] = []
         self.failed: list[Subtitle] = []
+        self.placed_best_next_to_video = False
 
         self.items_by_subtitle_id: dict[int, QListWidgetItem] = {}
+        self.action_rows_by_subtitle_id: dict[int, SubtitleActionRow] = {}
         self.subtitles_by_row: dict[int, Subtitle] = {}
         self.spinning_rows: dict[int, tuple[QListWidgetItem, str]] = {}
         self.spinner_progress = 0.0
@@ -170,7 +185,9 @@ class ManualSearchInterface(QWidget):
         self.skipped_providers = []
         self.downloaded = []
         self.failed = []
+        self.placed_best_next_to_video = False
         self.items_by_subtitle_id.clear()
+        self.action_rows_by_subtitle_id.clear()
         self.subtitles_by_row.clear()
         self._show_placeholder(SEARCHING_PLACEHOLDER_TEXT)
 
@@ -196,6 +213,29 @@ class ManualSearchInterface(QWidget):
         self.skipped_providers = skipped_providers or []
         self._clear_placeholder()
         self._build_list_widget()
+        if self._auto_download_accepted:
+            self._auto_download_accepted_subtitles()
+
+    def _auto_download_accepted_subtitles(self) -> None:
+        for subtitle in self._accepted_for_auto_download():
+            self.download_service.enqueue(subtitle)
+
+    def _accepted_for_auto_download(self) -> list[Subtitle]:
+        downloads_per_provider = int(self._store.read(ConfigKey.SEARCH_DOWNLOADS_PER_PROVIDER))
+        accepted = sorted(
+            (subtitle for subtitle in self.subtitles if subtitle.status is SubtitleStatus.ACCEPTED),
+            key=lambda subtitle: (subtitle.token_result, subtitle.download_count),
+            reverse=True,
+        )
+        downloads_by_provider: dict[str, int] = {}
+        selected: list[Subtitle] = []
+        for subtitle in accepted:
+            taken = downloads_by_provider.get(subtitle.provider_name, 0)
+            if taken >= downloads_per_provider:
+                continue
+            downloads_by_provider[subtitle.provider_name] = taken + 1
+            selected.append(subtitle)
+        return selected
 
     def _no_results_text(self) -> str:
         return "\n".join([NO_RESULTS_PLACEHOLDER_TEXT, *self.skipped_providers])
@@ -215,10 +255,11 @@ class ManualSearchInterface(QWidget):
         inset_list_highlight_right(self.list_widget, LIST_SCROLLBAR_WIDTH)
         self.list_widget.setFont(self._list_font())
         self.list_widget.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
-        # The ::item:hover stylesheet repaints only the row being entered, so the
-        # previously hovered row keeps its highlight when the cursor crosses into
-        # the selected row. Repaint the whole viewport on every hover change.
-        self.list_widget.entered.connect(lambda _index: self.list_widget.viewport().update())
+        viewport = self.list_widget.viewport()
+        viewport.setMouseTracking(True)
+        viewport.installEventFilter(self)
+        self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.list_widget.customContextMenuRequested.connect(self._open_context_menu)
         self._card.viewLayout.addWidget(self.list_widget, stretch=1)
         for subtitle in self.subtitles:
             item = QListWidgetItem(self._row_text(subtitle))
@@ -234,6 +275,21 @@ class ManualSearchInterface(QWidget):
                 self._render_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
                 self._attach_action_buttons(item, subtitle)
         self.list_widget.itemDoubleClicked.connect(self._on_item_clicked)
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        list_widget = getattr(self, "list_widget", None)
+        if (
+            list_widget is not None
+            and watched is list_widget.viewport()
+            and isinstance(event, QMouseEvent)
+            and event.type() == QEvent.Type.MouseMove
+        ):
+            self._sync_hovered_row(list_widget, event.position().toPoint())
+        return super().eventFilter(watched, event)
+
+    @staticmethod
+    def _sync_hovered_row(list_widget: ListWidget, viewport_position: QPoint) -> None:
+        set_list_hovered_row(list_widget, list_widget.indexAt(viewport_position).row())
 
     @staticmethod
     def _list_font() -> QFont:
@@ -281,12 +337,48 @@ class ManualSearchInterface(QWidget):
             return
         self.download_service.enqueue(subtitle)
 
+    def _open_context_menu(self, position: QPoint) -> None:
+        item = self.list_widget.itemAt(position)
+        if item is None:
+            return
+        subtitle = self.subtitles_by_row[self.list_widget.row(item)]
+        menu = ContextMenuPopup(self, self._context_menu_items(subtitle))
+        menu.show_at_point(self.list_widget.viewport().mapToGlobal(position))
+
+    def _context_menu_items(self, subtitle: Subtitle) -> list[ContextMenuItem]:
+        already_downloaded = subtitle in self.downloaded
+        action_row = self.action_rows_by_subtitle_id.get(id(subtitle))
+        return [
+            ContextMenuItem(
+                LucideIcon.ARROW_DOWN_TO_LINE,
+                "Download subtitle",
+                lambda: self._on_item_clicked(self.items_by_subtitle_id[id(subtitle)]),
+                enabled=not already_downloaded and bool(subtitle.download_url),
+            ),
+            ContextMenuItem(
+                LucideIcon.FILES,
+                "Move to extraction folder",
+                lambda: action_row.trigger_move() if action_row else None,
+                enabled=action_row is not None,
+            ),
+            ContextMenuItem(
+                LucideIcon.FILE_PEN,
+                "Unpack, rename and place next to video",
+                lambda: action_row.trigger_rename_and_place() if action_row else None,
+                enabled=action_row is not None and SEARCH_SUBJECT.file_exists,
+            ),
+            ContextMenuItem(
+                LucideIcon.FOLDER_SEARCH,
+                "Open containing folder",
+                lambda: action_row.trigger_open_location() if action_row else None,
+                enabled=action_row is not None and action_row.has_delivered_directory(),
+            ),
+        ]
+
     def _item_for(self, subtitle: Subtitle) -> QListWidgetItem | None:
         return self.items_by_subtitle_id.get(id(subtitle))
 
     def _attach_action_buttons(self, item: QListWidgetItem, subtitle: Subtitle) -> None:
-        if not self._store.read(ConfigKey.SUBTITLE_WORKSPACE_MANUAL_POST_PROCESSING):
-            return
         row = SubtitleActionRow(
             subtitle,
             self._store,
@@ -294,6 +386,7 @@ class ManualSearchInterface(QWidget):
             self.list_widget,
         )
         self.list_widget.setItemWidget(item, row)
+        self.action_rows_by_subtitle_id[id(subtitle)] = row
 
     def _on_download_started(self, subtitle: Subtitle) -> None:
         item = self._item_for(subtitle)
@@ -306,6 +399,15 @@ class ManualSearchInterface(QWidget):
         if item is not None:
             self._render_status(item, subtitle, SUCCESS_ICON, SUCCESS_COLOR)
             self._attach_action_buttons(item, subtitle)
+            self._auto_post_process(subtitle)
+
+    def _auto_post_process(self, subtitle: Subtitle) -> None:
+        action_row = self.action_rows_by_subtitle_id.get(id(subtitle))
+        if action_row is None:
+            return
+        action_row.trigger_automatic_post_processing()
+        if SEARCH_SUBJECT.file_exists:
+            self.placed_best_next_to_video = True
 
     def _on_download_failed(self, subtitle: Subtitle, _message: str) -> None:
         self.failed.append(subtitle)

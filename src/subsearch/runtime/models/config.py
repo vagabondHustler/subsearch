@@ -30,9 +30,10 @@ class AppConfig:
     notification_display_duration: float
     notification_play_sound: bool
     search_mode: str
-    subtitle_workspace_manual_post_processing: bool
+    ui_visibility: str
     post_processing: dict[str, Any]
     paths: dict[str, Any]
+    mica_effect: bool
     show_terminal: bool
     show_tray_icon: bool
     single_instance: bool

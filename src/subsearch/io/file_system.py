@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import shutil
@@ -8,20 +9,13 @@ import traceback
 import zipfile
 from io import BufferedReader
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Collection, Iterable, Optional
 
 if TYPE_CHECKING:
     from curl_cffi.requests import Response as CurlResponse
 
 from subsearch.runtime.models import Subtitle
 from subsearch.runtime.recorder import LogLevel, capture
-
-
-def _track(path: Path) -> None:
-    # lazy import: file_tracking lives in runtime and depends back on this module
-    from subsearch.runtime.recorder.standard_in import get_file_tracker
-
-    get_file_tracker().track(path)
 
 
 def create_path_from_string(
@@ -60,6 +54,9 @@ def is_zip_payload(chunk: bytes) -> bool:
 
 _HASH_MATCH_PREFIX = "hashmatch__"
 
+# marks a subtitle that was already placed next to the video and later displaced, so it is not re-selected
+_TESTED_MARKER = "_tested"
+
 
 def _cloudflare_block_reason(response: "CurlResponse") -> str:
     headers = response.headers
@@ -71,9 +68,15 @@ def _cloudflare_block_reason(response: "CurlResponse") -> str:
     return "none"
 
 
+class DownloadedSubtitle:
+    def __init__(self, path: Path, content_hash: str) -> None:
+        self.path = path
+        self.content_hash = content_hash
+
+
 def download_subtitle(
-    subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path, extraction_dir: Path
-) -> bool:
+    subtitle: Subtitle, index_position: int, index_size: int, tmp_dir: Path
+) -> DownloadedSubtitle | None:
     from subsearch.io.http import get_session
 
     capture(f"Downloading {subtitle.subtitle_name}")
@@ -82,46 +85,52 @@ def download_subtitle(
     chunks = response.iter_content(chunk_size=1024)
     first_chunk = next(chunks, b"")
     if is_zip_payload(first_chunk):
-        _save_zip_archive(subtitle, tmp_dir, first_chunk, chunks)
-        return True
+        return _save_zip_archive(subtitle, tmp_dir, first_chunk, chunks)
     raw_extension = _raw_subtitle_extension(response)
     if raw_extension is not None:
-        _save_raw_subtitle(subtitle, extraction_dir, raw_extension, first_chunk, chunks)
-        return True
+        return _save_raw_subtitle(subtitle, tmp_dir, raw_extension, first_chunk, chunks)
     capture(
         f"{subtitle.provider_name}: {subtitle.subtitle_name} is not a zip "
         f"(status {response.status_code}, cloudflare {_cloudflare_block_reason(response)}) "
         f"from {subtitle.download_url}, skipping download",
         level=LogLevel.WARNING,
     )
-    return False
+    return None
 
 
-def _save_zip_archive(subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chunks: Iterable[bytes]) -> None:
+def _write_chunks(file_descriptor: Any, first_chunk: bytes, chunks: Iterable[bytes]) -> str:
+    digest = hashlib.sha256()
+    file_descriptor.write(first_chunk)
+    digest.update(first_chunk)
+    for chunk in chunks:
+        file_descriptor.write(chunk)
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _save_zip_archive(
+    subtitle: Subtitle, tmp_dir: Path, first_chunk: bytes, chunks: Iterable[bytes]
+) -> DownloadedSubtitle:
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     tmp_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         dir=tmp_dir, prefix=f"{name_prefix}{subtitle.subtitle_id}_", suffix=".zip", delete=False
     ) as fd:
         download_path = Path(fd.name)
-        _track(download_path)
-        fd.write(first_chunk)
-        for chunk in chunks:
-            fd.write(chunk)
+        file_hash = _write_chunks(fd, first_chunk, chunks)
+    return DownloadedSubtitle(download_path, file_hash)
 
 
 def _save_raw_subtitle(
-    subtitle: Subtitle, extraction_dir: Path, extension: str, first_chunk: bytes, chunks: Iterable[bytes]
-) -> None:
-    extraction_dir.mkdir(parents=True, exist_ok=True)
+    subtitle: Subtitle, download_dir: Path, extension: str, first_chunk: bytes, chunks: Iterable[bytes]
+) -> DownloadedSubtitle:
+    download_dir.mkdir(parents=True, exist_ok=True)
     name_prefix = _HASH_MATCH_PREFIX if subtitle.hash_match else ""
     stem = f"{name_prefix}{subtitle.subtitle_name}"
-    download_path = _next_available_path(extraction_dir, stem, extension)
-    _track(download_path)
+    download_path = _next_available_path(download_dir, stem, extension)
     with download_path.open("wb") as fd:
-        fd.write(first_chunk)
-        for chunk in chunks:
-            fd.write(chunk)
+        file_hash = _write_chunks(fd, first_chunk, chunks)
+    return DownloadedSubtitle(download_path, file_hash)
 
 
 _SUBTITLE_EXTENSIONS = {".srt", ".sub", ".ass", ".ssa", ".vtt"}
@@ -158,6 +167,24 @@ def _archive_listing(archive: zipfile.ZipFile) -> str:
     return "\n".join(f"  {info.filename} ({info.file_size} bytes)" for info in archive.infolist())
 
 
+def content_hash(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def file_content_hash(path: Path) -> str:
+    return content_hash(path.read_bytes())
+
+
+def _resolve_extraction_target(destination: Path, filename: str, payload: bytes) -> Path | None:
+    target = destination / Path(filename).name
+    if not target.exists():
+        return target
+    if file_content_hash(target) == content_hash(payload):
+        capture(f"Skipping {target.name} (identical copy already extracted)", level=LogLevel.DEBUG)
+        return None
+    return _next_available_path(destination, target.stem, target.suffix)
+
+
 def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool = False) -> int:
     members = archive.infolist()
     total_uncompressed = sum(info.file_size for info in members)
@@ -180,12 +207,14 @@ def _safe_extract_archive(archive: zipfile.ZipFile, dst: Path, hash_match: bool 
         if member_path.suffix.lower() not in _SUBTITLE_EXTENSIONS:
             capture(f"Ignoring {member.filename} (not a subtitle file)", level=LogLevel.DEBUG)
             continue
-        extracted_path = Path(archive.extract(member, dst))
-        if hash_match and not extracted_path.name.startswith(_HASH_MATCH_PREFIX):
-            renamed_path = extracted_path.with_name(f"{_HASH_MATCH_PREFIX}{extracted_path.name}")
-            extracted_path.rename(renamed_path)
-            extracted_path = renamed_path
-        _track(extracted_path)
+        payload = archive.read(member)
+        member_name = Path(member.filename).name
+        if hash_match and not member_name.startswith(_HASH_MATCH_PREFIX):
+            member_name = f"{_HASH_MATCH_PREFIX}{member_name}"
+        target = _resolve_extraction_target(dst, member_name, payload)
+        if target is None:
+            continue
+        target.write_bytes(payload)
         extracted_count += 1
     return extracted_count
 
@@ -200,11 +229,27 @@ def _extract_archive_file(file: Path, dst: Path) -> int:
         return 0
 
 
-def extract_files_in_dir(src: Path, dst: Path, extension: str = ".zip") -> int:
+def extract_files_in_dir(
+    src: Path, dst: Path, extension: str = ".zip", exclude_ids: Collection[str] = frozenset()
+) -> int:
     extracted_count = 0
     for file in src.glob(f"*{extension}"):
+        if any(f"{excluded_id}_" in file.stem for excluded_id in exclude_ids):
+            continue
         extracted_count += _extract_archive_file(file, dst)
+    for file in src.iterdir():
+        if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS:
+            extracted_count += _move_raw_subtitle(file, dst)
     return extracted_count
+
+
+def _move_raw_subtitle(file: Path, dst: Path) -> int:
+    target = _resolve_extraction_target(dst, file.name, file.read_bytes())
+    if target is None:
+        return 0
+    dst.mkdir(parents=True, exist_ok=True)
+    file.replace(target)
+    return 1
 
 
 def extract_subtitle_by_id(subtitle_id: str, src: Path, dst: Path, extension: str = ".zip") -> int:
@@ -215,11 +260,17 @@ def extract_subtitle_by_id(subtitle_id: str, src: Path, dst: Path, extension: st
     return extracted_count
 
 
+def _is_tested_subtitle(stem: str) -> bool:
+    return stem.endswith(_TESTED_MARKER) or f"{_TESTED_MARKER}_v" in stem
+
+
 def subtitle_files_in(directory: Path) -> list[Path]:
     if not directory.is_dir():
         return []
     return sorted(
-        file for file in directory.iterdir() if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS
+        file
+        for file in directory.iterdir()
+        if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS and not _is_tested_subtitle(file.stem)
     )
 
 
@@ -265,9 +316,19 @@ def move_all(src: Path, dst: Path) -> int:
     return moved_count
 
 
-def move_and_replace(source_file: Path, destination_directory: Path) -> None:
-    source_file.replace(destination_directory / source_file.name)
-    capture(f"Moving file: {source_file} -> {destination_directory}")
+def move_best_next_to_video(
+    source_file: Path, destination_directory: Path, video_stem: str, extraction_directory: Path
+) -> None:
+    if _is_tested_subtitle(source_file.stem):
+        capture(f"Refusing to move already-tested subtitle: {source_file}", level=LogLevel.DEBUG)
+        return
+    target = destination_directory / f"{video_stem}{source_file.suffix}"
+    if target.exists():
+        preserved = _next_available_path(extraction_directory, f"{video_stem}{_TESTED_MARKER}", target.suffix)
+        capture(f"Preserving existing subtitle: {target} -> {preserved}")
+        target.replace(preserved)
+    capture(f"Moving file: {source_file} -> {target}")
+    source_file.replace(target)
 
 
 def del_file_type(cwd: Path, extension: str) -> None:
@@ -303,6 +364,23 @@ def write_json_list(path: Path, items: list[Any]) -> None:
     path.write_text(json.dumps(items, indent=2), encoding="utf-8")
 
 
+def read_json_dict(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return dict(json.loads(path.read_text(encoding="utf-8")))
+    except json.JSONDecodeError, OSError:
+        capture(f"Unreadable dict file at {path.name}, starting empty", level=LogLevel.WARNING)
+        return {}
+
+
+def write_json_dict(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_suffix(f"{path.suffix}.tmp")
+    temp_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    temp_path.replace(path)
+
+
 def directory_is_empty(directory: Path) -> bool:
     if not any(directory.iterdir()):
         return True
@@ -334,6 +412,18 @@ def get_file_hash(file_path: Path) -> str:
 
     hash_algorithm = MPCHashAlgorithm(file_path)
     return hash_algorithm.get_hash()
+
+
+def count_extractable_archives(path: Path, exclude_ids: Collection[str] = frozenset(), extension: str = ".zip") -> int:
+    if not path.is_dir():
+        return 0
+    archives = sum(
+        1
+        for file in path.glob(f"*{extension}")
+        if not any(f"{excluded_id}_" in file.stem for excluded_id in exclude_ids)
+    )
+    raw_subtitles = sum(1 for file in path.iterdir() if file.is_file() and file.suffix.lower() in _SUBTITLE_EXTENSIONS)
+    return archives + raw_subtitles
 
 
 def count_files_in_directory(path: Path, extensions: Optional[Iterable[str]] = None) -> int:

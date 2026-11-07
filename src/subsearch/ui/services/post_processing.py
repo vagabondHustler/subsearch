@@ -46,9 +46,9 @@ class _PostProcessWorker(Worker):
     def _rename_and_place(self) -> int:
         target_path = self._resolve_target_path()
         renamed = subtitle_selection.autoload_rename(SEARCH_SUBJECT.search_term, self._extraction_dir)
-        file_system.move_and_replace(renamed, target_path)
-        placed = (target_path / renamed.name).exists()
-        if not placed:
+        placed_name = f"{SEARCH_SUBJECT.search_term}{renamed.suffix}"
+        file_system.move_best_next_to_video(renamed, target_path, SEARCH_SUBJECT.search_term, self._extraction_dir)
+        if not (target_path / placed_name).exists():
             self._log_no_files(0)
             return 0
         capture(f"Moved 1 subtitles to {target_path}")
